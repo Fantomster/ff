@@ -1,0 +1,76 @@
+<?php
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+namespace frontend\controllers;
+
+use Yii;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
+
+/**
+ * Custom user controller
+ * 
+ * @inheritdoc
+ */
+class UserController extends \amnah\yii2\user\controllers\DefaultController {
+    /**
+     * Display registration page
+     */
+    public function actionRegister()
+    {
+        /** @var \common\models\User $user */
+        /** @var \common\models\Profile $profile */
+        /** @var \amnah\yii2\user\models\Role $role */
+        /** @var \common\models\Organization $organization */
+
+        // set up new user/profile/organization objects
+        $user = $this->module->model("User", ["scenario" => "register"]);
+        $profile = $this->module->model("Profile");
+        $organization = $this->module->model("Organization");
+
+        // load post data
+        $post = Yii::$app->request->post();
+        if ($user->load($post)) {
+
+            // ensure profile data gets loaded
+            $profile->load($post);
+            
+            // load organization data
+            $organization->load($post);
+
+            // validate for ajax request
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ActiveForm::validate($user, $profile, $organization);
+            }
+
+            // validate for normal request
+            if ($user->validate() && $profile->validate() && $organization->validate()) {
+
+                // perform registration
+                $role = $this->module->model("Role");
+                $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
+                $profile->setUser($user->id)->save();
+                $organization->save();
+                $user->setOrganization($organization->id)->save();
+                $this->afterRegister($user);
+
+                // set flash
+                // don't use $this->refresh() because user may automatically be logged in and get 403 forbidden
+                $successText = Yii::t("user", "Successfully registered [ {displayName} ]", ["displayName" => $user->getDisplayName()]);
+                $guestText = "";
+                if (Yii::$app->user->isGuest) {
+                    $guestText = Yii::t("user", " - Please check your email to confirm your account");
+                }
+                Yii::$app->session->setFlash("Register-success", $successText . $guestText);
+            }
+        }
+
+        return $this->render("register", compact("user", "profile", "organization"));
+    }
+}

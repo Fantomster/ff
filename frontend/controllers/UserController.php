@@ -73,4 +73,42 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         return $this->render("register", compact("user", "profile", "organization"));
     }
+
+    /**
+     * Accept restaurant's invite
+     */
+    public function actionAcceptRestaurantsInvite($token)
+    {
+        /** @var \amnah\yii2\user\models\User $user */
+        /** @var \amnah\yii2\user\models\UserToken $userToken */
+
+        // get user token
+        $userToken = $this->module->model("UserToken");
+        $userToken = $userToken::findByToken($token, $userToken::TYPE_EMAIL_ACTIVATE);
+        if (!$userToken) {
+            return $this->render('acceptRestaurantsInvite', ["invalidToken" => true]);
+        }
+
+        // get user and set "acceptInvite" scenario
+        $success = false;
+        $user = $this->module->model("User");
+        $user = $user::findOne($userToken->user_id);
+        $profile = $user->profile;
+        $organization = $user->organization;
+        $user->setScenario("acceptInvite");
+
+        // load post data and set user password
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $profile->validate() && $organization->validate) {
+            $user->status = $user::STATUS_ACTIVE;
+            $user->save();
+            $profile->save();
+            $organization->save();
+            // delete userToken and set success = true
+            $userToken->delete();
+            $success = true;
+        }
+
+        return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));
+    }
+    
 }

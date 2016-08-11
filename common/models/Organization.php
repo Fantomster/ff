@@ -23,6 +23,10 @@ use Yii;
  */
 class Organization extends \yii\db\ActiveRecord
 {
+    const TYPE_RESTAURANT = 1;
+    
+    const TYPE_SUPPLIER = 2;
+    
     /**
      * @inheritdoc
      */

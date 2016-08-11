@@ -33,6 +33,7 @@ return [
                 'Role' => 'common\models\Role',
                 'Organization' => 'common\models\Organization',
             ],
+            'emailViewPath' => '@app/mail',
         ],
     ],
 ];

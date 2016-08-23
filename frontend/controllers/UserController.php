@@ -19,6 +19,20 @@ use yii\widgets\ActiveForm;
  */
 class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['access']['rules'][] = [
+            'actions' => ['accept-restaurants-invite'],
+            'allow' => true,
+            'roles' => ['?'],
+        ];
+        return $behaviors;
+    }
+    
+    /**
      * Display registration page
      */
     public function actionRegister()
@@ -98,7 +112,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $user->setScenario("acceptInvite");
 
         // load post data and set user password
-        if ($user->load(Yii::$app->request->post()) && $user->validate() && $profile->validate() && $organization->validate) {
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $profile->validate() && $organization->validate()) {
             $user->status = $user::STATUS_ACTIVE;
             $user->save();
             $profile->save();
@@ -106,6 +120,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // delete userToken and set success = true
             $userToken->delete();
             $success = true;
+            return $this->redirect('user/login');
         }
 
         return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));

@@ -15,5 +15,12 @@ namespace common\models;
  *
  */
 class Profile extends \amnah\yii2\user\models\Profile {
-    //put your code here
+    /**
+     * @inheritdoc
+     */
+    public function rules() {
+        $rules = parent::rules();
+        $rules[] = [['full_name'], 'required'];
+        return $rules;
+    }
 }

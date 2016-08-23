@@ -8,6 +8,8 @@
 
 namespace common\models;
 
+use Yii;
+
 /**
  * User model
  *
@@ -24,7 +26,8 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function rules() {
         $rules = parent::rules();
-        $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite']];
+        $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite', 'manageNew']];
+        $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
         return $rules;
     }
 
@@ -57,10 +60,10 @@ class User extends \amnah\yii2\user\models\User {
 
     /**
      * Send email invite to supplier
-     * @param UserToken $userToken
+     * @param User $vendor
      * @return int
      */
-    public function sendInviteToSupplier($supplier) {
+    public function sendInviteToVendor($vendor) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         // modify view path to module views
@@ -69,13 +72,38 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $this->module->emailViewPath;
 
         // send email
-        $user = $supplier;
-        $restaurant = $supplier->organization->name;
+        $restaurant = $this->organization->name;
+        $userToken = $this->module->model("UserToken");
+        $userToken = $userToken::generate($vendor->id, $userToken::TYPE_EMAIL_ACTIVATE);
+        $email = $vendor->email;
+        $subject = "Приглашение на f-keeper";
+        $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "vendor", "userToken", "restaurant"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        return $result;
+    }
+
+    /**
+     *  Send confirmation email to your new employee
+     *  @param User $user
+     *  @return int 
+     */
+    public function sendEmployeeConfirmation($user) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;
-        $subject = Yii::$app->id . " - " . Yii::t("user", "Invite to f-keeper");
-        $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "user", "userToken", "restaurant"))
+        $subject = "Подтвердите аккаунт на f-keeper";
+        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

@@ -54,4 +54,40 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             'price' => 'Price',
         ];
     }
+    
+    public function search($params,$cat_base_id) {
+	    $query = CatalogBaseGoods::find()->where(['cat_id'=>$cat_base_id]);
+	    $dataProvider = new ActiveDataProvider([
+	        'query' => $query,
+	    ]);
+	    $dataProvider->setSort([
+	        'attributes' => [
+	            'id',
+				'cat_id',
+				'category_id',
+				'article',
+				'product',
+				'units',
+				'price',
+	        ]
+	    ]);
+	 
+	    if (!($this->load($params) && $this->validate())) {
+	        return $dataProvider;
+	    }
+	 
+	    $this->addCondition($query, 'id');
+	    $this->addCondition($query, 'cat_id', true);
+	    $this->addCondition($query, 'category_id', true);
+	    $this->addCondition($query, 'article');
+	 
+	    /* Setup your custom filtering criteria */
+	 
+	    // filter by person full name
+	    /*$query->andWhere('first_name LIKE "%' . $this->fullName . '%" ' .
+	        'OR last_name LIKE "%' . $this->fullName . '%"'
+	    );*/
+	 
+	    return $dataProvider;
+	}
 }

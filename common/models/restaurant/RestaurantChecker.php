@@ -1,5 +1,5 @@
 <?php
-namespace frontend\models\restaurant;
+namespace common\models\restaurant;
 
 use Yii;
 use common\models\User;

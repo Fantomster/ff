@@ -14,6 +14,7 @@ use common\models\User;
 use common\models\Profile;
 use common\models\search\UserSearch;
 use common\models\RelationSuppRest;
+use common\models\Catalog;
 use yii\web\Response;
 
 /**
@@ -140,6 +141,20 @@ class VendorController extends Controller {
 			$RelationSuppRest->update();
 
             $result = ['success' => true, 'status'=>$st];
+            return $result;
+            exit;
+        }
+    }
+    public function actionMycatalogdelcatalog()
+    {
+	    if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            
+            $Catalog = new Catalog;
+            $RelationSuppRest = new RelationSuppRest;
+            
+            $id = \Yii::$app->request->post('id');
+            $result = ['success' => true, 'status'=>$id];
             return $result;
             exit;
         }

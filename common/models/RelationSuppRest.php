@@ -15,12 +15,9 @@ use Yii;
 class RelationSuppRest extends \yii\db\ActiveRecord
 {	
 	const INVITE_OFF = 0;
-	
-    const INVITE_ON = 1;
-    
+	const INVITE_ON = 1;
     const STATUS_OFF = 0;
-	
-    const STATUS_ON = 1;
+	const STATUS_ON = 1;
     /**
      * @inheritdoc
      */
@@ -57,7 +54,9 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 		$catalog = RelationSuppRest::
 		find()
 		->select(['id','cat_id','rest_org_id','status'])
-		->where(['sup_org_id' => User::getOrganizationUser(Yii::$app->user->id)])->all();  
+		->where(['sup_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
+		->andWhere(['not', ['cat_id' => null]])
+		->all();  
 		return $catalog;  
     }
     public static function getStatusRelation($sup_org_id,$rest_org_id){

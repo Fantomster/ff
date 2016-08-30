@@ -6,7 +6,7 @@ use yii\bootstrap\Tabs;
     'items' => [
         [
             'label' => 'Общие',
-            'content' => $this->render('settings/_info'),
+            'content' => $this->render('settings/_info', compact('organization')),
             'active' => true,
         ],
         [

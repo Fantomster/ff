@@ -45,6 +45,8 @@ class Organization extends \yii\db\ActiveRecord
             [['type_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'website'], 'filter', 'filter'=>'\yii\helpers\HtmlPurifier::process'],
+            [['email'], 'email'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
         ];
     }

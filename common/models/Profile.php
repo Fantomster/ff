@@ -21,6 +21,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
     public function rules() {
         $rules = parent::rules();
         $rules[] = [['full_name'], 'required'];
+        $rules[] = [['full_name'], 'filter', 'filter'=>'\yii\helpers\HtmlPurifier::process'];
         return $rules;
     }
 }

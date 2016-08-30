@@ -32,11 +32,12 @@ class ClientController extends Controller {
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
+        $organization = $this->currentUser->organization;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('settings', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('settings', compact('searchModel', 'dataProvider', 'organization'));
         } else {
-            return $this->render('settings', compact('searchModel', 'dataProvider'));
+            return $this->render('settings', compact('searchModel', 'dataProvider', 'organization'));
         }
     }
 

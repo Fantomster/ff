@@ -15,6 +15,8 @@ class AppAsset extends AssetBundle
         'css/site.css',
     ];
     public $js = [
+        'js/js.cookie.js',
+        'js/socket.io-1.4.5.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

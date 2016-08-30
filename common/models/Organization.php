@@ -70,7 +70,11 @@ class Organization extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
-
+    public static function getOrganization($id){
+	    $getOrganization = Organization::find()
+		->where(['id' => $id])->one();  
+		return $getOrganization;
+    }
     /**
      * @return \yii\db\ActiveQuery
      */

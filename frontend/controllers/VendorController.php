@@ -13,6 +13,8 @@ use yii\web\Controller;
 use common\models\User;
 use common\models\Profile;
 use common\models\search\UserSearch;
+use common\models\RelationSuppRest;
+use yii\web\Response;
 
 /**
  * Controller for supplier
@@ -119,7 +121,29 @@ class VendorController extends Controller {
 
         return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
     }
+	 public function actionMycatalogs()
+    {
+        $relation_supp_rest = new RelationSuppRest;
+        return $this->render("mycatalogs", compact("relation_supp_rest"));
+    }
+    public function actionChangestatus()
+    {
+	    if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $RelationSuppRest = new RelationSuppRest;
+            
+            $id = \Yii::$app->request->post('id');
+            $status = \Yii::$app->request->post('status');
+            $status==1?$st=0:$st=1;
+	        $RelationSuppRest = RelationSuppRest::findOne(['id' => $id]);    
+	        $RelationSuppRest->status = $st;
+			$RelationSuppRest->update();
 
+            $result = ['success' => true, 'status'=>$st];
+            return $result;
+            exit;
+        }
+    }
     /*
      *  User delete (not actual delete, just remove organization relation)
      */

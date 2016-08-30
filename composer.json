@@ -20,6 +20,11 @@
         "yiisoft/yii2-swiftmailer": "*",
         "amnah/yii2-user": "^5.0",
         "2amigos/yii2-resource-manager-component": "^0.1.0",
+        "kartik-v/yii2-widget-select2": "@dev",
+        "fedemotta/yii2-widget-datatables": "*",
+        "bower-asset/bootbox": "~4.3.0",
+        "rmrevin/yii2-fontawesome": "~2.15",
+        "kartik-v/yii2-grid": "@dev",
         "yiisoft/yii2-redis": "^2.0"
     },
     "require-dev": {

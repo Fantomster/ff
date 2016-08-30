@@ -2,6 +2,7 @@
 
 namespace common\models;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 class Category extends \yii\db\ActiveRecord
 {
@@ -34,4 +35,7 @@ class Category extends \yii\db\ActiveRecord
             'name' => 'Name',
         ];
     }
+    public static function allCategory() {
+		return ArrayHelper::map(Category::find()->all(),'id','name');
+	}
 }

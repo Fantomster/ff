@@ -107,7 +107,7 @@ foreach($arrCatalog as $arrCatalogs){
       </div>
       <div class="modal-body">
 	   <div id="CreateCatalog">
-		   <?php
+		   <?php /*
 			    $searchModel = new CatalogBaseGoods();
 			    $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$cat_base_id);
 			?>
@@ -118,10 +118,6 @@ foreach($arrCatalog as $arrCatalogs){
 					[
 						'label'=>'Артикул',
 						'value'=>'article',
-						/*'editableOptions'=> [
-				            'header' => 'profile',
-				            'format' => Editable::FORMAT_BUTTON,
-						]*/
 					],
 					[
 						'label'=>'Продукт',
@@ -143,7 +139,7 @@ foreach($arrCatalog as $arrCatalogs){
 				    "info"=>false,
 				    "responsive"=>true, 
 				],
-			]);?>
+			]);*/?>
 	   </div>   
       </div>
       <div class="modal-footer">

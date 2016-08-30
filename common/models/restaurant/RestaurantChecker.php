@@ -60,9 +60,7 @@ class RestaurantChecker
 
 					}else{
 					//поставщик авторизован
-					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик авторизован, предлагаем invite',
-					'fio' => $userProfileFullName,
-					'organization' => $userOrgName];
+					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик авторизован, предлагаем invite','fio' => $userProfileFullName,'organization' => $userOrgName];
 			
 					return $result;
 

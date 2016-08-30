@@ -217,7 +217,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category').attr('readonly','readonly');
+		            $('#relationcategory-category').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);  
 	                }
@@ -234,14 +234,18 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            console.log(response.message);    
 	                }
 	                if(response.eventType==6){
+		            var fio = response.fio;
+	                var organization = response.organization;
+	                $('#profile-full_name').val(fio);
+	                $('#organization-name').val(organization); 
 	                $('#addProduct').addClass('hide');
 	                $('#inviteSupplier').removeClass('hide');  
 		            $('#inviteSupplier').removeAttr('disabled');
 		            $('#addProduct').attr('disabled','disabled');
 		            
-		            $('#profile-full_name').removeAttr('readonly');
-		            $('#organization-name').removeAttr('readonly');
-		            $('#relationcategory-category').removeAttr('disabled');
+		            $('#profile-full_name').attr('readonly','readonly');
+		            $('#organization-name').attr('readonly','readonly');
+		            $('#relationcategory-category').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);    
 	                }

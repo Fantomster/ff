@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use yii\web\Controller;
 use common\models\User;
+use common\models\Role;
 use common\models\Organization;
 use common\models\OrganizationType;
 use common\models\RelationCategory;
@@ -90,12 +91,14 @@ class RestaurantController extends Controller {
 			    if ($check['eventType']==2){return $check;}
 			    if ($check['eventType']==4){return $check;}
 			    if ($check['eventType']==3 || $check['eventType']==5) {   
+				     
 					/**
 				    *
 					* Создаем нового поставщика и организацию
 					*    
 					**/
 					if($check['eventType']==5){
+					/*
 					$user->username = $email;
 					$user->email = $email;
 					$user->save();
@@ -112,6 +115,14 @@ class RestaurantController extends Controller {
 					$profile->full_name = $fio;
 					$profile->user_id = $id_user;
 					$profile->save();
+					*/
+					$user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
+                    $profile->setUser($user->id)->save();
+                    $organization->save();
+                    $user->setOrganization($organization->id)->save();
+					$currentUser->sendInviteToVendor($user);
+					//
+					
 					}else{
 					//Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
 					$id_org = $check['org_id'];
@@ -133,7 +144,7 @@ class RestaurantController extends Controller {
 					*    
 					**/
 					if($check['eventType']==5){
-					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$id_org,1)";
+					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$organization->id,1)";
 				    \Yii::$app->db->createCommand($sql)->execute(); 
 				    $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 				    }else{
@@ -145,7 +156,7 @@ class RestaurantController extends Controller {
 					* Создаем каталог для ресторана
 					*    
 					**/
-					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$id_org,2)";
+					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$organization->id,2)";
 				    \Yii::$app->db->createCommand($sql)->execute(); 
 				    $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
 				    

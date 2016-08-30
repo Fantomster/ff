@@ -55,12 +55,18 @@ class RestaurantController extends Controller {
 	    if (Yii::$app->request->isAjax){
 		    Yii::$app->response->format = Response::FORMAT_JSON;
 		    
+		    $post = Yii::$app->request->Post('User');
+			$check = RestaurantChecker::checkEmail($post['email']);
+			if($check['eventType']!=5){
+			$user = User::find()->where(['email'=>$post['email']])->one();    
+		    }else{
+			$user = new User();    
+		    }
+			$relationSuppRest = new RelationSuppRest;
 		    $relationCategory = new RelationCategory;
 			$organization = new Organization;
 			$profile = new Profile();
-			$user = new User;
-			$relationSuppRest = new RelationSuppRest;
-		    
+			
 		    $post = Yii::$app->request->post();
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
@@ -70,7 +76,7 @@ class RestaurantController extends Controller {
             $currentUser = User::findIdentity(Yii::$app->user->id);
 			
 			$arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
-
+			
 			if ($user->validate() && $profile->validate() && $organization->validate()) {
 				if ($arrCatalog === Array()){
 				  $result = ['success'=>false,'message'=>'err: Каталог пустой!'];  
@@ -82,8 +88,6 @@ class RestaurantController extends Controller {
 			    $fio = 		$profile->full_name;
 			    $org = 		$organization->name;
 			    $categorys = $relationCategory['category'];
-			    
-			    $check = RestaurantChecker::checkEmail($email);
 			    
 			    if ($check['eventType']==1){return $check;}
 			    if ($check['eventType']==2){return $check;}
@@ -101,8 +105,9 @@ class RestaurantController extends Controller {
                     $user->setOrganization($organization->id)->save();
                     $id_org = $organization->id;
 					
-					$currentUser->sendInviteToVendor($user);
+					$currentUser->sendInviteToVendor($user); //TODO: не работает отправка почты
 					}else{
+					
 					//Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
 					$id_org = $check['org_id'];
 					}
@@ -134,7 +139,7 @@ class RestaurantController extends Controller {
 					* Создаем каталог для ресторана
 					*    
 					**/
-					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$organization->id,2)";
+					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$id_org,2)";
 				    \Yii::$app->db->createCommand($sql)->execute(); 
 				    $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
 				    
@@ -166,7 +171,7 @@ class RestaurantController extends Controller {
 				      \Yii::$app->db->createCommand($sql)->execute();       
 				    }
 				    
-				    $result = ['success'=>true,'message'=>'Поставщик <b>'.$fio.'</b> и каталог добавлен! Инструкция по авторизации была отправлена на '.$email]; 
+				    $result = ['success'=>true,'message'=>'Поставщик <b>'.$fio.'</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>'.$email.'</strong>']; 
 				    return $result;
 				}else{
 				$result = ['success'=>false,'message'=>'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!']; 
@@ -187,12 +192,19 @@ class RestaurantController extends Controller {
     public function actionInvite()
     {
 	  	if (Yii::$app->request->isAjax){
-		   Yii::$app->response->format = Response::FORMAT_JSON;
-		   
+		    Yii::$app->response->format = Response::FORMAT_JSON;
+		    
+		    $post = Yii::$app->request->Post('User');
+		    $check = RestaurantChecker::checkEmail($post['email']);
+		    if($check['eventType']!=5){
+			$user = User::find()->where(['email'=>$post['email']])->one();    
+		    }else{
+			$user = new User();    
+		    }
 		    $relationCategory = new RelationCategory;
 			$organization = new Organization;
 			$profile = new Profile();
-			$user = new User;
+			
 			$relationSuppRest = new RelationSuppRest;
 		    
 		    $post = Yii::$app->request->post();
@@ -202,22 +214,15 @@ class RestaurantController extends Controller {
             $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
-            /*
-            */
-		    //почему-то не проходит валидация по user
-		    if (/*$user->validate() && */$profile->validate() && $organization->validate()) {
-	        $check = RestaurantChecker::checkEmail($user->email);
+            
+		    if ($user->validate() && $profile->validate() && $organization->validate()) {
+	        
 	        if($check['eventType']==6){
 		        $email = 	$user->email;
 				$fio = 		$profile->full_name;
 				$org = 		$organization->name;
 				$categorys = $relationCategory['category'];
 				$id_org = $check['org_id'];
-				/*	       
-			    $relationSuppRest->rest_org_id = $currentUser->organization_id;
-			    $relationSuppRest->sup_org_id = $id_org;
-			    $relationSuppRest->save();
-			    */
 			    $sql = "insert into ".RelationSuppRest::tableName()."(`rest_org_id`,`sup_org_id`) VALUES ($currentUser->organization_id,$id_org)";
 				\Yii::$app->db->createCommand($sql)->execute();
 				

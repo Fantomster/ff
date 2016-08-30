@@ -22,7 +22,6 @@ $this->registerCss('
 <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>
     <li><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
-    <li><a data-toggle="tab" href="#tabListSuppliers">Список поставщиков</a></li>
 </ul>
 <div class="tab-content">
     <div id="tabAddSuppliers" class="tab-pane fade in active">
@@ -54,8 +53,6 @@ $this->registerCss('
     </div>
     <div id="tabMySuppliers" class="tab-pane fade">
     </div>
-    <div id="tabListSuppliers" class="tab-pane fade">
-    </div>
 </div>
 <div id="modal_addProduct" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
@@ -76,7 +73,7 @@ $this->registerCss('
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
-        <button id="invite" type="button" class="btn btn-info">Пригласить</button>
+        <button id="invite" type="button" class="btn btn-info">Отправить</button>
       </div>
     </div>
   </div>

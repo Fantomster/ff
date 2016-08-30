@@ -3,7 +3,7 @@
 namespace common\models;
 
 use Yii;
-
+use yii\data\ActiveDataProvider;
 /**
  * This is the model class for table "catalog_base_goods".
  *

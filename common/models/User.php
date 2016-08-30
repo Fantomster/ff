@@ -112,5 +112,9 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
+    public static function getOrganizationUser($user_ids) {
+		$user_orgganization = User::find()->select('organization_id')->where(['id' => $user_ids])->one();
+		return $user_orgganization['organization_id'];
+    }
 
 }

@@ -15,6 +15,9 @@ use Yii;
  */
 class Catalog extends \yii\db\ActiveRecord
 {
+	const BASE_CATALOG = 1;
+    
+    const CATALOG = 2;
     /**
      * @inheritdoc
      */
@@ -48,5 +51,18 @@ class Catalog extends \yii\db\ActiveRecord
             'type' => 'Type',
             'create_datetime' => 'Create Datetime',
         ];
+    }
+    public static function getNameCatalog($id){
+	$catalogName = Catalog::find()
+	->where(['id' => $id])->one();  
+	return $catalogName;
+    }
+    public static function GetBaseCatalog()
+    {
+		$catalog = Catalog::
+		find()
+		->select(['id','org_supp_id'])
+		->where(['org_supp_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>Catalog::BASE_CATALOG])->all();   
+		return $catalog;
     }
 }

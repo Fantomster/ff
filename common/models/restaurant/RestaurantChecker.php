@@ -28,7 +28,7 @@ class RestaurantChecker
 				if(RelationSuppRest::find()->where(['rest_org_id' => $rest_org_id,'sup_org_id'=>$userProfileOrgId])->exists())
 				{
 				$userRelationSuppRest = RelationSuppRest::find()->select('status')->where(['rest_org_id' => $rest_org_id,'sup_org_id'=>$userProfileOrgId])->one();
-					if($userRelationSuppRest['status']==1)
+					if($userRelationSuppRest['invite']==1)
 					{
 	
 					//есть связь с поставщиком
@@ -60,7 +60,7 @@ class RestaurantChecker
 
 					}else{
 					//поставщик авторизован
-					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик авторизован, предлагаем invite','fio' => $userProfileFullName,'organization' => $userOrgName];
+					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик авторизован, предлагаем invite','fio' => $userProfileFullName,'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
 			
 					return $result;
 

@@ -17,6 +17,10 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 	const INVITE_OFF = 0;
 	
     const INVITE_ON = 1;
+    
+    const STATUS_OFF = 0;
+	
+    const STATUS_ON = 1;
     /**
      * @inheritdoc
      */

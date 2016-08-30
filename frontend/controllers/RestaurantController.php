@@ -61,17 +61,15 @@ class RestaurantController extends Controller {
 			$user = new User;
 			$relationSuppRest = new RelationSuppRest;
 		    
-		    
 		    $post = Yii::$app->request->post();
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post);	//name
             $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
-            $currentUser = Yii::$app->user->id; //текущий юзер id
-            $currentUserOrgId = User::getOrganizationUser($currentUser); //организация текущего пользователя id
-
-		    $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+			
+			$arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
 
 			if ($user->validate() && $profile->validate() && $organization->validate()) {
 				if ($arrCatalog === Array()){
@@ -91,37 +89,17 @@ class RestaurantController extends Controller {
 			    if ($check['eventType']==2){return $check;}
 			    if ($check['eventType']==4){return $check;}
 			    if ($check['eventType']==3 || $check['eventType']==5) {   
-				     
+				    if($check['eventType']==5){
 					/**
 				    *
 					* Создаем нового поставщика и организацию
 					*    
-					**/
-					if($check['eventType']==5){
-					/*
-					$user->username = $email;
-					$user->email = $email;
-					$user->save();
-					$id_user=$user->id;
-					
-					$organization->name = $org;
-					$organization->type_id = OrganizationType::TYPE_SUPPLIER;
-					$organization->save();
-					$id_org=$organization->id;
-					
-					$user->organization_id = $id_org;
-					$user->save();
-					
-					$profile->full_name = $fio;
-					$profile->user_id = $id_user;
-					$profile->save();
-					*/
+					**/	
 					$user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization->id)->save();
 					$currentUser->sendInviteToVendor($user);
-					//
 					
 					}else{
 					//Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
@@ -132,9 +110,8 @@ class RestaurantController extends Controller {
 					* Делаем связь категорий поставщика
 					* 
 					**/
-					$rest_org_id = $currentUserOrgId;
 					foreach ( $categorys as $arrCategorys ) { 
-					$sql = "insert into ".RelationCategory::tableName()."(`category`,`relation_rest_org_id`,`relation_supp_org_id`) VALUES ('$arrCategorys',$rest_org_id,$id_org)";
+					$sql = "insert into ".RelationCategory::tableName()."(`category`,`relation_rest_org_id`,`relation_supp_org_id`) VALUES ('$arrCategorys',$currentUser->organization_id,$id_org)";
 				    \Yii::$app->db->createCommand($sql)->execute(); 	
 				    }
 				    
@@ -165,7 +142,7 @@ class RestaurantController extends Controller {
 					* Связь ресторана и поставщика
 					*    
 					**/
-					$relationSuppRest->rest_org_id = $rest_org_id;
+					$relationSuppRest->rest_org_id = $currentUser->organization_id;
 					$relationSuppRest->sup_org_id = $id_org;
 					$relationSuppRest->cat_id = $lastInsert_cat_id;
 					$relationSuppRest->save();
@@ -209,7 +186,52 @@ class RestaurantController extends Controller {
     {
 	  	if (Yii::$app->request->isAjax){
 		   Yii::$app->response->format = Response::FORMAT_JSON;
-		   ///////
+		   
+		    $relationCategory = new RelationCategory;
+			$organization = new Organization;
+			$profile = new Profile();
+			$user = new User;
+			$relationSuppRest = new RelationSuppRest;
+		    
+		    $post = Yii::$app->request->post();
+            $user->load($post); //user-email
+            $profile->load($post); //profile-full_name
+            $organization->load($post);	//name
+            $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
+            $relationCategory->load($post); //array category
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            /*
+            */
+		    //почему-то не проходит валидация по user
+		    if (/*$user->validate() && */$profile->validate() && $organization->validate()) {
+	        $check = RestaurantChecker::checkEmail($user->email);
+	        if($check['eventType']==6){
+		        $email = 	$user->email;
+				$fio = 		$profile->full_name;
+				$org = 		$organization->name;
+				$categorys = $relationCategory['category'];
+				$id_org = $check['org_id'];
+				/*	       
+			    $relationSuppRest->rest_org_id = $currentUser->organization_id;
+			    $relationSuppRest->sup_org_id = $id_org;
+			    $relationSuppRest->save();
+			    */
+			    $sql = "insert into ".RelationSuppRest::tableName()."(`rest_org_id`,`sup_org_id`) VALUES ($currentUser->organization_id,$id_org)";
+				\Yii::$app->db->createCommand($sql)->execute();
+				
+			    foreach ( $categorys as $arrCategorys ) { 
+					$sql = "insert into ".RelationCategory::tableName()."(`category`,`relation_rest_org_id`,`relation_supp_org_id`) VALUES ('$arrCategorys',$currentUser->organization_id,$id_org)";
+				    \Yii::$app->db->createCommand($sql)->execute(); 	
+				    }
+			    $result = ['success'=>true,'message'=>'Приглашение отправлено!'];
+				return $result;
+				exit; 
+			    }
+		    }else{
+				$result = ['success'=>true,'message'=>'Валидация не пройдена!'];
+				return $result;
+				exit;     
+		    }
 		}  
     }
 }

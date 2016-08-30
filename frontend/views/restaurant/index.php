@@ -245,7 +245,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category').attr('disabled','disabled');
+		            $('#relationcategory-category').removeAttr('disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);    
 	                }
@@ -261,13 +261,36 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
         }); 
 	}
 });
+$('#inviteSupplier').click(function(e){
+e.preventDefault();	
+	$.ajax({
+	  url: 'index.php?r=restaurant/invite',
+	  type: 'POST',
+	  dataType: "json",
+	  data: $("#SuppliersFormSend" ).serialize(),
+	  cache: false,
+	  success: function (response) {
+		if(response.success){
+		bootbox.dialog({
+			  message: response.message,
+			  title: "Уведомление",
+			  buttons: {
+			    success: {
+			      label: "Завершить",
+			      className: "btn-success",
+			      callback: function() {
+				  location.reload();    
+			      }
+			    },
+			  }
+			});	
+		}
+		console.log(response);  
+      }
+	});
+});
 $('#invite').click(function(e){
 e.preventDefault();	
-    //$('#invite').attr('readonly','readonly');
-	/*var email = $('#user-email').val();
-	var	fio = $('#profile-full_name').val();
-	var	organization = $('#organization-name').val();
-	var	category = $('#relationcategory-category').val(); */
 	var i, items, item, dataItem, data = [];
 	var cols = [ 'article', 'product', 'units', 'price', 'note'];
 	$('#CreateCatalog tr').each(function() {
@@ -288,42 +311,29 @@ e.preventDefault();
 	});
 	var catalog = data;
 	catalog = JSON.stringify(catalog);
-	//var profile =[];
-	//profile.push({'profile' : {'email' : email,'username' : fio,'organization' : organization, 'category' : category}});
-	//profile = JSON.stringify(profile);
 	$.ajax({
-	  url: 'index.php?r=restaurant/create',
-	  type: 'POST',
-	  dataType: "json",
-	  //data: {'profile':profile,'catalog':catalog},
-	  data: $("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
-	  cache: false,
-	  success: function (response) {
-		  if(response.success){
-		  $('#modal_addProduct').modal('hide'); 
-		  bootbox.dialog({
-		  message: response.message,
-		  title: "Уведомление",
-		  buttons: {
-		    success: {
-		      label: "Завершить",
-		      className: "btn-success",
-		      callback: function() {
-			  location.reload();    
-		      }
-		    },
-		  }
-		});
-		   //пока так, над обработкой callback-ов нужно подумать
-		  /*$('#invite').removeAttr('readonly');
-		  $('#user-email').val('');*/
-		  /*$('#profile-full_name').val('');
-		  $('#organization-name').val('');
-		  $('#relationcategory-category').val('');
-		  $('.form-group').removeClass('has-success');
-		  $('.form-group [aria-invalid]').removeAttr('aria-invalid');
-		  $('div.form-group').attr('required');*/
-		  //console.log(response.message);
+		  url: 'index.php?r=restaurant/create',
+		  type: 'POST',
+		  dataType: "json",
+		  //data: {'profile':profile,'catalog':catalog},
+		  data: $("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
+		  cache: false,
+		  success: function (response) {
+			  if(response.success){
+			  $('#modal_addProduct').modal('hide'); 
+			  bootbox.dialog({
+			  message: response.message,
+			  title: "Уведомление",
+			  buttons: {
+			    success: {
+			      label: "Завершить",
+			      className: "btn-success",
+			      callback: function() {
+				  location.reload();    
+			      }
+			    },
+			  }
+			});
 		  }else{
 		  //$('#invite').removeAttr('readonly');
 		  bootboxDialogShow(response.message);
@@ -335,14 +345,6 @@ e.preventDefault();
       }
 	});
 });
-/*
-$('#CreateCatalog').on('afterValidate', function(result){
-   if(!result.isValid){
-	   alert('! - value - '+ result.value +' row -' + result.row +' prop -' + result.prop+ +' source-'+result.source); 
-   }
-});
-*/
-
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

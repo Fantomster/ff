@@ -99,8 +99,9 @@ class RestaurantController extends Controller {
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization->id)->save();
-					$currentUser->sendInviteToVendor($user);
+                    $id_org = $organization->id;
 					
+					$currentUser->sendInviteToVendor($user);
 					}else{
 					//Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
 					$id_org = $check['org_id'];
@@ -164,6 +165,7 @@ class RestaurantController extends Controller {
 				      $sql = "insert into ".CatalogGoods::tableName()."(`cat_id`,`cat_base_goods_id`,`article`,`product`,`units`,`price`,`note`) VALUES ($lastInsert_cat_id,$lastInsert_base_goods_id,'$article','$product','$units','$price','$note')";
 				      \Yii::$app->db->createCommand($sql)->execute();       
 				    }
+				    
 				    $result = ['success'=>true,'message'=>'Поставщик <b>'.$fio.'</b> и каталог добавлен! Инструкция по авторизации была отправлена на '.$email]; 
 				    return $result;
 				}else{

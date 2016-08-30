@@ -83,7 +83,7 @@ class User extends \amnah\yii2\user\models\User {
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
-        return $result;
+        //return $result;
     }
 
     /**

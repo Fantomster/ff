@@ -63,6 +63,9 @@ foreach($arrBaseCatalog as $arrBaseCatalogs){
 $cat_base_id = $arrBaseCatalogs->id;
 } ?>	
 <h2>Шаблоны каталогов</h2>
+<div class="input-group" style="margin-bottom: 15px;">
+<?= Html::input('text', 'searchToCatalogs', null, ['class' => 'form-control','placeholder'=>'Умный поиск']) ?> 
+</div>
 <?php $form = ActiveForm::begin(['id'=>'MyCatalogFormSend']);?>
 <?php 
 $arrCatalog = RelationSuppRest::GetCatalogs();	
@@ -82,7 +85,7 @@ foreach($arrCatalog as $arrCatalogs){
 		                    <?= Html::button('<i class="fa fa-fw fa-clone"></i> Дубликат', ['class' => 'btn btn-default m-t','name'=>'clone_'.$arrCatalogs->id,'id'=>'clone_'.$arrCatalogs->id]) ?>
 		                    
 			            </div>
-		                <a ui-sref="view_catalog" href="#/view_catalog"><h4 class="m-b-xs text-info"><?php echo Catalog::getNameCatalog($arrCatalogs->cat_id)->name; ?></h4></a>
+		                <a href="#/view_catalog"><h4 class="m-b-xs text-info"><?php echo Catalog::getNameCatalog($arrCatalogs->cat_id)->name; ?></h4></a>
 		                <p class="small">Инфа</p>
 		                </p>
 		            </div>
@@ -107,7 +110,7 @@ foreach($arrCatalog as $arrCatalogs){
       </div>
       <div class="modal-body">
 	   <div id="CreateCatalog">
-		   <?php /*
+		   <?php 
 			    $searchModel = new CatalogBaseGoods();
 			    $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$cat_base_id);
 			?>
@@ -139,7 +142,7 @@ foreach($arrCatalog as $arrCatalogs){
 				    "info"=>false,
 				    "responsive"=>true, 
 				],
-			]);*/?>
+			]);?>
 	   </div>   
       </div>
       <div class="modal-footer">
@@ -172,14 +175,40 @@ bootbox.dialog({
 });
 }
 $('#viewBaseCatalog').click(function (e){
-	console.log('aa');
   $('#modal_baseCatalog').modal('show');
 });
+$('.del').click(function (e){
+	var id = $(this).attr('id').replace('del_','');
+	bootbox.confirm("<h3>Удалить этот каталог?</h3><p class='small'>Все привязки каталога к клиенту тоже удаляться</p>", function(result) {
+		if(result){
+			$.ajax({
+	        url: "index.php?r=vendor/mycatalogdelcatalog",
+	        type: "POST",
+	        dataType: "json",
+	        data: {'id' : id},
+	        cache: false,
+	        success: function(response) {
+		        if(response.success){
+			        console.log(response); 
+			        
+			        }else{
+				    console.log('Что-то пошло не так');    
+			        }
+		        }	
+		    });
+		}else{
+		console.log('cancel');	
+		}
+	});
+});
 $('.enDs').click(function (e){
-	$(this).attr('disabled','disabled')
+	$(this).attr('disabled','disabled');
 	var elem = $(this);
 	var id = elem.attr('id').replace('cat_','');
 	var status = elem.attr('data-status');
+	bootbox.confirm("<h3>Подтвердите действие</h3>", function(result) {
+		if(result){
+	
 	$.ajax({
         url: "index.php?r=vendor/changestatus",
         type: "POST",
@@ -204,6 +233,8 @@ $('.enDs').click(function (e){
             console.log(errMsg);
         }
 	});
+	}
+});
 });
 $('#modal_baseCatalog').on('shown.bs.modal', function() {
     //Get the datatable which has previously been initialized

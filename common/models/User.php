@@ -70,8 +70,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-
-        // send email
+		// send email
         $restaurant = $this->organization->name;
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($vendor->id, $userToken::TYPE_EMAIL_ACTIVATE);

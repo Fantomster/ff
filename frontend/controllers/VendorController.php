@@ -9,7 +9,6 @@ use common\models\User;
 use common\models\Role;
 use common\models\Profile;
 use common\models\search\UserSearch;
-<<<<<<< HEAD
 use common\models\RelationSuppRest;
 use common\models\RelationCategory;
 use common\models\Category;
@@ -17,10 +16,8 @@ use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
 use yii\web\Response;
-=======
 use common\components\AccessRule;
 use yii\filters\AccessControl;
->>>>>>> 42343846bd456490b888c69280edefb8ac8224be
 
 /**
  * Controller for supplier

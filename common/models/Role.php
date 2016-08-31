@@ -20,6 +20,23 @@ namespace common\models;
  */
 class Role extends \amnah\yii2\user\models\Role {
 
+    /**
+     * @var int Restaurant manager role
+     */
+    const ROLE_RESTAURANT_MANAGER = 3;
+    /**
+     * @var int Restaurant employee role
+     */
+    const ROLE_RESTAURANT_EMPLOYEE = 4;
+    /**
+     * @var int Supplier manager role
+     */
+    const ROLE_SUPPLIER_MANAGER = 5;
+    /**
+     * @var int Supplier employee role
+     */
+    const ROLE_SUPPLIER_EMPLOYEE = 6;
+    
     public static function getManagerRole($organization_type) {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [
             ':orgType' => $organization_type

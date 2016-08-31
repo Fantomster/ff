@@ -31,7 +31,7 @@ use yii\helpers\Html;
         ) ?>
 
         <?= !Yii::$app->user->isGuest ? $this->render(
-            'left.php',
+            'client/left',
             ['directoryAsset' => $directoryAsset]
         ) : ''
         ?>

@@ -1,18 +1,15 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace frontend\controllers;
 
 use Yii;
+use yii\web\HttpException;
 use yii\web\Controller;
 use common\models\User;
+use common\models\Role;
 use common\models\Profile;
 use common\models\search\UserSearch;
+<<<<<<< HEAD
 use common\models\RelationSuppRest;
 use common\models\RelationCategory;
 use common\models\Category;
@@ -20,6 +17,10 @@ use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
 use yii\web\Response;
+=======
+use common\components\AccessRule;
+use yii\filters\AccessControl;
+>>>>>>> 42343846bd456490b888c69280edefb8ac8224be
 
 /**
  * Controller for supplier
@@ -27,6 +28,35 @@ use yii\web\Response;
 class VendorController extends Controller {
 
     private $currentUser;
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'only' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                'rules' => [
+                    [
+                        'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_SUPPLIER_MANAGER,
+                        ],
+                    ],
+                ],
+                'denyCallback' => function($rule, $action) {
+                    throw new HttpException(404 ,'Не здесь ничего такого, проходите, гражданин');
+                }
+            ],
+        ];
+    }
 
     /*
      *  Main settings page
@@ -219,7 +249,7 @@ class VendorController extends Controller {
      */
 
     private function loadCurrentUser() {
-        $this->currentUser = User::findIdentity(Yii::$app->user->id);
+        $this->currentUser = Yii::$app->user->identity;//User::findIdentity(Yii::$app->user->id);
     }
 
 }

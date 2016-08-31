@@ -126,4 +126,24 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));
     }
     
+    /**
+     * Display login page
+     */
+    public function actionLogin()
+    {
+        //$this->layout = '@app/views/layouts/main-login';
+        
+        /** @var \amnah\yii2\user\models\forms\LoginForm $model */
+        $model = $this->module->model("LoginForm");
+
+        // load post data and login
+        $post = Yii::$app->request->post();
+        if ($model->load($post) && $model->validate()) {
+            $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
+            return $this->redirect($returnUrl);
+        }
+
+        return $this->render('login', compact("model"));
+    }
+    
 }

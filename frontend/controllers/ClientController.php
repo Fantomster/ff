@@ -1,25 +1,54 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace frontend\controllers;
 
 use Yii;
+use yii\web\HttpException;
 use yii\web\Controller;
 use common\models\User;
+use common\models\Role;
 use common\models\Profile;
 use common\models\search\UserSearch;
+use common\components\AccessRule;
+use yii\filters\AccessControl;
 
 /**
  *  Controller for restaurant 
  */
 class ClientController extends Controller {
 
+    public $layout = "main-client";
+    
     private $currentUser;
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'only' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                'rules' => [
+                    [
+                        'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                        ],
+                    ],
+                ],
+                'denyCallback' => function($rule, $action) {
+                    throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+                }
+            ],
+        ];
+    }
 
     /*
      *  Main settings page
@@ -30,6 +59,7 @@ class ClientController extends Controller {
         $searchModel = new UserSearch();
         $params = Yii::$app->request->getQueryParams();
         $this->loadCurrentUser();
+        $test = Yii::$app->user->identity;
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
         $organization = $this->currentUser->organization;
@@ -44,6 +74,7 @@ class ClientController extends Controller {
     /*
      *  User validate
      */
+
     public function actionAjaxValidateUser() {
         $user = new User();
         $profile = new Profile();
@@ -60,7 +91,7 @@ class ClientController extends Controller {
             }
         }
     }
-    
+
     /*
      *  User create
      */
@@ -101,7 +132,7 @@ class ClientController extends Controller {
         $user->setScenario("manage");
         $profile = $user->profile;
         $organizationType = $user->organization->type_id;
-        
+
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($user->load($post)) {
@@ -134,7 +165,7 @@ class ClientController extends Controller {
      */
 
     private function loadCurrentUser() {
-        $this->currentUser = User::findIdentity(Yii::$app->user->id);
+        $this->currentUser = Yii::$app->user->identity;//User::findIdentity(Yii::$app->user->id);
     }
 
 }

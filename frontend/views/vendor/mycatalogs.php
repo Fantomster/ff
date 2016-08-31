@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\url;
 use yii\web\View;
 use yii\bootstrap\ActiveForm;
-
+use yii\bootstrap\Modal;
 use common\models\CatalogBaseGoods;
 use common\models\RelationSuppRest;
 use common\models\Catalog;
@@ -29,17 +29,30 @@ $this->registerCss('
 }
 ');	
 ?>
+
 <h1><?= Html::encode($this->title) ?></h1>
 <div class="catalog-index">
 <div class="row">
 	<div class="col-lg-12">
-		<div class="text-right">
-			<?= Html::button('<i class="fa fa-fw fa-plus"></i> Новый каталог', ['class' => 'btn btn-primary', 'name' => 'newCatalog','id' => 'newCatalog']) ?>
-		</div>
+		<h2 style="float: left">Базовый каталог</h2>
+			<?=
+			Modal::widget([
+			    'id' => 'create-catalog',
+			    'clientOptions' => false,
+			    'toggleButton' => [
+			        'label' => '<i class="fa fa-fw fa-plus"></i> Новый каталог',
+			        'tag' => 'a',
+			        'data-target' => '#create-catalog',
+			        'class' => 'btn btn-primary',
+			        'href' => Url::toRoute(['/vendor/createcatalog']),
+			        'style' => 'float:right',
+			    ],
+			])
+			?>
 	</div>
 </div>
 
-<h2>Базовый каталог</h2>
+
 <?php 
 $arrBaseCatalog = Catalog::GetBaseCatalog();	
 foreach($arrBaseCatalog as $arrBaseCatalogs){
@@ -53,7 +66,7 @@ foreach($arrBaseCatalog as $arrBaseCatalogs){
 	                <?= Html::button('Просмотр/Редактирование', ['class' => 'btn btn-default m-t', 'name' => 'viewBaseCatalog','id' => 'viewBaseCatalog']) ?>
                     <?= Html::button('<i class="fa fa-fw fa-clone"></i> Дубликат', ['class' => 'btn btn-default m-t', 'name' => 'cloneBaseCatalog','id' => 'cloneBaseCatalog']) ?>
                 </div>
-                <a class="setting_<?php echo $arrBaseCatalogs->id; ?>" href="#view_catalog"><h4 class="m-b-xs text-info">Базовый каталог</h4></a>
+                <?= Html::a('<h4 class="m-b-xs text-info">Базовый каталог</h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
                 <p class="small">Этот каталог содержит все ваши продукты доступные на f-keeper</p>
             </div>
         </div>
@@ -61,7 +74,14 @@ foreach($arrBaseCatalog as $arrBaseCatalogs){
 </div>
 <?php 
 $cat_base_id = $arrBaseCatalogs->id;
-} ?>	
+} ?>
+<?php
+Modal::begin([
+    'id' => 'setting-base-catalog',
+    'clientOptions' => false,
+    ]);
+?>
+<?php Modal::end(); ?>	
 <h2>Шаблоны каталогов</h2>
 <div class="input-group" style="margin-bottom: 15px;">
 <?= Html::input('text', 'searchToCatalogs', null, ['class' => 'form-control','placeholder'=>'Умный поиск']) ?> 
@@ -76,7 +96,7 @@ foreach($arrCatalog as $arrCatalogs){
 		        <div class="hpanel" style="margin-bottom:0px;">
 					<div class="panel-body">
 		                <div class="pull-right text-right">
-			                <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', ['class' => 'btn btn-danger m-t del','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
+			                <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', ['class' => 'btn btn-danger m-t del','name'=>'del_'.$arrCatalogs->cat_id,'id'=>'del_'.$arrCatalogs->cat_id]) ?>
 		                    <?php if($arrCatalogs->status==1){
 			                     echo Html::button('Активный', ['class' => 'btn btn-success m-t enDs','data-status'=>'1','name'=>'cat_'.$arrCatalogs->id,'id'=>'cat_'.$arrCatalogs->id]);}else{
 				                 echo Html::button('Отключен', ['class' => 'btn btn-default m-t enDs','data-status'=>'0','name'=>'cat_'.$arrCatalogs->id,'id'=>'cat_'.$arrCatalogs->id]);}
@@ -95,6 +115,7 @@ foreach($arrCatalog as $arrCatalogs){
 <?php } ?>
 <?php ActiveForm::end();?>
 </div>
+
 <div id="modal_baseCatalog" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <!-- Modal content-->
@@ -152,6 +173,7 @@ foreach($arrCatalog as $arrCatalogs){
     </div>
   </div>
 </div>
+
 <?php
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
 $this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
@@ -162,20 +184,12 @@ $this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js'
 $this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable.js');
 $customJs = <<< JS
-function bootboxDialogShow(msg){
-bootbox.dialog({
-  message: msg,
-  title: "Уведомление",
-  buttons: {
-    success: {
-      label: "ОК",
-      className: "btn-success",
-    },
-  }
-});
-}
+/*
 $('#viewBaseCatalog').click(function (e){
   $('#modal_baseCatalog').modal('show');
+});*/
+$("body").on("hidden.bs.modal", function() {
+    $(this).data("bs.modal", null);
 });
 $('.del').click(function (e){
 	var id = $(this).attr('id').replace('del_','');
@@ -190,7 +204,7 @@ $('.del').click(function (e){
 	        success: function(response) {
 		        if(response.success){
 			        console.log(response); 
-			        
+			        location.reload(); 
 			        }else{
 				    console.log('Что-то пошло не так');    
 			        }
@@ -233,16 +247,25 @@ $('.enDs').click(function (e){
             console.log(errMsg);
         }
 	});
+	}else{
+	elem.removeAttr('disabled');
 	}
 });
 });
-$('#modal_baseCatalog').on('shown.bs.modal', function() {
-    //Get the datatable which has previously been initialized
-    //var dataTable= $('#CreateCatalog').DataTable();
-    //recalculate the dimensions
-    //dataTable.columns.adjust().responsive.recalc();
-
-});
+/*
+$('#setting-base-cat').on('click', function() {
+        var id = $(this).attr('data-id');
+		$.ajax({
+            url: 'index.php?r=vendor/settingbasecatalog',
+            data: {'id' : id},
+            type: "POST",
+			dataType: "json",
+			cache: false,
+        }).success(function(response) {
+	    $('#myModal').modal('show');
+	    });
+	});    
+*/	        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

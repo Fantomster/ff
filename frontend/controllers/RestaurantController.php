@@ -92,6 +92,7 @@ class RestaurantController extends Controller {
 			    if ($check['eventType']==1){return $check;}
 			    if ($check['eventType']==2){return $check;}
 			    if ($check['eventType']==4){return $check;}
+			    if ($check['eventType']==6){return $check;}
 			    if ($check['eventType']==3 || $check['eventType']==5) {   
 				    if($check['eventType']==5){
 					/**
@@ -104,10 +105,13 @@ class RestaurantController extends Controller {
                     $organization->save();
                     $user->setOrganization($organization->id)->save();
                     $id_org = $organization->id;
-					
-					$currentUser->sendInviteToVendor($user); //TODO: не работает отправка почты
+                    /**
+				    *
+					* Отправка почты
+					* 
+					**/
+					//$currentUser->sendInviteToVendor($user); //TODO: не работает отправка почты
 					}else{
-					
 					//Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
 					$id_org = $check['org_id'];
 					}

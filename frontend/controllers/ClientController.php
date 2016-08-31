@@ -17,8 +17,6 @@ use yii\filters\AccessControl;
  */
 class ClientController extends Controller {
 
-    public $layout = "main-client";
-    
     private $currentUser;
 
     /**
@@ -32,7 +30,7 @@ class ClientController extends Controller {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                'only' => ['index' ,'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
                 'rules' => [
                     [
                         'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
@@ -42,12 +40,28 @@ class ClientController extends Controller {
                             Role::ROLE_RESTAURANT_MANAGER,
                         ],
                     ],
+                    [
+                        'actions' => ['index'],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                        ],
+                    ],
                 ],
                 'denyCallback' => function($rule, $action) {
-                    throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+                    throw new HttpException(404 ,'Не здесь ничего такого, проходите, гражданин');
                 }
             ],
         ];
+    }
+    
+    /*
+     *  index
+     */
+    public function actionIndex() {
+        return $this->render('index');
     }
 
     /*

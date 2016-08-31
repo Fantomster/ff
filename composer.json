@@ -25,7 +25,8 @@
         "bower-asset/bootbox": "~4.3.0",
         "rmrevin/yii2-fontawesome": "~2.15",
         "kartik-v/yii2-grid": "@dev",
-        "yiisoft/yii2-redis": "^2.0"
+        "yiisoft/yii2-redis": "^2.0",
+        "dmstr/yii2-adminlte-asset": "2.*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

@@ -14,7 +14,11 @@ use common\models\User;
 use common\models\Profile;
 use common\models\search\UserSearch;
 use common\models\RelationSuppRest;
+use common\models\RelationCategory;
+use common\models\Category;
 use common\models\Catalog;
+use common\models\CatalogGoods;
+use common\models\CatalogBaseGoods;
 use yii\web\Response;
 
 /**
@@ -124,9 +128,18 @@ class VendorController extends Controller {
     }
 	 public function actionMycatalogs()
     {
+	    
         $relation_supp_rest = new RelationSuppRest;
         return $this->render("mycatalogs", compact("relation_supp_rest"));
     }
+     public function actionBasecatalog($id)
+    {
+	   $searchModel = new CatalogBaseGoods;
+	   $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id);
+       return $this->render('mycatalogs/basecatalog', compact('searchModel', 'dataProvider'));
+    }
+    
+    
     public function actionChangestatus()
     {
 	    if (Yii::$app->request->isAjax) {
@@ -150,23 +163,48 @@ class VendorController extends Controller {
 	    if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             
-            $Catalog = new Catalog;
-            $RelationSuppRest = new RelationSuppRest;
-            
             $cat_id = \Yii::$app->request->post('id');
             
-            $Catalog = Catalog::findOne(['id' => $cat_id]);
+            $Catalog = Catalog::find()->where(['id'=>$cat_id,'type'=>2])->one();
 			$Catalog->delete();
+			
+			$CatalogGoods = CatalogGoods::deleteAll(['cat_id' => $cat_id]);
+			
+			$RelationSuppRest = RelationSuppRest::updateAll(['cat_id' => null,'status' =>0],['cat_id' => $cat_id]);
             
-            $RelationSuppRest = RelationSuppRest::findOne(['cat_id' => $cat_id]);    
-	        $RelationSuppRest->cat_id = null;
-	        $RelationSuppRest->status = 0;
-			$RelationSuppRest->update();
-            
-            $result = ['success' => true, 'status'=>$id];
+            $result = ['success' => true];
             return $result;
             exit;
         }
+    }
+    public function actionSettingbasecatalog()
+    {
+	    $relation_supp_rest = new RelationSuppRest;
+	    $relationCategory = new RelationCategory;
+	    $category = new Category;
+	    if (Yii::$app->request->isAjax) {
+		    $i =true;
+            if ($i) {
+	        //$post = Yii::$app->request->post();
+			$message = 'Сохранено!';
+            return $this->renderAjax('mycatalogs/_setting', ['message' => $message]);
+            }
+        }
+        return $this->renderAjax('mycatalogs/_setting', compact("relation_supp_rest", "category", "relationCategory"));
+    }
+    public function actionCreateCatalog()
+    {
+	    $relation_supp_rest = new RelationSuppRest;
+	    
+	    if (Yii::$app->request->isAjax) {
+		    $i =true;
+            if ($i) {
+	        //$post = Yii::$app->request->post();
+			$message = 'Сохранено!';
+            return $this->renderAjax('mycatalogs/_success', ['message' => $message]);
+            }
+        }
+        return $this->renderAjax('mycatalogs/_create', compact('relation_supp_rest'));
     }
     /*
      *  User delete (not actual delete, just remove organization relation)

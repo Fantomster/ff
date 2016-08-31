@@ -55,8 +55,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         ];
     }
     
-    public function search($params,$cat_base_id) {
-	    $query = CatalogBaseGoods::find()->where(['cat_id'=>$cat_base_id]);
+    public function search($params,$id) {
+	    $query = CatalogBaseGoods::find()->where(['cat_id'=>$id]);
 	    $dataProvider = new ActiveDataProvider([
 	        'query' => $query,
 	    ]);

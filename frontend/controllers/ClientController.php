@@ -19,6 +19,8 @@ class ClientController extends Controller {
 
     private $currentUser;
 
+    public $layout = "main-client";
+
     /**
      * @inheritdoc
      */

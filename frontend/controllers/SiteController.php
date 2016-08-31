@@ -8,13 +8,11 @@ use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
-use frontend\models\PasswordResetRequestForm;
-use frontend\models\ResetPasswordForm;
-use frontend\models\SignupForm;
-use frontend\models\ContactForm;
 use yii\helpers\Json;
 use common\models\User;
+use common\models\Role;
+use common\components\AccessRule;
+use yii\helpers\Url;
 
 /**
  * Site controller
@@ -28,7 +26,10 @@ class SiteController extends Controller {
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['logout', 'signup'],
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'only' => ['logout', 'signup', 'index', 'about'],
                 'rules' => [
                     [
                         'actions' => ['signup'],
@@ -39,6 +40,28 @@ class SiteController extends Controller {
                         'actions' => ['logout'],
                         'allow' => true,
                         'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['index', 'about'],
+                        'allow' => false,
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                        ],
+                        'denyCallback' => function($rule, $action) {
+                            $this->redirect(Url::to(['/client/index']));
+                        }
+                    ],
+                    [
+                        'actions' => ['index', 'about'],
+                        'allow' => false,
+                        'roles' => [
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                        ],
+                        'denyCallback' => function($rule, $action) {
+                            $this->redirect(Url::to(['/vendor/index']));
+                        }
                     ],
                 ],
             ],

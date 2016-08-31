@@ -177,7 +177,16 @@ class VendorController extends Controller {
             $Catalog = new Catalog;
             $RelationSuppRest = new RelationSuppRest;
             
-            $id = \Yii::$app->request->post('id');
+            $cat_id = \Yii::$app->request->post('id');
+            
+            $Catalog = Catalog::findOne(['id' => $cat_id]);
+			$Catalog->delete();
+            
+            $RelationSuppRest = RelationSuppRest::findOne(['cat_id' => $cat_id]);    
+	        $RelationSuppRest->cat_id = null;
+	        $RelationSuppRest->status = 0;
+			$RelationSuppRest->update();
+            
             $result = ['success' => true, 'status'=>$id];
             return $result;
             exit;

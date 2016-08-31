@@ -30,7 +30,6 @@ class User extends \amnah\yii2\user\models\User {
         $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
         return $rules;
     }
-
     /**
      * Set organization id
      * @param int $orgId

@@ -17,6 +17,8 @@ use yii\data\ActiveDataProvider;
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord
 {
+	const MARKETPLACE_ON = 1;
+	const MARKETPLACE_OFF = 0;
     /**
      * @inheritdoc
      */

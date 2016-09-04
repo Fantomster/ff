@@ -20,14 +20,14 @@ use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 
 class RestaurantController extends Controller {	
-    public function actionIndex()
+    public function actionSupplirs()
     {	
 	    $user = new User;
 	    $profile = new Profile;
 	    $category = new Category;
 	    $relationCategory = new RelationCategory;
 	    $organization = new Organization;
-        return $this->render("index", compact("user", "organization", "relationCategory", "category", "profile"));
+        return $this->render("suppliers", compact("user", "organization", "relationCategory", "category", "profile"));
     }
 /**
 *

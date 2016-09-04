@@ -35,5 +35,9 @@ return [
             ],
             'emailViewPath' => '@app/mail',
         ],
+		'gridview' => [
+			'class' => 'kartik\grid\Module',
+		]
+
     ],
 ];

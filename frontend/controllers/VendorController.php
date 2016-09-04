@@ -25,7 +25,8 @@ use yii\filters\AccessControl;
 class VendorController extends Controller {
 
     private $currentUser;
-
+	
+	public $layout = "main-vendor";
     /**
      * @inheritdoc
      */
@@ -42,23 +43,37 @@ class VendorController extends Controller {
                     [
                         'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
                         'allow' => true,
-                        // Allow restaurant managers
+                        // Allow suppliers managers
                         'roles' => [
                             Role::ROLE_SUPPLIER_MANAGER,
                         ],
                     ],
+                    [
+                        'actions' => ['index','catalog'],
+                        'allow' => true,
+                        // Allow suppliers managers
+                        'roles' => [
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                        ],
+                    ],
                 ],
-                'denyCallback' => function($rule, $action) {
+               /* 'denyCallback' => function($rule, $action) {
                     throw new HttpException(404 ,'Не здесь ничего такого, проходите, гражданин');
-                }
+                }*/
             ],
         ];
     }
-
+    /*
+     *  index
+     */
+	public function actionIndex() {
+        return $this->render('index');
+    }
     /*
      *  Main settings page
      */
-
+	 
     public function actionSettings() {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
@@ -153,17 +168,21 @@ class VendorController extends Controller {
 
         return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
     }
-	 public function actionMycatalogs()
+	 public function actionCatalogs()
     {
 	    
         $relation_supp_rest = new RelationSuppRest;
-        return $this->render("mycatalogs", compact("relation_supp_rest"));
+        return $this->render("catalogs", compact("relation_supp_rest"));
     }
      public function actionBasecatalog($id)
     {
+	   $currentCatalog = $id;
+	   $currentUser = User::findIdentity(Yii::$app->user->id);
 	   $searchModel = new CatalogBaseGoods;
+	   $searchModel2 = new RelationSuppRest;
 	   $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id);
-       return $this->render('mycatalogs/basecatalog', compact('searchModel', 'dataProvider'));
+	   $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams,$currentUser);
+       return $this->render('catalogs/basecatalog', compact('searchModel', 'dataProvider','searchModel2','dataProvider2','currentCatalog'));
     }
     
     
@@ -171,16 +190,16 @@ class VendorController extends Controller {
     {
 	    if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $RelationSuppRest = new RelationSuppRest;
+            $Catalog = new Catalog;
             
             $id = \Yii::$app->request->post('id');
             $status = \Yii::$app->request->post('status');
-            $status==1?$st=0:$st=1;
-	        $RelationSuppRest = RelationSuppRest::findOne(['id' => $id]);    
-	        $RelationSuppRest->status = $st;
-			$RelationSuppRest->update();
+            $status==1?$status=0:$status=1;
+	        $Catalog = Catalog::findOne(['id' => $id]);    
+	        $Catalog->status = $status;
+			$Catalog->update();
 
-            $result = ['success' => true, 'status'=>$st];
+            $result = ['success' => true, 'status'=>$status];
             return $result;
             exit;
         }
@@ -197,7 +216,7 @@ class VendorController extends Controller {
 			
 			$CatalogGoods = CatalogGoods::deleteAll(['cat_id' => $cat_id]);
 			
-			$RelationSuppRest = RelationSuppRest::updateAll(['cat_id' => null,'status' =>0],['cat_id' => $cat_id]);
+			$RelationSuppRest = RelationSuppRest::updateAll(['cat_id' => null],['cat_id' => $cat_id]);
             
             $result = ['success' => true];
             return $result;
@@ -214,10 +233,117 @@ class VendorController extends Controller {
             if ($i) {
 	        //$post = Yii::$app->request->post();
 			$message = 'Сохранено!';
-            return $this->renderAjax('mycatalogs/_setting', ['message' => $message]);
+            return $this->renderAjax('catalogs/_setting', ['message' => $message]);
             }
         }
-        return $this->renderAjax('mycatalogs/_setting', compact("relation_supp_rest", "category", "relationCategory"));
+        return $this->renderAjax('catalogs/_setting', compact("relation_supp_rest", "category", "relationCategory"));
+    }
+    public function actionChangecatalogprop()
+    {
+	   if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $CatalogBaseGoods = new CatalogBaseGoods;
+            
+            $id = \Yii::$app->request->post('id');
+            $state = \Yii::$app->request->post('state');
+            $elem = \Yii::$app->request->post('elem');
+            if($elem=='market'){
+	          	if($state=='true'){
+		         $CatalogBaseGoods = CatalogBaseGoods::findOne(['id' => $id]);    
+				 $CatalogBaseGoods->market_place = CatalogBaseGoods::MARKETPLACE_ON;
+				 $CatalogBaseGoods->update(); 	
+				 
+				 $result = ['success' => true, 'status'=>'update market'];
+				 return $result;
+	          	}else{
+		         $CatalogBaseGoods = CatalogBaseGoods::findOne(['id' => $id]);    
+				 $CatalogBaseGoods->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+				 $CatalogBaseGoods->update();  
+				 
+				 $result = ['success' => true, 'status'=>'no update market'];
+				 return $result;	
+	          	}
+            }
+            if($elem=='status'){
+	            if($state=='true'){
+		            
+		         $CatalogBaseGoods = CatalogBaseGoods::findOne(['id' => $id]);    
+				 $CatalogBaseGoods->status = 1;
+				 $CatalogBaseGoods->update();  
+				 
+				 $result = ['success' => true, 'status'=>'update status'];
+				 return $result;
+				  	
+	          	}else{
+		          	
+		         $CatalogBaseGoods = CatalogBaseGoods::findOne(['id' => $id]);    
+				 $CatalogBaseGoods->status = 0;
+				 $CatalogBaseGoods->update(); 	
+				 
+				 $result = ['success' => true, 'status'=>'no update status'];
+				 return $result;
+				 
+	          	}
+            }
+        } 
+    }
+    public function actionChangesetcatalog()
+    {
+	   if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $relation_supp_rest = new RelationSuppRest;
+            $curCat = \Yii::$app->request->post('curCat'); //rest_org_id
+            $id = \Yii::$app->request->post('id'); //rest_org_id
+            $state = \Yii::$app->request->post('state'); //true/false
+	          	if($state=='true'){
+		         $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $id,'sup_org_id'=>$currentUser->organization_id]);    
+				 $relation_supp_rest->cat_id = $curCat;
+				 $relation_supp_rest->status = 1;
+				 $relation_supp_rest->update(); 	
+				 
+				 $result = ['success' => true, 'status'=>'ресторан '.$id.' назначен каталог '.$curCat];
+				 return $result;
+	          	}else{
+		         $cat_id ='NULL';
+		         $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $id,'sup_org_id'=>$currentUser->organization_id]);    
+				 $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
+				 $relation_supp_rest->status = 0;
+				 $relation_supp_rest->update();  
+				 
+				 $result = ['success' => true, 'status'=>'unset catalog'];
+				 return $result;	
+	          	}
+        } 
+    }
+    public function actionChangecatalogstatus()
+    {
+	   if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $Catalog = new Catalog;
+            
+            $id = \Yii::$app->request->post('id');
+            $state = \Yii::$app->request->post('state');
+	            if($state=='true'){
+		            
+		         $Catalog = Catalog::findOne(['id' => $id]);    
+				 $Catalog->status = 1;
+				 $Catalog->update();  
+				 
+				 $result = ['success' => true, 'status'=>'update status'];
+				 return $result;
+				  	
+	          	}else{
+		          	
+		         $Catalog = Catalog::findOne(['id' => $id]);    
+				 $Catalog->status = 0;
+				 $Catalog->update(); 	
+				 
+				 $result = ['success' => true, 'status'=>'no update status'];
+				 return $result;
+				 
+	          	}
+        } 
     }
     public function actionCreateCatalog()
     {
@@ -228,10 +354,10 @@ class VendorController extends Controller {
             if ($i) {
 	        //$post = Yii::$app->request->post();
 			$message = 'Сохранено!';
-            return $this->renderAjax('mycatalogs/_success', ['message' => $message]);
+            return $this->renderAjax('catalogs/_success', ['message' => $message]);
             }
         }
-        return $this->renderAjax('mycatalogs/_create', compact('relation_supp_rest'));
+        return $this->renderAjax('catalogs/_create', compact('relation_supp_rest'));
     }
     /*
      *  User delete (not actual delete, just remove organization relation)

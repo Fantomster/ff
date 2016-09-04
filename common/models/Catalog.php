@@ -18,6 +18,12 @@ class Catalog extends \yii\db\ActiveRecord
 	const BASE_CATALOG = 1;
     
     const CATALOG = 2;
+    
+    const NON_CATALOG = 0;
+    
+    const STATUS_ON = 1;
+    
+    const STATUS_OFF = 0;
     /**
      * @inheritdoc
      */
@@ -49,6 +55,7 @@ class Catalog extends \yii\db\ActiveRecord
             'name' => 'Name',
             'org_supp_id' => 'Org Supp ID',
             'type' => 'Type',
+            'status' => 'Status',
             'create_datetime' => 'Create Datetime',
         ];
     }
@@ -57,12 +64,11 @@ class Catalog extends \yii\db\ActiveRecord
 	->where(['id' => $id])->one();  
 	return $catalogName;
     }
-    public static function GetBaseCatalog()
+    public static function GetCatalogs($typeCat)
     {
-		$catalog = Catalog::
-		find()
-		->select(['id','org_supp_id'])
-		->where(['org_supp_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>Catalog::BASE_CATALOG])->all();   
+		$catalog = Catalog::find()
+		->select(['id','org_supp_id','status','name'])
+		->where(['org_supp_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$typeCat])->all();   
 		return $catalog;
     }
 }

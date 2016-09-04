@@ -7,7 +7,7 @@ use yii\bootstrap\Modal;
 use kartik\select2\Select2;
 ?>
 <?php
-$this->title = 'Restaurant - my-suppliers';
+$this->title = 'Мои поставщики';
 $this->params['breadcrumbs'][] = $this->title;
 
 $this->registerCss('
@@ -18,7 +18,6 @@ $this->registerCss('
 .modal-footer {border-top:1px solid #ccc;background-color: #ecf0f5}
 ');	
 ?>
-<h1>Мои поставщики</h1>
 <ul class="nav nav-tabs">
     <li class="active"><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>
     <li><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
@@ -104,6 +103,7 @@ bootbox.dialog({
 $('#profile-full_name').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');
 $('#relationcategory-category').attr('disabled','disabled');
+$('#addProduct').attr('disabled','disabled');
 $('#modal_addProduct').on('shown.bs.modal', function() {
 var data = [['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', '']];
 var container = document.getElementById('CreateCatalog');

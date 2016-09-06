@@ -3,7 +3,6 @@
 namespace common\models;
 
 use Yii;
-//use common\models\Category;
 use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "relation_category".
@@ -12,6 +11,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $supp_org_id
  * @property integer $rest_org_id
  * @property integer $category_id
+ * @property string $created_at
  */
 class RelationCategory extends \yii\db\ActiveRecord
 {
@@ -48,7 +48,4 @@ class RelationCategory extends \yii\db\ActiveRecord
             'category_id' => 'Category ID',
         ];
     }
-    /*public static function allCategory() {
-		return ArrayHelper::map(Category::find()->all(),'id','name');
-	}*/
 }

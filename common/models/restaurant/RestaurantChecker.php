@@ -14,6 +14,8 @@ class RestaurantChecker
     {
 		if(User::find()->select('email')->where(['email' => $email])->exists())
 		{
+		//$currentUser = User::findIdentity(Yii::$app->user->id);
+		//todo: переделать , брать все из $currentUser
 		$rest_org_id = User::getOrganizationUser(Yii::$app->user->id);    
 		$userProfile = User::find()->select('id,organization_id,status,email')->where(['email' => $email])->one();
 		$userProfileFullName = Profile::find()->select('full_name')->where(['user_id' => $userProfile['id']])->one();
@@ -25,13 +27,13 @@ class RestaurantChecker
 		$userOrgTypeId = $userOrg['type_id']; //тип организации 1 или 2
 			if($userOrgTypeId==2)
 			{
-				if(RelationSuppRest::find()->where(['rest_org_id' => $rest_org_id,'sup_org_id'=>$userProfileOrgId])->exists())
+				if(RelationSuppRest::find()->where(['rest_org_id' => $rest_org_id,'supp_org_id'=>$userProfileOrgId])->exists())
 				{
-				$userRelationSuppRest = RelationSuppRest::find()->select('status')->where(['rest_org_id' => $rest_org_id,'sup_org_id'=>$userProfileOrgId])->one();
-					if($userRelationSuppRest['invite']==1)
+				$userRelationSuppRest = RelationSuppRest::find()->select('invite')->where(['rest_org_id' => $rest_org_id,'supp_org_id'=>$userProfileOrgId])->one();
+					if($userRelationSuppRest['invite']==RelationSuppRest::INVITE_ON)
 					{
 	
-					//есть связь с поставщиком
+					//есть связь с поставщиком invite_on
 					$result = ['success'=>true,'eventType'=>1,'message'=>'Поставщик уже есть в списке контактов!',
 					'fio' => $userProfileFullName,
 					'organization' => $userOrgName]; 
@@ -81,7 +83,7 @@ class RestaurantChecker
 		}	
 	}
 	public static function getBaseCatalog($id_org){
-		$idorg=Catalog::find()->select('id')->where(['org_supp_id' => $id_org,'type'=>1])->one();
+		$idorg = Catalog::find()->select('id')->where(['supp_org_id' => $id_org,'type'=>Catalog::BASE_CATALOG])->one();
 		return $idorg;
 	}
 }		

@@ -199,10 +199,9 @@ class ClientController extends Controller {
     {	
 	    $user = new User;
 	    $profile = new Profile;
-	    $category = new Category;
 	    $relationCategory = new RelationCategory;
 	    $organization = new Organization;
-        return $this->render("suppliers", compact("user", "organization", "relationCategory", "category", "profile"));
+        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile"));
     }
 	/**
 	*
@@ -229,9 +228,10 @@ class ClientController extends Controller {
     {
 	    if (Yii::$app->request->isAjax){
 		    Yii::$app->response->format = Response::FORMAT_JSON;
-		    
+		     
 		    $post = Yii::$app->request->Post('User');
 			$check = RestaurantChecker::checkEmail($post['email']);
+			
 			if($check['eventType']!=5){
 			$user = User::find()->where(['email'=>$post['email']])->one();    
 		    }else{
@@ -243,6 +243,7 @@ class ClientController extends Controller {
 			$profile = new Profile();
 			
 		    $post = Yii::$app->request->post();
+		    
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post);	//name
@@ -253,22 +254,24 @@ class ClientController extends Controller {
 			$arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
 			
 			if ($user->validate() && $profile->validate() && $organization->validate()) {
+				
 				if ($arrCatalog === Array()){
 				  $result = ['success'=>false,'message'=>'err: Каталог пустой!'];  
 				  return $result;   
 				  exit; 
 			    }
-			
+				
 				$email = 	$user->email;
 			    $fio = 		$profile->full_name;
 			    $org = 		$organization->name;
-			    $categorys = $relationCategory['category'];
-			    
+			    $categorys = $relationCategory['category_id'];
+				
 			    if ($check['eventType']==1){return $check;}
 			    if ($check['eventType']==2){return $check;}
 			    if ($check['eventType']==4){return $check;}
 			    if ($check['eventType']==6){return $check;}
-			    if ($check['eventType']==3 || $check['eventType']==5) {   
+			    if ($check['eventType']==3 || $check['eventType']==5) { 
+				        
 				    if($check['eventType']==5){
 					/**
 				    *
@@ -279,79 +282,87 @@ class ClientController extends Controller {
                     $profile->setUser($user->id)->save();
                     $organization->save();
                     $user->setOrganization($organization->id)->save();
-                    $id_org = $organization->id;
+                    $get_supp_org_id = $organization->id;
                     /**
 				    *
 					* Отправка почты
 					* 
 					**/
-					//$currentUser->sendInviteToVendor($user); //TODO: не работает отправка почты
+					$currentUser->sendInviteToVendor($user); //TODO: не работает отправка почты
 					}else{
 					//Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
-					$id_org = $check['org_id'];
+					$get_supp_org_id = $check['org_id'];
 					}
 					/**
 				    *
-					* Делаем связь категорий поставщика
+					* 1) Делаем связь категорий поставщика
 					* 
 					**/
+					
 					foreach ( $categorys as $arrCategorys ) { 
-					$sql = "insert into ".RelationCategory::tableName()."(`category`,`relation_rest_org_id`,`relation_supp_org_id`) VALUES ('$arrCategorys',$currentUser->organization_id,$id_org)";
+					$sql = "insert into ".RelationCategory::tableName()."(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
 				    \Yii::$app->db->createCommand($sql)->execute(); 	
-				    }
-				    
-					/**
-				    *
-					* Создаем каталог базовый
-					*    
-					**/
-					if($check['eventType']==5){
-					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$organization->id,1)";
-				    \Yii::$app->db->createCommand($sql)->execute(); 
-				    $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
-				    }else{
-					$lastInsert_base_cat_id = RestaurantChecker::getBaseCatalog($id_org);
-					$lastInsert_base_cat_id=$lastInsert_base_cat_id['id'];
 				    }
 				    /**
 				    *
-					* Создаем каталог для ресторана
+					* 2) Создаем базовый и каталог для ресторана
 					*    
 					**/
-					$sql = "insert into ".Catalog::tableName()."(`name`,`org_supp_id`,`type`) VALUES ('default',$id_org,2)";
+					
+					if($check['eventType']==5){
+					$sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'default',".Catalog::BASE_CATALOG.",NOW())";
+				    \Yii::$app->db->createCommand($sql)->execute(); 
+				    $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
+				    }else{
+					$lastInsert_base_cat_id = RestaurantChecker::getBaseCatalog($get_supp_org_id);
+					$lastInsert_base_cat_id=$lastInsert_base_cat_id['id'];    
+				    }
+				    $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'default',".Catalog::CATALOG.",NOW())";
 				    \Yii::$app->db->createCommand($sql)->execute(); 
 				    $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
 				    
-					/**
+				    /**
 				    *
-					* Связь ресторана и поставщика
+					* 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
 					*    
 					**/
-					$relationSuppRest->rest_org_id = $currentUser->organization_id;
-					$relationSuppRest->sup_org_id = $id_org;
-					$relationSuppRest->cat_id = $lastInsert_cat_id;
-					$relationSuppRest->save();
-					
-					/**
-				    *
-					* добавляем каталог для ресторана на основе базового
-					*    
-					**/
-					foreach ( $arrCatalog as $arrCatalogs ) { 
+				    
+				    foreach ( $arrCatalog as $arrCatalogs ) { 
 				      $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
 				      $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
 				      $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
 				      $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
-				      $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));        
-				      $sql = "insert into ".CatalogBaseGoods::tableName()."(`cat_id`,`category_id`,`article`,`product`,`units`,`price`) VALUES ($lastInsert_base_cat_id,0,'$article','$product','$units','$price')";
+				      $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note'])); 
+				             
+				      $sql = "insert into ".CatalogBaseGoods::tableName()."(
+				      `cat_id`,`category_id`,`article`,`product`,`units`,`price`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
+				      $lastInsert_base_cat_id,0,'$article','$product','$units','$price',1,0,0,NOW())";
 				      \Yii::$app->db->createCommand($sql)->execute();
 				      $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
-				      $sql = "insert into ".CatalogGoods::tableName()."(`cat_id`,`cat_base_goods_id`,`article`,`product`,`units`,`price`,`note`) VALUES ($lastInsert_cat_id,$lastInsert_base_goods_id,'$article','$product','$units','$price','$note')";
+				      
+				      $sql = "insert into ".CatalogGoods::tableName()."(
+				      `cat_id`,`base_goods_id`,`price`,`note`,`discount`,`created_at`) VALUES (
+				      $lastInsert_cat_id, $lastInsert_base_goods_id, '$price', '$note', 0,NOW())";
 				      \Yii::$app->db->createCommand($sql)->execute();       
 				    }
 				    
+				    /**
+				    *
+					* 5) Связь ресторана и поставщика
+					*    
+					**/
+					
+					$relationSuppRest->rest_org_id = $currentUser->organization_id;
+					$relationSuppRest->supp_org_id = $get_supp_org_id;
+					$relationSuppRest->cat_id = $lastInsert_cat_id;
+					$relationSuppRest->save();
+					if($check['eventType']==5){				    
 				    $result = ['success'=>true,'message'=>'Поставщик <b>'.$fio.'</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>'.$email.'</strong>']; 
 				    return $result;
+				    }else{
+					$result = ['success'=>true,'message'=>'Каталог добавлен! Уведомление было отправлено на почту  <strong>'.$email.'</strong>']; 
+				    return $result;    
+				    }
 				}else{
 				$result = ['success'=>false,'message'=>'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!']; 
 				return $result;
@@ -397,16 +408,20 @@ class ClientController extends Controller {
 		    if ($user->validate() && $profile->validate() && $organization->validate()) {
 	        
 	        if($check['eventType']==6){
+		        
+		        
+		        
 		        $email = 	$user->email;
 				$fio = 		$profile->full_name;
 				$org = 		$organization->name;
-				$categorys = $relationCategory['category'];
-				$id_org = $check['org_id'];
-			    $sql = "insert into ".RelationSuppRest::tableName()."(`rest_org_id`,`sup_org_id`) VALUES ($currentUser->organization_id,$id_org)";
+				$categorys = $relationCategory['category_id'];
+				$get_supp_org_id = $check['org_id'];
+				
+				$sql = "insert into ".RelationSuppRest::tableName()."(`rest_org_id`,`supp_org_id`,`created_at`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW())";
 				\Yii::$app->db->createCommand($sql)->execute();
 				
 			    foreach ( $categorys as $arrCategorys ) { 
-					$sql = "insert into ".RelationCategory::tableName()."(`category`,`relation_rest_org_id`,`relation_supp_org_id`) VALUES ('$arrCategorys',$currentUser->organization_id,$id_org)";
+					$sql = "insert into ".RelationCategory::tableName()."(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
 				    \Yii::$app->db->createCommand($sql)->execute(); 	
 				    }
 			    $result = ['success'=>true,'message'=>'Приглашение отправлено!'];

@@ -17,8 +17,8 @@ use yii\data\ActiveDataProvider;
  * @property integer $status
  * @property integer $market_place
  * @property integer $deleted
- * @property string $create_at
- * @property string $last_update
+ * @property string $created_at
+ * @property string $updated_at
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord
 {
@@ -44,8 +44,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['cat_id', 'category_id'], 'required'],
-            [['cat_id', 'category_id'], 'integer'],
+            [['cat_id'], 'required'],
+            [['cat_id', 'category_id','status','market_place','deleted'], 'integer'],
             [['article', 'price'], 'string', 'max' => 50],
             [['product'], 'string', 'max' => 255],
             [['units'], 'string', 'max' => 15],
@@ -65,11 +65,14 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
             'product' => 'Product',
             'units' => 'Units',
             'price' => 'Price',
+            'status'=> 'Status',
+            'market_place'=> 'Market_place',
+            'deleted'=> 'Deleted'
         ];
     }
     
     public function search($params,$id) {
-	    $query = CatalogBaseGoods::find()->where(['cat_id'=>$id]);
+	    $query = CatalogBaseGoods::find()->where(['cat_id'=>$id,'deleted'=>'0']);
 	    $query->andFilterWhere(['like', 'product', '']);
 	    $dataProvider = new ActiveDataProvider([
 	        'query' => $query,
@@ -99,11 +102,11 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 	 
 	    return $dataProvider;
 	}
-	public function delete_product($id){
+	/*public function delete_product($id){
 	$Catalog = common\models\Catalog::findOne(['id' => $id]);    
 	$Catalog->status = $status;
 	$Catalog->update();
-	}
+	}*/
 	public static function GetCatalog()
     {
 		$catalog = CatalogBaseGoods::find()

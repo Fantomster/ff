@@ -13,9 +13,14 @@ use yii\data\ActiveDataProvider;
  * @property integer $supp_org_id
  * @property integer $cat_id
  * @property integer $invite
+ * @property string $created_at
+ * @property string $updated_at
  */
 class RelationSuppRest extends \yii\db\ActiveRecord
 {	
+        const PAGE_CLIENTS = 1;
+        const PAGE_CATALOG = 2;
+        
 	const INVITE_OFF = 0;
 	const INVITE_ON = 1;
     
@@ -66,10 +71,16 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 		return $catalogName->status;
     }*/
     
-    public function search($params,$currentUser) {
-	    
-	    $query = RelationSuppRest::find()
-	    ->where(['supp_org_id'=>$currentUser->organization_id,'invite'=>RelationSuppRest::INVITE_ON]);
+    public function search($params,$currentUser,$const) {
+	    if($const==RelationSuppRest::PAGE_CLIENTS){ 
+             $query = RelationSuppRest::find()
+            ->where(['supp_org_id'=>$currentUser->organization_id]); 
+            }
+	    if($const==RelationSuppRest::PAGE_CATALOG){
+             $query = RelationSuppRest::find()
+            ->where(['supp_org_id'=>$currentUser->organization_id])
+            ->andWhere(['invite'=>RelationSuppRest::INVITE_ON]);  
+            }
 	    $dataProvider = new ActiveDataProvider([
 	        'query' => $query,
 	    ]);
@@ -87,10 +98,6 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 	        return $dataProvider;
 	    }
 	 
-	    $this->addCondition($query, 'id');
-	    $this->addCondition($query, 'rest_org_id', true);
-	    $this->addCondition($query, 'cat_id', true);
-	    $this->addCondition($query, 'invite');
 	 
 	    /* Setup your custom filtering criteria */
 	 

@@ -11,7 +11,7 @@ use common\models\Profile;
 use common\models\search\UserSearch;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
-
+use yii\widgets\ActiveForm;
 /**
  *  Controller for restaurant 
  */
@@ -88,6 +88,36 @@ class ClientController extends Controller {
     }
 
     /*
+     *  Organization validate
+     */
+    public function actionAjaxValidateOrganization() {
+        $this->loadCurrentUser();
+        $organization = $this->currentUser->organization;
+        
+        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
+            if ($organization->validate()) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return json_encode(ActiveForm::validate($organization));
+            }
+        }
+    }
+    
+    /*
+     *  Organization save
+     */
+    public function actionAjaxUpdateOrganization() {
+        $this->loadCurrentUser();
+        $organization = $this->currentUser->organization;
+        
+        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
+            if ($organization->validate()) {
+                $organization->save();
+                return $this->render('settings/_info', compact('organization'));
+            }
+        }
+    }
+    
+    /*
      *  User validate
      */
 
@@ -102,7 +132,7 @@ class ClientController extends Controller {
 
                 if ($user->validate() && $profile->validate()) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
-                    return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
+                    return json_encode(ActiveForm::validateMultiple([$user, $profile]));
                 }
             }
         }

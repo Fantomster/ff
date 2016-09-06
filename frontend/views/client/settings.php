@@ -1,7 +1,22 @@
 <?php
 use yii\bootstrap\Tabs;
-?>
 
+$this->registerJs(
+        '$("document").ready(function(){
+            $(".settings").on("click", "#cancelOrg", function() {
+                alert("cancel");
+            });
+            $(".settings").on("click", "#saveOrg", function() {
+                alert("save");
+            });
+            $(".settings").on("change paste keyup", ".org-info>.col-lg-5>input[text]", function() {
+                $("#saveOrg").prop( "disabled", true );
+            });
+        });'
+);
+
+?>
+<div class="settings">
 <?= Tabs::widget([
     'items' => [
         [
@@ -19,3 +34,4 @@ use yii\bootstrap\Tabs;
         ],
     ],
 ]) ?>
+</div>

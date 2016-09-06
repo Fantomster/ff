@@ -8,6 +8,7 @@
                 'items' => [
                     ['label' => 'Главная', 'icon' => 'fa fa-dashboard', 'url' => ['client/index']],
                     ['label' => 'Настройки', 'icon' => 'fa fa-gears', 'url' => ['client/settings']],
+                    ['label' => 'Мои поставщики', 'icon' => 'fa fa-gears', 'url' => ['client/suppliers']],
                 ],
             ]
         ) ?>

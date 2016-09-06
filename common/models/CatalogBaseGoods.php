@@ -14,9 +14,22 @@ use yii\data\ActiveDataProvider;
  * @property string $product
  * @property string $units
  * @property string $price
+ * @property integer $status
+ * @property integer $market_place
+ * @property integer $deleted
+ * @property string $create_at
+ * @property string $last_update
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord
 {
+	const STATUS_ON = 1;
+	const STATUS_OFF = 0;
+	
+	const MARKETPLACE_ON = 1;
+	const MARKETPLACE_OFF = 0;
+	
+	const DELETED_ON = 1;
+	const DELETED_OFF = 0;
     /**
      * @inheritdoc
      */
@@ -57,6 +70,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     
     public function search($params,$id) {
 	    $query = CatalogBaseGoods::find()->where(['cat_id'=>$id]);
+	    $query->andFilterWhere(['like', 'product', '']);
 	    $dataProvider = new ActiveDataProvider([
 	        'query' => $query,
 	    ]);
@@ -76,13 +90,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 	        return $dataProvider;
 	    }
 	 
-	    $this->addCondition($query, 'id');
-	    $this->addCondition($query, 'cat_id', true);
-	    $this->addCondition($query, 'category_id', true);
-	    $this->addCondition($query, 'article');
-	 
 	    /* Setup your custom filtering criteria */
-	 
+		
 	    // filter by person full name
 	    /*$query->andWhere('first_name LIKE "%' . $this->fullName . '%" ' .
 	        'OR last_name LIKE "%' . $this->fullName . '%"'
@@ -90,4 +99,15 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 	 
 	    return $dataProvider;
 	}
+	public function delete_product($id){
+	$Catalog = common\models\Catalog::findOne(['id' => $id]);    
+	$Catalog->status = $status;
+	$Catalog->update();
+	}
+	public static function GetCatalog()
+    {
+		$catalog = CatalogBaseGoods::find()
+		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>\common\models\Catalog::BASE_CATALOG])->all();   
+		return $catalog;
+    }
 }

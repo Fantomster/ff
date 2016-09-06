@@ -22,7 +22,7 @@ class AppAsset extends AssetBundle
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
         'frontend\assets\BootboxAsset',
-        '\rmrevin\yii\fontawesome\AssetBundle',
         'fedemotta\datatables\DataTablesAsset',
+        '\rmrevin\yii\fontawesome\AssetBundle',        
     ];
 }

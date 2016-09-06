@@ -3,14 +3,15 @@
 namespace common\models;
 
 use Yii;
-use common\models\Category;
+//use common\models\Category;
 use yii\helpers\ArrayHelper;
 /**
  * This is the model class for table "relation_category".
  *
  * @property integer $id
- * @property integer $relation_supp_rest_id
- * @property integer $category
+ * @property integer $supp_org_id
+ * @property integer $rest_org_id
+ * @property integer $category_id
  */
 class RelationCategory extends \yii\db\ActiveRecord
 {
@@ -27,10 +28,11 @@ class RelationCategory extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['relation_supp_rest_id', 'category'], 'required'],
-            [['relation_supp_rest_id', 'category'], 'integer'],
-            [['relation_rest_supp_id', 'category'], 'required'],
-            [['relation_rest_supp_id', 'category'], 'integer'],
+            [['supp_rest_id', 'category_id'], 'required'],
+            [['supp_rest_id', 'category_id'], 'integer'],
+            [['rest_supp_id', 'category_id'], 'required'],
+            [['rest_supp_id', 'category_id'], 'integer'],
+            
         ];
     }
 
@@ -41,12 +43,12 @@ class RelationCategory extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'relation_supp_rest_id' => 'Relation Supp Rest ID',
-            'relation_rest_supp_id' => 'Relation Rest Supp ID',
-            'category' => 'Категория',
+            'supp_org_id' => 'Relation Supp org ID',
+            'rest_org_id' => 'Relation Rest org ID',
+            'category_id' => 'Category ID',
         ];
     }
-    public static function allCategory() {
+    /*public static function allCategory() {
 		return ArrayHelper::map(Category::find()->all(),'id','name');
-	}
+	}*/
 }

@@ -10,9 +10,6 @@ use Yii;
  * @property integer $id
  * @property integer $cat_id
  * @property integer $cat_base_goods_id
- * @property string $article
- * @property string $product
- * @property string $units
  * @property string $price
  * @property string $note
  */
@@ -34,9 +31,7 @@ class CatalogGoods extends \yii\db\ActiveRecord
         return [
             [['cat_id', 'cat_base_goods_id'], 'required'],
             [['cat_id', 'cat_base_goods_id'], 'integer'],
-            [['article', 'price'], 'string', 'max' => 50],
-            [['product'], 'string', 'max' => 255],
-            [['units'], 'string', 'max' => 15],
+            [['price'], 'string', 'max' => 50],
             [['note'], 'string', 'max' => 500],
         ];
     }
@@ -50,9 +45,6 @@ class CatalogGoods extends \yii\db\ActiveRecord
             'id' => 'ID',
             'cat_id' => 'Cat ID',
             'cat_base_goods_id' => 'Cat Base Goods ID',
-            'article' => 'Article',
-            'product' => 'Product',
-            'units' => 'Units',
             'price' => 'Price',
             'note' => 'Note',
         ];

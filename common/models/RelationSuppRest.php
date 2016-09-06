@@ -10,7 +10,7 @@ use yii\data\ActiveDataProvider;
  *
  * @property integer $id
  * @property integer $rest_org_id
- * @property integer $sup_org_id
+ * @property integer $supp_org_id
  * @property integer $cat_id
  * @property integer $invite
  */
@@ -33,8 +33,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['rest_org_id', 'sup_org_id', 'cat_id'], 'required'],
-            [['rest_org_id', 'sup_org_id', 'cat_id'], 'integer'],
+            [['rest_org_id', 'supp_org_id', 'cat_id'], 'required'],
+            [['rest_org_id', 'supp_org_id', 'cat_id'], 'integer'],
         ];
     }
 
@@ -46,7 +46,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'rest_org_id' => 'Rest Org ID',
-            'sup_org_id' => 'Sup Org ID',
+            'supp_org_id' => 'Supp Org ID',
             'cat_id' => 'Cat ID',
         ];
     }
@@ -55,7 +55,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 		$catalog = RelationSuppRest::
 		find()
 		->select(['id','cat_id','rest_org_id','invite'])
-		->where(['sup_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
+		->where(['supp_org_id' => User::getOrganizationUser(Yii::$app->user->id)])
 		->andWhere(['not', ['cat_id' => null]])
 		->all();  
 		return $catalog;  
@@ -69,7 +69,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function search($params,$currentUser) {
 	    
 	    $query = RelationSuppRest::find()
-	    ->where(['sup_org_id'=>$currentUser->organization_id,'invite'=>RelationSuppRest::INVITE_ON]);
+	    ->where(['supp_org_id'=>$currentUser->organization_id,'invite'=>RelationSuppRest::INVITE_ON]);
 	    $dataProvider = new ActiveDataProvider([
 	        'query' => $query,
 	    ]);
@@ -77,6 +77,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 	        'attributes' => [
 	            'id',
 				'rest_org_id',
+				'supp_org_id',
 				'cat_id',
 				'invite'
 	        ]

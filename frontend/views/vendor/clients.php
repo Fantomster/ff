@@ -1,5 +1,5 @@
 <?php
-use kartik\grid\gridview;
+use kartik\grid\Gridview;
 use yii\helpers\Html;
 use dosamigos\switchinput\SwitchBox;
 //use kartik\export\ExportMenu;
@@ -13,14 +13,6 @@ use common\models\Users;
 //use common\models\CatalogBaseGoods;
 //use common\models\CatalogGoods;
 ?>
-
-<?php 
-//  нужно отобразить таблицу вида 
-//  ресторан / статус / Принят
-//  rest_org_id / invite / переключатель да / нет
-//  select rest_org_id, invite from relation_supp_rest where supp_org_id=currentUser->organization_id
-
-?>
 <?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
 <?php 
 $gridColumnsClients = [
@@ -31,6 +23,10 @@ $gridColumnsClients = [
                 [
 		'label'=>'Статус',
 		'value'=>'invite',
+		],
+                [
+		'label'=>'Каталог назначеный',
+		'value'=>'cat_id',
 		],
                 [
                 'attribute' => 'Статус сотрудничества',

@@ -1,5 +1,5 @@
 <?php
-use kartik\grid\gridview;
+use kartik\grid\Gridview;
 use yii\helpers\Html;
 use dosamigos\switchinput\SwitchBox;
 use kartik\export\ExportMenu;

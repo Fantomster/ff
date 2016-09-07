@@ -256,6 +256,7 @@ class VendorController extends Controller {
                     }else{
 		    $relationSuppRest = RelationSuppRest::findOne(['rest_org_id' => $id,'supp_org_id'=>$currentUser->organization_id]);    
                     $relationSuppRest->invite = RelationSuppRest::INVITE_OFF;
+                    $relationSuppRest->cat_id = RelationSuppRest::INVITE_OFF;
                     $relationSuppRest->update();  
 				 
                     $result = ['success' => true, 'status'=>'no update invite'];
@@ -445,15 +446,9 @@ class VendorController extends Controller {
     }
     public function actionCreateCatalog()
     {
-	    $relation_supp_rest = new RelationSuppRest;
-	    
-	    if (Yii::$app->request->isAjax) {
-		    $i =true;
-            if ($i) {
-	        //$post = Yii::$app->request->post();
-			$message = 'Сохранено!';
-            return $this->renderAjax('catalogs/_success', ['message' => $message]);
-            }
+	$relation_supp_rest = new RelationSuppRest;
+	if (Yii::$app->request->isAjax) {
+	
         }
         return $this->renderAjax('catalogs/_create', compact('relation_supp_rest'));
     }

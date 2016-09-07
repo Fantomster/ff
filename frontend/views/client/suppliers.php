@@ -5,6 +5,7 @@ use yii\web\View;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
 use kartik\select2\Select2;
+use common\models\Category;
 ?>
 <?php
 $this->title = 'Мои поставщики';
@@ -30,8 +31,8 @@ $this->registerCss('
 		    <?= $form->field($user, 'email')?>
 			<?= $form->field($profile, 'full_name')?>
 			<?= $form->field($organization, 'name')?>
-		    <?= $form->field($relationCategory, 'category')->widget(Select2::classname(), [
-				    'data' => $category::allCategory(),
+		    <?= $form->field($relationCategory, 'category_id')->widget(Select2::classname(), [
+				    'data' => Category::allCategory(),
 				    'theme' => Select2::THEME_BOOTSTRAP,
 				    'language' => 'ru',
 				    'options' => ['multiple' => true,'placeholder' => 'Выбрать категорию...'],
@@ -102,7 +103,7 @@ bootbox.dialog({
 }
 $('#profile-full_name').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');
-$('#relationcategory-category').attr('disabled','disabled');
+$('#relationcategory-category_id').attr('disabled','disabled');
 $('#addProduct').attr('disabled','disabled');
 $('#modal_addProduct').on('shown.bs.modal', function() {
 var data = [['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', '']];
@@ -149,7 +150,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
     if (attribute.name === 'email' && !hasError)
     {
 		$.ajax({
-            url: "index.php?r=restaurant/chkmail",
+            url: "index.php?r=client/chkmail",
             type: "POST",
             dataType: "json",
             data: {'email' : input.val()},
@@ -167,7 +168,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category').attr('disabled','disabled');
+		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);	    
 	                }
@@ -184,7 +185,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category').attr('disabled','disabled');
+		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);   
 	                }
@@ -201,7 +202,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category').removeAttr('disabled');
+		            $('#relationcategory-category_id').removeAttr('disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);    
 	                }
@@ -214,7 +215,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category').attr('disabled','disabled');
+		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);  
 	                }
@@ -226,7 +227,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').removeAttr('readonly');
 		            $('#organization-name').removeAttr('readonly');
-		            $('#relationcategory-category').removeAttr('disabled');
+		            $('#relationcategory-category_id').removeAttr('disabled');
 		            //bootboxDialogShow(response.message);
 		            console.log(response.message);    
 	                }
@@ -242,7 +243,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category').removeAttr('disabled');
+		            $('#relationcategory-category_id').removeAttr('disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(response.message);    
 	                }
@@ -261,7 +262,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 $('#inviteSupplier').click(function(e){
 e.preventDefault();	
 	$.ajax({
-	  url: 'index.php?r=restaurant/invite',
+	  url: 'index.php?r=client/invite',
 	  type: 'POST',
 	  dataType: "json",
 	  data: $("#SuppliersFormSend" ).serialize(),
@@ -286,8 +287,8 @@ e.preventDefault();
       }
 	});
 });
-$('#invite').click(function(e){
-e.preventDefault();	
+$('#invite').click(function(e){	
+e.preventDefault();
 	var i, items, item, dataItem, data = [];
 	var cols = [ 'article', 'product', 'units', 'price', 'note'];
 	$('#CreateCatalog tr').each(function() {
@@ -309,10 +310,9 @@ e.preventDefault();
 	var catalog = data;
 	catalog = JSON.stringify(catalog);
 	$.ajax({
-		  url: 'index.php?r=restaurant/create',
+		  url: 'index.php?r=client/create',
 		  type: 'POST',
 		  dataType: "json",
-		  //data: {'profile':profile,'catalog':catalog},
 		  data: $("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
 		  cache: false,
 		  success: function (response) {

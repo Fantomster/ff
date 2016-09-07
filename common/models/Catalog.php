@@ -12,8 +12,8 @@ use Yii;
  * @property string $name
  * @property integer $status
  * @property integer $type
- * @property string $create_at
- * @property string $last_update
+ * @property string $created_at
+ * @property string $updated_at
  */
 class Catalog extends \yii\db\ActiveRecord
 {    
@@ -40,7 +40,7 @@ class Catalog extends \yii\db\ActiveRecord
         return [
             [['name', 'supp_org_id', 'type'], 'required'],
             [['supp_org_id', 'type', 'status'], 'integer'],
-            [['create_at'], 'safe'],
+            [['created_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
         ];
     }
@@ -56,7 +56,7 @@ class Catalog extends \yii\db\ActiveRecord
             'supp_org_id' => 'Org Supp ID',
             'type' => 'Type',
             'status' => 'Status',
-            'create_at' => 'Create Datetime',
+            'created_at' => 'Create Datetime',
         ];
     }
     public static function getNameCatalog($id){

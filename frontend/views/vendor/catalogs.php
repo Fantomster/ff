@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\helpers\url;
 use yii\web\View;
+use yii\db\Query;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
 use common\models\CatalogBaseGoods;
@@ -52,7 +53,7 @@ $this->registerCss('
 
 
 <?php 
-$arrBaseCatalog = Catalog::GetCatalogs(Catalog::BASE_CATALOG);	
+$arrBaseCatalog = Catalog::GetCatalogs(\common\models\Catalog::BASE_CATALOG);
 foreach($arrBaseCatalog as $arrBaseCatalogs){
 ?>
 <div class="row">
@@ -70,10 +71,8 @@ foreach($arrBaseCatalog as $arrBaseCatalogs){
         </div>
     </div>
 </div>
-<?php 
-$cat_base_id = $arrBaseCatalogs->id;
-} ?>
 <?php
+}
 Modal::begin([
     'id' => 'setting-base-catalog',
     'clientOptions' => false,
@@ -86,8 +85,16 @@ Modal::begin([
 </div>
 
 <?php 
-//$arrCatalog = RelationSuppRest::GetRelationCatalogs();	
-$arrCatalog = Catalog::GetCatalogs(Catalog::CATALOG);	
+/*
+ $query=new Query();
+ $query->addSelect(['c.status','c.id','c.name'])
+         ->from ([\common\models\CatalogGoods::tableName().' cg'])
+         ->rightJoin(\common\models\Catalog::tableName().' c','cg.cat_id = c.id')
+         ->where(['cg.supp_org_id'=>\common\models\User::getOrganizationUser(Yii::$app->user->id)]);
+
+ return $query->all();
+*/	
+$arrCatalog = Catalog::GetCatalogs(\common\models\Catalog::CATALOG);	
 foreach($arrCatalog as $arrCatalogs){
 ?>
 		<div class="row" style="margin-bottom: 15px;">
@@ -108,13 +115,13 @@ foreach($arrCatalog as $arrCatalogs){
 								    ],
 								    'class'=>'m-t'
 								]);
-			                //return $link;
 		                    ?>
-			                <?= Html::button('Просмотр/Редактирование', ['class' => 'btn btn-default m-t','name'=>'view_'.$arrCatalogs->id,'id'=>'view_'.$arrCatalogs->id]) ?>
+                                    <?= Html::a('Просмотр/Редактирование', ['vendor/catalog', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t']) ?>
 		                    <?= Html::button('<i class="fa fa-fw fa-clone"></i> Дубликат', ['class' => 'btn btn-default m-t','name'=>'clone_'.$arrCatalogs->id,'id'=>'clone_'.$arrCatalogs->id]) ?>
 		                    <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
 			            </div>
-		                <a href="#/view_catalog"><h4 class="m-b-xs text-info"><?=$arrCatalogs->name; ?></h4></a>
+                                <?= Html::a('<h4 class="m-b-xs text-info"> '.$arrCatalogs->name.'</h4>', ['vendor/catalog', 'id' => $arrCatalogs->id]) ?>
+		              
 		                <p class="small">Инфа</p>
 		                </p>
 		            </div>

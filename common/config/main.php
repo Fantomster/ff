@@ -1,6 +1,9 @@
 <?php
 return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
+    'sourceLanguage'=>'ru_ru',
+    'language'=>'ru',
+    'charset'=>'utf-8',
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',

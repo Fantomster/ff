@@ -1,0 +1,110 @@
+<?php
+
+namespace common\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "order".
+ *
+ * @property integer $id
+ * @property integer $client_id
+ * @property integer $vendor_id
+ * @property integer $created_by_id
+ * @property integer $accepted_by_id
+ * @property integer $status
+ * @property string $total_price
+ * @property string $created_at
+ * @property string $updated_at
+ *
+ * @property User $acceptedBy
+ * @property Organization $client
+ * @property User $createdBy
+ * @property Organization $vendor
+ * @property OrderContent[] $orderContent
+ */
+class Order extends \yii\db\ActiveRecord
+{
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'order';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status'], 'required'],
+            [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status'], 'integer'],
+            [['total_price'], 'number'],
+            [['created_at', 'updated_at'], 'safe'],
+            [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
+            [['created_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by_id' => 'id']],
+            [['vendor_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['vendor_id' => 'id']],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'client_id' => 'Client ID',
+            'vendor_id' => 'Vendor ID',
+            'created_by_id' => 'Created By ID',
+            'accepted_by_id' => 'Accepted By ID',
+            'status' => 'Status',
+            'total_price' => 'Total Price',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+        ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAcceptedBy()
+    {
+        return $this->hasOne(User::className(), ['id' => 'accepted_by_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClient()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'client_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreatedBy()
+    {
+        return $this->hasOne(User::className(), ['id' => 'created_by_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVendor()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrderContent()
+    {
+        return $this->hasMany(OrderContent::className(), ['order_id' => 'id']);
+    }
+}

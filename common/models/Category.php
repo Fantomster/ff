@@ -4,6 +4,10 @@ namespace common\models;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+/**
+ * @property integer $id
+ * @property string $name
+ */
 
 class Category extends \yii\db\ActiveRecord
 {

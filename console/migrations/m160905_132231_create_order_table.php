@@ -21,7 +21,7 @@ class m160905_132231_create_order_table extends Migration
             'id' => Schema::TYPE_PK,
             'client_id' => Schema::TYPE_INTEGER  . ' not null',
             'vendor_id' => Schema::TYPE_INTEGER  . ' not null',
-            'created_by_id' => Schema::TYPE_INTEGER  . ' not_null',
+            'created_by_id' => Schema::TYPE_INTEGER  . ' not null',
             'accepted_by_id' => Schema::TYPE_INTEGER . ' not null',
             'status' => Schema::TYPE_INTEGER . ' not null',
             'total_price' => Schema::TYPE_DECIMAL . ' null',

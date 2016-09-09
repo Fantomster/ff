@@ -21,7 +21,10 @@ class RelationSuppRest extends \yii\db\ActiveRecord
         const PAGE_CLIENTS = 1;
         const PAGE_CATALOG = 2;
         
-	const INVITE_OFF = 0;
+        const CATALOG_STATUS_OFF = 0;
+        const CATALOG_STATUS_ON = 1;
+
+        const INVITE_OFF = 0;
 	const INVITE_ON = 1;
     
     /**

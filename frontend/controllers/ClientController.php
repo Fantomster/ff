@@ -243,14 +243,14 @@ class ClientController extends Controller {
 			$profile = new Profile();
 			
 		    $post = Yii::$app->request->post();
-		    
+	       
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post);	//name
             $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
-			
+
 			$arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
 			
 			if ($user->validate() && $profile->validate() && $organization->validate()) {
@@ -274,17 +274,17 @@ class ClientController extends Controller {
 				        
 				    if($check['eventType']==5){
 					/**
-				    *
+                                        *
 					* Создаем нового поставщика и организацию
 					*    
 					**/	
 					$user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
-                    $profile->setUser($user->id)->save();
-                    $organization->save();
-                    $user->setOrganization($organization->id)->save();
-                    $get_supp_org_id = $organization->id;
-                    /**
-				    *
+                                        $profile->setUser($user->id)->save();
+                                        $organization->save();
+                                        $user->setOrganization($organization->id)->save();
+                                        $get_supp_org_id = $organization->id;
+                                        /**
+                                        *
 					* Отправка почты
 					* 
 					**/
@@ -294,7 +294,7 @@ class ClientController extends Controller {
 					$get_supp_org_id = $check['org_id'];
 					}
 					/**
-				    *
+                                        *
 					* 1) Делаем связь категорий поставщика
 					* 
 					**/
@@ -303,8 +303,8 @@ class ClientController extends Controller {
 					$sql = "insert into ".RelationCategory::tableName()."(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
 				    \Yii::$app->db->createCommand($sql)->execute(); 	
 				    }
-				    /**
-				    *
+                                        /**
+                                        *
 					* 2) Создаем базовый и каталог для ресторана
 					*    
 					**/
@@ -317,12 +317,12 @@ class ClientController extends Controller {
 					$lastInsert_base_cat_id = RestaurantChecker::getBaseCatalog($get_supp_org_id);
 					$lastInsert_base_cat_id=$lastInsert_base_cat_id['id'];    
 				    }
-				    $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'default',".Catalog::CATALOG.",NOW())";
+				    $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'".Organization::getOrganization($currentUser->organization_id)->name."',".Catalog::CATALOG.",NOW())";
 				    \Yii::$app->db->createCommand($sql)->execute(); 
 				    $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
 				    
-				    /**
-				    *
+                                        /**
+                                        *
 					* 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
 					*    
 					**/
@@ -346,15 +346,17 @@ class ClientController extends Controller {
 				      \Yii::$app->db->createCommand($sql)->execute();       
 				    }
 				    
-				    /**
-				    *
+                                        /**
+                                        *  
 					* 5) Связь ресторана и поставщика
-					*    
+					*     
 					**/
 					
 					$relationSuppRest->rest_org_id = $currentUser->organization_id;
 					$relationSuppRest->supp_org_id = $get_supp_org_id;
 					$relationSuppRest->cat_id = $lastInsert_cat_id;
+                                        $relationSuppRest->status = RelationSuppRest::CATALOG_STATUS_ON;
+                                        $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
 					$relationSuppRest->save();
 					if($check['eventType']==5){				    
 				    $result = ['success'=>true,'message'=>'Поставщик <b>'.$fio.'</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>'.$email.'</strong>']; 

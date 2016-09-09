@@ -34,20 +34,7 @@ $this->registerCss('
 <div class="row">
 	<div class="col-lg-12">
 		<h2 style="float: left">Базовый каталог</h2>
-			<?=
-			Modal::widget([
-			    'id' => 'create-catalog',
-			    'clientOptions' => false,
-			    'toggleButton' => [
-			        'label' => '<i class="fa fa-fw fa-plus"></i> Новый каталог',
-			        'tag' => 'a',
-			        'data-target' => '#create-catalog',
-			        'class' => 'btn btn-primary',
-			        'href' => Url::toRoute(['/vendor/createcatalog']),
-			        'style' => 'float:right',
-			    ],
-			])
-			?>
+                <?= Html::a('<i class="fa fa-fw fa-plus"></i> Новый каталог', ['vendor/step-1'],['class'=>'btn btn-primary','style' => 'float:right']) ?>
 	</div>
 </div>
 
@@ -62,7 +49,7 @@ foreach($arrBaseCatalog as $arrBaseCatalogs){
 			<div class="panel-body">
                 <div class="pull-right text-right">
 	                <?= Html::a('Просмотр/Редактирование', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t']) ?>
-                    <?= Html::button('<i class="fa fa-fw fa-clone"></i> Дубликат', ['class' => 'btn btn-default m-t', 'name' => 'cloneBaseCatalog','id' => 'cloneBaseCatalog']) ?>
+                        <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дубликат', ['vendor/step-1-clone', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t clone-catalog']) ?>
                     
                 </div>
                 <?= Html::a('<h4 class="m-b-xs text-info">Базовый каталог</h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
@@ -116,11 +103,11 @@ foreach($arrCatalog as $arrCatalogs){
 								    'class'=>'m-t'
 								]);
 		                    ?>
-                                    <?= Html::a('Просмотр/Редактирование', ['vendor/catalog', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t']) ?>
-		                    <?= Html::button('<i class="fa fa-fw fa-clone"></i> Дубликат', ['class' => 'btn btn-default m-t','name'=>'clone_'.$arrCatalogs->id,'id'=>'clone_'.$arrCatalogs->id]) ?>
+                                    <?= Html::a('Просмотр/Редактирование', ['vendor/step-1-update', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t']) ?>
+		                    <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дубликат', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog']) ?>
 		                    <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
 			            </div>
-                                <?= Html::a('<h4 class="m-b-xs text-info"> '.$arrCatalogs->name.'</h4>', ['vendor/catalog', 'id' => $arrCatalogs->id]) ?>
+                                <?= Html::a('<h4 class="m-b-xs text-info"> '.$arrCatalogs->name.'</h4>', ['vendor/step-1-update', 'id' => $arrCatalogs->id]) ?>
 		              
 		                <p class="small">Инфа</p>
 		                </p>
@@ -133,10 +120,6 @@ foreach($arrCatalog as $arrCatalogs){
 
 <?php
 $customJs = <<< JS
-/*
-$('#viewBaseCatalog').click(function (e){
-  $('#modal_baseCatalog').modal('show');
-});*/
 $("body").on("hidden.bs.modal", function() {
     $(this).data("bs.modal", null);
 });
@@ -171,11 +154,7 @@ $('input[type=checkbox]').on('switchChange.bootstrapSwitch', function (event, st
 var e,id,state
 e = $(this).attr('name')
 id = e.replace('status_','')
-//
-//status or market
-//state --true / false
-//id
-$.ajax({
+    $.ajax({
         url: "index.php?r=vendor/changecatalogstatus",
         type: "POST",
         dataType: "json",
@@ -187,9 +166,19 @@ $.ajax({
 	    failure: function(errMsg) {
             console.log(errMsg);
         }
-	});
+    });
 })
-        
+$(".clone-catalog").click(function(e) {        
+    e.preventDefault();
+    elem = $(this)
+    Url = $(this).attr('href')
+    bootbox.confirm("<h3>Создать дубликат каталога?</h3>", function(result) {
+        if(result)
+        {
+           location.href = Url;
+        }
+    })
+});        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

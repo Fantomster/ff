@@ -9,8 +9,11 @@ use yii\data\ActiveDataProvider;
  *
  * @property integer $id
  * @property integer $cat_id
- * @property integer $cat_base_goods_id
+ * @property integer $base_goods_id
  * @property string $price
+ * @property integer $discount
+ * @property integer $discount_percent
+ * @property integer $discount_fixed
  * @property string $note
  * @property string $created_at
  * @property string $updated_at
@@ -31,8 +34,8 @@ class CatalogGoods extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['cat_id', 'cat_base_goods_id'], 'required'],
-            [['cat_id', 'cat_base_goods_id'], 'integer'],
+            [['cat_id', 'base_goods_id'], 'required'],
+            [['cat_id', 'base_goods_id','discount','discount_percent','discount_fixed'], 'integer'],
             [['price'], 'string', 'max' => 50],
             [['note'], 'string', 'max' => 500],
         ];
@@ -46,38 +49,45 @@ class CatalogGoods extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'cat_id' => 'Cat ID',
-            'cat_base_goods_id' => 'Cat Base Goods ID',
+            'base_goods_id' => 'Cat Base Goods ID',
             'price' => 'Price',
             'note' => 'Note',
+            'discount' => 'Discount Price',
+            'discount_percent' => 'Discount Price',
+            'discount_fixed' => 'Discount Price',
         ];
     }
     public function search($params,$id) {
-	    $query = CatalogGoods::find()->where(['cat_id'=>$id]);
-	    //$query->andFilterWhere(['like', 'product', '']);
-	    $dataProvider = new ActiveDataProvider([
-	        'query' => $query,
-	    ]);
-	    $dataProvider->setSort([
-	        'attributes' => [
-	            'id',
-                    'cat_id',
-                    'cat_base_goods_id',
-                    'price',
-                    'note',
-	        ]
-	    ]);
-	 
-	    if (!($this->load($params) && $this->validate())) {
-	        return $dataProvider;
-	    }
-	 
-	    /* Setup your custom filtering criteria */
-		
-	    // filter by person full name
-	    /*$query->andWhere('first_name LIKE "%' . $this->fullName . '%" ' .
-	        'OR last_name LIKE "%' . $this->fullName . '%"'
-	    );*/
-	 
-	    return $dataProvider;
-	}
+        $query = CatalogGoods::find()->where(['cat_id'=>$id]);
+        //$query->andFilterWhere(['like', 'product', '']);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+        $dataProvider->setSort([
+            'attributes' => [
+                'id',
+                'cat_id',
+                'base_goods_id',
+                'price',
+                'note',
+                'discount',
+                'discount_percent',
+                'discount_fixed'
+            ]
+        ]);
+
+        if (!($this->load($params) && $this->validate())) {
+            return $dataProvider;
+        }
+
+        return $dataProvider;
+    }
+    public static function searchProductFromCatalogGoods($id,$cat_id){
+        if(CatalogGoods::find()->where(['base_goods_id' => $id, 'cat_id' => $cat_id])->exists()){
+            return true;
+        }else{
+            return false;
+                
+        }
+    }
 }

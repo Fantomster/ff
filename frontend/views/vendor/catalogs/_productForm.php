@@ -7,32 +7,27 @@ use yii\widgets\ActiveForm;
 $form = ActiveForm::begin([
             'id' => 'product-form',
             'enableAjaxValidation' => false,
-            'action' => $catalogBaseGoods->isNewRecord? Url::toRoute('vendor/ajax-create-product') : Url::toRoute(['vendor/ajax-update-product', 'id' => $catalogBaseGoods->id]),
+            'action' => Url::toRoute(['vendor/step-3-update-product', 'id' => $catalogGoods->id]),
             'options' => [
                 'class' => 'product-form',
             ],
-            //'validationUrl' => Url::toRoute('vendor/ajax-validate-product'),
         ]);
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord? 'Новый продукт' : 'Редактировать продукт' ?></h4>
+    <h4 class="modal-title">Редактировать продукт</h4>
 </div>
 <div class="modal-body">
-	<?= $form->field($catalogBaseGoods, 'article') ?>
+    <?= $form->field($catalogGoods, 'price') ?>
 
-    <?= $form->field($catalogBaseGoods, 'product') ?>
+    <?= $form->field($catalogGoods, 'discount') ?>
 
-    <?= $form->field($catalogBaseGoods, 'units') ?>
+    <?= $form->field($catalogGoods, 'discount_percent') ?>
 
-    <?= $form->field($catalogBaseGoods, 'price') ?>
-
-    <?= $form->field($catalogBaseGoods, 'category_id')->dropDownList(common\models\Category::allCategory(),['prompt' => '']) ?>
-    
-    <?= $catalogBaseGoods->isNewRecord? $form->field($catalogBaseGoods, 'cat_id')->hiddenInput(['value'=> Yii::$app->request->get('id')])->label(false):'' ?>
+    <?= $form->field($catalogGoods, 'discount_fixed') ?>
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-primary" data-dismiss="modal">Отмена</a>
-    <?= Html::button($catalogBaseGoods->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $catalogBaseGoods->isNewRecord ? 'btn btn-success edit' : 'btn btn-primary edit']) ?>
+    <?= Html::button('Сохранить', ['class' => 'btn btn-primary edit']) ?>
 </div>
 <?php ActiveForm::end(); ?>

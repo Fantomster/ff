@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use Yii;
+use yii\helpers\Json;
 use yii\web\HttpException;
 use yii\web\Controller;
 use common\models\User;
@@ -203,20 +204,8 @@ class VendorController extends Controller {
     }
     public function actionExportBaseCatalogToXls()
     {
-	    moonland\phpexcel\Excel::export([
-		    'models' => common\models\CatalogBaseGoods::find()
-		    ->addSelect(['article','product','units','price'])
-		    ->from ([common\models\CatalogBaseGoods::tableName().' cb'])
-		    ->leftJoin(common\models\Catalog::tableName().' c','cb.cat_id = c.id')
-		    ->where([
-		    'supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),
-		    'type'=>\common\models\Catalog::BASE_CATALOG
-		    ])
-		    ->all(),
-		    'columns' => ['article','product','units','price'],
-			'headers' => ['article'=>'Артикул','product'=>'Продукт','units'=>'Кол-во','price'=>'Цена (руб)'],
-		]);
-	}
+	return $this->renderPartial('catalogs/exportCatalog');  
+    }    
     public function actionChangestatus()
     {
 	    if (Yii::$app->request->isAjax) {
@@ -316,7 +305,7 @@ class VendorController extends Controller {
             }
         }
 
-        return $this->renderAjax('catalogs/_productForm', compact('catalogBaseGoods'));
+        return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
     }
     public function actionAjaxCreateProduct() {
         if (Yii::$app->request->isAjax) {
@@ -333,7 +322,7 @@ class VendorController extends Controller {
                 }
             }
         }
-        return $this->renderAjax('catalogs/_productForm', compact('catalogBaseGoods'));
+        return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
     }
     public function actionChangecatalogprop()
     {
@@ -465,7 +454,171 @@ class VendorController extends Controller {
      */
 
     private function loadCurrentUser() {
-        $this->currentUser = Yii::$app->user->identity;//User::findIdentity(Yii::$app->user->id);
+        $this->currentUser = Yii::$app->user->identity;
     }
 
+    public function actionStep1(){
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $catalog = new Catalog();
+            $post = Yii::$app->request->post();
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            if ($catalog->load($post)) {
+                $catalog->supp_org_id=$currentUser->organization_id;
+                $catalog->type=Catalog::CATALOG;
+                if ($catalog->validate()) {
+                    $catalog->save();
+                    return (['success' => true, 'cat_id'=>$catalog->id]); 
+                }else{
+                 return (['success' => false, 'Валидация не пройдена']);  
+                 exit;
+                }
+            }else{
+            return (['success' => false, 'POST не определен']);  
+            exit;
+            }
+        }
+        $catalog = new Catalog();
+        return $this->render('newcatalog/step-1',compact('catalog'));  
+    }
+    public function actionStep1Update($id){
+        $cat_id = $id;
+        $catalog = Catalog::find()->where(['id'=>$cat_id])->one();
+            if (Yii::$app->request->isAjax) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                $post = Yii::$app->request->post();
+                if ($catalog->load($post)) {
+                    if ($catalog->validate()) {
+                        $catalog->save(); 
+                        return (['success' => true, 'cat_id'=>$catalog->id]); 
+                    }else{
+                        return (['success' => false, 'Валидация не пройдена']);  
+                        exit;
+                    }
+                }
+            }
+        return $this->render('newcatalog/step-1',compact('catalog','cat_id'));
+    }
+    public function actionStep1Clone($id){
+        $cat_id_old = $id; //id исходного каталога
+        //$db->createCommand('insert into catalog')
+        //->execute();
+        $model=Catalog::findOne(['id' => $id]);
+        $model->id = null;
+        $model->name = $model->type==Catalog::BASE_CATALOG ? 'Базовый каталог (копия)' : $model->name.' дубликат';
+        $cat_type=$model->type;   //текущий тип каталога(исходный)    
+        $model->type = Catalog::CATALOG; //переопределяем тип на 2
+        $model->isNewRecord = true;
+        $model->save();
+        
+        $cat_id = $model->id;//новый каталог id
+        if($cat_type==1){
+        $sql = "insert into ".CatalogGoods::tableName().
+                "(`cat_id`,`base_goods_id`,`price`,`created_at`)".
+                "SELECT $cat_id as cat_id, id, price, NOW() from ".CatalogBaseGoods::tableName().
+                " WHERE  cat_id = $cat_id_old";
+        \Yii::$app->db->createCommand($sql)->execute(); 
+        }
+        if($cat_type==2){
+        $sql = "insert into ".CatalogGoods::tableName().
+                "(`cat_id`,`base_goods_id`,`price`,`created_at`)".
+                "SELECT $cat_id as cat_id, id, price, NOW() from ".CatalogGoods::tableName().
+                " WHERE  cat_id = $cat_id_old";   
+        \Yii::$app->db->createCommand($sql)->execute(); 
+        }
+        $catalog = Catalog::find()->where(['id'=>$cat_id])->one();
+        return $this->render('newcatalog/step-1',compact('catalog','cat_id'));
+    }
+    public function actionStep2($id){
+        $cat_id = $id;
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+                if (Yii::$app->request->post('check')) {  
+                  if(CatalogGoods::find()->where(['cat_id' => $cat_id])->exists()){
+                  return (['success' => true, 'cat_id'=>$cat_id]);     
+                  }else{
+                  return (['success' => false, 'Пустой каталог']);  
+                  exit;    
+                  }
+                } 
+                if (Yii::$app->request->post('add-product')) {  
+                  if(Yii::$app->request->post('state')=='true'){
+                   $product_id = Yii::$app->request->post('baseProductId');
+                   $catalogGoods = new CatalogGoods;
+                   $catalogGoods->base_goods_id = $product_id;
+                   $catalogGoods->cat_id = $cat_id;
+                   $catalogGoods->price = CatalogBaseGoods::findOne(['id'=>$product_id])->price;
+                   $catalogGoods->save();
+                   return (['success' => false, 'Добавлен']);  
+                   exit; 
+                  }else{
+                   $product_id = Yii::$app->request->post('baseProductId');
+                   $CatalogGoods = CatalogGoods::deleteAll(['base_goods_id' => $product_id]);    
+                   return (['success' => false, 'Удален']);  
+                   exit;    
+                  }
+                     
+                }
+            }
+        
+        $baseCatalog = Catalog::findOne(['supp_org_id'=>$currentUser->organization_id,'type'=>Catalog::BASE_CATALOG]);
+        $searchModel = new CatalogBaseGoods;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$baseCatalog->id);
+        return $this->render('newcatalog/step-2',compact('searchModel', 'dataProvider','cat_id'));
+    }
+    public function actionStep3($id){
+        $cat_id = $id;
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchModel = new CatalogGoods();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$cat_id);
+        return $this->render('newcatalog/step-3',compact('searchModel', 'dataProvider','cat_id'));
+    }
+    public function actionStep3UpdateProduct($id) {
+        $catalogGoods = CatalogGoods::find()->where(['id'=>$id])->one(); 
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($catalogGoods->load($post)) {
+                if ($catalogGoods->validate()) {
+
+                    $catalogGoods->save();
+
+                    $message = 'Продукт обновлен!';
+                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                }
+            }
+        }
+        return $this->renderAjax('catalogs/_productForm', compact('catalogGoods'));
+    }
+    public function actionStep4($id){
+        $cat_id = $id;
+	$currentUser = User::findIdentity(Yii::$app->user->id);
+	$searchModel = new RelationSuppRest;
+	$dataProvider = $searchModel->search(Yii::$app->request->queryParams,$currentUser,RelationSuppRest::PAGE_CATALOG);
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            if (Yii::$app->request->post('add-client')) {  
+                if(Yii::$app->request->post('state')=='true'){
+                    $rest_org_id = Yii::$app->request->post('rest_org_id');
+                    $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $rest_org_id,'supp_org_id'=>$currentUser->organization_id]);
+                    $relation_supp_rest->cat_id = $cat_id;
+                    $relation_supp_rest->status = 1;
+                    $relation_supp_rest->update();
+
+                    return (['success' => true, 'Подписан']); 
+                    exit;
+                }else{
+                    $rest_org_id = Yii::$app->request->post('rest_org_id');
+                    $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $rest_org_id,'supp_org_id'=>$currentUser->organization_id]);    
+                    $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
+                    $relation_supp_rest->status = 0;
+                    $relation_supp_rest->update(); 
+                    return (['success' => true, 'Не подписан']);
+                    exit;
+                }
+            }
+        }
+        return $this->render('newcatalog/step-4', compact('searchModel', 'dataProvider','currentCatalog','cat_id'));
+    }
+    
 }

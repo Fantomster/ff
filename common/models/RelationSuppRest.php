@@ -18,8 +18,10 @@ use yii\data\ActiveDataProvider;
  */
 class RelationSuppRest extends \yii\db\ActiveRecord
 {	
-        const PAGE_CLIENTS = 1;
+        const PAGE_CLIENTS = 3;
         const PAGE_CATALOG = 2;
+        
+        const PAGE_SUPPLIERS = 1;
         
         const CATALOG_STATUS_OFF = 0;
         const CATALOG_STATUS_ON = 1;
@@ -79,6 +81,10 @@ class RelationSuppRest extends \yii\db\ActiveRecord
              $query = RelationSuppRest::find()
             ->where(['supp_org_id'=>$currentUser->organization_id]); 
             }
+            if($const==RelationSuppRest::PAGE_SUPPLIERS){ 
+             $query = RelationSuppRest::find()
+            ->where(['rest_org_id'=>$currentUser->organization_id]); 
+            }
 	    if($const==RelationSuppRest::PAGE_CATALOG){
              $query = RelationSuppRest::find()
             ->where(['supp_org_id'=>$currentUser->organization_id])
@@ -100,15 +106,12 @@ class RelationSuppRest extends \yii\db\ActiveRecord
 	    if (!($this->load($params) && $this->validate())) {
 	        return $dataProvider;
 	    }
-	 
-	 
-	    /* Setup your custom filtering criteria */
-	 
-	    // filter by person full name
-	    /*$query->andWhere('first_name LIKE "%' . $this->fullName . '%" ' .
-	        'OR last_name LIKE "%' . $this->fullName . '%"'
-	    );*/
-	 
-	    return $dataProvider;
+            return $dataProvider;
 	}
+    public static function row_count($id){
+        $count = RelationSuppRest::find()
+    ->where(['cat_id' => $id])
+    ->count();
+        return $count;
+    }
 }

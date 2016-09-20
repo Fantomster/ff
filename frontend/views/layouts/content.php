@@ -1,11 +1,12 @@
 <?php
 use yii\widgets\Breadcrumbs;
 use dmstr\widgets\Alert;
-
+$this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
 ?>
-<div class="content-wrapper">
+<div class="content-wrapper" style="min-height: 843px; background: rgb(255, 255, 255) !important;">
+    <div id="loader-show"></div>
     <section class="content-header">
-        <?php if (isset($this->blocks['content-header'])) { ?>
+        <?php /* if (isset($this->blocks['content-header'])) { ?>
             <h1><?= $this->blocks['content-header'] ?></h1>
         <?php } else { ?>
             <h1>
@@ -19,7 +20,7 @@ use dmstr\widgets\Alert;
                     echo ($this->context->module->id !== \Yii::$app->id) ? '<small>Module</small>' : '';
                 } ?>
             </h1>
-        <?php } ?>
+        <?php } */?>
 
         <?=
         Breadcrumbs::widget(
@@ -39,8 +40,7 @@ use dmstr\widgets\Alert;
     <div class="pull-right hidden-xs">
         <b>Version</b> 2.0
     </div>
-    <strong>Copyright &copy; 2014-2015 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>.</strong> All rights
-    reserved.
+    <strong>Copyright &copy; 2016</strong>
 </footer>
 
 <!-- Control Sidebar -->

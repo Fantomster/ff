@@ -31,7 +31,20 @@ class Catalog extends \yii\db\ActiveRecord
     {
         return 'catalog';
     }
-
+    //auto created_at && updated_at 
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => \yii\behaviors\TimestampBehavior::className(),
+                'attributes' => [
+                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+                'value' => new \yii\db\Expression('NOW()'),
+            ],
+        ];
+    }
     /**
      * @inheritdoc
      */
@@ -44,7 +57,6 @@ class Catalog extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 255],
         ];
     }
-
     /**
      * @inheritdoc
      */
@@ -64,10 +76,17 @@ class Catalog extends \yii\db\ActiveRecord
 	->where(['id' => $id])->one();  
 	return $catalogName;
     }
+    public static function get_value($id){
+        $model = Catalog::find()->where(["id" => $id])->one();
+        if(!empty($model)){
+            return $model;
+        }
+        return null;
+    }
     public static function GetCatalogs($type)
     {
 		$catalog = Catalog::find()
-		->select(['id','status','name'])
+		->select(['id','status','name','created_at'])
 		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();   
 		return $catalog;
     }

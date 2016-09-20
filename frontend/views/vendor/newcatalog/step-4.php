@@ -9,60 +9,65 @@ use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
+use kartik\checkbox\CheckboxX;
+$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
+$this->title = 'Назначить каталог';
 ?>
 <?php Pjax::begin(['id' => 'pjax-container']); ?>
-    <?= Html::a(
-        'Завершить',
-        ['vendor/catalogs'],
-        ['class' => 'btn btn-success','style' => 'float:right;margin-left:10px;']
-    ) ?>
-    <?= Html::a(
-        'Вернуться на шаг 3',
-        ['vendor/step-3','id'=>$cat_id],
-        ['class' => 'btn btn-default','style' => 'float:right;margin-left:10px;']
-    ) 
-    ?>
-    <h2>Подпишите участников на этот каталог</h2>
+<div class="panel-body">
+    <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
+</div>
+<div class="panel-body">
+    <ul class="nav nav-tabs">
+      <?='<li>'.Html::a('Имя каталога',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+      <?='<li>'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>'?>
+      <?='<li>'.Html::a('Редактировать',['vendor/step-3','id'=>$cat_id]).'</li>'?>
+      <?='<li class="active">'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+    </ul>
+</div>
 <?php 
 $gridColumns = [
 		[
 		'label'=>'Ресторан',
 		'value'=>function ($data) {
-		return $data->rest_org_id;
-		}
-		//'rest_org_id',
+                $organization_name=common\models\Organization::get_value($data->rest_org_id)->name;
+                return $organization_name;
+                }
 		],
 		[
 		'label'=>'Текущий каталог',
+                'format' => 'raw',
 		'value'=>function ($data) {
-		$cat_id = $data->cat_id==0 ? 'Не назначен' : $data->cat_id;
-		return $cat_id;
+		$catalog_name = $data->cat_id==0 ? '' : 
+                common\models\Catalog::get_value($data->cat_id)->name;
+		return $catalog_name;
 		}
-		
-		//'cat_id',
 		],
-        [
-            'attribute' => 'Назначить каталог',
+              [
+            'attribute' => 'Назначить',
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) {
-                $link = SwitchBox::widget([
-					    'name' => 'setcatalog_'.$data->rest_org_id,
-					    'checked' => $data->status==1 && $data->cat_id ==Yii::$app->request->get('id') ? true : false,
-					    'clientOptions' => [
-					        'onColor' => 'success',
-					        'offColor' => 'default',
-					        'onText'=>'Да',
-					        'offText'=>'Нет',
-					        'baseClass'=>'bootstrap-switch',
-					    ],
-					]);
+                $link = CheckboxX::widget([
+                    'name'=>'setcatalog_'.$data->rest_org_id,
+                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                    'value'=>$data->status==1 && $data->cat_id ==Yii::$app->request->get('id') ? 1 : 0,
+                    'autoLabel' => true,
+                    'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
+                    'pluginOptions'=>[
+                        'threeState'=>false,
+                        'theme' => 'krajee-flatblue',
+                        'enclosedLabel' => true,
+                        'size'=>'lg',
+                        ]
+                ]);
                 return $link;
             },
             
         ],
 ];
 ?>
+<div class="panel-body">
 <?=GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
@@ -80,6 +85,7 @@ $gridColumns = [
         ], 
 ]);
 ?>
+</div>
 <?php
 $this->registerJs('
 /** 
@@ -98,11 +104,9 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
   });
 }
 
-$("input[type=checkbox]").on("switchChange.bootstrapSwitch", function (event, state) {	
-var e,id,state
-elem = $(this);
-e = $(this).attr("name")
-id = e.replace("setcatalog_","")
+$("input[type=checkbox]").on("change", function(e) {	
+var id = $(this).attr("data-id");
+var state = $(this).prop("checked");
   //bootbox.confirm("<h3>Подтвердите действие</h3>", function(result) {if(result){
     $.ajax({
     url: "index.php?r=vendor/step-4&id='. $cat_id .'",

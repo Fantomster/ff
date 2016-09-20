@@ -75,6 +75,13 @@ class Organization extends \yii\db\ActiveRecord
 		->where(['id' => $id])->one();  
 		return $getOrganization;
     }
+    public static function get_value($id){
+        $model = Organization::find()->where(["id" => $id])->one();
+        if(!empty($model)){
+            return $model;
+        }
+        return null;
+    }
     /**
      * @return \yii\db\ActiveQuery
      */

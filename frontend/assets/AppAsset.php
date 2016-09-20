@@ -7,12 +7,14 @@ use yii\web\AssetBundle;
 /**
  * Main frontend application asset bundle.
  */
-class AppAsset extends AssetBundle
-{
+class AppAsset extends AssetBundle {
+
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
+        'css/custom_style.less', 
+        'https://fonts.googleapis.com/css?family=Open+Sans'
     ];
     public $js = [
         'js/js.cookie.js',
@@ -23,6 +25,7 @@ class AppAsset extends AssetBundle
         'yii\bootstrap\BootstrapAsset',
         'frontend\assets\BootboxAsset',
         'fedemotta\datatables\DataTablesAsset',
-        '\rmrevin\yii\fontawesome\AssetBundle',        
+        '\rmrevin\yii\fontawesome\AssetBundle',
     ];
+
 }

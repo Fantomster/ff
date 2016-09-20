@@ -10,7 +10,7 @@ use yii\data\ActiveDataProvider;
  * @property integer $id
  * @property integer $cat_id
  * @property integer $base_goods_id
- * @property string $price
+ * @property integer $price
  * @property integer $discount
  * @property integer $discount_percent
  * @property integer $discount_fixed
@@ -31,16 +31,25 @@ class CatalogGoods extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function scenarios()
+    {
+         $scenarios = parent::scenarios();
+           $scenarios['update'] = ['discount_percent','cat_id'];
+
+           return $scenarios;
+    }
     public function rules()
     {
         return [
             [['cat_id', 'base_goods_id'], 'required'],
-            [['cat_id', 'base_goods_id','discount','discount_percent','discount_fixed'], 'integer'],
+            [['cat_id', 'base_goods_id'], 'integer'],
             [['price'], 'string', 'max' => 50],
             [['note'], 'string', 'max' => 500],
+            [['discount'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/', 'min' => 0],
+            [['discount_percent'],'number','min'=>-100,'max'=>100],
+            [['discount_fixed'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/','min' => 0],
         ];
     }
-
     /**
      * @inheritdoc
      */
@@ -52,9 +61,9 @@ class CatalogGoods extends \yii\db\ActiveRecord
             'base_goods_id' => 'Cat Base Goods ID',
             'price' => 'Price',
             'note' => 'Note',
-            'discount' => 'Discount Price',
-            'discount_percent' => 'Discount Price',
-            'discount_fixed' => 'Discount Price',
+            'discount' => 'Discount',
+            'discount_percent' => 'Discount %',
+            'discount_fixed' => 'Discount Fixed',
         ];
     }
     public function search($params,$id) {
@@ -82,6 +91,7 @@ class CatalogGoods extends \yii\db\ActiveRecord
 
         return $dataProvider;
     }
+
     public static function searchProductFromCatalogGoods($id,$cat_id){
         if(CatalogGoods::find()->where(['base_goods_id' => $id, 'cat_id' => $cat_id])->exists()){
             return true;
@@ -90,4 +100,5 @@ class CatalogGoods extends \yii\db\ActiveRecord
                 
         }
     }
+    
 }

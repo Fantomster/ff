@@ -9,23 +9,24 @@ use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
-
+use kartik\checkbox\CheckboxX;
+$this->registerCss('.table-hover > tbody > tr.select-row:hover > td,.select-row > td {color:#ccc}');
+$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
+$this->title = 'Добавить продукты';
 ?>
-<?php Pjax::begin(['id' => 'pjax-container'])?>
 
-    <?= Html::a(
-        'Перейти на шаг 3',
-        ['vendor/step-3'],
-        ['class' => 'btn btn-success step-3','style' => 'float:right;margin-left:10px;']
-    ) 
-    ?>
-    <?= Html::a(
-        'Вернуться на шаг 1',
-        ['vendor/step-1-update','id'=>$cat_id],
-        ['class' => 'btn btn-default step-1','style' => 'float:right;margin-left:10px;']
-    ) 
-    ?>
-    <h2>Добавьте продукты</h2>
+<?php Pjax::begin(['id' => 'pjax-container'])?>
+<div class="panel-body">
+    <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
+</div>
+<div class="panel-body">
+<ul class="nav nav-tabs">
+    <?='<li>'.Html::a('Имя каталога',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+    <?='<li class="active">'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>'?>
+    <?='<li>'.Html::a('Редактировать',['vendor/step-3','id'=>$cat_id]).'</li>'?>
+    <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+</ul>
+</div>
 <?php 
 $gridColumnsBaseCatalog = [
     [
@@ -42,44 +43,71 @@ $gridColumnsBaseCatalog = [
     ],
     [
     'label'=>'Цена',
-    'value'=>'price',
+    'value'=>function ($data) {
+    $price = preg_replace('/[^\d.,]/','',$data->price);
+    return $price." руб.";
+    },
     ],
     [
     'label'=>'Категория',
-    'value'=>function ($data,$fff) {return $fff;},
+    'value'=>function ($data) {
+                $data->category_id==0 ? $category_name='':$category_name=common\models\Category::get_value($data->category_id)->name;
+                return $category_name;
+                }
+    ],        
+    [
+    'label'=>'Статус',
+    'format' => 'raw',
+    'contentOptions' => ['style' => 'width:50px;'],    
+    'value'=>function ($data) {$data->status==common\models\CatalogBaseGoods::STATUS_OFF?
+            $product_status='<i class="fa fa-times" style="color:red"  aria-hidden="true"></i>':
+            $product_status='<i class="fa fa-check" style="color:green" aria-hidden="true"></i>';
+            return $product_status;
+        },
     ],
     [
-    'attribute' => 'Добавить в каталог',
+    'attribute' => 'Добавить',
     'format' => 'raw',
     'contentOptions' => ['style' => 'width:50px;'],
     'value' => function ($data) {
-        $link = SwitchBox::widget([
-            'name' => 'product_'.$data->id,
-            'id'=>'status_'.$data->id,
-            'checked' => common\models\CatalogGoods::searchProductFromCatalogGoods($data->id,Yii::$app->request->get('id'))? true : false,
-            'clientOptions' => [
-                'onColor' => 'success',
-                'offColor' => 'default',
-                'onText'=>'Да',
-                'offText'=>'Нет',
-                'baseClass'=>'bootstrap-switch',
-                ],
-
-            ]);
-            return $link;
+        $link = CheckboxX::widget([
+                    'name'=>'product_'.$data->id,
+                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                    'value'=>common\models\CatalogGoods::searchProductFromCatalogGoods($data->id,Yii::$app->request->get('id'))? 1 : 0,
+                    'autoLabel' => true,
+                    'options'=>['id'=>'product_'.$data->id, 'data-id'=>$data->id],
+                    'pluginOptions'=>[
+                        'threeState'=>false,
+                        'theme' => 'krajee-flatblue',
+                        'enclosedLabel' => true,
+                        'size'=>'lg',
+                        ]
+                ]);
+                return $link;
         },
 
     ]
 ];
 ?>
+<div class="panel-body">
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
 	'columns' => $gridColumnsBaseCatalog,
         'resizableColumns'=>false,
+        'tableOptions' => [
+                //'class' => 'table table-condensed table-bordered',
+            ],
+        /*'rowOptions'=>function ($data){
+            $data->status==common\models\CatalogBaseGoods::STATUS_OFF ?
+            $product_style = ['class' => 'select-row'] :
+            $product_style = ['class' => 'default'];    
+            return $product_style;
+        }*/
 ]);
 ?>
+</div>
 <?php
 $this->registerJs('
 /** 
@@ -97,31 +125,9 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }
-$(".step-3").click(function(e){
-e.preventDefault();
-$.ajax({
-    url: "index.php?r=vendor/step-2&id='. $cat_id .'",
-    type: "POST",
-    dataType: "json",
-    data: {"check":true},
-    cache: false,
-    success: function(response) {
-            if(response.success){
-                var url = "' . Url::toRoute(['vendor/step-3','id'=>$cat_id]) . '";
-                $.pjax({url: url, container: "#pjax-container"});
-                }else{
-            console.log(response);    
-            }
-        },
-        failure: function(errMsg) {
-        console.log(errMsg);
-        }
-    });
-}); 
-$("input[type=checkbox]").live("switchChange.bootstrapSwitch", function (event, state) {	
-var e,id,state
-e = $(this).attr("name")
-id = e.replace("product_","")
+$("input[type=checkbox]").on("change", function(e) {	
+var id = $(this).attr("data-id");
+var state = $(this).prop("checked");
 $.ajax({
     url: "index.php?r=vendor/step-2&id='. $cat_id .'",
     type: "POST",

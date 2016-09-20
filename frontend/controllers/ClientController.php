@@ -16,6 +16,7 @@ use common\models\Catalog;
 use common\models\RelationSuppRest;
 use common\models\CatalogBaseGoods;
 use common\models\CatalogGoods;
+use common\models\GoodsNotes;
 use common\models\search\UserSearch;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -197,11 +198,14 @@ class ClientController extends Controller {
     
     public function actionSuppliers()
     {	
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $searchModel = new RelationSuppRest;
+            $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$currentUser,RelationSuppRest::PAGE_SUPPLIERS);
 	    $user = new User;
 	    $profile = new Profile;
 	    $relationCategory = new RelationCategory;
 	    $organization = new Organization;
-        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile"));
+        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
     }
 	/**
 	*
@@ -224,6 +228,7 @@ class ClientController extends Controller {
 		return $result;			
 		}
 	}
+    
     public function actionCreate()
     {
 	    if (Yii::$app->request->isAjax){
@@ -260,7 +265,32 @@ class ClientController extends Controller {
 				  return $result;   
 				  exit; 
 			    }
-				
+				$numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+                                foreach ( $arrCatalog as $arrCatalogs ) { 
+                                $product = trim($arrCatalogs['dataItem']['product']);
+                                    if(empty($product)){
+                                        $result = ['success'=>false,'message'=>'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];  
+                                        return $result;   
+                                        exit;    
+                                    }
+                                    $price = $arrCatalogs['dataItem']['price'];
+                                    $price = str_replace(',', '.', $price);
+                                        if(substr($price, -3, 1) == '.')
+                                        {
+                                        $price = explode('.', $price);
+                                        $last = array_pop($price);
+                                        $price = join($price, '').'.'.$last;
+                                        }
+                                        else
+                                        {
+                                        $price = str_replace('.', '', $price);
+                                        }
+                                        if (!preg_match($numberPattern,$price)) {
+                                        $result = ['success'=>false,'message'=>'Ошибка: <strong>[Цена]</strong> в неверном формате!'];  
+                                        return $result;   
+                                        exit;    
+                                        }    
+                                    }
 				$email = 	$user->email;
 			    $fio = 		$profile->full_name;
 			    $org = 		$organization->name;
@@ -271,7 +301,7 @@ class ClientController extends Controller {
 			    if ($check['eventType']==4){return $check;}
 			    if ($check['eventType']==6){return $check;}
 			    if ($check['eventType']==3 || $check['eventType']==5) { 
-				        
+                                    
 				    if($check['eventType']==5){
 					/**
                                         *
@@ -341,9 +371,17 @@ class ClientController extends Controller {
 				      $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
 				      
 				      $sql = "insert into ".CatalogGoods::tableName()."(
-				      `cat_id`,`base_goods_id`,`price`,`note`,`discount`,`created_at`) VALUES (
-				      $lastInsert_cat_id, $lastInsert_base_goods_id, '$price', '$note', 0,NOW())";
+				      `cat_id`,`base_goods_id`,`price`,`discount`,`created_at`) VALUES (
+				      $lastInsert_cat_id, $lastInsert_base_goods_id, '$price', 0,NOW())";
+                                      $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
 				      \Yii::$app->db->createCommand($sql)->execute();       
+                                      
+                                      if(!empty(trim($note))){
+                                      $sql = "insert into ".GoodsNotes::tableName()."(
+				      `rest_org_id`,`catalog_goods_id`,`note`,`created_at`) VALUES (
+				      $currentUser->organization_id, $lastInsert_goods_id, '$note',NOW())";
+				      \Yii::$app->db->createCommand($sql)->execute();    
+                                      }
 				    }
 				    
                                         /**

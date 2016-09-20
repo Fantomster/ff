@@ -31,3 +31,17 @@ $form = ActiveForm::begin([
     <?= Html::button('Сохранить', ['class' => 'btn btn-primary edit']) ?>
 </div>
 <?php ActiveForm::end(); ?>
+<?php
+$this->registerJs('
+$("#cataloggoods-discount").on("keyup paste put", function(e){
+$("#cataloggoods-discount_percent,#cataloggoods-discount_fixed").val(0)
+})
+$("#cataloggoods-discount_percent").on("keyup paste put", function(e){
+$("#cataloggoods-discount,#cataloggoods-discount_fixed").val(0)
+
+})
+$("#cataloggoods-discount_fixed").on("keyup paste put", function(e){
+$("#cataloggoods-discount_percent,#cataloggoods-discount").val(0)
+})
+');
+?>

@@ -13,12 +13,13 @@ use yii\data\ActiveDataProvider;
  * @property string $article
  * @property string $product
  * @property string $units
- * @property string $price
+ * @property integer $price
  * @property integer $status
  * @property integer $market_place
  * @property integer $deleted
  * @property string $created_at
  * @property string $updated_at
+ * @property file $importCatalog
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord
 {
@@ -46,12 +47,17 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
         return [
             [['cat_id'], 'required'],
             [['cat_id', 'category_id','status','market_place','deleted'], 'integer'],
-            [['article', 'price'], 'string', 'max' => 50],
+            [['article'], 'string', 'max' => 50],
             [['product'], 'string', 'max' => 255],
             [['units'], 'string', 'max' => 15],
+            [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
+            /*[['price'],'filter','filter'=>function ($value) {
+            $price = $value/100;
+            return $value;
+            }],*/
         ];
     }
-
+    
     /**
      * @inheritdoc
      */
@@ -59,33 +65,63 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'cat_id' => 'Cat ID',
-            'category_id' => 'Category ID',
-            'article' => 'Article',
-            'product' => 'Product',
+            'cat_id' => 'Каталог',
+            'category_id' => 'Категория',
+            'article' => 'Артикул',
+            'product' => 'Продукт',
             'units' => 'Units',
-            'price' => 'Price',
-            'status'=> 'Status',
+            'price' => 'Цена (руб.)',
+            'status'=> 'Статус',
             'market_place'=> 'Market_place',
-            'deleted'=> 'Deleted'
+            'deleted'=> 'Deleted',
+            //'importCatalog'=>'Files'
         ];
     }
-    
+    public function afterSave($insert,$changedAttributes){
+        if (parent::beforeSave($insert)) {
+            $this->price = str_replace(",", ".", $this->price);
+            return true;
+        } else {
+            return false;
+        }
+      
+    }
+    /*public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            $price = $this->price;
+            $price = str_replace(',', '.', $price);
+            if(substr($price, -3, 1) == '.')
+            {
+                $price = explode('.', $price);
+                $last = array_pop($price);
+                $price = join($price, '').'.'.$last;
+            }
+            else
+            {
+                $price = str_replace('.', '', $price);
+            }
+            $this->price = $price;
+            return true;
+        } else {
+            return false;
+        }
+    }*/
     public function search($params,$id) {
-	    $query = CatalogBaseGoods::find()->where(['cat_id'=>$id,'deleted'=>'0']);
-	    $query->andFilterWhere(['like', 'product', '']);
+            $query = CatalogBaseGoods::find()->select(['id','cat_id','category_id','article','product','units','price','status','market_place'])->where(['cat_id'=>$id,'deleted'=>'0']);
+	    //$query->andFilterWhere(['like', 'product', '']);
 	    $dataProvider = new ActiveDataProvider([
 	        'query' => $query,
 	    ]);
 	    $dataProvider->setSort([
 	        'attributes' => [
 	            'id',
-				'cat_id',
-				'category_id',
-				'article',
-				'product',
-				'units',
-				'price',
+                    'cat_id',
+                    'category_id',
+                    'article',
+                    'product',
+                    'units',
+                    'price',
 	        ]
 	    ]);
 	 
@@ -93,24 +129,28 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 	        return $dataProvider;
 	    }
 	 
-	    /* Setup your custom filtering criteria */
-		
-	    // filter by person full name
-	    /*$query->andWhere('first_name LIKE "%' . $this->fullName . '%" ' .
-	        'OR last_name LIKE "%' . $this->fullName . '%"'
-	    );*/
-	 
 	    return $dataProvider;
 	}
-	/*public function delete_product($id){
-	$Catalog = common\models\Catalog::findOne(['id' => $id]);    
-	$Catalog->status = $status;
-	$Catalog->update();
-	}*/
 	public static function GetCatalog()
-    {
-		$catalog = CatalogBaseGoods::find()
-		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>\common\models\Catalog::BASE_CATALOG])->all();   
-		return $catalog;
-    }
+        {
+                    $catalog = CatalogBaseGoods::find()
+                    ->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>\common\models\Catalog::BASE_CATALOG])->all();   
+                    return $catalog;
+        }
+        public static function get_value($id){
+            $model = CatalogBaseGoods::find()->where(["id" => $id])->one();
+            if(!empty($model)){
+                return $model;
+            }
+            return null;
+        }
+
+        public static function get_no_active_product($id){
+            $model = CatalogBaseGoods::find()->select('id')->where(["id" => $id,'status'=>CatalogBaseGoods::STATUS_OFF])->all();
+            return $model;
+        }
+        public static function getImageurl()
+        {
+          return \Yii::$app->urlManager->createUrl('@web/path/to/logo/'.$this->image);
+        }
 }

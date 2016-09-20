@@ -24,14 +24,17 @@
         "fedemotta/yii2-widget-datatables": "*",
         "bower-asset/bootbox": "~4.3.0",
         "rmrevin/yii2-fontawesome": "~2.15",
-        "kartik-v/yii2-grid": "@dev",
         "yiisoft/yii2-redis": "^2.0",
         "dmstr/yii2-adminlte-asset": "2.*",
-        "moonlandsoft/yii2-phpexcel": "*",
-        "kartik-v/yii2-mpdf": "*",
+        "phpoffice/phpexcel": "*",
         "2amigos/yii2-switch-widget": "~1.0",
         "kartik-v/yii2-export": "@dev",
-        "kartik-v/yii2-editable": "*"
+        "kartik-v/yii2-mpdf": "*",
+        "kartik-v/yii2-grid": "@dev",
+        "kartik-v/yii2-editable": "*",
+        "nizsheanez/yii2-asset-converter": "1.*",
+        "nirvana-msu/yii2-showloading": "1.0.*@dev",
+        "kartik-v/yii2-checkbox-x": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

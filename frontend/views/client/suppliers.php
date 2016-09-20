@@ -1,4 +1,5 @@
 <?php
+use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\url;
 use yii\web\View;
@@ -52,6 +53,29 @@ $this->registerCss('
 		</div>
     </div>
     <div id="tabMySuppliers" class="tab-pane fade">
+    <?php 
+$gridColumnsCatalog = [
+        [
+        'label'=>'Организация',
+        'value'=>function ($data) {return \common\models\Organization::get_value($data->supp_org_id)->name;},
+        ],
+        [
+        'label'=>'СТАТУС',
+        'value'=>function ($data) {
+                $status_invite = $data->invite==0 ? 'Ожидается отклик':'Подтвержден';
+                return $status_invite;
+                },
+        ],
+];
+?>
+        <div class="panel-body">
+<?=GridView::widget([
+	'dataProvider' => $dataProvider,
+	'filterModel' => $searchModel,
+	'filterPosition' => false,
+	'columns' => $gridColumnsCatalog,
+]);
+?>    
     </div>
 </div>
 <div id="modal_addProduct" class="modal fade" role="dialog">
@@ -115,7 +139,7 @@ var hot = new Handsontable(container, {
     {data: 'article'},
 	{data: 'product'},
 	{data: 'kolvo'},
-	{data: 'price',type: 'numeric',format: '0,0.00 $',language: 'ru-RU'},
+	{data: 'price',type: 'numeric',format: '0,0.00'},
     {data: 'note'}
     ],
   className : 'Handsontable_table',

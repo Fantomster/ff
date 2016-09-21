@@ -102,6 +102,12 @@ var data = [
     ['', '', '', '', ''],
     ['', '', '', '', ''],
     ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+        ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
 ];
 var container = document.getElementById('CreateCatalog');
 var hot = new Handsontable(container, {
@@ -167,8 +173,8 @@ e.preventDefault();
 	  }	    
 	});
 	var catalog = data;
-        console.log(JSON.stringify(catalog));
-        return false;
+        //console.log(JSON.stringify(catalog));
+        //return false;
 	catalog = JSON.stringify(catalog);
 	$.ajax({
 		  url: 'index.php?r=vendor/supplier-start-catalog-create',

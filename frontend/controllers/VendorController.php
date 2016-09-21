@@ -27,8 +27,6 @@ use yii\web\UploadedFile;
  */
 class VendorController extends DefaultController {
 
-    private $currentUser;
-	
     /**
      * @inheritdoc
      */
@@ -588,14 +586,6 @@ class VendorController extends DefaultController {
 
     public function actionAjaxDeleteUser() {
         //
-    }
-
-    /*
-     *  Load current user 
-     */
-
-    private function loadCurrentUser() {
-        $this->currentUser = Yii::$app->user->identity;
     }
 
     public function actionStep1(){

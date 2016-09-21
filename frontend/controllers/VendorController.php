@@ -25,11 +25,10 @@ use yii\web\UploadedFile;
 /**
  * Controller for supplier
  */
-class VendorController extends Controller {
+class VendorController extends DefaultController {
 
     private $currentUser;
 	
-	public $layout = "main-vendor";
     /**
      * @inheritdoc
      */

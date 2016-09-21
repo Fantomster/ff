@@ -7,9 +7,10 @@ use yii\helpers\Html;
 
 if (!Yii::$app->user->isGuest) {
 $user = Yii::$app->user->identity;
+$homeUrl = Yii::$app->urlManager->baseUrl;
 $js = <<<JS
 
-   socket = io.connect('http://localhost:8890');
+   socket = io.connect('http://$homeUrl:8890');
 
    socket.on('connect', function(){
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});

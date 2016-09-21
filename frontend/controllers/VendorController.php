@@ -342,7 +342,7 @@ class VendorController extends Controller {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
             if (Yii::$app->request->isPost) {
-                    $unique = \Yii::$app->request->post('importUnique');
+                    //$unique = \Yii::$app->request->post('importUnique');
                     $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile');
                     $path = $importModel->upload();
                     $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -362,12 +362,8 @@ class VendorController extends Controller {
                      $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'default',".Catalog::BASE_CATALOG.",NOW())";
 			\Yii::$app->db->createCommand($sql)->execute(); 
 			$lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
-                        
-                     $count_array = count($sql_array_products);
-                     $arr = [];
-                     for ($i = 0; $i < $count_array; $i++) {
-                        array_push($arr,$sql_array_products[$i][$unique]);
-                        }
+                    
+                
                      for($row=2; $row<=$highestRow; ++$row)
                      {         
                          $rowData = $sheet->rangeToArray('A'.$row.':'.$highestColumn.$row,NULL,TRUE,FALSE);
@@ -380,7 +376,7 @@ class VendorController extends Controller {
          
                                $sql = "insert into ".CatalogBaseGoods::tableName().
                                   "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`created_at`) VALUES "
-                                . "($cat_id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}',".CatalogBaseGoods::STATUS_ON.",NOW())";
+                                . "($lastInsert_base_cat_id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}',".CatalogBaseGoods::STATUS_ON.",NOW())";
                               \Yii::$app->db->createCommand($sql)->execute(); 
 
                         }
@@ -388,9 +384,9 @@ class VendorController extends Controller {
                      unlink($path);
                      //не нашел другого способа как обновить без перезагрузки =(((
                      //Есть идея через pjax обновлять модальное окно с редиректом при успехе _success.php
-                     return $this->redirect(['vendor/basecatalog','id'=>$id]);
+                     return $this->redirect(['vendor/basecatalog','id'=>$lastInsert_base_cat_id]);
             }
-        return $this->renderAjax('catalogs/_importForm', compact('importModel'));
+        return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
     }
     public function actionChangestatus()
     {

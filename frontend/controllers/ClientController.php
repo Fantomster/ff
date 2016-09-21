@@ -365,8 +365,8 @@ class ClientController extends Controller {
 				      $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note'])); 
 				             
 				      $sql = "insert into ".CatalogBaseGoods::tableName()."(
-				      `cat_id`,`category_id`,`article`,`product`,`units`,`price`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
-				      $lastInsert_base_cat_id,0,'$article','$product','$units','$price',1,0,0,NOW())";
+				      `cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
+				      $lastInsert_base_cat_id,0,'$get_supp_org_id','$article','$product','$units','$price',1,0,0,NOW())";
 				      \Yii::$app->db->createCommand($sql)->execute();
 				      $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
 				      

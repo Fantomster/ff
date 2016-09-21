@@ -29,13 +29,16 @@ $this->registerCss('
 .modal-footer {border-top:1px solid #ccc;background-color: #ecf0f5}
 ');
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
+$this->registerCssFile('modules/handsontable/dist/chosen.css');
 $this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
 $this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
 $this->registerjsFile('modules/handsontable/dist/moment/moment.js');
 $this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
 $this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
 $this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable.js');
+$this->registerJsFile('modules/handsontable/dist/handsontable.full.js');
+$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
+$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <div class="panel-body">   
     <h3 class="font-light"><i class="fa fa-list-alt"></i> Создание главного каталога</h3>
@@ -57,7 +60,7 @@ $this->registerJsFile('modules/handsontable/dist/handsontable.js');
                 'tag' => 'a',
                 'data-target' => '#importToXls',
                 'class' => 'btn btn-default',
-                'href' => Url::to(['/vendor/import-to-xls']),
+                'href' => Url::to(['/vendor/import-base-catalog-from-xls']),
                 'style' => '',
             ],
         ])
@@ -81,17 +84,43 @@ $this->registerJsFile('modules/handsontable/dist/handsontable.js');
 <div class="handsontable" id="CreateCatalog"></div> 
 </div>
 <?php
+$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
+
+
+
+
 $customJs = <<< JS
-var data = [['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', ''],['', '', '', '']];
+var array = $categorys;
+var datas = { "programs": [array] };
+var arr = [];
+$.each(datas.programs[0], function(key,val) {
+                    arr.push({'id': key, 'label' : val});
+                });
+console.log(arr);
+var data = [
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+];
 var container = document.getElementById('CreateCatalog');
 var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Артикул', 'Продукт', 'Количество', 'Цена (руб)'],
+  colHeaders : ['Артикул', 'Продукт', 'Количество', 'Цена (руб)', 'Категория'],
   columns: [
     {data: 'article'},
-	{data: 'product'},
-	{data: 'kolvo'},
-	{data: 'price',type: 'numeric',format: '0,0.00'}
+    {data: 'product'},
+    {data: 'kolvo'},
+    {data: 'price',type: 'numeric',format: '0,0.00'},
+    {
+        renderer: customDropdownRenderer,
+        editor: "chosen",
+        width: 100,
+        chosenOptions: {
+            multiple: false,
+            data: arr
+            }
+    },
     ],
   className : 'Handsontable_table',
   rowHeaders : true,
@@ -101,6 +130,22 @@ var hot = new Handsontable(container, {
   autoWrapRow: true,
   minSpareRows: 1,
   });
+function customDropdownRenderer(instance, td, row, col, prop, value, cellProperties) {
+    var selectedId;
+    var optionsList = cellProperties.chosenOptions.data;
+
+    var values = (value + "").split(",");
+    var value = [];
+    for (var index = 0; index < optionsList.length; index++) {
+        if (values.indexOf(optionsList[index].id + "") > -1) {
+            selectedId = optionsList[index].id;
+            value.push(optionsList[index].label);
+        }
+    }
+    value = value.join(", ");
+
+    Handsontable.TextCell.renderer.apply(this, arguments);
+}
 $('.save').click(function(e){	
 e.preventDefault();
     var i, items, item, dataItem, data = [];

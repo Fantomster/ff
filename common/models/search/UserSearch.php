@@ -96,7 +96,6 @@ class UserSearch extends \common\models\User {
             'status' => $this->status,
             'organization_id' => $this->organization_id,
         ]);
-
         return $dataProvider;
     }
 }

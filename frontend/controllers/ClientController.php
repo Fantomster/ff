@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use yii\web\HttpException;
-use yii\web\Controller;
+use frontend\controllers\Controller;
 use common\models\User;
 use common\models\Role;
 use common\models\Organization;
@@ -24,12 +24,11 @@ use yii\helpers\ArrayHelper;
 use yii\web\Response;
 use common\models\restaurant\RestaurantChecker;
 
+use yii\widgets\ActiveForm;
 /**
  *  Controller for restaurant 
  */
-class ClientController extends Controller {
-
-    private $currentUser;
+class ClientController extends DefaultController {
 
     public $layout = "main-client";
 
@@ -87,7 +86,6 @@ class ClientController extends Controller {
         $searchModel = new UserSearch();
         $params = Yii::$app->request->getQueryParams();
         $this->loadCurrentUser();
-        $test = Yii::$app->user->identity;
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
         $organization = $this->currentUser->organization;
@@ -99,6 +97,36 @@ class ClientController extends Controller {
         }
     }
 
+    /*
+     *  Organization validate
+     */
+    public function actionAjaxValidateOrganization() {
+        $this->loadCurrentUser();
+        $organization = $this->currentUser->organization;
+        
+        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
+            if ($organization->validate()) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return json_encode(ActiveForm::validate($organization));
+            }
+        }
+    }
+    
+    /*
+     *  Organization save
+     */
+    public function actionAjaxUpdateOrganization() {
+        $this->loadCurrentUser();
+        $organization = $this->currentUser->organization;
+        
+        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
+            if ($organization->validate()) {
+                $organization->save();
+                return $this->render('settings/_info', compact('organization'));
+            }
+        }
+    }
+    
     /*
      *  User validate
      */
@@ -114,7 +142,7 @@ class ClientController extends Controller {
 
                 if ($user->validate() && $profile->validate()) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
-                    return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
+                    return json_encode(ActiveForm::validateMultiple([$user, $profile]));
                 }
             }
         }
@@ -188,14 +216,6 @@ class ClientController extends Controller {
         //
     }
 
-    /*
-     *  Load current user 
-     */
-
-    private function loadCurrentUser() {
-        $this->currentUser = Yii::$app->user->identity;//User::findIdentity(Yii::$app->user->id);
-    }
-    
     public function actionSuppliers()
     {	
             $currentUser = User::findIdentity(Yii::$app->user->id);

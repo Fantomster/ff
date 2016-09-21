@@ -117,7 +117,7 @@ class SiteController extends Controller {
 
             return Yii::$app->redis->executeCommand('PUBLISH', [
                         'channel' => 'notification',
-                        'message' => Json::encode(['name' => $name, 'message' => $message])
+                        'message' => Json::encode(['name' => $name, 'message' => $message, 'channel' => 'testchan'])
             ]);
         }
 

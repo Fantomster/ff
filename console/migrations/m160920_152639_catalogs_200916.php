@@ -1,11 +1,17 @@
 <?php
 
 use yii\db\Migration;
+use yii\db\Schema;
 
 class m160920_152639_catalogs_200916 extends Migration
 {
     public function safeUp()
     {
+        $tableOptions = null;
+        if ($this->db->driverName === 'mysql') {
+            $tableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
+        }
+        
         $this->dropColumn('{{%catalog_base_goods}}', 'price');
         $this->dropColumn('{{%catalog_goods}}', 'note');
 	$this->addColumn('{{%catalog_base_goods}}', 'price', $this->decimal(10,2)->defaultValue(0));

@@ -19,7 +19,7 @@ socket.on('connect', function(){
         
 
 });
-            socket.on('notification', function (data) {
+            socket.on('testchan', function (data) {
 
         var message = JSON.parse(data);
 

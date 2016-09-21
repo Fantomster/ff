@@ -14,9 +14,15 @@ $role = new Role();
 
 $this->registerJs(
         '$("document").ready(function(){
-//            $("#users-list").on("change keyup paste cut", "input", function() {
-//                $("#search-form").submit();
-//            });
+            var timer = null;
+            $("#users-list").on("change keyup paste cut", "input", function() {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    $("#search-form").submit();
+                }, 200);
+            });
             $("#users-list").on("pjax:complete", function() {
                 var searchInput = $("#search-string");
                 var strLength = searchInput.val().length * 2;
@@ -55,7 +61,7 @@ Modal::widget([
     ],
 ])
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list',]); ?>
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list', 'timeout' => 3000]); ?>
 <?php
 $form = ActiveForm::begin([
             'options' => [
@@ -94,26 +100,26 @@ GridView::widget([
                 ]);
                 return $link;
             },
-                ],
-                'email',
-                'role.name',
-                [
-                    'attribute' => 'status',
-                    'label' => Yii::t('user', 'Status'),
-                    'filter' => $user::statusDropdown(),
-                    'value' => function($model, $index, $dataColumn) use ($user) {
-                        $statusDropdown = $user::statusDropdown();
-                        return $statusDropdown[$model->status];
-                    },
-                ],
-            ],
-        ]);
-        ?>
-        <?php Pjax::end(); ?>
+        ],
+        'email',
+        'role.name',
+        [
+            'attribute' => 'status',
+            'label' => Yii::t('user', 'Status'),
+            'filter' => $user::statusDropdown(),
+            'value' => function($model, $index, $dataColumn) use ($user) {
+                $statusDropdown = $user::statusDropdown();
+                return $statusDropdown[$model->status];
+            },
+        ],
+    ],
+]);
+?>
+<?php Pjax::end(); ?>
 
-        <?php
-        Modal::begin([
-            'id' => 'user-edit',
-        ]);
-        ?>
-        <?php Modal::end(); ?>
+<?php
+Modal::begin([
+    'id' => 'user-edit',
+]);
+?>
+<?php Modal::end(); ?>

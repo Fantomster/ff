@@ -1,36 +1,49 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
 ?>
-<div class="row">
+<div class="row org-info" style="padding-top: 10px;">
     <div class="col-lg-5">
         <?php $form = ActiveForm::begin([
             'id' => 'generalSettings',
             'enableAjaxValidation' => false,
-          //  'action' => Url::toRoute(['client/ajax-update-user']),
-            'options' => [
-                'class' => 'user-form',
-            ],
-         //   'validationUrl' => Url::toRoute('client/ajax-validate-user')
+            'action' => Url::toRoute(['client/ajax-update-organization']),
+            'validationUrl' => Url::toRoute('client/ajax-validate-organization')
             ]); ?>
 
-        <?= $form->field($organization, 'name') ?>
+        <?= $form->field($organization, 'name')
+                    ->label(false)
+                    ->textInput(['placeholder' => $organization->getAttributeLabel('name')]) ?>
 
-        <?= $form->field($organization, 'city') ?>
+        <?= $form->field($organization, 'city')
+                    ->label(false)
+                    ->textInput(['placeholder' => $organization->getAttributeLabel('city')]) ?>
 
-        <?= $form->field($organization, 'address') ?>
+        <?= $form->field($organization, 'address')
+                    ->label(false)
+                    ->textInput(['placeholder' => $organization->getAttributeLabel('address')]) ?>
         
-        <?= $form->field($organization, 'zip_code') ?>
+        <?= $form->field($organization, 'zip_code')
+                    ->label(false)
+                    ->textInput(['placeholder' => $organization->getAttributeLabel('zip_code')]) ?>
         
-        <?= $form->field($organization, 'phone') ?>
+        <?= $form->field($organization, 'phone')
+                    ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+                    ->label(false)
+                    ->textInput(['placeholder' => $organization->getAttributeLabel('phone')]) ?>
         
-        <?= $form->field($organization, 'email') ?>
+        <?= $form->field($organization, 'email')
+                    ->label(false)
+                    ->textInput(['placeholder' => $organization->getAttributeLabel('email')]) ?>
         
-        <?= $form->field($organization, 'website') ?>
+        <?= $form->field($organization, 'website')
+                    ->label(false)
+                    ->textInput(['placeholder' => $organization->getAttributeLabel('website')]) ?>
         
         <div class="form-group">
-            <?= Html::button('Отменить изменения', ['class' => 'btn btn-default']) ?>
-            <?= Html::submitButton('Сохранить изменения', ['class' => 'btn btn-primary']) ?>
+            <?= Html::button('Отменить изменения', ['class' => 'btn btn-default', 'id' => 'cancelOrg']) ?>
+            <?= Html::button('Сохранить изменения', ['class' => 'btn btn-primary', 'id' => 'saveOrg', 'disabled' => true]) ?>
         </div>				
 <?php ActiveForm::end(); ?>
     </div>

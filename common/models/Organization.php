@@ -54,6 +54,21 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+    
+    /**
+     * @inheritdoc
+     */
     public function attributeLabels()
     {
         return [
@@ -70,6 +85,7 @@ class Organization extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
+    
     public static function getOrganization($id){
 	    $getOrganization = Organization::find()
 		->where(['id' => $id])->one();  
@@ -88,5 +104,53 @@ class Organization extends \yii\db\ActiveRecord
     public function getType()
     {
         return $this->hasOne(OrganizationType::className(), ['id' => 'type_id']);
+    }
+    
+    /**
+     * get available categories for restaurant
+     * 
+     * @return array
+     */
+    public function getRestaurantCategories() {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return [];
+        }
+        $categories = RelationCategory::find()
+                ->select(['category.id', 'category.name'])
+                ->distinct()
+                ->joinWith('category', false)
+                ->where(['relation_category.rest_org_id' => $this->id])
+                ->orderBy(['category.name' => SORT_ASC])
+                ->asArray()
+                ->all();
+        return $categories;
+    }
+    
+    /**
+     * get list of suppliers for selected categories
+     * 
+     * @return array
+     */
+    public function getSuppliers($categories) {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return [];
+        }
+        $categoriesList = [];
+        foreach($categories as $category) {
+            if ($category['selected']) {
+                $categoriesList[] = $category['id'];
+            }
+        }
+        $vendors = RelationCategory::find()
+                ->select(['organization.id', 'organization.name', 'relation_supp_rest.cat_id'])
+                ->distinct()
+                ->leftJoin('relation_supp_rest', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
+                ->joinWith('vendor', false)
+                ->where(['category_id' => $categoriesList])
+                ->andWhere(['relation_category.rest_org_id' => $this->id])
+                ->orderBy(['organization.name' => SORT_ASC])
+                ->asArray()
+                ->all();
+        return $vendors;
     }
 }

@@ -30,11 +30,12 @@ function authenticate(socket, data, callback) {
 
 function postAuthenticate(socket, data) {
     var redisClient = redis.createClient();
-    redisClient.subscribe('notification');
+    redisClient.subscribe('chat');
 
     redisClient.on("message", function (channel, message) {
-        console.log("New message: " + message + ". In channel: " + channel);
-        socket.emit(channel, message);
+        messageObj = JSON.parse(message);
+        console.log("New message: " + message + ". In channel: " + messageObj.channel);
+        socket.emit(messageObj.channel, message);
     });
 
     socket.on('disconnect', function () {

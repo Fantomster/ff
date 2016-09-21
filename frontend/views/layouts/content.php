@@ -3,33 +3,7 @@ use yii\widgets\Breadcrumbs;
 use dmstr\widgets\Alert;
 $this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
 ?>
-<div class="content-wrapper" style="min-height: 843px; background: rgb(255, 255, 255) !important;">
-    <div id="loader-show"></div>
-    <section class="content-header">
-        <?php /* if (isset($this->blocks['content-header'])) { ?>
-            <h1><?= $this->blocks['content-header'] ?></h1>
-        <?php } else { ?>
-            <h1>
-                <?php
-                if ($this->title !== null) {
-                    echo \yii\helpers\Html::encode($this->title);
-                } else {
-                    echo \yii\helpers\Inflector::camel2words(
-                        \yii\helpers\Inflector::id2camel($this->context->module->id)
-                    );
-                    echo ($this->context->module->id !== \Yii::$app->id) ? '<small>Module</small>' : '';
-                } ?>
-            </h1>
-        <?php } */?>
-
-        <?=
-        Breadcrumbs::widget(
-            [
-                'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-            ]
-        ) ?>
-    </section>
-
+<div class="content-wrapper">
     <section class="content">
         <?= Alert::widget() ?>
         <?= $content ?>

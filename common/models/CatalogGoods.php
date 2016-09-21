@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use yii\data\ActiveDataProvider;
+
 /**
  * This is the model class for table "catalog_goods".
  *
@@ -17,44 +18,45 @@ use yii\data\ActiveDataProvider;
  * @property string $note
  * @property string $created_at
  * @property string $updated_at
+ * 
+ * @property CatalogBaseGoods $baseProduct
+ * @property Organization $organization
  */
-class CatalogGoods extends \yii\db\ActiveRecord
-{
+class CatalogGoods extends \yii\db\ActiveRecord {
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'catalog_goods';
     }
 
     /**
      * @inheritdoc
      */
-    public function scenarios()
-    {
-         $scenarios = parent::scenarios();
-           $scenarios['update'] = ['discount_percent','cat_id'];
+    public function scenarios() {
+        $scenarios = parent::scenarios();
+        $scenarios['update'] = ['discount_percent', 'cat_id'];
 
-           return $scenarios;
+        return $scenarios;
     }
-    public function rules()
-    {
+
+    public function rules() {
         return [
             [['cat_id', 'base_goods_id'], 'required'],
             [['cat_id', 'base_goods_id'], 'integer'],
             [['price'], 'string', 'max' => 50],
             [['note'], 'string', 'max' => 500],
             [['discount'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/', 'min' => 0],
-            [['discount_percent'],'number','min'=>-100,'max'=>100],
-            [['discount_fixed'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/','min' => 0],
+            [['discount_percent'], 'number', 'min' => -100, 'max' => 100],
+            [['discount_fixed'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/', 'min' => 0],
         ];
     }
+
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'cat_id' => 'Cat ID',
@@ -66,8 +68,9 @@ class CatalogGoods extends \yii\db\ActiveRecord
             'discount_fixed' => 'Discount Fixed',
         ];
     }
-    public function search($params,$id) {
-        $query = CatalogGoods::find()->where(['cat_id'=>$id]);
+
+    public function search($params, $id) {
+        $query = CatalogGoods::find()->where(['cat_id' => $id]);
         //$query->andFilterWhere(['like', 'product', '']);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -92,13 +95,26 @@ class CatalogGoods extends \yii\db\ActiveRecord
         return $dataProvider;
     }
 
-    public static function searchProductFromCatalogGoods($id,$cat_id){
-        if(CatalogGoods::find()->where(['base_goods_id' => $id, 'cat_id' => $cat_id])->exists()){
+    public static function searchProductFromCatalogGoods($id, $cat_id) {
+        if (CatalogGoods::find()->where(['base_goods_id' => $id, 'cat_id' => $cat_id])->exists()) {
             return true;
-        }else{
+        } else {
             return false;
-                
         }
     }
-    
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBaseProduct() {
+        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'base_goods_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization() {
+        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id'])->via('baseProduct');
+    }
+
 }

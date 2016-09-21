@@ -12,6 +12,10 @@ use yii\helpers\ArrayHelper;
  * @property integer $rest_org_id
  * @property integer $category_id
  * @property string $created_at
+ * 
+ * @property Category $category
+ * @property Organization $vendor
+ * @property Catalog $catalog
  */
 class RelationCategory extends \yii\db\ActiveRecord
 {
@@ -47,5 +51,26 @@ class RelationCategory extends \yii\db\ActiveRecord
             'rest_org_id' => 'Relation Rest org ID',
             'category_id' => 'Category ID',
         ];
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCategory() {
+        return $this->hasOne(Category::className(), ['id' => 'category_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVendor() {
+        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCatalog() {
+        return $this->hasOne(Catalog::className(), ['id' => 'supp_org_id']);
     }
 }

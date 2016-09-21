@@ -6,6 +6,7 @@ use yii\helpers\Html;
 
 
     dmstr\web\AdminLteAsset::register($this);
+    frontend\assets\AppAsset::register($this);
 
     frontend\assets\AppAsset::register($this);
 

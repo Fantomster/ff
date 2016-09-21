@@ -1,0 +1,96 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 16.09.2016, 14:31:49
+    Author     : ilia
+*/
+@import (reference) "../../../vendor/almasaeed2010/adminlte/build/less/AdminLTE.less";
+@import (reference) "variables.less";
+/*
+ * Core: General Layout Style
+ * -------------------------
+ */
+html,
+body {
+  min-height: 100%;
+  .layout-boxed & {
+    height: 100%;
+  }
+}
+
+body {
+  font-family: @font-family-base;
+}
+
+
+/* H1 - H6 font */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: @font-family-base;
+}
+
+
+.skin-blue {
+  //Navbar
+  .main-header {
+    .navbar {
+      .navbar-variant(@light-blue-fk; #fff);
+      .sidebar-toggle {
+        color: #fff;
+        &:hover {
+          background-color: darken(@light-blue-fk, 5%);
+        }
+      }
+      @media (max-width: @screen-header-collapse) {
+        .dropdown-menu {
+          li {
+            &.divider {
+              background-color: rgba(255, 255, 255, 0.1);
+            }
+            a {
+              color: #fff;
+              &:hover {
+                background: darken(@light-blue-fk, 5%);
+              }
+            }
+          }
+        }
+      }
+    }
+    //Logo
+    .logo {
+      .logo-variant(darken(@light-blue-left-fk, 0%));
+    }
+
+    li.user-header {
+      background-color: @light-blue-fk;
+    }
+  }
+
+  //Content Header
+  .content-header {
+    background: transparent;
+  }
+
+  //Create the sidebar skin
+  .skin-dark-sidebar(@light-blue-fk);
+}
+
+.skin-blue.layout-top-nav .main-header > .logo {
+  .logo-variant(@light-blue-fk);
+}
+
+

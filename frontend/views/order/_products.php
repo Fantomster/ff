@@ -27,7 +27,7 @@ echo GridView::widget([
             'value' => 'baseProduct.units',
             'label' => 'Количество в упаковке',
         ],
-        'note',
+        //'note',
         [
             'format' => 'raw',
             'value' => function ($data) {

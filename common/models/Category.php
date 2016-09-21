@@ -42,5 +42,12 @@ class Category extends \yii\db\ActiveRecord
     }
     public static function allCategory() {
 		return ArrayHelper::map(Category::find()->all(),'id','name');
-	}
+    }
+    public static function get_value($id){
+        $model = Category::find()->where(["id" => $id])->one();
+        if(!empty($model)){
+            return $model;
+        }
+        return null;
+    }
 }

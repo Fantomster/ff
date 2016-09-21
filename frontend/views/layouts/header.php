@@ -4,6 +4,8 @@ use yii\helpers\Html;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
+
+if (!Yii::$app->user->isGuest) {
 $user = Yii::$app->user->identity;
 $js = <<<JS
 
@@ -20,6 +22,7 @@ $this->registerJs($js, \yii\web\View::POS_READY)
 <script type="text/javascript">
     var socket;
 </script>
+<?php } ?>
 <header class="main-header">
 
     <?= Html::a('<span class="logo-mini">APP</span><span class="logo-lg">' . Yii::$app->name . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>

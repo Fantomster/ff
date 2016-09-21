@@ -84,7 +84,26 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         //return $result;
     }
+    public function sendInviteToClient($client) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+		// send email
+        $vendor = $this->organization->name;
+        $email = $client->email;
+        $subject = "Приглашение на f-keeper";
+        $result = $mailer->compose('acceptVendorInvite', compact("subject", "vendor", "vendor"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        //return $result;
+    }
     /**
      *  Send confirmation email to your new employee
      *  @param User $user

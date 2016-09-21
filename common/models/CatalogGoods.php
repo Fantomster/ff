@@ -61,11 +61,11 @@ class CatalogGoods extends \yii\db\ActiveRecord {
             'id' => 'ID',
             'cat_id' => 'Cat ID',
             'base_goods_id' => 'Cat Base Goods ID',
-            'price' => 'Price',
-            'note' => 'Note',
-            'discount' => 'Discount',
-            'discount_percent' => 'Discount %',
-            'discount_fixed' => 'Discount Fixed',
+            'price' => 'Цена',
+            'note' => 'Комментарий',
+            'discount' => 'Скидка (руб.)',
+            'discount_percent' => 'Скидка %',
+            'discount_fixed' => 'Фиксированная цена',
         ];
     }
 

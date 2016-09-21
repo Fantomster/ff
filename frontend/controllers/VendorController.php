@@ -174,7 +174,7 @@ class VendorController extends DefaultController {
     {
 	$currentUser = User::findIdentity(Yii::$app->user->id);
         if(!Catalog::find()->where(['supp_org_id'=>$currentUser->organization_id,'type'=>Catalog::BASE_CATALOG])->exists()){
-        return $this->render("catalogs/CreateBaseCatalog", compact("Catalog")); 
+        return $this->render("catalogs/createBaseCatalog", compact("Catalog")); 
         }else{
         $relation_supp_rest = new RelationSuppRest;
         return $this->render("catalogs", compact("relation_supp_rest"));
@@ -646,7 +646,7 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $model=Catalog::findOne(['id' => $id]);
         $model->id = null;
-        $model->name = $model->type==Catalog::BASE_CATALOG ? 'Базовый каталог (копия)' : $model->name.' дубликат';
+        $model->name = $model->type==Catalog::BASE_CATALOG ? 'Базовый каталог '.date("Y-m-d") : $model->name.' дубликат';
         $cat_type=$model->type;   //текущий тип каталога(исходный)    
         $model->type = Catalog::CATALOG;//переопределяем тип на 2
         $model->isNewRecord = true;

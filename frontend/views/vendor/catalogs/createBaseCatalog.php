@@ -38,7 +38,7 @@ $this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js'
 $this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable.full.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
-$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.js', ['depends' => [yii\web\JqueryAsset::className()]]);
+$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <div class="panel-body">   
     <h3 class="font-light"><i class="fa fa-list-alt"></i> Создание главного каталога</h3>
@@ -149,7 +149,7 @@ function customDropdownRenderer(instance, td, row, col, prop, value, cellPropert
 $('.save').click(function(e){	
 e.preventDefault();
     var i, items, item, dataItem, data = [];
-    var cols = [ 'article', 'product', 'units', 'price'];
+    var cols = [ 'article', 'product', 'units', 'price', 'category'];
     $('#CreateCatalog tr').each(function() {
 	  items = $(this).children('td');
 	  if(items.length === 0) {
@@ -162,11 +162,13 @@ e.preventDefault();
 	      dataItem[cols[i]] = item.html();
 	    }
 	  }
-	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]] || dataItem[cols[3]]){
+	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]] || dataItem[cols[3]] || dataItem[cols[4]]){
 	    data.push({dataItem});    
 	  }	    
 	});
 	var catalog = data;
+        console.log(JSON.stringify(catalog));
+        return false;
 	catalog = JSON.stringify(catalog);
 	$.ajax({
 		  url: 'index.php?r=vendor/supplier-start-catalog-create',

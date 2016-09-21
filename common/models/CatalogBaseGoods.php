@@ -19,6 +19,8 @@ use yii\data\ActiveDataProvider;
  * @property integer $deleted
  * @property string $created_at
  * @property string $updated_at
+ * 
+ * @property Organization $vendor
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord
 {
@@ -112,5 +114,13 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord
 		$catalog = CatalogBaseGoods::find()
 		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>\common\models\Catalog::BASE_CATALOG])->all();   
 		return $catalog;
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVendor()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 }

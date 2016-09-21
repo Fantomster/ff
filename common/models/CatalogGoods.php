@@ -9,11 +9,14 @@ use yii\data\ActiveDataProvider;
  *
  * @property integer $id
  * @property integer $cat_id
- * @property integer $cat_base_goods_id
+ * @property integer $base_goods_id
  * @property string $price
  * @property string $note
  * @property string $created_at
  * @property string $updated_at
+ * 
+ * @property CatalogBaseGoods $baseProduct
+ * @property Organization $organization
  */
 class CatalogGoods extends \yii\db\ActiveRecord
 {
@@ -31,8 +34,8 @@ class CatalogGoods extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['cat_id', 'cat_base_goods_id'], 'required'],
-            [['cat_id', 'cat_base_goods_id'], 'integer'],
+            [['cat_id', 'base_goods_id'], 'required'],
+            [['cat_id', 'base_goods_id'], 'integer'],
             [['price'], 'string', 'max' => 50],
             [['note'], 'string', 'max' => 500],
         ];
@@ -46,7 +49,7 @@ class CatalogGoods extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'cat_id' => 'Cat ID',
-            'cat_base_goods_id' => 'Cat Base Goods ID',
+            'base_goods_id' => 'Cat Base Goods ID',
             'price' => 'Price',
             'note' => 'Note',
         ];
@@ -61,7 +64,7 @@ class CatalogGoods extends \yii\db\ActiveRecord
 	        'attributes' => [
 	            'id',
                     'cat_id',
-                    'cat_base_goods_id',
+                    'base_goods_id',
                     'price',
                     'note',
 	        ]
@@ -80,4 +83,23 @@ class CatalogGoods extends \yii\db\ActiveRecord
 	 
 	    return $dataProvider;
 	}
+        
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBaseProduct()
+    {
+        return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'base_goods_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id'])->via('baseProduct');
+    }
 }
+//        $query->joinWith(['baseProduct' => function ($query) use ($baseProductTable) {
+//            $query->from(['baseProduct' => $baseProductTable]);
+//        }]);

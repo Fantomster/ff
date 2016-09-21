@@ -13,7 +13,7 @@ use Yii;
  * @property integer $created_by_id
  * @property integer $accepted_by_id
  * @property integer $status
- * @property string $total_price
+ * @property integer $total_price
  * @property string $created_at
  * @property string $updated_at
  *
@@ -25,6 +25,13 @@ use Yii;
  */
 class Order extends \yii\db\ActiveRecord
 {
+    const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
+    const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
+    const STATUS_PROCESSING = 3;
+    const STATUS_DONE = 4;
+    const STATUS_REJECTED = 5;
+    const STATUS_CANCELLED = 6;
+    
     /**
      * @inheritdoc
      */
@@ -36,11 +43,26 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+    
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
-            [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status'], 'required'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status'], 'integer'],
             [['total_price'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],

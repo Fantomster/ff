@@ -316,7 +316,7 @@ class OrderController extends DefaultController {
             
             return Yii::$app->redis->executeCommand('PUBLISH', [
                         'channel' => 'chat',
-                        'message' => Json::encode(['name' => $name, 'message' => $newMessage->message, 'channel' => $channel])
+                        'message' => Json::encode(['name' => $name, 'message' => $newMessage->message, 'channel' => $channel, 'isSystem' => 0])
             ]);
         }
     }

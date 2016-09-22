@@ -102,27 +102,4 @@ class SiteController extends Controller {
     public function actionAbout() {
         return $this->render('about');
     }
-
-    /*
-     *  Chat test
-     */
-
-    public function actionChatTest() {
-        $user = User::findIdentity(Yii::$app->user->id);
-
-        if (Yii::$app->request->post()) {
-
-            $name = Yii::$app->request->post('name');
-            $message = Yii::$app->request->post('message');
-
-            return Yii::$app->redis->executeCommand('PUBLISH', [
-                        'channel' => 'notification',
-                        'message' => Json::encode(['name' => $name, 'message' => $message, 'channel' => 'testchan'])
-            ]);
-        }
-
-
-        return $this->render('chat-test', ['user' => $user, 'channel' => 'testchan']);
-    }
-
 }

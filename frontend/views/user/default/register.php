@@ -13,69 +13,58 @@ use common\models\OrganizationType;
  * @var common\models\Organization $organization
  * @var string $userDisplayName
  */
-
 $module = $this->context->module;
-
 $this->title = Yii::t('user', 'Register');
-$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="user-default-register">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
-
-        <div class="alert alert-success">
-            <p><?= $flash ?></p>
-        </div>
-
-    <?php else: ?>
-
-        <?php $form = ActiveForm::begin([
-            'id' => 'register-form',
-            'options' => ['class' => 'form-horizontal'],
-            'fieldConfig' => [
-                'template' => "{label}\n<div class=\"col-lg-3\">{input}</div>\n<div class=\"col-lg-7\">{error}</div>",
-                'labelOptions' => ['class' => 'col-lg-2 control-label'],
-            ],
-            'enableAjaxValidation' => true,
-        ]); ?>
-
-        <?php if ($module->requireEmail): ?>
-            <?= $form->field($user, 'email') ?>
-        <?php endif; ?>
-
-        <?php if ($module->requireUsername): ?>
-            <?= $form->field($user, 'username') ?>
-        <?php endif; ?>
-
-        <?= $form->field($user, 'newPassword')->passwordInput() ?>
-
-        <?= $form->field($profile, 'full_name') ?>
-    
-        <?= $form->field($organization, 'name') ?>
-    
-        <?= $form->field($organization, 'type_id')->dropDownList(OrganizationType::getList(), ['prompt'=>'Тип бизнеса:']) ?>
-
-        <div class="form-group">
-            <div class="col-lg-offset-2 col-lg-10">
-                <?= Html::submitButton(Yii::t('user', 'Register'), ['class' => 'btn btn-primary']) ?>
-
-                <br/><br/>
-                <?= Html::a(Yii::t('user', 'Login'), ["/user/login"]) ?>
+<div class="login__block">
+    <div class="login__inside">
+        <img src="/images/login-logo.png" alt=""/>
+        <div class="contact__form">
+            <?php
+            $form = ActiveForm::begin(['id' => 'login-form']);
+            ?>
+            <div class="form-group">
+                <?=
+                        $form->field($organization, 'type_id')
+                        ->label(false)
+                        ->dropDownList(OrganizationType::getList(), [
+                            'prompt' => 'ресторан / поставщик',
+                            'class' => 'form-control'])
+                ?>
+                <?=
+                        $form->field($organization, 'name')
+                        ->label(false)
+                        ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
+                ?>
+                <?=
+                        $form->field($user, 'email')
+                        ->label(false)
+                        ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
+                ?>
+                <?=
+                        $form->field($profile, 'full_name')
+                        ->label(false)
+                        ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
+                ?>
+            <?=
+                    $form->field($user, 'newPassword')
+                    ->label(false)
+                    ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
+            ?>
             </div>
-        </div>
-
-        <?php ActiveForm::end(); ?>
-
-        <?php if (Yii::$app->get("authClientCollection", false)): ?>
-            <div class="col-lg-offset-2 col-lg-10">
-                <?= yii\authclient\widgets\AuthChoice::widget([
-                    'baseAuthUrl' => ['/user/auth/login']
-                ]) ?>
+            <?=
+            Html::a('Зарегистрироваться', '#', [
+                'data' => [
+                    'method' => 'post',
+                ],
+                'class' => 'send__btn',
+            ])
+            ?>
+            <div class="regist">
+<?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
             </div>
-        <?php endif; ?>
-
-    <?php endif; ?>
+<?php ActiveForm::end(); ?>
+        </div>
+    </div>
 
 </div>

@@ -8,33 +8,40 @@ use yii\widgets\ActiveForm;
  * @var yii\widgets\ActiveForm $form
  * @var amnah\yii2\user\models\forms\ResendForm $model
  */
-
 $this->title = Yii::t('user', 'Resend');
-$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="user-default-resend">
+<div class="login__block">
+    <div class="login__inside">
+        <img src="/images/login-logo.png" alt=""/>
+        <div class="contact__form">
+            <?php if ($flash = Yii::$app->session->getFlash('Resend-success')): ?>
 
-    <h1><?= Html::encode($this->title) ?></h1>
+                <div class="alert alert-success">
+                    <p><?= $flash ?></p>
+                </div>
 
-    <?php if ($flash = Yii::$app->session->getFlash('Resend-success')): ?>
+            <?php else: ?>
 
-        <div class="alert alert-success">
-            <p><?= $flash ?></p>
-        </div>
-
-    <?php else: ?>
-
-        <div class="row">
-            <div class="col-lg-5">
                 <?php $form = ActiveForm::begin(['id' => 'resend-form']); ?>
-                    <?= $form->field($model, 'email') ?>
-                    <div class="form-group">
-                        <?= Html::submitButton(Yii::t('user', 'Submit'), ['class' => 'btn btn-primary']) ?>
-                    </div>
+                <div class="form-group">
+                    <?=
+                            $form->field($model, 'email')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'email']);
+                    ?>
+                </div>
+                <?=
+                Html::a(Yii::t('user', 'Submit'), '#', [
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                    'class' => 'send__btn',
+                ])
+                ?>
                 <?php ActiveForm::end(); ?>
-            </div>
-        </div>
 
-    <?php endif; ?>
+            <?php endif; ?>
+        </div>
+    </div>
 
 </div>

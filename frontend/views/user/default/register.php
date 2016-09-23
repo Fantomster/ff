@@ -20,50 +20,58 @@ $this->title = Yii::t('user', 'Register');
     <div class="login__inside">
         <img src="/images/login-logo.png" alt=""/>
         <div class="contact__form">
-            <?php
-            $form = ActiveForm::begin(['id' => 'login-form']);
-            ?>
-            <div class="form-group">
-                <?=
-                        $form->field($organization, 'type_id')
-                        ->label(false)
-                        ->dropDownList(OrganizationType::getList(), [
-                            'prompt' => 'ресторан / поставщик',
-                            'class' => 'form-control'])
+            <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
+
+                <div class="alert alert-success">
+                    <p><?= $flash ?></p>
+                </div>
+
+            <?php else: ?>
+                <?php
+                $form = ActiveForm::begin(['id' => 'login-form']);
                 ?>
+                <div class="form-group">
+                    <?=
+                            $form->field($organization, 'type_id')
+                            ->label(false)
+                            ->dropDownList(OrganizationType::getList(), [
+                                'prompt' => 'ресторан / поставщик',
+                                'class' => 'form-control'])
+                    ?>
+                    <?=
+                            $form->field($organization, 'name')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
+                    ?>
+                    <?=
+                            $form->field($user, 'email')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
+                    ?>
+                    <?=
+                            $form->field($profile, 'full_name')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
+                    ?>
+                    <?=
+                            $form->field($user, 'newPassword')
+                            ->label(false)
+                            ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
+                    ?>
+                </div>
                 <?=
-                        $form->field($organization, 'name')
-                        ->label(false)
-                        ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
+                Html::a('Зарегистрироваться', '#', [
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                    'class' => 'send__btn',
+                ])
                 ?>
-                <?=
-                        $form->field($user, 'email')
-                        ->label(false)
-                        ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
-                ?>
-                <?=
-                        $form->field($profile, 'full_name')
-                        ->label(false)
-                        ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
-                ?>
-            <?=
-                    $form->field($user, 'newPassword')
-                    ->label(false)
-                    ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
-            ?>
-            </div>
-            <?=
-            Html::a('Зарегистрироваться', '#', [
-                'data' => [
-                    'method' => 'post',
-                ],
-                'class' => 'send__btn',
-            ])
-            ?>
-            <div class="regist">
-<?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
-            </div>
-<?php ActiveForm::end(); ?>
+                <div class="regist">
+                    <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
+                </div>
+                <?php ActiveForm::end(); ?>
+            <?php endif; ?>
         </div>
     </div>
 

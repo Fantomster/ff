@@ -42,15 +42,12 @@ $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js')
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <div class="panel-body">   
-    <h3 class="font-light"><i class="fa fa-list-alt"></i> Создание главного каталога</h3>
-</div>
-<div class="panel-body"> 
-<?= Html::a(
+    <h3 class="font-light pull-left" style="margin-top: 5px;"><i class="fa fa-list-alt"></i> Создание главного каталога</h3>
+    <?= Html::a(
         'Сохранить',
         ['#'],
-        ['class' => 'btn btn-success pull-right save']
+        ['class' => 'btn btn-success pull-right save','style' => ['margin-left'=>'5px']]
     ) ?>
-<div class="btn-group m-t-xs m-r pull-right" placement="left" style="margin-right: 10px">
     <?=
         Modal::widget([
             'id' => 'importToXls',
@@ -60,28 +57,34 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
                 'label' => '<i class="glyphicon glyphicon-import"></i> Импорт',
                 'tag' => 'a',
                 'data-target' => '#importToXls',
-                'class' => 'btn btn-default',
+                'class' => 'btn btn-default pull-right',
                 'href' => Url::to(['/vendor/import-base-catalog-from-xls']),
-                'style' => '',
+                'style' => 'margin: 0 5px;',
             ],
         ])
     ?>
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <span class="caret"></span>
-        <span class="sr-only">Toggle Dropdown</span>
-    </button>
-    <ul class="dropdown-menu m-t-sm">
-        <li>
-            <a href="upload/template.xlsx" class="ng-binding">
-                <i class="fa fa-list-alt m-r-xs"></i> Скачать шаблон
-            </a>
-        </li>
-    </ul>
-</div>
-<button style="margin-right: 10px; margin-left: 10px;" class="btn btn-default m-t-xs m-r pull-right"><i class="fa fa-question-circle"></i> Инструкция</button>
+    <?= Html::a(
+        '<i class="fa fa-list-alt"></i> Скачать шаблон',
+        Url::to('@web/upload/template.xlsx'),
+        ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px']]
+    ) ?>
+    <?=
+        Modal::widget([
+            'id' => 'info',
+            'clientOptions' => false,
+            'size'=>'modal-md',
+            'toggleButton' => [
+                'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
+                'tag' => 'a',
+                'data-target' => '#info',
+                'class' => 'btn btn-default pull-right',
+                'href' => Url::to(['#']),
+                'style' => 'margin-right:5px;',
+            ],
+        ])
+    ?>
 </div>
 <div class="panel-body">
-
 <div class="handsontable" id="CreateCatalog"></div> 
 </div>
 <?php
@@ -142,17 +145,20 @@ var data = [
 var container = document.getElementById('CreateCatalog');
 var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Артикул', 'Продукт', 'Количество', 'Цена (руб)', 'Категория'],
+  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Категория'],
   colWidths: [40, 180, 45, 45, 80],
   renderAllRows: true,
   columns: [
     {data: 'article'},
     {data: 'product'},
-    {data: 'kolvo'},
+    {
+        data: 'kolvo', 
+        type: 'numeric',
+    },
     {
         data: 'price', 
         type: 'numeric',
-        format: '0,0.00',
+        format: '0.00',
         language: 'ru-RU'
     },
     {
@@ -209,7 +215,6 @@ e.preventDefault();
 	});
 	var catalog = data;
         //console.log(data);
-        //return false;
 	catalog = JSON.stringify(catalog);
 	$.ajax({
 		  url: 'index.php?r=vendor/supplier-start-catalog-create',

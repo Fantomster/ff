@@ -10,14 +10,12 @@ use yii\widgets\ActiveForm;
  * @var bool $success
  * @var bool $invalidToken
  */
-
 $this->title = Yii::t('user', 'Reset');
-$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="user-default-reset">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
+<div class="login__block">
+    <div class="login__inside">
+        <img src="/images/login-logo.png" alt=""/>
+        <div class="contact__form">
     <?php if (!empty($success)): ?>
 
         <div class="alert alert-success">
@@ -35,8 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php else: ?>
 
-        <div class="row">
-            <div class="col-lg-5">
 
                 <div class="alert alert-warning">
                     <p><?= Yii::t("user", "Email") ?> [ <?= $user->email ?> ]</p>
@@ -44,15 +40,26 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?php $form = ActiveForm::begin(['id' => 'reset-form']); ?>
 
-                    <?= $form->field($user, 'newPassword')->passwordInput() ?>
-                    <?= $form->field($user, 'newPasswordConfirm')->passwordInput() ?>
                     <div class="form-group">
-                        <?= Html::submitButton(Yii::t("user", "Reset"), ['class' => 'btn btn-primary']) ?>
+                    <?= $form->field($user, 'newPassword')
+                        ->label(false)
+                        ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль']) ?>
+                    <?= $form->field($user, 'newPasswordConfirm')
+                        ->label(false)
+                        ->passwordInput(['class' => 'form-control', 'placeholder' => 'повторите пароль']) ?>
                     </div>
+                <?=
+                Html::a(Yii::t('user', 'Reset'), '#', [
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                    'class' => 'send__btn',
+                ])
+                ?>
                 <?php ActiveForm::end(); ?>
-            </div>
-        </div>
 
     <?php endif; ?>
+        </div>
+    </div>
 
 </div>

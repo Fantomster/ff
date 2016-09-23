@@ -18,6 +18,9 @@ use yii\widgets\ActiveForm;
  * @inheritdoc
  */
 class UserController extends \amnah\yii2\user\controllers\DefaultController {
+    
+    public $layout = "@frontend/views/layouts/main-user";
+    
     /**
      * @inheritdoc
      */

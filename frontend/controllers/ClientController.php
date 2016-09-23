@@ -64,7 +64,7 @@ class ClientController extends DefaultController {
                     ],
                 ],
                /*'denyCallback' => function($rule, $action) {
-                    throw new HttpException(404 ,'Не здесь ничего такого, проходите, гражданин');
+                    throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
                 }*/
             ],
         ];

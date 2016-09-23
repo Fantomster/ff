@@ -56,7 +56,7 @@ $exportColumns = [
 <div class="panel-body">
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#tabCatalog">Редактирование</a></li>
-        <li><a data-toggle="tab" href="#tabClients">Назначить</a></li>
+        <li><a data-toggle="tab" href="#tabClients">Назначить ресторану</a></li>
     </ul>
 </div>
     <div class="tab-content">
@@ -174,7 +174,7 @@ $exportColumns = [
             
 <?php 
 $gridColumnsBaseCatalog = [
-                    [
+                    /*[
                 'label' => '',  
                 'format' => 'raw',  
                 'contentOptions' => ['style' => 'width:50px;'],
@@ -192,34 +192,39 @@ $gridColumnsBaseCatalog = [
                         ]);
                     return ($images);
                     }
-                ],
+                ],*/
 		[
 		'label'=>'Артикул',
 		'value'=>'article',
+                'contentOptions' => ['style' => 'vertical-align:middle'],
 		],
 		[
 		'label'=>'Продукт',
 		'value'=>'product',
+                'contentOptions' => ['style' => 'vertical-align:middle'],
 		],
 		[
-		'label'=>'кол-во',
+		'label'=>'Кратность',
 		'value'=>'units',
+                'contentOptions' => ['style' => 'vertical-align:middle'],    
 		],
                 [
 		'label'=>'Категория',
                 'value'=>function ($data) {
                 $data->category_id==0 ? $category_name='':$category_name=Category::get_value($data->category_id)->name;
                 return $category_name;
-                }
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle'],
 		],
 		[
 		'label'=>'Цена',
                 'value'=>function ($data) {return $data->price;},
+                'contentOptions' => ['style' => 'vertical-align:middle'],
 		],
         [
-            'attribute' => 'статус',
+            'attribute' => 'Наличие',
             'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],
+            'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
             'value' => function ($data) {
                 $link = CheckboxX::widget([
                     'name'=>'status_'.$data->id,
@@ -238,7 +243,7 @@ $gridColumnsBaseCatalog = [
             },
             
         ],
-        [
+        /*[
             'attribute' => 'MarketPlace',
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:100px;'],
@@ -259,20 +264,7 @@ $gridColumnsBaseCatalog = [
                 return $link;
             },
             
-        ],
-        [
-            'attribute' => '',
-            'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],
-            'value' => function ($data) {
-                $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
-                    'class'=>'btn btn-danger del-product',
-                    'data'=>['id'=>$data->id],
-                ]);
-                return $link;
-            },
-            
-        ],
+        ],*/
         [
             'attribute' => '',
             'format' => 'raw',
@@ -284,8 +276,21 @@ $gridColumnsBaseCatalog = [
                     'toggle' => 'modal',
                     'backdrop' => 'static',
                               ],
-                    'class'=>'btn btn-default'
+                    'class'=>'btn btn-warning'
                     
+                ]);
+                return $link;
+            },
+            
+        ],
+        [
+            'attribute' => '',
+            'format' => 'raw',
+            'contentOptions' => ['style' => 'width:50px;'],
+            'value' => function ($data) {
+                $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
+                    'class'=>'btn btn-danger del-product',
+                    'data'=>['id'=>$data->id],
                 ]);
                 return $link;
             },
@@ -317,8 +322,9 @@ $form = ActiveForm::begin([
         'export' => [
             'fontAwesome' => true,
         ],
-        'condensed'=>true,
+        //'condensed'=>true,
         //'floatHeader'=>true, //зафиксировать заголовок
+        //'floatHeaderOptions'=>['scrollingTop'=>'0'],
         'bordered'=>true,
 ]);
 ?>   

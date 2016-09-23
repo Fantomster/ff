@@ -187,6 +187,7 @@ h6,
 .handsontable thead th {
   background-color: #3f3e3e;
   color: #fff;
+  padding-top: 6px;
 }
 .handsontable tbody th {
   background-color: rgba(63, 62, 62, 0.1);
@@ -198,4 +199,35 @@ a {
 .content-wrapper,
 .right-side {
   background-color: #fff;
+}
+.kv-grid-table td label {
+  margin-bottom: 0px;
+}
+.kv-grid-table > tbody > tr > td {
+  vertical-align: middle;
+}
+.kv-grid-table thead th {
+  background-color: #3f3e3e;
+  color: #fff;
+  font-weight: normal;
+  text-align: center;
+}
+.grid-view > tbody > tr > td {
+  vertical-align: middle;
+}
+.grid-view thead th {
+  background-color: #3f3e3e;
+  color: #fff;
+  font-weight: normal;
+  text-align: center;
+}
+.grid-view thead th a {
+  color: #fff;
+  font-weight: normal;
+  text-align: center;
+  cursor: pointer;
+}
+.grid-view thead th a:hover {
+  color: #84bf76;
+  cursor: pointer;
 }

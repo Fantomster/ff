@@ -13,7 +13,6 @@ use kartik\checkbox\CheckboxX;
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 $this->title = 'Назначить каталог';
 ?>
-<?php Pjax::begin(['id' => 'pjax-container']); ?>
 <div class="panel-body">
     <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
 </div>
@@ -25,6 +24,7 @@ $this->title = 'Назначить каталог';
       <?='<li class="active">'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
     </ul>
 </div>
+<?php Pjax::begin(['id' => 'pjax-container']); ?>
 <?php 
 $gridColumns = [
 		[
@@ -86,6 +86,7 @@ $gridColumns = [
 ]);
 ?>
 </div>
+<?php Pjax::end(); ?>
 <?php
 $this->registerJs('
 /** 
@@ -107,7 +108,6 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 $("input[type=checkbox]").on("change", function(e) {	
 var id = $(this).attr("data-id");
 var state = $(this).prop("checked");
-  //bootbox.confirm("<h3>Подтвердите действие</h3>", function(result) {if(result){
     $.ajax({
     url: "index.php?r=vendor/step-4&id='. $cat_id .'",
     type: "POST",
@@ -122,9 +122,6 @@ var state = $(this).prop("checked");
         console.log(errMsg);
         }
     });
-    //}else{elem.bootstrapSwitch("toggleState" , false);}
-  //})
 })
 ');
 ?>
-<?php Pjax::end(); ?>

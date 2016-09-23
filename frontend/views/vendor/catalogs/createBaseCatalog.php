@@ -172,6 +172,7 @@ var hot = new Handsontable(container, {
     },
     ],
   className : 'Handsontable_table',
+  tableClassName: ['table-hover', 'table-striped'],
   rowHeaders : true,
   stretchH : 'all',
   startRows: 1,

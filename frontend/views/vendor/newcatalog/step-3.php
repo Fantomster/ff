@@ -15,7 +15,7 @@ $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margi
 $this->title = 'Редактировать продукты';
 ?>
 
-<?php Pjax::begin(['id' => 'pjax-container']); ?>
+
 <div class="panel-body">
     <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
 </div>
@@ -27,6 +27,7 @@ $this->title = 'Редактировать продукты';
         <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
     </ul>
 </div>
+<?php Pjax::begin(['id' => 'pjax-container']); ?>
 <?php 
 $gridColumnsCatalog = [
     [
@@ -134,7 +135,7 @@ $gridColumnsCatalog = [
 'clientOptions' => false,
 ])
 ?>
-
+<?php Pjax::end(); ?>
 <?php
 $this->registerJs('
 /** 
@@ -185,4 +186,3 @@ $("body").on("hidden.bs.modal", "#add-product,#discount-all-product", function()
 
 ');
 ?>
-<?php Pjax::end(); ?>

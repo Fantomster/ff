@@ -34,6 +34,9 @@ body {
 body {
   font-family: 'Open Sans', sans-serif;
 }
+.content-wrapper {
+  background: #efefef;
+}
 /* H1 - H6 font */
 h1,
 h2,
@@ -183,4 +186,12 @@ h6,
 }
 .skin-blue.layout-top-nav .main-header > .logo:hover {
   background-color: #81bd73;
+}
+.handsontable thead th {
+  background-color: #3f3e3e;
+  color: #fff;
+}
+.handsontable tbody th {
+  background-color: rgba(63, 62, 62, 0.1);
+  color: #555;
 }

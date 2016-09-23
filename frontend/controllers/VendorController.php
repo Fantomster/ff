@@ -226,6 +226,12 @@ class VendorController extends DefaultController {
             $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
             $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
             $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+            $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
+            if(empty($category_name)){
+            $category_name=0;    
+            }else{
+            $category_name = empty(Category::find()->where(["name" => $category_name])->one()->id) ? 0 :Category::find()->where(["name" => $category_name])->one()->id;
+            }
             $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
             $price = str_replace(',', '.', $price);
             if(substr($price, -3, 1) == '.')
@@ -239,11 +245,9 @@ class VendorController extends DefaultController {
                 $price = str_replace('.', '', $price);
             }
             
-            //$price = $price*100;//bigInt format
-            
             $sql = "insert into ".CatalogBaseGoods::tableName()."(
-            `cat_id`,`category_id`,`article`,`product`,`units`,`price`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
-            $lastInsert_base_cat_id,0,'$article','$product','$units','$price',1,0,0,NOW())";
+            `cat_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`category_id`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
+            $lastInsert_base_cat_id,$currentUser->organization_id,'$article','$product','$units','$price','$category_name',1,0,0,NOW())";
             \Yii::$app->db->createCommand($sql)->execute();
 
             

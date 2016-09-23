@@ -29,6 +29,7 @@ $this->registerCss('
 .modal-footer {border-top:1px solid #ccc;background-color: #ecf0f5}
 ');
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
+$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
 $this->registerCssFile('modules/handsontable/dist/chosen.css');
 $this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
 $this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
@@ -36,7 +37,7 @@ $this->registerjsFile('modules/handsontable/dist/moment/moment.js');
 $this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
 $this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
 $this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable.full.js');
+$this->registerJsFile('modules/handsontable/dist/handsontable.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
@@ -94,9 +95,8 @@ var array = $categorys;
 var datas = { "programs": [array] };
 var arr = [];
 $.each(datas.programs[0], function(key,val) {
-                    arr.push({'id': key, 'label' : val});
-                });
-console.log(arr);
+    arr.push({'id': key, 'label' : val});
+});
 var data = [
     ['', '', '', '', ''],
     ['', '', '', '', ''],
@@ -104,7 +104,37 @@ var data = [
     ['', '', '', '', ''],
     ['', '', '', '', ''],
     ['', '', '', '', ''],
-        ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
     ['', '', '', '', ''],
     ['', '', '', '', ''],
     ['', '', '', '', ''],
@@ -113,15 +143,22 @@ var container = document.getElementById('CreateCatalog');
 var hot = new Handsontable(container, {
   data: data,
   colHeaders : ['Артикул', 'Продукт', 'Количество', 'Цена (руб)', 'Категория'],
+  colWidths: [40, 180, 45, 45, 80],
+  renderAllRows: true,
   columns: [
     {data: 'article'},
     {data: 'product'},
     {data: 'kolvo'},
-    {data: 'price',type: 'numeric',format: '0,0.00'},
     {
+        data: 'price', 
+        type: 'numeric',
+        format: '0,0.00',
+        language: 'ru-RU'
+    },
+    {
+        
         renderer: customDropdownRenderer,
         editor: "chosen",
-        width: 100,
         chosenOptions: {
             multiple: false,
             data: arr
@@ -131,10 +168,8 @@ var hot = new Handsontable(container, {
   className : 'Handsontable_table',
   rowHeaders : true,
   stretchH : 'all',
-  autoRowSize: true,
-  manualColumnResize: true,
+  startRows: 1,
   autoWrapRow: true,
-  minSpareRows: 1,
   });
 function customDropdownRenderer(instance, td, row, col, prop, value, cellProperties) {
     var selectedId;
@@ -173,7 +208,7 @@ e.preventDefault();
 	  }	    
 	});
 	var catalog = data;
-        //console.log(JSON.stringify(catalog));
+        //console.log(data);
         //return false;
 	catalog = JSON.stringify(catalog);
 	$.ajax({

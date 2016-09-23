@@ -92,17 +92,19 @@ body {
 .clear {
 	clear: both;
 }
+
+
 /* Header
 -----------------------------------------------------------------------------*/
 .header {
-	background: url(../images/header-banner.jpg) no-repeat top center;
+	background-repeat: no-repeat;
+	background-position: top center;
 	background-size: cover;
 	min-height: 720px;
 	padding-top: 20px;
 	position: relative;
 	z-index: 1;
 }
-
 .overlay {
 	display: block;
 	background-color: rgba(63, 62, 62, 0.5);
@@ -113,11 +115,27 @@ body {
 	height: 100%;
 	z-index: -1;
 }
-
-.header.header__inner_page {
+.header__inner_page {
 	min-height: auto;
 	background: #3f3e3e;
 	padding-bottom: 15px;
+	width: 100%;
+	position: fixed;
+	top: 0;
+}
+
+.fixed-block {
+	min-height: auto;
+	background: #3f3e3e;
+	padding: 15px;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+}
+.nav-bg {
+	background: #3f3e3e;
 }
 .header .logo__block-icon {
 	background: url(../images/logo-rut.png) no-repeat;	
@@ -125,52 +143,6 @@ body {
 	display: block;
 	width: 180px;
 	height: 34px;
-}
-.header .logo__block-icon:hover {
-	background-position: 0 -34px;
-}
-.header .logo__block {
-	float: left;
-	margin: 0 90px 0 0;
-}
-.header .phone__block {
-	float: left;
-	padding: 10px 0 0 0;
-}
-.header .phone__block .phone__block-number {
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-}
-.header .phone__block .phone__block-number span {
-	font-size: 0.9em;
-	margin-right: 5px;
-}
-.header .nav_menu {
-	overflow: hidden;
-}
-.header .registr__block {
-	float: right;
-}
-.header .nav__block {
-	float: right;
-	padding: 10px 35px 0 0;
-}
-.header .nav_menu >li {
-	display: inline-block;
-	font-size: 12px;
-	text-transform: uppercase;
-	font-weight: bold;
-	margin: 0 15px;
-}
-.header .nav_menu >li a {
-	color: #fff;	
-	line-height: 1;
-	display: block;
-	padding-bottom: 5px;
-}
-.header .nav_menu >li a:focus {
-	text-decoration: none;
 }
 
 a:visited,
@@ -188,56 +160,6 @@ a:focus {
 	text-decoration: none;
 	color: #fff;
 }
-.header .nav_menu >li a:hover {
-	text-decoration: none;
-	border-bottom: 1px solid #fff;
-}
-.header .nav_menu >li a.active {
-	border-bottom: 1px solid #fff;
-}
-.header .registr__block {
-	border: 2px solid rgba(255,255,255,0.2);
-	border-radius: 3px;
-	display: inline-block;
-	float: right;
-	overflow: hidden;
-	padding: 7px 15px;
-	cursor: pointer;
-	transition: 0.3s;
-}
-.header .registr__block:hover {
-	background-color: #84bf76;
-	border-color: #84bf76;
-}
-.header .registr__block ul {
-	overflow: hidden;
-	padding: 0;
-	margin: 0;
-}
-.header .registr__block ul li {
-	float: left;
-}
-.header .registr__block ul li a,
-.header .registr__block ul li span  {
-	color: #fff;
-	font-size: 12px;
-	font-weight: bold;
-	text-transform: uppercase;
-}
-.header .registr__block ul li a:hover {
-	text-decoration: none;
-}
-.header .registr__block ul li span {
-	display: block;
-	padding: 2px 5px 0;
-}
-#top_nav{
-   top:0;
-   position: fixed;
-   z-index: 1000;
-   width:100%;
-   height:100px;
-}
 .restoran__banner {
 	margin: 20px 0 0;
 	padding-bottom: 30px;
@@ -253,9 +175,11 @@ a:focus {
 	background-size: cover;
 	position: relative;
 	z-index: 1;
+	min-height: 420px
 }
 .restoran {
 	padding-bottom: 0!important;
+	min-height: 420px;
 }
 .restoran__content {
 	background: url(../images/restoran-bg.jpg) repeat-y top center;
@@ -377,14 +301,456 @@ a:focus {
 	left: 50%;
 	margin-left: -9px;
 }
+@media (min-width: 1070px) {	
+.header-nav {
+	position: fixed;
+	z-index: 1000;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    width: 100%;
+}
 
+.header-nav .logo__block-icon {
+	background: url(../images/logo-rut.png) no-repeat;	
+	background-size: 180px 69px;
+	display: block;
+	width: 180px;
+	height: 34px;
+}
+.header-nav .logo__block-icon:hover {
+	background-position: 0 -34px;
+}
+.header-nav .logo__block {
+	float: left;
+	margin: 0 90px 0 0;
+}
+.header-nav .phone__block {
+	float: left;
+	padding: 10px 0 0 0;
+}
+.header-nav .phone__block .phone__block-number {
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+}
+.header-nav .phone__block .phone__block-number span {
+	font-size: 0.9em;
+	margin-right: 5px;
+}
+.header-nav .nav_menu {
+	overflow: hidden;
+}
+.header-nav .registr__block {
+	float: right;
+}
+.header-nav .nav__block {
+	float: right;
+	padding: 10px 0 0 0;
+}
+.header-nav .nav_menu >li {
+	display: inline-block;
+	font-size: 12px;
+	text-transform: uppercase;
+	font-weight: bold;
+	margin: 0 15px;
+}
+.header-nav .nav_menu >li a {
+	color: #fff;	
+	line-height: 1;
+	display: block;
+	padding-bottom: 5px;
+}
+.header-nav .nav_menu >li a:focus {
+	text-decoration: none;
+}
 
+a:visited,
+a:active,
+a:focus {
+	color: #84bf76;
+	text-decoration: none !important;
+}
+* {
+	outline: none;
+}
 
+.header-nav .nav_menu >li a:hover {
+	text-decoration: none;
+	border-bottom: 1px solid #fff;
+}
+.header-nav .nav_menu >li a.active {
+	border-bottom: 1px solid #fff;
+}
+.header-nav .registr__block {
+	border: 2px solid rgba(255,255,255,0.2);
+	border-radius: 3px;
+	display: inline-block;
+	float: right;
+	overflow: hidden;
+	padding: 7px 15px;
+	cursor: pointer;
+	transition: 0.3s;
+}
+.header-nav .registr__block:hover {
+	background-color: #84bf76;
+	border-color: #84bf76;
+}
+.header-nav .registr__block ul {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+.header-nav .registr__block ul li {
+	float: left;
+}
+.header-nav .registr__block ul li a,
+.header-nav .registr__block ul li span  {
+	color: #fff;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+.header-nav .registr__block ul li a:hover {
+	text-decoration: none;
+}
+.header-nav .registr__block ul li span {
+	display: block;
+	padding: 2px 5px 0;
+}
+#menu__burger {
+	display: none;
+	color: #fff;
+	text-transform: uppercase;
+	font-weight: bold;
+	background: #84bf76;
+	border-radius: 3px;
+	padding: 8px 20px; 
+	margin-bottom: 15px;
+	cursor: pointer;
+}
+}
+.inner-bg-block {
+	min-height: 450px;
+}
+.dark-bg {
+	background: #3f3e3e;
+}
+@media (min-width: 621px) and (max-width: 1070px) {	
+.header-nav {
+	background: #3f3e3e;
+	background-size: cover;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	position: relative;
+	z-index: 1;
+}
+.overlay {
+	display: block;
+	background-color: rgba(63, 62, 62, 0.5);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+}
+.header-nav .logo__block-icon {
+	background: url(../images/logo-rut.png) no-repeat;	
+	background-size: 180px 69px;
+	display: block;
+	width: 180px;
+	height: 34px;
+}
+.header-nav .logo__block-icon:hover {
+	background-position: 0 -34px;
+}
+.header-nav .logo__block {
+	float: left;
+	margin: 0 90px 0 0;
+}
+.header-nav .phone__block {
+	float: left;
+	padding: 10px 0 0 0;
+}
+.header-nav .phone__block .phone__block-number {
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+}
+.header-nav .phone__block .phone__block-number span {
+	font-size: 0.9em;
+	margin-right: 5px;
+}
+.header-nav .nav_menu {
+	overflow: hidden;
+}
+.header-nav .registr__block {
+	float: right;
+}
+.header-nav .nav__block {
+	display: inline-block;
+	text-align: center;
+	width: 100%;
+	padding: 10px 0px 0px 0px;
+}
+.header-nav .nav_menu >li {
+	display: inline-block;
+	font-size: 12px;
+	text-transform: uppercase;
+	font-weight: bold;
+	margin: 0 15px;
+}
+.header-nav .nav_menu >li a {
+	color: #fff;	
+	line-height: 1;
+	display: block;
+	padding-bottom: 5px;
+}
+.header-nav .nav_menu >li a:focus {
+	text-decoration: none;
+}
+
+a:visited,
+a:active,
+a:focus {
+	color: #84bf76;
+	text-decoration: none !important;
+}
+* {
+	outline: none;
+}
+
+.header-nav .nav_menu >li a:hover {
+	text-decoration: none;
+	border-bottom: 1px solid #fff;
+}
+.header-nav .nav_menu >li a.active {
+	border-bottom: 1px solid #fff;
+}
+.header-nav .registr__block {
+	border: 2px solid rgba(255,255,255,0.2);
+	border-radius: 3px;
+	display: inline-block;
+	float: right;
+	overflow: hidden;
+	padding: 7px 15px;
+	cursor: pointer;
+	transition: 0.3s;
+}
+.header-nav .registr__block:hover {
+	background-color: #84bf76;
+	border-color: #84bf76;
+}
+.header-nav .registr__block ul {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+.header-nav .registr__block ul li {
+	float: left;
+}
+.header-nav .registr__block ul li a,
+.header-nav .registr__block ul li span  {
+	color: #fff;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+.header-nav .registr__block ul li a:hover {
+	text-decoration: none;
+}
+.header-nav .registr__block ul li span {
+	display: block;
+	padding: 2px 5px 0;
+}
+#menu__burger {
+	display: none;
+	color: #fff;
+	text-transform: uppercase;
+	font-weight: bold;
+	background: #84bf76;
+	border-radius: 3px;
+	padding: 8px 20px; 
+	margin-bottom: 15px;
+	cursor: pointer;
+}
+
+}
+
+@media (max-width: 620px) {	
+.header-nav {
+	background: #3f3e3e;
+	background-size: cover;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	position: relative;
+	z-index: 1;
+}
+.overlay {
+	display: block;
+	background-color: rgba(63, 62, 62, 0.5);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+}
+.header-nav .logo__block-icon {
+	background: url(../images/logo-rut.png) no-repeat;	
+	background-size: 180px 69px;
+	display: block;
+	width: 180px;
+	height: 34px;
+}
+.header-nav .logo__block-icon:hover {
+	background-position: 0 -34px;
+}
+.header-nav .logo__block {
+	float: none;
+    width: 180px;
+    margin: 0 auto 15px;
+}
+
+.header-nav .phone__block {
+	float: none;
+	text-align: center;
+	width: 200px;
+    margin: 0 auto;
+	padding: 10px 0 0 0;
+}
+.header-nav .phone__block .phone__block-number {
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+}
+.header-nav .phone__block .phone__block-number span {
+	font-size: 0.9em;
+	margin-right: 5px;
+}
+.header-nav .nav_menu {
+	overflow: hidden;
+}
+.header-nav .nav__block {
+	display: inline-block;
+	text-align: center;
+	width: 100%;
+	padding: 10px 0px 0px 0px;
+}
+.header-nav .nav_menu >li {
+	margin: 0 0 10px;
+	display: block;
+	font-size: 14px;
+	text-align: center;
+}
+.header-nav .nav_menu >li a {
+	color: #fff;	
+	line-height: 1;
+	display: block;
+	padding-bottom: 5px;
+}
+.header-nav .nav_menu >li a:focus {
+	text-decoration: none;
+}
+
+a:visited,
+a:active,
+a:focus {
+	color: #84bf76;
+	text-decoration: none !important;
+}
+* {
+	outline: none;
+}
+
+.header-nav .nav_menu >li a:hover {
+	text-decoration: none;
+	border-bottom: none;
+}
+.header-nav .nav_menu >li a.active {
+	border-bottom: none;
+}
+.header-nav .registr-block {
+	 width: 100%;
+    margin: 0 auto;
+    display: block;
+}
+.header-nav .registr__block {
+	border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 3px;
+    display: block;
+    float: none; 
+    overflow: hidden;
+    padding: 7px 15px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+    margin: 0 auto;
+    margin: 10px auto;
+    width: 180px
+}
+.header-nav .registr__block:hover {
+	background-color: #84bf76;
+	border-color: #84bf76;
+}
+.header-nav .registr__block ul {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+.header-nav .registr__block ul li {
+	float: left;
+}
+.header-nav .registr__block ul li a,
+.header-nav .registr__block ul li span  {
+	color: #fff;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+.header-nav .registr__block ul li a:hover {
+	text-decoration: none;
+}
+.header-nav .registr__block ul li span {
+	display: block;
+	padding: 2px 5px 0;
+}
+#menu__burger {
+	display: inline-block;
+	color: #fff;
+	text-transform: uppercase;
+	font-weight: bold;
+	background: #84bf76;
+	border-radius: 3px;
+	padding: 8px 20px; 
+	margin-bottom: 15px;
+	cursor: pointer;
+}
+.nav_menu {
+	display: none;
+}
+
+}
+.fixed{
+background: #3f3e3e;	
+}
+.center-block {
+	display: block;
+	width: 400px;
+	margin: 0 auto;
+}
 /* Middle
 -----------------------------------------------------------------------------*/
+.content-inner {
+	display: block;
+	margin-top: 20px;
+}
+
 .content .white__block {
 	background: #fff;
-	padding: 60px 0;
+	padding: 80px 0;
 }
 
 .hows__banner {
@@ -484,16 +850,11 @@ a:focus {
 	border-color: #b7beb5 !important;
 	height: 46px !important;
 }
-
-::-webkit-input-placeholder {text-transform: uppercase; font-size: 12px;}
-::-moz-placeholder          {text-transform: uppercase; font-size: 12px;}/* Firefox 19+ */
-:-moz-placeholder           {text-transform: uppercase; font-size: 12px;}/* Firefox 18- */
-:-ms-input-placeholder      {text-transform: uppercase; font-size: 12px;}
-
 .contact__form input {
 	margin-top: 15px;
 	color: #000;
-	font-size: 14px;
+	text-transform: uppercase;
+	font-size: 12px;
 }
 .contact__form input:focus {
 	background: #f5f3f1;
@@ -664,6 +1025,7 @@ a:focus {
 	margin-left: 20px;
 }
 .error__block p a:hover {
+	background-color: #378a5f;
 	text-decoration: none;
 }
 .have__quest {
@@ -685,7 +1047,7 @@ a:focus {
 }
 .login__inside {
 	max-width: 460px;
-	margin: 85px auto 0;
+	margin: 15% auto 0;
 	background: #fff;
 	padding: 30px;
 	border-radius: 5px;
@@ -900,17 +1262,6 @@ a:focus {
 .contacts .glyphicon {
 	margin-right: 12px;
 }
-#menu__burger {
-	display: none;
-	color: #fff;
-	text-transform: uppercase;
-	font-weight: bold;
-	background: #84bf76;
-	border-radius: 3px;
-	padding: 8px 20px; 
-	margin-bottom: 15px;
-	cursor: pointer;
-}
 
 .logo__block_outside img {
   filter: grayscale(100%);
@@ -929,4 +1280,125 @@ a:focus {
   -ms-filter: grayscale(0%);
   -o-filter: grayscale(0%);
 }
+
+.header_nav {
+	background-size: cover;
+	padding-top: 20px;
+	padding-bottom: 10px;
+	position: relative;
+	z-index: 1000;
+}
+.header_nav .logo__block-icon {
+	background: url(../images/logo-rut.png) no-repeat;	
+	background-size: 180px 69px;
+	display: block;
+	width: 180px;
+	height: 34px;
+}
+.header_nav .logo__block-icon:hover {
+	background-position: 0 -34px;
+}
+.header_nav .logo__block {
+	float: left;
+	margin: 0 90px 0 0;
+}
+.header_nav .phone__block {
+	float: left;
+	padding: 10px 0 0 0;
+}
+.header_nav .phone__block .phone__block-number {
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+}
+.header_nav .phone__block .phone__block-number span {
+	font-size: 0.9em;
+	margin-right: 5px;
+}
+.header_nav .nav_menu {
+	overflow: hidden;
+}
+.header_nav .registr__block {
+	float: right;
+}
+.header_nav .nav__block {
+	float: right;
+	padding: 10px 35px 0 0;
+}
+.header_nav .nav_menu >li {
+	display: inline-block;
+	font-size: 12px;
+	text-transform: uppercase;
+	font-weight: bold;
+	margin: 0 15px;
+}
+.header_nav .nav_menu >li a {
+	color: #fff;	
+	line-height: 1;
+	display: block;
+	padding-bottom: 5px;
+}
+.header_nav .nav_menu >li a:focus {
+	text-decoration: none;
+}
+
+.header_nav .nav_menu >li a:hover {
+	text-decoration: none;
+	border-bottom: 1px solid #fff;
+}
+.header_nav .nav_menu >li a.active {
+	border-bottom: 1px solid #fff;
+}
+.header_nav .registr__block {
+	border: 2px solid rgba(255,255,255,0.2);
+	border-radius: 3px;
+	display: inline-block;
+	float: right;
+	overflow: hidden;
+	padding: 7px 15px;
+	cursor: pointer;
+	transition: 0.3s;
+}
+.header_nav .registr__block:hover {
+	background-color: #84bf76;
+	border-color: #84bf76;
+}
+.header_nav .registr__block ul {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+.header_nav .registr__block ul li {
+	float: left;
+}
+.header_nav .registr__block ul li a,
+.header_nav .registr__block ul li span  {
+	color: #fff;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+.header_nav .registr__block ul li a:hover {
+	text-decoration: none;
+}
+.header_nav .registr__block ul li span {
+	display: block;
+	padding: 2px 5px 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

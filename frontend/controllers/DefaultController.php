@@ -32,8 +32,8 @@ class DefaultController extends Controller {
                 $this->layout = 'main-client';
                 //проверка, имеет ли кабак поставщиков, если нет, то направляем на страницу добавления поставщиков
                 $suppliers = RelationSuppRest::findOne(['rest_org_id' => $organization->id]);
-                $isTargetPage = ($this->id == 'client') && ($this->action->id == 'suppliers');
-                if (!isset($suppliers) && !$isTargetPage) {
+                $isIndex = ($this->id == 'client') && ($this->action->id == 'index');
+                if (!isset($suppliers) && $isIndex) {
                     return $this->redirect(['client/suppliers']);
                 }
                 break;
@@ -41,8 +41,8 @@ class DefaultController extends Controller {
                 $this->layout = 'main-vendor';
                 //проверка, имеет ли крестьянин базовый каталог, если нет, то направляем создавать
                 $baseCatalogs = CatalogBaseGoods::findOne(['supp_org_id' => $organization->id]);
-                $isTargetPage = ($this->id == 'vendor') && ($this->action->id == 'catalogs');
-                if (!isset($suppliers) && !$isTargetPage) {
+                $isIndex = ($this->id == 'vendor') && ($this->action->id == 'index');
+                if (!isset($suppliers) && $isIndex) {
                     return $this->redirect(['vendor/catalogs']);
                 }
                 break;

@@ -6,6 +6,7 @@ use yii\widgets\Pjax;
 use common\models\Order;
 use common\models\Organization;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 $quantityEditable = (in_array($order->status, [
     Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, 
@@ -15,6 +16,8 @@ $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array
     Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, 
     Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 
+$urlButtons = Url::to(['/order/ajax-refresh-buttons']);
+$urlOrderAction = Url::to(['/order/ajax-order-action']);
 $js = <<<JS
 
     socket.on('order$order->id', function (data) {
@@ -22,6 +25,15 @@ $js = <<<JS
         var message = JSON.parse(data);
 
         $( "#notifications" ).prepend( message.body );
+        
+        if (message.isSystem) {
+            $.post(
+                    "$urlButtons",
+                    {"order_id": $order->id}
+                ).done(function(result) {
+                    $('#actionButtons').html(result);
+                });
+        }
 
     });
         
@@ -40,6 +52,15 @@ $('#chat-form').submit(function() {
 
      return false;
 });
+        
+$('#actionButtons').on('click', '.btnOrderAction', function() { 
+        $.post(
+                "$urlOrderAction",
+                    {"action": $(this).data("action"), "order_id": $order->id}
+                ).done(function(result) {
+                    $('#actionButtons').html(result);
+                });
+    });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 

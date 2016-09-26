@@ -275,14 +275,30 @@ class OrderController extends DefaultController {
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             $posted = current($_POST['OrderContent']);
             $post = ['OrderContent' => $posted];
-            if ($model->load($post) && in_array($order->status, [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR])) {
+            $allowedStatuses = [
+                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                Order::STATUS_PROCESSING
+            ];
+            if ($model->load($post) && in_array($order->status, $allowedStatuses)) {
                 $quantityChanged = isset($posted['quantity']);
+                if (!$quantityChanged && ($order->status == Order::STATUS_PROCESSING)) {
+                    return ['output' => '', 'message' => ''];
+                }
                 $value = ($quantityChanged) ? $model->quantity : $model->price;
                 $model->save();
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
-                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    if ($quantityChanged) {
+                        $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
+                    }
                 } else {
-                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                    if ($quantityChanged) {
+                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
+                    } else {
+                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
+                    }
                 }
                 $order->save();
                 return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('order', 'organizationType'))];
@@ -298,11 +314,37 @@ class OrderController extends DefaultController {
         return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
     }
 
-    public function actionAjaxOrderAction($id, $action) {
-        $organizationType = $this->currentUser->organization->type_id;
-        return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
+    public function actionAjaxOrderAction() {
+        if (Yii::$app->request->post()) {
+            $user_id = $this->currentUser->id;
+            $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
+            $organizationType = $this->currentUser->organization->type_id;
+            switch (Yii::$app->request->post('action')) {
+                case 'cancel':
+                    $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
+                    $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? 'Клиент' : 'Поставщик';
+                    $systemMessage = $initiator . ' отменил заказ!';
+                    break;
+                case 'confirm':
+                    if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
+                        $order->status = Order::STATUS_PROCESSING;
+                        $systemMessage = 'Клиент подтвердил заказ!';
+                    } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
+                        $systemMessage = 'Поставщик подтвердил заказ!';
+                        $order->status = Order::STATUS_PROCESSING;
+                    } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                        $systemMessage = 'Клиент получил заказ!';
+                        $order->status = Order::STATUS_DONE;
+                    }
+                    break;
+            }
+            if ($order->save()) {
+                $this->sendSystemMessage($user_id, $order->id, $systemMessage);
+                return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
+            }
+        }
     }
-    
+
     public function actionSendMessage() {
         $user = $this->currentUser;
         if (Yii::$app->request->post()) {
@@ -314,13 +356,38 @@ class OrderController extends DefaultController {
             $newMessage->sent_by_id = $user->id;
             $newMessage->message = $message;
             $newMessage->save();
-            
+
             $body = $this->renderPartial('_chat-message', ['name' => $name, 'message' => $newMessage->message, 'time' => $newMessage->created_at, 'isSystem' => 0]);
-            
+
             return Yii::$app->redis->executeCommand('PUBLISH', [
                         'channel' => 'chat',
                         'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
             ]);
         }
     }
+
+    public function actionAjaxRefreshButtons() {
+        if (Yii::$app->request->post()) {
+            $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
+            $organizationType = $this->currentUser->organization->type_id;
+            return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
+        }
+    }
+
+    private function sendSystemMessage($user_id, $order_id, $message) {
+        $channel = 'order' . $order_id;
+        $newMessage = new OrderChat();
+        $newMessage->order_id = $order_id;
+        $newMessage->message = $message;
+        $newMessage->is_system = 1;
+        $newMessage->sent_by_id = $user_id;
+        $newMessage->save();
+        $body = $this->renderPartial('_chat-message', ['name' => '', 'message' => $newMessage->message, 'time' => $newMessage->created_at, 'isSystem' => 1]);
+
+        return Yii::$app->redis->executeCommand('PUBLISH', [
+                    'channel' => 'chat',
+                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
+        ]);
+    }
+
 }

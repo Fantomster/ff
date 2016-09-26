@@ -15,7 +15,7 @@ $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margi
 $this->title = 'Добавить продукты';
 ?>
 
-<?php Pjax::begin(['id' => 'pjax-container'])?>
+
 <div class="panel-body">
     <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
 </div>
@@ -27,6 +27,7 @@ $this->title = 'Добавить продукты';
     <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
 </ul>
 </div>
+<?php Pjax::begin(['id' => 'pjax-container'])?>
 <?php 
 $gridColumnsBaseCatalog = [
     [
@@ -38,7 +39,7 @@ $gridColumnsBaseCatalog = [
     'value'=>'product',
     ],
     [
-    'label'=>'кол-во',
+    'label'=>'Кратность',
     'value'=>'units',
     ],
     [
@@ -56,12 +57,12 @@ $gridColumnsBaseCatalog = [
                 }
     ],        
     [
-    'label'=>'Статус',
+    'label'=>'Наличие',
     'format' => 'raw',
     'contentOptions' => ['style' => 'width:50px;'],    
     'value'=>function ($data) {$data->status==common\models\CatalogBaseGoods::STATUS_OFF?
-            $product_status='<i class="fa fa-times" style="color:red"  aria-hidden="true"></i>':
-            $product_status='<i class="fa fa-check" style="color:green" aria-hidden="true"></i>';
+            $product_status='<i class="fa fa-times"   aria-hidden="true"></i>':
+            $product_status='<i class="fa fa-check"  aria-hidden="true"></i>';
             return $product_status;
         },
     ],
@@ -108,6 +109,7 @@ $gridColumnsBaseCatalog = [
 ]);
 ?>
 </div>
+<?php  Pjax::end(); ?>
 <?php
 $this->registerJs('
 /** 
@@ -145,4 +147,3 @@ $.ajax({
 });
 ');
 ?>
-<?php  Pjax::end(); ?>

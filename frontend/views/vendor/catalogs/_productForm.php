@@ -27,8 +27,8 @@ $form = ActiveForm::begin([
     <?= $form->field($catalogGoods, 'discount_fixed') ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Отмена</a>
-    <?= Html::button('Сохранить', ['class' => 'btn btn-primary edit']) ?>
+    <a href="#" class="btn btn-default" data-dismiss="modal">Отмена</a>
+    <?= Html::button('Сохранить', ['class' => 'btn btn-success edit']) ?>
 </div>
 <?php ActiveForm::end(); ?>
 <?php

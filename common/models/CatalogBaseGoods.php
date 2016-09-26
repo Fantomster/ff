@@ -13,7 +13,7 @@ use yii\data\ActiveDataProvider;
  * @property integer $category_id
  * @property string $article
  * @property string $product
- * @property string $units
+ * @property integer $units
  * @property integer $price
  * @property integer $status
  * @property integer $market_place
@@ -45,11 +45,11 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['cat_id'], 'required'],
+            [['cat_id','article','price','product'], 'required'],
             [['cat_id', 'category_id', 'status', 'market_place', 'deleted'], 'integer'],
             [['article'], 'string', 'max' => 50],
             [['product'], 'string', 'max' => 255],
-            [['units'], 'string', 'max' => 15],
+            [['units'], 'number'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
                 /* [['price'],'filter','filter'=>function ($value) {
                   $price = $value/100;
@@ -68,7 +68,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'category_id' => 'Категория',
             'article' => 'Артикул',
             'product' => 'Продукт',
-            'units' => 'Units',
+            'units' => 'Кратность',
             'price' => 'Цена (руб.)',
             'status' => 'Статус',
             'market_place' => 'Market_place',
@@ -77,14 +77,15 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         ];
     }
 
-    public function afterSave($insert, $changedAttributes) {
-        if (parent::beforeSave($insert)) {
+    public function beforeSave($insert)
+    {
+    if (parent::beforeSave($insert)) {
             $this->price = str_replace(",", ".", $this->price);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
+    
 
     /* public function beforeSave($insert)
       {

@@ -1,7 +1,6 @@
 <?php
 use kartik\grid\GridView;
 use yii\helpers\Html;
-use dosamigos\switchinput\SwitchBox;
 use kartik\export\ExportMenu;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
@@ -12,6 +11,7 @@ use yii\web\View;
 use common\models\Category;
 use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
+//use kop\y2sp\ScrollPager;
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 ?>
 <?php 
@@ -56,7 +56,7 @@ $exportColumns = [
 <div class="panel-body">
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#tabCatalog">Редактирование</a></li>
-        <li><a data-toggle="tab" href="#tabClients">Назначить</a></li>
+        <li><a data-toggle="tab" href="#tabClients">Назначить ресторану</a></li>
     </ul>
 </div>
     <div class="tab-content">
@@ -75,18 +75,19 @@ $exportColumns = [
                         'href' => Url::to(['/vendor/ajax-create-product','id' => Yii::$app->request->get('id')]),
                     ],
                 ])
-                ?><div class="btn-group m-t-xs m-r pull-right" placement="left" style="margin-right: 10px">
+                ?><div class="btn-group pull-right" placement="left" style="margin-right: 10px">
                     <?= ExportMenu::widget([
                                 'dataProvider' => $dataProvider,
                                 'columns' => $exportColumns,
                                 'fontAwesome' => true,
-                                'filename'=>'Catalog'.date('Y-m-d H:i:s'),
+                                'filename'=>'Главный каталог - '.date('Y-m-d'),
                                 'encoding'=>'UTF-8',
                                 'target' => ExportMenu::TARGET_SELF,
                                 'showConfirmAlert'=>false,
+                                'showColumnSelector'=>false,
                                 'columnSelectorOptions'=>[
                                     'label' => '',
-                                    'class' => 'btn btn-default '
+                                    'class' => 'btn btn-danger '
                                     ],
                                 'dropdownOptions' => [
                                     'label' => 'Скачать каталог',
@@ -140,7 +141,7 @@ $exportColumns = [
                                 ]); 
                             ?>
                 </div>
-                    <div class="btn-group m-t-xs m-r pull-right" placement="left" style="margin-right: 10px">
+                    <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
                         <?=
                             Modal::widget([
                                 'id' => 'importToXls',
@@ -156,25 +157,33 @@ $exportColumns = [
                                 ],
                             ])
                         ?>
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="caret"></span>
-                            <span class="sr-only">Toggle Dropdown</span>
-                        </button>
-                        <ul class="dropdown-menu m-t-sm">
-                            <li>
-                                <a href="upload/template.xlsx" class="ng-binding">
-                                    <i class="fa fa-list-alt m-r-xs"></i> Скачать шаблон
-                                </a>
-                            </li>
-                        </ul>
+                     <?= Html::a(
+                        '<i class="fa fa-list-alt"></i> Скачать шаблон',
+                        Url::to('@web/upload/template.xlsx'),
+                        ['class' => 'btn btn-default pull-right','style' => ['margin-left'=>'10px;']]
+                    ) ?>   
                     </div>
-                    <button style="margin-right: 10px; margin-left: 10px;" class="btn btn-default m-t-xs m-r pull-right ng-binding" ng-click="tour.restart(true)"><i class="fa fa-question-circle"></i> Инструкция</button>
+                    <?=
+        Modal::widget([
+            'id' => 'info',
+            'clientOptions' => false,
+            'size'=>'modal-md',
+            'toggleButton' => [
+                'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
+                'tag' => 'a',
+                'data-target' => '#info',
+                'class' => 'btn btn-default pull-right',
+                'href' => Url::to(['#']),
+                'style' => 'margin-right:10px;',
+            ],
+        ])
+    ?>
                 </div>
             </div>
             
 <?php 
 $gridColumnsBaseCatalog = [
-                    [
+                    /*[
                 'label' => '',  
                 'format' => 'raw',  
                 'contentOptions' => ['style' => 'width:50px;'],
@@ -192,34 +201,39 @@ $gridColumnsBaseCatalog = [
                         ]);
                     return ($images);
                     }
-                ],
+                ],*/
 		[
 		'label'=>'Артикул',
 		'value'=>'article',
+                'contentOptions' => ['style' => 'vertical-align:middle'],
 		],
 		[
 		'label'=>'Продукт',
 		'value'=>'product',
+                'contentOptions' => ['style' => 'vertical-align:middle;'],
 		],
 		[
-		'label'=>'кол-во',
+		'label'=>'Кратность',
 		'value'=>'units',
+                'contentOptions' => ['style' => 'vertical-align:middle'],    
 		],
                 [
 		'label'=>'Категория',
                 'value'=>function ($data) {
                 $data->category_id==0 ? $category_name='':$category_name=Category::get_value($data->category_id)->name;
                 return $category_name;
-                }
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle'],
 		],
 		[
 		'label'=>'Цена',
                 'value'=>function ($data) {return $data->price;},
+                'contentOptions' => ['style' => 'vertical-align:middle'],
 		],
         [
-            'attribute' => 'статус',
+            'attribute' => 'Наличие',
             'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],
+            'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
             'value' => function ($data) {
                 $link = CheckboxX::widget([
                     'name'=>'status_'.$data->id,
@@ -238,7 +252,7 @@ $gridColumnsBaseCatalog = [
             },
             
         ],
-        [
+        /*[
             'attribute' => 'MarketPlace',
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:100px;'],
@@ -259,20 +273,7 @@ $gridColumnsBaseCatalog = [
                 return $link;
             },
             
-        ],
-        [
-            'attribute' => '',
-            'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],
-            'value' => function ($data) {
-                $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
-                    'class'=>'btn btn-danger del-product',
-                    'data'=>['id'=>$data->id],
-                ]);
-                return $link;
-            },
-            
-        ],
+        ],*/
         [
             'attribute' => '',
             'format' => 'raw',
@@ -284,8 +285,21 @@ $gridColumnsBaseCatalog = [
                     'toggle' => 'modal',
                     'backdrop' => 'static',
                               ],
-                    'class'=>'btn btn-default'
+                    'class'=>'btn btn-warning'
                     
+                ]);
+                return $link;
+            },
+            
+        ],
+        [
+            'attribute' => '',
+            'format' => 'raw',
+            'contentOptions' => ['style' => 'width:50px;'],
+            'value' => function ($data) {
+                $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
+                    'class'=>'btn btn-danger del-product',
+                    'data'=>['id'=>$data->id],
                 ]);
                 return $link;
             },
@@ -317,9 +331,6 @@ $form = ActiveForm::begin([
         'export' => [
             'fontAwesome' => true,
         ],
-        'condensed'=>true,
-        //'floatHeader'=>true, //зафиксировать заголовок
-        'bordered'=>true,
 ]);
 ?>   
 </div>
@@ -426,7 +437,6 @@ $('input[type=checkbox]').live('change', function(e) {
 	        cache: false,
 	        success: function(response) {
 		        console.log(response)
-		        //$.pjax.reload({container: "#products-list"});
 		    },
 		    failure: function(errMsg) {
 	            console.log(errMsg);
@@ -485,7 +495,21 @@ $("#add-product").on("click", ".edit", function() {
     });
 $(".del-product").live("click", function(e){
     var id = $(this).attr('data-id');
-	bootbox.confirm("<h3>Удалить этот продукт?</h3>", function(result) {
+	bootbox.confirm({
+            title: "Удалить этот продукт?",
+            message: "Продукт будет удален из всех каталогов", 
+            buttons: {
+                confirm: {
+                    label: 'Удалить',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
+            },
+            className: "danger-fk",
+            callback: function(result) {
 		if(result){
 		$.ajax({
 	        url: "index.php?r=vendor/ajax-delete-product",
@@ -506,7 +530,7 @@ $(".del-product").live("click", function(e){
 		}else{
 		console.log('cancel');	
 		}
-	});      
+	}});      
 })      
 JS;
 $this->registerJs($customJs, View::POS_READY);

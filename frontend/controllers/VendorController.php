@@ -185,22 +185,41 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         
         $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
-        
         if ($arrCatalog === Array()){
-            $result = ['success'=>false,'message'=>'err: Каталог пустой!'];  
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Нельзя сохранить пустой каталог!']];  
             return $result;   
             exit; 
             }
         //проверка на корректность введенных данных (цена)
         $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
         foreach ( $arrCatalog as $arrCatalogs ) {
-            $product = trim($arrCatalogs['dataItem']['product']);
-            if(empty($product)){
-            $result = ['success'=>false,'message'=>'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];  
+            $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
+            $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
+            $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+            $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+            $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
+            if(empty($article)){
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не указан <strong>Артикул</strong>']];             
             return $result;   
             exit;    
             }
-            $price = $arrCatalogs['dataItem']['price'];
+            if(empty($product)){
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не указан <strong>Продукт</strong>']];             
+            return $result;   
+            exit;    
+            }
+            if(empty($price)){
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не указана <strong>Цена</strong> продукта']];             
+            return $result;   
+            exit;
+            }
+            if(!empty($category_name)){
+                if(!Category::find()->where(['name' => $category_name])->exists()){
+                    $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Ошибка в поле <strong>Категория</strong>']];             
+                    return $result;   
+                    exit;
+                }
+            }
             $price = str_replace(',', '.', $price);
             if(substr($price, -3, 1) == '.')
             {
@@ -213,7 +232,12 @@ class VendorController extends DefaultController {
                 $price = str_replace('.', '', $price);
             }
             if (!preg_match($numberPattern,$price)) {
-            $result = ['success'=>false,'message'=>'Ошибка: <strong>[Цена]</strong> в неверном формате!'];  
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
+            return $result;   
+            exit;    
+            }
+            if (!empty($units) && !preg_match($numberPattern,$units)) {
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не верный формат <strong>Кратность</strong><br><small>только число</small>']];
             return $result;   
             exit;    
             }
@@ -252,7 +276,7 @@ class VendorController extends DefaultController {
 
             
             }
-        $result = ['success'=>true,'message'=>'Каталог успешно создан!'];  
+        $result = ['success'=>true,'alert'=>['class'=>'success-fk','title'=>'Мои поздравления!','body'=>'Вы успешно создали свой первый каталог!']];  
         return $result;   
         exit;
         }
@@ -498,9 +522,9 @@ class VendorController extends DefaultController {
 	    $catalogBaseGoods = new CatalogBaseGoods();
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
-                
+                $catalogBaseGoods->status = 1;
                 if ($catalogBaseGoods->validate()) {
-		
+                    
                     $catalogBaseGoods->save();
 					
                     $message = 'Продукт добавлен!';

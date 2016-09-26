@@ -15,7 +15,7 @@ $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margi
 $this->title = 'Редактировать продукты';
 ?>
 
-<?php Pjax::begin(['id' => 'pjax-container']); ?>
+
 <div class="panel-body">
     <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
 </div>
@@ -27,6 +27,7 @@ $this->title = 'Редактировать продукты';
         <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
     </ul>
 </div>
+<?php Pjax::begin(['id' => 'pjax-container']); ?>
 <?php 
 $gridColumnsCatalog = [
     [
@@ -82,7 +83,7 @@ $gridColumnsCatalog = [
                 }
             }
             $price = number_format((float)$price,2, '.', '');
-            return '<strong>'.$price.' руб.</strong>';
+            return '<span class="text-success-fk">'.$price.' руб.</span>';
         },
     ],
     [
@@ -90,13 +91,13 @@ $gridColumnsCatalog = [
     'format' => 'raw',
     'contentOptions' => ['style' => 'width:50px;'],
     'value' => function ($data) {
-        $link = Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['/vendor/step3-update-product', 'id' => $data->id], [
+        $link = Html::a('<i class="fa fa-pencil"></i>', ['/vendor/step3-update-product', 'id' => $data->id], [
             'data' => [
             'target' => '#add-product',
             'toggle' => 'modal',
             'backdrop' => 'static',
                       ],
-            'class'=>'btn btn-default'
+            'class'=>'btn btn-warning'
 
         ]);
         return $link;
@@ -134,7 +135,7 @@ $gridColumnsCatalog = [
 'clientOptions' => false,
 ])
 ?>
-
+<?php Pjax::end(); ?>
 <?php
 $this->registerJs('
 /** 
@@ -185,4 +186,3 @@ $("body").on("hidden.bs.modal", "#add-product,#discount-all-product", function()
 
 ');
 ?>
-<?php Pjax::end(); ?>

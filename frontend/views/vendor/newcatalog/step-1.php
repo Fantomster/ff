@@ -15,7 +15,7 @@ $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margi
 $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 'Редактирование каталога '
 ?>
 
-<?php Pjax::begin(['id' => 'pjax-container'])?>    
+  
 <div class="panel-body">
       
             <h3 class="font-light">
@@ -44,6 +44,7 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
 </ul>
 </div>
 </div>
+<?php Pjax::begin(['id' => 'pjax-container'])?>  
 <?php $form = ActiveForm::begin([
     'id' => 'newCatalogForm'
     ]);
@@ -59,6 +60,7 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
 
 
 <?php $form = ActiveForm::end();?>
+<?php Pjax::end(); ?>
 <?php
 if($catalog->isNewRecord){$route = 'index.php?r=vendor/step-1';} else {$route = 'index.php?r=vendor/step-1-update&id='.$cat_id;}
 $this->registerJs('
@@ -90,9 +92,10 @@ $.ajax({
     success: function(response) {
             
             if(response.success){
-                bootbox.alert("<h3>Сохранено!</h3>");
-                var url = "' . Url::toRoute(['vendor/step-1-update']) . '"+"&id="+response.cat_id;
-                $.pjax({url: url, container: "#pjax-container"});
+                //bootbox.alert("<h3>Сохранено!</h3>");
+                var url = "' . Url::toRoute(['vendor/step-2']) . '"+"&id="+response.cat_id;
+                $(location).attr("href",url);
+                //$.pjax({url: url, container: "#pjax-container"});
                 //$("#loader-show").hideLoading();
                 }else{
             if(response.type==1){
@@ -110,4 +113,3 @@ $.ajax({
 });        
 ');
 ?>
-<?php Pjax::end(); ?>

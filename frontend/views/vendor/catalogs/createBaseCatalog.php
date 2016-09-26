@@ -22,11 +22,8 @@ use common\models\Category;
  * 
  */
 $this->registerCss('
-.Handsontable_table{position: relative;width: 100%;height:500px;overflow: hidden;}
-.modal-title {color: #69b3e3;text-align: center;font-size: 16px;font-weight: 900;}
-.font-light {font-weight: 300;}
+.Handsontable_table{position: relative;width: 100%;overflow: hidden;}
 .hide{dosplay:none}
-.modal-footer {border-top:1px solid #ccc;background-color: #ecf0f5}
 ');
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
 $this->registerCssFile('modules/handsontable/dist/bootstrap.css');
@@ -46,7 +43,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
     <?= Html::a(
         'Сохранить',
         ['#'],
-        ['class' => 'btn btn-success pull-right save','style' => ['margin-left'=>'5px']]
+        ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px'],'id'=>'save', 'name'=>'save']
     ) ?>
     <?=
         Modal::widget([
@@ -88,71 +85,44 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
 <div class="handsontable" id="CreateCatalog"></div> 
 </div>
 <?php
-$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
+//$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
 
-
+$catgrs = json_encode(\yii\helpers\ArrayHelper::getColumn(common\models\Category::find()->all(), 'name'), JSON_UNESCAPED_UNICODE);
 
 
 $customJs = <<< JS
-var array = $categorys;
-var datas = { "programs": [array] };
+var category = $catgrs;
+//var datas = { "programs": [array] };
 var arr = [];
-$.each(datas.programs[0], function(key,val) {
+/*$.each(datas.programs[0], function(key,val) {
     arr.push({'id': key, 'label' : val});
-});
-var data = [
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-];
+});*/
+var data = [];
+        
+for ( var i = 0; i < 60; i++ ) {
+    data.push({article: '', product: '', units: '', price: '', category: ''});
+}
 var container = document.getElementById('CreateCatalog');
-var hot = new Handsontable(container, {
-  data: data,
+
+height = $('.content-wrapper').height() - $("#CreateCatalog").offset().top;
+$(window).resize(function(){
+        $("#CreateCatalog").height($('.content-wrapper').height() - $("#CreateCatalog").offset().top)
+});
+var save = document.getElementById('save'), hot;
+       
+hot = new Handsontable(container, {
+  data: JSON.parse(JSON.stringify(data)),
+  beforeChange: function () {
+      //console.log('beforeChange');
+  },
   colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Категория'],
   colWidths: [40, 180, 45, 45, 80],
   renderAllRows: true,
   columns: [
     {data: 'article'},
-    {data: 'product'},
+    {data: 'product', wordWrap:true},
     {
-        data: 'kolvo', 
+        data: 'units', 
         type: 'numeric',
     },
     {
@@ -161,7 +131,7 @@ var hot = new Handsontable(container, {
         format: '0.00',
         language: 'ru-RU'
     },
-    {
+    /*{
         
         renderer: customDropdownRenderer,
         editor: "chosen",
@@ -169,14 +139,78 @@ var hot = new Handsontable(container, {
             multiple: false,
             data: arr
             }
-    },
+    },*/
+    {
+        data: 'category', 
+        type: 'dropdown',
+        source: category
+    },    
     ],
   className : 'Handsontable_table',
+  tableClassName: ['table-hover'],
   rowHeaders : true,
   stretchH : 'all',
   startRows: 1,
   autoWrapRow: true,
+  height: height,
   });
+Handsontable.Dom.addEvent(save, 'click', function() {
+  var dataTable = hot.getData(),i, item, dataItem, data=[]; 
+  var cleanedData = {};
+  var cols = ['article', 'product', 'units', 'price', 'category'];
+    $.each(dataTable, function( rowKey, object) {
+        if (!hot.isEmptyRow(rowKey)){
+            cleanedData[rowKey] = object;
+            dataItem = {};
+            for(i = 0; i < cols.length; i+=1) {
+              item = cleanedData[rowKey][i];
+                dataItem[cols[i]] = item;
+            }
+            data.push({dataItem});
+        }
+    });
+    $.ajax({
+          url: 'index.php?r=vendor/supplier-start-catalog-create',
+          type: 'POST',
+          dataType: "json",
+          data: $.param({'catalog':JSON.stringify(data)}),
+          cache: false,
+          success: function (response) {
+              if(response.success){ 
+                bootbox.dialog({
+                    message: response.alert.body,
+                    title: response.alert.title,
+                    buttons: {
+                        success: {
+                          label: "Приступить к работе",
+                          className: "btn-success btn-md",
+                          callback: function() {
+                            location.reload();    
+                          }
+                        },
+                    },
+                    className: response.alert.class
+                });
+              }else{
+                bootbox.dialog({
+                    message: response.alert.body,
+                    title: response.alert.title,
+                    buttons: {
+                        success: {
+                          label: "Окей!",
+                          className: "btn-success btn-md",
+                        },
+                    },
+                    className: response.alert.class
+                });
+              }
+          },
+          error: function(response) {
+          console.log(response.message);
+          }
+    });
+}) 
+/*
 function customDropdownRenderer(instance, td, row, col, prop, value, cellProperties) {
     var selectedId;
     var optionsList = cellProperties.chosenOptions.data;
@@ -192,60 +226,9 @@ function customDropdownRenderer(instance, td, row, col, prop, value, cellPropert
     value = value.join(", ");
 
     Handsontable.TextCell.renderer.apply(this, arguments);
-}
-$('.save').click(function(e){	
+}*/
+$('#save').click(function(e){	
 e.preventDefault();
-    var i, items, item, dataItem, data = [];
-    var cols = [ 'article', 'product', 'units', 'price', 'category'];
-    $('#CreateCatalog tr').each(function() {
-	  items = $(this).children('td');
-	  if(items.length === 0) {
-	    return;
-	  }
-	  dataItem = {};
-	  for(i = 0; i < cols.length; i+=1) {
-	    item = items.eq(i);
-	    if(item) {
-	      dataItem[cols[i]] = item.html();
-	    }
-	  }
-	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]] || dataItem[cols[3]] || dataItem[cols[4]]){
-	    data.push({dataItem});    
-	  }	    
-	});
-	var catalog = data;
-        //console.log(data);
-	catalog = JSON.stringify(catalog);
-	$.ajax({
-		  url: 'index.php?r=vendor/supplier-start-catalog-create',
-		  type: 'POST',
-		  dataType: "json",
-		  data: $.param({'catalog':catalog}),
-		  cache: false,
-		  success: function (response) {
-			  if(response.success){ 
-			  bootbox.dialog({
-			  message: response.message,
-			  title: "Уведомление",
-			  buttons: {
-			    success: {
-			      label: "Завершить",
-			      className: "btn-success",
-			      callback: function() {
-				  location.reload();    
-			      }
-			    },
-			  }
-			});
-		  }else{
-		 // bootboxDialogShow(response.message);
-		  console.log(response.message); 	  
-		  }
-	  },
-      error: function(response) {
-      console.log(response.message);
-      }
-    });
 });
 JS;
 $this->registerJs($customJs, View::POS_READY);

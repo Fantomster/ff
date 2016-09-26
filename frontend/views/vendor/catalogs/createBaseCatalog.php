@@ -86,9 +86,9 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
 </div>
 <?php
 //$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
-
-$catgrs = json_encode(\yii\helpers\ArrayHelper::getColumn(common\models\Category::find()->all(), 'name'), JSON_UNESCAPED_UNICODE);
-
+$catgrs = \yii\helpers\ArrayHelper::getColumn(common\models\Category::find()->all(), 'name');
+array_unshift($catgrs,"");
+$catgrs = json_encode($catgrs, JSON_UNESCAPED_UNICODE);
 
 $customJs = <<< JS
 var category = $catgrs;

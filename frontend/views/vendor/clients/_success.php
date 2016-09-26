@@ -4,6 +4,6 @@
     <?= $message ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Закрыть</a>
+    <a href="#" class="btn btn-success" data-dismiss="modal">Окей</a>
 </div>
 

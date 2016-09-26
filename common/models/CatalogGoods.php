@@ -30,7 +30,19 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     public static function tableName() {
         return 'catalog_goods';
     }
-
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => \yii\behaviors\TimestampBehavior::className(),
+                'attributes' => [
+                    \yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    \yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+                'value' => new \yii\db\Expression('NOW()'),
+            ],
+        ];
+    }
     /**
      * @inheritdoc
      */
@@ -71,7 +83,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
 
     public function search($params, $id) {
         $query = CatalogGoods::find()->where(['cat_id' => $id]);
-        //$query->andFilterWhere(['like', 'product', '']);
+        $query->andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->where(['supp_org_id' => 'supp_org_id','deleted' => 1])]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);

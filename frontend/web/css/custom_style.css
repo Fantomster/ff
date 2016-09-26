@@ -330,3 +330,10 @@ a {
 .text-success-fk {
   color: #378a5f;
 }
+.handsontable .htAutocompleteArrow {
+  color: #3f3e3e;
+  cursor: pointer;
+}
+.handsontable.listbox tr:hover {
+  background: #eee;
+}

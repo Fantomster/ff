@@ -1,7 +1,6 @@
 <?php
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
-use kartik\editable\Editable;
 use yii\helpers\Html;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
@@ -9,8 +8,8 @@ use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
-use dosamigos\switchinput\SwitchBox;
 use kartik\export\ExportMenu;
+use kartik\editable\Editable;
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 $this->title = 'Редактировать продукты';
 ?>
@@ -45,6 +44,21 @@ $gridColumnsCatalog = [
     return $price." руб.";
     },
     ],
+    /*[
+    'label'=>'Цена',
+    'format' => 'raw',
+    'value'=>function ($data) {
+    return Editable::widget([
+        'id'=>'price'.$data->id,
+        'name'=>'price', 
+        'asPopover' => false,
+        'value' => $data->price,
+        'size'=>'md',
+        'options' => ['style'=>'width:100px']
+    ]);
+    },
+    ],*/
+    
     [
     'label'=>'Скидка (руб)',
     'value'=>function ($data) {return $data->discount!=0?$data->discount." руб.":'0 руб.';},

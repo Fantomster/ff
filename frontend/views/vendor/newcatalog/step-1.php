@@ -99,7 +99,17 @@ $.ajax({
                 //$("#loader-show").hideLoading();
                 }else{
             if(response.type==1){
-            bootbox.alert("Назовите каталог!");
+            bootbox.dialog({
+                    message: response.alert.body,
+                    title: response.alert.title,
+                    buttons: {
+                        success: {
+                          label: "Окей",
+                          className: "btn-success btn-md",
+                        },
+                    },
+                    className: response.alert.class
+                });
             //$("#loader-show").hideLoading();
             }
             console.log(response);    

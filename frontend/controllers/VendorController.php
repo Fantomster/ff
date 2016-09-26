@@ -499,11 +499,13 @@ class VendorController extends DefaultController {
 
     public function actionAjaxUpdateProduct($id) {
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id'=>$id])->one(); 
+        $currentUser = User::findIdentity(Yii::$app->user->id);
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             
             if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/","",str_replace(',', '.', $catalogBaseGoods->price));
+                $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
                 if ($catalogBaseGoods->validate()) {
                     
                     $catalogBaseGoods->save();
@@ -520,11 +522,13 @@ class VendorController extends DefaultController {
     public function actionAjaxCreateProduct() {
         if (Yii::$app->request->isAjax) {
 	    $catalogBaseGoods = new CatalogBaseGoods();
+            $currentUser = User::findIdentity(Yii::$app->user->id);
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->status = 1;
+                
                 if ($catalogBaseGoods->validate()) {
-                    
+                $catalogBaseGoods->supp_org_id = $currentUser->organization_id;    
                     $catalogBaseGoods->save();
 					
                     $message = 'Продукт добавлен!';
@@ -628,8 +632,9 @@ class VendorController extends DefaultController {
                 if ($catalog->validate()) {
                     $catalog->save();
                     return (['success' => true, 'cat_id'=>$catalog->id]); 
-                }else{
-                 return (['success' => false,'type'=>1, 'Валидация не пройдена']);  
+                }else{ 
+                 $result = ['success'=>false,'type'=>1, 'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Укажите корректное  <strong>Имя</strong> каталога']];
+                 return $result;
                  exit;
                 }
             }else{
@@ -652,7 +657,8 @@ class VendorController extends DefaultController {
                         $catalog->save(); 
                         return (['success' => true, 'cat_id'=>$catalog->id]); 
                     }else{
-                        return (['success' => false,'type'=>1, 'Валидация не пройдена']);  
+                        $result = ['success'=>false,'type'=>1, 'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Укажите корректное  <strong>Имя</strong> каталога']];
+                        return $result;
                         exit;
                     }
                 }
@@ -737,7 +743,7 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-3',compact('searchModel', 'dataProvider','exportModel','exportProvider','cat_id'));
     }
     public function actionStep3UpdateProduct($id) {
-        $catalogGoods = CatalogGoods::find()->where(['id'=>$id])->one(); 
+        $catalogGoods = CatalogGoods::find()->where(['id'=>$id])->one();
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogGoods->load($post)) {

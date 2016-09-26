@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $content string */
 
 frontend\assets\MainAsset::register($this);
-$isIndex = ($this->context == 'site') && ($this->context->action->id == 'index');
+$isIndex = ($this->context->id === 'site') && ($this->context->action->id === 'index');
 if ($isIndex) {
     $js = <<<JS
 

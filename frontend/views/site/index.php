@@ -1,53 +1,107 @@
 <?php
-
 /* @var $this yii\web\View */
-
-$this->title = 'My Yii Application';
+use yii\helpers\Html;
+$this->title = 'F-keeper';
 ?>
-<div class="site-index">
-
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
-
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
-
-    <div class="body-content">
-
-        <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
+<header class="header" style="background-image: url(images/header-banner.jpg)">
+    <div class="inside__block">
+        <div class="site__title"> 
+            <h1>Автоматизация закупок<br/>между поставщиками и ресторанами</h1>
+            <h2>Никогда закупка не была проще, чем сейчас</h2>
+        </div>
+        <div class="buttons__block">
+            <?= Html::a('<span>для ресторанов</span>', ["/site/restaurant"], ['class' => 'for__restaurants']) ?>
+            <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
+            <div class="clear"></div>
+            <div class="watch_video">
+                <a href="#" data-toggle="modal" data-target="#myModal" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
 
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+            <div id="myModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="video__block">
+                        <iframe width="100%" height="500px" src="https://www.youtube.com/embed/xkScMQHqORk" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
-</div>
+    <a href="#bottom" class="show__bottom"></a>
+    <div class="overlay"></div>
+</header><!-- .header-->
+
+<main class="content">
+    <div id="bottom" class="white__block">
+        <div class="inside__block">
+            <div class="container-fluid">
+                <div class="col-md-5">
+                    <div class="how_its_work">
+                        <h3>как это работает</h3>
+                        <p>F-keeper это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. F-keeper, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.</p>
+                        <?= Html::a('Для ресторанов', ["/site/restaurant"]) ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
+                    </div>
+                </div>	
+                <div class="col-md-7">
+                    <img class="hows__banner" src="images/image-1.png" alt=""/>
+                </div>	
+            </div>
+        </div>
+    </div>
+
+    <div class="number__block">
+        <div class="inside__number-block">
+            <div class="container-fluid">
+                <div class="col-md-6 col-sm-6">
+                    <span class="number">420</span>
+                    <span class="plays__title">Ресторанов</span>	
+                </div>
+                <div class="col-md-6 col-sm-6">
+                    <div class="alig__right">
+                        <span class="number">200</span>
+                        <span class="plays__title">Поставщиков</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="logo__block_outside">
+        <span><img src="images/logo-1.png" alt=""/></span>
+        <span><img src="images/logo-2.png" alt=""/></span>
+        <span><img src="images/logo-3.png" alt=""/></span>
+        <span><img src="images/logo-4.png" alt=""/></span>
+    </div>
+
+    <div class="contact__block">
+
+        <h4>Автоматизируйте свой бизнес сейчас</h4>
+        <span>Вы в одном шаге, расскажите о себе</span>
+
+        <div class="contact__form">
+            <form role="form">
+                <div class="form-group">
+                    <select class="form-control" id="sel1">
+                        <option>Ресторан / поставщик</option>
+                        <option>Ресторан / поставщик</option>
+                        <option>Ресторан / поставщик</option>
+                        <option>Ресторан / поставщик</option>
+                    </select>
+                    <input type="text" class="form-control" id="email" placeholder="название организации">
+                    <input type="email" class="form-control" id="email" placeholder="Email">
+                    <input type="text" class="form-control" id="email" placeholder="Фио">
+                    <input type="password" class="form-control" id="email" placeholder="пароль">
+                </div>
+                <?=
+                Html::a('Зарегистрироваться', '#', [
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                    'class' => 'send__btn',
+                ])
+                ?>
+            </form>
+        </div>
+    </div>
+</main><!-- .content -->

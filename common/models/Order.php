@@ -22,6 +22,7 @@ use Yii;
  * @property User $createdBy
  * @property Organization $vendor
  * @property OrderContent[] $orderContent
+ * @property OrderChat[] $orderChat
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -128,5 +129,13 @@ class Order extends \yii\db\ActiveRecord
     public function getOrderContent()
     {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrderChat()
+    {
+        return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy(['created_at' => SORT_DESC]);
     }
 }

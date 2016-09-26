@@ -37,9 +37,8 @@ $this->title = Yii::t('user', 'Login');
                 'class' => 'send__btn',
             ])
             ?>
+            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
             <div class="regist">
-<!--                <a href="#">Зарегистрироваться</a>
-                <a href="#">Забыли пароль?</a>-->
             <?= Html::a(Yii::t("user", "Register"), ["/user/register"]) ?>
             <?= Html::a(Yii::t("user", "Forgot password") . "?", ["/user/forgot"]) ?>
             <?= Html::a(Yii::t("user", "Resend confirmation email"), ["/user/resend"]) ?>

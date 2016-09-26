@@ -38,6 +38,7 @@ $this->title = Yii::t('user', 'Resend');
                     'class' => 'send__btn',
                 ])
                 ?>
+            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
                 <?php ActiveForm::end(); ?>
 
             <?php endif; ?>

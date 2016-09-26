@@ -314,9 +314,11 @@ class OrderController extends DefaultController {
             $newMessage->message = $message;
             $newMessage->save();
             
+            $body = $this->renderPartial('_chat-message', ['name' => $name, 'message' => $newMessage->message, 'time' => $newMessage->created_at, 'isSystem' => 0]);
+            
             return Yii::$app->redis->executeCommand('PUBLISH', [
                         'channel' => 'chat',
-                        'message' => Json::encode(['name' => $name, 'message' => $newMessage->message, 'channel' => $channel, 'isSystem' => 0])
+                        'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
             ]);
         }
     }

@@ -21,7 +21,7 @@ $js = <<<JS
 
         var message = JSON.parse(data);
 
-        $( "#notifications" ).prepend( "<p><strong>" + message.name + "</strong>: " + message.message + "</p>" );
+        $( "#notifications" ).prepend( message.body );
 
     });
         
@@ -162,6 +162,11 @@ Html::submitButton('Send', [
 
 <?= Html::endForm() ?>
                 <div id="notifications" ></div>
+                <?php
+                foreach ($order->orderChat as $chat) {
+                    echo "<p><strong>" . $chat->sentBy->profile->full_name . "</strong>: " . $chat->message . "</p>";
+                }
+                ?>
                 </div>
                     
             </div>

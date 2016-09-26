@@ -30,7 +30,7 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
 ]) ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Отмена</a>
+    <a href="#" class="btn btn-default" data-dismiss="modal">Отмена</a>
     <?= Html::submitButton('Импорт',['class' => 'btn btn-success import']) ?>
 </div>
 <?php ActiveForm::end(); ?>

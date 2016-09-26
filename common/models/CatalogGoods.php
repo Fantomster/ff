@@ -45,7 +45,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
         return [
             [['cat_id', 'base_goods_id'], 'required'],
             [['cat_id', 'base_goods_id'], 'integer'],
-            [['price'], 'string', 'max' => 50],
+            [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],           
             [['note'], 'string', 'max' => 500],
             [['discount'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/', 'min' => 0],
             [['discount_percent'], 'number', 'min' => -100, 'max' => 100],

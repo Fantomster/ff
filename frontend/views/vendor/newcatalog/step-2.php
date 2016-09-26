@@ -39,7 +39,7 @@ $gridColumnsBaseCatalog = [
     'value'=>'product',
     ],
     [
-    'label'=>'кол-во',
+    'label'=>'Кратность',
     'value'=>'units',
     ],
     [
@@ -57,7 +57,7 @@ $gridColumnsBaseCatalog = [
                 }
     ],        
     [
-    'label'=>'Статус',
+    'label'=>'Наличие',
     'format' => 'raw',
     'contentOptions' => ['style' => 'width:50px;'],    
     'value'=>function ($data) {$data->status==common\models\CatalogBaseGoods::STATUS_OFF?

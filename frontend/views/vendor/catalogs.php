@@ -120,7 +120,21 @@ $(location).attr('href','index.php?r=vendor/catalogs')
 })
 $('.del').click(function (e){
 	var id = $(this).attr('id').replace('del_','');
-	bootbox.confirm("<h3>Удалить этот каталог?</h3><p class='small'>Все привязки каталога к клиенту тоже удаляться</p>", function(result) {
+	bootbox.confirm({
+            title: "Удалить каталог?",
+            message: "Все рестораны будут отвязаны от текущего каталога", 
+            buttons: {
+                confirm: {
+                    label: 'Удалить',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
+            },
+            className: "danger-fk",
+            callback: function(result) {
 		if(result){
 			$.ajax({
 	        url: "index.php?r=vendor/mycatalogdelcatalog",
@@ -140,7 +154,7 @@ $('.del').click(function (e){
 		}else{
 		console.log('cancel');	
 		}
-	});
+	}})
 });
 $('input[type=checkbox]').on('switchChange.bootstrapSwitch', function (event, state) {	
 var e,id,state
@@ -164,12 +178,25 @@ $(".clone-catalog").click(function(e) {
     e.preventDefault();
     elem = $(this)
     Url = $(this).attr('href')
-    bootbox.confirm("<h3>Создать дубликат каталога?</h3>", function(result) {
-        if(result)
-        {
+    bootbox.confirm({
+            title: "Создать дубликат?",
+            message: "Будет создана копия текущего каталога", 
+            buttons: {
+                confirm: {
+                    label: 'Создать',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
+            },
+            className: "success-fk",
+            callback: function(result) {
+		if(result){
            location.href = Url;
         }
-    })
+    }})
 });        
 JS;
 $this->registerJs($customJs, View::POS_READY);

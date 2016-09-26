@@ -19,7 +19,7 @@ use yii\web\View;
 <?= $form->field($importModel, 'importFile')->fileInput() ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Отмена</a>
+    <a href="#" class="btn btn-default" data-dismiss="modal">Отмена</a>
     <?= Html::submitButton('Импорт',['class' => 'btn btn-success import']) ?>
 </div>
 <?php ActiveForm::end(); ?>

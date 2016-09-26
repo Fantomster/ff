@@ -164,7 +164,11 @@ Html::submitButton('Send', [
                 <div id="notifications" ></div>
                 <?php
                 foreach ($order->orderChat as $chat) {
-                    echo "<p><strong>" . $chat->sentBy->profile->full_name . "</strong>: " . $chat->message . "</p>";
+                    echo $this->render('_chat-message', [
+                        'name' => $chat->sentBy->profile->full_name,
+                        'message' => $chat->message,
+                        'time' => $chat->created_at,
+                        'isSystem' => $chat->is_system]);
                 }
                 ?>
                 </div>

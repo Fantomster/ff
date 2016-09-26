@@ -1,1 +1,1 @@
-<?= "<p><strong>" + $name + "</strong>: " + $message + "</p>" ?>
+<?= "<p>[".Yii::t('app', '{0, time}', $time)."]<strong>" . $name . "</strong>: " . $message . "</p>" ?>

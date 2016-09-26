@@ -13,6 +13,7 @@ use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
 //use kop\y2sp\ScrollPager;
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
+kartik\checkbox\CheckboxXAsset::register($this);
 ?>
 <?php 
 $this->title = 'Основной каталог';

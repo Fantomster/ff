@@ -30,6 +30,10 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+        'formatter' => [
+            'datetimeFormat' => 'MM/dd/yyyy HH:mm',
+            'timeFormat' => 'HH:mm',
+        ],
     ],
     'params' => $params,
 ];

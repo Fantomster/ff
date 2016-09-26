@@ -276,7 +276,8 @@ class OrderController extends DefaultController {
             $posted = current($_POST['OrderContent']);
             $post = ['OrderContent' => $posted];
             if ($model->load($post) && in_array($order->status, [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR])) {
-                $value = (isset($posted['quantity'])) ? $model->quantity : $model->price;
+                $quantityChanged = isset($posted['quantity']);
+                $value = ($quantityChanged) ? $model->quantity : $model->price;
                 $model->save();
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;

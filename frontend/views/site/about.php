@@ -4,13 +4,35 @@
 
 use yii\helpers\Html;
 
-$this->title = 'About';
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = 'О компании';
 ?>
-<div class="site-about">
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>This is the About page. You may modify the following file to customize its content:</p>
-
-    <code><?= __FILE__ ?></code>
-</div>
+<main class="content content-inner ">
+			<div class="faq__inner">
+				<div class="container-fluid">
+					<div class="inside__faq">
+						<h2>О компании</h2>
+						<span class="faq__inder_title">Мы руководствуемся одной целью: обеспечить вас современными и технологичными инструментами.</span>
+					<!--	<p><b>Здравствуйте, наша компания работает на рынке информационных технологий около 10 лет. </b></p> -->
+						<p>Пришло время, когда работать без современной IT инфраструктуры, просто невозможно. Мир изменился, и это стало неотъемлемой частью бизнеса.<br/>
+						
+						 <br/>Мы молодая и амбициозная команда профессионалов. Наши ключевые ценности: <b>действовать и создавать</b>.<br/>
+						 <br/>
+						 В основу площадки f-keeper, был вложен наш 10 летний опыт работы по автоматизации бизнеса, продажам, и решению сложных бизнес задач.
+						 <br/>
+						 <br/>Цель, которую мы ставим перед собой, автоматизировать закупки во всех ресторанах, кафе, барах, России.<br/>
+						 <br/>Присоединяйтесь, мы будем рады видеть вас, в числе наших клиентов. Вы можете рассчитывать на нас.
+						 
+						 
+						 
+					</p> 
+					</div>
+				</div>
+			</div>
+			<div class="clear"></div>
+					
+				
+			</div>
+			<div class="error__block">
+				<p>Хотите работать у нас? <a href="#">hr@f-keeper.ru</a></p>
+			</div>
+		</main><!-- .content -->

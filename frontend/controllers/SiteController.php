@@ -102,4 +102,17 @@ class SiteController extends Controller {
     public function actionAbout() {
         return $this->render('about');
     }
+    
+    public function actionContacts() {
+        return $this->render('contacts');
+    }
+    public function actionFaq() {
+        return $this->render('faq');
+    }
+    public function actionRestaurant() {
+        return $this->render('restaurant');
+    }
+    public function actionSupplier() {
+        return $this->render('supplier');
+    }
 }

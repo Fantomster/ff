@@ -5,9 +5,7 @@ use yii\helpers\Html;
 /* @var $this \yii\web\View */
 /* @var $content string */
 
-frontend\assets\UserAsset::register($this);
-
-$directoryAsset = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed2010/adminlte/dist');
+frontend\assets\MainAsset::register($this);
 
 $js = <<<JS
 
@@ -30,6 +28,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
+        <link href="css/style.css" rel="stylesheet">
 <?php $this->head() ?>
         <!--[if lt IE 9]>
 	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>

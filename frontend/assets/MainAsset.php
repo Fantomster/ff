@@ -8,11 +8,11 @@ use yii\web\AssetBundle;
  *
  * @author sharaf
  */
-class UserAsset extends AssetBundle {
+class MainAsset extends AssetBundle {
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        'css/style.css',
+        //'css/style.css',
         'css/media.css', 
         'https://fonts.googleapis.com/css?family=Open+Sans:300,400'
     ];
@@ -20,5 +20,6 @@ class UserAsset extends AssetBundle {
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
         'yii\bootstrap\BootstrapThemeAsset',
+        'yii\bootstrap\BootstrapPluginAsset',
     ];
 }

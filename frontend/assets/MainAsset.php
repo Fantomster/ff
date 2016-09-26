@@ -20,5 +20,6 @@ class MainAsset extends AssetBundle {
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
         'yii\bootstrap\BootstrapThemeAsset',
+        'yii\bootstrap\BootstrapPluginAsset',
     ];
 }

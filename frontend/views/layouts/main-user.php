@@ -16,6 +16,9 @@ function heightDetect() {
 	$(window).resize(function() {
 		heightDetect();
 	});
+            $("#menu__burger").click(function () {
+                $(".nav_menu").slideToggle();
+            });
         
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);

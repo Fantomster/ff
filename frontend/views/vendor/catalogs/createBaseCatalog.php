@@ -131,15 +131,6 @@ hot = new Handsontable(container, {
         format: '0.00',
         language: 'ru-RU'
     },
-    /*{
-        
-        renderer: customDropdownRenderer,
-        editor: "chosen",
-        chosenOptions: {
-            multiple: false,
-            data: arr
-            }
-    },*/
     {
         data: 'category', 
         type: 'dropdown',
@@ -209,24 +200,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
           console.log(response.message);
           }
     });
-}) 
-/*
-function customDropdownRenderer(instance, td, row, col, prop, value, cellProperties) {
-    var selectedId;
-    var optionsList = cellProperties.chosenOptions.data;
-
-    var values = (value + "").split(",");
-    var value = [];
-    for (var index = 0; index < optionsList.length; index++) {
-        if (values.indexOf(optionsList[index].id + "") > -1) {
-            selectedId = optionsList[index].id;
-            value.push(optionsList[index].label);
-        }
-    }
-    value = value.join(", ");
-
-    Handsontable.TextCell.renderer.apply(this, arguments);
-}*/
+})
 $('#save').click(function(e){	
 e.preventDefault();
 });

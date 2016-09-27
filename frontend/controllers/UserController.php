@@ -122,7 +122,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // delete userToken and set success = true
             $userToken->delete();
             $success = true;
-            return $this->redirect('user/login');
+            return $this->redirect(['user/login']);
         }
 
         return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));

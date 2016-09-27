@@ -52,7 +52,14 @@ class CatalogGoods extends \yii\db\ActiveRecord {
 
         return $scenarios;
     }
-
+    public function beforeSave($insert)
+    {
+    if (parent::beforeSave($insert)) {
+            $this->price = str_replace(",", ".", $this->price);
+            return true;
+        }
+        return false;
+    }
     public function rules() {
         return [
             [['cat_id', 'base_goods_id'], 'required'],

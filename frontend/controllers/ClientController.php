@@ -306,19 +306,18 @@ class ClientController extends DefaultController {
                                         return $result;   
                                         exit;    
                                     }
-                                    $price = $arrCatalogs['dataItem']['price'];
                                     $price = str_replace(',', '.', $price);
-                                        if(substr($price, -3, 1) == '.')
-                                        {
+                                    if(substr($price, -3, 1) == '.')
+                                    {
                                         $price = explode('.', $price);
                                         $last = array_pop($price);
                                         $price = join($price, '').'.'.$last;
-                                        }
-                                        else
-                                        {
+                                    }
+                                    else
+                                    {
                                         $price = str_replace('.', '', $price);
-                                        }
-                                        if (!preg_match($numberPattern,$price)) {
+                                    }
+                                    if (!preg_match($numberPattern,$price)) {
                                         $result = ['success'=>false,'message'=>'Ошибка: <strong>[Цена]</strong> в неверном формате!'];  
                                         return $result;   
                                         exit;    
@@ -330,9 +329,9 @@ class ClientController extends DefaultController {
                                         }
                                     }
 				$email = 	$user->email;
-                                $fio = 		$profile->full_name;
-                                $org = 		$organization->name;
-                                $categorys = $relationCategory['category_id'];
+			    $fio = 		$profile->full_name;
+			    $org = 		$organization->name;
+			    $categorys = $relationCategory['category_id'];
 				
 			    if ($check['eventType']==1){return $check;}
 			    if ($check['eventType']==2){return $check;}

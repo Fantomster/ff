@@ -101,11 +101,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="registr-block">
                             <div class="registr__block">
-                                <ul>
-                                    <li><?= Html::a('вход', ["/user/login"]) ?></li>
-                                    <li><span>/</span></li>
-                                    <li><?= Html::a('регистрация', ["/user/register"]) ?></li>
-                                </ul>
+                                <?= Html::a('вход / регистрация', ["/user/login"]) ?>
                             </div>
                         </div>
                         <div class="nav__block">

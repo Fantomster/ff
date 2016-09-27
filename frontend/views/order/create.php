@@ -92,8 +92,11 @@ $this->registerJs(
         });'
 );
 
-//var_dump($categories);
-echo "Категории: ";
+?>
+ <div class="panel panel-primary">
+      <div class="panel-heading">Категории</div>
+      <div class="panel-body">
+          <?php
 foreach ($categories as $cat) {
     echo Html::button(
             $cat['name'], [
@@ -103,12 +106,14 @@ foreach ($categories as $cat) {
         'data-selected' => $cat['selected'],
     ]);
 }
-?>
+          ?>
+      </div>
+    </div>
 <div style="padding-top: 20px;">
     <div class="list-group" style="padding-right: 10px; width: 300px; float: left;" id="vendors">
         <?= $this->render('_vendors', compact('vendors')) ?>
     </div>
-    <div style="padding-right: 10px; float: left;" id="products">
+    <div style="padding-right: 10px; float: left; width: 60%" id="products">
         <?= $this->render('_products', compact('searchModel', 'dataProvider')) ?>
     </div>
     <div style="float: left;" id="orders">

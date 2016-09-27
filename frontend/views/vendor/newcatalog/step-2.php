@@ -61,8 +61,8 @@ $gridColumnsBaseCatalog = [
     'format' => 'raw',
     'contentOptions' => ['style' => 'width:50px;'],    
     'value'=>function ($data) {$data->status==common\models\CatalogBaseGoods::STATUS_OFF?
-            $product_status='<i class="fa fa-times"   aria-hidden="true"></i>':
-            $product_status='<i class="fa fa-check"  aria-hidden="true"></i>';
+            $product_status='<span class="text-danger">Нету</span>':
+            $product_status='<span class="text-success">Есть</span>';
             return $product_status;
         },
     ],

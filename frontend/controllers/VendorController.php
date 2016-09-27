@@ -731,15 +731,52 @@ class VendorController extends DefaultController {
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$baseCatalog->id);
         return $this->render('newcatalog/step-2',compact('searchModel', 'dataProvider','cat_id'));
     }
-    public function actionStep3($id){
+    public function actionStep3copy($id){
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchModel = new CatalogGoods();
+        // выборка для handsontable
+        $arr = CatalogGoods::find()->select(['id','base_goods_id','price','discount','discount_percent'])->where(['cat_id' => $id])->
+                andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->
+                 where(['supp_org_id' => $currentUser->organization_id,'deleted' => 1])])->all();
+        $arr = \yii\helpers\ArrayHelper::toArray($arr);
+        $array = [];
+        foreach($arr as $arrs){           
+            $c_article = CatalogBaseGoods::find()->where(['id'=>$arrs['base_goods_id']])->one()->article;
+            $c_product = CatalogBaseGoods::find()->where(['id'=>$arrs['base_goods_id']])->one()->product;
+            $c_base_goods_id = $arrs['base_goods_id'];
+            $c_goods_id = $arrs['id'];
+            $c_base_price = CatalogBaseGoods::find()->where(['id'=>$arrs['base_goods_id']])->one()->price;
+            $c_price = $arrs['price'];
+            $c_discount = $arrs['discount'];
+            $c_discount_percent = $arrs['discount_percent'];
+            
+        array_push($array,[
+            'article'=>$c_article,
+            'product'=>$c_product,
+            'base_goods_id'=>$c_base_goods_id,
+            'goods_id'=>$c_goods_id,
+            'base_price'=>$c_base_price,
+            'price'=>$c_price,
+            'discount'=>$c_discount,
+            'discount_percent'=>$c_discount_percent]);   
+        }
+        return $this->render('newcatalog/step-3',compact('array','cat_id'));
+        /*$searchModel = new CatalogGoods();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$cat_id);
         
         $exportModel = new CatalogBaseGoods;
 	$exportProvider = $exportModel->search(Yii::$app->request->queryParams,$cat_id,NULL);
         
+        return $this->render('newcatalog/step-3',compact('arr','searchModel', 'dataProvider','exportModel','exportProvider','cat_id'));
+    */
+    }
+    public function actionStep3($id){
+        $cat_id = $id;
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchModel = new CatalogGoods();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$cat_id);       
+        $exportModel = new CatalogBaseGoods;
+	$exportProvider = $exportModel->search(Yii::$app->request->queryParams,$cat_id,NULL);        
         return $this->render('newcatalog/step-3',compact('searchModel', 'dataProvider','exportModel','exportProvider','cat_id'));
     }
     public function actionStep3UpdateProduct($id) {

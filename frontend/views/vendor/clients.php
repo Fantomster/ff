@@ -17,10 +17,9 @@ $gridColumnsClients = [
 		[
 		'label'=>'Ресторан',
 		'value'=>function ($data) {
-                $organization_name=common\models\Organization::get_value($data->rest_org_id)->name;
+                $organization_name = common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
                 return $organization_name;
                 }
-		//'rest_org_id',
 		],
 		[
 		'label'=>'Текущий каталог',

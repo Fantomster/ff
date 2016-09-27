@@ -38,10 +38,16 @@ $gridColumnsCatalog = [
     'value'=>function ($data) {return common\models\CatalogBaseGoods::get_value($data->base_goods_id)->product;},
     ],
     [
+    'label'=>'Базовая цена',
+    'value'=>function ($data) { 
+    $price = common\models\CatalogBaseGoods::find()->where(['id'=>$data->base_goods_id])->one()->price;
+    return $price." руб.";
+    },
+    ],
+    [
     'label'=>'Цена',
     'value'=>function ($data) {
-    $price = preg_replace('/[^\d.,]/','',$data->price);
-    return $price." руб.";
+    return $data->price." руб.";
     },
     ],
     /*[

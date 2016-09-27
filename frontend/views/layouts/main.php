@@ -101,11 +101,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="registr-block">
                             <div class="registr__block">
-                                <ul>
-                                    <li><?= Html::a('вход', ["/user/login"]) ?></li>
-                                    <li><span>/</span></li>
-                                    <li><?= Html::a('регистрация', ["/user/register"]) ?></li>
-                                </ul>
+                                <?= Html::a('вход / регистрация', ["/user/login"]) ?>
                             </div>
                         </div>
                         <div class="nav__block">
@@ -114,10 +110,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             yii\widgets\Menu::widget([
                                 'options' => ['class' => 'nav_menu'],
                                 'items' => [
-                                    ['label' => 'Главная', 'url' => ['site/index']],
-                                    ['label' => 'Вопрос / ответ', 'url' => ['site/faq']],
-                                    ['label' => 'о компании', 'url' => ['site/about']],
-                                    ['label' => 'контакты', 'url' => ['site/contacts']],
+                                    ['label' => 'Главная', 'url' => ['/site/index']],
+                                    ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
+                                    ['label' => 'о компании', 'url' => ['/site/about']],
+                                    ['label' => 'контакты', 'url' => ['/site/contacts']],
                                 ]
                             ])
                             ?>

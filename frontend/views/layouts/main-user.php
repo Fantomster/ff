@@ -16,6 +16,9 @@ function heightDetect() {
 	$(window).resize(function() {
 		heightDetect();
 	});
+            $("#menu__burger").click(function () {
+                $(".nav_menu").slideToggle();
+            });
         
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
@@ -38,21 +41,34 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     <body class="hold-transition skin-blue sidebar-mini">
 <?php $this->beginBody() ?>
         <div class="wrapper">
-            <header class="header header__inner_page">
+            <header class="header-nav default dark-bg" id="menu-fk">
                 <div class="inside__block">
                     <div class="container-fluid">
                         <div class="logo__block">
-                            <?= Html::a('', Yii::$app->homeUrl, ['class' => 'logo__block-icon']) ?>
+                            <a class="logo__block-icon" href="<?= Yii::$app->homeUrl; ?>"></a>
                         </div>
-                        <div class="phone__block have__quest">
-                            <span>Остались вопросы?</span> <span class="phone__block-number"><span class="glyphicon glyphicon-phone"></span>8-499-404-10-18</span>
+                        <div class="phone__block">
+                            <span class="phone__block-number">
+                                <span class="glyphicon glyphicon-phone"></span>8-499-404-10-18
+                            </span>
                         </div>
-                        <div class="clear"></div>
+                        <div class="nav__block">
+                            <span id="menu__burger">Меню</span>
+                            <?=
+                            yii\widgets\Menu::widget([
+                                'options' => ['class' => 'nav_menu'],
+                                'items' => [
+                                    ['label' => 'Главная', 'url' => ['/site/index']],
+                                    ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
+                                    ['label' => 'о компании', 'url' => ['/site/about']],
+                                    ['label' => 'контакты', 'url' => ['/site/contacts']],
+                                ]
+                            ])
+                            ?>
+                        </div>
                     </div>
-
                 </div>
-
-            </header><!-- .header-->
+            </header><!-- .header-nav-->
 
             <main class="content">
         <?= $content ?>

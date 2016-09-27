@@ -11,6 +11,7 @@ namespace frontend\controllers;
 use Yii;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use yii\web\HttpException;
 
 /**
  * Custom user controller
@@ -18,33 +19,33 @@ use yii\widgets\ActiveForm;
  * @inheritdoc
  */
 class UserController extends \amnah\yii2\user\controllers\DefaultController {
-    
+
     public $layout = "@frontend/views/layouts/main-user";
-    
+
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         $behaviors = parent::behaviors();
         $behaviors['access']['rules'][] = [
             'actions' => ['accept-restaurants-invite'],
             'allow' => true,
             'roles' => ['?'],
         ];
+        $behaviors['access']['denyCallback'] = function($rule, $action) {
+                $this->redirect(['/site/index']);
+            };
         return $behaviors;
     }
-    
+
     /**
      * Display registration page
      */
-    public function actionRegister()
-    {
+    public function actionRegister() {
         /** @var \common\models\User $user */
         /** @var \common\models\Profile $profile */
         /** @var \amnah\yii2\user\models\Role $role */
         /** @var \common\models\Organization $organization */
-
         // set up new user/profile/organization objects
         $user = $this->module->model("User", ["scenario" => "register"]);
         $profile = $this->module->model("Profile");
@@ -56,7 +57,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
             // ensure profile data gets loaded
             $profile->load($post);
-            
+
             // load organization data
             $organization->load($post);
 
@@ -94,11 +95,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     /**
      * Accept restaurant's invite
      */
-    public function actionAcceptRestaurantsInvite($token)
-    {
+    public function actionAcceptRestaurantsInvite($token) {
         /** @var \amnah\yii2\user\models\User $user */
         /** @var \amnah\yii2\user\models\UserToken $userToken */
-
         // get user token
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::findByToken($token, $userToken::TYPE_EMAIL_ACTIVATE);
@@ -128,14 +127,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));
     }
-    
+
     /**
      * Display login page
      */
-    public function actionLogin()
-    {
+    public function actionLogin() {
         //$this->layout = '@app/views/layouts/main-login';
-        
+
         /** @var \amnah\yii2\user\models\forms\LoginForm $model */
         $model = $this->module->model("LoginForm");
 
@@ -148,5 +146,5 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         return $this->render('login', compact("model"));
     }
-    
+
 }

@@ -68,6 +68,7 @@ class OrderCatalogSearch extends CatalogGoods {
         $query->joinWith('organization');
         $query->where([
             $productTable.'.cat_id' => $catalogs,
+            $baseProductTable.'.deleted' => 0,
         ]);
 
         // create data provider

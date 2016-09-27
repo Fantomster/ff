@@ -115,12 +115,17 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        $categories = RelationCategory::find()
-                ->select(['category.id', 'category.name'])
-                ->distinct()
-                ->joinWith('category', false)
-                ->where(['relation_category.rest_org_id' => $this->id])
-                ->orderBy(['category.name' => SORT_ASC])
+//        $categories = RelationCategory::find()
+//                ->select(['category.id', 'category.name'])
+//                ->distinct()
+//                ->joinWith('category', false)
+//                ->where(['relation_category.rest_org_id' => $this->id])
+//                ->orderBy(['category.name' => SORT_ASC])
+//                ->asArray()
+//                ->all();
+        $categories = Category::find()
+                ->select(['id', 'name'])
+                ->orderBy(['name' => SORT_ASC])
                 ->asArray()
                 ->all();
         return $categories;

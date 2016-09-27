@@ -4,13 +4,27 @@ use yii\bootstrap\Tabs;
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
-                alert("cancel");
+                var form = $("#generalSettings");
+                $.get(
+                    form.attr("action")
+                )
+                .done(function(result) {
+                    form.replaceWith(result);
+                });                
             });
             $(".settings").on("click", "#saveOrg", function() {
-                alert("save");
+                var form = $("#generalSettings");
+                $.post(
+                    form.attr("action"),
+                    form.serialize()
+                )
+                .done(function(result) {
+                    form.replaceWith(result);
+                });
             });
-            $(".settings").on("change paste keyup", ".org-info>.col-lg-5>input[text]", function() {
-                $("#saveOrg").prop( "disabled", true );
+            $(".settings").on("change paste keyup", ".form-control", function() {
+                $("#cancelOrg").prop( "disabled", false );
+                $("#saveOrg").prop( "disabled", false );
             });
         });'
 );
@@ -28,10 +42,10 @@ $this->registerJs(
             'label' => 'Пользователи',
             'content' => $this->render('settings/_users', compact('dataProvider', 'searchModel')),
         ],
-        [
-            'label' => 'Бюджет',
-            'content' => $this->render('settings/_budget'),
-        ],
+//        [
+//            'label' => 'Бюджет',
+//            'content' => $this->render('settings/_budget'),
+//        ],
     ],
 ]) ?>
 </div>

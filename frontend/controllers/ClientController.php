@@ -122,9 +122,10 @@ class ClientController extends DefaultController {
         if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 $organization->save();
-                return $this->render('settings/_info', compact('organization'));
             }
-        }
+        } 
+        
+        return $this->renderAjax('settings/_info', compact('organization'));
     }
     
     /*

@@ -82,8 +82,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     }
 
     public function search($params, $id) {
-        $query = CatalogGoods::find()->where(['cat_id' => $id]);
-        $query->andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->where(['supp_org_id' => 'supp_org_id','deleted' => 1])]);
+        $query = CatalogGoods::find()->where(['cat_id' => $id])->andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->where(['supp_org_id' => User::findIdentity(Yii::$app->user->id)->organization_id,'deleted' => 1])]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);

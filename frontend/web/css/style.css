@@ -248,6 +248,12 @@ a:focus {
 	padding: 140px 0 50px;
 	color: #ffffff;
 }
+.header-nav .registr__block a {
+	color: #fff;
+	text-decoration: none;
+	padding: 7px 15px;
+	display: block;
+}
 .site__title h1 {
 	font-size: 46px;
 	font-weight: normal;
@@ -295,6 +301,13 @@ a:focus {
 	border-radius: 3px;
 	transition: 0.3s;
 }
+
+.small-login {
+	font-weight: normal;
+    font-size: 11px;
+    text-transform: inherit;
+}
+
 .buttons__block .for__restaurants:hover,
 .buttons__block .for__suppliers:hover {
 	text-decoration: none;
@@ -420,7 +433,7 @@ a:focus {
 	display: inline-block;
 	float: right;
 	overflow: hidden;
-	padding: 7px 15px;
+	// padding: 7px 15px;
 	cursor: pointer;
 	transition: 0.3s;
 	margin-top: 11px;
@@ -433,6 +446,7 @@ a:focus {
 .header-nav .registr__block a {
 	color: #fff;
 	text-decoration: none;
+	padding: 7px 15px;
 }
 
 .header-nav .registr__block a:hover {
@@ -578,7 +592,6 @@ a:focus {
 	display: inline-block;
 	float: right;
 	overflow: hidden;
-	padding: 7px 15px;
 	cursor: pointer;
 	transition: 0.3s;
 	margin-top: 11px;
@@ -718,7 +731,6 @@ a:focus {
     display: block;
     float: none; 
     overflow: hidden;
-    padding: 7px 15px;
     cursor: pointer;
     transition: 0.3s;
     text-align: center;
@@ -1395,7 +1407,6 @@ background: #3f3e3e;
 	display: inline-block;
 	float: right;
 	overflow: hidden;
-	padding: 7px 15px;
 	cursor: pointer;
 	transition: 0.3s;
 }

@@ -41,7 +41,7 @@ $this->title = Yii::t('user', 'Login');
             <div class="regist">
             <?= Html::a(Yii::t("user", "Register"), ["/user/register"]) ?>
             <?= Html::a(Yii::t("user", "Forgot password") . "?", ["/user/forgot"]) ?>
-            <?= Html::a(Yii::t("user", "Resend confirmation email"), ["/user/resend"]) ?>
+            <?= Html::a(Yii::t("user", "Resend confirmation email"), ["/user/resend"], ["class" => "small-login"]) ?>
             </div>
 <?php ActiveForm::end(); ?>
         </div>

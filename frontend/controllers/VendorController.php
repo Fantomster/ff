@@ -221,7 +221,17 @@ class VendorController extends DefaultController {
                     exit;
                 }
             }
-            
+            $price = str_replace(',', '.', $price);
+            if(substr($price, -3, 1) == '.')
+            {
+                $price = explode('.', $price);
+                $last = array_pop($price);
+                $price = join($price, '').'.'.$last;
+            }
+            else
+            {
+                $price = str_replace('.', '', $price);
+            }
             if (!preg_match($numberPattern,$price)) {
             $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
             return $result;   

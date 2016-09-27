@@ -732,7 +732,7 @@ class VendorController extends DefaultController {
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$baseCatalog->id);
         return $this->render('newcatalog/step-2',compact('searchModel', 'dataProvider','cat_id'));
     }
-    public function actionStep3copy($id){
+    public function actionStep3Copy($id){
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         // выборка для handsontable
@@ -751,25 +751,17 @@ class VendorController extends DefaultController {
             $c_discount = $arrs['discount'];
             $c_discount_percent = $arrs['discount_percent'];
             
-        array_push($array,[
-            'article'=>$c_article,
-            'product'=>$c_product,
-            'base_goods_id'=>$c_base_goods_id,
-            'goods_id'=>$c_goods_id,
-            'base_price'=>$c_base_price,
-            'price'=>$c_price,
-            'discount'=>$c_discount,
-            'discount_percent'=>$c_discount_percent]);   
+            array_push($array,[
+                'article'=>$c_article,
+                'product'=>$c_product,
+                'base_goods_id'=>$c_base_goods_id,
+                'goods_id'=>$c_goods_id,
+                'base_price'=>$c_base_price,
+                'price'=>$c_price,
+                'discount'=>$c_discount,
+                'discount_percent'=>$c_discount_percent]);   
         }
-        return $this->render('newcatalog/step-3',compact('array','cat_id'));
-        /*$searchModel = new CatalogGoods();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$cat_id);
-        
-        $exportModel = new CatalogBaseGoods;
-	$exportProvider = $exportModel->search(Yii::$app->request->queryParams,$cat_id,NULL);
-        
-        return $this->render('newcatalog/step-3',compact('arr','searchModel', 'dataProvider','exportModel','exportProvider','cat_id'));
-    */
+        return $this->render('newcatalog/step-3-copy',compact('array','cat_id'));
     }
     public function actionStep3($id){
         $cat_id = $id;

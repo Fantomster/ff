@@ -268,29 +268,41 @@ class ClientController extends DefaultController {
 			$organization = new Organization;
 			$profile = new Profile();
 			
-		    $post = Yii::$app->request->post();
-	       
-            $user->load($post); //user-email
-            $profile->load($post); //profile-full_name
-            $organization->load($post);	//name
-            $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
-            $relationCategory->load($post); //array category
-            $currentUser = User::findIdentity(Yii::$app->user->id);
+                        $post = Yii::$app->request->post();
+                        $user->load($post); //user-email
+                        $profile->load($post); //profile-full_name
+                        $organization->load($post);	//name
+                        $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
+                        $relationCategory->load($post); //array category
+                        $currentUser = User::findIdentity(Yii::$app->user->id);
 
 			$arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
 			
 			if ($user->validate() && $profile->validate() && $organization->validate()) {
 				
 				if ($arrCatalog === Array()){
-				  $result = ['success'=>false,'message'=>'err: Каталог пустой!'];  
+				  $result = ['success'=>false,'message'=>'Каталог пустой!'];  
 				  return $result;   
 				  exit; 
 			    }
 				$numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
                                 foreach ( $arrCatalog as $arrCatalogs ) { 
                                 $product = trim($arrCatalogs['dataItem']['product']);
+                                $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
+                                $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                                $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                                    if(empty($article)){
+                                        $result = ['success'=>false,'message'=>'Ошибка: Пустое поле <strong>[Артикул]</strong>!'];  
+                                        return $result;   
+                                        exit;    
+                                    }
                                     if(empty($product)){
                                         $result = ['success'=>false,'message'=>'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];  
+                                        return $result;   
+                                        exit;    
+                                    }
+                                    if(empty($price)){
+                                        $result = ['success'=>false,'message'=>'Ошибка: Пустое поле <strong>[Цена]</strong>!'];  
                                         return $result;   
                                         exit;    
                                     }
@@ -311,11 +323,16 @@ class ClientController extends DefaultController {
                                         return $result;   
                                         exit;    
                                         }    
+                                        if (!empty($units) && !preg_match($numberPattern,$units)) {
+                                        $result = ['success'=>false,'message'=>'Ошибка: <strong>[Кратность]</strong> в неверном формате!'];  
+                                        return $result;   
+                                        exit;    
+                                        }
                                     }
 				$email = 	$user->email;
-			    $fio = 		$profile->full_name;
-			    $org = 		$organization->name;
-			    $categorys = $relationCategory['category_id'];
+                                $fio = 		$profile->full_name;
+                                $org = 		$organization->name;
+                                $categorys = $relationCategory['category_id'];
 				
 			    if ($check['eventType']==1){return $check;}
 			    if ($check['eventType']==2){return $check;}

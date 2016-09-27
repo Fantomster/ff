@@ -306,17 +306,7 @@ class ClientController extends DefaultController {
                                         return $result;   
                                         exit;    
                                     }
-                                    $price = str_replace(',', '.', $price);
-                                    if(substr($price, -3, 1) == '.')
-                                    {
-                                        $price = explode('.', $price);
-                                        $last = array_pop($price);
-                                        $price = join($price, '').'.'.$last;
-                                    }
-                                    else
-                                    {
-                                        $price = str_replace('.', '', $price);
-                                    }
+                                    
                                     if (!preg_match($numberPattern,$price)) {
                                         $result = ['success'=>false,'message'=>'Ошибка: <strong>[Цена]</strong> в неверном формате!'];  
                                         return $result;   
@@ -400,7 +390,17 @@ class ClientController extends DefaultController {
 				      $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
 				      $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
 				      $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note'])); 
-				             
+				      $price = str_replace(',', '.', $price);
+                                        if(substr($price, -3, 1) == '.')
+                                        {
+                                            $price = explode('.', $price);
+                                            $last = array_pop($price);
+                                            $price = join($price, '').'.'.$last;
+                                        }
+                                        else
+                                        {
+                                            $price = str_replace('.', '', $price);
+                                        }       
 				      $sql = "insert into ".CatalogBaseGoods::tableName()."(
 				      `cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
 				      $lastInsert_base_cat_id,0,'$get_supp_org_id','$article','$product','$units','$price',1,0,0,NOW())";

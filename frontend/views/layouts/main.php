@@ -114,10 +114,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             yii\widgets\Menu::widget([
                                 'options' => ['class' => 'nav_menu'],
                                 'items' => [
-                                    ['label' => 'Главная', 'url' => ['site/index']],
-                                    ['label' => 'Вопрос / ответ', 'url' => ['site/faq']],
-                                    ['label' => 'о компании', 'url' => ['site/about']],
-                                    ['label' => 'контакты', 'url' => ['site/contacts']],
+                                    ['label' => 'Главная', 'url' => ['/site/index']],
+                                    ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
+                                    ['label' => 'о компании', 'url' => ['/site/about']],
+                                    ['label' => 'контакты', 'url' => ['/site/contacts']],
                                 ]
                             ])
                             ?>

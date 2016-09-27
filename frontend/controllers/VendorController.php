@@ -81,11 +81,12 @@ class VendorController extends DefaultController {
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
+        $organization = $this->currentUser->organization;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('settings', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('settings', compact('searchModel', 'dataProvider', 'organization'));
         } else {
-            return $this->render('settings', compact('searchModel', 'dataProvider'));
+            return $this->render('settings', compact('searchModel', 'dataProvider', 'organization'));
         }
     }
 
@@ -820,4 +821,37 @@ class VendorController extends DefaultController {
         }
         return $this->renderAjax('catalogs/_setPercentCatalog', compact('catalogGoods','cat_id'));  
     }
+    
+    /*
+     *  Organization validate
+     */
+    public function actionAjaxValidateOrganization() {
+        $this->loadCurrentUser();
+        $organization = $this->currentUser->organization;
+        
+        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
+            if ($organization->validate()) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return json_encode(ActiveForm::validate($organization));
+            }
+        }
+    }
+    
+    /*
+     *  Organization save
+     */
+    public function actionAjaxUpdateOrganization() {
+        $this->loadCurrentUser();
+        $organization = $this->currentUser->organization;
+        
+        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
+            if ($organization->validate()) {
+                $organization->save();
+            }
+        } 
+        
+        return $this->renderAjax('settings/_info', compact('organization'));
+    }
+    
+    
 }

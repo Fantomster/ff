@@ -17,47 +17,50 @@ use common\models\OrganizationType;
 $module = $this->context->module;
 
 $this->title = Yii::t('user', 'Register');
-$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="user-default-register">
+<div class="login__block">
+    <div class="login__inside">
+        <img src="/images/logo-inner.png" alt=""/>
+        <div class="contact__form">
+            <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
 
-    <h1><?= Html::encode($this->title) ?></h1>
+                <div class="alert alert-success">
+                    <p><?= $flash ?></p>
+                </div>
 
-    <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
-
-        <div class="alert alert-success">
-            <p><?= $flash ?></p>
-        </div>
-
-    <?php else: ?>
-
+            <?php else: ?>
         <?php $form = ActiveForm::begin([
             'id' => 'register-form',
-            'options' => ['class' => 'form-horizontal'],
-            'fieldConfig' => [
-                'template' => "{label}\n<div class=\"col-lg-3\">{input}</div>\n<div class=\"col-lg-7\">{error}</div>",
-                'labelOptions' => ['class' => 'col-lg-2 control-label'],
-            ],
-            'enableAjaxValidation' => true,
         ]); ?>
-
-        <?= $form->field($profile, 'full_name') ?>
-    
-        <?= $form->field($user, 'newPassword')->passwordInput() ?>
-
-        <?= $form->field($organization, 'name') ?>
-    
-        <div class="form-group">
-            <div class="col-lg-offset-2 col-lg-10">
-                <?= Html::submitButton(Yii::t('user', 'Register'), ['class' => 'btn btn-primary']) ?>
-
-                <br/><br/>
-                <?= Html::a(Yii::t('user', 'Login'), ["/user/login"]) ?>
-            </div>
+                <div class="form-group">
+                    <?=
+                            $form->field($profile, 'full_name')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
+                    ?>
+                    <?=
+                            $form->field($user, 'newPassword')
+                            ->label(false)
+                            ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
+                    ?>
+                    <?=
+                            $form->field($organization, 'name')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
+                    ?>
+                </div>
+                <?=
+                Html::a('Зарегистрироваться', '#', [
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                    'class' => 'send__btn',
+                ])
+                ?>
+            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
+                <?php ActiveForm::end(); ?>
+            <?php endif; ?>
         </div>
-
-        <?php ActiveForm::end(); ?>
-
-    <?php endif; ?>
+    </div>
 
 </div>

@@ -11,7 +11,7 @@ $this->title = Yii::t('user', $success ? 'Confirmed' : 'Error');
 ?>
 <div class="login__block">
     <div class="login__inside">
-        <img src="/images/logo-inner.png" alt=""/>
+        <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-inner.png" alt=""/></a>
         <div class="contact__form">
             <?php if ($success): ?>
 

@@ -758,8 +758,68 @@ class VendorController extends DefaultController {
                 'goods_id'=>$c_goods_id,
                 'base_price'=>$c_base_price,
                 'price'=>$c_price,
+                'total_price'=>$c_price,
                 'discount'=>$c_discount,
                 'discount_percent'=>$c_discount_percent]);   
+        }
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $post = Yii::$app->request->post();
+            $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
+            //'goods_id','total_price'
+            /* $result = ['success'=>true,'alert'=>['class'=>'success-fk','title'=>'Сохранено','body'=>Yii::$app->request->post('catalog')]];
+            return $result;
+            exit;*/
+            $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+            foreach ( $arrCatalog as $arrCatalogs ) {
+            $goods_id = htmlspecialchars(trim($arrCatalogs['dataItem']['goods_id']));
+            $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
+            
+            if(!CatalogGoods::find()->where(['id' => $goods_id])->exists()){
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не верный продукт']];             
+            return $result;   
+            exit;
+            }
+            
+            $price = str_replace(',', '.', $price);
+            if(substr($price, -3, 1) == '.')
+            {
+                $price = explode('.', $price);
+                $last = array_pop($price);
+                $price = join($price, '').'.'.$last;
+            }
+            else
+            {
+                $price = str_replace('.', '', $price);
+            }
+            if (!preg_match($numberPattern,$price)) {
+            $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
+            return $result;   
+            exit;    
+            }    
+            }
+            foreach ( $arrCatalog as $arrCatalogs ) {
+            $goods_id = htmlspecialchars(trim($arrCatalogs['dataItem']['goods_id']));
+            $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
+            
+            $price = str_replace(',', '.', $price);
+            if(substr($price, -3, 1) == '.')
+            {
+                $price = explode('.', $price);
+                $last = array_pop($price);
+                $price = join($price, '').'.'.$last;
+            }
+            else
+            {
+                $price = str_replace('.', '', $price);
+            }
+            $catalogGoods = CatalogGoods::findOne(['id' => $goods_id]);
+            $catalogGoods->price = $price;
+            $catalogGoods->update();
+            }
+            $result = ['success'=>true,'alert'=>['class'=>'success-fk','title'=>'Сохранено','body'=>'Данные успешно обновлены']];
+            return $result;
+            exit;
         }
         return $this->render('newcatalog/step-3-copy',compact('array','cat_id'));
     }
@@ -772,7 +832,7 @@ class VendorController extends DefaultController {
 	$exportProvider = $exportModel->search(Yii::$app->request->queryParams,$cat_id,NULL);        
         return $this->render('newcatalog/step-3',compact('searchModel', 'dataProvider','exportModel','exportProvider','cat_id'));
     }
-    public function actionStep3UpdateProduct($id) {
+            public function actionStep3UpdateProduct($id) {
         $catalogGoods = CatalogGoods::find()->where(['id'=>$id])->one();
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();

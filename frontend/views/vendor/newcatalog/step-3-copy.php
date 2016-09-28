@@ -34,7 +34,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
     <ul class="nav nav-tabs">
         <?='<li>'.Html::a('Имя каталога',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
         <?='<li>'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-        <?='<li class="active">'.Html::a('Редактировать',['vendor/step-3','id'=>$cat_id]).'</li>'?>
+        <?='<li class="active">'.Html::a('Редактировать',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
         <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
     </ul>
 </div>
@@ -78,14 +78,34 @@ height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
         $("#handsontable").height($('.content-wrapper').height() - $("#handsontable").offset().top)
 });
-var save = document.getElementById('save'), hot;      
-hot = new Handsontable(container, {
+var save = document.getElementById('save'), hot;     
+var colsToHide = [0];
+/*function getCustomRenderer() {
+    return function(instance, td, row, col, prop, value, cellProperties) {
+        console.log(td)
+      Handsontable.renderers.TextRenderer.apply(this, arguments);
+      if (colsToHide.indexOf(col) > -1) {
+        td.hidden = true;
+      } else {
+        td.hidden = false;
+      }
+    }
+  }*/
+  hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
-  colHeaders : ['Артикул', 'Наименование', 'Базовая цена', 'Цена каталога','Скидка в рублях','Скидка %','Итоговая цена'],
-  colWidths: [50, 90, 50, 50, 50, 50, 50],
+  colHeaders : ['id','Артикул', 'Наименование', 'Базовая цена', 'Цена каталога','Скидка в рублях','Скидка %','Итоговая цена'],
+  colWidths: [50,50, 90, 50, 50, 50, 50, 50],
   renderAllRows: true,
   maxRows: $arr_count,
+   fillHandle: false,
+   minSpareCols: 0,
+   minSpareRows: 0,
+  rowHeaders: true,
+  hiddenColumns: {
+      columns: [0]
+    },
   columns: [
+    {data: 'goods_id',readOnly: true},
     {data: 'article',readOnly: true},
     {data: 'product', wordWrap:true,readOnly: true},  
     {
@@ -98,17 +118,17 @@ hot = new Handsontable(container, {
     {
         data: 'price', 
         type: 'numeric',
-        format: '0.00',
+        format: '0.00 $',
         language: 'ru-RU'
     }, 
     {
         data: 'discount',
         type: 'numeric',
-        format: '0.00',
+        format: '0.00 $',
         language: 'ru-RU'
     },
-    {data: 'discount_percent'},
-    {data: 'total_price',readOnly: true},
+    {data: 'discount_percent', type: 'numeric',format: '0',},
+    {data: 'total_price',readOnly: true,type: 'numeric',format: '0.00',language: 'ru-RU'},
   ],
   className : 'Handsontable_table',
   tableClassName: ['table-hover'],
@@ -117,14 +137,95 @@ hot = new Handsontable(container, {
   startRows: 1,
   autoWrapRow: true,
   height: height,
+  //renderer: getCustomRenderer(),
+  beforeChangeRender: function (changes, source) {
+      if(source !== 'sum'){
+          var a, b, c, sum, i, value;
+            var change = changes[0];
+            var line = change[0];
+            a = parseFloat(this.getDataAtCell(line, 4));
+            b = parseFloat(this.getDataAtCell(line, 5));
+            c = parseInt(this.getDataAtCell(line, 6));
+            if(c>100)c=100;
+            if(c<-100)c=-100;
+            if(changes[0][1]=='price'){ 
+            this.setDataAtCell(change[0], 5, 0, 'sum');
+            this.setDataAtCell(change[0], 6, 0, 'sum');
+            this.setDataAtCell(change[0], 7, a, 'sum');
+            }
+            if(changes[0][1]=='discount'){ 
+            this.setDataAtCell(change[0], 6, 0, 'sum');
+            value = a - b;
+            this.setDataAtCell(change[0], 7, value, 'sum');
+            }
+            if(changes[0][1]=='discount_percent'){
+            this.setDataAtCell(change[0], 5, 0, 'sum');
+            this.setDataAtCell(change[0], 6, c, 'sum');
+            valueTwo = a - (a/100 * c);
+            this.setDataAtCell(change[0], 7, valueTwo, 'sum');   
+            }
+        }      
+      }
   });
+
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
-  var cols = ['article', 'product', 'units', 'price', 'category'];
+  var cols = ['goods_id',2, 3, 4, 5,6,7,'total_price'];
     $.each(dataTable, function( rowKey, object) {
-        
-    })
+        if (!hot.isEmptyRow(rowKey)){
+            cleanedData[rowKey] = object;
+            dataItem = {};
+            for(i = 0; i < cols.length; i+=1) {
+              item = cleanedData[rowKey][i];
+                dataItem[cols[i]] = item;
+            }
+            data.push({dataItem});
+        }    
+    });
+    $.ajax({
+          url: "index.php?r=vendor/step-3-copy&id=$cat_id",
+          type: 'POST',
+          dataType: "json",
+          data: $.param({'catalog':JSON.stringify(data)}),
+          cache: false,
+          success: function (response) {
+              if(response.success){ 
+                bootbox.dialog({
+                    message: response.alert.body,
+                    title: response.alert.title,
+                    buttons: {
+                        success: {
+                          label: "Успешно!",
+                          className: "btn-success btn-md",
+                          callback: function() {
+                            location.reload();    
+                          }
+                        },
+                    },
+                    className: response.alert.class
+                });
+              }else{
+                bootbox.dialog({
+                    message: response.alert.body,
+                    title: response.alert.title,
+                    buttons: {
+                        success: {
+                          label: "Окей!",
+                          className: "btn-success btn-md",
+                        },
+                    },
+                    className: response.alert.class
+                });
+              }
+          },
+          error: function(response) {
+          console.log(response.message);
+          }
+    });
+});
+$('#save').click(function(e){	
+e.preventDefault();
 });
 JS;
 $this->registerJs($customJs, View::POS_READY);

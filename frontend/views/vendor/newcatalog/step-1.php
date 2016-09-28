@@ -35,7 +35,7 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
     ?>
     <?=$catalog->isNewRecord?
     '<li class="disabled">'.Html::a('Редактировать').'</li>':
-    '<li>'.Html::a('Редактировать',['vendor/step-3','id'=>$cat_id]).'</li>' 
+    '<li>'.Html::a('Редактировать',['vendor/step-3-copy','id'=>$cat_id]).'</li>' 
     ?>
     <?=$catalog->isNewRecord?
     '<li class="disabled">'.Html::a('Назначить').'</li>':

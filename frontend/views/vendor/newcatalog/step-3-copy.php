@@ -44,15 +44,13 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         ['#'],
         ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px','margin-bottom'=>'15px'],'id'=>'save', 'name'=>'save']
 ) ?>
-<div class="handsontable" id="handsontable"></div>    
-    
-    
-    
-    
-</div>
+ 
 <?php Pjax::begin(['id' => 'pjax-container']); ?>
+<div class="handsontable" id="handsontable"></div> 
+<?php Pjax::end(); ?>   
+   
+</div>
 
-<?php Pjax::end(); ?>
 <?php
 $arr= json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);
@@ -149,8 +147,8 @@ var colsToHide = [0];
             if(c>100)c=100;
             if(c<-100)c=-100;
             if(changes[0][1]=='price'){ 
-            this.setDataAtCell(change[0], 5, 0, 'sum');
-            this.setDataAtCell(change[0], 6, 0, 'sum');
+            this.setDataAtCell(change[0], 5, '0,00', 'sum');
+            this.setDataAtCell(change[0], 6, '0', 'sum');
             this.setDataAtCell(change[0], 7, a, 'sum');
             }
             if(changes[0][1]=='discount'){ 
@@ -159,7 +157,7 @@ var colsToHide = [0];
             this.setDataAtCell(change[0], 7, value, 'sum');
             }
             if(changes[0][1]=='discount_percent'){
-            this.setDataAtCell(change[0], 5, 0, 'sum');
+            this.setDataAtCell(change[0], 5, '0,00', 'sum');
             this.setDataAtCell(change[0], 6, c, 'sum');
             valueTwo = a - (a/100 * c);
             this.setDataAtCell(change[0], 7, valueTwo, 'sum');   
@@ -170,6 +168,8 @@ var colsToHide = [0];
 
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
+        //console.log(hot.getData())
+        //return false;
   var cleanedData = {};
   var cols = ['goods_id',2, 3, 4, 5,6,7,'total_price'];
     $.each(dataTable, function( rowKey, object) {
@@ -199,7 +199,8 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                           label: "Успешно!",
                           className: "btn-success btn-md",
                           callback: function() {
-                            location.reload();    
+                            //location.reload(); 
+                              $.pjax.reload({container: "#pjax-container"});
                           }
                         },
                     },

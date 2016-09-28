@@ -222,16 +222,7 @@ class VendorController extends DefaultController {
                 }
             }
             $price = str_replace(',', '.', $price);
-            if(substr($price, -3, 1) == '.')
-            {
-                $price = explode('.', $price);
-                $last = array_pop($price);
-                $price = join($price, '').'.'.$last;
-            }
-            else
-            {
-                $price = str_replace('.', '', $price);
-            }
+           
             if (!preg_match($numberPattern,$price)) {
             $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
             return $result;   
@@ -596,7 +587,7 @@ class VendorController extends DefaultController {
                     $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
                     $relation_supp_rest->status = 0;
                     $relation_supp_rest->update(); 
-                    return (['success' => true, Yii::$app->request->post('state')]);
+                    return (['success' => true, 'Не подписан']);
                     exit;
                 }
 			/*$relation_supp_rest->cat_id = $relation_supp_rest->status==0 ? $curCat : Catalog::NON_CATALOG ;
@@ -795,16 +786,7 @@ class VendorController extends DefaultController {
             }
             
             $price = str_replace(',', '.', $price);
-            if(substr($price, -3, 1) == '.')
-            {
-                $price = explode('.', $price);
-                $last = array_pop($price);
-                $price = join($price, '').'.'.$last;
-            }
-            else
-            {
-                $price = str_replace('.', '', $price);
-            }
+            
             if (!preg_match($numberPattern,$price)) {
             $result = ['success'=>false,'alert'=>['class'=>'danger-fk','title'=>'УПС! Ошибка','body'=>'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
             return $result;   
@@ -816,16 +798,7 @@ class VendorController extends DefaultController {
             $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
             
             $price = str_replace(',', '.', $price);
-            if(substr($price, -3, 1) == '.')
-            {
-                $price = explode('.', $price);
-                $last = array_pop($price);
-                $price = join($price, '').'.'.$last;
-            }
-            else
-            {
-                $price = str_replace('.', '', $price);
-            }
+            
             $catalogGoods = CatalogGoods::findOne(['id' => $goods_id]);
             $catalogGoods->price = $price;
             $catalogGoods->update();

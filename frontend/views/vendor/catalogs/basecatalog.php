@@ -343,7 +343,6 @@ $form = ActiveForm::begin([
 <?php
 $form = ActiveForm::begin([
             'options' => [
-                'data-pjax' => true,
                 'id' => 'search-form2',
                 'class' => "navbar-form",
                 'role' => 'search',
@@ -468,23 +467,6 @@ $("body").on("hidden.bs.modal", "#add-product", function() {
     $.pjax.reload({container: "#products-list"});
 })
 
-/*$("#importToXls").on("click", ".import", function(e) {
-    e.preventDefault();
-    var form = $("#import-form");
-    var formData = new FormData($("#import-form")[0]);
-    console.log(formData);
-    var formData = form.serialize();    
-    $.ajax({
-	        url: form.attr("action"),
-	        type: "POST",
-	        dataType: "json",
-	        data: formData,
-	        cache: false,
-	        success: function(response) {
-        console.log(response);
-        }
-    });
-});*/
 $("#add-product").on("click", ".edit", function() {
     var form = $("#product-form");
     $.post(

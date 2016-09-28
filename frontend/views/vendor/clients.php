@@ -17,8 +17,22 @@ $gridColumnsClients = [
 		[
 		'label'=>'Ресторан',
 		'value'=>function ($data) {
-                $organization_name = common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
-                return $organization_name;
+                $res = common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
+                return $res;
+                }
+		],
+                [
+		'label'=>'email',
+		'value'=>function ($data) {
+                $res = common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->email;
+                return $res;
+                }
+		],
+                [
+		'label'=>'Последний заказ',
+		'value'=>function ($data) {
+                $res = common\models\Order::find()->select('max(created_at)')->where(['client_id'=>$data->rest_org_id,'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
+                return $res;
                 }
 		],
 		[

@@ -41,7 +41,7 @@ $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margi
 $arrBaseCatalog = Catalog::GetCatalogs(\common\models\Catalog::BASE_CATALOG);
 foreach($arrBaseCatalog as $arrBaseCatalogs){
 ?>
-<div class="hpanel">
+<div class="hpanel" style="margin-bottom:15px;">
     <div class="panel-body">
         <div class="pull-right text-right">
 	                <?= Html::a('Просмотр/Редактирование', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t']) ?>
@@ -67,19 +67,11 @@ Modal::begin([
 <?php 	
 $arrCatalog = Catalog::GetCatalogs(\common\models\Catalog::CATALOG);	
 if(!empty($arrCatalog)){
-?>
-<div class="panel-body">
-    <h4 class="font-light">
-        Каталоги
-    </h4> 
-</div>    
+?>   
 <?php }
 foreach($arrCatalog as $arrCatalogs){?>
-    
-        <div class="row" style="margin-bottom: 15px;">
-            <div class="col-lg-12">
-                <div class="hpanel" style="margin-bottom:0px;">
-                                <div class="panel-body">
+                <div class="hpanel" style="margin-bottom:15px;">
+                    <div class="panel-body">
                         <div class="pull-right text-right">
                                 <?php echo $link = SwitchBox::widget([
                                 'name' => 'status_'.$arrCatalogs->id,
@@ -105,8 +97,6 @@ foreach($arrCatalog as $arrCatalogs){?>
                         </p>
                     </div>
                 </div>
-            </div>
-        </div>
 <?php } ?>
 </div>
 

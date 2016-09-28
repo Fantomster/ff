@@ -307,16 +307,6 @@ class ClientController extends DefaultController {
                                         exit;    
                                     }
                                     $price = str_replace(',', '.', $price);
-                                    if(substr($price, -3, 1) == '.')
-                                    {
-                                        $price = explode('.', $price);
-                                        $last = array_pop($price);
-                                        $price = join($price, '').'.'.$last;
-                                    }
-                                    else
-                                    {
-                                        $price = str_replace('.', '', $price);
-                                    }
                                     if (!preg_match($numberPattern,$price)) {
                                         $result = ['success'=>false,'message'=>'Ошибка: <strong>[Цена]</strong> в неверном формате!'];  
                                         return $result;   

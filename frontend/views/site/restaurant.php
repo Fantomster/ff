@@ -136,7 +136,7 @@ $this->title = 'Ресторанам';
 				</div>
 			</div>
 			
-			<div class="rew__block">
+<!--			<div class="rew__block">
 				<div class="inside__block">
 					<div class="container-fluid">
 					
@@ -165,7 +165,7 @@ $this->title = 'Ресторанам';
 					</div>
 				</div>
 			
-			</div>
+			</div>-->
 			
 			
 			<div class="logo__block_outside">

@@ -234,7 +234,7 @@ class VendorController extends DefaultController {
             exit;    
             }
         }
-        $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'default',".Catalog::BASE_CATALOG.",NOW())";
+        $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'Главный каталог',".Catalog::BASE_CATALOG.",NOW())";
 	\Yii::$app->db->createCommand($sql)->execute(); 
 	$lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
         
@@ -376,7 +376,7 @@ class VendorController extends DefaultController {
                      $highestRow = $sheet->getHighestRow();
                      $highestColumn = $sheet->getHighestColumn();
                      //импорт таблицы начиная со второй строки
-                     $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'default',".Catalog::BASE_CATALOG.",NOW())";
+                     $sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'Главный каталог',".Catalog::BASE_CATALOG.",NOW())";
 			\Yii::$app->db->createCommand($sql)->execute(); 
 			$lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
                     
@@ -677,9 +677,13 @@ class VendorController extends DefaultController {
     public function actionStep1Clone($id){
         $cat_id_old = $id; //id исходного каталога
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $i=0;
+        $copyCatalog = 'Главный каталог '.date("Y-m-d").' '.$i;
         $model=Catalog::findOne(['id' => $id]);
         $model->id = null;
-        $model->name = $model->type==Catalog::BASE_CATALOG ? 'Базовый каталог '.date("Y-m-d") : $model->name.' дубликат';
+        $model->name = $model->type==Catalog::BASE_CATALOG ? 
+                common\models\Catalog::find()->'Главный каталог '.date("Y-m-d") :
+            $model->name.' дубликат';
         $cat_type=$model->type;   //текущий тип каталога(исходный)    
         $model->type = Catalog::CATALOG;//переопределяем тип на 2
         $model->isNewRecord = true;

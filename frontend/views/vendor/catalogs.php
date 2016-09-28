@@ -95,11 +95,11 @@ foreach($arrCatalog as $arrCatalogs){?>
                                 'class'=>'m-t'
                             ]);
                             ?>
-                            <?= Html::a('Просмотр/Редактирование', ['vendor/step-3', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t']) ?>
+                            <?= Html::a('Просмотр/Редактирование', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t']) ?>
                             <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дубликат', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog']) ?>
                             <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
                             </div>
-                        <?= Html::a('<h4 class="m-b-xs text-info"> '.$arrCatalogs->name.' <sup class="text-success"><i class="fa fa-user"></i> '.\common\models\relationSuppRest::row_count($arrCatalogs->id).'</sup></h4>', ['vendor/step-3', 'id' => $arrCatalogs->id]) ?>
+                        <?= Html::a('<h4 class="m-b-xs text-info"> '.$arrCatalogs->name.' <sup class="text-success"><i class="fa fa-user"></i> '.\common\models\relationSuppRest::row_count($arrCatalogs->id).'</sup></h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
 
                         <p class="small m-b-none">Создан: <?=$arrCatalogs->created_at ?></p>
                         </p>

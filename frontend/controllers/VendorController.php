@@ -766,10 +766,6 @@ class VendorController extends DefaultController {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
-            //'goods_id','total_price'
-            /* $result = ['success'=>true,'alert'=>['class'=>'success-fk','title'=>'Сохранено','body'=>Yii::$app->request->post('catalog')]];
-            return $result;
-            exit;*/
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             foreach ( $arrCatalog as $arrCatalogs ) {
             $goods_id = htmlspecialchars(trim($arrCatalogs['dataItem']['goods_id']));

@@ -357,7 +357,7 @@ $gridColumnsCatalog = [
         [
         'label'=>'Ресторан',
         'value'=>function ($data) {
-        $organization_name=common\models\Organization::get_value($data->rest_org_id)->name;
+        $organization_name=common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
         return $organization_name;
         }
         ],
@@ -365,8 +365,8 @@ $gridColumnsCatalog = [
         'label'=>'Текущий каталог',
         'format' => 'raw',
         'value'=>function ($data) {
-        $catalog_name = $data->cat_id==0 ? '' : 
-        common\models\Catalog::get_value($data->cat_id)->name;
+        $catalog_name = $data->cat_id == 0 ? '' : 
+        common\models\Catalog::find()->where(['id'=>$data->cat_id])->one()->name;
         return $catalog_name;
         }
         ],
@@ -378,7 +378,7 @@ $gridColumnsCatalog = [
                 $link = CheckboxX::widget([
                     'name'=>'setcatalog_'.$data->id,
                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->status==1 && $data->cat_id ==Yii::$app->request->get('id') ? 1 : 0,
+                    'value'=>$data->cat_id ==Yii::$app->request->get('id') ? 1 : 0,
                     'autoLabel' => true,
                     'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
                     'pluginOptions'=>[

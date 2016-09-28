@@ -15,7 +15,6 @@ use yii\data\ActiveDataProvider;
  * @property integer $discount
  * @property integer $discount_percent
  * @property integer $discount_fixed
- * @property string $note
  * @property string $created_at
  * @property string $updated_at
  * 
@@ -64,8 +63,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
         return [
             [['cat_id', 'base_goods_id'], 'required'],
             [['cat_id', 'base_goods_id'], 'integer'],
-            [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],           
-            [['note'], 'string', 'max' => 500],
+            [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'], 
             [['discount'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/', 'min' => 0],
             [['discount_percent'], 'number', 'min' => -100, 'max' => 100],
             [['discount_fixed'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/', 'min' => 0],
@@ -81,7 +79,6 @@ class CatalogGoods extends \yii\db\ActiveRecord {
             'cat_id' => 'Cat ID',
             'base_goods_id' => 'Cat Base Goods ID',
             'price' => 'Цена',
-            'note' => 'Комментарий',
             'discount' => 'Скидка (руб.)',
             'discount_percent' => 'Скидка %',
             'discount_fixed' => 'Фиксированная цена',
@@ -99,7 +96,6 @@ class CatalogGoods extends \yii\db\ActiveRecord {
                 'cat_id',
                 'base_goods_id',
                 'price',
-                'note',
                 'discount',
                 'discount_percent',
                 'discount_fixed'

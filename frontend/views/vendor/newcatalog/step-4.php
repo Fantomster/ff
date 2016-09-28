@@ -51,7 +51,7 @@ $gridColumns = [
                 $link = CheckboxX::widget([
                     'name'=>'setcatalog_'.$data->rest_org_id,
                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->status==1 && $data->cat_id ==Yii::$app->request->get('id') ? 1 : 0,
+                    'value'=>$data->cat_id ==Yii::$app->request->get('id') ? 1 : 0,
                     'autoLabel' => true,
                     'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
                     'pluginOptions'=>[
@@ -105,7 +105,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
   });
 }
 
-$("input[type=checkbox]").on("change", function(e) {	
+$("input[type=checkbox]").live("change", function(e) {	
 var id = $(this).attr("data-id");
 var state = $(this).prop("checked");
     $.ajax({

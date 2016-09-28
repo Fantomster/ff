@@ -139,16 +139,16 @@ body {
 }
 
 .header-nav .logo__block-icon {
-    background: url(../images/logo-new.png) no-repeat;	
-    background-size: 196px 56px;
+    background: url(../images/logo-new2.png) no-repeat;	
+    background-size: 150px 43px;
     display: block;
-    width: 196px;
-    height: 56px;
+    width: 150px;
+    height: 43px;
 }
 
 .header-nav .phone__block {
     float: left;
-    padding: 21px 0 0 0;
+    padding: 14px 0 0 0;
 }
 
 .header-nav .registr__block a {
@@ -356,7 +356,7 @@ a:focus {
     }
     .header-nav .nav__block {
         float: right;
-        padding: 21px 0 0 0;
+        padding: 14px 0 0 0;
     }
     .header-nav .nav_menu >li {
         display: inline-block;
@@ -401,7 +401,7 @@ a:focus {
         // padding: 7px 15px;
         cursor: pointer;
         transition: 0.3s;
-        margin-top: 11px;
+        margin-top: 4px;
     }
     .header-nav .registr__block:hover {
         background-color: #84bf76;
@@ -559,7 +559,7 @@ a:focus {
         overflow: hidden;
         cursor: pointer;
         transition: 0.3s;
-        margin-top: 11px;
+        margin-top: 4px;
     }
     .header-nav .registr__block:hover {
         background-color: #84bf76;
@@ -632,7 +632,7 @@ a:focus {
         text-align: center;
         width: 200px;
         margin: 0 auto;
-        padding: 21px 0 0 0;
+        padding: 14px 0 0 0;
     }
     .header-nav .phone__block .phone__block-number {
         color: #fff;
@@ -858,15 +858,24 @@ a:focus {
     color: #51504f;
     margin-bottom: 35px;
 }
+
+
+::-webkit-input-placeholder {text-transform: uppercase; font-size: 12px; color: #b7beb5;}
+::-moz-placeholder          {text-transform: uppercase; font-size: 12px; color: #b7beb5;}/* Firefox 19+ */
+:-moz-placeholder           {text-transform: uppercase; font-size: 12px; color: #b7beb5;}/* Firefox 18- */
+:-ms-input-placeholder      {text-transform: uppercase; font-size: 12px; color: #b7beb5;}
+
 .form-control {
     border-color: #b7beb5 !important;
     height: 46px !important;
+    color: #a5a8a4 !important;
+    opacity: 1 !important;
+    appearance: none!important;
+    /*for WebKit*/
+    -webkit-appearance: none;
+    /* for FF */
+    -moz-appearance: none;
 }
-
-::-webkit-input-placeholder {text-transform: uppercase; font-size: 12px;}
-::-moz-placeholder          {text-transform: uppercase; font-size: 12px;}/* Firefox 19+ */
-:-moz-placeholder           {text-transform: uppercase; font-size: 12px;}/* Firefox 18- */
-:-ms-input-placeholder      {text-transform: uppercase; font-size: 12px;}
 
 .contact__form input {
     margin-top: 15px;
@@ -1064,7 +1073,7 @@ a:focus {
 }
 .login__inside {
     max-width: 460px;
-    margin: 15% auto 0;
+    margin: 7% auto 0;
     background: #fff;
     padding: 30px;
     border-radius: 5px;
@@ -1329,7 +1338,7 @@ a:focus {
 }
 .header_nav .phone__block {
     float: left;
-    padding: 21px 0 0 0;
+    padding: 14px 0 0 0;
 }
 .header_nav .phone__block .phone__block-number {
     color: #fff;

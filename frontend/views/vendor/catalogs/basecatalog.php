@@ -378,7 +378,7 @@ $gridColumnsCatalog = [
                 $link = CheckboxX::widget([
                     'name'=>'setcatalog_'.$data->id,
                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->cat_id ==Yii::$app->request->get('id') ? 1 : 0,
+                    'value'=>$data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
                     'autoLabel' => true,
                     'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
                     'pluginOptions'=>[
@@ -426,16 +426,17 @@ if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))
         
 $('input[type=checkbox]').live('change', function(e) {
     var id = $(this).attr('data-id');
+    var state = $(this).prop("checked");
     var elem = $(this).attr('name').substr(0, 6);
-    if(elem=="status"){statusOrMarket(elem,id);}
-    if(elem=="market"){statusOrMarket(elem,id);}
-    if(elem=="setcat"){setRestOrgCatalog(id);}   
-	function statusOrMarket(elem,id){
+    if(elem=="status"){statusOrMarket(elem,id,state);}
+    if(elem=="market"){statusOrMarket(elem,id,state);}
+    if(elem=="setcat"){setRestOrgCatalog(id,state);}   
+	function statusOrMarket(elem,id,state){
 		$.ajax({
 	        url: "index.php?r=vendor/changecatalogprop",
 	        type: "POST",
 	        dataType: "json",
-	        data: {'elem' : elem,'id' : id},
+	        data: {'elem' : elem,'id' : id,'state' : state},
 	        cache: false,
 	        success: function(response) {
 		        console.log(response)
@@ -445,12 +446,12 @@ $('input[type=checkbox]').live('change', function(e) {
 	        }
 		});
 	}
-	function setRestOrgCatalog(id){
+	function setRestOrgCatalog(id,state){
 		$.ajax({
 	        url: "index.php?r=vendor/changesetcatalog",
 	        type: "POST",
 	        dataType: "json",
-	        data: {'id' : id, 'curCat' : $currentCatalog},
+	        data: {'id' : id, 'curCat' : $currentCatalog,'state' : state},
 	        cache: false,
 	        success: function(response) {
 		        console.log(response)

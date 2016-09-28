@@ -577,17 +577,34 @@ class VendorController extends DefaultController {
             //$relation_supp_rest = new RelationSuppRest;
             $curCat = \Yii::$app->request->post('curCat'); //catalog
             $id = \Yii::$app->request->post('id'); //rest_org_id
+            $state = Yii::$app->request->post('state');
+                //$relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $id,'supp_org_id'=>$currentUser->organization_id]);
 
-                        $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $id,'supp_org_id'=>$currentUser->organization_id]);
+                        //if($relation_supp_rest->status==0){$set = 1;}else{$set = 0;}
+                if($state=='true'){
+                    $rest_org_id = $id;
+                    $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $rest_org_id,'supp_org_id'=>$currentUser->organization_id]);
+                    $relation_supp_rest->cat_id = $curCat;
+                    $relation_supp_rest->status = 1;
+                    $relation_supp_rest->update();
 
-                        if($relation_supp_rest->status==0){$set = 1;}else{$set = 0;}
-                        
-			$relation_supp_rest->cat_id = $relation_supp_rest->status==0 ? $curCat : Catalog::NON_CATALOG ;
+                    return (['success' => true, 'Подписан']); 
+                    exit;
+                }else{
+                    $rest_org_id = $id;
+                    $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $rest_org_id,'supp_org_id'=>$currentUser->organization_id]);    
+                    $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
+                    $relation_supp_rest->status = 0;
+                    $relation_supp_rest->update(); 
+                    return (['success' => true, Yii::$app->request->post('state')]);
+                    exit;
+                }
+			/*$relation_supp_rest->cat_id = $relation_supp_rest->status==0 ? $curCat : Catalog::NON_CATALOG ;
 			$relation_supp_rest->status = $set;
 			$relation_supp_rest->update(); 	
 				 
 			$result = ['success' => true, 'status'=>'ресторан '.$id.' назначен каталог '.$curCat];
-			return $result;
+			return $result;*/
 	          	}
     }
     public function actionChangecatalogstatus()

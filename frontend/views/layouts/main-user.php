@@ -28,10 +28,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 <html lang="<?= Yii::$app->language ?>">
     <head>
         <meta charset="<?= Yii::$app->charset ?>"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <link href="css/style.css" rel="stylesheet">
+        <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
 <?php $this->head() ?>
         <!--[if lt IE 9]>
 	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -41,7 +42,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     <body class="hold-transition skin-blue sidebar-mini">
 <?php $this->beginBody() ?>
         <div class="wrapper">
-            <header class="header-nav default dark-bg" id="menu-fk">
+<!--            <header class="header-nav default dark-bg" id="menu-fk">
                 <div class="inside__block">
                     <div class="container-fluid">
                         <div class="logo__block">
@@ -68,7 +69,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                     </div>
                 </div>
-            </header><!-- .header-nav-->
+            </header> .header-nav-->
 
             <main class="content">
         <?= $content ?>

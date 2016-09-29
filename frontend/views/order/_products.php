@@ -7,25 +7,30 @@ use yii\widgets\Pjax;
 Pjax::begin(['enablePushState' => false, 'id' => 'productsList', 'timeout' => 3000]);
 echo GridView::widget([
     'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
+//    'filterModel' => $searchModel,
     'filterPosition' => false,
     'summary' => '',
     'columns' => [
         [
-            'attribute' => 'baseProduct.product',
-            'value' => 'baseProduct.product',
+            'attribute' => 'product',
+            'value' => function($data){
+                   return $data['product'];
+               },
             'label' => 'Название продукта',
         ],
         [
-            'attribute' => 'organization.name',
-            'value' => 'organization.name',
-            'label' => 'Поставщик',
+            'attribute' => 'price',
+            'value' => function($data) {
+                   return $data['price']  . ' / ' . $data['units'];
+            },
+            'label' => 'Цена'
         ],
-        'price',
         [
-            'attribute' => 'baseProduct.units',
-            'value' => 'baseProduct.units',
-            'label' => 'Количество в упаковке',
+            'format' => 'raw',
+            'value' => function($data){
+                return Html::textInput('', 1);
+            },
+            'label' => 'Количество'
         ],
         //'note',
         [
@@ -33,11 +38,11 @@ echo GridView::widget([
             'value' => function ($data) {
                 $link = Html::a('<span class="glyphicon glyphicon-plus"></span>', '#', [
                             'class' => 'add-to-cart',
-                            'data-id' => $data->id,
+                            'data-id' => $data['id'],
                 ]);
                 return $link;
             },
-                ],
-            ],
-        ]);
+        ],
+    ],
+]);
 Pjax::end();        

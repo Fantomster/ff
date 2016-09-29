@@ -12,6 +12,7 @@ use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use yii\helpers\Json;
 use common\models\OrderChat;
+use yii\data\SqlDataProvider;
 
 class OrderController extends DefaultController {
     /*
@@ -20,35 +21,53 @@ class OrderController extends DefaultController {
 
     public function actionCreate() {
         $session = Yii::$app->session;
-//        $session->remove('categories');
-//        $session->remove('vendors');
+//        $session->remove('selectedCategory');
+//        $session->remove('selectedVendor');
 //        $session->remove('orders');
         $client = $this->currentUser->organization;
 
-        if (!$session->has('categories')) {
-            $categories = $client->getRestaurantCategories();
-            for ($i = 0; $i < count($categories); $i++) {
-                $categories[$i]['selected'] = 0;
-            }
-            $session['categories'] = $categories;
-        } else {
-            $categories = $session['categories'];
-        }
+        //$categories = $client->getRestaurantCategories();
 
-        if (!$session->has('vendors')) {
-            $vendors = $client->getSuppliers($categories);
-            for ($i = 0; $i < count($vendors); $i++) {
-                $vendors[$i]['selected'] = 0;
-            }
-            $session['vendors'] = $vendors;
-        } else {
-            $vendors = $session['vendors'];
+        $selectedCategory = isset($session['selectedCategory']) ? $session['selectedCategory'] : null;
+        
+        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : null;
+        
+        $post = Yii::$app->request->post();
+        
+        if ($post) {
+            $selectedVendor = ($selectedCategory == $post['selectedCategory']) ? $post['selectedVendor'] : '';
+            $selectedCategory = $post['selectedCategory'];
         }
+        
+        $session['selectedCategory'] = $selectedCategory;
+        $session['selectedVendor'] = $selectedVendor;
+        
+        $vendors = $client->getSuppliers($selectedCategory);
 
-        $searchModel = new OrderCatalogSearch();
-        $searchModel->vendors = $vendors;
-        $params = Yii::$app->request->getQueryParams();
-        $dataProvider = $searchModel->search($params);
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
+
+        $query = "SELECT id, product, supp_org_id, units, price FROM catalog_base_goods WHERE cat_id IN ($catalogs) "
+                . 'UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price FROM '
+                    . 'catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id '
+                    . "WHERE cg.cat_id IN ($catalogs))";
+        
+        $count = Yii::$app->db->createCommand($query)->queryScalar();
+
+        $dataProvider = new SqlDataProvider([
+            'sql' => $query,
+            'totalCount' => $count,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'product',
+                    'price',
+                ],
+            ],
+        ]);
+
+        $test = $dataProvider->sql;
 
         if ($session->has('orders')) {
             $orders = $session['orders'];
@@ -57,9 +76,9 @@ class OrderController extends DefaultController {
         }
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('_products', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('create', compact('dataProvider', 'orders', 'client', 'selectedCategory', 'selectedVendor', 'vendors'));
         } else {
-            return $this->render('create', compact('categories', 'vendors', 'searchModel', 'dataProvider', 'orders'));
+            return $this->render('create', compact('dataProvider', 'orders', 'client', 'selectedCategory', 'selectedVendor', 'vendors'));
         }
     }
 
@@ -107,6 +126,7 @@ class OrderController extends DefaultController {
         }
         $post = Yii::$app->request->post();
         $product = CatalogGoods::findOne(['id' => $post['id']]);
+        $quantity = (int)$post['quantity'];
         $vendor = $product->organization;
         $newOrder = true;
         foreach ($orders as &$order) {
@@ -116,14 +136,14 @@ class OrderController extends DefaultController {
                 foreach ($order['content'] as &$prod) {
                     if ($prod['product_id'] == $product->id) {
                         $newProduct = false;
-                        $prod['quantity'] ++;
+                        $prod['quantity'] += $quantity;
                     }
                 }
                 if ($newProduct) {
                     $order['content'][$product->id] = [
                         'product_id' => $product->id,
                         'product_name' => $product->baseProduct->product,
-                        'quantity' => 1,
+                        'quantity' => $quantity,
                         'price' => $product->price];
                 }
             }
@@ -135,7 +155,7 @@ class OrderController extends DefaultController {
                 'content' => [$product->id => [
                         'product_id' => $product->id,
                         'product_name' => $product->baseProduct->product,
-                        'quantity' => 1,
+                        'quantity' => $quantity,
                         'price' => $product->price]]
             ];
         }

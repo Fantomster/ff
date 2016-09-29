@@ -29,6 +29,14 @@ class OrderSearch extends Order
     /**
      * @inheritdoc
      */
+    public function attributes()
+    {
+        return array_merge(parent::attributes(), ['baseProduct.product', 'vendor.name', 'baseProduct.units']);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function scenarios()
     {
         // bypass scenarios() implementation in the parent class

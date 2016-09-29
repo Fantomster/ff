@@ -3,47 +3,27 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
+use yii\widgets\Pjax;
+use yii\grid\GridView;
+use kartik\widgets\Select2;
+use yii\widgets\ActiveForm;
 
 $this->registerJs(
         '$("document").ready(function(){
-            $(".category").on("click", function(e) {
-                e.preventDefault();
-                if ($(this).data("selected") == 0) {
-                    $(this).removeClass("btn-default").addClass("btn-primary");
-                    $(this).data("selected", 1);
-                } else {
-                    $(this).removeClass("btn-primary").addClass("btn-default");
-                    $(this).data("selected", 0);
-                }
-                $.post(
-                    "' . Url::to(['/order/ajax-categories']) . '",
-                    {"id": $(this).data("id"), "selected": $(this).data("selected")}
-                ).done(function(result) {
-                    $("#vendors").html(result);
-                    $.pjax.reload({container: "#productsList"});
-                });
+            $("#createP").on("change", "#selectedCategory", function(e) {
+                var form = $("#createForm");
+                form.submit();
             });
-            $("#vendors").on("click", ".vendor", function(e) {
-                e.preventDefault();
-                if ($(this).data("selected") == 0) {
-                    $(this).addClass("active");
-                    $(this).data("selected", 1);
-                } else {
-                    $(this).removeClass("active");
-                    $(this).data("selected", 0);
-                }
-                $.post(
-                    "' . Url::to(['/order/ajax-vendors']) . '",
-                    {"id": $(this).data("id"), "selected": $(this).data("selected")}
-                ).done(function(result) {
-                    $.pjax.reload({container: "#productsList"});
-                });
+            $("#createP").on("change", "#selectedVendor", function(e) {
+                var form = $("#createForm");
+                form.submit();
             });
-            $("#products").on("click", ".add-to-cart", function(e) {
+            $("#createP").on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
+                quantity = $(this).parent().parent().find(".quantity").val();
                 $.post(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
-                    {"id": $(this).data("id")}
+                    {"id": $(this).data("id"), "quantity": quantity}
                 ).done(function(result) {
                     $("#orders").html(result);
                 });
@@ -91,39 +71,100 @@ $this->registerJs(
             });
         });'
 );
-
 ?>
- <div class="panel panel-primary">
-      <div class="panel-heading">Категории</div>
-      <div class="panel-body">
-          <?php
-foreach ($categories as $cat) {
-    echo Html::button(
-            $cat['name'], [
-        'class' => $cat['selected'] ? 'btn btn-primary category' : 'btn btn-default category',
-        'data-id' => $cat['id'],
-        'data-name' => $cat['name'],
-        'data-selected' => $cat['selected'],
-    ]);
-}
-          ?>
-      </div>
-    </div>
-<div style="padding-top: 20px;">
-    <div class="list-group" style="padding-right: 10px; width: 300px; float: left;" id="vendors">
-        <?= $this->render('_vendors', compact('vendors')) ?>
-    </div>
-    <div style="padding-right: 10px; float: left; width: 60%" id="products">
-        <?= $this->render('_products', compact('searchModel', 'dataProvider')) ?>
-    </div>
-    <div style="float: left;" id="orders">
-        <?= $this->render('_orders', compact('orders')) ?>
-    </div>
+<div id="createP">
+<?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 3000]);
+$form = ActiveForm::begin([
+            'options' => [
+                'id' => 'createForm',
+               // 'data-pjax' => true,
+            ],
+        ]); ?>
+    <div style="padding-top: 20px; float: left; width: 60%;">
+        <div id="categories">
+            <?=
+            Select2::widget([
+                'name' => 'selectedCategory',
+                'value' => $selectedCategory,
+                'id' => 'selectedCategory',
+                'data' => $client->getRestaurantCategories(),
+                'options' => ['placeholder' => 'Все категории'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ])
+            ?>
+        </div>
+        <div id="vendors">
+            <?=
+            Select2::widget([
+                'name' => 'selectedVendor',
+                'value' => $selectedVendor,
+                'id' => 'selectedVendor',
+                'data' => $vendors,
+                'options' => ['placeholder' => 'Все поставщики'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ])
+            ?>
+        </div>
+        <div style="padding-right: 10px; float: left; width: 100%" id="products">
+            <?=
+            GridView::widget([
+                'dataProvider' => $dataProvider,
+                'filterPosition' => false,
+                'summary' => '',
+                'columns' => [
+                    [
+                        'attribute' => 'product',
+                        'value' => function($data) {
+                            return $data['product'];
+                        },
+                        'label' => 'Название продукта',
+                    ],
+                    [
+                        'attribute' => 'price',
+                        'value' => function($data) {
+                            return $data['price'] . ' / ' . $data['units'];
+                        },
+                        'label' => 'Цена'
+                    ],
+                    [
+                        'format' => 'raw',
+                        'value' => function($data) {
+                            return Html::textInput('', 1, ['class' => 'quantity']);
+                        },
+                        'label' => 'Количество'
+                    ],
+                    //'note',
+                    [
+                        'format' => 'raw',
+                        'value' => function ($data) {
+                            $link = Html::a('<span class="glyphicon glyphicon-plus"></span>', '#', [
+                                        'class' => 'add-to-cart',
+                                        'data-id' => $data['id'],
+                            ]);
+                            return $link;
+                        },
+                            ],
+                        ],
+                    ])
+                    ?>
+                </div>
+            </div>
+            <div style="float: left;" id="orders">
+                <?= $this->render('_orders', compact('orders')) ?>
+            </div>
+        </form>
+        <?php 
+        ActiveForm::end();
+        Pjax::end(); 
+        ?>
 </div>
-
-<?=
-Modal::widget([
-    'id' => 'showOrder',
-    'clientOptions' => false,
-])
-?>
+        <?=
+        Modal::widget([
+            'id' => 'showOrder',
+            'clientOptions' => false,
+        ])
+        ?>

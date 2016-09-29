@@ -11,14 +11,35 @@ use common\models\Users;
 use kartik\checkbox\CheckboxX;
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
+<?=
+Modal::widget([
+    'id' => 'view-catalog',
+    'size' => 'modal-lg',
+    'clientOptions' => false,   
+])
+?>
+<?=
+Modal::widget([
+    'id' => 'view-client',
+    'size' => 'modal-md',
+    'clientOptions' => false,   
+])
+?>
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'cl-list',]); ?>
 <?php 
 $gridColumnsClients = [
 		[
 		'label'=>'Ресторан',
+                'format' => 'raw',
 		'value'=>function ($data) {
                 $res = common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
-                return $res;
+                return Html::a(Html::encode($res), ['vendor/view-client', 'id' => $data->rest_org_id], [
+                    'data' => [
+                    'target' => '#view-client',
+                    'toggle' => 'modal',
+                    'backdrop' => 'static',
+                              ],
+                    ]);
                 }
 		],
                 [
@@ -31,7 +52,7 @@ $gridColumnsClients = [
                 [
 		'label'=>'Последний заказ',
 		'value'=>function ($data) {
-                $res = common\models\Order::find()->select('max(created_at)')->where(['client_id'=>$data->rest_org_id,'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
+                $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id'=>$data->rest_org_id,'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
                 return $res;
                 }
 		],
@@ -39,15 +60,21 @@ $gridColumnsClients = [
 		'label'=>'Текущий каталог',
                 'format' => 'raw',
 		'value'=>function ($data) {
-                $cat = $data->cat_id==0 ? '' : common\models\Catalog::get_value($data->cat_id)->name;
-
-		return $cat;
+                $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
+                return $data->cat_id==0? '':
+                        Html::a(Html::encode($cat->name), ['vendor/view-catalog', 'id' => $data->cat_id], [
+                    'data' => [
+                    'target' => '#view-catalog',
+                    'toggle' => 'modal',
+                    'backdrop' => 'static',
+                              ],
+                    ]);
 		}
 		],
                 [
-                'attribute' => 'Статус',
+                'attribute' => 'Статус сотрудничества',
                 'format' => 'raw',
-                'contentOptions' => ['style' => 'width:50px;'],
+                'contentOptions' => ['style' => 'width:190px;text-align:center'],
                 'value' => function ($data) {
                     $link = CheckboxX::widget([
                     'name'=>'restOrgId_'.$data->rest_org_id,
@@ -90,6 +117,7 @@ $gridColumnsClients = [
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
+        'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
 	'columns' => $gridColumnsClients,
 ]);
 ?> 
@@ -127,7 +155,7 @@ function invite(elem,state,id){
 	        cache: false,
 	        success: function(response) {
 		        console.log(response)
-		        $.pjax.reload({container: "#clients-list"});
+		        $.pjax.reload({container: "#cl-list"});
 		    },
 		    failure: function(errMsg) {
 	            console.log(errMsg);
@@ -146,6 +174,27 @@ $("#add-client").on("click", ".adds-client", function() {
             )
             .done(function(result) {
             form.replaceWith(result);
+        });
+        return false;
+    });
+$("body").on("hidden.bs.modal", "#view-client", function() {
+    $(this).data("bs.modal", null);
+    $.pjax.reload({container: "#cl-list"});
+});
+$("body").on("hidden.bs.modal", "#view-catalog", function() {
+    console.log('close catalog');
+    $(this).data("bs.modal", null);       
+});
+$("#view-client").on("click", ".save-form", function() {        
+    var form = $("#client-form");
+        console.log(form.serialize())
+    $.post(
+        form.attr("action"),
+            form.serialize()
+            )
+            .done(function(result) {
+            form.replaceWith(result);
+            
         });
         return false;
     });

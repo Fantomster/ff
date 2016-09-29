@@ -9,6 +9,7 @@ use yii\bootstrap\Modal;
 use common\models\CatalogBaseGoods;
 use common\models\RelationSuppRest;
 use common\models\Catalog;
+use yii\widgets\Pjax;
 use common\models\Organization;
 use common\models\User;
 use dosamigos\switchinput\SwitchBox;
@@ -65,9 +66,10 @@ Modal::begin([
 
 
 <?php 	
-$arrCatalog = Catalog::GetCatalogs(\common\models\Catalog::CATALOG);	
-if(!empty($arrCatalog)){
-?>   
+$arrCatalog = Catalog::GetCatalogs(\common\models\Catalog::CATALOG); ?>
+    
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'catalog-list',]); ?>
+<?php if(!empty($arrCatalog)){ ?>   
 <?php }
 foreach($arrCatalog as $arrCatalogs){?>
                 <div class="hpanel" style="margin-bottom:15px;">
@@ -98,17 +100,33 @@ foreach($arrCatalog as $arrCatalogs){?>
                     </div>
                 </div>
 <?php } ?>
+<?php Pjax::end(); ?> 
 </div>
 
 <?php
 $customJs = <<< JS
+/** 
+ * Forward port jQuery.live()
+ * Wrapper for newer jQuery.on()
+ * Uses optimized selector context 
+ * Only add if live() not already existing.
+*/
+if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))) {
+  jQuery.fn.extend({
+      live: function (event, callback) {
+         if (this.selector) {
+              jQuery(document).on(event, this.selector, callback);
+          }
+      }
+  });
+}
 $("body").on("hidden.bs.modal", function() {
     $(this).data("bs.modal", null);
 });
 $('#viewBaseCatalog').click(function (e){
 $(location).attr('href','index.php?r=vendor/catalogs')
 })
-$('.del').click(function (e){
+$('.del').live("click", function (e){
 	var id = $(this).attr('id').replace('del_','');
 	bootbox.confirm({
             title: "Удалить каталог?",
@@ -135,7 +153,7 @@ $('.del').click(function (e){
 	        success: function(response) {
 		        if(response.success){
 			        console.log(response); 
-			        location.reload(); 
+			        $.pjax.reload({container: "#catalog-list"});
 			        }else{
 				    console.log('Что-то пошло не так');    
 			        }

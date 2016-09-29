@@ -20,12 +20,12 @@ $this->title = 'Добавить продукты';
     <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
 </div>
 <div class="panel-body">
-<ul class="nav nav-tabs">
-    <?='<li>'.Html::a('Имя каталога',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-    <?='<li class="active">'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-    <?='<li>'.Html::a('Редактировать',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-    <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
-</ul>
+    <ul class="nav nav-tabs">
+        <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+        <?='<li class="active">'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+    </ul>
 </div>
 <?php Pjax::begin(['id' => 'pjax-container'])?>
 <?php 
@@ -35,7 +35,7 @@ $gridColumnsBaseCatalog = [
     'value'=>'article',
     ],
     [
-    'label'=>'Продукт',
+    'label'=>'Список товаров',
     'value'=>'product',
     ],
     [

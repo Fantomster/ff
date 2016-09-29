@@ -7,6 +7,7 @@ use yii\helpers\Json;
 use yii\web\HttpException;
 use yii\web\Controller;
 use common\models\User;
+use common\models\Organization;
 use common\models\Role;
 use common\models\Profile;
 use common\models\search\UserSearch;
@@ -678,12 +679,10 @@ class VendorController extends DefaultController {
     public function actionStep1Clone($id){
         $cat_id_old = $id; //id исходного каталога
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $i=0;
-        $copyCatalog = 'Главный каталог '.date("Y-m-d").' '.$i;
+        
         $model=Catalog::findOne(['id' => $id]);
         $model->id = null;
-        $model->name = $model->type==Catalog::BASE_CATALOG ? 'Главный каталог '.date("Y-m-d") :
-            $model->name.' '.date("Y-m-d");
+        $model->name = $model->name.' '.date('H:i:s');
         $cat_type=$model->type;   //текущий тип каталога(исходный)    
         $model->type = Catalog::CATALOG;//переопределяем тип на 2
         $model->status = 1;
@@ -932,6 +931,42 @@ class VendorController extends DefaultController {
         
         return $this->renderAjax('settings/_info', compact('organization'));
     }
-    
-    
+    public function actionViewClient($id){
+        $client_id = $id;
+	$currentUser = User::findIdentity(Yii::$app->user->id);
+        $organization = Organization::find()->where(['id' => $client_id])->one();
+        $relation_supp_rest = RelationSuppRest::find()->where([
+            'rest_org_id' => $client_id, 
+            'supp_org_id' => $currentUser->organization_id])->one();
+        $catalogs = \yii\helpers\ArrayHelper::map(Catalog::find()->
+                where(['supp_org_id' => $currentUser->organization_id])->
+                all(),'id','name');
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($relation_supp_rest->load($post)) {
+               if ($relation_supp_rest->validate()) {
+                 
+                    $relation_supp_rest->update();
+                    $message = 'Сохранено';
+                return $this->renderAjax('clients/_success',['message' => $message]);   
+               }
+            }
+             
+        }
+        return $this->renderAjax('clients/_viewClient', compact('organization','relation_supp_rest','catalogs','client_id'));
+    }
+    public function actionViewCatalog($id){
+        $cat_id = $id;
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        if(Catalog::find()->where(['id'=>$cat_id])->one()->type==Catalog::BASE_CATALOG){
+          $searchModel = new CatalogBaseGoods;
+	  $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id,NULL);
+          return $this->renderAjax('catalogs/_viewBaseCatalog', compact('searchModel', 'dataProvider','cat_id'));   
+        } 
+        if(Catalog::find()->where(['id'=>$cat_id])->one()->type==Catalog::CATALOG){
+          $searchModel = new CatalogGoods;
+	  $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id);
+          return $this->renderAjax('catalogs/_viewCatalog', compact('searchModel', 'dataProvider','cat_id'));  
+        }
+    }    
 }

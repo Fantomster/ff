@@ -26,16 +26,16 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
 <div class="text-center m-b-sm">
 <ul class="nav nav-tabs">
     <?=$catalog->isNewRecord?
-    '<li class="active">'.Html::a('Имя каталога',['vendor/step-1']).'</li>':
-    '<li class="active">'.Html::a('Имя каталога',['vendor/step-1','id'=>$cat_id]).'</li>' 
+    '<li class="active">'.Html::a('Название',['vendor/step-1']).'</li>':
+    '<li class="active">'.Html::a('Название',['vendor/step-1','id'=>$cat_id]).'</li>' 
     ?>
     <?=$catalog->isNewRecord?
-    '<li class="disabled">'.Html::a('Добавить продукты').'</li>':
-    '<li>'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>' 
+    '<li class="disabled">'.Html::a('Добавить товары').'</li>':
+    '<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>' 
     ?>
     <?=$catalog->isNewRecord?
-    '<li class="disabled">'.Html::a('Редактировать').'</li>':
-    '<li>'.Html::a('Редактировать',['vendor/step-3-copy','id'=>$cat_id]).'</li>' 
+    '<li class="disabled">'.Html::a('Изменить цены').'</li>':
+    '<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>' 
     ?>
     <?=$catalog->isNewRecord?
     '<li class="disabled">'.Html::a('Назначить').'</li>':

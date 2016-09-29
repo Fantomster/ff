@@ -638,6 +638,7 @@ class VendorController extends DefaultController {
             if ($catalog->load($post)) {
                 $catalog->supp_org_id=$currentUser->organization_id;
                 $catalog->type=Catalog::CATALOG;
+                $catalog->status=1;
                 if ($catalog->validate()) {
                     $catalog->save();
                     return (['success' => true, 'cat_id'=>$catalog->id]); 
@@ -681,11 +682,11 @@ class VendorController extends DefaultController {
         $copyCatalog = 'Главный каталог '.date("Y-m-d").' '.$i;
         $model=Catalog::findOne(['id' => $id]);
         $model->id = null;
-        $model->name = $model->type==Catalog::BASE_CATALOG ? 
-                common\models\Catalog::find()->'Главный каталог '.date("Y-m-d") :
-            $model->name.' дубликат';
+        $model->name = $model->type==Catalog::BASE_CATALOG ? 'Главный каталог '.date("Y-m-d") :
+            $model->name.' '.date("Y-m-d");
         $cat_type=$model->type;   //текущий тип каталога(исходный)    
         $model->type = Catalog::CATALOG;//переопределяем тип на 2
+        $model->status = 1;
         $model->isNewRecord = true;
         $model->save();
         

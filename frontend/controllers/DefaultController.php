@@ -34,7 +34,7 @@ class DefaultController extends Controller {
                 $suppliers = RelationSuppRest::findOne(['rest_org_id' => $organization->id]);
                 $isIndex = ($this->id === 'client') && ($this->action->id === 'index');
                 if (!isset($suppliers) && $isIndex) {
-                    return $this->redirect(['client/suppliers']);
+                    //return $this->redirect(['client/suppliers']);
                 }
                 break;
             case Organization::TYPE_SUPPLIER:
@@ -43,7 +43,7 @@ class DefaultController extends Controller {
                 $baseCatalogs = CatalogBaseGoods::findOne(['supp_org_id' => $organization->id]);
                 $isIndex = ($this->id === 'vendor') && ($this->action->id === 'index');
                 if (!isset($suppliers) && $isIndex) {
-                    return $this->redirect(['vendor/catalogs']);
+                    //return $this->redirect(['vendor/catalogs']);
                 }
                 break;
         }

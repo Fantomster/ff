@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "organization".
@@ -115,19 +116,11 @@ class Organization extends \yii\db\ActiveRecord
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-//        $categories = RelationCategory::find()
-//                ->select(['category.id', 'category.name'])
-//                ->distinct()
-//                ->joinWith('category', false)
-//                ->where(['relation_category.rest_org_id' => $this->id])
-//                ->orderBy(['category.name' => SORT_ASC])
-//                ->asArray()
-//                ->all();
-        $categories = Category::find()
+        $categories = ArrayHelper::map(Category::find()
                 ->select(['id', 'name'])
                 ->orderBy(['name' => SORT_ASC])
                 ->asArray()
-                ->all();
+                ->all(), 'id', 'name');
         return $categories;
     }
     
@@ -136,26 +129,46 @@ class Organization extends \yii\db\ActiveRecord
      * 
      * @return array
      */
-    public function getSuppliers($categories) {
+    public function getSuppliers($category_id = '') {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        $categoriesList = [];
-        foreach($categories as $category) {
-            if ($category['selected']) {
-                $categoriesList[] = $category['id'];
-            }
-        }
-        $vendors = RelationCategory::find()
-                ->select(['organization.id', 'organization.name', 'relation_supp_rest.cat_id'])
+        $query = RelationCategory::find()
+                ->select(['organization.id', 'organization.name'])
                 ->distinct()
                 ->leftJoin('relation_supp_rest', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
                 ->joinWith('vendor', false)
-                ->where(['category_id' => $categoriesList])
-                ->andWhere(['relation_category.rest_org_id' => $this->id])
-                ->orderBy(['organization.name' => SORT_ASC])
+                ->where(['relation_category.rest_org_id' => $this->id]);
+        if ($category_id) {
+            $query = $query->andWhere(['category_id' => $category_id]);
+        }
+                
+        $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
                 ->asArray()
-                ->all();
+                ->all(), 'id', 'name');
         return $vendors;
+    }
+    
+    /**
+     *  get catalogs list for sqldataprovider for order creation
+     *  
+     *  @return string
+     */
+    public function getCatalogs($vendor_id = '', $category_id = '') {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return '0';
+        }
+        $query = RelationSuppRest::find()
+                ->select(['relation_supp_rest.cat_id'])
+                ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+        if ($category_id) {
+            $query = $query->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
+                    ->andWhere(['relation_category.category_id' => $category_id]);
+        }
+        if ($vendor_id) {
+            $query = $query->andWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
+        }
+        $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
+        return implode (",", $catalogs);
     }
 }

@@ -5,6 +5,7 @@ use yii\helpers\url;
 use yii\web\View;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
+use yii\widgets\Pjax;
 use kartik\select2\Select2;
 use common\models\Category;
 ?>
@@ -17,12 +18,6 @@ $this->registerCss('
 .hide{dosplay:none}
 ');	
 ?>
-<ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
-    <li><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>    
-</ul>
-<div class="tab-content">
-    <div id="tabMySuppliers" class="tab-pane fade in active">
 <?=
 Modal::widget([
     'id' => 'view-catalog',
@@ -37,6 +32,13 @@ Modal::widget([
     'clientOptions' => false,   
 ])
 ?>
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
+    <li><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>    
+</ul>
+<div class="tab-content">
+    <div id="tabMySuppliers" class="tab-pane fade in active">
+
     <?php 
 $gridColumnsCatalog = [
         [
@@ -90,6 +92,7 @@ $gridColumnsCatalog = [
 ];
 ?>
         <div class="panel-body">
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'sp-list',]); ?>
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
@@ -97,7 +100,8 @@ $gridColumnsCatalog = [
         'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
 	'columns' => $gridColumnsCatalog,
 ]);
-?>    
+?>  
+<?php Pjax::end(); ?> 
         </div>
     </div>
     <div id="tabAddSuppliers" class="tab-pane fade">
@@ -449,23 +453,28 @@ e.preventDefault();
 });
 $("body").on("hidden.bs.modal", "#view-supplier", function() {
     $(this).data("bs.modal", null);
+    //$.pjax.reload({container: "#sp-list"});
 })
 $("body").on("hidden.bs.modal", "#view-catalog", function() {
     $(this).data("bs.modal", null);
 })
 $("#view-supplier").on("click", ".save-form", function() {        
     var form = $("#supplier-form");
-        console.log(form.serialize())
-    $.post(
-        form.attr("action"),
-            form.serialize()
-            )
-            .done(function(result) {
-            form.replaceWith(result);
-            
-        });
-        return false;
+    console.log(form.serialize())
+    $.ajax({
+    url: form.attr("action"),
+    type: "POST",
+    //dataType: "json",
+    data: form.serialize(),
+    cache: false,
+    success: function(response) {
+            form.replaceWith(response);
+        },
+        failure: function(errMsg) {
+        console.log(errMsg);
+    }
     });
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

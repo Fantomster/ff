@@ -44,8 +44,8 @@ $gridColumnsCatalog = [
     'format' => 'raw',
     'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
     'value'=>function ($data) {common\models\CatalogBaseGoods::get_value($data->base_goods_id)->status==common\models\CatalogBaseGoods::STATUS_OFF?
-            $product_status='<span class="text-danger">Нет</span>':
-            $product_status='<span class="text-success">Есть</span>';
+            $product_status='<div class="label label-table label-danger">Нет</div>':
+            $product_status='<div class="label label-table label-success">Есть</div>';
             return $product_status;
         },
     ],  

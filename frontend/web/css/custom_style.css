@@ -187,9 +187,8 @@ h6,
 a {
   color: #378a5f;
 }
-.content-wrapper,
-.right-side {
-  background-color: #fff;
+.content-wrapper .right-side {
+  background-color: #fefefe;
 }
 .kv-grid-table td label {
   margin-bottom: 0px;
@@ -348,4 +347,30 @@ a {
   width: 25px;
   height: 25px;
   font-size: 15px;
+}
+.box.box-info {
+  border-top-color: #84bf76;
+}
+.hpanel .panel-body {
+  background: #fff;
+  border: 1px solid #e4e5e7;
+  border-radius: 2px;
+  position: relative;
+  padding: 4px;
+}
+.panel-body {
+  padding: 15px;
+}
+.m-t {
+  margin-top: 18px;
+}
+.btn-fk-success {
+  background-color: #84bf76;
+  border-color: #60a94f;
+  color: #fff;
+}
+.btn-fk-success:hover {
+  background-color: #60a94f;
+  border-color: #529144;
+  color: #fff;
 }

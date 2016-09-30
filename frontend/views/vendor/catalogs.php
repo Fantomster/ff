@@ -19,92 +19,103 @@ use yii\data\Pagination;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 $this->title = 'Мои каталоги (Поставщик)';
 //$this->params['breadcrumbs'][] = $this->title;
-$this->registerCss('
-.hpanel .panel-body {background: #fff;
-    border: 1px solid #e4e5e7;
-    border-radius: 2px;
-    padding: 20px;
-    position: relative;}
-.m-t {
-    margin-top: 15px;
-}
-');
-$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 ?>
 <div class="catalog-index">
-    <div class="panel-body">
-<?= Html::a('<i class="fa fa-fw fa-plus"></i> Новый каталог', ['vendor/step-1'],['class'=>'btn btn-lg btn-primary pull-right']) ?>
-        <h3 class="font-light">
-            <i class="fa fa-list-alt"></i> Мои Каталоги
-        </h3> 
-    </div>
-<?php 
-$arrBaseCatalog = Catalog::GetCatalogs(\common\models\Catalog::BASE_CATALOG);
-foreach($arrBaseCatalog as $arrBaseCatalogs){
-?>
-<div class="hpanel" style="margin-bottom:15px;">
-    <div class="panel-body">
-        <div class="col-md-6 text-left">
-            <?= Html::a('<h4 class="m-b-xs text-info">Главный каталог <sup class="text-success"><i class="fa fa-user"></i> '.\common\models\relationSuppRest::row_count($arrBaseCatalogs->id).'</sup></h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
-            <p class="small">Этот каталог содержит все ваши продукты доступные на f-keeper</p>
-        </div>
-        <div class="col-md-6 text-right">
-            <?= Html::a('Просмотр/Редактирование', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t']) ?>
-            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дубликат', ['vendor/step-1-clone', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t clone-catalog']) ?>
-        </div>
-    </div>
-</div>
-<?php
-}
-Modal::begin([
-    'id' => 'setting-base-catalog',
-    'clientOptions' => false,
-    ]);
-?>
-<?php Modal::end(); ?>	
-
-<?php // Html::input('text', 'searchToCatalogs', null, ['class' => 'form-control','placeholder'=>'Умный поиск']) ?> 
-
-
-<?php 	
-$arrCatalog = Catalog::GetCatalogs(\common\models\Catalog::CATALOG); ?>
-    
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'catalog-list',]); ?>
-<?php if(!empty($arrCatalog)){ ?>   
-<?php }
-foreach($arrCatalog as $arrCatalogs){?>
-    <div class="hpanel" style="margin-bottom:15px;">
-        <div class="panel-body">
-            <div class="col-md-4 text-left">
-            <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
-                    ' <sup class="text-success"><i class="fa fa-user"></i> '.
-                    \common\models\relationSuppRest::row_count($arrCatalogs->id).
-                    '</sup></h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
-            <p class="small m-b-none">Создан: <?=$arrCatalogs->created_at ?></p>
+    	<div class="box box-info">
+            <div class="box-header with-border">
+              <h3 class="box-title">Каталоги</h3>
             </div>
-            <div class="col-md-8 text-right">
-                    <?php echo $link = SwitchBox::widget([
-                    'name' => 'status_'.$arrCatalogs->id,
-                    'checked' => $arrCatalogs->status==Catalog::STATUS_OFF ? false : true,
-                    'clientOptions' => [
-                        'onColor' => 'success',
-                        'offColor' => 'default',
-                        'onText'=>'Вкл',
-                        'offText'=>'Выкл',
-                        'baseClass'=>'bootstrap-switch',
-                        'wrapperClass'=>'wrapper m-t',
-                    ],
-                    'class'=>'m-t'
-                ]);
+            <!-- /.box-header -->
+            <div class="box-body">
+              <?php 
+                $arrBaseCatalog = Catalog::GetCatalogs(\common\models\Catalog::BASE_CATALOG);
+                foreach($arrBaseCatalog as $arrBaseCatalogs){
                 ?>
-                <?= Html::a('Просмотр/Редактирование', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t']) ?>
-                <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дубликат', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog']) ?>
-                <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
+                <div class="hpanel">
+                    <div class="panel-body">
+                        <div class="col-md-6 text-left">
+                            <?= Html::a('<h4 class="m-b-xs text-info">Главный каталог <sup class="text-success"><i class="fa fa-user"></i> '.\common\models\relationSuppRest::row_count($arrBaseCatalogs->id).'</sup></h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
+                            <p class="small">Этот каталог содержит все ваши продукты доступные на f-keeper</p>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <?= Html::a('Просмотр/Редактирование', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t']) ?>
+                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дубликат', ['vendor/step-1-clone', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t clone-catalog']) ?>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                }
+                Modal::begin([
+                    'id' => 'setting-base-catalog',
+                    'clientOptions' => false,
+                    ]);
+                ?>
+                <?php Modal::end(); ?>	
             </div>
-        </div>
-    </div>
-<?php } ?>
-<?php Pjax::end(); ?> 
+            <!-- /.box-body -->
+            <!--div class="box-footer clearfix">
+              <span class="pull-right">5 каталогов</span>
+            </div-->
+            <!-- /.box-footer -->
+          </div>
+                <div class="box box-info">
+            <div class="box-header with-border">
+              <div class="box-title pull-left">
+                <?= Html::a('Новый каталог', ['vendor/step-1'],['class'=>'btn btn-sm btn-fk-success']) ?>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+				<?php // Html::input('text', 'searchToCatalogs', null, ['class' => 'form-control','placeholder'=>'Умный поиск']) ?> 
+				
+				
+				<?php 	
+				$arrCatalog = Catalog::GetCatalogs(\common\models\Catalog::CATALOG); ?>
+				    
+				<?php Pjax::begin(['enablePushState' => false, 'id' => 'catalog-list',]); ?>
+				<?php if(!empty($arrCatalog)){ ?>   
+				<?php }
+				foreach($arrCatalog as $arrCatalogs){?>
+				    <div class="hpanel" style="margin-bottom:15px;">
+				        <div class="panel-body">
+				            <div class="col-md-4 text-left">
+				            <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
+				                    ' <sup class="text-success"><i class="fa fa-user"></i> '.
+				                    \common\models\relationSuppRest::row_count($arrCatalogs->id).
+				                    '</sup></h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
+				            <p class="small m-b-none">Создан: <?=$arrCatalogs->created_at ?></p>
+				            </div>
+				            <div class="col-md-8 text-right">
+				                    <?php echo $link = SwitchBox::widget([
+				                    'name' => 'status_'.$arrCatalogs->id,
+				                    'checked' => $arrCatalogs->status==Catalog::STATUS_OFF ? false : true,
+				                    'clientOptions' => [
+				                        'onColor' => 'success',
+				                        'offColor' => 'default',
+				                        'onText'=>'Вкл',
+				                        'offText'=>'Выкл',
+				                        'baseClass'=>'bootstrap-switch',
+				                        'wrapperClass'=>'wrapper m-t bootstrap-switch-small',
+				                    ],
+				                    'class'=>'m-t'
+				                ]);
+				                ?>
+				                <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t btn-sm']) ?>
+				                <?= Html::a('<i class="fa fa-fw fa-clone"></i>', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog btn-sm ']) ?>
+				                <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
+				            </div>
+				        </div>
+				    </div>
+				<?php } ?>
+				<?php Pjax::end(); ?> 
+              <!-- /.table-responsive -->
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer clearfix">
+              <span class="pull-right">5 каталогов</span>
+            </div>
+            <!-- /.box-footer -->
+          </div>
 </div>
 
 <?php

@@ -66,25 +66,31 @@ $form = ActiveForm::begin([
     </div>
     <?php 
     
-    $load_data = ArrayHelper::getColumn(Category::find()->where(['in', 'id', \common\models\RelationCategory::find()->
-            select('category_id')->
-                 where(['rest_org_id'=>$currentUser->organization_id,
-                       'supp_org_id'=>$supplier_org_id])])->all(),'id');    
+        
     ?>
     <?php 
-    $data = ArrayHelper::map(Category::find()->all(),'id','name');
     echo '<label class="control-label">Категория</label>';
     echo Select2::widget([
         'name'=>'relationCategory',
         'value' => $load_data,
-        'data' => $data,
+        'data' => ArrayHelper::map(Category::find()->all(),'id','name'),
         'options' => ['placeholder' => 'Выбрать категорию...', 'multiple' => true],
         'pluginOptions' => [
             'tags' => true,
         ],
     ]);
     ?>
-    
+    <?php /*= $form->field($relationCategory, 'category_id')->widget(Select2::classname(), [
+        'value' => $load_data,
+        'data' => Category::allCategory(),
+        'theme' => Select2::THEME_BOOTSTRAP,
+        'language' => 'ru',
+        'options' => ['multiple' => true,'placeholder' => 'Выбрать категорию...'],
+        'pluginOptions' => [
+            'allowClear' => true
+        ],
+    ]);*/
+    ?>
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-primary" data-dismiss="modal">Закрыть</a>

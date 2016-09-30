@@ -185,7 +185,7 @@ $("body").on("hidden.bs.modal", "#view-catalog", function() {
     console.log('close catalog');
     $(this).data("bs.modal", null);       
 });
-$("#view-client").on("click", ".save-form", function() {     
+$("#view-client").on("click", ".save-form", function() { 
     var form = $("#client-form");
     $.post(
         form.attr("action"),

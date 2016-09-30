@@ -516,9 +516,10 @@ class ClientController extends DefaultController {
         $supplier_org_id = $id;
 	$currentUser = User::findIdentity(Yii::$app->user->id);
         $organization = Organization::find()->where(['id' => $supplier_org_id])->one();
-        $relationCategory = RelationCategory::find()->where([
-            'rest_org_id'=>$currentUser->organization_id,
-            'supp_org_id'=>$supplier_org_id])->all();
+        $load_data = ArrayHelper::getColumn(Category::find()->where(['in', 'id', \common\models\RelationCategory::find()->
+            select('category_id')->
+                 where(['rest_org_id'=>$currentUser->organization_id,
+                       'supp_org_id'=>$supplier_org_id])])->all(),'id');
         if (Yii::$app->request->isAjax) {
             $categorys = Yii::$app->request->post('relationCategory');
             if ($categorys) {
@@ -536,7 +537,7 @@ class ClientController extends DefaultController {
             }
              
         }
-        return $this->renderAjax('suppliers/_viewSupplier', compact('organization','supplier_org_id','currentUser','relationCategory'));
+        return $this->renderAjax('suppliers/_viewSupplier', compact('organization','supplier_org_id','currentUser','load_data'));
     }
     public function actionViewCatalog($id){
         $cat_id = $id;

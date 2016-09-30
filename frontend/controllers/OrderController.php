@@ -138,7 +138,7 @@ class OrderController extends DefaultController {
                 return $this->renderAjax('_orders', compact('orders'));
             }
             $product_id = $product->id;
-            $product_name = $product->name;
+            $product_name = $product->product;
             $price = $product->price;
         }
         $quantity = (int)$post['quantity'];

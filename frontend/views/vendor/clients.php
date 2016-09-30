@@ -97,19 +97,19 @@ $gridColumnsClients = [
 ?>
 <div class="panel-body">
     <?=
-                Modal::widget([
-                    'id' => 'add-client',
-                    'clientOptions' => false,
-                    'toggleButton' => [
-                        'label' => '<i class="fa fa-plus"></i> Пригласить клиента',
-                        'tag' => 'a',
-                        'data-target' => '#add-client',
-                        'class' => 'btn btn-lg btn-info m-t-xs m-r pull-right',
-                        'href' => Url::to(['/vendor/ajax-add-client']),
-                        'style' => 'float:right',
-                    ],
-                ])
-                ?>
+    Modal::widget([
+        'id' => 'add-client',
+        'clientOptions' => false,
+        'toggleButton' => [
+            'label' => '<i class="fa fa-plus"></i> Пригласить клиента',
+            'tag' => 'a',
+            'data-target' => '#add-client',
+            'class' => 'btn btn-lg btn-info m-t-xs m-r pull-right',
+            'href' => Url::to(['/vendor/ajax-add-client']),
+            'style' => 'float:right',
+        ],
+    ])
+    ?>
     <h3 class="font-light"><i class="fa fa-users"></i> Мои Клиенты</h3>
 </div>
 <div class="panel-body">
@@ -185,9 +185,8 @@ $("body").on("hidden.bs.modal", "#view-catalog", function() {
     console.log('close catalog');
     $(this).data("bs.modal", null);       
 });
-$("#view-client").on("click", ".save-form", function() {        
+$("#view-client").on("click", ".save-form", function() {     
     var form = $("#client-form");
-        console.log(form.serialize())
     $.post(
         form.attr("action"),
             form.serialize()

@@ -570,9 +570,7 @@ class VendorController extends DefaultController {
             $curCat = \Yii::$app->request->post('curCat'); //catalog
             $id = \Yii::$app->request->post('id'); //rest_org_id
             $state = Yii::$app->request->post('state');
-                //$relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $id,'supp_org_id'=>$currentUser->organization_id]);
-
-                        //if($relation_supp_rest->status==0){$set = 1;}else{$set = 0;}
+                
                 if($state=='true'){
                     $rest_org_id = $id;
                     $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $rest_org_id,'supp_org_id'=>$currentUser->organization_id]);
@@ -591,27 +589,19 @@ class VendorController extends DefaultController {
                     return (['success' => true, 'Не подписан']);
                     exit;
                 }
-			/*$relation_supp_rest->cat_id = $relation_supp_rest->status==0 ? $curCat : Catalog::NON_CATALOG ;
-			$relation_supp_rest->status = $set;
-			$relation_supp_rest->update(); 	
-				 
-			$result = ['success' => true, 'status'=>'ресторан '.$id.' назначен каталог '.$curCat];
-			return $result;*/
-	          	}
+	}
     }
     public function actionChangecatalogstatus()
     {
 	   if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            //$Catalog = new Catalog;
             $id = \Yii::$app->request->post('id');
-                    $Catalog = Catalog::findOne(['id' => $id]);  
-                    if($Catalog->status==0){$set = 1;}else{$set = 0;}
-                    $Catalog->status = Catalog::STATUS_ON;
-                    $Catalog->update();  
+            $Catalog = Catalog::findOne(['id' => $id]);
+            $Catalog->status = \Yii::$app->request->post('state')=='true'?1:0;
+            $Catalog->update();  
 
-                    $result = ['success' => true, 'status'=>'update status'];
-                    return $result;
+            $result = ['success' => true, 'status'=>'update status'];
+            return $result;
         } 
     }
     public function actionCreateCatalog()

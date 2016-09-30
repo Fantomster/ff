@@ -512,5 +512,44 @@ class ClientController extends DefaultController {
 		    }
 		}  
     }
-
+    public function actionViewSupplier($id){
+        $supplier_org_id = $id;
+	$currentUser = User::findIdentity(Yii::$app->user->id);
+        $organization = Organization::find()->where(['id' => $supplier_org_id])->one();
+        $relationCategory = RelationCategory::find()->where([
+            'rest_org_id'=>$currentUser->organization_id,
+            'supp_org_id'=>$supplier_org_id])->all();
+        if (Yii::$app->request->isAjax) {
+            $categorys = Yii::$app->request->post('relationCategory');
+            if ($categorys) {
+                 $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
+                 \Yii::$app->db->createCommand($sql)->execute();
+                 
+                 foreach ( $categorys as $arrCategorys ) { 
+                 $sql = "insert into relation_category (`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ($arrCategorys,$currentUser->organization_id,$supplier_org_id,NOW())";
+                 \Yii::$app->db->createCommand($sql)->execute(); 	
+                 }
+                 
+                 $message = 'Сохранено';
+                return $this->renderAjax('suppliers/_success',['message' => $message]);   
+               
+            }
+             
+        }
+        return $this->renderAjax('suppliers/_viewSupplier', compact('organization','supplier_org_id','currentUser','relationCategory'));
+    }
+    public function actionViewCatalog($id){
+        $cat_id = $id;
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        if(Catalog::find()->where(['id'=>$cat_id])->one()->type==Catalog::BASE_CATALOG){
+          $searchModel = new CatalogBaseGoods;
+	  $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id,NULL);
+          return $this->renderAjax('suppliers/_viewBaseCatalog', compact('searchModel', 'dataProvider','cat_id'));   
+        } 
+        if(Catalog::find()->where(['id'=>$cat_id])->one()->type==Catalog::CATALOG){
+          $searchModel = new CatalogGoods;
+	  $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id);
+          return $this->renderAjax('suppliers/_viewCatalog', compact('searchModel', 'dataProvider','cat_id'));  
+        }
+    }
 }

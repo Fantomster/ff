@@ -18,11 +18,89 @@ $this->registerCss('
 ');	
 ?>
 <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>
-    <li><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
+    <li class="active"><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
+    <li><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>    
 </ul>
 <div class="tab-content">
-    <div id="tabAddSuppliers" class="tab-pane fade in active">
+    <div id="tabMySuppliers" class="tab-pane fade in active">
+<?=
+Modal::widget([
+    'id' => 'view-catalog',
+    'size' => 'modal-lg',
+    'clientOptions' => false,   
+])
+?>
+<?=
+Modal::widget([
+    'id' => 'view-supplier',
+    'size' => 'modal-md',
+    'clientOptions' => false,   
+])
+?>
+    <?php 
+$gridColumnsCatalog = [
+        [
+        'label'=>'Организация',
+        'format' => 'raw',
+        'value'=>function ($data) {
+        $res = common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->name;
+        return Html::a(Html::encode($res), ['client/view-supplier', 'id' => $data->supp_org_id], [
+            'data' => [
+            'target' => '#view-supplier',
+            'toggle' => 'modal',
+            'backdrop' => 'static',
+                      ],
+            ]);
+        }
+        ],
+        [
+        'label'=>'email',
+        'contentOptions' => ['class' => 'text-center'],
+        'value'=>function ($data) {
+        return common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->email;
+        }
+        ],
+        [
+        'label'=>'Статус сотрудничества',
+        'contentOptions' => ['class' => 'text-center'],
+        'format' => 'raw',
+        'value'=>function ($data) {
+                $status_invite = $data->invite==0 ? '<span class="text-danger">Ожидается<br>подтверждение</span>':'<span class="text-primary">Подтвержден</span>';
+                return $status_invite;
+                },
+        ],
+        [
+        'label'=>'Каталог',
+        'contentOptions' => ['class' => 'text-center text-wrap'],
+        'format' => 'raw',
+        'value'=>function ($data) {
+        $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
+        $data->invite==0 ? $result = '' :
+        $result = $data->cat_id==0 ? 'Каталог не назначен' :
+            Html::a('<i class="fa fa-list-alt" aria-hidden="true"></i>', ['client/view-catalog', 'id' => $data->cat_id], [
+            'data' => [
+            'target' => '#view-catalog',
+            'toggle' => 'modal',
+            'backdrop' => 'static',
+               ],
+            ]);
+        return $result;
+        }
+        ],
+];
+?>
+        <div class="panel-body">
+<?=GridView::widget([
+	'dataProvider' => $dataProvider,
+	'filterModel' => $searchModel,
+	'filterPosition' => false,
+        'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+	'columns' => $gridColumnsCatalog,
+]);
+?>    
+        </div>
+    </div>
+    <div id="tabAddSuppliers" class="tab-pane fade">
 		<div class="row">
 		  <div class="col-lg-5">
 		    <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
@@ -49,32 +127,6 @@ $this->registerCss('
 		  </div>
 		</div>
     </div>
-    <div id="tabMySuppliers" class="tab-pane fade">
-    <?php 
-$gridColumnsCatalog = [
-        [
-        'label'=>'Организация',
-        'value'=>function ($data) {return \common\models\Organization::get_value($data->supp_org_id)->name;},
-        ],
-        [
-        'label'=>'СТАТУС',
-        'value'=>function ($data) {
-                $status_invite = $data->invite==0 ? 'Ожидается отклик':'Подтвержден';
-                return $status_invite;
-                },
-        ],
-];
-?>
-        <div class="panel-body">
-<?=GridView::widget([
-	'dataProvider' => $dataProvider,
-	'filterModel' => $searchModel,
-	'filterPosition' => false,
-	'columns' => $gridColumnsCatalog,
-]);
-?>    
-    </div>
-</div>
 <div id="modal_addProduct" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <!-- Modal content-->
@@ -112,6 +164,21 @@ $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js')
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 //$this->registerJsFile('modules/alerts.js');
 $customJs = <<< JS
+/** 
+ * Forward port jQuery.live()
+ * Wrapper for newer jQuery.on()
+ * Uses optimized selector context 
+ * Only add if live() not already existing.
+*/
+if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))) {
+  jQuery.fn.extend({
+      live: function (event, callback) {
+         if (this.selector) {
+              jQuery(document).on(event, this.selector, callback);
+          }
+      }
+  });
+}
 function bootboxDialogShow(msg){
 bootbox.dialog({
     message: msg,
@@ -380,6 +447,25 @@ e.preventDefault();
       }
 	});
 });
+$("body").on("hidden.bs.modal", "#view-supplier", function() {
+    $(this).data("bs.modal", null);
+})
+$("body").on("hidden.bs.modal", "#view-catalog", function() {
+    $(this).data("bs.modal", null);
+})
+$("#view-supplier").on("click", ".save-form", function() {        
+    var form = $("#supplier-form");
+        console.log(form.serialize())
+    $.post(
+        form.attr("action"),
+            form.serialize()
+            )
+            .done(function(result) {
+            form.replaceWith(result);
+            
+        });
+        return false;
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -32,9 +32,9 @@ class RelationCategory extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['supp_rest_id', 'category_id'], 'required'],
+            [['supp_rest_id'], 'required'],
             [['supp_rest_id', 'category_id'], 'integer'],
-            [['rest_supp_id', 'category_id'], 'required'],
+            [['rest_supp_id'], 'required'],
             [['rest_supp_id', 'category_id'], 'integer'],
             
         ];
@@ -49,7 +49,7 @@ class RelationCategory extends \yii\db\ActiveRecord
             'id' => 'ID',
             'supp_org_id' => 'Relation Supp org ID',
             'rest_org_id' => 'Relation Rest org ID',
-            'category_id' => 'Category ID',
+            'category_id' => 'Категория',
         ];
     }
     

@@ -23,7 +23,7 @@ $this->registerJs(
                 quantity = $(this).parent().parent().find(".quantity").val();
                 $.post(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
-                    {"id": $(this).data("id"), "quantity": quantity}
+                    {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
                     $("#orders").html(result);
                 });
@@ -144,6 +144,7 @@ $form = ActiveForm::begin([
                             $link = Html::a('<span class="glyphicon glyphicon-plus"></span>', '#', [
                                         'class' => 'add-to-cart',
                                         'data-id' => $data['id'],
+                                        'data-cat' => $data['cat_id'],
                             ]);
                             return $link;
                         },

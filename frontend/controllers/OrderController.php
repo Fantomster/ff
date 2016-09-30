@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use common\models\search\OrderCatalogSearch;
 use common\models\CatalogGoods;
+use common\models\CatalogBaseGoods;
 use common\models\Order;
 use common\models\OrderContent;
 use common\models\Organization;
@@ -46,8 +47,8 @@ class OrderController extends DefaultController {
 
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
-        $query = "SELECT id, product, supp_org_id, units, price FROM catalog_base_goods WHERE cat_id IN ($catalogs) "
-                . 'UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price FROM '
+        $query = "SELECT id, product, supp_org_id, units, price, cat_id FROM catalog_base_goods WHERE cat_id IN ($catalogs) "
+                . 'UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id FROM '
                     . 'catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id '
                     . "WHERE cg.cat_id IN ($catalogs))";
         
@@ -125,7 +126,21 @@ class OrderController extends DefaultController {
             $orders = [];
         }
         $post = Yii::$app->request->post();
-        $product = CatalogGoods::findOne(['id' => $post['id']]);
+        $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
+        
+        if ($product) {
+            $product_id = $product->baseProduct->id;
+            $price = $product->price;
+            $product_name = $product->baseProduct->product;
+        } else {
+            $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
+            if (!$product) {
+                return $this->renderAjax('_orders', compact('orders'));
+            }
+            $product_id = $product->id;
+            $product_name = $product->name;
+            $price = $product->price;
+        }
         $quantity = (int)$post['quantity'];
         $vendor = $product->organization;
         $newOrder = true;
@@ -134,17 +149,17 @@ class OrderController extends DefaultController {
                 $newOrder = false;
                 $newProduct = true;
                 foreach ($order['content'] as &$prod) {
-                    if ($prod['product_id'] == $product->id) {
+                    if ($prod['product_id'] == $product_id) {
                         $newProduct = false;
                         $prod['quantity'] += $quantity;
                     }
                 }
                 if ($newProduct) {
-                    $order['content'][$product->id] = [
-                        'product_id' => $product->id,
-                        'product_name' => $product->baseProduct->product,
+                    $order['content'][$product_id] = [
+                        'product_id' => $product_id,
+                        'product_name' => $product_name,
                         'quantity' => $quantity,
-                        'price' => $product->price];
+                        'price' => $price];
                 }
             }
         }
@@ -152,11 +167,11 @@ class OrderController extends DefaultController {
             $orders[$vendor->id] = [
                 'vendor_id' => $vendor->id,
                 'vendor_name' => $vendor->name,
-                'content' => [$product->id => [
-                        'product_id' => $product->id,
-                        'product_name' => $product->baseProduct->product,
+                'content' => [$product_id => [
+                        'product_id' => $product_id,
+                        'product_name' => $product_name,
                         'quantity' => $quantity,
-                        'price' => $product->price]]
+                        'price' => $price]]
             ];
         }
         $session['orders'] = $orders;

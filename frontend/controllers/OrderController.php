@@ -132,6 +132,7 @@ class OrderController extends DefaultController {
             $product_id = $product->baseProduct->id;
             $price = $product->price;
             $product_name = $product->baseProduct->product;
+            $vendor = $product->organization;
         } else {
             $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
             if (!$product) {
@@ -140,9 +141,9 @@ class OrderController extends DefaultController {
             $product_id = $product->id;
             $product_name = $product->product;
             $price = $product->price;
+            $vendor = $product->vendor;
         }
         $quantity = (int)$post['quantity'];
-        $vendor = $product->organization;
         $newOrder = true;
         foreach ($orders as &$order) {
             if ($order['vendor_id'] == $vendor->id) {

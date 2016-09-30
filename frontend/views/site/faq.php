@@ -254,6 +254,6 @@ $this->title = 'Вопросы / ответы';
     </div>
 </div>
 <div class="error__block">
-    <p>Нашли ошибку в работе программы? <a href="mailto:hr@f-keeper.ru">hr@f-keeper.ru</a></p>
+    <p>Нашли ошибку? Помогите нам стать лучше <a href="mailto:hr@f-keeper.ru">hr@f-keeper.ru</a></p>
 </div>
 </main><!-- .content -->

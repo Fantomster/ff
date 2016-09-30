@@ -8,7 +8,7 @@ use yii\helpers\Html;
 if (!Yii::$app->user->isGuest) {
 $user = Yii::$app->user->identity;
 $homeUrl = Yii::$app->urlManager->baseUrl;
-/*$js = <<<JS
+$js = <<<JS
 
    socket = io.connect('http://$homeUrl:8890');
 
@@ -18,7 +18,7 @@ $homeUrl = Yii::$app->urlManager->baseUrl;
         
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY)
-*/
+
 ?>
 <script type="text/javascript">
     var socket;

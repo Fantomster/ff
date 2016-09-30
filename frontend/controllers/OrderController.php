@@ -348,6 +348,7 @@ class OrderController extends DefaultController {
                 case 'confirm':
                     if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
+                        $order->accepted_by_id = $user_id;
                         $systemMessage = 'Клиент подтвердил заказ!';
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $systemMessage = 'Поставщик подтвердил заказ!';

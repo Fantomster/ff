@@ -43,7 +43,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['rest_org_id', 'supp_org_id', 'cat_id'], 'required'],
+            [['rest_org_id', 'supp_org_id'], 'required'],
             [['rest_org_id', 'supp_org_id', 'cat_id'], 'integer'],
         ];
     }
@@ -57,7 +57,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord
             'id' => 'ID',
             'rest_org_id' => 'Rest Org ID',
             'supp_org_id' => 'Supp Org ID',
-            'cat_id' => 'Cat ID',
+            'cat_id' => 'Каталог',
         ];
     }
     public static function GetRelationCatalogs()

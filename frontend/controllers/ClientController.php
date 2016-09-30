@@ -367,7 +367,7 @@ class ClientController extends DefaultController {
 					**/
 					
 					if($check['eventType']==5){
-					$sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'default',".Catalog::BASE_CATALOG.",NOW())";
+					$sql = "insert into ".Catalog::tableName()."(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'Главный каталог',".Catalog::BASE_CATALOG.",NOW())";
 				    \Yii::$app->db->createCommand($sql)->execute(); 
 				    $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 				    }else{

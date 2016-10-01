@@ -11,9 +11,6 @@ use yii\web\View;
 use common\models\Category;
 use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
-//use kop\y2sp\ScrollPager;
-$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
-//kartik\checkbox\CheckboxXAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <?php 
@@ -27,27 +24,28 @@ $this->title = 'Основной каталог';
 <?php
 $exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
 $exportColumns = [
-		[
-		'label'=>'Артикул',
-		'value'=>'article',
-		],
-		[
-		'label'=>'Продукт',
-		'value'=>'product',
-		],
-		[
-		'label'=>'кол-во',
-		'value'=>'units',
-		],
-		[
-		'label'=>'Цена',
-		'value'=>'price',
-		]
+    [
+    'label'=>'Артикул',
+    'value'=>'article',
+    ],
+    [
+    'label'=>'Продукт',
+    'value'=>'product',
+    ],
+    [
+    'label'=>'кол-во',
+    'value'=>'units',
+    ],
+    [
+    'label'=>'Цена',
+    'value'=>'price',
     ]
+]
 ?>           
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Главный Каталог</h3>
+        <button class="btn btn-default btn-sm pull-right" onclick="window.history.back();">Вернуться</button>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
@@ -69,7 +67,7 @@ $exportColumns = [
                         'label' => '<i class="fa fa-plus"></i> Новый продукт',
                         'tag' => 'a',
                         'data-target' => '#add-product',
-                        'class' => 'btn btn-info m-t-xs m-r pull-right',
+                        'class' => 'btn btn-fk-success btn-sm pull-right',
                         'href' => Url::to(['/vendor/ajax-create-product','id' => Yii::$app->request->get('id')]),
                     ],
                 ])
@@ -83,13 +81,9 @@ $exportColumns = [
                                 'target' => ExportMenu::TARGET_SELF,
                                 'showConfirmAlert'=>false,
                                 'showColumnSelector'=>false,
-                                'columnSelectorOptions'=>[
-                                    'label' => '',
-                                    'class' => 'btn btn-danger '
-                                    ],
                                 'dropdownOptions' => [
                                     'label' => 'Скачать каталог',
-                                    'class' => 'btn btn-default'
+                                    'class' => ['btn btn-default btn-sm pull-right']
                                     ],
                                 'exportConfig' => [
                                     ExportMenu::FORMAT_HTML => false,
@@ -139,7 +133,6 @@ $exportColumns = [
                                 ]); 
                             ?>
                 </div>
-                    <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
                         <?=
                             Modal::widget([
                                 'id' => 'importToXls',
@@ -149,18 +142,17 @@ $exportColumns = [
                                     'label' => '<i class="glyphicon glyphicon-import"></i> Импорт',
                                     'tag' => 'a',
                                     'data-target' => '#importToXls',
-                                    'class' => 'btn btn-default',
+                                    'class' => 'btn btn-default btn-sm pull-right',
                                     'href' => Url::to(['/vendor/import-to-xls','id' => Yii::$app->request->get('id')]),
-                                    'style' => '',
+                                    'style' => 'margin-right:10px;',
                                 ],
                             ])
                         ?>
                      <?= Html::a(
                         '<i class="fa fa-list-alt"></i> Скачать шаблон',
                         Url::to('@web/upload/template.xlsx'),
-                        ['class' => 'btn btn-default pull-right','style' => ['margin-left'=>'10px;']]
+                        ['class' => 'btn btn-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
                     ) ?>   
-                    </div>
                     <?=
         Modal::widget([
             'id' => 'info',
@@ -170,7 +162,7 @@ $exportColumns = [
                 'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
                 'tag' => 'a',
                 'data-target' => '#info',
-                'class' => 'btn btn-default pull-right',
+                'class' => 'btn btn-default btn-sm pull-right',
                 'href' => Url::to(['#']),
                 'style' => 'margin-right:10px;',
             ],
@@ -320,14 +312,19 @@ $form = ActiveForm::begin([
 ?>  
 <?php ActiveForm::end(); ?>          
 
-<div class="table-responsive"> 
+<div class="box-body table-responsive no-padding"> 
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
 	'columns' => $gridColumnsBaseCatalog, 
-        'tableOptions' => ['class' => 'table no-margin table-hover'],
+        'tableOptions' => ['class' => 'table no-margin'],
         'options' => ['class' => 'table-responsive'],
+        'bordered' => false,
+        'striped' => true,
+        'condensed' => false,
+        'responsive' => false,
+        'hover' => false,
         'export' => [
             'fontAwesome' => true,
         ],

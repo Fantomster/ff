@@ -192,6 +192,10 @@ a {
 }
 /*
 .kv-grid-table td label {
+=======
+}
+/*.kv-grid-table td label {
+>>>>>>> origin/master
     margin-bottom: 0px;
 } 
 .kv-grid-table > tbody > tr > td {
@@ -202,8 +206,8 @@ a {
     color: #fff;
     font-weight: normal;
     text-align:center;
-}
-.grid-view > tbody > tr > td {
+}*/
+/*.grid-view > tbody > tr > td {
     vertical-align:middle;
 } 
 .grid-view thead th{
@@ -371,4 +375,17 @@ a {
   background-color: #60a94f;
   border-color: #529144;
   color: #fff;
+}
+.system > .direct-chat-text {
+  border-radius: 5px;
+  position: relative;
+  padding: 5px 10px;
+  background: #dd4b39;
+  border: 1px solid #dd4b39;
+  margin: 5px 0 0 5px;
+  color: #fff;
+}
+.system > .direct-chat-text:after,
+.system > .direct-chat-text:before {
+  border-right-color: #dd4b39;
 }

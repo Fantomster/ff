@@ -24,7 +24,10 @@ $js = <<<JS
 
         var message = JSON.parse(data);
 
-        $( "#notifications" ).prepend( message.body );
+        messageBody = $.parseHTML( message.body );
+        alert(messageBody);
+        
+        $( ".direct-chat-messages" ).prepend( message.body );
         
         if (message.isSystem) {
             $.post(
@@ -65,13 +68,23 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 
 ?>
-<h3>Заказ <?= ($organizationType == Organization::TYPE_RESTAURANT) ? 'у ' . $order->vendor->name : 'для ' . $order->client->name ?></h3>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Заказ <?= ($organizationType == Organization::TYPE_RESTAURANT) ? 'у ' . $order->vendor->name : 'для ' . $order->client->name ?></h3>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
 <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
 <?=
 GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'filterPosition' => false,
+    'summary' => '',
+    'tableOptions' => ['class' => 'table no-margin'],
+    'options' => ['class' => 'table-responsive'],
+    'panel' => false,
+    'bootstrap' => false,
     'columns' => [
         'product.product',
         ($quantityEditable) ? 
@@ -139,61 +152,64 @@ GridView::widget([
     ],
 ]);
 ?>
+        
 <?php Pjax::end(); ?>
-<div id="actionButtons">
-<?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>    
+<!-- /.table-responsive -->
+    </div>
+    <!-- /.box-body -->
+    <div class="box-footer clearfix" id="actionButtons">
+    <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>    
+    </div>
+    
 </div>
-<div style="padding-top: 50px;">
-    <div class="row">
-            <div class="well col-lg-8 col-lg-offset-2">
-                <?=
-                Html::beginForm(['/order/send-message'], 'POST', [
-                    'id' => 'chat-form'
-                ])
-                ?>
 
-                <div class="row">
-                    <div class="col-xs-3">
-                        <div class="form-group">
-<?= Html::label($user->profile->full_name) ?>
-<?= Html::hiddenInput('order_id', $order->id); ?>
-                        </div>
-                    </div>
-                    <div class="col-xs-7">
-                        <div class="form-group">
-                            <?=
-                            Html::textInput('message', null, [
-                                'id' => 'message-field',
-                                'class' => 'form-control',
-                                'placeholder' => 'Message'
-                            ])
-                            ?>
-                        </div>
-                    </div>
-                    <div class="col-xs-2">
-                        <div class="form-group">
-<?=
-Html::submitButton('Send', [
-    'class' => 'btn btn-block btn-success'
-])
-?>
-                        </div>
-                    </div>
+<div class="box box-warning direct-chat direct-chat-warning">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Чат заказа</h3>
                 </div>
-
-<?= Html::endForm() ?>
-                <div id="notifications" ></div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <!-- Conversations are loaded here -->
+                  <div class="direct-chat-messages">
                 <?php
                 foreach ($order->orderChat as $chat) {
                     echo $this->render('_chat-message', [
                         'name' => $chat->sentBy->profile->full_name,
                         'message' => $chat->message,
                         'time' => $chat->created_at,
-                        'isSystem' => $chat->is_system]);
+                        'isSystem' => $chat->is_system,
+                        'organizationType' => $chat->sentBy->organization->type_id]);
                 }
                 ?>
+                  </div>
+                  <!--/.direct-chat-messages-->
                 </div>
-                    
-            </div>
-        
-</div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                <?=
+                Html::beginForm(['/order/send-message'], 'POST', [
+                    'id' => 'chat-form'
+                ])
+                ?>
+                    <div class="input-group">
+<?= Html::hiddenInput('order_id', $order->id); ?>
+<?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
+<?=
+                            Html::textInput('message', null, [
+                                'id' => 'message-field',
+                                'class' => 'form-control',
+                                'placeholder' => 'Сообщение ...'
+                            ])
+                            ?>                     
+                          <span class="input-group-btn">
+<?=
+Html::submitButton('Послать', [
+    'class' => 'btn btn-warning btn-flat'
+])
+?>
+                          </span>
+                    </div>
+                 <?= Html::endForm() ?>
+                </div>
+                <!-- /.box-footer-->
+              </div>

@@ -138,4 +138,25 @@ class Order extends \yii\db\ActiveRecord
     {
         return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy(['created_at' => SORT_DESC]);
     }
+    
+    public static function statusText($status) {
+        $text = 'Неопределен';
+        switch ($status) {
+            case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+            case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                $text = 'Новый';
+                break;
+            case Order::STATUS_PROCESSING:
+                $text = 'Исполняется';
+                break;
+            case Order::STATUS_DONE:
+                $text = 'Готов';
+                break;
+            case Order::STATUS_REJECTED:
+            case Order::STATUS_CANCELLED:
+                $text = 'Отменен';
+                break;
+        }
+        return $text;
+    }
 }

@@ -45,25 +45,21 @@ $exportColumns = [
 		]
     ]
 ?>           
-
-<div class="panel-body">
-    <?= Html::a(
-        '<i class="fa fa-reply m-r-xs"></i> Назад',
-        ['vendor/catalogs'],
-        ['class' => 'btn btn-lg btn-default pull-right step-1','style' => 'margin-left:10px;']
-    ) 
-    ?>
-    <h3 class="font-light"><i class="fa fa-list-alt"></i> Главный Каталог</h3>
-</div>
-<div class="panel-body">
-    <ul class="nav nav-tabs">
-        <li class="active"><a data-toggle="tab" href="#tabCatalog">Редактирование</a></li>
-        <li><a data-toggle="tab" href="#tabClients">Назначить ресторану</a></li>
-    </ul>
-</div>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Главный Каталог</h3>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="panel-body">
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#tabCatalog">Редактирование</a></li>
+                <li><a data-toggle="tab" href="#tabClients">Назначить ресторану</a></li>
+            </ul>
+        </div>
     <div class="tab-content">
         <div id="tabCatalog" class="tab-pane fade in active">
-            <div class="hpanel">
+            
                 <div class="panel-body">
                 <?=
                 Modal::widget([
@@ -180,7 +176,7 @@ $exportColumns = [
             ],
         ])
     ?>
-                </div>
+                
             </div>
             
 <?php 
@@ -324,12 +320,14 @@ $form = ActiveForm::begin([
 ?>  
 <?php ActiveForm::end(); ?>          
 
-<div class="panel-body">   
+<div class="table-responsive"> 
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
 	'columns' => $gridColumnsBaseCatalog, 
+        'tableOptions' => ['class' => 'table no-margin table-hover'],
+        'options' => ['class' => 'table-responsive'],
         'export' => [
             'fontAwesome' => true,
         ],
@@ -403,6 +401,8 @@ $gridColumnsCatalog = [
 ?> 
         </div>
 <?php Pjax::end(); ?>   
+            </div>
+        </div>
     </div>
 </div>
 <?php

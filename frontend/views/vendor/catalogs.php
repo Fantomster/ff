@@ -34,12 +34,12 @@ $this->title = 'Мои каталоги (Поставщик)';
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
-                            <?= Html::a('<h4 class="m-b-xs text-info">Главный каталог <sup class="text-success"><i class="fa fa-user"></i> '.\common\models\relationSuppRest::row_count($arrBaseCatalogs->id).'</sup></h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
+                            <?= Html::a('<h4 class="m-b-xs text-info">Главный каталог</h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
                             <p class="small">Этот каталог содержит все ваши продукты доступные на f-keeper</p>
                         </div>
                         <div class="col-md-6 text-right">
-                            <?= Html::a('Просмотр/Редактирование', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t']) ?>
-                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дубликат', ['vendor/step-1-clone', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t clone-catalog']) ?>
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default btn-sm m-t']) ?>
+                            <?= Html::a('<i class="fa fa-fw fa-clone"></i>', ['vendor/step-1-clone', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t btn-sm clone-catalog']) ?>
                         </div>
                     </div>
                 </div>
@@ -80,9 +80,7 @@ $this->title = 'Мои каталоги (Поставщик)';
 				        <div class="panel-body">
 				            <div class="col-md-4 text-left">
 				            <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
-				                    ' <sup class="text-success"><i class="fa fa-user"></i> '.
-				                    \common\models\relationSuppRest::row_count($arrCatalogs->id).
-				                    '</sup></h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
+				                    '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
 				            <p class="small m-b-none">Создан: <?=$arrCatalogs->created_at ?></p>
 				            </div>
 				            <div class="col-md-8 text-right">

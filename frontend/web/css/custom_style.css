@@ -190,41 +190,42 @@ a {
 .content-wrapper .right-side {
   background-color: #fefefe;
 }
+/*
 .kv-grid-table td label {
-  margin-bottom: 0px;
-}
+    margin-bottom: 0px;
+} 
 .kv-grid-table > tbody > tr > td {
-  vertical-align: middle;
-}
-.kv-grid-table thead th {
-  background-color: #3f3e3e;
-  color: #fff;
-  font-weight: normal;
-  text-align: center;
+    vertical-align:middle;
+} 
+.kv-grid-table thead th{
+    background-color: @sidebar-dark-bg;
+    color: #fff;
+    font-weight: normal;
+    text-align:center;
 }
 .grid-view > tbody > tr > td {
-  vertical-align: middle;
+    vertical-align:middle;
+} 
+.grid-view thead th{
+    background-color: @sidebar-dark-bg;
+    color: #fff;
+    font-weight: normal;
+    text-align:center;
 }
-.grid-view thead th {
-  background-color: #3f3e3e;
-  color: #fff;
-  font-weight: normal;
-  text-align: center;
+.grid-view thead th a{
+    color: #fff;
+    font-weight: normal;
+    text-align:center;
+    cursor:pointer;
 }
-.grid-view thead th a {
-  color: #fff;
-  font-weight: normal;
-  text-align: center;
-  cursor: pointer;
+.grid-view thead th a:hover{
+    color: @light-blue-fk;
+    cursor:pointer;
 }
-.grid-view thead th a:hover {
-  color: #84bf76;
-  cursor: pointer;
-}
-.grid-view thead td {
-  color: #84bf76;
-  cursor: pointer;
-}
+.grid-view thead td{
+    color: @light-blue-fk;
+    cursor:pointer;
+}*/
 .handsontable thead th {
   background-color: #3f3e3e;
   color: #fff;
@@ -338,9 +339,6 @@ a {
 }
 .ht_master tr > td.current {
   background-color: #000;
-}
-.table > tbody > tr > td {
-  padding: 4px;
 }
 .cbx-lg {
   border-radius: 4px;

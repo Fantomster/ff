@@ -133,42 +133,41 @@ $exportColumns = [
                                 ]); 
                             ?>
                 </div>
-                        <?=
-                            Modal::widget([
-                                'id' => 'importToXls',
-                                'clientOptions' => false,
-                                'size'=>'modal-md',
-                                'toggleButton' => [
-                                    'label' => '<i class="glyphicon glyphicon-import"></i> Импорт',
-                                    'tag' => 'a',
-                                    'data-target' => '#importToXls',
-                                    'class' => 'btn btn-default btn-sm pull-right',
-                                    'href' => Url::to(['/vendor/import-to-xls','id' => Yii::$app->request->get('id')]),
-                                    'style' => 'margin-right:10px;',
-                                ],
-                            ])
-                        ?>
-                     <?= Html::a(
-                        '<i class="fa fa-list-alt"></i> Скачать шаблон',
-                        Url::to('@web/upload/template.xlsx'),
-                        ['class' => 'btn btn-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
-                    ) ?>   
-                    <?=
-                        Modal::widget([
-                            'id' => 'info',
-                            'clientOptions' => false,
-                            'size'=>'modal-md',
-                            'toggleButton' => [
-                                'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
-                                'tag' => 'a',
-                                'data-target' => '#info',
-                                'class' => 'btn btn-default btn-sm pull-right',
-                                'href' => Url::to(['#']),
-                                'style' => 'margin-right:10px;',
-                            ],
-                        ])
-                    ?>
-                
+                <?=
+                    Modal::widget([
+                        'id' => 'importToXls',
+                        'clientOptions' => false,
+                        'size'=>'modal-md',
+                        'toggleButton' => [
+                            'label' => '<i class="glyphicon glyphicon-import"></i> Импорт',
+                            'tag' => 'a',
+                            'data-target' => '#importToXls',
+                            'class' => 'btn btn-default btn-sm pull-right',
+                            'href' => Url::to(['/vendor/import-to-xls','id' => Yii::$app->request->get('id')]),
+                            'style' => 'margin-right:10px;',
+                        ],
+                    ])
+                ?>
+                <?= Html::a(
+                   '<i class="fa fa-list-alt"></i> Скачать шаблон',
+                   Url::to('@web/upload/template.xlsx'),
+                   ['class' => 'btn btn-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
+               ) ?>   
+               <?=
+                   Modal::widget([
+                       'id' => 'info',
+                       'clientOptions' => false,
+                       'size'=>'modal-md',
+                       'toggleButton' => [
+                           'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
+                           'tag' => 'a',
+                           'data-target' => '#info',
+                           'class' => 'btn btn-default btn-sm pull-right',
+                           'href' => Url::to(['#']),
+                           'style' => 'margin-right:10px;',
+                       ],
+                   ])
+               ?>
             </div>            
             <?php 
             $gridColumnsBaseCatalog = [
@@ -219,28 +218,27 @@ $exportColumns = [
                             'value'=>function ($data) {return $data->price;},
                             'contentOptions' => ['style' => 'vertical-align:middle'],
                             ],
-                    [
-                        'attribute' => 'Наличие',
-                        'format' => 'raw',
-                        'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
-                        'value' => function ($data) {
-                            $link = CheckboxX::widget([
-                                'name'=>'status_'.$data->id,
-                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                'value'=>$data->status==0 ? 0 : 1,
-                                'autoLabel' => false,
-                                'options'=>['id'=>'status_'.$data->id, 'data-id'=>$data->id],
-                                'pluginOptions'=>[
-                                    'threeState'=>false,
-                                    'theme' => 'krajee-flatblue',
-                                    'enclosedLabel' => true,
-                                    'size'=>'lg',
-                                    ]
-                            ]);
-                            return $link;
-                        },
-
-                    ],
+                            [
+                            'attribute' => 'Наличие',
+                            'format' => 'raw',
+                            'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
+                            'value' => function ($data) {
+                                $link = CheckboxX::widget([
+                                    'name'=>'status_'.$data->id,
+                                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                    'value'=>$data->status==0 ? 0 : 1,
+                                    'autoLabel' => false,
+                                    'options'=>['id'=>'status_'.$data->id, 'data-id'=>$data->id],
+                                    'pluginOptions'=>[
+                                        'threeState'=>false,
+                                        'theme' => 'krajee-flatblue',
+                                        'enclosedLabel' => true,
+                                        'size'=>'lg',
+                                        ]
+                                ]);
+                                return $link;               
+                            },
+                            ],                           
                     /*[
                         'attribute' => 'MarketPlace',
                         'format' => 'raw',
@@ -338,26 +336,25 @@ $exportColumns = [
                     }
                     ],
                     [
-                        'attribute' => 'Назначить',
-                        'format' => 'raw',
-                        'contentOptions' => ['style' => 'width:50px;'],
-                        'value' => function ($data) {
-                            $link = CheckboxX::widget([
-                                'name'=>'setcatalog_'.$data->id,
-                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                'value'=>$data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
-                                'autoLabel' => true,
-                                'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
-                                'pluginOptions'=>[
-                                    'threeState'=>false,
-                                    'theme' => 'krajee-flatblue',
-                                    'enclosedLabel' => true,
-                                    'size'=>'lg',
-                                    ]
-                            ]);
-                            return $link;
-                        },
-
+                    'attribute' => 'Назначить',
+                    'format' => 'raw',
+                    'contentOptions' => ['style' => 'width:50px;'],
+                    'value' => function ($data) {
+                        $link = CheckboxX::widget([
+                            'name'=>'setcatalog_'.$data->id,
+                            'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                            'value'=>$data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
+                            'autoLabel' => true,
+                            'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
+                            'pluginOptions'=>[
+                                'threeState'=>false,
+                                'theme' => 'krajee-flatblue',
+                                'enclosedLabel' => true,
+                                'size'=>'lg',
+                                ]
+                        ]);
+                        return $link;
+                    },
                     ],
                 ];
                 ?>
@@ -378,8 +375,7 @@ $exportColumns = [
                     ]);
                     ?>
                     <?php Pjax::end(); ?>
-                </div>
-               
+                </div>              
             </div>
         </div>
     </div>
@@ -400,14 +396,14 @@ if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))
           }
       }
   });
-}
-        
-$('input[type=checkbox]').live('change', function(e) {
-    var id = $(this).attr('data-id');
-    var state = $(this).prop("checked");
-    var elem = $(this).attr('name').substr(0, 6);
-    if(elem=="status"){statusOrMarket(elem,id,state);}
-    if(elem=="market"){statusOrMarket(elem,id,state);}
+}     
+$('.cbx-container').live('click', function(e) {
+    //
+    var id = $(this).children('input[type=checkbox]').attr('data-id');
+    var state = $(this).children('input[type=checkbox]').prop("checked");
+    var elem = $(this).children('input[type=checkbox]').attr('name').substr(0, 6);
+    if(elem=="status"){statusOrMarket(elem,id,state);$(this).children('input[type=checkbox]').change();}
+    //if(elem=="market"){statusOrMarket(elem,id,state);}
     if(elem=="setcat"){setRestOrgCatalog(id,state);}   
 	function statusOrMarket(elem,id,state){
 		$.ajax({

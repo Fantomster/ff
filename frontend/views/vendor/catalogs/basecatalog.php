@@ -154,250 +154,232 @@ $exportColumns = [
                         ['class' => 'btn btn-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
                     ) ?>   
                     <?=
-        Modal::widget([
-            'id' => 'info',
-            'clientOptions' => false,
-            'size'=>'modal-md',
-            'toggleButton' => [
-                'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
-                'tag' => 'a',
-                'data-target' => '#info',
-                'class' => 'btn btn-default btn-sm pull-right',
-                'href' => Url::to(['#']),
-                'style' => 'margin-right:10px;',
-            ],
-        ])
-    ?>
+                        Modal::widget([
+                            'id' => 'info',
+                            'clientOptions' => false,
+                            'size'=>'modal-md',
+                            'toggleButton' => [
+                                'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
+                                'tag' => 'a',
+                                'data-target' => '#info',
+                                'class' => 'btn btn-default btn-sm pull-right',
+                                'href' => Url::to(['#']),
+                                'style' => 'margin-right:10px;',
+                            ],
+                        ])
+                    ?>
                 
-            </div>
-            
-<?php 
-$gridColumnsBaseCatalog = [
-                    /*[
-                'label' => '',  
-                'format' => 'raw',  
-                'contentOptions' => ['style' => 'width:50px;'],
-                'value' => function ($data) {
-                     $data->image?$imgUrl=$data->image:$imgUrl='NOIMAGE.gif';
-                     $images = Html::img(\Yii::$app->request->BaseUrl.'/upload/'.$imgUrl,
-                        [
-                        'alt'=>'',
-                        'width'=>'50',
-                        'height'=>'50', 
-                        'data-toggle'=>'tooltip',
-                        'data-placement'=>'left',
-                        'title' => '' ,
-                        'style'=>'cursor:default;'
-                        ]);
-                    return ($images);
-                    }
-                ],*/
-		[
-		'label'=>'Артикул',
-		'value'=>'article',
-                'contentOptions' => ['style' => 'vertical-align:middle'],
-		],
-		[
-		'label'=>'Продукт',
-		'value'=>'product',
-                'contentOptions' => ['style' => 'vertical-align:middle;'],
-		],
-		[
-		'label'=>'Кратность',
-		'value'=>'units',
-                'contentOptions' => ['style' => 'vertical-align:middle'],    
-		],
-                [
-		'label'=>'Категория',
-                'value'=>function ($data) {
-                $data->category_id==0 ? $category_name='':$category_name=Category::get_value($data->category_id)->name;
-                return $category_name;
-                },
-                'contentOptions' => ['style' => 'vertical-align:middle'],
-		],
-		[
-		'label'=>'Цена',
-                'value'=>function ($data) {return $data->price;},
-                'contentOptions' => ['style' => 'vertical-align:middle'],
-		],
-        [
-            'attribute' => 'Наличие',
-            'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
-            'value' => function ($data) {
-                $link = CheckboxX::widget([
-                    'name'=>'status_'.$data->id,
-                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->status==0 ? 0 : 1,
-                    'autoLabel' => true,
-                    'options'=>['id'=>'status_'.$data->id, 'data-id'=>$data->id],
-                    'pluginOptions'=>[
-                        'threeState'=>false,
-                        'theme' => 'krajee-flatblue',
-                        'enclosedLabel' => true,
-                        'size'=>'lg',
-                        ]
-                ]);
-                return $link;
-            },
-            
-        ],
-        /*[
-            'attribute' => 'MarketPlace',
-            'format' => 'raw',
-            'contentOptions' => ['style' => 'width:100px;'],
-            'value' => function ($data) {
-                $link = CheckboxX::widget([
-                    'name'=>'marketplace_'.$data->id,
-                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->market_place==0 ? 0 : 1,
-                    'autoLabel' => true,
-                    'options'=>['id'=>'marketplace_'.$data->id, 'data-id'=>$data->id],
-                    'pluginOptions'=>[
-                        'threeState'=>false,
-                        'theme' => 'krajee-flatblue',
-                        'enclosedLabel' => true,
-                        'size'=>'lg',
-                        ]
-                ]);
-                return $link;
-            },
-            
-        ],*/
-        [
-            'attribute' => '',
-            'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],
-            'value' => function ($data) {
-                $link = Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['/vendor/ajax-update-product', 'id' => $data->id], [
-                    'data' => [
-                    'target' => '#add-product',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',
-                              ],
-                    'class'=>'btn btn-warning'
-                    
-                ]);
-                return $link;
-            },
-            
-        ],
-        [
-            'attribute' => '',
-            'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],
-            'value' => function ($data) {
-                $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
-                    'class'=>'btn btn-danger del-product',
-                    'data'=>['id'=>$data->id],
-                ]);
-                return $link;
-            },
-            
-        ],
-];
-?>
-            
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
-<?php
-$form = ActiveForm::begin([
-            'options' => [
-                'data-pjax' => true,
-                'id' => 'search-form',
-                'class' => "navbar-form",
-                'role' => 'search',
-            ],
-            'method' => 'get',
-        ]);
-?>  
-<?php ActiveForm::end(); ?>          
+            </div>            
+            <?php 
+            $gridColumnsBaseCatalog = [
+                                /*[
+                            'label' => '',  
+                            'format' => 'raw',  
+                            'contentOptions' => ['style' => 'width:50px;'],
+                            'value' => function ($data) {
+                                 $data->image?$imgUrl=$data->image:$imgUrl='NOIMAGE.gif';
+                                 $images = Html::img(\Yii::$app->request->BaseUrl.'/upload/'.$imgUrl,
+                                    [
+                                    'alt'=>'',
+                                    'width'=>'50',
+                                    'height'=>'50', 
+                                    'data-toggle'=>'tooltip',
+                                    'data-placement'=>'left',
+                                    'title' => '' ,
+                                    'style'=>'cursor:default;'
+                                    ]);
+                                return ($images);
+                                }
+                            ],*/
+                            [
+                            'label'=>'Артикул',
+                            'value'=>'article',
+                            'contentOptions' => ['style' => 'vertical-align:middle'],
+                            ],
+                            [
+                            'label'=>'Продукт',
+                            'value'=>'product',
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            ],
+                            [
+                            'label'=>'Кратность',
+                            'value'=>'units',
+                            'contentOptions' => ['style' => 'vertical-align:middle'],    
+                            ],
+                            [
+                            'label'=>'Категория',
+                            'value'=>function ($data) {
+                            $data->category_id==0 ? $category_name='':$category_name=Category::get_value($data->category_id)->name;
+                            return $category_name;
+                            },
+                            'contentOptions' => ['style' => 'vertical-align:middle'],
+                            ],
+                            [
+                            'label'=>'Цена',
+                            'value'=>function ($data) {return $data->price;},
+                            'contentOptions' => ['style' => 'vertical-align:middle'],
+                            ],
+                    [
+                        'attribute' => 'Наличие',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
+                        'value' => function ($data) {
+                            $link = CheckboxX::widget([
+                                'name'=>'status_'.$data->id,
+                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                'value'=>$data->status==0 ? 0 : 1,
+                                'autoLabel' => false,
+                                'options'=>['id'=>'status_'.$data->id, 'data-id'=>$data->id],
+                                'pluginOptions'=>[
+                                    'threeState'=>false,
+                                    'theme' => 'krajee-flatblue',
+                                    'enclosedLabel' => true,
+                                    'size'=>'lg',
+                                    ]
+                            ]);
+                            return $link;
+                        },
 
-<div class="box-body table-responsive no-padding"> 
-<?=GridView::widget([
-	'dataProvider' => $dataProvider,
-	'filterModel' => $searchModel,
-	'filterPosition' => false,
-	'columns' => $gridColumnsBaseCatalog, 
-        'tableOptions' => ['class' => 'table no-margin'],
-        'options' => ['class' => 'table-responsive'],
-        'bordered' => false,
-        'striped' => true,
-        'condensed' => false,
-        'responsive' => false,
-        'hover' => false,
-        'export' => [
-            'fontAwesome' => true,
-        ],
-]);
-?>   
-</div>
-<?php Pjax::end(); ?>
+                    ],
+                    /*[
+                        'attribute' => 'MarketPlace',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:100px;'],
+                        'value' => function ($data) {
+                            $link = CheckboxX::widget([
+                                'name'=>'marketplace_'.$data->id,
+                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                'value'=>$data->market_place==0 ? 0 : 1,
+                                'autoLabel' => true,
+                                'options'=>['id'=>'marketplace_'.$data->id, 'data-id'=>$data->id],
+                                'pluginOptions'=>[
+                                    'threeState'=>false,
+                                    'theme' => 'krajee-flatblue',
+                                    'enclosedLabel' => true,
+                                    'size'=>'lg',
+                                    ]
+                            ]);
+                            return $link;
+                        },
+
+                    ],*/
+                    [
+                        'attribute' => '',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:50px;'],
+                        'value' => function ($data) {
+                            $link = Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['/vendor/ajax-update-product', 'id' => $data->id], [
+                                'data' => [
+                                'target' => '#add-product',
+                                'toggle' => 'modal',
+                                'backdrop' => 'static',
+                                          ],
+                                'class'=>'btn btn-sm btn-warning'
+
+                            ]);
+                            return $link;
+                        },
+
+                    ],
+                    [
+                        'attribute' => '',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:50px;'],
+                        'value' => function ($data) {
+                            $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
+                                'class'=>'btn btn-sm btn-danger del-product',
+                                'data'=>['id'=>$data->id],
+                            ]);
+                            return $link;
+                        },
+
+                    ],
+            ];
+            ?>
+            <div class="box-body table-responsive no-padding"> 
+            <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
+            <?=GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'filterModel' => $searchModel,
+                    'filterPosition' => false,
+                    'columns' => $gridColumnsBaseCatalog, 
+                    'tableOptions' => ['class' => 'table no-margin'],
+                    'options' => ['class' => 'table-responsive'],
+                    'bordered' => false,
+                    'striped' => true,
+                    'condensed' => false,
+                    'responsive' => false,
+                    'hover' => false,
+                    'export' => [
+                        'fontAwesome' => true,
+                    ],
+            ]);
+            ?>  
+            <?php Pjax::end(); ?>
+            </div>
         </div>
-        <div id="tabClients" class="tab-pane fade">
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
-<?php
-$form = ActiveForm::begin([
-            'options' => [
-                'id' => 'search-form2',
-                'class' => "navbar-form",
-                'role' => 'search',
-            ],
-            'method' => 'get',
-        ]);
-?>  
-<?php ActiveForm::end(); ?> 	    
-<?php 
-$gridColumnsCatalog = [
-        [
-        'label'=>'Ресторан',
-        'value'=>function ($data) {
-        $organization_name=common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
-        return $organization_name;
-        }
-        ],
-        [
-        'label'=>'Текущий каталог',
-        'format' => 'raw',
-        'value'=>function ($data) {
-        $catalog_name = $data->cat_id == 0 ? '' : 
-        common\models\Catalog::find()->where(['id'=>$data->cat_id])->one()->name;
-        return $catalog_name;
-        }
-        ],
-        [
-            'attribute' => 'Назначить',
-            'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],
-            'value' => function ($data) {
-                $link = CheckboxX::widget([
-                    'name'=>'setcatalog_'.$data->id,
-                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
-                    'autoLabel' => true,
-                    'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
-                    'pluginOptions'=>[
-                        'threeState'=>false,
-                        'theme' => 'krajee-flatblue',
-                        'enclosedLabel' => true,
-                        'size'=>'lg',
-                        ]
-                ]);
-                return $link;
-            },
-            
-        ],
-];
-?>
-        <div class="panel-body">
-<?=GridView::widget([
-	'dataProvider' => $dataProvider2,
-	'filterModel' => $searchModel2,
-	'filterPosition' => false,
-	'columns' => $gridColumnsCatalog,
-]);
-?> 
-        </div>
-<?php Pjax::end(); ?>   
+        <div id="tabClients" class="tab-pane fade"> 	    
+                <?php 
+                $gridColumnsCatalog = [
+                    [
+                    'label'=>'Ресторан',
+                    'value'=>function ($data) {
+                    $organization_name=common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
+                    return $organization_name;
+                    }
+                    ],
+                    [
+                    'label'=>'Текущий каталог',
+                    'format' => 'raw',
+                    'value'=>function ($data) {
+                    $catalog_name = $data->cat_id == 0 ? '' : 
+                    common\models\Catalog::find()->where(['id'=>$data->cat_id])->one()->name;
+                    return $catalog_name;
+                    }
+                    ],
+                    [
+                        'attribute' => 'Назначить',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:50px;'],
+                        'value' => function ($data) {
+                            $link = CheckboxX::widget([
+                                'name'=>'setcatalog_'.$data->id,
+                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                'value'=>$data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
+                                'autoLabel' => true,
+                                'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
+                                'pluginOptions'=>[
+                                    'threeState'=>false,
+                                    'theme' => 'krajee-flatblue',
+                                    'enclosedLabel' => true,
+                                    'size'=>'lg',
+                                    ]
+                            ]);
+                            return $link;
+                        },
+
+                    ],
+                ];
+                ?>
+                <div class="panel-body">
+                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
+                    <?=GridView::widget([
+                        'dataProvider' => $dataProvider2,
+                        'filterModel' => $searchModel2,
+                        'filterPosition' => false,
+                        'columns' => $gridColumnsCatalog, 
+                        'tableOptions' => ['class' => 'table no-margin'],
+                        'options' => ['class' => 'table-responsive'],
+                        'bordered' => false,
+                        'striped' => true,
+                        'condensed' => false,
+                        'responsive' => false,
+                        'hover' => false,
+                    ]);
+                    ?>
+                    <?php Pjax::end(); ?>
+                </div>
+               
             </div>
         </div>
     </div>

@@ -11,56 +11,55 @@ use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
 use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
-$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 'Редактирование каталога '
 ?>
 
-  
-<div class="panel-body">
-      
-            <h3 class="font-light">
-<?= $catalog->isNewRecord? '<i class="fa fa-list-alt"></i> Создание нового каталога' : '<i class="fa fa-list-alt"></i> Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
-            </h3>
-</div>
-<div class="panel-body">
-<div class="text-center m-b-sm">
-<ul class="nav nav-tabs">
-    <?=$catalog->isNewRecord?
-    '<li class="active">'.Html::a('Название',['vendor/step-1']).'</li>':
-    '<li class="active">'.Html::a('Название',['vendor/step-1','id'=>$cat_id]).'</li>' 
-    ?>
-    <?=$catalog->isNewRecord?
-    '<li class="disabled">'.Html::a('Добавить товары').'</li>':
-    '<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>' 
-    ?>
-    <?=$catalog->isNewRecord?
-    '<li class="disabled">'.Html::a('Изменить цены').'</li>':
-    '<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>' 
-    ?>
-    <?=$catalog->isNewRecord?
-    '<li class="disabled">'.Html::a('Назначить').'</li>':
-    '<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>' 
-    ?>
-</ul>
-</div>
-</div>
-<?php Pjax::begin(['id' => 'pjax-container'])?>  
-<?php $form = ActiveForm::begin([
-    'id' => 'newCatalogForm'
-    ]);
-?>
-<div class="panel-body">
-    <?= $form->field($catalog, 'name')->textInput(['class' => 'form-control input-md m-b'])->label(false) ?>
-    <?= Html::a(
-        'Сохранить',
-        ['vendor/step-2'],
-        ['class' => 'btn btn-lg btn-success pull-right step-2','style' => 'margin-left:10px;']
-    ) ?>
-</div>
-
-
-<?php $form = ActiveForm::end();?>
-<?php Pjax::end(); ?>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title"><?= $catalog->isNewRecord? 'Создание нового каталога' : 'Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
+        </h3>
+        <?= Html::a(
+                'Сохранить и перейти далее',
+                ['vendor/step-2'],
+                ['class' => 'btn btn-sm btn-success pull-right step-2']
+            ) ?>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="panel-body">
+            <div class="text-center">
+                <ul class="nav nav-tabs">
+                    <?=$catalog->isNewRecord?
+                    '<li class="active">'.Html::a('Название',['vendor/step-1']).'</li>':
+                    '<li class="active">'.Html::a('Название',['vendor/step-1','id'=>$cat_id]).'</li>' 
+                    ?>
+                    <?=$catalog->isNewRecord?
+                    '<li class="disabled">'.Html::a('Добавить товары').'</li>':
+                    '<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>' 
+                    ?>
+                    <?=$catalog->isNewRecord?
+                    '<li class="disabled">'.Html::a('Изменить цены').'</li>':
+                    '<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>' 
+                    ?>
+                    <?=$catalog->isNewRecord?
+                    '<li class="disabled">'.Html::a('Назначить').'</li>':
+                    '<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>' 
+                    ?>
+                </ul>
+            </div>
+        </div>
+        <?php Pjax::begin(['id' => 'pjax-container'])?>  
+        <?php $form = ActiveForm::begin([
+            'id' => 'newCatalogForm'
+            ]);
+        ?>
+        <div class="panel-body">
+            <?= $form->field($catalog, 'name')->textInput(['class' => 'form-control input-md'])->label(false) ?>
+        </div>
+        <?php $form = ActiveForm::end();?>
+        <?php Pjax::end(); ?>
+    </div>
+</div>    
 <?php
 if($catalog->isNewRecord){$route = 'index.php?r=vendor/step-1';} else {$route = 'index.php?r=vendor/step-1-update&id='.$cat_id;}
 $this->registerJs('

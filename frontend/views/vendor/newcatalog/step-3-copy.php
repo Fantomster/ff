@@ -27,30 +27,32 @@ $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js')
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 
-<div class="panel-body">
-    <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
+        <?= Html::a(
+                'Сохранить',
+                ['#'],
+                ['class' => 'btn btn-sm btn-success pull-right','id'=>'save', 'name'=>'save']
+        ) ?>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="panel-body">
+            <ul class="nav nav-tabs">
+                <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+            </ul>
+        </div>
+        <div class="panel-body">
+            <?php Pjax::begin(['id' => 'pjax-container']); ?>
+                <div class="handsontable" id="handsontable"></div> 
+            <?php Pjax::end(); ?>   
+        </div>
+    </div>
 </div>
-<div class="panel-body">
-    <ul class="nav nav-tabs">
-        <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-        <?='<li class="active">'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
-    </ul>
-</div>
-<div class="panel-body">
-<?= Html::a(
-        'Сохранить',
-        ['#'],
-        ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px','margin-bottom'=>'15px'],'id'=>'save', 'name'=>'save']
-) ?>
- 
-<?php Pjax::begin(['id' => 'pjax-container']); ?>
-<div class="handsontable" id="handsontable"></div> 
-<?php Pjax::end(); ?>   
-   
-</div>
-
 <?php
 $arr= json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);

@@ -30,23 +30,28 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
-        <?= Html::a(
-                'Сохранить',
-                ['#'],
-                ['class' => 'btn btn-sm btn-success pull-right','id'=>'save', 'name'=>'save']
-        ) ?>
+        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
-            <ul class="nav nav-tabs">
+            <ul class="nav fk-tab nav-tabs pull-left">
                 <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
                 <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a('Изменить цены <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
                 <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+            </ul>
+            <ul class="fk-prev-next pull-right">
+              <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-2','id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-4','id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
             </ul>
         </div>
         <div class="panel-body">
+            <div class="callout callout-fk-info">
+                <h4>ШАГ 3</h4>
+
+                <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
+            </div> 
             <?php Pjax::begin(['id' => 'pjax-container']); ?>
                 <div class="handsontable" id="handsontable"></div> 
             <?php Pjax::end(); ?>   
@@ -193,21 +198,8 @@ Handsontable.Dom.addEvent(save, 'click', function() {
           cache: false,
           success: function (response) {
               if(response.success){ 
-                bootbox.dialog({
-                    message: response.alert.body,
-                    title: response.alert.title,
-                    buttons: {
-                        success: {
-                          label: "Успешно!",
-                          className: "btn-success btn-md",
-                          callback: function() {
-                            //location.reload(); 
-                              $.pjax.reload({container: "#pjax-container"});
-                          }
-                        },
-                    },
-                    className: response.alert.class
-                });
+                var url = "index.php?r=vendor/step-4&id=$cat_id";
+                $(location).attr("href",url);
               }else{
                 bootbox.dialog({
                     message: response.alert.body,

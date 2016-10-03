@@ -16,16 +16,20 @@ $this->title = 'Добавить продукты';
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
-        <button class="btn btn-default btn-sm pull-right" onclick="window.history.back();">Вернуться</button>
+        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
-            <ul class="nav nav-tabs">
+            <ul class="nav fk-tab nav-tabs pull-left">
                 <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a('Добавить товары <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-2','id'=>$cat_id]).'</li>'?>
                 <?='<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
                 <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+            </ul>
+            <ul class="fk-prev-next pull-right">
+              <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
             </ul>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>
@@ -92,6 +96,11 @@ $this->title = 'Добавить продукты';
         ];
         ?>
         <div class="panel-body">
+            <div class="callout callout-fk-info">
+                <h4>ШАГ 2</h4>
+
+                <p>Отлично. Теперь выберите товары для вашего каталога, просто проставив галочки в колонке <strong>Добавить</strong>. </p>
+            </div>     
         <?=GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,

@@ -18,20 +18,16 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
     <div class="box-header with-border">
         <h3 class="box-title"><?= $catalog->isNewRecord? 'Создание нового каталога' : 'Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
         </h3>
-        <?= Html::a(
-                'Сохранить и перейти далее',
-                ['vendor/step-2'],
-                ['class' => 'btn btn-sm btn-success pull-right step-2']
-            ) ?>
+        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
             <div class="text-center">
-                <ul class="nav nav-tabs">
+                <ul class="nav fk-tab nav-tabs pull-left">
                     <?=$catalog->isNewRecord?
-                    '<li class="active">'.Html::a('Название',['vendor/step-1']).'</li>':
-                    '<li class="active">'.Html::a('Название',['vendor/step-1','id'=>$cat_id]).'</li>' 
+                    '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['class'=>'btn btn-default'],['vendor/step-1']).'</li>':
+                    '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1','id'=>$cat_id]).'</li>' 
                     ?>
                     <?=$catalog->isNewRecord?
                     '<li class="disabled">'.Html::a('Добавить товары').'</li>':
@@ -46,6 +42,11 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
                     '<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>' 
                     ?>
                 </ul>
+                <ul class="fk-prev-next pull-right">
+                  <?='<li class="fk-prev">'.Html::a('Назад',['vendor/catalogs']).'</li>'?>
+                  <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-2','id'=>$cat_id],['class' => 'step-2']).'</li>'?>
+                </ul>
+                
             </div>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>  
@@ -54,6 +55,10 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
             ]);
         ?>
         <div class="panel-body">
+            <div class="callout callout-fk-info">
+                <h4>ШАГ 1</h4>
+                <p><?=$catalog->isNewRecord ? 'Введите название для нового каталога':'Изменить название каталога' ?></p>
+            </div>
             <?= $form->field($catalog, 'name')->textInput(['class' => 'form-control input-md'])->label(false) ?>
         </div>
         <?php $form = ActiveForm::end();?>

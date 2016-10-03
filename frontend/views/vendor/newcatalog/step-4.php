@@ -15,18 +15,25 @@ $this->title = 'Назначить каталог';
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
-        <button class="btn btn-default btn-sm pull-right" onclick="window.history.back();">Вернуться</button>
+        <!--button class="btn btn-default btn-sm pull-right" onclick="window.history.back();">Вернуться к списку каталогов</button-->
+        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
-            <ul class="nav nav-tabs">
+            <ul class="nav fk-tab nav-tabs pull-left">
               <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
                 <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
                 <?='<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a('Назначить <i class="fa fa-fw fa-thumbs-o-up"></i>',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+            </ul>
+            <ul class="fk-prev-next pull-right">
+              <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('Сохранить',['vendor/catalogs']).'</li>'?>
             </ul>
         </div>
+       
+            
         
         <?php 
         $gridColumns = [
@@ -71,6 +78,11 @@ $this->title = 'Назначить каталог';
         ];
         ?>
         <div class="panel-body">
+            <div class="callout callout-fk-info">
+                <h4>ШАГ 4</h4>
+
+                <p>И наконец, укажите рестораны, которым будет доступен ваш каталог.</p>
+            </div>
         <?php Pjax::begin(['id' => 'pjax-container']); ?>
         <?=GridView::widget([
             'dataProvider' => $dataProvider,

@@ -305,6 +305,9 @@ class OrderController extends DefaultController {
     public function actionView($id) {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
+        if (!(($order->client_id == $user->organization_id) || ($order->client_id == $user->organization_id))) {
+            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+        }
         $organizationType = $user->organization->type_id;
         if (isset($_POST['hasEditable'])) {
             $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
@@ -431,5 +434,4 @@ class OrderController extends DefaultController {
                     'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
         ]);
     }
-
 }

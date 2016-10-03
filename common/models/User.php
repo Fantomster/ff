@@ -84,6 +84,12 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         //return $result;
     }
+    
+    /**
+     * Send email invite to restaurant
+     * @param User $client
+     * @return int
+     */
     public function sendInviteToClient($client) {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -93,9 +99,11 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $this->module->emailViewPath;
 		// send email
         $vendor = $this->organization->name;
+        $userToken = $this->module->model("UserToken");
+        $userToken = $userToken::generate($vendor->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $client->email;
         $subject = "Приглашение на f-keeper";
-        $result = $mailer->compose('acceptVendorInvite', compact("subject", "vendor", "vendor"))
+        $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "userToken", "vendor"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

@@ -10,16 +10,17 @@ use common\models\Organization;
 /**
  *  Model for order catalog search form
  */
-class OrderCatalogSearch extends CatalogGoods {
+class OrderCatalogSearch extends CatalogBaseGoods {
     public $searchString;
     public $vendors;
+    public $actualPrice;
     
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return "{{%catalog_goods}}";
+        return "{{%catalog_base_goods}}";
     }
 
     /**
@@ -29,7 +30,7 @@ class OrderCatalogSearch extends CatalogGoods {
     {
         return [
             [['id'], 'integer'],
-            [['baseProduct.product', 'vendor.name', 'price', 'baseProduct.units', 'note', 'searchString'], 'safe'],
+            [['product', 'vendor.name', 'actualPrice', 'units', 'searchString'], 'safe'],
         ];
     }
     
@@ -38,7 +39,7 @@ class OrderCatalogSearch extends CatalogGoods {
      */
     public function attributes()
     {
-        return array_merge(parent::attributes(), ['baseProduct.product', 'vendor.name', 'baseProduct.units']);
+        return array_merge(parent::attributes(), ['product', 'vendor.name', 'units']);
     }
     
     /**

@@ -14,4 +14,4 @@ use yii\helpers\Url;
 
 <p><?= Yii::t("user", "$vendor invites you to use f-keeper.") ?></p>
 
-<p><?= Url::toRoute(["http://f-keeper.ru"]); ?></p>
+<p><?= Url::toRoute(["/user/accept-vendor-invite", "token" => $userToken->token], true); ?></p>

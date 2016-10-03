@@ -8,7 +8,7 @@ use kartik\money\MaskMoney;
 ?>
 <div class="col-md-8">
     <div class="box box-info">
-        <div class="box-header with-border">
+        <div class="box-header">
         </div>
         <?php
         $form = ActiveForm::begin([
@@ -20,8 +20,8 @@ use kartik\money\MaskMoney;
                         'class' => 'form-horizontal'
                     ],
                     'fieldConfig' => [
-                        'template' => '{label}<div class="col-sm-5">{input}</div><div class="col-sm-10 pull-right">{error}</div>',
-                        'labelOptions' => ['class' => 'col-sm-5 control-label'],
+                        'template' => '{label}<div class="col-sm-5">{input}</div><div class="col-sm-9 pull-right">{error}</div>',
+                        'labelOptions' => ['class' => 'col-sm-4 control-label'],
                     ],
         ]);
         ?>

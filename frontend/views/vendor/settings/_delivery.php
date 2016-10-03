@@ -68,8 +68,8 @@ use kartik\money\MaskMoney;
                 ])
         ?>
         <div class="form-group">
-            <label class="col-sm-5 control-label">Дни доставки</label>
-            <div class="col-sm-6">
+            <label class="col-sm-4 control-label">Дни доставки</label>
+            <div class="col-sm-5">
                 <!--?=
                         $form->field($delivery, 'delivery_mon')
                         ->label(false)

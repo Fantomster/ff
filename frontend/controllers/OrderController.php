@@ -384,7 +384,7 @@ class OrderController extends DefaultController {
 
     public function actionSendMessage() {
         $user = $this->currentUser;
-        if (Yii::$app->request->post()) {
+        if (Yii::$app->request->post() && Yii::$app->request->post('message')) {
             $name = $user->profile->full_name;
             $message = Yii::$app->request->post('message');
             $channel = 'order' . Yii::$app->request->post('order_id');

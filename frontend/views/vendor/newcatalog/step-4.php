@@ -10,23 +10,33 @@ use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
 use kartik\checkbox\CheckboxX;
-$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 $this->title = 'Назначить каталог';
 ?>
-<div class="panel-body">
-    <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
-</div>
-<div class="panel-body">
-    <ul class="nav nav-tabs">
-      <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-        <?='<li class="active">'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
-    </ul>
-</div>
-<?php Pjax::begin(['id' => 'pjax-container']); ?>
-<?php 
-$gridColumns = [
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
+        <!--button class="btn btn-default btn-sm pull-right" onclick="window.history.back();">Вернуться к списку каталогов</button-->
+        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="panel-body">
+            <ul class="nav fk-tab nav-tabs pull-left">
+              <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a('Назначить <i class="fa fa-fw fa-thumbs-o-up"></i>',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+            </ul>
+            <ul class="fk-prev-next pull-right">
+              <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('Сохранить',['vendor/catalogs']).'</li>'?>
+            </ul>
+        </div>
+       
+            
+        
+        <?php 
+        $gridColumns = [
 		[
 		'label'=>'Ресторан',
 		'value'=>function ($data) {
@@ -65,28 +75,33 @@ $gridColumns = [
             },
             
         ],
-];
-?>
-<div class="panel-body">
-<?=GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'filterPosition' => false,
-    'columns' => $gridColumns,
-    'resizableColumns'=>false,
-    'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
-    'headerRowOptions'=>['class'=>'kartik-sheet-style'],
-    'filterRowOptions'=>['class'=>'kartik-sheet-style'],
-    'pjax' => true, 
-    'pjaxSettings' =>
-        [
-            'neverTimeout'=>true,
-            'options'=>['id'=>'w0'],
-        ], 
-]);
-?>
+        ];
+        ?>
+        <div class="panel-body">
+            <div class="callout callout-fk-info">
+                <h4>ШАГ 4</h4>
+
+                <p>И наконец, укажите рестораны, которым будет доступен ваш каталог.</p>
+            </div>
+        <?php Pjax::begin(['id' => 'pjax-container']); ?>
+        <?=GridView::widget([
+            'dataProvider' => $dataProvider,
+            'filterModel' => $searchModel,
+            'filterPosition' => false,
+            'columns' => $gridColumns,
+            'tableOptions' => ['class' => 'table no-margin'],
+            'options' => ['class' => 'table-responsive'],
+            'bordered' => false,
+            'striped' => true,
+            'condensed' => false,
+            'responsive' => false,
+            'hover' => false, 
+        ]);
+        ?>
+        <?php Pjax::end(); ?>
+        </div>
+    </div>
 </div>
-<?php Pjax::end(); ?>
 <?php
 $this->registerJs('
 /** 

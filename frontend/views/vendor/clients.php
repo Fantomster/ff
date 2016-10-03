@@ -9,7 +9,6 @@ use yii\widgets\ActiveForm;
 use yii\web\View;
 use common\models\Users;
 use kartik\checkbox\CheckboxX;
-$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
 ?>
 <?=
 Modal::widget([
@@ -25,7 +24,6 @@ Modal::widget([
     'clientOptions' => false,   
 ])
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'cl-list',]); ?>
 <?php 
 $gridColumnsClients = [
 		[
@@ -95,34 +93,41 @@ $gridColumnsClients = [
     
 ];
 ?>
-<div class="panel-body">
-    <?=
-    Modal::widget([
-        'id' => 'add-client',
-        'clientOptions' => false,
-        'toggleButton' => [
-            'label' => '<i class="fa fa-plus"></i> Пригласить клиента',
-            'tag' => 'a',
-            'data-target' => '#add-client',
-            'class' => 'btn btn-lg btn-info m-t-xs m-r pull-right',
-            'href' => Url::to(['/vendor/ajax-add-client']),
-            'style' => 'float:right',
-        ],
-    ])
-    ?>
-    <h3 class="font-light"><i class="fa fa-users"></i> Мои Клиенты</h3>
+
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Мои Клиенты</h3>
+        <?=
+        Modal::widget([
+            'id' => 'add-client',
+            'clientOptions' => false,
+            'toggleButton' => [
+                'label' => 'Пригласить клиента',
+                'tag' => 'a',
+                'data-target' => '#add-client',
+                'class' => 'btn btn-sm btn-fk-success pull-right',
+                'href' => Url::to(['/vendor/ajax-add-client']),
+                'style' => 'float:right',
+            ],
+        ])
+        ?>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="panel-body">
+            <?php Pjax::begin(['enablePushState' => false, 'id' => 'cl-list',]); ?>
+            <?=GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'filterModel' => $searchModel,
+                    'filterPosition' => false,
+                    'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+                    'columns' => $gridColumnsClients,
+            ]);
+            ?> 
+            <?php Pjax::end(); ?> 
+        </div>
+    </div>
 </div>
-<div class="panel-body">
-<?=GridView::widget([
-	'dataProvider' => $dataProvider,
-	'filterModel' => $searchModel,
-	'filterPosition' => false,
-        'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
-	'columns' => $gridColumnsClients,
-]);
-?> 
-</div>
-<?php Pjax::end(); ?> 
 <?php
 $customJs = <<< JS
 /** 

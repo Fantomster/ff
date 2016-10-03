@@ -306,7 +306,7 @@ class OrderController extends DefaultController {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
         if (!(($order->client_id == $user->organization_id) || ($order->client_id == $user->organization_id))) {
-            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpExceptionion(404 ,'Нет здесь ничего такого, проходите, гражданин');
         }
         $organizationType = $user->organization->type_id;
         if (isset($_POST['hasEditable'])) {

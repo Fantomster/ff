@@ -42,7 +42,6 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
                     ?>
                 </ul>
                 <ul class="fk-prev-next pull-right">
-                  <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-1']).'</li>'?>
                   <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
                 

@@ -305,7 +305,7 @@ class OrderController extends DefaultController {
     public function actionView($id) {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
-        if (!(($order->client_id == $user->organization_id) || ($order->client_id == $user->organization_id))) {
+        if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
         }
         $organizationType = $user->organization->type_id;

@@ -12,6 +12,6 @@ use yii\helpers\Url;
 
 <h3><?= $subject ?></h3>
 
-<p><?= Yii::t("user", "$vendor invites you to use f-keeper.") ?></p>
+<p><?= Yii::t("user", "$vendor invites you to use f-keeper. Please follow next link:") ?></p>
 
-<p><?= Url::toRoute(["/user/accept-vendor-invite", "token" => $userToken->token], true); ?></p>
+<p><?= Url::toRoute(["/user/register"], true); ?></p>

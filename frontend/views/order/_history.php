@@ -2,6 +2,7 @@
 
 use yii\grid\GridView;
 use common\models\Order;
+use common\models\Organization;
 ?>
 <div class="box box-info">
     <div class="box-header with-border">
@@ -23,10 +24,14 @@ use common\models\Order;
                     'value' => 'id',
                     'label' => 'Номер заказа',
                 ],
-                [
+                $organization->type_id == Organization::TYPE_RESTAURANT ? [
                     'attribute' => 'vendor.name',
                     'value' => 'vendor.name',
                     'label' => 'Поставщик',
+                ] : [
+                    'attribute' => 'client.name',
+                    'value' => 'client.name',
+                    'label' => 'Ресторан',
                 ],
                 [
                     'attribute' => 'createdBy.profile.full_name',

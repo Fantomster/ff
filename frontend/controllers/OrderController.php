@@ -296,9 +296,9 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization'));
         } else {
-            return $this->render('index', compact('searchModel', 'dataProvider'));
+            return $this->render('index', compact('searchModel', 'dataProvider', 'organization'));
         }
     }
 

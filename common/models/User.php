@@ -99,11 +99,9 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $this->module->emailViewPath;
 		// send email
         $vendor = $this->organization->name;
-        $userToken = $this->module->model("UserToken");
-        $userToken = $userToken::generate($vendor->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $client->email;
         $subject = "Приглашение на f-keeper";
-        $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "userToken", "vendor"))
+        $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

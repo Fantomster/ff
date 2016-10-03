@@ -868,7 +868,7 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($user->load($post)) {
                 if ($user->validate()) {
-                    //class отправки приглашения ресторану от поставщика
+                    $this->currentUser->sendInviteToClient($user);
                     $message = 'Приглашение отправлено!';
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }

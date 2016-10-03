@@ -13,7 +13,6 @@ use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
 $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 'Редактирование каталога '
 ?>
-
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title"><?= $catalog->isNewRecord? 'Создание нового каталога' : 'Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
@@ -26,7 +25,7 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
             <div class="text-center">
                 <ul class="nav fk-tab nav-tabs pull-left">
                     <?=$catalog->isNewRecord?
-                    '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['class'=>'btn btn-default'],['vendor/step-1']).'</li>':
+                    '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>':
                     '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1','id'=>$cat_id]).'</li>' 
                     ?>
                     <?=$catalog->isNewRecord?
@@ -43,8 +42,8 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
                     ?>
                 </ul>
                 <ul class="fk-prev-next pull-right">
-                  <?='<li class="fk-prev">'.Html::a('Назад',['vendor/catalogs']).'</li>'?>
-                  <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-2','id'=>$cat_id],['class' => 'step-2']).'</li>'?>
+                  <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-1']).'</li>'?>
+                  <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
                 
             </div>
@@ -66,7 +65,7 @@ $catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 
     </div>
 </div>    
 <?php
-if($catalog->isNewRecord){$route = 'index.php?r=vendor/step-1';} else {$route = 'index.php?r=vendor/step-1-update&id='.$cat_id;}
+if($catalog->isNewRecord){$router = 'index.php?r=vendor/step-1';}else{$router = 'index.php?r=vendor/step-1-update&id='.$cat_id;}
 $this->registerJs('
 /** 
  * Forward port jQuery.live()
@@ -86,7 +85,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 $(".step-2").click(function(e){
 e.preventDefault();
 //$("#loader-show").showLoading();
-var urlStap = "'.$route.'";
+var urlStap = "'.$router.'";
 $.ajax({
     url: urlStap,
     type: "POST",

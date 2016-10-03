@@ -6,7 +6,6 @@ use yii\helpers\Url;
 use kartik\checkbox\CheckboxX;
 use kartik\money\MaskMoney;
 ?>
-<div class="col-md-8">
     <div class="box box-info">
         <div class="box-header">
         </div>
@@ -21,7 +20,7 @@ use kartik\money\MaskMoney;
                     ],
                     'fieldConfig' => [
                         'template' => '{label}<div class="col-sm-5">{input}</div><div class="col-sm-9 pull-right">{error}</div>',
-                        'labelOptions' => ['class' => 'col-sm-4 control-label'],
+                        'labelOptions' => ['class' => 'col-sm-3 control-label'],
                     ],
         ]);
         ?>
@@ -181,9 +180,8 @@ use kartik\money\MaskMoney;
             </div>
         </div>
         <div class="box-footer">
+            <?= Html::button('Сохранить изменения', ['class' => 'btn btn-success', 'id' => 'saveDlv', 'disabled' => true]) ?>
             <?= Html::button('Отменить изменения', ['class' => 'btn btn-danger', 'id' => 'cancelDlv', 'disabled' => true]) ?>
-            <?= Html::button('Сохранить изменения', ['class' => 'btn btn-primary pull-right', 'id' => 'saveDlv', 'disabled' => true]) ?>
         </div>				
         <?php ActiveForm::end(); ?>
     </div>
-</div>

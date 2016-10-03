@@ -42,7 +42,6 @@ $this->registerJs(
 );
 ?>
 <?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list',]); ?>
-<div class="col-md-8">
     <div class="box box-info">
         <div class="box-header">
         </div>
@@ -114,7 +113,6 @@ GridView::widget([
         ]);
         ?>
     </div>
-</div>
         <?php Pjax::end(); ?>
 
         <?php

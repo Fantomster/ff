@@ -13,15 +13,16 @@ use common\models\Organization;
  * OrderSearch represents the model behind the search form about `common\models\Order`.
  */
 class OrderSearch extends Order {
-//    public $client_id = null;
-//    public $vendor_id = null;
+
+    public $vendor_search_id = null;
+    public $client_search_id = null;
 
     /**
      * @inheritdoc
      */
     public function rules() {
         return [
-            [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price'], 'integer'],
+            [['client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 'client_search_id', 'vendor_search_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
         ];
     }
@@ -57,35 +58,47 @@ class OrderSearch extends Order {
      */
     public function search($params) {
         $query = Order::find();
+        $this->load($params);
 
-        $query->joinWith([
-            'vendor' => function ($query) {
-                $query->from(Organization::tableName() . ' vendor');
-            },
-        ]);
+        if ($this->vendor_search_id) {
+            $query->joinWith([
+                'vendor' => function ($query) {
+                    $query->from(Organization::tableName() . ' vendor');
+                },
+            ]);
+        } else {
+            $query->joinWith([
+                'client' => function ($query) {
+                    $query->from(Organization::tableName() . ' client');
+                },
+            ]);
+        }
         $query->joinWith([
             'acceptedBy' => function ($query) {
                 $query->from(User::tableName() . ' acceptedBy');
             },
-        ], true);
+                ], true);
         $query->joinWith([
             'createdBy' => function ($query) {
                 $query->from(User::tableName() . ' createdBy');
             },
-        ], true);
+                ], true);
+        if ($this->vendor_search_id) {
+            $query->where(['vendor.id' => $this->vendor_search_id]);
+        } else {
+            $query->where(['client.id' => $this->client_search_id]);
+        }
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
 
-        $addSortAttributes = ['vendor.name'];
+        $addSortAttributes = $this->vendor ? ['vendor.name'] : ['client.name'];
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
                 'asc' => [$addSortAttribute => SORT_ASC],
                 'desc' => [$addSortAttribute => SORT_DESC],
             ];
         }
-
-        $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails

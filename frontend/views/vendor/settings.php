@@ -51,7 +51,7 @@ $this->registerJs(
         });'
 );
 ?>
-
+<div class="nav-tabs-custom settings">
 <?= Tabs::widget([
     'items' => [
         [
@@ -71,3 +71,4 @@ $this->registerJs(
         ],
     ],
 ]) ?>
+</div>

@@ -289,9 +289,9 @@ class OrderController extends DefaultController {
         $params = Yii::$app->request->getQueryParams();
         $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
+            $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
         } else {
-            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
+            $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
         }
         $dataProvider = $searchModel->search($params);
 

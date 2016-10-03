@@ -34,3 +34,4 @@ phpunit.phar
 /instant/node_modules/
 /composer.lock
 /frontend/web/css/custom_style.css
+/frontend/web/css/custom_style.css.map

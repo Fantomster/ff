@@ -56,6 +56,10 @@ Modal::widget([
 ])
 ?>
 <?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list',]); ?>
+<div class="col-md-8">
+    <div class="box box-info">
+        <div class="box-header with-border">
+        </div>
 <?php
 $form = ActiveForm::begin([
             'options' => [
@@ -80,6 +84,7 @@ GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'filterPosition' => false,
+    'summary' => '',
     'columns' => [
         [
             'attribute' => 'profile.full_name',

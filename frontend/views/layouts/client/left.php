@@ -10,9 +10,9 @@
                     ['label' => 'Разместить заказ', 'icon' => 'fa fa-gears', 'url' => ['order/create']],
                     ['label' => 'История заказов', 'icon' => 'fa fa-gears', 'url' => ['order/index']],
                     ['label' => 'Мои поставщики', 'icon' => 'fa fa-gears', 'url' => ['client/suppliers']],
-                    ['label' => 'Аналитика', 'icon' => 'fa fa-gears', 'url' => ['client/settings']],
-                    ['label' => 'Обучающее видео', 'icon' => 'fa fa-gears', 'url' => ['client/settings']],
-                    ['label' => 'Акции', 'icon' => 'fa fa-gears', 'url' => ['client/settings']],
+                    ['label' => 'Аналитика', 'icon' => 'fa fa-gears', 'url' => '#'],
+                    ['label' => 'Обучающее видео', 'icon' => 'fa fa-gears', 'url' => '#'],
+                    ['label' => 'Акции', 'icon' => 'fa fa-gears', 'url' => '#'],
                     ['label' => 'Настройки', 'icon' => 'fa fa-gears', 'url' => ['client/settings']],
                 ],
             ]

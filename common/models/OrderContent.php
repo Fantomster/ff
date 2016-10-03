@@ -11,7 +11,7 @@ use Yii;
  * @property integer $product_id
  * @property integer $quantity
  * @property integer $accepted_quantity
- * @property integer $price
+ * @property string $price
  *
  * @property Order $order
  * @property CatalogBaseGoods $product
@@ -48,9 +48,9 @@ class OrderContent extends \yii\db\ActiveRecord
         return [
             'order_id' => 'Order ID',
             'product_id' => 'Product ID',
-            'quantity' => 'Quantity',
+            'quantity' => 'Количество',
             'accepted_quantity' => 'Accepted quantity',
-            'price' => 'Price',
+            'price' => 'Цена',
         ];
     }
 

@@ -4,8 +4,6 @@ namespace frontend\controllers;
 
 use Yii;
 use yii\helpers\Json;
-use yii\web\HttpException;
-use yii\web\Controller;
 use common\models\User;
 use common\models\Organization;
 use common\models\Role;
@@ -21,8 +19,8 @@ use common\models\CatalogBaseGoods;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
-use yii\behaviors\TimestampBehavior;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 /**
  * Controller for supplier
  */
@@ -59,9 +57,9 @@ class VendorController extends DefaultController {
                         ],
                     ],
                 ],
-               /* 'denyCallback' => function($rule, $action) {
-                    throw new HttpException(404 ,'Не здесь ничего такого, проходите, гражданин');
-                }*/
+                'denyCallback' => function($rule, $action) {
+                    $this->redirect(Url::to(['/vendor/index']));
+                }
             ],
         ];
     }
@@ -83,11 +81,17 @@ class VendorController extends DefaultController {
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
         $organization = $this->currentUser->organization;
+        $delivery = $organization->delivery;
+        if (!$delivery) {
+            $delivery = new \common\models\Delivery();
+            $delivery->vendor_id = $organization->id;
+            $delivery->save();
+        }
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('settings', compact('searchModel', 'dataProvider', 'organization'));
+            return $this->renderPartial('settings', compact('searchModel', 'dataProvider', 'organization', 'delivery'));
         } else {
-            return $this->render('settings', compact('searchModel', 'dataProvider', 'organization'));
+            return $this->render('settings', compact('searchModel', 'dataProvider', 'organization', 'delivery'));
         }
     }
 
@@ -895,7 +899,6 @@ class VendorController extends DefaultController {
      *  Organization validate
      */
     public function actionAjaxValidateOrganization() {
-        $this->loadCurrentUser();
         $organization = $this->currentUser->organization;
         
         if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
@@ -910,7 +913,6 @@ class VendorController extends DefaultController {
      *  Organization save
      */
     public function actionAjaxUpdateOrganization() {
-        $this->loadCurrentUser();
         $organization = $this->currentUser->organization;
         
         if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
@@ -921,6 +923,36 @@ class VendorController extends DefaultController {
         
         return $this->renderAjax('settings/_info', compact('organization'));
     }
+
+    /*
+     *  Delivery info validate
+     */
+    public function actionAjaxValidateDelivery() {
+        $delivery = $this->currentUser->organization->delivery;
+        
+        if (Yii::$app->request->isAjax && $delivery->load(Yii::$app->request->post())) {
+            if ($delivery->validate()) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return json_encode(ActiveForm::validate($delivery));
+            }
+        }
+    }
+    
+    /*
+     *  Delivery info save
+     */
+    public function actionAjaxUpdateDelivery() {
+        $delivery = $this->currentUser->organization->delivery;
+        
+        if (Yii::$app->request->isAjax && $delivery->load(Yii::$app->request->post())) {
+            if ($delivery->validate()) {
+                $delivery->save();
+            }
+        } 
+        
+        return $this->renderAjax('settings/_delivery', compact('delivery'));
+    }
+
     public function actionViewClient($id){
         $client_id = $id;
 	$currentUser = User::findIdentity(Yii::$app->user->id);

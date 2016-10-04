@@ -38,7 +38,7 @@ class OrderSearch extends Order {
      * @inheritdoc
      */
     public function attributes() {
-        return array_merge(parent::attributes(), ['acceptedBy.profile.full_name', 'vendor.name', 'createdBy.profile.full_name']);
+        return array_merge(parent::attributes(), ['acceptedBy.profile.full_name', 'vendor.name', 'client.name', 'createdBy.profile.full_name']);
     }
 
     /**

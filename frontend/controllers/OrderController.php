@@ -290,16 +290,18 @@ class OrderController extends DefaultController {
         $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
             $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
-            $newCount = Order::find(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->where(['client_id' => $organization->id])->count();
-            $processingCount = Order::find(['status' => Order::STATUS_PROCESSING])->where(['client_id' => $organization->id])->count();
-            $fulfilledCount = Order::find([])->where(['client_id' => $organization->id])->count();
-            $totalPrice = Yii::$app->db->createCommand('select sum(total_price) from `order` where client_id='.$organization->id)->execute();
+            $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
+            $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
+            $fulfilledCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
+            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status='.Order::STATUS_DONE.' and client_id='.$organization->id)->queryOne();
+            $totalPrice = $query['total'];
         } else {
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
-            $newCount = Order::find(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->where(['vendor_id' => $organization->id])->count();
-            $processingCount = Order::find(['status' => Order::STATUS_PROCESSING])->where(['vendor_id' => $organization->id])->count();
-            $fulfilledCount = Order::find([])->where(['vendor_id' => $organization->id])->count();
-            $totalPrice = Yii::$app->db->createCommand('select sum(total_price) from `order` where vendor_id='.$organization->id.';')->execute();
+            $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
+            $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
+            $fulfilledCount = Order::find([])->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
+            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status='.Order::STATUS_DONE.' and vendor_id='.$organization->id.';')->queryOne();
+            $totalPrice = $query['total'];
         }
         $dataProvider = $searchModel->search($params);
 

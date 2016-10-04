@@ -92,7 +92,7 @@ class OrderSearch extends Order {
             'query' => $query,
         ]);
 
-        $addSortAttributes = $this->vendor ? ['vendor.name'] : ['client.name'];
+        $addSortAttributes = $this->vendor_search_id ? ['vendor.name'] : ['client.name'];
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
                 'asc' => [$addSortAttribute => SORT_ASC],

@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\controllers;
 
 use Yii;
@@ -16,36 +17,38 @@ class DefaultController extends Controller {
     protected $currentUser;
 
     /*
-     *  Load current user 
+     *  Load current user
      */
 
     protected function loadCurrentUser() {
         $this->currentUser = Yii::$app->user->identity;
     }
-    
+
     public function beforeAction($action) {
         //parent::beforeAction($action);
-        $this->loadCurrentUser();
-        $organization = $this->currentUser->organization;
-        switch ($organization->type_id) {
-            case Organization::TYPE_RESTAURANT: 
-                $this->layout = 'main-client';
-                //проверка, имеет ли кабак поставщиков, если нет, то направляем на страницу добавления поставщиков
-                $suppliers = RelationSuppRest::findOne(['rest_org_id' => $organization->id]);
-                $isIndex = ($this->id === 'client') && ($this->action->id === 'index');
-                if (!isset($suppliers) && $isIndex) {
-                    //return $this->redirect(['client/suppliers']);
-                }
-                break;
-            case Organization::TYPE_SUPPLIER:
-                $this->layout = 'main-vendor';
-                //проверка, имеет ли крестьянин базовый каталог, если нет, то направляем создавать
-                $baseCatalogs = CatalogBaseGoods::findOne(['supp_org_id' => $organization->id]);
-                $isIndex = ($this->id === 'vendor') && ($this->action->id === 'index');
-                if (!isset($suppliers) && $isIndex) {
-                    //return $this->redirect(['vendor/catalogs']);
-                }
-                break;
+        if (!Yii::$app->user->isGuest) {
+            $this->loadCurrentUser();
+            $organization = $this->currentUser->organization;
+            switch ($organization->type_id) {
+                case Organization::TYPE_RESTAURANT:
+                    $this->layout = 'main-client';
+                    //проверка, имеет ли кабак поставщиков, если нет, то направляем на страницу добавления поставщиков
+                    $suppliers = RelationSuppRest::findOne(['rest_org_id' => $organization->id]);
+                    $isIndex = ($this->id === 'client') && ($this->action->id === 'index');
+                    if (!isset($suppliers) && $isIndex) {
+                        //return $this->redirect(['client/suppliers']);
+                    }
+                    break;
+                case Organization::TYPE_SUPPLIER:
+                    $this->layout = 'main-vendor';
+                    //проверка, имеет ли крестьянин базовый каталог, если нет, то направляем создавать
+                    $baseCatalogs = CatalogBaseGoods::findOne(['supp_org_id' => $organization->id]);
+                    $isIndex = ($this->id === 'vendor') && ($this->action->id === 'index');
+                    if (!isset($suppliers) && $isIndex) {
+                        //return $this->redirect(['vendor/catalogs']);
+                    }
+                    break;
+            }
         }
         if (!parent::beforeAction($action)) {
             return false;
@@ -55,5 +58,6 @@ class DefaultController extends Controller {
 //            return $this->redirect(['order/index']);
 //        }
         return true;
-   }
+    }
+
 }

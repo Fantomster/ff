@@ -75,7 +75,7 @@ class ClientController extends DefaultController {
      */
 
     public function actionIndex() {
-        return $this->render('index');
+        return $this->render('/site/underConstruction');
     }
 
     /*
@@ -555,4 +555,19 @@ class ClientController extends DefaultController {
         }
     }
 
+    public function actionMessages() {
+        return $this->render('/site/underConstruction');
+    }
+    
+    public function actionAnalytics() {
+        return $this->render('/site/underConstruction');
+    }
+    
+    public function actionTutorial() {
+        return $this->render('/site/underConstruction');
+    }
+    
+    public function actionEvents() {
+        return $this->render('/site/underConstruction');
+    }
 }

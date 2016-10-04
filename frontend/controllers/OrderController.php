@@ -7,6 +7,7 @@ use common\models\search\OrderCatalogSearch;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
 use common\models\Order;
+use common\models\Role;
 use common\models\OrderContent;
 use common\models\Organization;
 use common\models\search\OrderSearch;
@@ -14,11 +15,80 @@ use common\models\search\OrderContentSearch;
 use yii\helpers\Json;
 use common\models\OrderChat;
 use yii\data\SqlDataProvider;
+use common\components\AccessRule;
+use yii\filters\AccessControl;
 
 class OrderController extends DefaultController {
-    /*
-     *  index
+
+    /**
+     * @inheritdoc
      */
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'only' => [
+                    'index',
+                    'view',
+                    'create',
+                    'send-message',
+                    'ajax-add-to-cart',
+                    'ajax-categories',
+                    'ajax-clear-order',
+                    'ajax-make-order',
+                    'ajax-modify-cart',
+                    'ajax-order-action',
+                    'ajax-order-refresh',
+                    'ajax-refresh-buttons',
+                    'ajax-show-order',
+                    'ajax-vendors',
+                ],
+                'rules' => [
+//                    [
+//                        'allow' => false,
+//                        'roles' => ['?'],
+//                    ],
+                    [
+                        'actions' => ['index', 'view', 'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'create',
+                            'ajax-add-to-cart',
+                            'ajax-categories',
+                            'ajax-clear-order',
+                            'ajax-make-order',
+                            'ajax-modify-cart',
+                            'ajax-order-refresh',
+                            'ajax-show-order',
+                            'ajax-vendors',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                        ],
+                    ],
+                ],
+                'denyCallback' => function($rule, $action) {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+            ],
+        ];
+    }
 
     public function actionCreate() {
         $session = Yii::$app->session;
@@ -293,14 +363,14 @@ class OrderController extends DefaultController {
             $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
             $fulfilledCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status='.Order::STATUS_DONE.' and client_id='.$organization->id)->queryOne();
+            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and client_id=' . $organization->id)->queryOne();
             $totalPrice = $query['total'];
         } else {
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
             $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
             $fulfilledCount = Order::find([])->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status='.Order::STATUS_DONE.' and vendor_id='.$organization->id.';')->queryOne();
+            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and vendor_id=' . $organization->id . ';')->queryOne();
             $totalPrice = $query['total'];
         }
         $dataProvider = $searchModel->search($params);

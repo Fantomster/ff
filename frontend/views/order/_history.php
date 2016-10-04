@@ -12,7 +12,7 @@ use common\models\Organization;
     <div class="box-body">
 
         <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-aqua">
+            <div class="info-box bg-new-count">
                 <div class="info-box-content">
                     <span class="info-box-text">Новые</span>
                     <span class="info-box-number"><?= $newCount ?></span>
@@ -28,7 +28,7 @@ use common\models\Organization;
             </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-green">
+            <div class="info-box bg-fulfilled-count">
                 <div class="info-box-content">
                     <span class="info-box-text">Завершено</span>
                     <span class="info-box-number"><?= $fulfilledCount ?></span>
@@ -36,7 +36,7 @@ use common\models\Organization;
             </div>    
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-aqua">
+            <div class="info-box bg-total-price">
                 <div class="info-box-content">
                     <span class="info-box-text">Всего выполнено на сумму</span>
                     <span class="info-box-number"><?= $totalPrice ?> руб</span>

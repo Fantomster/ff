@@ -2,6 +2,9 @@
 /* @var $this yii\web\View */
 
 use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\widgets\ActiveForm;
+use common\models\OrganizationType;
 
 $this->title = 'Поставщикам';
 ?>
@@ -164,22 +167,60 @@ $this->title = 'Поставщикам';
 				<h4>Автоматизируйте свой бизнес сейчас</h4>
 				<span>Вы в одном шаге, расскажите о себе</span>
 				
-				<div class="contact__form">
-					<form role="form">
-						<div class="form-group">
-							<select class="form-control" id="sel1">
-								<option>Ресторан / поставщик</option>
-								<option>Ресторан / поставщик</option>
-								<option>Ресторан / поставщик</option>
-								<option>Ресторан / поставщик</option>
-							</select>
-							<input type="text" class="form-control" id="email" placeholder="название организации">
-							<input type="email" class="form-control" id="email" placeholder="Email">
-							<input type="text" class="form-control" id="email" placeholder="Фио">
-							<input type="password" class="form-control" id="email" placeholder="пароль">
-						</div>
-						<a href="#" class="send__btn">зарегистрироваться</a>
-					</form>
-				</div>
+        <div class="contact__form">
+            <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
+
+                <div class="alert alert-success">
+                    <p><?= $flash ?></p>
+                </div>
+
+            <?php else: ?>
+                <?php
+                $form = ActiveForm::begin(['id' => 'login-form', 'action' => Url::toRoute('user/register')]);
+                ?>
+                <div class="form-group">
+                    <?=
+                            $form->field($organization, 'type_id')
+                            ->label(false)
+                            ->dropDownList(OrganizationType::getList(), [
+                                'prompt' => 'ресторан / поставщик',
+                                'class' => 'form-control'])
+                    ?>
+                    <?=
+                            $form->field($organization, 'name')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
+                    ?>
+                    <?=
+                            $form->field($user, 'email')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
+                    ?>
+                    <?=
+                            $form->field($profile, 'full_name')
+                            ->label(false)
+                            ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
+                    ?>
+                    <?=
+                            $form->field($user, 'newPassword')
+                            ->label(false)
+                            ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
+                    ?>
+                </div>
+                <?=
+                Html::a('Зарегистрироваться', '#', [
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                    'class' => 'send__btn',
+                ])
+                ?>
+                <div class="regist">
+                    <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
+                </div>
+            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
+                <?php ActiveForm::end(); ?>
+            <?php endif; ?>
+        </div>
 			</div>
 		</main><!-- .content -->

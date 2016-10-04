@@ -10,6 +10,8 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Json;
 use common\models\User;
+use common\models\Profile;
+use common\models\Organization;
 use common\models\Role;
 use common\components\AccessRule;
 use yii\helpers\Url;
@@ -91,7 +93,11 @@ class SiteController extends Controller {
      * @return mixed
      */
     public function actionIndex() {
-        return $this->render('index');
+        $user = new User();
+        $user->scenario = 'register';
+        $profile = new Profile();
+        $organization = new Organization();
+        return $this->render('index', compact("user", "profile", "organization"));
     }
 
     /**
@@ -110,9 +116,17 @@ class SiteController extends Controller {
         return $this->render('faq');
     }
     public function actionRestaurant() {
-        return $this->render('restaurant');
+        $user = new User();
+        $user->scenario = 'register';
+        $profile = new Profile();
+        $organization = new Organization();
+        return $this->render('restaurant', compact("user", "profile", "organization"));
     }
     public function actionSupplier() {
-        return $this->render('supplier');
+        $user = new User();
+        $user->scenario = 'register';
+        $profile = new Profile();
+        $organization = new Organization();
+        return $this->render('supplier', compact("user", "profile", "organization"));
     }
 }

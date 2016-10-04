@@ -30,6 +30,12 @@ class User extends \amnah\yii2\user\models\User {
         $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
         return $rules;
     }
+    public function scenarios() {
+        $scenarios = parent::scenarios();
+        $scenarios['sendInviteFromVendor'] = ['email'];
+
+        return $scenarios;
+    }
     /**
      * Set organization id
      * @param int $orgId
@@ -84,6 +90,12 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         //return $result;
     }
+    
+    /**
+     * Send email invite to restaurant
+     * @param User $client
+     * @return int
+     */
     public function sendInviteToClient($client) {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -95,7 +107,7 @@ class User extends \amnah\yii2\user\models\User {
         $vendor = $this->organization->name;
         $email = $client->email;
         $subject = "Приглашение на f-keeper";
-        $result = $mailer->compose('acceptVendorInvite', compact("subject", "vendor", "vendor"))
+        $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

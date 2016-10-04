@@ -38,7 +38,7 @@ class OrderSearch extends Order {
      * @inheritdoc
      */
     public function attributes() {
-        return array_merge(parent::attributes(), ['acceptedBy.profile.full_name', 'vendor.name', 'createdBy.profile.full_name']);
+        return array_merge(parent::attributes(), ['acceptedBy.profile.full_name', 'vendor.name', 'client.name', 'createdBy.profile.full_name']);
     }
 
     /**
@@ -60,7 +60,7 @@ class OrderSearch extends Order {
         $query = Order::find();
         $this->load($params);
 
-        if ($this->vendor_search_id) {
+        if (!$this->vendor_search_id) {
             $query->joinWith([
                 'vendor' => function ($query) {
                     $query->from(Organization::tableName() . ' vendor');
@@ -84,15 +84,15 @@ class OrderSearch extends Order {
             },
                 ], true);
         if ($this->vendor_search_id) {
-            $query->where(['vendor.id' => $this->vendor_search_id]);
+            $query->where(['order.vendor_id' => $this->vendor_search_id]);
         } else {
-            $query->where(['client.id' => $this->client_search_id]);
+            $query->where(['order.client_id' => $this->client_search_id]);
         }
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
 
-        $addSortAttributes = $this->vendor ? ['vendor.name'] : ['client.name'];
+        $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
                 'asc' => [$addSortAttribute => SORT_ASC],

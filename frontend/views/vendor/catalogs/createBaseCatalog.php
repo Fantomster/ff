@@ -38,8 +38,19 @@ $this->registerJsFile('modules/handsontable/dist/handsontable.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
-<div class="panel-body">   
-    <h3 class="font-light pull-left" style="margin-top: 5px;"><i class="fa fa-list-alt"></i> Создание главного каталога</h3>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Создание главного каталога</h3>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="panel-body">
+            <div class="callout callout-fk-info">
+                   <h4>Загрузите ваш первый каталог</h4>
+                   <p>Вы можете добавить все свои продукты в эту таблицу. Это работает точно так же, как <strong>Excel</strong>.</p>
+            </div> 
+        </div>
+        <div class="panel-body">
     <?= Html::a(
         'Сохранить',
         ['#'],
@@ -80,9 +91,11 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
             ],
         ])
     ?>
-</div>
-<div class="panel-body">
-<div class="handsontable" id="CreateCatalog"></div> 
+        </div>
+        <div class="panel-body">
+            <div class="handsontable" id="CreateCatalog"></div> 
+        </div>
+    </div>
 </div>
 <?php
 //$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
@@ -104,7 +117,7 @@ for ( var i = 0; i < 60; i++ ) {
 }
 var container = document.getElementById('CreateCatalog');
 
-height = $('.content-wrapper').height() - $("#CreateCatalog").offset().top;
+height = $('.content-wrapper').height() - $("#CreateCatalog").offset().top - 20;
 $(window).resize(function(){
         $("#CreateCatalog").height($('.content-wrapper').height() - $("#CreateCatalog").offset().top)
 });

@@ -2,6 +2,7 @@
 
 use yii\grid\GridView;
 use common\models\Order;
+use common\models\Organization;
 ?>
 <div class="box box-info">
     <div class="box-header with-border">
@@ -9,6 +10,41 @@ use common\models\Order;
     </div>
     <!-- /.box-header -->
     <div class="box-body">
+
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-aqua">
+                <div class="info-box-content">
+                    <span class="info-box-text">Новые</span>
+                    <span class="info-box-number"><?= $newCount ?></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-yellow">
+                <div class="info-box-content">
+                    <span class="info-box-text">Выполняются</span>
+                    <span class="info-box-number"><?= $processingCount ?></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-green">
+                <div class="info-box-content">
+                    <span class="info-box-text">Завершено</span>
+                    <span class="info-box-number"><?= $fulfilledCount ?></span>
+                </div>
+            </div>    
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-aqua">
+                <div class="info-box-content">
+                    <span class="info-box-text">Всего выполнено на сумму</span>
+                    <span class="info-box-number"><?= $totalPrice ?> руб</span>
+                </div>
+            </div>    
+        </div>
+                <div style="clear: both;">
+        </div>
         <?=
         GridView::widget([
             'dataProvider' => $dataProvider,
@@ -23,11 +59,15 @@ use common\models\Order;
                     'value' => 'id',
                     'label' => 'Номер заказа',
                 ],
-                [
+                $organization->type_id == Organization::TYPE_RESTAURANT ? [
                     'attribute' => 'vendor.name',
                     'value' => 'vendor.name',
                     'label' => 'Поставщик',
-                ],
+                        ] : [
+                    'attribute' => 'client.name',
+                    'value' => 'client.name',
+                    'label' => 'Ресторан',
+                        ],
                 [
                     'attribute' => 'createdBy.profile.full_name',
                     'value' => 'createdBy.profile.full_name',

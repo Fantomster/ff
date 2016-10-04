@@ -13,4 +13,4 @@ $this->registerJs("
 $this->registerCss("
     tr:hover{cursor: pointer;}
         ");
-echo $this->render('_history', compact('searchModel', 'dataProvider'));
+echo $this->render('_history', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice'));

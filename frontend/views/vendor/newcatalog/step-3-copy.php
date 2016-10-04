@@ -49,15 +49,30 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         <div class="panel-body">
             <div class="callout callout-fk-info">
                 <h4>ШАГ 3</h4>
-
                 <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
             </div> 
+            <?php /*=Html::a('<i class="fa fa-pencil m-r-xs"></i> установить скидку на весь ассортимент', 
+                    [
+                    'vendor/ajax-set-percent','id'=>$cat_id
+                    ], 
+                    [
+                    'data' => [
+                        'target' => '#discount-all-product',
+                        'toggle' => 'modal',
+                        'backdrop' => 'static',
+                        ],'class'=>'pull-left'
+                    ])*/?>
             <?php Pjax::begin(['id' => 'pjax-container']); ?>
                 <div class="handsontable" id="handsontable"></div> 
             <?php Pjax::end(); ?>   
         </div>
     </div>
 </div>
+<?=Modal::widget([
+'id' => 'discount-all-product',
+'clientOptions' => false,
+])
+?>
 <?php
 $arr= json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);
@@ -83,19 +98,7 @@ height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
         $("#handsontable").height($('.content-wrapper').height() - $("#handsontable").offset().top)
 });
-var save = document.getElementById('save'), hot;     
-var colsToHide = [0];
-/*function getCustomRenderer() {
-    return function(instance, td, row, col, prop, value, cellProperties) {
-        console.log(td)
-      Handsontable.renderers.TextRenderer.apply(this, arguments);
-      if (colsToHide.indexOf(col) > -1) {
-        td.hidden = true;
-      } else {
-        td.hidden = false;
-      }
-    }
-  }*/
+var save = document.getElementById('save'), hot, originalColWidths = [], colWidths = [];         
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
   colHeaders : ['id','Артикул', 'Наименование', 'Базовая цена', 'Цена каталога','Скидка в рублях','Скидка %','Итоговая цена'],
@@ -106,9 +109,6 @@ var colsToHide = [0];
    minSpareCols: 0,
    minSpareRows: 0,
   rowHeaders: true,
-  hiddenColumns: {
-      columns: [0]
-    },
   columns: [
     {data: 'goods_id',readOnly: true},
     {data: 'article',readOnly: true},
@@ -142,7 +142,6 @@ var colsToHide = [0];
   startRows: 1,
   autoWrapRow: true,
   height: height,
-  //renderer: getCustomRenderer(),
   beforeChangeRender: function (changes, source) {
       if(source !== 'sum'){
           var a, b, c, sum, i, value;
@@ -172,11 +171,11 @@ var colsToHide = [0];
         }      
       }
   });
-
+colWidths[0] = 0.1;
+hot.updateSettings({colWidths: colWidths});
+        
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
-        //console.log(hot.getData())
-        //return false;
   var cleanedData = {};
   var cols = ['goods_id',2, 3, 4, 5,6,7,'total_price'];
     $.each(dataTable, function( rowKey, object) {
@@ -222,6 +221,16 @@ Handsontable.Dom.addEvent(save, 'click', function() {
 $('#save').click(function(e){	
 e.preventDefault();
 });
+$(".set").live("click", function() {
+var form = $("#set_discount_percent");
+$.post(
+    form.attr("action"),
+        form.serialize()
+    ).done(function(result) {
+        form.replaceWith(result);
+    });
+return false;
+})
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

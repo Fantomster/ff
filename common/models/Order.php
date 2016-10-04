@@ -13,7 +13,7 @@ use Yii;
  * @property integer $created_by_id
  * @property integer $accepted_by_id
  * @property integer $status
- * @property integer $total_price
+ * @property string $total_price
  * @property string $created_at
  * @property string $updated_at
  *
@@ -85,7 +85,7 @@ class Order extends \yii\db\ActiveRecord
             'created_by_id' => 'Created By ID',
             'accepted_by_id' => 'Accepted By ID',
             'status' => 'Status',
-            'total_price' => 'Total Price',
+            'total_price' => 'Итоговая цена',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];

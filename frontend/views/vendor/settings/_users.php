@@ -41,6 +41,10 @@ $this->registerJs(
         });'
 );
 ?>
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list',]); ?>
+    <div class="box box-info">
+        <div class="box-header">
+        </div>
 <?=
 Modal::widget([
     'id' => 'add-user',
@@ -49,13 +53,11 @@ Modal::widget([
         'label' => ' Добавить пользователя',
         'tag' => 'a',
         'data-target' => '#add-user',
-        'class' => 'btn btn-primary',
+        'class' => 'btn btn-primary pull-right',
         'href' => Url::to(['/vendor/ajax-create-user']),
-        'style' => 'float:right',
     ],
 ])
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list',]); ?>
 <?php
 $form = ActiveForm::begin([
             'options' => [
@@ -80,6 +82,7 @@ GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'filterPosition' => false,
+    'summary' => '',
     'columns' => [
         [
             'attribute' => 'profile.full_name',
@@ -109,6 +112,7 @@ GridView::widget([
             ],
         ]);
         ?>
+    </div>
         <?php Pjax::end(); ?>
 
         <?php

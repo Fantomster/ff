@@ -32,6 +32,7 @@ echo Html::hiddenInput('vendor_id', $showOrder['vendor_id']);
                             'pluginOptions' => [
                                 'initval' => $product['quantity'],
                                 'min' => 0,
+                                'max' => PHP_INT_MAX,
                                 'step' => 1,
                                 'decimals' => 0,
                                 'buttonup_class' => 'btn btn-primary',

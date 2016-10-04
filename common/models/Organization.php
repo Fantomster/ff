@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property string $updated_at
  *
  * @property OrganizationType $type
+ * @property Delivery $delivery
  */
 class Organization extends \yii\db\ActiveRecord
 {
@@ -170,5 +171,12 @@ class Organization extends \yii\db\ActiveRecord
         }
         $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
         return implode (",", $catalogs);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDelivery() {
+        return $this->hasOne(Delivery::className(), ['vendor_id' => 'id']);
     }
 }

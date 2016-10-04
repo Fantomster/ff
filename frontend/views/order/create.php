@@ -126,7 +126,7 @@ $form = ActiveForm::begin([
                     [
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data['price'] . ' / ' . $data['units'];
+                            return $data['price'] . ' руб / ' . $data['units'];
                         },
                         'label' => 'Цена'
                     ],

@@ -25,7 +25,7 @@ $js = <<<JS
         var message = JSON.parse(data);
 
         messageBody = $.parseHTML( message.body );
-        alert(messageBody);
+       // alert(messageBody);
         
         $( ".direct-chat-messages" ).prepend( message.body );
         
@@ -97,13 +97,14 @@ GridView::widget([
                 return '<div class="text_content">' . htmlentities($data->quantity) . '</div>';
             },
             'editableOptions' => [
-                'header' => 'Quantity',
+                'header' => 'Количество',
                 'inputType' => Editable::INPUT_SPIN,
                 'asPopover' => false,
                 'options' => [
                     'pluginOptions' => [
                         'initval' => 'quantity',
                         'min' => 0,
+                        'max' => PHP_INT_MAX,
                         'step' => 1,
                         'decimals' => 0,
                         'buttonup_class' => 'btn btn-primary',
@@ -124,10 +125,10 @@ GridView::widget([
             'pageSummary' => true,
             'readonly' => false,
             'content' => function($data) {
-                return '<div class="text_content">' . htmlentities($data->price) . '</div>';
+                return '<div class="text_content">' . htmlentities($data->price) . ' руб</div>';
             },
             'editableOptions' => [
-                'header' => 'Quantity',
+                'header' => 'Цена',
                 'inputType' => Editable::INPUT_SPIN,
                 'asPopover' => false,
                 'options' => [
@@ -135,8 +136,8 @@ GridView::widget([
                         'initval' => 'price',
                         'min' => 0,
                         'max' => PHP_INT_MAX,
-                        'step' => 1,
-                        'decimals' => 0,
+                        'step' => 0.01,
+                        'decimals' => 2,
                         'buttonup_class' => 'btn btn-primary',
                         'buttondown_class' => 'btn btn-info',
                         'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
@@ -147,7 +148,13 @@ GridView::widget([
                     "editableSuccess" => "function(event, val, form, data) { $('#actionButtons').html(data.buttons); }",
                 ],
             ],
-        ] : 'price',
+        ] : [
+            'attribute' => 'price',
+            'value' => function($data) {
+                return $data->price . ' руб';
+            },
+            'label' => 'Цена',
+        ],
     //'accepted_quantity',
     ],
 ]);

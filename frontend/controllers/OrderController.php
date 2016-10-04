@@ -289,22 +289,25 @@ class OrderController extends DefaultController {
         $params = Yii::$app->request->getQueryParams();
         $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
+            $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
         } else {
-            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
+            $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
         }
         $dataProvider = $searchModel->search($params);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization'));
         } else {
-            return $this->render('index', compact('searchModel', 'dataProvider'));
+            return $this->render('index', compact('searchModel', 'dataProvider', 'organization'));
         }
     }
 
     public function actionView($id) {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
+        if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+            throw new \yii\web\HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+        }
         $organizationType = $user->organization->type_id;
         if (isset($_POST['hasEditable'])) {
             $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
@@ -384,7 +387,7 @@ class OrderController extends DefaultController {
 
     public function actionSendMessage() {
         $user = $this->currentUser;
-        if (Yii::$app->request->post()) {
+        if (Yii::$app->request->post() && Yii::$app->request->post('message')) {
             $name = $user->profile->full_name;
             $message = Yii::$app->request->post('message');
             $channel = 'order' . Yii::$app->request->post('order_id');
@@ -431,5 +434,4 @@ class OrderController extends DefaultController {
                     'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
         ]);
     }
-
 }

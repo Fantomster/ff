@@ -98,19 +98,7 @@ height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
         $("#handsontable").height($('.content-wrapper').height() - $("#handsontable").offset().top)
 });
-var save = document.getElementById('save'), hot;     
-var colsToHide = [0];
-/*function getCustomRenderer() {
-    return function(instance, td, row, col, prop, value, cellProperties) {
-        console.log(td)
-      Handsontable.renderers.TextRenderer.apply(this, arguments);
-      if (colsToHide.indexOf(col) > -1) {
-        td.hidden = true;
-      } else {
-        td.hidden = false;
-      }
-    }
-  }*/
+var save = document.getElementById('save'), hot, originalColWidths = [], colWidths = [];         
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
   colHeaders : ['id','Артикул', 'Наименование', 'Базовая цена', 'Цена каталога','Скидка в рублях','Скидка %','Итоговая цена'],
@@ -121,9 +109,6 @@ var colsToHide = [0];
    minSpareCols: 0,
    minSpareRows: 0,
   rowHeaders: true,
-  hiddenColumns: {
-      columns: [0]
-    },
   columns: [
     {data: 'goods_id',readOnly: true},
     {data: 'article',readOnly: true},
@@ -157,7 +142,6 @@ var colsToHide = [0];
   startRows: 1,
   autoWrapRow: true,
   height: height,
-  //renderer: getCustomRenderer(),
   beforeChangeRender: function (changes, source) {
       if(source !== 'sum'){
           var a, b, c, sum, i, value;
@@ -187,11 +171,11 @@ var colsToHide = [0];
         }      
       }
   });
-
+colWidths[0] = 0.1;
+hot.updateSettings({colWidths: colWidths});
+        
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
-        //console.log(hot.getData())
-        //return false;
   var cleanedData = {};
   var cols = ['goods_id',2, 3, 4, 5,6,7,'total_price'];
     $.each(dataTable, function( rowKey, object) {

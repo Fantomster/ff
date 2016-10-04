@@ -41,11 +41,13 @@ $this->registerJs(
         });'
 );
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list',]); ?>
+
+
+
     <div class="box box-info">
         <div class="box-header">
         </div>
-<?=
+        <?=
 Modal::widget([
     'id' => 'add-user',
     'clientOptions' => false,
@@ -58,7 +60,7 @@ Modal::widget([
     ],
 ])
 ?>
-<?php
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list',]); 
 $form = ActiveForm::begin([
             'options' => [
                 'data-pjax' => true,
@@ -111,9 +113,10 @@ GridView::widget([
                 ],
             ],
         ]);
+                    Pjax::end();
         ?>
     </div>
-        <?php Pjax::end(); ?>
+        <?php  ?>
 
         <?php
         Modal::begin([

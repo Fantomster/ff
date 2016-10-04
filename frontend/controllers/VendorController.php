@@ -177,7 +177,7 @@ class VendorController extends DefaultController {
         return $this->render("catalogs/createBaseCatalog", compact("Catalog")); 
         }else{
         $relation_supp_rest = new RelationSuppRest;
-        return $this->render("catalogs", compact("relation_supp_rest"));
+        return $this->render("catalogs", compact("relation_supp_rest","currentUser"));
         }
     }
     public function actionSupplierStartCatalogCreate ()
@@ -291,16 +291,6 @@ class VendorController extends DefaultController {
 	   $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams,$currentUser,RelationSuppRest::PAGE_CATALOG);
       return $this->render('catalogs/basecatalog', compact('searchModel', 'dataProvider','searchModel2','dataProvider2','currentCatalog'));
     }
-    public function actionCatalog($id)
-    {
-	   $currentCatalog = $id;
-	   $currentUser = User::findIdentity(Yii::$app->user->id);
-	   $searchModel = new CatalogGoods;
-	   $searchModel2 = new RelationSuppRest;
-	   $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id);
-	   $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams,$currentUser,RelationSuppRest::PAGE_CATALOG);
-       return $this->render('catalogs/catalog', compact('searchModel', 'dataProvider','searchModel2','dataProvider2','currentCatalog'));
-    } 
     public function actionImportToXls($id)
     {
         $importModel = new \common\models\upload\UploadForm();
@@ -859,12 +849,20 @@ class VendorController extends DefaultController {
         return $this->render('newcatalog/step-4', compact('searchModel', 'dataProvider','currentCatalog','cat_id'));
     }
     public function actionAjaxAddClient() {
-        $user = new User();
+        $user = new User(['scenario' => 'sendInviteFromVendor']);
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($user->load($post)) {
                 if ($user->validate()) {
                     //class отправки приглашения ресторану от поставщика
+                $email = $user->email;
+                $subject = "Приглашение на f-keeper";
+                Yii::$app->mailer->compose()
+                ->setFrom('admin@f-keeper.ru')
+                ->setTo($email)
+                ->setSubject($subject)
+                ->setHtmlBody('<b>Приглашение на f-keeper.ru</b>')
+                ->send();
                     $message = 'Приглашение отправлено!';
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
@@ -880,8 +878,8 @@ class VendorController extends DefaultController {
             $catalogGoods->cat_id = $cat_id;
             if ($catalogGoods->load($post)) {
                if ($catalogGoods->validate()) {
-                $catalogGoods = CatalogGoods::updateAll(['discount_percent' => $catalogGoods->discount_percent],['cat_id' => $cat_id]);   
-                //var_dump($catalogGoods);
+            
+                $catalogGoods = CatalogGoods::updateAll(['price' => 'price' - (('price' / 100) * $catalogGoods->discount_percent)],['cat_id' => $cat_id]); 
                 $message = "Сохранено!";
                 return $this->renderAjax('catalogs/_success',['message' => $message]);   
                }
@@ -958,5 +956,12 @@ class VendorController extends DefaultController {
 	  $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$id);
           return $this->renderAjax('catalogs/_viewCatalog', compact('searchModel', 'dataProvider','cat_id'));  
         }
-    }    
-}
+    }
+    public function actionListCatalog(){
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $search = Yii::$app->request->post('search');
+        $restaurant = Yii::$app->request->post('restaurant');
+        echo $this->renderAjax('catalogs/_listCatalog', compact('currentUser','search','restaurant'));  
+    }
+}     
+

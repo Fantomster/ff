@@ -49,15 +49,30 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         <div class="panel-body">
             <div class="callout callout-fk-info">
                 <h4>ШАГ 3</h4>
-
                 <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
             </div> 
+            <?php /*=Html::a('<i class="fa fa-pencil m-r-xs"></i> установить скидку на весь ассортимент', 
+                    [
+                    'vendor/ajax-set-percent','id'=>$cat_id
+                    ], 
+                    [
+                    'data' => [
+                        'target' => '#discount-all-product',
+                        'toggle' => 'modal',
+                        'backdrop' => 'static',
+                        ],'class'=>'pull-left'
+                    ])*/?>
             <?php Pjax::begin(['id' => 'pjax-container']); ?>
                 <div class="handsontable" id="handsontable"></div> 
             <?php Pjax::end(); ?>   
         </div>
     </div>
 </div>
+<?=Modal::widget([
+'id' => 'discount-all-product',
+'clientOptions' => false,
+])
+?>
 <?php
 $arr= json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);
@@ -222,6 +237,16 @@ Handsontable.Dom.addEvent(save, 'click', function() {
 $('#save').click(function(e){	
 e.preventDefault();
 });
+$(".set").live("click", function() {
+var form = $("#set_discount_percent");
+$.post(
+    form.attr("action"),
+        form.serialize()
+    ).done(function(result) {
+        form.replaceWith(result);
+    });
+return false;
+})
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

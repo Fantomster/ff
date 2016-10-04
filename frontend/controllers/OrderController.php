@@ -30,28 +30,28 @@ class OrderController extends DefaultController {
         //$categories = $client->getRestaurantCategories();
 
         $selectedCategory = isset($session['selectedCategory']) ? $session['selectedCategory'] : null;
-        
+
         $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : null;
-        
+
         $post = Yii::$app->request->post();
-        
+
         if ($post) {
             $selectedVendor = ($selectedCategory == $post['selectedCategory']) ? $post['selectedVendor'] : '';
             $selectedCategory = $post['selectedCategory'];
         }
-        
+
         $session['selectedCategory'] = $selectedCategory;
         $session['selectedVendor'] = $selectedVendor;
-        
+
         $vendors = $client->getSuppliers($selectedCategory);
 
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
         $query = "SELECT id, product, supp_org_id, units, price, cat_id FROM catalog_base_goods WHERE cat_id IN ($catalogs) "
                 . 'UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id FROM '
-                    . 'catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id '
-                    . "WHERE cg.cat_id IN ($catalogs))";
-        
+                . 'catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id '
+                . "WHERE cg.cat_id IN ($catalogs))";
+
         $count = Yii::$app->db->createCommand($query)->queryScalar();
 
         $dataProvider = new SqlDataProvider([
@@ -127,7 +127,7 @@ class OrderController extends DefaultController {
         }
         $post = Yii::$app->request->post();
         $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
-        
+
         if ($product) {
             $product_id = $product->baseProduct->id;
             $price = $product->price;
@@ -143,7 +143,7 @@ class OrderController extends DefaultController {
             $price = $product->price;
             $vendor = $product->vendor;
         }
-        $quantity = (int)$post['quantity'];
+        $quantity = (int) $post['quantity'];
         $newOrder = true;
         foreach ($orders as &$order) {
             if ($order['vendor_id'] == $vendor->id) {
@@ -290,15 +290,23 @@ class OrderController extends DefaultController {
         $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
             $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
+            $newCount = Order::find(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->where(['client_id' => $organization->id])->count();
+            $processingCount = Order::find(['status' => Order::STATUS_PROCESSING])->where(['client_id' => $organization->id])->count();
+            $fulfilledCount = Order::find([])->where(['client_id' => $organization->id])->count();
+            $totalPrice = Yii::$app->db->createCommand('select sum(total_price) from `order` where client_id='.$organization->id)->execute();
         } else {
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
+            $newCount = Order::find(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->where(['vendor_id' => $organization->id])->count();
+            $processingCount = Order::find(['status' => Order::STATUS_PROCESSING])->where(['vendor_id' => $organization->id])->count();
+            $fulfilledCount = Order::find([])->where(['vendor_id' => $organization->id])->count();
+            $totalPrice = Yii::$app->db->createCommand('select sum(total_price) from `order` where vendor_id='.$organization->id.';')->execute();
         }
         $dataProvider = $searchModel->search($params);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization'));
+            return $this->renderPartial('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice'));
         } else {
-            return $this->render('index', compact('searchModel', 'dataProvider', 'organization'));
+            return $this->render('index', compact('searchModel', 'dataProvider', 'organization', 'newCount', 'processingCount', 'fulfilledCount', 'totalPrice'));
         }
     }
 
@@ -306,7 +314,7 @@ class OrderController extends DefaultController {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
-            throw new \yii\web\HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
         $organizationType = $user->organization->type_id;
         if (isset($_POST['hasEditable'])) {
@@ -398,11 +406,11 @@ class OrderController extends DefaultController {
             $newMessage->save();
 
             $body = $this->renderPartial('_chat-message', [
-                'name' => $name, 
-                'message' => $newMessage->message, 
-                'time' => $newMessage->created_at, 
+                'name' => $name,
+                'message' => $newMessage->message,
+                'time' => $newMessage->created_at,
                 'isSystem' => 0,
-                ]);
+            ]);
 
             return Yii::$app->redis->executeCommand('PUBLISH', [
                         'channel' => 'chat',
@@ -434,4 +442,5 @@ class OrderController extends DefaultController {
                     'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
         ]);
     }
+
 }

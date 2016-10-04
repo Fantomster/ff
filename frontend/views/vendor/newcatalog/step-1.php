@@ -11,11 +11,13 @@ use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
 use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
-$catalog->isNewRecord?$this->title = 'Новый каталог':$this->title = 'Редактирование каталога '
+$catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога '
 ?>
 <div class="box box-info">
     <div class="box-header with-border">
-        <h3 class="box-title"><?= $catalog->isNewRecord? 'Создание нового каталога' : 'Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
+        <h3 class="box-title"><?= $catalog->isNewRecord? 
+        'Создание нового каталога' : 
+        'Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
         </h3>
         <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
     </div>

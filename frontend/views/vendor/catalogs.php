@@ -14,11 +14,12 @@ use common\models\Organization;
 use common\models\User;
 use dosamigos\switchinput\SwitchBox;
 use yii\data\Pagination;
+use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-$this->title = 'Мои каталоги (Поставщик)';
-//$this->params['breadcrumbs'][] = $this->title;
+$this->title = 'Мои каталоги';
 ?>
 <div class="catalog-index">
     	<div class="box box-info">
@@ -66,50 +67,57 @@ $this->title = 'Мои каталоги (Поставщик)';
             </div>
             <!-- /.box-header -->
             <div class="box-body">
-                <?php Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск']) ?>
-                <?php $arrCatalog = Catalog::GetCatalogs(\common\models\Catalog::CATALOG); ?>
-
-                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'catalog-list',]); ?>
-                    <?php if(!empty($arrCatalog)){ ?>   
-                    <?php }
-                    foreach($arrCatalog as $arrCatalogs){?>
-                        <div class="hpanel" style="margin-bottom:15px;">
-                            <div class="panel-body">
-                                <div class="col-md-4 text-left">
-                                <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
-                                        '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
-                                <p class="small m-b-none">Создан: <?=$arrCatalogs->created_at ?></p>
-                                </div>
-                                <div class="col-md-8 text-right">
-                                        <?php echo $link = SwitchBox::widget([
-                                        'name' => 'status_'.$arrCatalogs->id,
-                                        'checked' => $arrCatalogs->status==Catalog::STATUS_OFF ? false : true,
-                                        'clientOptions' => [
-                                            'onColor' => 'success',
-                                            'offColor' => 'default',
-                                            'onText'=>'Вкл',
-                                            'offText'=>'Выкл',
-                                            'baseClass'=>'bootstrap-switch',
-                                            'wrapperClass'=>'wrapper m-t bootstrap-switch-small',
-                                        ],
-                                        'class'=>'m-t'
-                                    ]);
-                                    ?>
-                                    <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t btn-sm']) ?>
-                                    <?= Html::a('<i class="fa fa-fw fa-clone"></i>', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog btn-sm ']) ?>
-                                    <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php } ?>
-                    <?php Pjax::end(); ?> 
-              <!-- /.table-responsive -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                    </div>
+                    <div class="col-md-4">
+                        <?= Html::dropDownList('restaurant', null,
+                            ArrayHelper::map(common\models\Organization::find()->
+                                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                                    select('rest_org_id')->
+                                    where(['supp_org_id'=>$currentUser->organization_id,'status'=>'1'])])->all(),'id','name'),['prompt' => '','class' => 'form-control','id'=>'restaurant']) ?>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="box-body">
+                <div id="pjaxgo">
+                    <?php echo $this->render('catalogs/_listCatalog',['currentUser'=>$currentUser,'search'=>'','restaurant'=>''])  ?>
+                </div>
             </div>
           </div>
 </div>
 
 <?php
 $customJs = <<< JS
+var timer;
+$('#search').keyup(function () {
+window.clearTimeout(timer);
+   timer = setTimeout(function () {
+       $.ajax({
+        type: 'POST',
+        url: 'index.php?r=vendor/list-catalog',
+        container: '#pjaxgo',
+        data: { search: $('#search').val(), restaurant: $('#restaurant').val() },
+        success: function(response) {
+        $('#pjaxgo').html(response)    
+        }
+      })
+   }, 700);
+});
+$("#restaurant").on("change", function() {
+    $.ajax({
+        type: 'POST',
+        url: 'index.php?r=vendor/list-catalog',
+        container: '#pjaxgo',
+        data: { search: $('#search').val(), restaurant: $('#restaurant').val() },
+        success: function(response) {
+        $('#pjaxgo').html(response)    
+        }
+      })
+});
+
 /** 
  * Forward port jQuery.live()
  * Wrapper for newer jQuery.on()
@@ -128,6 +136,8 @@ if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))
 $("body").on("hidden.bs.modal", function() {
     $(this).data("bs.modal", null);
 });
+        
+
 $('#viewBaseCatalog').click(function (e){
 $(location).attr('href','index.php?r=vendor/catalogs')
 })
@@ -149,7 +159,7 @@ $('.del').live("click", function (e){
             className: "danger-fk",
             callback: function(result) {
 		if(result){
-			$.ajax({
+		$.ajax({
 	        url: "index.php?r=vendor/mycatalogdelcatalog",
 	        type: "POST",
 	        dataType: "json",
@@ -158,7 +168,17 @@ $('.del').live("click", function (e){
 	        success: function(response) {
 		        if(response.success){
 			        console.log(response); 
-			        $.pjax.reload({container: "#catalog-list"});
+			        //$.pjax.reload({container: "#catalog-list"});
+                                $.ajax({
+                                    type: 'POST',
+                                    url: 'index.php?r=vendor/list-catalog',
+                                    container: '#pjaxgo',
+                                    data: { search: $('#search').val(), restaurant: "1" },
+                                    //dataType: 'application/json',
+                                    success: function(response) {
+                                    $('#pjaxgo').html(response)    
+                                    }
+                                  })
 			        }else{
 				    console.log('Что-то пошло не так');    
 			        }
@@ -169,7 +189,7 @@ $('.del').live("click", function (e){
 		}
 	}})
 });
-$('input[type=checkbox]').on('switchChange.bootstrapSwitch', function (event, state) {	
+$('input[type=checkbox]').live('switchChange.bootstrapSwitch', function (event, state) {	
 var e,id,state
 e = $(this).attr('name')
 id = e.replace('status_','')
@@ -187,7 +207,7 @@ id = e.replace('status_','')
         }
     });
 })
-$(".clone-catalog").click(function(e) {        
+$(".clone-catalog").live('click', function(e) {        
     e.preventDefault();
     elem = $(this)
     Url = $(this).attr('href')

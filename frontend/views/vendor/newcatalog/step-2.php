@@ -136,9 +136,9 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }
-$("input[type=checkbox]").on("change", function(e) {	
-var id = $(this).attr("data-id");
-var state = $(this).prop("checked");
+$(".cbx-container").live("click", function(e) {
+    var id = $(this).children("input[type=checkbox]").attr("data-id");
+    var state = $(this).children("input[type=checkbox]").prop("checked");
 $.ajax({
     url: "index.php?r=vendor/step-2&id='. $cat_id .'",
     type: "POST",

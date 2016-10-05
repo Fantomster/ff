@@ -130,5 +130,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     public function getOrganization() {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id'])->via('baseProduct');
     }
-
+    /**
+     * @return \yii\db\ActiveQuery
+     */
 }

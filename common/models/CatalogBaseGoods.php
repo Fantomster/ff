@@ -32,7 +32,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;
     const DELETED_OFF = 0;
-
+    
+    public $USER_TYPE;
+    public $searchString; 
+    
     /**
      * @inheritdoc
      */
@@ -98,29 +101,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return false;
     }
     
-
-    /* public function beforeSave($insert)
-      {
-      if (parent::beforeSave($insert)) {
-      $price = $this->price;
-      $price = str_replace(',', '.', $price);
-      if(substr($price, -3, 1) == '.')
-      {
-      $price = explode('.', $price);
-      $last = array_pop($price);
-      $price = join($price, '').'.'.$last;
-      }
-      else
-      {
-      $price = str_replace('.', '', $price);
-      }
-      $this->price = $price;
-      return true;
-      } else {
-      return false;
-      }
-      } */
-
     public function search($params, $id) {
         $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
         //$query->andFilterWhere(['like', 'product', '']);
@@ -136,12 +116,16 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 'product',
                 'units',
                 'price',
+                'status',
             ]
         ]);
 
         if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
         }
+        
+        $query->orFilterWhere(['like', 'article', $this->searchString])
+              ->orFilterWhere(['like', 'product', $this->searchString]);
 
         return $dataProvider;
     }
@@ -164,11 +148,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         $model = CatalogBaseGoods::find()->select('id')->where(["id" => $id, 'status' => CatalogBaseGoods::STATUS_OFF])->all();
         return $model;
     }
-
-    public static function getImageurl() {
-        return \Yii::$app->urlManager->createUrl('@web/path/to/logo/' . $this->image);
-    }
-
+    
     /**
      * @return \yii\db\ActiveQuery
      */

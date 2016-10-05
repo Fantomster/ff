@@ -92,7 +92,7 @@ $this->title = 'Мои каталоги';
 <?php
 $customJs = <<< JS
 var timer;
-$('#search').keyup(function () {
+$('#search').on("keyup put paste change", function () {
 window.clearTimeout(timer);
    timer = setTimeout(function () {
        $.ajax({

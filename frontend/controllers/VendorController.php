@@ -291,11 +291,71 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchModel = new CatalogBaseGoods;
         $searchModel2 = new RelationSuppRest;
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $id, NULL);
+        $searchString="";
+        $query = (new \yii\db\Query())
+        ->select("id,article,product,units,category_id,price,status")
+        ->from("catalog_base_goods")
+        ->where("cat_id = $currentCatalog")
+        ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
+        ->createCommand(); 
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                . "WHERE cat_id = $currentCatalog and article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")->queryScalar();
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'status',
+                ],
+            ],
+        ]);
+        
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         return $this->render('catalogs/basecatalog', compact('searchModel', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog'));
     }
-
+    public function actionFilterBaseCatalog($id) {
+        $currentCatalog = $id;
+        $searchString ="";
+        if (Yii::$app->request->isPost) {
+        $searchString = trim(\Yii::$app->request->post('searchString'));
+        }
+        $searchString="";
+        $query = (new \yii\db\Query())
+        ->select("id,article,product,units,category_id,price,status")
+        ->from("catalog_base_goods")
+        ->where("cat_id = $currentCatalog")
+        ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
+        ->createCommand(); 
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                . "WHERE cat_id = $currentCatalog and article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")->queryScalar();
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'status',
+                ],
+            ],
+        ]);
+        return $this->render('catalogs/_basecatalog', compact('dataProvider'));
+        
+    }
     public function actionImportToXls($id) {
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
@@ -324,8 +384,8 @@ class VendorController extends DefaultController {
             for ($row = 2; $row <= $highestRow; ++$row) {
 
                 $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-                $row_article = htmlspecialchars(trim($rowData[0][0]));
-                $row_product = htmlspecialchars(trim($rowData[0][1]));
+                $row_article = trim($rowData[0][0]);
+                $row_product = trim($rowData[0][1]);
                 $row_units = htmlspecialchars(trim($rowData[0][2]));
                 $row_price = htmlspecialchars(trim($rowData[0][3]));
                 $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
@@ -335,8 +395,12 @@ class VendorController extends DefaultController {
                     if (!in_array($unique, $arr)) {
                         $sql = "insert into " . CatalogBaseGoods::tableName() .
                                 "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`created_at`) VALUES "
-                                . "($id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
-                        \Yii::$app->db->createCommand($sql)->execute();
+                              //.  "($id,0,$currentUser->organization_id,':article',':product','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
+                              . "($id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
+                        $command = \Yii::$app->db->createCommand($sql);
+                        /*$command->bindParam(":article",$row_article,PDO::PARAM_STR);
+                        $command->bindParam(":product",$row_product,PDO::PARAM_STR);*/
+                        $command->execute();
                     }
                 }
             }

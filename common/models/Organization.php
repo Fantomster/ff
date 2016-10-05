@@ -151,6 +151,28 @@ class Organization extends \yii\db\ActiveRecord
     }
     
     /**
+     * get list of clients
+     * 
+     * @return array
+     */
+    public function getClients() {
+        if ($this->type_id !== Organization::TYPE_SUPPLIER) {
+            return [];
+        }
+        $query = RelationCategory::find()
+                ->select(['organization.id', 'organization.name'])
+                ->distinct()
+                ->leftJoin('relation_supp_rest', 'relation_category.rest_org_id = relation_supp_rest.rest_org_id')
+                ->joinWith('client', false)
+                ->where(['relation_category.supp_org_id' => $this->id]);
+                
+        $clients = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
+                ->asArray()
+                ->all(), 'id', 'name');
+        return array_merge(['0' => 'Все'], $clients);
+    }
+    
+    /**
      *  get catalogs list for sqldataprovider for order creation
      *  
      *  @return string

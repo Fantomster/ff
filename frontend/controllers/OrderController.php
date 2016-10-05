@@ -356,6 +356,8 @@ class OrderController extends DefaultController {
 
     public function actionIndex() {
         $searchModel = new OrderSearch();
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
         $params = Yii::$app->request->getQueryParams();
         $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {

@@ -6,9 +6,9 @@ use yii\helpers\Html;
 /* @var $content string */
 
 if (!Yii::$app->user->isGuest) {
-$user = Yii::$app->user->identity;
-$homeUrl = Yii::$app->urlManager->baseUrl;
-$js = <<<JS
+    $user = Yii::$app->user->identity;
+    $homeUrl = Yii::$app->urlManager->baseUrl;
+    $js = <<<JS
 
    socket = io.connect('http://$homeUrl:8890');
 
@@ -17,31 +17,30 @@ $js = <<<JS
     });
         
 JS;
-$this->registerJs($js, \yii\web\View::POS_READY)
-
-?>
-<script type="text/javascript">
-    var socket;
-</script>
+    $this->registerJs($js, \yii\web\View::POS_READY)
+    ?>
+    <script type="text/javascript">
+        var socket;
+    </script>
 <?php } ?>
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini">APP</span><span class="logo-lg">' . Yii::$app->name . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini">APP</span><span class="logo-lg"><img src="images/logo-admin.png" /></span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
 
         <?php if (Yii::$app->user->isGuest) { ?>
-        <div class="navbar-custom-menu">
-            <ul class="nav navbar-nav">
-                <li>
-                <?=
-                Html::a(
-                        'Login', ['/user/login']
-                )
-                ?>
-                </li>
-            </ul>   
-        </div>
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <?=
+                        Html::a(
+                                'Login', ['/user/login']
+                        )
+                        ?>
+                    </li>
+                </ul>   
+            </div>
         <?php } else { ?>
             <div class="navbar-custom-menu">
 
@@ -173,119 +172,45 @@ $this->registerJs($js, \yii\web\View::POS_READY)
                     </li>
                     <!-- Tasks: style can be found in dropdown.less -->
                     <li class="dropdown tasks-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-flag-o"></i>
-                            <span class="label label-danger">9</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="header">You have 9 tasks</li>
-                            <li>
-                                <!-- inner menu: contains the actual data -->
-                                <ul class="menu">
-                                    <li><!-- Task item -->
-                                        <a href="#">
-                                            <h3>
-                                                Design some buttons
-                                                <small class="pull-right">20%</small>
-                                            </h3>
-                                            <div class="progress xs">
-                                                <div class="progress-bar progress-bar-aqua" style="width: 20%"
-                                                     role="progressbar" aria-valuenow="20" aria-valuemin="0"
-                                                     aria-valuemax="100">
-                                                    <span class="sr-only">20% Complete</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <!-- end task item -->
-                                    <li><!-- Task item -->
-                                        <a href="#">
-                                            <h3>
-                                                Create a nice theme
-                                                <small class="pull-right">40%</small>
-                                            </h3>
-                                            <div class="progress xs">
-                                                <div class="progress-bar progress-bar-green" style="width: 40%"
-                                                     role="progressbar" aria-valuenow="20" aria-valuemin="0"
-                                                     aria-valuemax="100">
-                                                    <span class="sr-only">40% Complete</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <!-- end task item -->
-                                    <li><!-- Task item -->
-                                        <a href="#">
-                                            <h3>
-                                                Some task I need to do
-                                                <small class="pull-right">60%</small>
-                                            </h3>
-                                            <div class="progress xs">
-                                                <div class="progress-bar progress-bar-red" style="width: 60%"
-                                                     role="progressbar" aria-valuenow="20" aria-valuemin="0"
-                                                     aria-valuemax="100">
-                                                    <span class="sr-only">60% Complete</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <!-- end task item -->
-                                    <li><!-- Task item -->
-                                        <a href="#">
-                                            <h3>
-                                                Make beautiful transitions
-                                                <small class="pull-right">80%</small>
-                                            </h3>
-                                            <div class="progress xs">
-                                                <div class="progress-bar progress-bar-yellow" style="width: 80%"
-                                                     role="progressbar" aria-valuenow="20" aria-valuemin="0"
-                                                     aria-valuemax="100">
-                                                    <span class="sr-only">80% Complete</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <!-- end task item -->
-                                </ul>
-                            </li>
-                            <li class="footer">
-                                <a href="#">View all tasks</a>
-                            </li>
-                        </ul>
+                        <?=
+                        Html::a(
+                                '<i class="fa fa-sign-out"></i>', ['/user/logout'], ['data-method' => 'post']
+                        )
+                        ?>
                     </li>
                     <!-- User Account: style can be found in dropdown.less -->
 
-                    <li class="dropdown user user-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="user-image" alt="User Image"/>
-                            <span class="hidden-xs"><?= Yii::$app->user->identity->profile->full_name ?></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <!-- User image -->
-                            <li class="user-header">
-                                <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle"
-                                     alt="User Image"/>
-
-                                <p>
-                                    <?= Yii::$app->user->identity->profile->full_name ?>
-                                    <small><?= Yii::$app->user->identity->role->name ?></small>
-                                </p>
-                            </li>
-                            <!-- Menu Footer-->
-                            <li class="user-footer">
-                                <div class="pull-left">
-                                    <a href="#" class="btn btn-default btn-flat">Profile</a>
-                                </div>
-                                <div class="pull-right">
-                                    <?=
-                                    Html::a(
-                                            'Logout', ['/user/logout'], ['data-method' => 'post', 'class' => 'btn btn-default btn-flat']
-                                    )
-                                    ?>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
+                    <!--                    <li class="dropdown user user-menu">
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                                <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="user-image" alt="User Image"/>
+                                                <span class="hidden-xs"><?= Yii::$app->user->identity->profile->full_name ?></span>
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                 User image 
+                                                <li class="user-header">
+                                                    <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle"
+                                                         alt="User Image"/>
+                    
+                                                    <p>
+                    <?= Yii::$app->user->identity->profile->full_name ?>
+                                                        <small><?= Yii::$app->user->identity->role->name ?></small>
+                                                    </p>
+                                                </li>
+                                                 Menu Footer
+                                                <li class="user-footer">
+                                                    <div class="pull-left">
+                                                        <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                                    </div>
+                                                    <div class="pull-right">
+                    <?=
+                    Html::a(
+                            'Logout', ['/user/logout'], ['data-method' => 'post', 'class' => 'btn btn-default btn-flat']
+                    )
+                    ?>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>-->
 
                     <!-- User Account: style can be found in dropdown.less -->
                 </ul>

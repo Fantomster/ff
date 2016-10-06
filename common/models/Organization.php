@@ -174,7 +174,7 @@ class Organization extends \yii\db\ActiveRecord
                 ->asArray()
                 ->all(), 'id', 'name');
         $clients['0'] = 'Все';
-        ksort($vendors);
+        ksort($clients);
         return $clients;
     }
     

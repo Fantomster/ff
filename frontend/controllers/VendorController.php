@@ -289,23 +289,32 @@ class VendorController extends DefaultController {
     public function actionBasecatalog($id) {
         $currentCatalog = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        //$searchModel = new \common\models\search\ProductSearch;
-        //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $searchString="";
         if (Yii::$app->request->isGet) {       
         $searchString = trim(\Yii::$app->request->get('searchString'));
-        }
         $query = (new \yii\db\Query())
         ->select("id,article,product,units,category_id,price,status")
         ->from("catalog_base_goods")
         ->where("cat_id = $currentCatalog")
         ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
         ->andWhere("deleted=0")
-        ->createCommand(); 
+        ->createCommand();  
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
                 . "WHERE cat_id = $currentCatalog "
                 . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
                 . "")->queryScalar();
+        }else{
+        $query = (new \yii\db\Query())
+        ->select("id,article,product,units,category_id,price,status")
+        ->from("catalog_base_goods")
+        ->where("cat_id = $currentCatalog")
+        ->andWhere("deleted=0")
+        ->createCommand();
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                . "WHERE cat_id = $currentCatalog " 
+                . "and deleted=0"
+                . "")->queryScalar();
+        }
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -327,46 +336,6 @@ class VendorController extends DefaultController {
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog'));
-    }
-    public function actionFilterBaseCatalog($id) {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchString ="";
-        $currentCatalog = $id;
-        if (Yii::$app->request->isGet) {       
-        $searchString = trim(\Yii::$app->request->get('searchString'));
-        }
-        $query = (new \yii\db\Query())
-        ->select("id,article,product,units,category_id,price,status")
-        ->from("catalog_base_goods")
-        ->where("cat_id = $currentCatalog")
-        ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
-        ->andWhere("deleted=0")
-        ->createCommand(); 
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $currentCatalog "
-                . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
-                . "")->queryScalar();
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'article',
-                    'product',
-                    'units',
-                    'category_id',
-                    'price',
-                    'status',
-                ],
-            ],
-        ]);
-        $searchModel2 = new RelationSuppRest;
-        $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
-        return $this->render('catalogs/basecatalog', compact('dataProvider','currentCatalog','searchString','searchModel2','dataProvider2'));
-        
     }
     public function actionImportToXls($id) {
         $importModel = new \common\models\upload\UploadForm();

@@ -21,7 +21,7 @@ $this->registerJs(
                 }
                 timer = setTimeout(function() {
                     $("#search-form").submit();
-                }, 200);
+                }, 300);
             });
             $("#users-list").on("pjax:complete", function() {
                 var searchInput = $("#search-string");

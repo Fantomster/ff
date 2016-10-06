@@ -124,10 +124,13 @@ class User extends \amnah\yii2\user\models\User {
     public function sendEmployeeConfirmation($user) {
         /** @var Mailer $mailer */
         /** @var Message $message */
+        
+        $profile = $user->profile;
+        
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-
+        
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;

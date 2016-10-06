@@ -130,7 +130,7 @@ class Organization extends \yii\db\ActiveRecord
      * 
      * @return array
      */
-    public function getSuppliers($category_id = '') {
+    public function getSuppliers($category_id = '', $all = false) {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
@@ -147,7 +147,7 @@ class Organization extends \yii\db\ActiveRecord
         $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
                 ->asArray()
                 ->all(), 'id', 'name');
-        return $vendors;
+        return $all ? array_merge(['0' => 'Все'], $vendors) : $vendors;
     }
     
     /**

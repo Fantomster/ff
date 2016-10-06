@@ -147,10 +147,10 @@ class Order extends \yii\db\ActiveRecord
                 $text = 'Новый';
                 break;
             case Order::STATUS_PROCESSING:
-                $text = 'Исполняется';
+                $text = 'Выполняется';
                 break;
             case Order::STATUS_DONE:
-                $text = 'Готов';
+                $text = 'Завершен';
                 break;
             case Order::STATUS_REJECTED:
             case Order::STATUS_CANCELLED:

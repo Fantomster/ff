@@ -90,7 +90,7 @@ $form = ActiveForm::begin([
 ?>
         <?= $form->field($searchModel, 'status')->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter']) ?>
         <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            echo $form->field($searchModel, 'vendor_id')->dropDownList($organization->getSuppliers(), ['id' => 'orgFilter']);
+            echo $form->field($searchModel, 'vendor_id')->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter']);
         } else {
             echo $form->field($searchModel, 'client_id')->dropDownList($organization->getClients(), ['id' => 'orgFilter']);
         } ?>

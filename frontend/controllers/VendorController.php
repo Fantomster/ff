@@ -289,17 +289,23 @@ class VendorController extends DefaultController {
     public function actionBasecatalog($id) {
         $currentCatalog = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchModel = new CatalogBaseGoods;
-        $searchModel2 = new RelationSuppRest;
+        //$searchModel = new \common\models\search\ProductSearch;
+        //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $searchString="";
+        if (Yii::$app->request->isGet) {       
+        $searchString = trim(\Yii::$app->request->get('searchString'));
+        }
         $query = (new \yii\db\Query())
         ->select("id,article,product,units,category_id,price,status")
         ->from("catalog_base_goods")
         ->where("cat_id = $currentCatalog")
         ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
+        ->andWhere("deleted=0")
         ->createCommand(); 
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $currentCatalog and article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")->queryScalar();
+                . "WHERE cat_id = $currentCatalog "
+                . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
+                . "")->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -318,24 +324,28 @@ class VendorController extends DefaultController {
             ],
         ]);
         
+        $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
-        return $this->render('catalogs/basecatalog', compact('searchModel', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog'));
+        return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog'));
     }
     public function actionFilterBaseCatalog($id) {
-        $currentCatalog = $id;
+        $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString ="";
-        if (Yii::$app->request->isPost) {
-        $searchString = trim(\Yii::$app->request->post('searchString'));
+        $currentCatalog = $id;
+        if (Yii::$app->request->isGet) {       
+        $searchString = trim(\Yii::$app->request->get('searchString'));
         }
-        $searchString="";
         $query = (new \yii\db\Query())
         ->select("id,article,product,units,category_id,price,status")
         ->from("catalog_base_goods")
         ->where("cat_id = $currentCatalog")
         ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
+        ->andWhere("deleted=0")
         ->createCommand(); 
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $currentCatalog and article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")->queryScalar();
+                . "WHERE cat_id = $currentCatalog "
+                . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
+                . "")->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -353,7 +363,9 @@ class VendorController extends DefaultController {
                 ],
             ],
         ]);
-        return $this->render('catalogs/_basecatalog', compact('dataProvider'));
+        $searchModel2 = new RelationSuppRest;
+        $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
+        return $this->render('catalogs/basecatalog', compact('dataProvider','currentCatalog','searchString','searchModel2','dataProvider2'));
         
     }
     public function actionImportToXls($id) {

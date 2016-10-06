@@ -58,8 +58,10 @@ $exportColumns = [
         </div>
     <div class="tab-content">
         <div id="tabCatalog" class="tab-pane fade in active">
-            
                 <div class="panel-body">
+    <div class="col-sm-4">
+        <?=Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left','placeholder'=>'Поиск','id'=>'search']) ?>
+    </div>   
                 <?=
                 Modal::widget([
                     'id' => 'add-product',
@@ -172,26 +174,7 @@ $exportColumns = [
                ?>
             </div>
             <?php 
-            $gridColumnsBaseCatalog = [
-                                /*[
-                            'label' => '',  
-                            'format' => 'raw',  
-                            'contentOptions' => ['style' => 'width:50px;'],
-                            'value' => function ($data) {
-                                 $data->image?$imgUrl=$data->image:$imgUrl='NOIMAGE.gif';
-                                 $images = Html::img(\Yii::$app->request->BaseUrl.'/upload/'.$imgUrl,
-                                    [
-                                    'alt'=>'',
-                                    'width'=>'50',
-                                    'height'=>'50', 
-                                    'data-toggle'=>'tooltip',
-                                    'data-placement'=>'left',
-                                    'title' => '' ,
-                                    'style'=>'cursor:default;'
-                                    ]);
-                                return ($images);
-                                }
-                            ],*/
+         /*   $gridColumnsBaseCatalog = [
                             [
                             'attribute' => 'article',
                             'label'=>'Артикул',
@@ -247,28 +230,7 @@ $exportColumns = [
                                 return $link;               
                             },
                             ],                           
-                    /*[
-                        'attribute' => 'MarketPlace',
-                        'format' => 'raw',
-                        'contentOptions' => ['style' => 'width:100px;'],
-                        'value' => function ($data) {
-                            $link = CheckboxX::widget([
-                                'name'=>'marketplace_'.$data->id,
-                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                'value'=>$data->market_place==0 ? 0 : 1,
-                                'autoLabel' => true,
-                                'options'=>['id'=>'marketplace_'.$data->id, 'data-id'=>$data->id],
-                                'pluginOptions'=>[
-                                    'threeState'=>false,
-                                    'theme' => 'krajee-flatblue',
-                                    'enclosedLabel' => true,
-                                    'size'=>'lg',
-                                    ]
-                            ]);
-                            return $link;
-                        },
-
-                    ],*/
+                    
                     [
                         'attribute' => '',
                         'label' => '',
@@ -306,13 +268,7 @@ $exportColumns = [
             ?>
            
             
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
-                        </div>
-                    </div>
-                </div>
+                
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">               
                     <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
@@ -335,7 +291,26 @@ $exportColumns = [
                     ?>  
                     <?php Pjax::end(); ?>
                     </div>
-                </div>
+                </div> */
+            ?>
+                <div class="panel-body">
+                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
+                        <?php $form = ActiveForm::begin([
+                                'options' => [
+                                    'data-pjax' => true,
+                                    'id' => 'search-form',
+                                    'class' => "navbar-form",
+                                    'role' => 'search',
+                                ],
+                                'method' => 'get',
+                            ]);
+                            ?>
+                            <?php ActiveForm::end(); ?>
+                            <?php echo $this->render('_listBaseCatalogGoods',compact('currentCatalog','dataProvider','searchModel')); ?>
+                        
+                    <?php Pjax::end(); ?>
+                </div>       
+                     
             </div>
             <div id="tabClients" class="tab-pane fade"> 	    
                 <?php 
@@ -403,21 +378,7 @@ $exportColumns = [
 </div>
 <?php
 $customJs = <<< JS
-var timer;
-$('#search').on("keyup put paste change", function () {
-window.clearTimeout(timer);
-   timer = setTimeout(function () {
-       /*$.ajax({
-        type: 'POST',
-        url: 'index.php?r=vendor/list-catalog',
-        container: '#pjaxgo',
-        data: { search: $('#search').val(), restaurant: $('#restaurant').val() },
-        success: function(response) {
-        $('#pjaxgo').html(response)    
-        }
-      })*/
-   }, 700);
-});
+
 /** 
  * Forward port jQuery.live()
  * Wrapper for newer jQuery.on()
@@ -491,6 +452,7 @@ $("#add-product").on("click", ".edit", function() {
     });
 $(".del-product").live("click", function(e){
     var id = $(this).attr('data-id');
+        
 	bootbox.confirm({
             title: "Удалить этот продукт?",
             message: "Продукт будет удален из всех каталогов", 
@@ -515,8 +477,7 @@ $(".del-product").live("click", function(e){
 	        cache: false,
 	        success: function(response) {
 		        if(response.success){
-                        $.pjax.reload({container: "#clients-list"});
-			        console.log(response); 
+                        //$.pjax.reload({container: "#clients-list"});
 			        $.pjax.reload({container: "#products-list"}); 
 			        }else{
 				    console.log('Что-то пошло не так');    

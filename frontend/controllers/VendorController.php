@@ -185,8 +185,47 @@ class VendorController extends DefaultController {
         if (!Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
             return $this->render("catalogs/createBaseCatalog", compact("Catalog"));
         } else {
+            $searchString = "";
+            $restaurant = "";
+            $type="";
             $relation_supp_rest = new RelationSuppRest;
-            return $this->render("catalogs", compact("relation_supp_rest", "currentUser"));
+            $relation = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
+                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                    select('rest_org_id')->
+                        where(['supp_org_id'=>$currentUser->organization_id,'invite'=>'1'])])->all(),'id','name');
+            $arrCatalog = Catalog::find()->select(['id','status','name','created_at'])->
+                        where(['supp_org_id'=>$currentUser->organization_id,'type'=>2])->all();
+            
+            if (Yii::$app->request->isPost) {      
+                $searchString = htmlspecialchars(trim(\Yii::$app->request->post('searchString')));
+                $restaurant = htmlspecialchars(trim(\Yii::$app->request->post('restaurant')));
+                //echo $restaurant;
+                if(!empty($restaurant)){
+                $arrCatalog = Catalog::find()->select(['id','status','name','created_at','type','id'])->
+                        where(['supp_org_id'=>$currentUser->organization_id])->
+                        andFilterWhere(['id'=>\common\models\RelationSuppRest::find()->
+                                select(['cat_id'])->
+                                where(['supp_org_id'=>$currentUser->organization_id,
+                                       'rest_org_id'=>$restaurant])])->one();
+                    if(empty($arrCatalog)){
+                        $arrCatalog==""; 
+                    }else{
+                        if($arrCatalog->type==1){
+                           $type = 1;  //ресторан подключен к главному каталогу
+                        }else{
+                           $catalog_id = $arrCatalog->id;  
+                           $arrCatalog = Catalog::find()->select(['id','status','name','created_at'])->
+                            where(['supp_org_id'=>$currentUser->organization_id,'id'=>$catalog_id])->all();
+                        }
+                    }
+                }else{
+                $arrCatalog = Catalog::find()->select(['id','status','name','created_at'])->
+                        where(['supp_org_id'=>$currentUser->organization_id,'type'=>2])->
+                        andFilterWhere(['LIKE', 'name', $searchString])->all();
+                    }
+                return $this->render("catalogs", compact("relation_supp_rest", "currentUser","relation","searchString","restaurant",'arrCatalog','type'));
+            }
+            return $this->render("catalogs", compact("relation_supp_rest", "currentUser","relation","searchString","restaurant",'type','arrCatalog'));
         }
     }
 
@@ -281,9 +320,66 @@ class VendorController extends DefaultController {
 
     public function actionClients() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        
+        $arr_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
+                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                    select('rest_org_id')->
+                        where(['supp_org_id'=>$currentUser->organization_id])])->all(),'id','name');
+        
+        $arr_catalog = yii\helpers\ArrayHelper::map(\common\models\Catalog::find()->
+                where(['supp_org_id'=>$currentUser->organization_id])->all(),'id','name');
+        
+        $filter_restaurant="";
+        $filter_catalog="";
+        $filter_invite="";
         $searchModel = new RelationSuppRest;
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CLIENTS);
-        return $this->render('clients', compact('searchModel', 'dataProvider'));
+        if (
+            !empty(\Yii::$app->request->get('filter_restaurant')) || 
+            !empty(\Yii::$app->request->get('filter_catalog')) || 
+            \Yii::$app->request->get('filter_invite')!="") { 
+            
+        $filter_restaurant = trim(\Yii::$app->request->get('filter_restaurant'));
+        $filter_catalog = trim(\Yii::$app->request->get('filter_catalog'));
+        $filter_invite = trim(\Yii::$app->request->get('filter_invite'));
+        
+        $query = (new \yii\db\Query());
+        $query->select("id,rest_org_id,cat_id,status,invite");
+        $query->from("relation_supp_rest");
+        $query->where(["supp_org_id" => $currentUser->organization_id]);
+        if(!empty($filter_restaurant)) $query->andWhere(["rest_org_id" => $filter_restaurant]);
+        if(!empty($filter_catalog)) $query->andWhere(["cat_id" => $filter_catalog]);
+        if($filter_invite !="") $query->andWhere(["invite" => $filter_invite]);
+        /*$totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
+                . "WHERE supp_org_id = $currentUser->organization_id " 
+                //. "and id in (select id from organization where name like '" . $search . "%')"
+                . "")->queryScalar();*/
+        }else{
+        $query = (new \yii\db\Query());
+        $query->select("id,rest_org_id,cat_id,status,invite");
+        $query->from("relation_supp_rest");
+        $query->where(["supp_org_id" => $currentUser->organization_id]);
+        /*$totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
+                . "WHERE supp_org_id = $currentUser->organization_id " 
+                . "")->queryScalar();*/
+        }
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            //'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'status',
+                ],
+            ],
+        ]);
+        return $this->render('clients', compact('searchModel', 'dataProvider','arr_catalog','arr_restaurant'));
     }
 
     public function actionBasecatalog($id) {
@@ -1046,7 +1142,8 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $search = Yii::$app->request->post('search');
         $restaurant = Yii::$app->request->post('restaurant');
-        echo $this->renderAjax('catalogs/_listCatalog', compact('currentUser', 'search', 'restaurant'));
+        
+        return $this->renderAjax('catalogs/_listCatalog', compact('currentUser', 'search', 'restaurant'));
     }
 
     public function actionMessages() {

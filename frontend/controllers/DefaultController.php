@@ -6,7 +6,7 @@ use Yii;
 use yii\web\Controller;
 use common\models\Organization;
 use common\models\RelationSuppRest;
-use common\models\CatalogBaseGoods;
+use common\models\Catalog;
 
 /**
  * Description of DefaultController
@@ -36,16 +36,16 @@ class DefaultController extends Controller {
                     $suppliers = RelationSuppRest::findOne(['rest_org_id' => $organization->id]);
                     $isIndex = ($this->id === 'client') && ($this->action->id === 'index');
                     if (!isset($suppliers) && $isIndex) {
-                        //return $this->redirect(['client/suppliers']);
+                        return $this->redirect(['client/suppliers']);
                     }
                     break;
                 case Organization::TYPE_SUPPLIER:
                     $this->layout = 'main-vendor';
                     //проверка, имеет ли крестьянин базовый каталог, если нет, то направляем создавать
-                    $baseCatalogs = CatalogBaseGoods::findOne(['supp_org_id' => $organization->id]);
+                    $baseCatalogs = Catalog::findOne(['supp_org_id' => $organization->id]);
                     $isIndex = ($this->id === 'vendor') && ($this->action->id === 'index');
-                    if (!isset($suppliers) && $isIndex) {
-                        //return $this->redirect(['vendor/catalogs']);
+                    if (!isset($baseCatalogs) && $isIndex) {
+                        return $this->redirect(['vendor/catalogs']);
                     }
                     break;
             }

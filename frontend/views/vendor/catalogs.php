@@ -128,7 +128,7 @@ Modal::begin([
                     <?php Pjax::end(); ?>
                 </div>
             </div>
-          </div>
+
 </div>
 
 <?php

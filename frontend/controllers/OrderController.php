@@ -14,7 +14,6 @@ use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use yii\helpers\Json;
 use common\models\OrderChat;
-use yii\data\SqlDataProvider;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 
@@ -92,53 +91,29 @@ class OrderController extends DefaultController {
 
     public function actionCreate() {
         $session = Yii::$app->session;
-//        $session->remove('selectedCategory');
-//        $session->remove('selectedVendor');
 //        $session->remove('orders');
         $client = $this->currentUser->organization;
+        $searchModel = new OrderCatalogSearch();
+        $params = Yii::$app->request->getQueryParams();
 
-        //$categories = $client->getRestaurantCategories();
+        $selectedCategory = null;
+        $selectedVendor = null;
+        $searchString = '';
 
-        $selectedCategory = isset($session['selectedCategory']) ? $session['selectedCategory'] : null;
-
-        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : null;
-
-        $post = Yii::$app->request->post();
-
-        if ($post) {
-            $selectedVendor = ($selectedCategory == $post['selectedCategory']) ? $post['selectedVendor'] : '';
-            $selectedCategory = $post['selectedCategory'];
+//        $post = Yii::$app->request->post();
+//
+        if (Yii::$app->request->post()) {
+            $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
+            $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }
 
-        $session['selectedCategory'] = $selectedCategory;
-        $session['selectedVendor'] = $selectedVendor;
-
         $vendors = $client->getSuppliers($selectedCategory);
-
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
-
-        $query = "SELECT id, product, supp_org_id, units, price, cat_id FROM catalog_base_goods WHERE cat_id IN ($catalogs) "
-                . 'UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id FROM '
-                . 'catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id '
-                . "WHERE cg.cat_id IN ($catalogs))";
-
-        $count = Yii::$app->db->createCommand($query)->queryScalar();
-
-        $dataProvider = new SqlDataProvider([
-            'sql' => $query,
-            'totalCount' => $count,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'product',
-                    'price',
-                ],
-            ],
-        ]);
-
-        $test = $dataProvider->sql;
+        
+        $searchModel->client = $client;
+        $searchModel->catalogs = $catalogs;
+        
+        $dataProvider = $searchModel->search($params);
 
         if ($session->has('orders')) {
             $orders = $session['orders'];
@@ -147,9 +122,9 @@ class OrderController extends DefaultController {
         }
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('create', compact('dataProvider', 'orders', 'client', 'selectedCategory', 'selectedVendor', 'vendors'));
+            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         } else {
-            return $this->render('create', compact('dataProvider', 'orders', 'client', 'selectedCategory', 'selectedVendor', 'vendors'));
+            return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
     }
 

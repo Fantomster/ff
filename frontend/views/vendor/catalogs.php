@@ -69,9 +69,11 @@ Modal::begin([
             <div class="box-body">
                 <div class="row">
                     <div class="col-md-4">
+                        <?= Html::label('&nbsp;', null, ['class' => 'label','style'=>'color:#555']) ?>
                         <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
                     </div>
                     <div class="col-md-4">
+                        <?= Html::label('Ресторан', null, ['class' => 'label','style'=>'color:#555']) ?>
                         <?= Html::dropDownList('restaurant', null,
                             $relation,['prompt' => '','class' => 'form-control','id'=>'restaurant']) ?>                        
                     </div>
@@ -139,6 +141,7 @@ window.clearTimeout(timer);
    timer = setTimeout(function () {
        $.pjax({
         type: 'POST',
+        push: false,
         url: 'index.php?r=vendor/catalogs',
         container: '#catalog-list',
         data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }
@@ -148,6 +151,7 @@ window.clearTimeout(timer);
 $("#restaurant").on("change", function() {
     $.pjax({
         type: 'POST',
+        push: false,
         url: 'index.php?r=vendor/catalogs',
         container: '#catalog-list',
         data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }       
@@ -207,6 +211,7 @@ $(document).on('click', '.del', function (e){
 			        //$.pjax.reload({container: "#catalog-list"});
                                 $.pjax({
                                     type: 'POST',
+                                    push: false,
                                     url: 'index.php?r=vendor/catalogs',
                                     container: '#catalog-list',
                                     data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }       

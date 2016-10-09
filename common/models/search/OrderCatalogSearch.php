@@ -2,100 +2,63 @@
 
 namespace common\models\search;
 
-use yii\data\ActiveDataProvider;
-use common\models\CatalogGoods;
-use common\models\CatalogBaseGoods;
-use common\models\Organization;
+use Yii;
+use yii\data\SqlDataProvider;
 
 /**
  *  Model for order catalog search form
  */
-class OrderCatalogSearch extends CatalogBaseGoods {
+class OrderCatalogSearch extends \yii\base\Model {
+
     public $searchString;
-    public $vendors;
-    public $actualPrice;
-    
-    /**
-     * @inheritdoc
-     */
-    public static function tableName()
-    {
-        return "{{%catalog_base_goods}}";
-    }
+    public $selectedCategory;
+    public $selectedVendor;
+    public $catalogs;
+    public $client;
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            [['id'], 'integer'],
-            [['product', 'vendor.name', 'actualPrice', 'units', 'searchString'], 'safe'],
+            [['product', 'price', 'searchString', 'selectedCategory', 'selectedVendor'], 'safe'],
         ];
     }
-    
-    /**
-     * @inheritdoc
-     */
-    public function attributes()
-    {
-        return array_merge(parent::attributes(), ['product', 'vendor.name', 'units']);
-    }
-    
+
     /**
      * Search
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params)
-    {
-        $productTable = CatalogGoods::tableName();
-        $baseProductTable = CatalogBaseGoods::tableName();
-        $organizationTable = Organization::tableName();
+    public function search($params) {
+        $this->load($params);
         
-        $catalogs = [];
-        foreach ($this->vendors as $vendor) {
-            if ($vendor['selected']) {
-                $catalogs[] = $vendor['cat_id'];
-            }
-        }
+        $this->searchString = \yii\helpers\HtmlPurifier::process($this->searchString);
 
-        $query = CatalogGoods::find();
-        
-        $query->joinWith(['baseProduct' => function ($query) use ($baseProductTable) {
-            $query->from(['baseProduct' => $baseProductTable]);
-        }]);
-//исправить ебанутый запрос с лишним джойном и лишними полями
-        $query->joinWith('organization');
-        $query->where([
-            $productTable.'.cat_id' => $catalogs,
-            $baseProductTable.'.deleted' => 0,
+        $query = "SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.article FROM "
+                . "catalog_base_goods AS cbg LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
+                . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%') "
+                . "UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id, org.name, cbg.article FROM "
+                . "catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
+                . "LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
+                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%'))";
+
+        $count = Yii::$app->db->createCommand($query)->queryScalar();
+
+        $dataProvider = new SqlDataProvider([
+            'sql' => $query,
+            'totalCount' => $count,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'product',
+                    'price',
+                ],
+            ],
         ]);
-
-        // create data provider
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
-        // enable sorting for the related columns
-        $addSortAttributes = ['baseProduct.product', 'organization.name', 'price', 'baseProduct.units'];
-        foreach ($addSortAttributes as $addSortAttribute) {
-            $dataProvider->sort->attributes[$addSortAttribute] = [
-                'asc' => [$addSortAttribute => SORT_ASC],
-                'desc' => [$addSortAttribute => SORT_DESC],
-            ];
-        }
-
-        if (!($this->load($params) && $this->validate())) {
-            return $dataProvider;
-        }
-
-        $query->orFilterWhere(['like', $baseProductTable.'.product', $this->searchString])
-            ->orFilterWhere(['like', $organizationTable.'.name', $this->searchString]);
-//        $query->andWhere([
-//            'cat_id' => $catalogs,
-//        ]);
         return $dataProvider;
     }
-    
+
 }

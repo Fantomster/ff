@@ -45,7 +45,8 @@ $exportColumns = [
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Главный Каталог</h3>
-        <button class="btn btn-default btn-sm pull-right" onclick="window.history.back();">Вернуться</button>
+        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
+    
     </div>
     <!-- /.box-header -->
     <div class="box-body">
@@ -57,8 +58,10 @@ $exportColumns = [
         </div>
     <div class="tab-content">
         <div id="tabCatalog" class="tab-pane fade in active">
-            
-                <div class="panel-body">
+            <div class="panel-body">
+                <div class="col-sm-4">
+                    <?=Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left','placeholder'=>'Поиск','id'=>'search']) ?>
+                </div>   
                 <?=
                 Modal::widget([
                     'id' => 'add-product',
@@ -133,6 +136,7 @@ $exportColumns = [
                                 ]); 
                             ?>
                 </div>
+                
                 <?=
                     Modal::widget([
                         'id' => 'importToXls',
@@ -168,67 +172,57 @@ $exportColumns = [
                        ],
                    ])
                ?>
-            </div>            
-            <?php 
-            $gridColumnsBaseCatalog = [
-                                /*[
-                            'label' => '',  
-                            'format' => 'raw',  
-                            'contentOptions' => ['style' => 'width:50px;'],
-                            'value' => function ($data) {
-                                 $data->image?$imgUrl=$data->image:$imgUrl='NOIMAGE.gif';
-                                 $images = Html::img(\Yii::$app->request->BaseUrl.'/upload/'.$imgUrl,
-                                    [
-                                    'alt'=>'',
-                                    'width'=>'50',
-                                    'height'=>'50', 
-                                    'data-toggle'=>'tooltip',
-                                    'data-placement'=>'left',
-                                    'title' => '' ,
-                                    'style'=>'cursor:default;'
-                                    ]);
-                                return ($images);
-                                }
-                            ],*/
+                </div>
+                <div class="panel-body">
+                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
+                        
+                      <?php
+                        $gridColumnsBaseCatalog = [
                             [
+                            'attribute' => 'article',
                             'label'=>'Артикул',
                             'value'=>'article',
-                            'contentOptions' => ['style' => 'vertical-align:middle'],
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
                             ],
                             [
-                            'label'=>'Продукт',
+                            'attribute' => 'product',
+                            'label'=>'Наименование',
                             'value'=>'product',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                             ],
                             [
+                            'attribute' => 'units',
                             'label'=>'Кратность',
                             'value'=>'units',
-                            'contentOptions' => ['style' => 'vertical-align:middle'],    
+                            'contentOptions' => ['style' => 'vertical-align:middle;width:120px;'],    
                             ],
                             [
+                            'attribute' => 'category_id',
                             'label'=>'Категория',
                             'value'=>function ($data) {
-                            $data->category_id==0 ? $category_name='':$category_name=Category::get_value($data->category_id)->name;
+                            $data['category_id']==0 ? $category_name='':$category_name=Category::get_value($data['category_id'])->name;
                             return $category_name;
                             },
-                            'contentOptions' => ['style' => 'vertical-align:middle'],
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
                             ],
                             [
+                            'attribute' => 'price',
                             'label'=>'Цена',
-                            'value'=>function ($data) {return $data->price;},
-                            'contentOptions' => ['style' => 'vertical-align:middle'],
+                            'value'=>'price',
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
                             ],
                             [
-                            'attribute' => 'Наличие',
+                            'attribute' => 'status',
+                            'label'=>'Наличие',
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],
+                            'contentOptions' => ['style' => 'vertical-align:middle;width:100px;'],
                             'value' => function ($data) {
                                 $link = CheckboxX::widget([
-                                    'name'=>'status_'.$data->id,
+                                    'name'=>'status_'.$data['id'],
                                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                    'value'=>$data->status==0 ? 0 : 1,
+                                    'value'=>$data['status']==0 ? 0 : 1,
                                     'autoLabel' => false,
-                                    'options'=>['id'=>'status_'.$data->id, 'data-id'=>$data->id],
+                                    'options'=>['id'=>'status_'.$data['id'], 'data-id'=>$data['id']],
                                     'pluginOptions'=>[
                                         'threeState'=>false,
                                         'theme' => 'krajee-flatblue',
@@ -239,84 +233,68 @@ $exportColumns = [
                                 return $link;               
                             },
                             ],                           
-                    /*[
-                        'attribute' => 'MarketPlace',
-                        'format' => 'raw',
-                        'contentOptions' => ['style' => 'width:100px;'],
-                        'value' => function ($data) {
-                            $link = CheckboxX::widget([
-                                'name'=>'marketplace_'.$data->id,
-                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                'value'=>$data->market_place==0 ? 0 : 1,
-                                'autoLabel' => true,
-                                'options'=>['id'=>'marketplace_'.$data->id, 'data-id'=>$data->id],
-                                'pluginOptions'=>[
-                                    'threeState'=>false,
-                                    'theme' => 'krajee-flatblue',
-                                    'enclosedLabel' => true,
-                                    'size'=>'lg',
-                                    ]
+                            [
+                                'attribute' => '',
+                                'label' => '',
+                                'format' => 'raw',
+                                'contentOptions' => ['style' => 'width:50px;'],
+                                'value' => function ($data) {
+                                    $link = Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['/vendor/ajax-update-product', 'id' => $data['id']], [
+                                        'data' => [
+                                        'target' => '#add-product',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                                  ],
+                                        'class'=>'btn btn-sm btn-warning'
+
+                                    ]);
+                                    return $link;
+                                },
+
+                            ],
+                            [
+                                'attribute' => '',
+                                'label' => '',
+                                'format' => 'raw',
+                                'contentOptions' => ['style' => 'width:50px;'],
+                                'value' => function ($data) {
+                                    $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
+                                        'class'=>'btn btn-sm btn-danger del-product',
+                                        'data'=>['id'=>$data['id']],
+                                    ]);
+                                    return $link;
+                                },
+
+                            ],
+                        ];
+                        ?>    
+
+                        <div class="panel-body">
+                            <div class="box-body table-responsive no-padding">
+                            <?=GridView::widget([
+                                'dataProvider' => $dataProvider,
+                                'filterPosition' => false,
+                                'columns' => $gridColumnsBaseCatalog, 
+                                'tableOptions' => ['class' => 'table no-margin'],
+                                'options' => ['class' => 'table-responsive'],
+                                'bordered' => false,
+                                'striped' => true,
+                                'condensed' => false,
+                                'responsive' => false,
+                                'hover' => false,
+                                'export' => [
+                                    'fontAwesome' => true,
+                                ],
                             ]);
-                            return $link;
-                        },
-
-                    ],*/
-                    [
-                        'attribute' => '',
-                        'format' => 'raw',
-                        'contentOptions' => ['style' => 'width:50px;'],
-                        'value' => function ($data) {
-                            $link = Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['/vendor/ajax-update-product', 'id' => $data->id], [
-                                'data' => [
-                                'target' => '#add-product',
-                                'toggle' => 'modal',
-                                'backdrop' => 'static',
-                                          ],
-                                'class'=>'btn btn-sm btn-warning'
-
-                            ]);
-                            return $link;
-                        },
-
-                    ],
-                    [
-                        'attribute' => '',
-                        'format' => 'raw',
-                        'contentOptions' => ['style' => 'width:50px;'],
-                        'value' => function ($data) {
-                            $link = Html::button('<i class="fa fa-trash m-r-xs"></i>',[
-                                'class'=>'btn btn-sm btn-danger del-product',
-                                'data'=>['id'=>$data->id],
-                            ]);
-                            return $link;
-                        },
-
-                    ],
-            ];
-            ?>
-            <div class="box-body table-responsive no-padding"> 
-            <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
-            <?=GridView::widget([
-                    'dataProvider' => $dataProvider,
-                    'filterModel' => $searchModel,
-                    'filterPosition' => false,
-                    'columns' => $gridColumnsBaseCatalog, 
-                    'tableOptions' => ['class' => 'table no-margin'],
-                    'options' => ['class' => 'table-responsive'],
-                    'bordered' => false,
-                    'striped' => true,
-                    'condensed' => false,
-                    'responsive' => false,
-                    'hover' => false,
-                    'export' => [
-                        'fontAwesome' => true,
-                    ],
-            ]);
-            ?>  
-            <?php Pjax::end(); ?>
+                            ?> 
+                            </div>
+                        </div>      
+                        
+                    <?php Pjax::end(); ?>
+                </div>       
+                     
             </div>
-        </div>
-        <div id="tabClients" class="tab-pane fade"> 	    
+            <div id="tabClients" class="tab-pane fade"> 	    
                 <?php 
                 $gridColumnsCatalog = [
                     [
@@ -382,6 +360,18 @@ $exportColumns = [
 </div>
 <?php
 $customJs = <<< JS
+var timer;
+$('#search').on("keyup", function () {
+window.clearTimeout(timer);
+   timer = setTimeout(function () {
+       $.pjax({
+        type: 'GET',
+        url: 'index.php?r=vendor/basecatalog&id=$currentCatalog',
+        container: '#products-list',
+        data: {searchString: $('#search').val()}
+      })
+   }, 700);
+});
 /** 
  * Forward port jQuery.live()
  * Wrapper for newer jQuery.on()
@@ -455,6 +445,7 @@ $("#add-product").on("click", ".edit", function() {
     });
 $(".del-product").live("click", function(e){
     var id = $(this).attr('data-id');
+        
 	bootbox.confirm({
             title: "Удалить этот продукт?",
             message: "Продукт будет удален из всех каталогов", 
@@ -479,8 +470,7 @@ $(".del-product").live("click", function(e){
 	        cache: false,
 	        success: function(response) {
 		        if(response.success){
-                        $.pjax.reload({container: "#clients-list"});
-			        console.log(response); 
+                        //$.pjax.reload({container: "#clients-list"});
 			        $.pjax.reload({container: "#products-list"}); 
 			        }else{
 				    console.log('Что-то пошло не так');    

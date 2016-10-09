@@ -23,7 +23,7 @@ switch ($order->status) {
         break;
     case Order::STATUS_PROCESSING:
 ?>
-<a href="#" class="btn btn-danger btnOrderAction" data-action="confirm">Отменить</a>       
+<a href="#" class="btn btn-danger btnOrderAction" data-action="cancel">Отменить</a>       
 <?php if ($organizationType == Organization::TYPE_SUPPLIER) { ?>
 <a href="#" class="btn btn-default disabled">Исполняется</a>  
 <?php } else { ?>

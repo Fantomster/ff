@@ -21,6 +21,13 @@ use kartik\select2\Select2;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 $this->title = 'Мои каталоги';
 ?>
+<?php
+Modal::begin([
+    'id' => 'setting-base-catalog',
+    'clientOptions' => false,
+    ]);
+?>
+<?php Modal::end(); ?>
 <div class="catalog-index">
     	<div class="box box-info">
             <div class="box-header with-border">
@@ -44,14 +51,7 @@ $this->title = 'Мои каталоги';
                         </div>
                     </div>
                 </div>
-                <?php
-                }
-                Modal::begin([
-                    'id' => 'setting-base-catalog',
-                    'clientOptions' => false,
-                    ]);
-                ?>
-                <?php Modal::end(); ?>	
+                <?php } ?>
             </div>
             <!-- /.box-body -->
             <!--div class="box-footer clearfix">
@@ -73,48 +73,84 @@ $this->title = 'Мои каталоги';
                     </div>
                     <div class="col-md-4">
                         <?= Html::dropDownList('restaurant', null,
-                            ArrayHelper::map(common\models\Organization::find()->
-                                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                                    select('rest_org_id')->
-                                    where(['supp_org_id'=>$currentUser->organization_id,'status'=>'1'])])->all(),'id','name'),['prompt' => '','class' => 'form-control','id'=>'restaurant']) ?>
-                        
+                            $relation,['prompt' => '','class' => 'form-control','id'=>'restaurant']) ?>                        
                     </div>
                 </div>
             </div>
             <div class="box-body">
-                <div id="pjaxgo">
-                    <?php echo $this->render('catalogs/_listCatalog',['currentUser'=>$currentUser,'search'=>'','restaurant'=>''])  ?>
+                <?php Pjax::begin(['enablePushState' => false, 'id' => 'catalog-list',]); ?>
+                    <?php  
+                    if(empty($arrCatalog)){ ?>   
+                        <h4>Каталоги не найдены</h4>
+                    <?php 
+                    }else{
+                        if($type==1){ ?>
+                            <div class="panel-body">
+                                <h4>Ресторан подключен к <strong>Главному каталогу</strong></h4>
+                            </div>
+                        <?php 
+                        }else{
+                            foreach($arrCatalog as $arrCatalogs){
+                        ?>
+                                <div class="hpanel" style="margin-bottom:15px;">
+                                    <div class="panel-body">
+                                        <div class="col-md-4 text-left">
+                                        <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
+                                                '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
+                                        <p class="small m-b-none">Создан: <?=$arrCatalogs->created_at ?></p>
+                                        </div>
+                                        <div class="col-md-8 text-right">
+                                                <?php echo $link = SwitchBox::widget([
+                                                'name' => 'status_'.$arrCatalogs->id,
+                                                'checked' => $arrCatalogs->status==\common\models\Catalog::STATUS_OFF ? false : true,
+                                                'clientOptions' => [
+                                                    'onColor' => 'success',
+                                                    'offColor' => 'default',
+                                                    'onText'=>'Вкл',
+                                                    'offText'=>'Выкл',
+                                                    'baseClass'=>'bootstrap-switch',
+                                                    'wrapperClass'=>'wrapper m-t bootstrap-switch-small',
+                                                ],
+                                                'class'=>'m-t'
+                                            ]);
+                                            ?>
+                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::a('<i class="fa fa-fw fa-clone"></i>', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php
+                            } 
+                        }
+                    }
+                    ?>
+                    <?php Pjax::end(); ?>
                 </div>
             </div>
-          </div>
+
 </div>
 
 <?php
 $customJs = <<< JS
 var timer;
-$('#search').keyup(function () {
+$('#search').on("keyup put paste change", function () {
 window.clearTimeout(timer);
    timer = setTimeout(function () {
-       $.ajax({
+       $.pjax({
         type: 'POST',
-        url: 'index.php?r=vendor/list-catalog',
-        container: '#pjaxgo',
-        data: { search: $('#search').val(), restaurant: $('#restaurant').val() },
-        success: function(response) {
-        $('#pjaxgo').html(response)    
-        }
+        url: 'index.php?r=vendor/catalogs',
+        container: '#catalog-list',
+        data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }
       })
    }, 700);
 });
 $("#restaurant").on("change", function() {
-    $.ajax({
+    $.pjax({
         type: 'POST',
-        url: 'index.php?r=vendor/list-catalog',
-        container: '#pjaxgo',
-        data: { search: $('#search').val(), restaurant: $('#restaurant').val() },
-        success: function(response) {
-        $('#pjaxgo').html(response)    
-        }
+        url: 'index.php?r=vendor/catalogs',
+        container: '#catalog-list',
+        data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }       
       })
 });
 
@@ -141,7 +177,7 @@ $("body").on("hidden.bs.modal", function() {
 $('#viewBaseCatalog').click(function (e){
 $(location).attr('href','index.php?r=vendor/catalogs')
 })
-$('.del').live("click", function (e){
+$(document).on('click', '.del', function (e){
 	var id = $(this).attr('id').replace('del_','');
 	bootbox.confirm({
             title: "Удалить каталог?",
@@ -169,15 +205,11 @@ $('.del').live("click", function (e){
 		        if(response.success){
 			        console.log(response); 
 			        //$.pjax.reload({container: "#catalog-list"});
-                                $.ajax({
+                                $.pjax({
                                     type: 'POST',
-                                    url: 'index.php?r=vendor/list-catalog',
-                                    container: '#pjaxgo',
-                                    data: { search: $('#search').val(), restaurant: "1" },
-                                    //dataType: 'application/json',
-                                    success: function(response) {
-                                    $('#pjaxgo').html(response)    
-                                    }
+                                    url: 'index.php?r=vendor/catalogs',
+                                    container: '#catalog-list',
+                                    data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }       
                                   })
 			        }else{
 				    console.log('Что-то пошло не так');    
@@ -207,7 +239,7 @@ id = e.replace('status_','')
         }
     });
 })
-$(".clone-catalog").live('click', function(e) {        
+$(document).on('click', '.clone-catalog', function(e) {        
     e.preventDefault();
     elem = $(this)
     Url = $(this).attr('href')
@@ -227,7 +259,7 @@ $(".clone-catalog").live('click', function(e) {
             className: "success-fk",
             callback: function(result) {
 		if(result){
-           location.href = Url;
+           //location.href = Url;
         }
     }})
 });        

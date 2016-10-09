@@ -7,68 +7,130 @@ use common\models\search\OrderCatalogSearch;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
 use common\models\Order;
+use common\models\Role;
 use common\models\OrderContent;
 use common\models\Organization;
 use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use yii\helpers\Json;
 use common\models\OrderChat;
-use yii\data\SqlDataProvider;
+use common\components\AccessRule;
+use yii\filters\AccessControl;
+use yii\web\HttpException;
 
 class OrderController extends DefaultController {
-    /*
-     *  index
+
+    /**
+     * @inheritdoc
      */
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'only' => [
+                    'index',
+                    'view',
+                    'create',
+                    'send-message',
+                    'ajax-add-to-cart',
+                    'ajax-categories',
+                    'ajax-clear-order',
+                    'ajax-make-order',
+                    'ajax-modify-cart',
+                    'ajax-order-action',
+                    'ajax-order-refresh',
+                    'ajax-refresh-buttons',
+                    'ajax-show-order',
+                    'ajax-vendors',
+                ],
+                'rules' => [
+//                    [
+//                        'allow' => false,
+//                        'roles' => ['?'],
+//                        'actions' => [
+//                            'index',
+//                            'view',
+//                            'create',
+//                            'send-message',
+//                            'ajax-add-to-cart',
+//                            'ajax-categories',
+//                            'ajax-clear-order',
+//                            'ajax-make-order',
+//                            'ajax-modify-cart',
+//                            'ajax-order-action',
+//                            'ajax-order-refresh',
+//                            'ajax-refresh-buttons',
+//                            'ajax-show-order',
+//                            'ajax-vendors',
+//                        ],
+//                    ],
+                    [
+                        'actions' => ['index', 'view', 'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'create',
+                            'ajax-add-to-cart',
+                            'ajax-categories',
+                            'ajax-clear-order',
+                            'ajax-make-order',
+                            'ajax-modify-cart',
+                            'ajax-order-refresh',
+                            'ajax-show-order',
+                            'ajax-vendors',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                        ],
+                    ],
+                ],
+                'denyCallback' => function($rule, $action) {
+                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+                }
+            ],
+        ];
+    }
 
     public function actionCreate() {
         $session = Yii::$app->session;
-//        $session->remove('selectedCategory');
-//        $session->remove('selectedVendor');
 //        $session->remove('orders');
         $client = $this->currentUser->organization;
+        $searchModel = new OrderCatalogSearch();
+        $params = Yii::$app->request->getQueryParams();
 
-        //$categories = $client->getRestaurantCategories();
+        $selectedCategory = null;
+        $selectedVendor = null;
+        $searchString = '';
 
-        $selectedCategory = isset($session['selectedCategory']) ? $session['selectedCategory'] : null;
-
-        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : null;
-
-        $post = Yii::$app->request->post();
-
-        if ($post) {
-            $selectedVendor = ($selectedCategory == $post['selectedCategory']) ? $post['selectedVendor'] : '';
-            $selectedCategory = $post['selectedCategory'];
+//        $post = Yii::$app->request->post();
+//
+        if (Yii::$app->request->post()) {
+            $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
+            $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }
 
-        $session['selectedCategory'] = $selectedCategory;
-        $session['selectedVendor'] = $selectedVendor;
-
         $vendors = $client->getSuppliers($selectedCategory);
-
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
 
-        $query = "SELECT id, product, supp_org_id, units, price, cat_id FROM catalog_base_goods WHERE cat_id IN ($catalogs) "
-                . 'UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id FROM '
-                . 'catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id '
-                . "WHERE cg.cat_id IN ($catalogs))";
+        $searchModel->client = $client;
+        $searchModel->catalogs = $catalogs;
 
-        $count = Yii::$app->db->createCommand($query)->queryScalar();
-
-        $dataProvider = new SqlDataProvider([
-            'sql' => $query,
-            'totalCount' => $count,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'product',
-                    'price',
-                ],
-            ],
-        ]);
-
-        $test = $dataProvider->sql;
+        $dataProvider = $searchModel->search($params);
 
         if ($session->has('orders')) {
             $orders = $session['orders'];
@@ -77,9 +139,9 @@ class OrderController extends DefaultController {
         }
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('create', compact('dataProvider', 'orders', 'client', 'selectedCategory', 'selectedVendor', 'vendors'));
+            return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         } else {
-            return $this->render('create', compact('dataProvider', 'orders', 'client', 'selectedCategory', 'selectedVendor', 'vendors'));
+            return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
     }
 
@@ -286,6 +348,8 @@ class OrderController extends DefaultController {
 
     public function actionIndex() {
         $searchModel = new OrderSearch();
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
         $params = Yii::$app->request->getQueryParams();
         $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
@@ -293,14 +357,14 @@ class OrderController extends DefaultController {
             $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
             $fulfilledCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status='.Order::STATUS_DONE.' and client_id='.$organization->id)->queryOne();
+            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and client_id=' . $organization->id)->queryOne();
             $totalPrice = $query['total'];
         } else {
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
             $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
             $fulfilledCount = Order::find([])->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status='.Order::STATUS_DONE.' and vendor_id='.$organization->id.';')->queryOne();
+            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and vendor_id=' . $organization->id . ';')->queryOne();
             $totalPrice = $query['total'];
         }
         $dataProvider = $searchModel->search($params);

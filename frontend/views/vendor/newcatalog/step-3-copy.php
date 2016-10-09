@@ -101,7 +101,7 @@ $(window).resize(function(){
 var save = document.getElementById('save'), hot, originalColWidths = [], colWidths = [];         
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
-  colHeaders : ['id','Артикул', 'Наименование', 'Базовая цена', 'Цена каталога','Скидка в рублях','Скидка %','Итоговая цена'],
+  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Цена каталога','Скидка в рублях','Скидка %','Итоговая цена'],
   colWidths: [50,50, 90, 50, 50, 50, 50, 50],
   renderAllRows: true,
   maxRows: $arr_count,
@@ -171,7 +171,7 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
         }      
       }
   });
-colWidths[0] = 0.1;
+colWidths[1] = 0.1;
 hot.updateSettings({colWidths: colWidths});
         
 Handsontable.Dom.addEvent(save, 'click', function() {

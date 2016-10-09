@@ -30,8 +30,8 @@ $gridColumnsClients = [
 		'label'=>'Ресторан',
                 'format' => 'raw',
 		'value'=>function ($data) {
-                $res = common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->name;
-                return Html::a(Html::encode($res), ['vendor/view-client', 'id' => $data->rest_org_id], [
+                $res = common\models\Organization::find()->where(['id'=>$data['rest_org_id']])->one()->name;
+                return Html::a(Html::encode($res), ['vendor/view-client', 'id' => $data['rest_org_id']], [
                     'data' => [
                     'target' => '#view-client',
                     'toggle' => 'modal',
@@ -41,16 +41,9 @@ $gridColumnsClients = [
                 }
 		],
                 [
-		'label'=>'email',
-		'value'=>function ($data) {
-                $res = common\models\Organization::find()->where(['id'=>$data->rest_org_id])->one()->email;
-                return $res;
-                }
-		],
-                [
 		'label'=>'Последний заказ',
 		'value'=>function ($data) {
-                $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id'=>$data->rest_org_id,'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
+                $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id'=>$data['rest_org_id'],'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
                 return $res;
                 }
 		],
@@ -58,9 +51,9 @@ $gridColumnsClients = [
 		'label'=>'Текущий каталог',
                 'format' => 'raw',
 		'value'=>function ($data) {
-                $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
-                return $data->cat_id==0? '':
-                        Html::a(Html::encode($cat->name), ['vendor/view-catalog', 'id' => $data->cat_id], [
+                $cat = common\models\Catalog::find()->where(['id'=>$data['cat_id']])->one();
+                return $data['cat_id']==0? '':
+                        Html::a(Html::encode($cat->name), ['vendor/view-catalog', 'id' => $data['cat_id']], [
                     'data' => [
                     'target' => '#view-catalog',
                     'toggle' => 'modal',
@@ -75,11 +68,11 @@ $gridColumnsClients = [
                 'contentOptions' => ['style' => 'width:190px;text-align:center'],
                 'value' => function ($data) {
                     $link = CheckboxX::widget([
-                    'name'=>'restOrgId_'.$data->rest_org_id,
+                    'name'=>'restOrgId_'.$data['rest_org_id'],
                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->invite==0 ? 0 : 1,
+                    'value'=>$data['invite']==0 ? 0 : 1,
                     'autoLabel' => true,
-                    'options'=>['id'=>'restOrgId_'.$data->rest_org_id, 'data-id'=>$data->rest_org_id],
+                    'options'=>['id'=>'restOrgId_'.$data['rest_org_id'], 'data-id'=>$data['rest_org_id']],
                     'pluginOptions'=>[
                         'threeState'=>false,
                         'theme' => 'krajee-flatblue',
@@ -114,11 +107,34 @@ $gridColumnsClients = [
     </div>
     <!-- /.box-header -->
     <div class="box-body">
+            <div class="panel-body">
+                <div class="col-sm-3">
+                    <?= Html::label('Ресторан', 'filter_restaurant', ['class' => 'label filter_catalog','style'=>'color:#000']) ?>
+                    <?= Html::dropDownList('filter_restaurant', null,
+                            $arr_restaurant,['prompt' => '','class' => 'form-control','id'=>'filter_restaurant']) ?> 
+                </div>
+                <div class="col-sm-3">
+                    <?= Html::label('Каталог', 'filter_catalog', ['class' => 'label filter_catalog','style'=>'color:#000']) ?>
+                    <?= Html::dropDownList('filter_catalog', null,
+                            $arr_catalog,['prompt' => '','class' => 'form-control','id'=>'filter_catalog']) ?>  
+                </div>
+                <div class="col-sm-3">
+                    <?= Html::label('Статус', 'filter_invite', ['class' => 'label filter_invite','style'=>'color:#000']) ?>
+                    <?= Html::dropDownList('filter_invite', null,
+                            [
+                                '0' => 'Не подтвержден',
+                                '1' => 'Подтвержден',
+                            ],['prompt' => '','class' => 'form-control','id'=>'filter_invite']) ?> 
+                </div>
+                <div class="col-sm-3">
+                    <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                    <?= Html::button('Сбросить фильтр', ['class' => 'form-control clear_filters btn btn-primary teaser']) ?>
+                </div>
+            </div>
         <div class="panel-body">
             <?php Pjax::begin(['enablePushState' => false, 'id' => 'cl-list',]); ?>
             <?=GridView::widget([
                     'dataProvider' => $dataProvider,
-                    'filterModel' => $searchModel,
                     'filterPosition' => false,
                     'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
                     'columns' => $gridColumnsClients,
@@ -130,6 +146,63 @@ $gridColumnsClients = [
 </div>
 <?php
 $customJs = <<< JS
+$('#filter_restaurant').on("change", function () {
+       $('#filter_catalog').val(''), 
+       $('#filter_invite').val('')
+       $.pjax({
+        type: 'GET',
+        url: 'index.php?r=vendor/clients',
+        container: '#cl-list',
+        data: { 
+            filter_restaurant: $('#filter_restaurant').val(), 
+            filter_catalog: $('#filter_catalog').val(), 
+            filter_invite: $('#filter_invite').val() 
+              }
+      })
+});
+$('#filter_catalog').on("change", function () {
+        $('#filter_restaurant').val(''), 
+       $('#filter_invite').val('')
+       $.pjax({
+        type: 'GET',
+        url: 'index.php?r=vendor/clients',
+        container: '#cl-list',
+        data: { 
+            filter_restaurant: $('#filter_restaurant').val(), 
+            filter_catalog: $('#filter_catalog').val(), 
+            filter_invite: $('#filter_invite').val() 
+              }
+      })
+});
+$('#filter_invite').on("change", function () {
+       $('#filter_restaurant').val(''), 
+       $('#filter_catalog').val('')
+       $.pjax({
+        type: 'GET',
+        url: 'index.php?r=vendor/clients',
+        container: '#cl-list',
+        data: { 
+            filter_restaurant: $('#filter_restaurant').val(), 
+            filter_catalog: $('#filter_catalog').val(), 
+            filter_invite: $('#filter_invite').val()
+              }
+      })
+});
+$('.clear_filters').on("click", function () {
+       $('#filter_restaurant').val(''), 
+       $('#filter_catalog').val(''), 
+       $('#filter_invite').val('')
+       $.pjax({
+        type: 'GET',
+        url: 'index.php?r=vendor/clients',
+        container: '#cl-list',
+        data: { 
+            filter_restaurant: $('#filter_restaurant').val(), 
+            filter_catalog: $('#filter_catalog').val(), 
+            filter_invite: $('#filter_invite').val()
+              }
+      })
+});
 /** 
  * Forward port jQuery.live()
  * Wrapper for newer jQuery.on()

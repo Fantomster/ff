@@ -14,8 +14,14 @@ $role = new Role();
 
 $this->registerJs(
         '$("document").ready(function(){
+            var timer = null;
             $("#users-list").on("change keyup paste cut", "input", function() {
-                $("#search-form").submit();
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    $("#search-form").submit();
+                }, 300);
             });
             $("#users-list").on("pjax:complete", function() {
                 var searchInput = $("#search-string");

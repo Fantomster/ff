@@ -16,6 +16,7 @@ use yii\helpers\Json;
 use common\models\OrderChat;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
+use yii\web\HttpException;
 
 class OrderController extends DefaultController {
 
@@ -50,6 +51,22 @@ class OrderController extends DefaultController {
 //                    [
 //                        'allow' => false,
 //                        'roles' => ['?'],
+//                        'actions' => [
+//                            'index',
+//                            'view',
+//                            'create',
+//                            'send-message',
+//                            'ajax-add-to-cart',
+//                            'ajax-categories',
+//                            'ajax-clear-order',
+//                            'ajax-make-order',
+//                            'ajax-modify-cart',
+//                            'ajax-order-action',
+//                            'ajax-order-refresh',
+//                            'ajax-refresh-buttons',
+//                            'ajax-show-order',
+//                            'ajax-vendors',
+//                        ],
 //                    ],
                     [
                         'actions' => ['index', 'view', 'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
@@ -83,8 +100,8 @@ class OrderController extends DefaultController {
                     ],
                 ],
                 'denyCallback' => function($rule, $action) {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-        }
+                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+                }
             ],
         ];
     }
@@ -109,10 +126,10 @@ class OrderController extends DefaultController {
 
         $vendors = $client->getSuppliers($selectedCategory);
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, $selectedCategory) : "(0)";
-        
+
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
-        
+
         $dataProvider = $searchModel->search($params);
 
         if ($session->has('orders')) {

@@ -76,7 +76,7 @@ class Organization extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'type_id' => 'Type',
-            'name' => 'Название',
+            'name' => 'Название организации',
             'city' => 'Город',
             'address' => 'Адрес',
             'zip_code' => 'Индекс',

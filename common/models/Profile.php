@@ -24,4 +24,10 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['full_name'], 'filter', 'filter'=>'\yii\helpers\HtmlPurifier::process'];
         return $rules;
     }
+    public function attributeLabels()
+    {
+        return [
+            'full_name' => 'ФИО',
+        ];
+    }
 }

@@ -80,7 +80,7 @@ Modal::begin([
                 </div>
             </div>
             <div class="box-body">
-                <?php Pjax::begin(['enablePushState' => false, 'id' => 'catalog-list',]); ?>
+                <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'catalog-list',]); ?>
                     <?php  
                     if(empty($arrCatalog)){ ?>   
                         <h4>Каталоги не найдены</h4>

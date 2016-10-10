@@ -118,7 +118,7 @@ $this->title = 'Добавить продукты';
             </div>
         </div>
         <div class="panel-body">
-        <?php Pjax::begin(['id' => 'pjax-container'])?>
+        <?php Pjax::begin(['enablePushState' => false, 'id' => 'pjax-container','timeout' => 10000,])?>
         <?=GridView::widget([
             'dataProvider' => $dataProvider,
             //'filterModel' => $searchModel,

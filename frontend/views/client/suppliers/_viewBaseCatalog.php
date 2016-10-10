@@ -64,7 +64,7 @@ $gridColumnsCatalog = [
     ],*/   
 ];
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'pjax-catalog-list'])?>
+<?php Pjax::begin(['enablePushState' => false,'timeout' => 10000,'id' => 'pjax-catalog-list'])?>
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,

@@ -103,7 +103,7 @@ $gridColumnsCatalog = [
 ?>
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
-                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'sp-list'])?>
+                    <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'sp-list'])?>
                     <?=GridView::widget([
                         'dataProvider' => $dataProvider,
                         'filterModel' => $searchModel,
@@ -432,7 +432,7 @@ e.preventDefault();
                     });	
             }
             console.log(response);  
-  }
+        }
     });
 });
 $('#invite').click(function(e){	

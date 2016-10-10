@@ -28,14 +28,15 @@ class User extends \amnah\yii2\user\models\User {
         $rules = parent::rules();
         $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite', 'manageNew']];
         $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
+        $rules[] = [['email'], 'unique', 'on'=>'sendInviteFromVendor', 'message' => 'ooo'];
+        
         return $rules;
     }
-    public function scenarios() {
+    /*public function scenarios() {
         $scenarios = parent::scenarios();
         $scenarios['sendInviteFromVendor'] = ['email'];
-
         return $scenarios;
-    }
+    }*/
     /**
      * Set organization id
      * @param int $orgId

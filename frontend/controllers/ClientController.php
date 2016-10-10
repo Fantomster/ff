@@ -292,7 +292,7 @@ class ClientController extends DefaultController {
                     $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                     if (empty($article)) {
-                        $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Артикул]</strong>!'];
+                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
                         return $result;
                         exit;
                     }
@@ -312,8 +312,16 @@ class ClientController extends DefaultController {
                         return $result;
                         exit;
                     }
-                    if (!empty($units) && !preg_match($numberPattern, $units)) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> в неверном формате!'];
+                    if (empty($units)) {
+                        $units=1;
+                    }
+                    if (is_int($units)==false) {
+                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате<br>(только целое число)'];
+                        return $result;
+                        exit;
+                    }
+                    if ($units<1) {
+                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара доолжно быть целым, положительным числом'];
                         return $result;
                         exit;
                     }
@@ -393,6 +401,9 @@ class ClientController extends DefaultController {
                         $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                         $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                         $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        if (empty($units)) {
+                            $units=1;
+                        }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                         $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
                         $price = str_replace(',', '.', $price);
@@ -438,7 +449,7 @@ class ClientController extends DefaultController {
                         $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
                         return $result;
                     } else {
-                        $result = ['success' => true, 'message' => 'Каталог добавлен! Уведомление было отправлено на почту  <strong>' . $email . '</strong>'];
+                        $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  <strong>' . $email . '</strong>'];
                         return $result;
                     }
                 } else {

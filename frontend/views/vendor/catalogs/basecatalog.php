@@ -268,7 +268,7 @@ $exportColumns = [
                         ?> 
                         <div class="panel-body">
                             <div class="box-body table-responsive no-padding">
-                            <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
+                            <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list','timeout' => 10000,]); ?>
                             <?=GridView::widget([
                                 'dataProvider' => $dataProvider,
                                 'filterPosition' => false,

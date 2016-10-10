@@ -64,15 +64,25 @@ $gridColumnsCatalog = [
     ],*/   
 ];
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'pjax-catalog-list'])?>
+<div class="box-body table-responsive no-padding">
+<?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'pjax-catalog-list'])?>
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
-	'columns' => $gridColumnsCatalog
+	'columns' => $gridColumnsCatalog, 
+        'tableOptions' => ['class' => 'table no-margin'],
+        'options' => ['class' => 'table-responsive'],
+        'bordered' => false,
+        'striped' => true,
+        'condensed' => false,
+        'responsive' => false,
+        'hover' => false,
+    
 ]);
-?>  
+?> 
 <?php Pjax::end(); ?> 
+</div>
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-default" data-dismiss="modal">Закрыть</a>

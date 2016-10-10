@@ -382,32 +382,33 @@ class VendorController extends DefaultController {
         return $this->render('clients', compact('searchModel', 'dataProvider','arr_catalog','arr_restaurant'));
     }
 
-    public function actionBasecatalog($id) {
-        $currentCatalog = $id;
+    public function actionBasecatalog() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString="";
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->id;
+        $currentCatalog = $baseCatalog;
         if (Yii::$app->request->isGet) {       
         $searchString = trim(\Yii::$app->request->get('searchString'));
         $query = (new \yii\db\Query())
         ->select("id,article,product,units,category_id,price,status")
         ->from("catalog_base_goods")
-        ->where("cat_id = $currentCatalog")
+        ->where("cat_id = $baseCatalog")
         ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
         ->andWhere("deleted=0")
         ->createCommand();  
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $currentCatalog "
+                . "WHERE cat_id = $baseCatalog "
                 . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
                 . "")->queryScalar();
         }else{
         $query = (new \yii\db\Query())
         ->select("id,article,product,units,category_id,price,status")
         ->from("catalog_base_goods")
-        ->where("cat_id = $currentCatalog")
+        ->where("cat_id = $baseCatalog")
         ->andWhere("deleted=0")
         ->createCommand();
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $currentCatalog " 
+                . "WHERE cat_id = $baseCatalog " 
                 . "and deleted=0"
                 . "")->queryScalar();
         }
@@ -428,7 +429,6 @@ class VendorController extends DefaultController {
                 ],
             ],
         ]);
-        
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog'));
@@ -870,9 +870,52 @@ class VendorController extends DefaultController {
             }
         }
 
-        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
-        $searchModel = new CatalogBaseGoods;
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $baseCatalog->id);
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->id;
+        /*$searchModel = new CatalogBaseGoods;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $baseCatalog->id);*/
+        $searchString="";
+        if (Yii::$app->request->isGet) {       
+        $searchString = trim(\Yii::$app->request->get('searchString'));
+        $query = (new \yii\db\Query())
+        ->select("id,article,product,units,category_id,price,status")
+        ->from("catalog_base_goods")
+        ->where("cat_id = $baseCatalog")
+        ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
+        ->andWhere("deleted=0")
+        ->createCommand();  
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                . "WHERE cat_id = $baseCatalog "
+                . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
+                . "")->queryScalar();
+        }else{
+        $query = (new \yii\db\Query())
+        ->select("id,article,product,units,category_id,price,status")
+        ->from("catalog_base_goods")
+        ->where("cat_id = $baseCatalog")
+        ->andWhere("deleted=0")
+        ->createCommand();
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                . "WHERE cat_id = $baseCatalog " 
+                . "and deleted=0"
+                . "")->queryScalar();
+        }
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'status',
+                ],
+            ],
+        ]);
         return $this->render('newcatalog/step-2', compact('searchModel', 'dataProvider', 'cat_id'));
     }
 

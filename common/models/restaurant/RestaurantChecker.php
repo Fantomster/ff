@@ -43,7 +43,7 @@ class RestaurantChecker
 					}else{
 	
 					//поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
-					$result = ['success'=>true,'eventType'=>2,'message'=>'Вы уже отправили приглашение этому поставщику, ожидается отклик поставщика!',
+					$result = ['success'=>true,'eventType'=>2,'message'=>'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика',
 					'fio' => $userProfileFullName,
 					'organization' => $userOrgName]; 
 						
@@ -62,7 +62,7 @@ class RestaurantChecker
 
 					}else{
 					//поставщик авторизован
-					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик авторизован, предлагаем invite','fio' => $userProfileFullName,'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
+					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик уже авторизован, предлагаем invite','fio' => $userProfileFullName,'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
 			
 					return $result;
 
@@ -70,13 +70,13 @@ class RestaurantChecker
 				} 
 			}else{
 			//найден email ресторана
-			$result = ['success'=>true,'eventType'=>4,'message'=>'err: Данный email не может быть использован!']; 
+			$result = ['success'=>true,'eventType'=>4,'message'=>'Данный email не может быть использован']; 
 			return $result;
 	
 			}
 		}else{
 			//нет в базе такого email
-			$result = ['success'=>true,'eventType'=>5,'message'=>'Нет совпадений по Email!'];
+			$result = ['success'=>true,'eventType'=>5,'message'=>'Нет совпадений по Email'];
 			return $result;
 			exit;  
 			  

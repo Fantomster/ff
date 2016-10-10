@@ -174,9 +174,7 @@ $exportColumns = [
                ?>
                 </div>
                 <div class="panel-body">
-                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
-                        
-                      <?php
+                    <?php
                         $gridColumnsBaseCatalog = [
                             [
                             'attribute' => 'article',
@@ -221,8 +219,8 @@ $exportColumns = [
                                     'name'=>'status_'.$data['id'],
                                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
                                     'value'=>$data['status']==0 ? 0 : 1,
-                                    'autoLabel' => false,
-                                    'options'=>['id'=>'status_'.$data['id'], 'data-id'=>$data['id']],
+                                    'autoLabel' => true,
+                                    'options'=>['id'=>'status_'.$data['id'], 'data-id'=>$data['id'], 'event-type' => 'set-status'],
                                     'pluginOptions'=>[
                                         'threeState'=>false,
                                         'theme' => 'krajee-flatblue',
@@ -267,10 +265,10 @@ $exportColumns = [
 
                             ],
                         ];
-                        ?>    
-
+                        ?> 
                         <div class="panel-body">
                             <div class="box-body table-responsive no-padding">
+                            <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list',]); ?>
                             <?=GridView::widget([
                                 'dataProvider' => $dataProvider,
                                 'filterPosition' => false,
@@ -287,10 +285,11 @@ $exportColumns = [
                                 ],
                             ]);
                             ?> 
+                            <?php Pjax::end(); ?>
                             </div>
                         </div>      
                         
-                    <?php Pjax::end(); ?>
+                    
                 </div>       
                      
             </div>
@@ -323,7 +322,7 @@ $exportColumns = [
                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
                             'value'=>$data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
                             'autoLabel' => true,
-                            'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
+                            'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id, 'event-type' => 'set-catalog'],
                             'pluginOptions'=>[
                                 'threeState'=>false,
                                 'theme' => 'krajee-flatblue',
@@ -337,6 +336,7 @@ $exportColumns = [
                 ];
                 ?>
                 <div class="panel-body">
+                    <div class="box-body table-responsive no-padding">
                     <?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
                     <?=GridView::widget([
                         'dataProvider' => $dataProvider2,
@@ -353,6 +353,7 @@ $exportColumns = [
                     ]);
                     ?>
                     <?php Pjax::end(); ?>
+                    </div>
                 </div>              
             </div>
         </div>
@@ -366,6 +367,7 @@ window.clearTimeout(timer);
    timer = setTimeout(function () {
        $.pjax({
         type: 'GET',
+        push: false,
         url: 'index.php?r=vendor/basecatalog&id=$currentCatalog',
         container: '#products-list',
         data: {searchString: $('#search').val()}
@@ -387,45 +389,64 @@ if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }     
-$('.cbx-container').live('click', function(e) {
-    //
-    var id = $(this).children('input[type=checkbox]').attr('data-id');
-    var state = $(this).children('input[type=checkbox]').prop("checked");
-    var elem = $(this).children('input[type=checkbox]').attr('name').substr(0, 6);
-    if(elem=="status"){statusOrMarket(elem,id,state);$(this).children('input[type=checkbox]').change();}
-    //if(elem=="market"){statusOrMarket(elem,id,state);}
-    if(elem=="setcat"){setRestOrgCatalog(id,state);}   
-	function statusOrMarket(elem,id,state){
-		$.ajax({
-	        url: "index.php?r=vendor/changecatalogprop",
-	        type: "POST",
-	        dataType: "json",
-	        data: {'elem' : elem,'id' : id,'state' : state},
-	        cache: false,
-	        success: function(response) {
-		        console.log(response)
-		    },
-		    failure: function(errMsg) {
-	            console.log(errMsg);
-	        }
-		});
-	}
-	function setRestOrgCatalog(id,state){
-		$.ajax({
-	        url: "index.php?r=vendor/changesetcatalog",
-	        type: "POST",
-	        dataType: "json",
-	        data: {'id' : id, 'curCat' : $currentCatalog,'state' : state},
-	        cache: false,
-	        success: function(response) {
-		        console.log(response)
-		        $.pjax.reload({container: "#clients-list"});
-		    },
-		    failure: function(errMsg) {
-	            console.log(errMsg);
-	        }
-		});
-	}
+//Статус продукта
+$(document).on('click','input[event-type=set-status]', function(e) { 
+    var id = $(this).attr('data-id');
+    var state = $(this).prop("checked");
+    var elem = $(this).attr('name').substr(0, 6);   
+    $.ajax({
+        url: "index.php?r=vendor/changecatalogprop",
+        type: "POST",
+        dataType: "json",
+        data: {'elem' : elem,'id' : id,'state' : state},
+        cache: false,
+        success: function(response) {
+                console.log(response)
+            },
+            failure: function(errMsg) {
+            console.log(errMsg);
+        }
+    });
+});
+//marketplace
+$(document).on('change','input[event-type=marketplace]', function(e) {
+    console.log('go')
+    var id = $(this).attr('data-id');
+    var state = $(this).prop("checked");
+    var elem = $(this).attr('name').substr(0, 6);   
+    $.ajax({
+        url: "index.php?r=vendor/changecatalogprop",
+        type: "POST",
+        dataType: "json",
+        data: {'elem' : elem,'id' : id,'state' : state},
+        cache: false,
+        success: function(response) {
+                console.log(response)
+            },
+            failure: function(errMsg) {
+            console.log(errMsg);
+        }
+    });
+});
+//Назначить каталог
+$(document).on('change','input[event-type=set-catalog]', function(e) {
+    var id = $(this).attr('data-id');
+    var state = $(this).prop("checked");
+    var elem = $(this).attr('name').substr(0, 6);
+    $.ajax({
+        url: "index.php?r=vendor/changesetcatalog",
+        type: "POST",
+        dataType: "json",
+        data: {'id' : id, 'curCat' : $currentCatalog,'state' : state},
+        cache: false,
+        success: function(response) {
+                console.log(response)
+                $.pjax.reload({container: "#clients-list"});
+            },
+            failure: function(errMsg) {
+            console.log(errMsg);
+        }
+    });
 })
 $("body").on("hidden.bs.modal", "#add-product", function() {
     $(this).data("bs.modal", null);

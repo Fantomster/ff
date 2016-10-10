@@ -26,7 +26,7 @@ use yii\helpers\Html;
     <body class="hold-transition skin-blue sidebar-mini">
     <?php $this->beginBody() ?>
     <div class="wrapper">
-
+    
         <?= $this->render(
             'header.php',
             ['directoryAsset' => $directoryAsset]

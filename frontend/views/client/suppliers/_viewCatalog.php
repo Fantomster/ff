@@ -3,6 +3,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use kartik\grid\GridView;
+use kartik\select2\Select2;
+use yii\widgets\Pjax;
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -26,8 +28,12 @@ $gridColumnsCatalog = [
     'value'=>function ($data) {return common\models\CatalogBaseGoods::get_value($data->base_goods_id)->article;},
     ],
     [
-    'label'=>'Продукт',
+    'label'=>'Наименование товара',
     'value'=>function ($data) {return common\models\CatalogBaseGoods::get_value($data->base_goods_id)->product;},
+    'noWrap' => false,
+    //the line below has solved the issue
+    'contentOptions' => 
+    ['style'=>'max-width: 350px; overflow: auto; word-wrap: break-word;'],
     ],
     [
     'label'=>'Кратность',
@@ -51,13 +57,15 @@ $gridColumnsCatalog = [
     ],  
 ];
 ?>
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'pjax-catalog-list'])?>
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
-	'columns' => $gridColumnsCatalog
+	'columns' => $gridColumnsCatalog,
 ]);
-?>     
+?> 
+<?php Pjax::end(); ?>    
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-default" data-dismiss="modal">Закрыть</a>

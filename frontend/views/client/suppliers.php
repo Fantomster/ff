@@ -8,6 +8,7 @@ use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
 use kartik\select2\Select2;
 use common\models\Category;
+kartik\select2\Select2Asset::register($this);
 ?>
 <?php
 $this->title = 'Мои поставщики';
@@ -32,12 +33,21 @@ Modal::widget([
     'clientOptions' => false,   
 ])
 ?>
-<ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
-    <li><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>    
-</ul>
-<div class="tab-content">
-    <div id="tabMySuppliers" class="tab-pane fade in active">
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Мои поставщики</h3>
+        <span class="pull-right"></span>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <div class="panel-body">
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
+                <li><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>    
+            </ul>
+        <div>
+        <div class="tab-content">
+            <div id="tabMySuppliers" class="tab-pane fade in active">
 
     <?php 
 $gridColumnsCatalog = [
@@ -57,14 +67,14 @@ $gridColumnsCatalog = [
         ],
         [
         'label'=>'email',
-        'contentOptions' => ['class' => 'text-center'],
+        'contentOptions' => ['class' => ''],
         'value'=>function ($data) {
         return common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->email;
         }
         ],
         [
         'label'=>'Статус сотрудничества',
-        'contentOptions' => ['class' => 'text-center'],
+        'contentOptions' => ['class' => ''],
         'format' => 'raw',
         'value'=>function ($data) {
                 $status_invite = $data->invite==0 ? '<span class="text-danger">Ожидается<br>подтверждение</span>':'<span class="text-primary">Подтвержден</span>';
@@ -73,7 +83,7 @@ $gridColumnsCatalog = [
         ],
         [
         'label'=>'Каталог',
-        'contentOptions' => ['class' => 'text-center text-wrap'],
+        'contentOptions' => ['class' => 'text-wrap'],
         'format' => 'raw',
         'value'=>function ($data) {
         $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
@@ -91,46 +101,71 @@ $gridColumnsCatalog = [
         ],
 ];
 ?>
-        <div class="panel-body">
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'sp-list',]); ?>
-<?=GridView::widget([
-	'dataProvider' => $dataProvider,
-	'filterModel' => $searchModel,
-	'filterPosition' => false,
-        'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
-	'columns' => $gridColumnsCatalog,
-]);
-?>  
-<?php Pjax::end(); ?> 
+                <div class="panel-body">
+                    <div class="box-body table-responsive no-padding">
+                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'sp-list'])?>
+                    <?=GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'filterModel' => $searchModel,
+                        'filterPosition' => false,
+                        'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+                        'columns' => $gridColumnsCatalog, 
+                        'tableOptions' => ['class' => 'table no-margin'],
+                        'options' => ['class' => 'table-responsive'],
+                        'bordered' => false,
+                        'striped' => true,
+                        'condensed' => false,
+                        'responsive' => false,
+                        'hover' => false,
+                    ]);
+                    ?>  
+                    <?php Pjax::end(); ?> 
+                    </div>
+                </div>
+            </div>
+            <div id="tabAddSuppliers" class="tab-pane fade">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
+                                <?= $form->field($user, 'email')?>
+                                <?= $form->field($profile, 'full_name')->label('ФИО')?>
+                                <?= $form->field($organization, 'name')->label('Организация')?>
+                                <?= $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
+                                    'data' => Category::allCategory(),
+                                    'theme' => 'krajee',
+                                    //'language' => 'ru',
+                                    'hideSearch' => true,
+                                    'options' => ['multiple' => true,'placeholder' => 'Выберите категорию'],
+                                    'pluginOptions' => [
+                                        'allowClear' => true,
+                                    ],
+                                ]);
+                                ?>
+                            <div class="form-group">
+                            <?=Html::a('Добавить продукты', ['#'], [
+                              'class' => 'btn btn-primary btn-sm',
+                              'disabled' => 'disabled',
+                              'name' => 'addSupplier',
+                              'id' => 'addProduct',
+                              'data' => [
+                              'target' => '#modal_addProduct',
+                              'toggle' => 'modal',
+                              'backdrop' => 'static',
+                                 ],
+                              ]);?>
+                            </div>
+                            <div class="form-group">
+                                <?= Html::submitButton('Пригласить', ['class' => 'btn btn-primary hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier','id' => 'inviteSupplier']) ?>
+                            </div>				
+                            <?php ActiveForm::end(); ?>		
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="tabAddSuppliers" class="tab-pane fade">
-		<div class="row">
-		  <div class="col-lg-5">
-		    <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
-		    <?= $form->field($user, 'email')?>
-			<?= $form->field($profile, 'full_name')?>
-			<?= $form->field($organization, 'name')?>
-		    <?= $form->field($relationCategory, 'category_id')->widget(Select2::classname(), [
-				    'data' => Category::allCategory(),
-				    'theme' => Select2::THEME_BOOTSTRAP,
-				    'language' => 'ru',
-				    'options' => ['multiple' => true,'placeholder' => 'Выбрать категорию...'],
-				    'pluginOptions' => [
-				        'allowClear' => true
-				    ],
-				]);
-			?>
-		    <div class="form-group">
-			  <?= Html::button('Добавить продукты', ['class' => 'btn btn-primary','data-keyboard' => 'false', 'data-backdrop' => 'static', 'readonly' => 'readonly', 'name' => 'addSupplier','id' => 'addProduct']) ?>
-			</div>
-			<div class="form-group">
-			  <?= Html::submitButton('Пригласить', ['class' => 'btn btn-primary hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier','id' => 'inviteSupplier']) ?>
-			</div>				
-			<?php ActiveForm::end(); ?>		
-		  </div>
-		</div>
-    </div>
+</div> 
 <div id="modal_addProduct" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <!-- Modal content-->
@@ -201,6 +236,7 @@ bootbox.dialog({
 $('#profile-full_name').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');
 $('#relationcategory-category_id').attr('disabled','disabled');
+$('.select2-search__field').css('width','100%')
 $('#addProduct').attr('disabled','disabled');
 $('#modal_addProduct').on('shown.bs.modal', function() {
 var data = [];
@@ -210,7 +246,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Комментарий'],
+  colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Комментарий'],
   columns: [
         {data: 'article'},
         {data: 'product', wordWrap:true},
@@ -228,6 +264,7 @@ for ( var i = 0; i < 60; i++ ) {
     ],
   className : 'Handsontable_table',
   rowHeaders : true,
+  renderAllRows: true,
   stretchH : 'all',
   autoRowSize: true,
   manualColumnResize: true,
@@ -238,7 +275,9 @@ for ( var i = 0; i < 60; i++ ) {
 });
 $('#addProduct').click(function (e){
   e.preventDefault();
-  $('#modal_addProduct').modal('show');
+  if ($(this).attr('disabled') == 'disabled') {
+  e.stopPropagation();
+  }
 });
 $('#modal_addProduct').on('hidden.bs.modal', function (e) {
   $('#CreateCatalog *').remove();
@@ -312,7 +351,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').removeAttr('disabled');
-		            bootboxDialogShow(response.message);
+		            //bootboxDialogShow(response.message);
 		            console.log(response.message);    
 	                }
 	                
@@ -353,7 +392,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            $('#profile-full_name').attr('readonly','readonly');
 		            $('#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').removeAttr('disabled');
-		            bootboxDialogShow(response.message);
+		            //bootboxDialogShow(response.message);
 		            console.log(response.message);    
 	                }
                 }else{
@@ -370,33 +409,34 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 });
 $('#inviteSupplier').click(function(e){
 e.preventDefault();	
-	$.ajax({
-	  url: 'index.php?r=client/invite',
-	  type: 'POST',
-	  dataType: "json",
-	  data: $("#SuppliersFormSend" ).serialize(),
-	  cache: false,
-	  success: function (response) {
-		if(response.success){
-		bootbox.dialog({
-			  message: response.message,
-			  title: "Уведомление",
-			  buttons: {
-			    success: {
-			      label: "Завершить",
-			      className: "btn-success",
-			      callback: function() {
-				  location.reload();    
-			      }
-			    },
-			  }
-			});	
-		}
-		console.log(response);  
-      }
-	});
+    $.ajax({
+      url: 'index.php?r=client/invite',
+      type: 'POST',
+      dataType: "json",
+      data: $("#SuppliersFormSend" ).serialize(),
+      cache: false,
+      success: function (response) {
+            if(response.success){
+            bootbox.dialog({
+                      message: response.message,
+                      title: "Уведомление",
+                      buttons: {
+                        success: {
+                          label: "Завершить",
+                          className: "btn-success",
+                          callback: function() {
+                              location.reload();    
+                          }
+                        },
+                      }
+                    });	
+            }
+            console.log(response);  
+  }
+    });
 });
 $('#invite').click(function(e){	
+ $('#loader-show').showLoading();
 e.preventDefault();
 	var i, items, item, dataItem, data = [];
 	var cols = [ 'article', 'product', 'units', 'price', 'note'];
@@ -425,7 +465,8 @@ e.preventDefault();
 		  data: $("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
 		  cache: false,
 		  success: function (response) {
-			  if(response.success){
+                        if(response.success){
+                          $('#loader-show').hideLoading();
 			  $('#modal_addProduct').modal('hide'); 
 			  bootbox.dialog({
 			  message: response.message,
@@ -435,18 +476,21 @@ e.preventDefault();
 			      label: "Завершить",
 			      className: "btn-success",
 			      callback: function() {
+                                  
 				  location.reload();    
 			      }
 			    },
 			  }
 			});
 		  }else{
+                  $('#loader-show').hideLoading();
 		  //$('#invite').removeAttr('readonly');
 		  bootboxDialogShow(response.message);
 		  console.log(response.message); 	  
 		  }
 	  },
       error: function(response) {
+      $('#loader-show').hideLoading();
       console.log(response.message);
       }
 	});

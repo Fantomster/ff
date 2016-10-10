@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use kartik\grid\GridView;
+use yii\widgets\Pjax;
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -58,13 +59,15 @@ $gridColumnsCatalog = [
     ],  
 ];
 ?>
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'catalog-list',]); ?>
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
 	'columns' => $gridColumnsCatalog
 ]);
-?>     
+?> 
+<?php Pjax::end(); ?>    
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-default" data-dismiss="modal">Закрыть</a>

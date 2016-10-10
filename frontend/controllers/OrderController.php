@@ -100,8 +100,8 @@ class OrderController extends DefaultController {
                     ],
                 ],
                 'denyCallback' => function($rule, $action) {
-                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-                }
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
             ],
         ];
     }
@@ -256,6 +256,12 @@ class OrderController extends DefaultController {
                     unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
                 }
             }
+            if (empty($orders[$post['vendor_id']]['content'])) {
+                unset($orders[$post['vendor_id']]);
+                $session['orders'] = $orders;
+                $message = "Заказ отменен!";
+                return $this->renderAjax('_order-message', compact('message'));
+            }
             $showOrder = $orders[$post['vendor_id']];
         }
         $session['orders'] = $orders;
@@ -277,6 +283,12 @@ class OrderController extends DefaultController {
                     unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
                 }
             }
+            if (empty($orders[$post['vendor_id']]['content'])) {
+                unset($orders[$post['vendor_id']]);
+                $session['orders'] = $orders;
+                $message = "Заказ отменен!";
+                return $this->renderAjax('_order-message', compact('message'));
+            }
         }
 
         $order = new Order();
@@ -292,7 +304,7 @@ class OrderController extends DefaultController {
             $orderContent->order_id = $order->id;
             $orderContent->product_id = $position['product_id'];
             $orderContent->quantity = $position['quantity'];
-            $orderContent->price = (int) $position['price']; //временно для теста до фикса соответствующей модели
+            $orderContent->price = $position['price']; //временно для теста до фикса соответствующей модели
             $orderContent->save();
             $totalPrice += ($orderContent->price * $orderContent->quantity);
         }

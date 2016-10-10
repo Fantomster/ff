@@ -84,6 +84,15 @@ $this->registerJs(
                 });
                 return false;
             });
+            $("#orders").on("click", ".btn-danger", function() {
+                $.post(
+                    "' . Url::to(['/order/ajax-remove-position']) . '",
+                    {vendor_id: $(this).data("vendor_id"), product_id: $(this).data("product_id")}
+                )
+                .done(function (result) {
+                    $("#orders").html(result);
+                });
+            });
         });'
 );
 ?>

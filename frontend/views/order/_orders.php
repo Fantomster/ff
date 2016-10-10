@@ -13,7 +13,19 @@ use yii\helpers\Html;
             <div class="list-group">
             <?php foreach ($order['content'] as $product) { ?>
                 <a class="list-group-item">
-                    <button class="btn btn-danger btn-outline pull-right"><i class="fa fa-trash" style="margin-top:-2px;"></i></button>
+                    <!--<button class="btn btn-danger btn-outline pull-right"><i class="fa fa-trash" style="margin-top:-2px;"></i></button>-->
+                    <?= 
+                        Html::button(
+                               '<i class="fa fa-trash" style="margin-top:-2px;"></i>',
+                                [
+                                    'class' => "btn btn-danger btn-outline pull-right",
+                                    'data' => [
+                                        'vendor_id' => $order['vendor_id'],
+                                        'product_id' => $product['product_id'],
+                                    ]
+                                ]
+                        )
+                    ?>
                     <h5 class="list-group-item-heading text-info"><?= $product['product_name'] ?> (<?= $product['price'] ?> руб/<?= $product['units'] ?>)</h5>
                     <p class="list-group-item-text text-left">Кол-во: <?= $product['quantity'] ?></p>
                 </a>
@@ -22,7 +34,7 @@ use yii\helpers\Html;
 
         </div>
         <div class="box-footer clearfix">
-            <?= Html::a("Оформить", ['order/checkout'], ['class' => 'btn btn-success pull-right']) ?>
+            <?= Html::a('<i class="fa fa-shopping-cart m-r-xs" style="margin-top:-3px;"></i>&nbsp;&nbsp;Оформить', ['order/checkout'], ['class' => 'btn btn-success pull-right']) ?>
             <!--<a href="#" class="btn btn-success pull-right">Оформить</a>-->
         </div>
     </div>

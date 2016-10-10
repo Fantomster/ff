@@ -252,7 +252,7 @@ for ( var i = 0; i < 60; i++ ) {
         {data: 'product', wordWrap:true},
 	{
             data: 'units', 
-            type: 'numeric',
+            type: 'numeric'
         },
 	{
             data: 'price', 

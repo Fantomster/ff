@@ -34,7 +34,7 @@ class RestaurantChecker
 					{
 	
 					//есть связь с поставщиком invite_on
-					$result = ['success'=>true,'eventType'=>1,'message'=>'Поставщик уже есть в списке контактов!',
+					$result = ['success'=>true,'eventType'=>1,'message'=>'Данный поставщик уже имеется в вашем списке контактов!',
 					'fio' => $userProfileFullName,
 					'organization' => $userOrgName]; 
 	
@@ -62,7 +62,7 @@ class RestaurantChecker
 
 					}else{
 					//поставщик авторизован
-					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик уже авторизован, предлагаем invite','fio' => $userProfileFullName,'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
+					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>','fio' => $userProfileFullName,'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
 			
 					return $result;
 

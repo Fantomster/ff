@@ -19,11 +19,9 @@ echo Html::hiddenInput('vendor_id', $showOrder['vendor_id']);
 <div class="modal-body">
     <table class="table table-striped">
         <tbody>
-            <?php
-            foreach ($showOrder['content'] as $product) {
-                ?>
+            <?php foreach ($showOrder['content'] as $product) { ?>
                 <tr>
-    <?= Html::hiddenInput("content[$product[product_id]][product_id]", $product['product_id']) ?>
+                    <?= Html::hiddenInput("content[$product[product_id]][product_id]", $product['product_id']) ?>
                     <td><?= Html::label($product['product_name']) ?></td>
                     <td><?=
                         TouchSpin::widget([
@@ -45,8 +43,7 @@ echo Html::hiddenInput('vendor_id', $showOrder['vendor_id']);
                         ?></td>
                     <td><?= Html::label($product['price']) ?></td>
                 </tr>
-                <?php }
-            ?>
+            <?php } ?>
         </tbody>
     </table>
 </div>

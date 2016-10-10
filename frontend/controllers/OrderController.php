@@ -100,8 +100,8 @@ class OrderController extends DefaultController {
                     ],
                 ],
                 'denyCallback' => function($rule, $action) {
-                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-                }
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
             ],
         ];
     }
@@ -195,6 +195,7 @@ class OrderController extends DefaultController {
             $price = $product->price;
             $product_name = $product->baseProduct->product;
             $vendor = $product->organization;
+            $units = $product->baseProduct->units;
         } else {
             $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
             if (!$product) {
@@ -204,6 +205,7 @@ class OrderController extends DefaultController {
             $product_name = $product->product;
             $price = $product->price;
             $vendor = $product->vendor;
+            $units = $product->units;
         }
         $quantity = (int) $post['quantity'];
         $newOrder = true;
@@ -222,7 +224,9 @@ class OrderController extends DefaultController {
                         'product_id' => $product_id,
                         'product_name' => $product_name,
                         'quantity' => $quantity,
-                        'price' => $price];
+                        'price' => $price,
+                        'units' => $units,
+                        ];
                 }
             }
         }
@@ -234,7 +238,9 @@ class OrderController extends DefaultController {
                         'product_id' => $product_id,
                         'product_name' => $product_name,
                         'quantity' => $quantity,
-                        'price' => $price]]
+                        'price' => $price,
+                        'units' => $units,
+                    ]]
             ];
         }
         $session['orders'] = $orders;
@@ -382,6 +388,12 @@ class OrderController extends DefaultController {
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+            $this->redirect(['/order/index']);
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+            $this->redirect(['/order/checkout']);
+        }
         $organizationType = $user->organization->type_id;
         if (isset($_POST['hasEditable'])) {
             $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
@@ -413,6 +425,11 @@ class OrderController extends DefaultController {
                         $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
                     }
                 }
+                $totalPrice = 0;
+                foreach ($order->orderContent as $position) {
+                    $totalPrice += ($position->price * $position->quantity);
+                }
+                $order->total_price = $totalPrice;
                 $order->save();
                 return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('order', 'organizationType'))];
             } else {
@@ -425,6 +442,10 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+    }
+    
+    public function actionCheckout() {
+        //
     }
 
     public function actionAjaxOrderAction() {

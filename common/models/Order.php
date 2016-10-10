@@ -32,6 +32,7 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_DONE = 4;
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
+    const STATUS_FORMING = 7;
     
     /**
      * @inheritdoc

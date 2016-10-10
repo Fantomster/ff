@@ -87,137 +87,121 @@ $this->registerJs(
         });'
 );
 ?>
-<div id="createP">
-    <?php
-    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 3000]);
-    $form = ActiveForm::begin([
-                'options' => [
-                    'data-pjax' => true,
-                    'id' => 'createForm',
-                    'class' => "navbar-form",
-                    'role' => 'search',
-                ],
-                'method' => 'get',
-    ]);
-    ?>
-    <div style="padding-top: 20px; float: left; width: 60%;">
-        <div id="categories">
-            <?=
-            ''
-//            Select2::widget([
-//                'name' => 'selectedCategory',
-//                'value' => $selectedCategory,
-//                'id' => 'selectedCategory',
-//                'data' => $client->getRestaurantCategories(),
-//                'options' => ['placeholder' => 'Все категории'],
-//                'pluginOptions' => [
-//                    'allowClear' => true
-//                ],
-//            ])
-            ?>
-        </div>
-        <div id="vendors">
-            <?=
-            ''
-//            Select2::widget([
-//                'name' => 'selectedVendor',
-//                'value' => $selectedVendor,
-//                'id' => 'selectedVendor',
-//                'data' => $vendors,
-//                'options' => ['placeholder' => 'Все поставщики'],
-//                'pluginOptions' => [
-//                    'allowClear' => true
-//                ],
-//            ])
-            ?>
-        </div>
-        <div>
-            <?=
-                    $form->field($searchModel, 'searchString')
-                    ->textInput([
-                        'id' => 'searchString',
-                        'class' => 'form-control',
-                        'placeholder' => 'Поиск'])
-                    ->label(false)
-            ?>
-            <?=
-                    $form->field($searchModel, 'selectedCategory')
-                    ->widget(Select2::classname(), [
-                        'data' => $client->getRestaurantCategories(),
-                        'options' => ['placeholder' => 'Все категории', 'id' => 'selectedCategory',],
-                        'pluginOptions' => [
-                            'allowClear' => true
-                        ],
-                    ])->label(false);
-            ?>
-            <?=
-                    $form->field($searchModel, 'selectedVendor')
-                    ->widget(Select2::classname(), [
-                        'data' => $vendors,
-                        'options' => ['placeholder' => 'Все поставщики', 'id' => 'selectedVendor',],
-                        'pluginOptions' => [
-                            'allowClear' => true
-                        ],
-                    ])->label(false);
-            ?>
-            <?php ActiveForm::end(); ?>
-        </div>
-        <div style="padding-right: 10px; float: left; width: 100%" id="products">
-            <?=
-            GridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'filterPosition' => false,
-                'summary' => '',
-                'columns' => [
-                    [
-                        'format' => 'raw',
-                        'attribute' => 'product',
-                        'value' => function($data) {
-                            return "<div class='grid-prod'>" . $data['product'] . "</div><div>"
-                                    . $data['name'] . "</div><div class='grid-article'>артикул: "
-                                    . $data['article'] . "</div>";
-                        },
-                        'label' => 'Название продукта',
-                    ],
-                    [
-                        'attribute' => 'price',
-                        'value' => function($data) {
-                            return $data['price'] . ' руб / ' . $data['units'];
-                        },
-                        'label' => 'Цена'
-                    ],
-                    [
-                        'format' => 'raw',
-                        'value' => function($data) {
-                            return Html::textInput('', 1, ['class' => 'quantity']);
-                        },
-                                'label' => 'Количество'
+<div class="row">
+    <div class="col-md-9">
+        <div class="box box-info" id="createP">
+            <div class="box-header with-border">
+                <h3 class="box-title">Список товаров</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">    
+                <?php
+                Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 3000]);
+                $form = ActiveForm::begin([
+                            'options' => [
+                                'data-pjax' => true,
+                                'id' => 'createForm',
+                                'class' => "navbar-form",
+                                'role' => 'search',
                             ],
-                            //'note',
+                            'method' => 'get',
+                ]);
+                ?>
+                <div>
+                    <?=
+                            $form->field($searchModel, 'searchString')
+                            ->textInput([
+                                'id' => 'searchString',
+                                'class' => 'form-control',
+                                'placeholder' => 'Поиск'])
+                            ->label(false)
+                    ?>
+                    <?=
+                            $form->field($searchModel, 'selectedCategory')
+                            ->widget(Select2::classname(), [
+                                'data' => $client->getRestaurantCategories(),
+                                'options' => ['placeholder' => 'Все категории', 'id' => 'selectedCategory',],
+                                'pluginOptions' => [
+                                    'allowClear' => true
+                                ],
+                            ])->label(false);
+                    ?>
+                    <?=
+                            $form->field($searchModel, 'selectedVendor')
+                            ->widget(Select2::classname(), [
+                                'data' => $vendors,
+                                'options' => ['placeholder' => 'Все поставщики', 'id' => 'selectedVendor',],
+                                'pluginOptions' => [
+                                    'allowClear' => true
+                                ],
+                            ])->label(false);
+                    ?>
+                    <?php ActiveForm::end(); ?>
+                </div>
+                <div style="padding-right: 10px; float: left; width: 100%" id="products">
+                    <?=
+                    GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'filterModel' => $searchModel,
+                        'filterPosition' => false,
+                        'summary' => '',
+                        'columns' => [
                             [
                                 'format' => 'raw',
-                                'value' => function ($data) {
-                                    $link = Html::a('<span class="glyphicon glyphicon-plus"></span>', '#', [
-                                                'class' => 'add-to-cart',
-                                                'data-id' => $data['id'],
-                                                'data-cat' => $data['cat_id'],
-                                    ]);
-                                    return $link;
+                                'attribute' => 'product',
+                                'value' => function($data) {
+                                    return "<div class='grid-prod'>" . $data['product'] . "</div><div>"
+                                            . $data['name'] . "</div><div class='grid-article'>артикул: "
+                                            . $data['article'] . "</div>";
                                 },
+                                'label' => 'Название продукта',
+                            ],
+                            [
+                                'attribute' => 'price',
+                                'value' => function($data) {
+                                    return $data['price'] . ' руб / ' . $data['units'];
+                                },
+                                'label' => 'Цена'
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return Html::textInput('', 1, ['class' => 'quantity']);
+                                },
+                                        'label' => 'Количество'
                                     ],
-                                ],
-                            ])
-                            ?>
+                                    //'note',
+                                    [
+                                        'format' => 'raw',
+                                        'value' => function ($data) {
+                                            $link = Html::a('<span class="glyphicon glyphicon-plus"></span>', '#', [
+                                                        'class' => 'add-to-cart',
+                                                        'data-id' => $data['id'],
+                                                        'data-cat' => $data['cat_id'],
+                                            ]);
+                                            return $link;
+                                        },
+                                            ],
+                                        ],
+                                    ])
+                                    ?>
+                                </div>
+                                </form>
+                                <?php Pjax::end(); ?>
+                            </div>
                         </div>
                     </div>
-                    <div style="float: left;" id="orders">
-                        <?= $this->render('_orders', compact('orders')) ?>
+                    <div class="col-md-3">
+                        <div class="box box-info ">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Корзина</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box-body" id="orders">
+                <?= $this->render('_orders', compact('orders')) ?>
+                            </div>
+                        </div>
                     </div>
-                </form>
-                <?php
-                Pjax::end();
-                ?>
                 </div>
                 <?=
                 Modal::widget([

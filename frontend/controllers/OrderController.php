@@ -119,7 +119,7 @@ class OrderController extends DefaultController {
 
 //        $post = Yii::$app->request->post();
 //
-        if ($params['OrderCatalogSearch']) {
+        if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
             $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }

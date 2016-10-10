@@ -32,40 +32,48 @@ $this->title = 'Добавить продукты';
               <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
             </ul>
         </div>
-        <?php Pjax::begin(['id' => 'pjax-container'])?>
+        
         <?php 
         $gridColumnsBaseCatalog = [
             [
+            'attribute' => 'article',
             'label'=>'Артикул',
             'value'=>'article',
+            'contentOptions' => ['style' => 'vertical-align:middle;'],
             ],
             [
-            'label'=>'Список товаров',
+            'attribute' => 'product',
+            'label'=>'Наименование',
             'value'=>'product',
+            'contentOptions' => ['style' => 'vertical-align:middle;'],
             ],
             [
+            'attribute' => 'units',
             'label'=>'Кратность',
             'value'=>'units',
+            'contentOptions' => ['style' => 'vertical-align:middle;width:120px;'],    
             ],
             [
+            'attribute' => 'price',
             'label'=>'Цена',
             'value'=>function ($data) {
-            $price = preg_replace('/[^\d.,]/','',$data->price);
+            $price = preg_replace('/[^\d.,]/','',$data['price']);
             return $price." руб.";
             },
             ],
             [
             'label'=>'Категория',
             'value'=>function ($data) {
-                        $data->category_id==0 ? $category_name='':$category_name=common\models\Category::get_value($data->category_id)->name;
+                        $data['category_id']==0 ? $category_name='':$category_name=common\models\Category::get_value($data['category_id'])->name;
                         return $category_name;
                         }
             ],        
             [
+            'attribute' => 'status',
             'label'=>'Наличие',
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],    
-            'value'=>function ($data) {$data->status==common\models\CatalogBaseGoods::STATUS_OFF?
+            'value'=>function ($data) {$data['status']==common\models\CatalogBaseGoods::STATUS_OFF?
                     $product_status='<span class="text-danger">Нет</span>':
                     $product_status='<span class="text-success">Есть</span>';
                     return $product_status;
@@ -77,11 +85,11 @@ $this->title = 'Добавить продукты';
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) {
                 $link = CheckboxX::widget([
-                            'name'=>'product_'.$data->id,
+                            'name'=>'product_'.$data['id'],
                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                            'value'=>common\models\CatalogGoods::searchProductFromCatalogGoods($data->id,Yii::$app->request->get('id'))? 1 : 0,
+                            'value'=>common\models\CatalogGoods::searchProductFromCatalogGoods($data['id'],Yii::$app->request->get('id'))? 1 : 0,
                             'autoLabel' => true,
-                            'options'=>['id'=>'product_'.$data->id, 'data-id'=>$data->id],
+                            'options'=>['id'=>'product_'.$data['id'], 'data-id'=>$data['id']],
                             'pluginOptions'=>[
                                 'threeState'=>false,
                                 'theme' => 'krajee-flatblue',
@@ -96,14 +104,24 @@ $this->title = 'Добавить продукты';
         ];
         ?>
         <div class="panel-body">
-            <div class="callout callout-fk-info">
+            <div class="callout callout-fk-info" style="margin-bottom:0">
                 <h4>ШАГ 2</h4>
 
                 <p>Отлично. Теперь выберите товары для вашего каталога, просто проставив галочки в колонке <strong>Добавить</strong>. </p>
-            </div>     
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                </div> 
+            </div>
+        </div>
+        <div class="panel-body">
+        <?php Pjax::begin(['id' => 'pjax-container'])?>
         <?=GridView::widget([
             'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
+            //'filterModel' => $searchModel,
             'filterPosition' => false,
             'columns' => $gridColumnsBaseCatalog,
             'tableOptions' => ['class' => 'table no-margin'],
@@ -115,12 +133,26 @@ $this->title = 'Добавить продукты';
             'hover' => false,
         ]);
         ?>
+        <?php  Pjax::end(); ?>
         </div>
     </div>    
 </div>
-<?php  Pjax::end(); ?>
+
 <?php
 $this->registerJs('
+var timer;
+$("#search").on("keyup", function () {
+window.clearTimeout(timer);
+   timer = setTimeout(function () {
+       $.pjax({
+        type: "GET",
+        push: false,
+        url: "index.php?r=vendor/step-2&id=' . $cat_id . '",
+        container: "#pjax-container",
+        data: {searchString: $("#search").val()}
+      })
+   }, 700);
+});
 /** 
  * Forward port jQuery.live()
  * Wrapper for newer jQuery.on()

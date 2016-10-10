@@ -543,6 +543,7 @@ class ClientController extends DefaultController {
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::BASE_CATALOG) {
             $searchModel = new CatalogBaseGoods;
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $id, NULL);

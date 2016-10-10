@@ -1,9 +1,12 @@
 <?php
 use yii\widgets\Breadcrumbs;
 use dmstr\widgets\Alert;
+use nirvana\showloading\ShowLoadingAsset;
+ShowLoadingAsset::register($this);
 $this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
 ?>
 <div class="content-wrapper">
+    <div id="loader-show"></div>
     <section class="content">
         <?= Alert::widget() ?>
         <?= $content ?>

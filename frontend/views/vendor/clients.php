@@ -109,17 +109,17 @@ $gridColumnsClients = [
     <div class="box-body">
             <div class="panel-body">
                 <div class="col-sm-3">
-                    <?= Html::label('Ресторан', 'filter_restaurant', ['class' => 'label filter_catalog','style'=>'color:#000']) ?>
+                    <?= Html::label('Ресторан', 'filter_restaurant', ['class' => 'label filter_catalog','style'=>'color:#555']) ?>
                     <?= Html::dropDownList('filter_restaurant', null,
                             $arr_restaurant,['prompt' => '','class' => 'form-control','id'=>'filter_restaurant']) ?> 
                 </div>
                 <div class="col-sm-3">
-                    <?= Html::label('Каталог', 'filter_catalog', ['class' => 'label filter_catalog','style'=>'color:#000']) ?>
+                    <?= Html::label('Каталог', 'filter_catalog', ['class' => 'label filter_catalog','style'=>'color:#555']) ?>
                     <?= Html::dropDownList('filter_catalog', null,
                             $arr_catalog,['prompt' => '','class' => 'form-control','id'=>'filter_catalog']) ?>  
                 </div>
                 <div class="col-sm-3">
-                    <?= Html::label('Статус', 'filter_invite', ['class' => 'label filter_invite','style'=>'color:#000']) ?>
+                    <?= Html::label('Статус', 'filter_invite', ['class' => 'label filter_invite','style'=>'color:#555']) ?>
                     <?= Html::dropDownList('filter_invite', null,
                             [
                                 '0' => 'Не подтвержден',
@@ -137,7 +137,14 @@ $gridColumnsClients = [
                     'dataProvider' => $dataProvider,
                     'filterPosition' => false,
                     'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
-                    'columns' => $gridColumnsClients,
+                    'columns' => $gridColumnsClients, 
+                    'tableOptions' => ['class' => 'table no-margin'],
+                    'options' => ['class' => 'table-responsive'],
+                    'bordered' => false,
+                    'striped' => true,
+                    'condensed' => false,
+                    'responsive' => false,
+                    'hover' => false,
             ]);
             ?> 
             <?php Pjax::end(); ?> 
@@ -153,6 +160,7 @@ $('#filter_restaurant').on("change", function () {
         type: 'GET',
         url: 'index.php?r=vendor/clients',
         container: '#cl-list',
+        push: false,
         data: { 
             filter_restaurant: $('#filter_restaurant').val(), 
             filter_catalog: $('#filter_catalog').val(), 
@@ -165,6 +173,7 @@ $('#filter_catalog').on("change", function () {
        $('#filter_invite').val('')
        $.pjax({
         type: 'GET',
+        push: false,
         url: 'index.php?r=vendor/clients',
         container: '#cl-list',
         data: { 
@@ -179,6 +188,7 @@ $('#filter_invite').on("change", function () {
        $('#filter_catalog').val('')
        $.pjax({
         type: 'GET',
+        push: false,
         url: 'index.php?r=vendor/clients',
         container: '#cl-list',
         data: { 
@@ -194,6 +204,7 @@ $('.clear_filters').on("click", function () {
        $('#filter_invite').val('')
        $.pjax({
         type: 'GET',
+        push: false,
         url: 'index.php?r=vendor/clients',
         container: '#cl-list',
         data: { 

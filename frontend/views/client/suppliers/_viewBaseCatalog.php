@@ -27,7 +27,7 @@ $gridColumnsCatalog = [
     'contentOptions' => ['style' => 'vertical-align:middle'],
     ],
     [
-    'label'=>'Продукт',
+    'label'=>'Наименование товара',
     'value'=>'product',
     'contentOptions' => ['style' => 'vertical-align:middle;'],
     ],
@@ -64,13 +64,15 @@ $gridColumnsCatalog = [
     ],*/   
 ];
 ?>
+<?php Pjax::begin(['enablePushState' => false, 'id' => 'pjax-catalog-list'])?>
 <?=GridView::widget([
 	'dataProvider' => $dataProvider,
 	'filterModel' => $searchModel,
 	'filterPosition' => false,
 	'columns' => $gridColumnsCatalog
 ]);
-?>     
+?>  
+<?php Pjax::end(); ?> 
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-default" data-dismiss="modal">Закрыть</a>

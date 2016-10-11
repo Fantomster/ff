@@ -37,15 +37,12 @@ class OrderController extends DefaultController {
                     'create',
                     'send-message',
                     'ajax-add-to-cart',
-                    'ajax-categories',
                     'ajax-clear-order',
                     'ajax-make-order',
-                    'ajax-modify-cart',
                     'ajax-order-action',
                     'ajax-order-refresh',
                     'ajax-refresh-buttons',
                     'ajax-show-order',
-                    'ajax-vendors',
                 ],
                 'rules' => [
 //                    [
@@ -83,13 +80,10 @@ class OrderController extends DefaultController {
                         'actions' => [
                             'create',
                             'ajax-add-to-cart',
-                            'ajax-categories',
                             'ajax-clear-order',
                             'ajax-make-order',
                             'ajax-modify-cart',
                             'ajax-order-refresh',
-                            'ajax-show-order',
-                            'ajax-vendors',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -143,41 +137,6 @@ class OrderController extends DefaultController {
         } else {
             return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
-    }
-
-    public function actionAjaxCategories() {
-        $session = Yii::$app->session;
-        $client = $this->currentUser->organization;
-
-        $categories = $session['categories'];
-        $post = Yii::$app->request->post();
-        foreach ($categories as &$category) {
-            if ($category['id'] == $post['id']) {
-                $category['selected'] = $post['selected'];
-            }
-        }
-        $vendors = $client->getSuppliers($categories);
-        for ($i = 0; $i < count($vendors); $i++) {
-            $vendors[$i]['selected'] = 1;
-        }
-        $session['categories'] = $categories;
-        $session['vendors'] = $vendors;
-
-        return $this->renderPartial('_vendors', compact('vendors'));
-    }
-
-    public function actionAjaxVendors() {
-        $session = Yii::$app->session;
-        $client = $this->currentUser->organization;
-
-        $vendors = $session['vendors'];
-        $post = Yii::$app->request->post();
-        foreach ($vendors as &$vendor) {
-            if ($vendor['id'] == $post['id']) {
-                $vendor['selected'] = $post['selected'];
-            }
-        }
-        $session['vendors'] = $vendors;
     }
 
     public function actionAjaxAddToCart() {
@@ -247,27 +206,6 @@ class OrderController extends DefaultController {
         return $this->renderAjax('_orders', compact('orders'));
     }
 
-    public function actionAjaxModifyCart() {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
-        $post = Yii::$app->request->post();
-        $newContent = $post['content'];
-
-        if (isset($orders[$post['vendor_id']])) {
-            foreach ($orders[$post['vendor_id']]['content'] as &$product) {
-                if (isset($newContent[$product['product_id']])) {
-                    $product['quantity'] = $newContent[$product['product_id']]['quantity'];
-                }
-                if ($product['quantity'] == 0) {
-                    unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
-                }
-            }
-            $showOrder = $orders[$post['vendor_id']];
-        }
-        $session['orders'] = $orders;
-        return $this->renderAjax('_show-order', compact('showOrder'));
-    }
-    
     public function actionAjaxRemovePosition() {
         $session = Yii::$app->session;
         $orders = $session['orders'];

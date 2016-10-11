@@ -289,7 +289,7 @@ class ClientController extends DefaultController {
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
-                    $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                    $units = (int)htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                     if (empty($article)) {
                         $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
@@ -313,10 +313,10 @@ class ClientController extends DefaultController {
                         exit;
                     }
                     if (empty($units)) {
-                        $units=1;
+                        $units=(int)1;
                     }
                     if (is_int($units)==false) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате<br>(только целое число)'];
+                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате<br>(только целое число)'.$units];
                         return $result;
                         exit;
                     }
@@ -362,7 +362,7 @@ class ClientController extends DefaultController {
                          * Отправка почты
                          * 
                          * */
-                        $currentUser->sendInviteToVendor($user); //TODO: не работает отправка почты
+                        $currentUser->sendInviteToVendor($user);
                     } else {
                         //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                         $get_supp_org_id = $check['org_id'];
@@ -499,8 +499,6 @@ class ClientController extends DefaultController {
 
                 if ($check['eventType'] == 6) {
 
-
-
                     $email = $user->email;
                     $fio = $profile->full_name;
                     $org = $organization->name;
@@ -530,11 +528,26 @@ class ClientController extends DefaultController {
         $supplier_org_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $organization = Organization::find()->where(['id' => $supplier_org_id])->one();
+        $user = User::find()->where(['email' => $organization->email])->one();
         $load_data = ArrayHelper::getColumn(Category::find()->where(['in', 'id', \common\models\RelationCategory::find()->
                                     select('category_id')->
                                     where(['rest_org_id' => $currentUser->organization_id,
                                         'supp_org_id' => $supplier_org_id])])->all(), 'id');
         if (Yii::$app->request->isAjax) {
+            if(!empty($user)){
+                $post = Yii::$app->request->post();
+                if($user->status==0 && $post){ 
+                 $organization->load($post);
+                 if($organization->validate()){
+                    $organization->save();
+                    $user->email = $organization->email;
+                    $user->save();
+                    }else{
+                    $message = 'Не верно заполнена форма!';
+                    return $this->renderAjax('suppliers/_success', ['message' => $message]);    
+                    }
+                }
+            }
             $categorys = Yii::$app->request->post('relationCategory');
             if ($categorys) {
                 $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
@@ -549,7 +562,7 @@ class ClientController extends DefaultController {
                 return $this->renderAjax('suppliers/_success', ['message' => $message]);
             }
         }
-        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data'));
+        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data','user'));
     }
 
     public function actionViewCatalog($id) {

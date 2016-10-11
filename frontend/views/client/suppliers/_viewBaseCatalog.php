@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use kartik\grid\GridView;
+use yii\widgets\Pjax;
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -77,8 +78,7 @@ $gridColumnsCatalog = [
         'striped' => true,
         'condensed' => false,
         'responsive' => false,
-        'hover' => false,
-    
+        'hover' => false,   
 ]);
 ?> 
 <?php Pjax::end(); ?> 

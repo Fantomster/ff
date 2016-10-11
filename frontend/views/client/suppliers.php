@@ -523,7 +523,9 @@ $("#view-supplier").on("click", ".save-form", function() {
     data: form.serialize(),
     cache: false,
     success: function(response) {
+        $.pjax.reload({container: "#sp-list"});
             form.replaceWith(response);
+                  
         },
         failure: function(errMsg) {
         console.log(errMsg);

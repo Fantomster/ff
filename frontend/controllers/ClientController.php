@@ -540,8 +540,11 @@ class ClientController extends DefaultController {
                  $organization->load($post);
                  if($organization->validate()){
                     $organization->save();
-                    $user->email = $organization->email;
-                    $user->save();
+                        if($user->email != $organization->email){
+                        $user->email = $organization->email;  
+                        $user->save();
+                        $currentUser->sendInviteToVendor($user);
+                        }
                     }else{
                     $message = 'Не верно заполнена форма!';
                     return $this->renderAjax('suppliers/_success', ['message' => $message]);    

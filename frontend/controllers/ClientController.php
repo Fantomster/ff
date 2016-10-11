@@ -353,6 +353,7 @@ class ClientController extends DefaultController {
                          * */
                         $user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
                         $profile->setUser($user->id)->save();
+                        $organization->email = $user->email;
                         $organization->save();
                         $user->setOrganization($organization->id)->save();
                         $get_supp_org_id = $organization->id;

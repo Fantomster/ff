@@ -1,5 +1,5 @@
 <?php
-
+use yii\helpers\Url;
 use yii\helpers\Html;
 ?>
 <!--<div class="list-group">-->
@@ -12,20 +12,14 @@ use yii\helpers\Html;
         <div class="box-body">
             <div class="list-group">
             <?php foreach ($order['content'] as $product) { ?>
-                <a class="list-group-item">
-                    <!--<button class="btn btn-danger btn-outline pull-right"><i class="fa fa-trash" style="margin-top:-2px;"></i></button>-->
-                    <?= 
-                        Html::button(
-                               '<i class="fa fa-trash" style="margin-top:-2px;"></i>',
-                                [
-                                    'class' => "btn btn-danger btn-outline pull-right",
-                                    'data' => [
-                                        'vendor_id' => $order['vendor_id'],
-                                        'product_id' => $product['product_id'],
-                                    ]
-                                ]
-                        )
-                    ?>
+                <a class="list-group-item" 
+                   data-vendor_id = "<?= $order['vendor_id'] ?>" 
+                   data-product_id = "<?= $product['product_id'] ?>"
+                   data-target="#changeQuantity"
+                   data-toggle="modal"
+                   data-backdrop="static"
+                   href="<?= Url::to(['order/ajax-change-quantity', 'vendor_id' => $order['vendor_id'], 'product_id' => $product['product_id']]) ?>">
+                    <button class="btn btn-danger btn-outline pull-right"><i class="fa fa-trash" style="margin-top:-2px;"></i></button>
                     <h5 class="list-group-item-heading text-info"><?= $product['product_name'] ?> (<?= $product['price'] ?> руб/<?= $product['units'] ?>)</h5>
                     <p class="list-group-item-text text-left">Кол-во: <?= $product['quantity'] ?></p>
                 </a>

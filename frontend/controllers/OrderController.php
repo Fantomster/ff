@@ -284,6 +284,25 @@ class OrderController extends DefaultController {
         
         return $this->renderAjax('_orders', compact('orders'));
     }
+    
+    public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null) {
+        $session = Yii::$app->session;
+        $orders = $session['orders'];
+        
+        if (Yii::$app->request->post()) {
+            $quantity = Yii::$app->request->post('quantity');
+            $product_id = Yii::$app->request->post('product_id');
+            $vendor_id = Yii::$app->request->post('vendor_id');
+            $orders[$vendor_id]['content'][$product_id]['quantity'] = $quantity;
+            $session['orders'] = $orders;
+            return $this->renderAjax('_orders', compact('orders'));
+        }
+        if (Yii::$app->request->get()) {
+            $quantity = $orders[$vendor_id]['content'][$product_id]['quantity'];
+            $product_name = $orders[$vendor_id]['content'][$product_id]['product_name'];
+            return $this->renderAjax('_change-quantity', compact('vendor_id', 'product_id', 'quantity', 'product_name'));
+        }
+    }
 
     public function actionAjaxMakeOrder() {
         $session = Yii::$app->session;

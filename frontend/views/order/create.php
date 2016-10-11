@@ -21,12 +21,14 @@ $this->registerJs(
             });
             $("#createP").on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
+                $("#loader-show").showLoading();
                 quantity = $(this).parent().parent().find(".quantity").val();
                 $.post(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
                     $("#orders").html(result);
+                    $("#loader-show").hideLoading();
                 });
             });
             $("#createP").on("change keyup paste cut", "#searchString", function() {
@@ -37,60 +39,31 @@ $this->registerJs(
                     $("#createForm").submit();
                 }, 300);
             });
-            $("#createOrder").on("pjax:complete", function() {
-                var searchInput = $("#searchString");
-                var strLength = searchInput.val().length * 2;
-                searchInput.focus();
-                searchInput[0].setSelectionRange(strLength, strLength);
-            });
-            $("body").on("hidden.bs.modal", "#showOrder", function() {
-                $(this).data("bs.modal", null);
-                $.post(
-                    "' . Url::to(['/order/ajax-order-refresh']) . '"
-                ).done(function(result) {
-                    $("#orders").html(result);
-                });
-            });
-            $("#showOrder").on("click", ".sendOrder", function() {
-                var form = $("#order-form");
-                $.post(
-                    "' . Url::to(['/order/ajax-make-order']) . '",
-                    form.serialize()
-                )
-                .done(function(result) {
-                    form.replaceWith(result);
-                });
-                return false;
-            });
-            $("#showOrder").on("click", ".saveOrder", function() {
-                var form = $("#order-form");
-                $.post(
-                    "' . Url::to(['/order/ajax-modify-cart']) . '",
-                    form.serialize()
-                )
-                .done(function(result) {
-                    form.replaceWith(result);
-                });
-                return false;
-            });
-            $("#showOrder").on("click", ".clearOrder", function() {
-                var form = $("#order-form");
-                $.post(
-                    "' . Url::to(['/order/ajax-clear-order']) . '",
-                    form.serialize()
-                )
-                .done(function(result) {
-                    form.replaceWith(result);
-                });
-                return false;
-            });
-            $("#orders").on("click", ".btn-danger", function() {
+            $("#orders").on("click", ".btn-danger", function(e) {
+                $("#loader-show").showLoading();
                 $.post(
                     "' . Url::to(['/order/ajax-remove-position']) . '",
-                    {vendor_id: $(this).data("vendor_id"), product_id: $(this).data("product_id")}
+                    {vendor_id: $(this).parent().data("vendor_id"), product_id: $(this).parent().data("product_id")}
                 )
                 .done(function (result) {
                     $("#orders").html(result);
+                    $("#loader-show").hideLoading();
+                });
+                return false;
+            });
+            $("body").on("hidden.bs.modal", "#changeQuantity", function() {
+                $(this).data("bs.modal", null);
+            });
+            $("#changeQuantity").on("click", ".save", function() {
+                $("#loader-show").showLoading();
+                var form = $("#quantityForm");
+                $.post(
+                    form.attr("action"),
+                    form.serialize()
+                )
+                .done(function (result) {
+                    $("#orders").html(result);
+                    $("#loader-show").hideLoading();
                 });
             });
         });'
@@ -204,7 +177,7 @@ $this->registerJs(
                 </div>
                 <?=
                 Modal::widget([
-                    'id' => 'showOrder',
+                    'id' => 'changeQuantity',
                     'clientOptions' => false,
                 ])
                 ?>

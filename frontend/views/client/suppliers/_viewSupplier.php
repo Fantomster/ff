@@ -23,44 +23,51 @@ $form = ActiveForm::begin([
 <div class="modal-body">
     <div class="row">
         <div class="col-md-6">
-            <?=
-                $form->field($organization, 'name')->textInput(['readonly' => true]);
+            <?=empty($user)?
+                $form->field($organization, 'name')->textInput(['readonly' => true]):
+                $form->field($organization, 'name');//->textInput(['readonly' => true]);
             ?>
         </div>
         <div class="col-md-6">
-            <?=
-                $form->field($organization, 'city')->textInput(['readonly' => true]);
-            ?>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <?=
-                $form->field($organization, 'address')->textInput(['readonly' => true]);
-            ?>
-        </div>
-        <div class="col-md-6">
-            <?=
-                $form->field($organization, 'zip_code')->textInput(['readonly' => true]);
+            <?=empty($user)?
+                $form->field($organization, 'city')->textInput(['readonly' => true]):
+                $form->field($organization, 'city');//
             ?>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
-            <?=
-                $form->field($organization, 'phone')->textInput(['readonly' => true]);
+            <?=empty($user)?
+                $form->field($organization, 'address')->textInput(['readonly' => true]):
+                $form->field($organization, 'address');
             ?>
         </div>
         <div class="col-md-6">
-            <?=
-                $form->field($organization, 'email')->textInput(['readonly' => true]);
+            <?=empty($user)?
+                $form->field($organization, 'zip_code')->textInput(['readonly' => true]):
+                $form->field($organization, 'zip_code');
             ?>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
-            <?=
-                $form->field($organization, 'website')->textInput(['readonly' => true]);
+            <?=empty($user)?
+                $form->field($organization, 'phone')->textInput(['readonly' => true]):
+                $form->field($organization, 'phone');
+            ?>
+        </div>
+        <div class="col-md-6">
+            <?=empty($user)?
+                $form->field($organization, 'email')->textInput(['readonly' => true]):
+                $form->field($organization, 'email');
+            ?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <?=empty($user)?
+                $form->field($organization, 'website')->textInput(['readonly' => true]):
+                $form->field($organization, 'website');
             ?>
         </div>
     </div>

@@ -284,7 +284,7 @@ class OrderController extends DefaultController {
         $order->created_by_id = $this->currentUser->id;
         $order->client_id = $this->currentUser->organization_id;
         $order->vendor_id = $post['vendor_id'];
-        $order->save();
+        $order->save(); //test
 
         $totalPrice = 0;
         foreach ($orders[$post['vendor_id']]['content'] as $position) {

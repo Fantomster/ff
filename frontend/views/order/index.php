@@ -85,6 +85,7 @@ $form = ActiveForm::begin([
                 'class' => "navbar-form",
                 'role' => 'search',
             ],
+            'enableClientValidation' => false,
             'method' => 'get',
         ]);
 ?>

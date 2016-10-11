@@ -267,6 +267,23 @@ class OrderController extends DefaultController {
         $session['orders'] = $orders;
         return $this->renderAjax('_show-order', compact('showOrder'));
     }
+    
+    public function actionAjaxRemovePosition() {
+        $session = Yii::$app->session;
+        $orders = $session['orders'];
+        $post = Yii::$app->request->post();
+        
+        if ($post && $post['vendor_id'] && $post['product_id'] && isset($orders[$post['vendor_id']])) {
+            foreach ($orders[$post['vendor_id']]['content'] as &$product) {
+                if ($product['product_id'] == $post['product_id']) {
+                    unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
+                }
+            }
+            $session['orders'] = $orders;
+        }
+        
+        return $this->renderAjax('_orders', compact('orders'));
+    }
 
     public function actionAjaxMakeOrder() {
         $session = Yii::$app->session;

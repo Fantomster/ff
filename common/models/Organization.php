@@ -122,6 +122,8 @@ class Organization extends \yii\db\ActiveRecord
                 ->orderBy(['name' => SORT_ASC])
                 ->asArray()
                 ->all(), 'id', 'name');
+        $categories[''] = 'Все категории';
+        ksort($categories);
         return $categories;
     }
     
@@ -147,9 +149,9 @@ class Organization extends \yii\db\ActiveRecord
         $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
                 ->asArray()
                 ->all(), 'id', 'name');
-        if ($all) {
-            $vendors['0'] = 'Все';
-        }
+        //if ($all) {
+            $vendors[''] = 'Все поставщики';
+        //}
         ksort($vendors);
         return $vendors;
     }
@@ -173,7 +175,7 @@ class Organization extends \yii\db\ActiveRecord
         $clients = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
                 ->asArray()
                 ->all(), 'id', 'name');
-        $clients['0'] = 'Все';
+        $clients[''] = 'Все рестораны';
         ksort($clients);
         return $clients;
     }
@@ -191,13 +193,16 @@ class Organization extends \yii\db\ActiveRecord
                 ->select(['relation_supp_rest.cat_id'])
                 ->where(['relation_supp_rest.rest_org_id' => $this->id]);
         if ($category_id) {
-            $query = $query->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
+            $query = $query->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id AND relation_category.rest_org_id = relation_supp_rest.rest_org_id')
                     ->andWhere(['relation_category.category_id' => $category_id]);
         }
         if ($vendor_id) {
             $query = $query->andWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
         }
         $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
+        if (empty($catalogs)) {
+            return '0';
+        }
         return implode (",", $catalogs);
     }
     

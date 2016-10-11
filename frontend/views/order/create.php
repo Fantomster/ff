@@ -127,23 +127,13 @@ $this->registerJs(
                     ?>
                     <?=
                             $form->field($searchModel, 'selectedCategory')
-                            ->widget(Select2::classname(), [
-                                'data' => $client->getRestaurantCategories(),
-                                'options' => ['placeholder' => 'Все категории', 'id' => 'selectedCategory',],
-                                'pluginOptions' => [
-                                    'allowClear' => true
-                                ],
-                            ])->label(false);
+                            ->dropDownList($client->getRestaurantCategories(), ['id' => 'selectedCategory'])
+                            ->label(false)
                     ?>
                     <?=
                             $form->field($searchModel, 'selectedVendor')
-                            ->widget(Select2::classname(), [
-                                'data' => $vendors,
-                                'options' => ['placeholder' => 'Все поставщики', 'id' => 'selectedVendor',],
-                                'pluginOptions' => [
-                                    'allowClear' => true
-                                ],
-                            ])->label(false);
+                            ->dropDownList($vendors, ['id' => 'selectedVendor'])
+                            ->label(false)
                     ?>
                     <?php ActiveForm::end(); ?>
                 </div>

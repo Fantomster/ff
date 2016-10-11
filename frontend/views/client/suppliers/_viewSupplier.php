@@ -5,6 +5,7 @@ use yii\widgets\ActiveForm;
 use kartik\select2\Select2;
 use common\models\Category;
 use yii\helpers\ArrayHelper;
+use kartik\checkbox\CheckboxX;
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -59,8 +60,9 @@ $form = ActiveForm::begin([
         <div class="col-md-6">
             <?=empty($user)?
                 $form->field($organization, 'email')->textInput(['readonly' => true]):
-                $form->field($organization, 'email');
+                $form->field($organization, 'email'); 
             ?>
+            
         </div>
     </div>
     <div class="row">
@@ -68,6 +70,24 @@ $form = ActiveForm::begin([
             <?=empty($user)?
                 $form->field($organization, 'website')->textInput(['readonly' => true]):
                 $form->field($organization, 'website');
+            ?>
+        </div>
+        <div class="col-md-6">
+            <?=empty($user)?'':
+                CheckboxX::widget([
+                                    'name'=>'resend_email',
+                                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                    'value'=>0,
+                                    'autoLabel' => true,
+                                    'options'=>['id'=>'resend_email'],
+                                    'pluginOptions'=>[
+                                        'threeState'=>false,
+                                        'theme' => 'krajee-flatblue',
+                                        'enclosedLabel' => true,
+                                        'size'=>'md',
+                                        ]
+                                ]) . 
+                '<label class="control-label" for="resend_email">Отправить приглашение</label>';
             ?>
         </div>
     </div>

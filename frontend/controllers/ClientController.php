@@ -544,7 +544,12 @@ class ClientController extends DefaultController {
                         $user->email = $organization->email;  
                         $user->save();
                         $currentUser->sendInviteToVendor($user);
-                        }
+                        }else{
+                            if(Yii::$app->request->post('resend_email')==1){
+                                $currentUser->sendInviteToVendor($user);    
+                            }  
+                        } 
+                        
                     }else{
                     $message = 'Не верно заполнена форма!';
                     return $this->renderAjax('suppliers/_success', ['message' => $message]);    

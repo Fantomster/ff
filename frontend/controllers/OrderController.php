@@ -101,8 +101,7 @@ class OrderController extends DefaultController {
     }
 
     public function actionCreate() {
-//        $session = Yii::$app->session;
-//        $session->remove('orders');
+
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -111,8 +110,6 @@ class OrderController extends DefaultController {
         $selectedVendor = null;
         $searchString = '';
 
-//        $post = Yii::$app->request->post();
-//
         if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
             $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
@@ -125,12 +122,6 @@ class OrderController extends DefaultController {
         $searchModel->catalogs = $catalogs;
 
         $dataProvider = $searchModel->search($params);
-
-//        if ($session->has('orders')) {
-//            $orders = $session['orders'];
-//        } else {
-//            $orders = [];
-//        }
 
         $orders = $client->getCart();
 
@@ -405,7 +396,10 @@ class OrderController extends DefaultController {
     }
 
     public function actionCheckout() {
-        //
+        $client = $this->currentUser->organization;
+        $orders = $client->getCart();
+        
+        return $this->render('checkout', compact('orders'));
     }
 
     public function actionAjaxOrderAction() {

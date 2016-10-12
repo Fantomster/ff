@@ -178,7 +178,7 @@ $this->registerJs(
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body" id="orders">
-                <?= $this->render('_orders', compact('orders')) ?>
+                <?= $this->render('_cart', compact('orders')) ?>
                             </div>
                         </div>
                     </div>

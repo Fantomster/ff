@@ -23,31 +23,28 @@ use yii\helpers\ArrayHelper;
  * @property OrganizationType $type
  * @property Delivery $delivery
  */
-class Organization extends \yii\db\ActiveRecord
-{
+class Organization extends \yii\db\ActiveRecord {
+
     const TYPE_RESTAURANT = 1;
-    
     const TYPE_SUPPLIER = 2;
-    
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'organization';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['type_id', 'name'], 'required'],
             [['type_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website'], 'string', 'max' => 255],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'website'], 'filter', 'filter'=>'\yii\helpers\HtmlPurifier::process'],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'website'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['email'], 'email'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
         ];
@@ -56,8 +53,7 @@ class Organization extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -67,12 +63,11 @@ class Organization extends \yii\db\ActiveRecord
             ],
         ];
     }
-    
+
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'type_id' => 'Type',
@@ -87,27 +82,28 @@ class Organization extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
-    
-    public static function getOrganization($id){
-	    $getOrganization = Organization::find()
-		->where(['id' => $id])->one();  
-		return $getOrganization;
+
+    public static function getOrganization($id) {
+        $getOrganization = Organization::find()
+                        ->where(['id' => $id])->one();
+        return $getOrganization;
     }
-    public static function get_value($id){
+
+    public static function get_value($id) {
         $model = Organization::find()->where(["id" => $id])->one();
-        if(!empty($model)){
+        if (!empty($model)) {
             return $model;
         }
         return null;
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getType()
-    {
+    public function getType() {
         return $this->hasOne(OrganizationType::className(), ['id' => 'type_id']);
     }
-    
+
     /**
      * get available categories for restaurant
      * 
@@ -118,15 +114,15 @@ class Organization extends \yii\db\ActiveRecord
             return [];
         }
         $categories = ArrayHelper::map(Category::find()
-                ->select(['id', 'name'])
-                ->orderBy(['name' => SORT_ASC])
-                ->asArray()
-                ->all(), 'id', 'name');
+                                ->select(['id', 'name'])
+                                ->orderBy(['name' => SORT_ASC])
+                                ->asArray()
+                                ->all(), 'id', 'name');
         $categories[''] = 'Все категории';
         ksort($categories);
         return $categories;
     }
-    
+
     /**
      * get list of suppliers for selected categories
      * 
@@ -145,17 +141,17 @@ class Organization extends \yii\db\ActiveRecord
         if ($category_id) {
             $query = $query->andWhere(['category_id' => $category_id]);
         }
-                
+
         $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
-                ->asArray()
-                ->all(), 'id', 'name');
+                                ->asArray()
+                                ->all(), 'id', 'name');
         //if ($all) {
-            $vendors[''] = 'Все поставщики';
+        $vendors[''] = 'Все поставщики';
         //}
         ksort($vendors);
         return $vendors;
     }
-    
+
     /**
      * get list of clients
      * 
@@ -171,15 +167,15 @@ class Organization extends \yii\db\ActiveRecord
                 ->leftJoin('relation_supp_rest', 'relation_category.rest_org_id = relation_supp_rest.rest_org_id')
                 ->joinWith('client', false)
                 ->where(['relation_category.supp_org_id' => $this->id]);
-                
+
         $clients = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
-                ->asArray()
-                ->all(), 'id', 'name');
+                                ->asArray()
+                                ->all(), 'id', 'name');
         $clients[''] = 'Все рестораны';
         ksort($clients);
         return $clients;
     }
-    
+
     /**
      *  get catalogs list for sqldataprovider for order creation
      *  
@@ -203,13 +199,24 @@ class Organization extends \yii\db\ActiveRecord
         if (empty($catalogs)) {
             return '0';
         }
-        return implode (",", $catalogs);
+        return implode(",", $catalogs);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getDelivery() {
         return $this->hasOne(Delivery::className(), ['vendor_id' => 'id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCart() {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return [];
+        }
+        return Order::find()->where(['client_id' => $this->id, 'status' => Order::STATUS_FORMING])->all();
+    }
+
 }

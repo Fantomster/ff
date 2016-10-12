@@ -27,7 +27,10 @@ $this->registerJs(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
-                    $("#orders").html(result);
+                    if (result) {
+                        $.pjax.reload({container: "#cart"});
+                    }
+//                    $("#orders").html(result);
                     $("#loader-show").hideLoading();
                 });
             });
@@ -46,7 +49,10 @@ $this->registerJs(
                     {vendor_id: $(this).parent().data("vendor_id"), product_id: $(this).parent().data("product_id")}
                 )
                 .done(function (result) {
-                    $("#orders").html(result);
+//                    $("#orders").html(result);
+                    if (result) {
+                        $.pjax.reload({container: "#cart"});
+                    }
                     $("#loader-show").hideLoading();
                 });
                 return false;
@@ -62,7 +68,9 @@ $this->registerJs(
                     form.serialize()
                 )
                 .done(function (result) {
-                    $("#orders").html(result);
+                    if (result) {
+                        $.pjax.reload({container: "#cart"});
+                    }
                     $("#loader-show").hideLoading();
                 });
             });

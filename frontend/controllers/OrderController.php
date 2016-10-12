@@ -101,7 +101,7 @@ class OrderController extends DefaultController {
     }
 
     public function actionCreate() {
-        $session = Yii::$app->session;
+//        $session = Yii::$app->session;
 //        $session->remove('orders');
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
@@ -126,11 +126,13 @@ class OrderController extends DefaultController {
 
         $dataProvider = $searchModel->search($params);
 
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
+//        if ($session->has('orders')) {
+//            $orders = $session['orders'];
+//        } else {
+//            $orders = [];
+//        }
+
+        $orders = $client->getCart();
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
@@ -140,12 +142,10 @@ class OrderController extends DefaultController {
     }
 
     public function actionAjaxAddToCart() {
-        $session = Yii::$app->session;
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
+
+        $client = $this->currentUser->organization;
+        $orders = $client->getCart();
+
         $post = Yii::$app->request->post();
         $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
 
@@ -158,7 +158,7 @@ class OrderController extends DefaultController {
         } else {
             $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
             if (!$product) {
-                return $this->renderAjax('_orders', compact('orders'));
+                return true;//$this->renderAjax('_orders', compact('orders'));
             }
             $product_id = $product->id;
             $product_name = $product->product;
@@ -167,77 +167,96 @@ class OrderController extends DefaultController {
             $units = $product->units;
         }
         $quantity = (int) $post['quantity'];
-        $newOrder = true;
-        foreach ($orders as &$order) {
-            if ($order['vendor_id'] == $vendor->id) {
-                $newOrder = false;
-                $newProduct = true;
-                foreach ($order['content'] as &$prod) {
-                    if ($prod['product_id'] == $product_id) {
-                        $newProduct = false;
-                        $prod['quantity'] += $quantity;
-                    }
-                }
-                if ($newProduct) {
-                    $order['content'][$product_id] = [
-                        'product_id' => $product_id,
-                        'product_name' => $product_name,
-                        'quantity' => $quantity,
-                        'price' => $price,
-                        'units' => $units,
-                        ];
-                }
+        $isNewOrder = true;
+
+        foreach ($orders as $order) {
+            if ($order->vendor_id == $vendor->id) {
+                $isNewOrder = false;
+                $alteringOrder = $order;
             }
         }
-        if ($newOrder) {
-            $orders[$vendor->id] = [
-                'vendor_id' => $vendor->id,
-                'vendor_name' => $vendor->name,
-                'content' => [$product_id => [
-                        'product_id' => $product_id,
-                        'product_name' => $product_name,
-                        'quantity' => $quantity,
-                        'price' => $price,
-                        'units' => $units,
-                    ]]
-            ];
+        if ($isNewOrder) {
+            $newOrder = new Order();
+            $newOrder->client_id = $client->id;
+            $newOrder->vendor_id = $vendor->id;
+            $newOrder->status = Order::STATUS_FORMING;
+            $newOrder->save();
+            $alteringOrder = $newOrder;
         }
-        $session['orders'] = $orders;
-        return $this->renderAjax('_orders', compact('orders'));
+
+        $isNewPosition = true;
+        foreach ($alteringOrder->orderContent as $position) {
+            if ($position->product_id == $product_id) {
+                $position->quantity += $quantity;
+                $position->save();
+                $isNewPosition = false;
+            }
+        }
+        if ($isNewPosition) {
+            $position = new OrderContent();
+            $position->order_id = $alteringOrder->id;
+            $position->product_id = $product_id;
+            $position->quantity = $quantity;
+            $position->price = $price;
+            $position->product_name = $product_name;
+            $position->units = $units;
+            $position->save();
+        }
+        //$orders = $client->getCart();
+
+        return true;//$this->renderPartial('_orders', compact('orders'));
     }
 
     public function actionAjaxRemovePosition() {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
+
+        $client = $this->currentUser->organization;
         $post = Yii::$app->request->post();
-        
-        if ($post && $post['vendor_id'] && $post['product_id'] && isset($orders[$post['vendor_id']])) {
-            foreach ($orders[$post['vendor_id']]['content'] as &$product) {
-                if ($product['product_id'] == $post['product_id']) {
-                    unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
+
+        if ($post && $post['vendor_id'] && $post['product_id']) {
+            $order = Order::find()->where(['vendor_id' => $post['vendor_id'], 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+            foreach ($order->orderContent as $position) {
+                if ($position->product_id == $post['product_id']) {
+                    $position->delete();
+                }
+                $test = $order->positionCount;
+                if (!($order->positionCount)) {
+                    $order->delete();
                 }
             }
-            $session['orders'] = $orders;
         }
-        
-        return $this->renderAjax('_orders', compact('orders'));
+
+        //$orders = $client->getCart();
+
+        return true;//$this->renderPartial('_orders', compact('orders'));
     }
-    
+
     public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null) {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
-        
+
+        $client = $this->currentUser->organization;
+
         if (Yii::$app->request->post()) {
             $quantity = Yii::$app->request->post('quantity');
             $product_id = Yii::$app->request->post('product_id');
             $vendor_id = Yii::$app->request->post('vendor_id');
-            $orders[$vendor_id]['content'][$product_id]['quantity'] = $quantity;
-            $session['orders'] = $orders;
-            return $this->renderAjax('_orders', compact('orders'));
+            $order = Order::find()->where(['vendor_id' => Yii::$app->request->post('vendor_id'), 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+            foreach ($order->orderContent as $position) {
+                if ($position->product_id == $product_id) {
+                    $position->quantity = $quantity;
+                    $position->save();
+                }
+            }
+            //$orders = $client->getCart();
+            return true;//$this->renderPartial('_orders', compact('orders'));
         }
+        
         if (Yii::$app->request->get()) {
-            $quantity = $orders[$vendor_id]['content'][$product_id]['quantity'];
-            $product_name = $orders[$vendor_id]['content'][$product_id]['product_name'];
+            $order = Order::findOne(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            foreach ($order->orderContent as $position) {
+                if ($position->product_id == $product_id) {
+                    $quantity = $position->quantity;
+                    $product_name = $position->product_name;
+                }
+            }
             return $this->renderAjax('_change-quantity', compact('vendor_id', 'product_id', 'quantity', 'product_name'));
         }
     }
@@ -287,45 +306,12 @@ class OrderController extends DefaultController {
         return $this->renderAjax('_order-message', compact('message'));
     }
 
-    public function actionAjaxShowOrder($vendor_id) {
-        $session = Yii::$app->session;
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
-        $showOrder = [];
-        foreach ($orders as $order) {
-            if ($order['vendor_id'] == $vendor_id) {
-                $showOrder = $order;
-            }
-        }
-        return $this->renderAjax('_show-order', compact('showOrder'));
+    public function actionRefreshCart() {
+        $client = $this->currentUser->organization;
+        $orders = $client->getCart();
+        return $this->renderAjax('_cart', compact('orders'));
     }
-
-    public function actionAjaxClearOrder() {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
-        $post = Yii::$app->request->post();
-
-        if (isset($orders[$post['vendor_id']])) {
-            unset($orders[$post['vendor_id']]);
-        }
-        $session['orders'] = $orders;
-        $message = "Заказ отменен!";
-        return $this->renderAjax('_order-message', compact('message'));
-    }
-
-    public function actionAjaxOrderRefresh() {
-        $session = Yii::$app->session;
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
-        return $this->renderAjax('_orders', compact('orders'));
-    }
-
+    
     public function actionIndex() {
         $searchModel = new OrderSearch();
         $today = new \DateTime();
@@ -417,7 +403,7 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
     }
-    
+
     public function actionCheckout() {
         //
     }

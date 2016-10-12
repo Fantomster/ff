@@ -23,6 +23,7 @@ use Yii;
  * @property Organization $vendor
  * @property OrderContent[] $orderContent
  * @property OrderChat[] $orderChat
+ * @property integer positionsCount
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -63,7 +64,7 @@ class Order extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['client_id', 'vendor_id', 'created_by_id', 'status'], 'required'],
+            [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status'], 'integer'],
             [['total_price'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
@@ -159,5 +160,9 @@ class Order extends \yii\db\ActiveRecord
                 break;
         }
         return $text;
+    }
+    
+    public function getPositionCount() {
+        return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
     }
 }

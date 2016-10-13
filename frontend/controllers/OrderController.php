@@ -264,16 +264,21 @@ class OrderController extends DefaultController {
                 $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
                 if ($order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    $order->createdBy = $this->currentUser->id;
                     $order->save();
                 }
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
                 foreach ($orders as $order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    $order->createdBy = $this->currentUser->id;
                     $order->save();
                 }
             }
+            return true;
         }
+        
+        return false;
     }
 
     public function actionRefreshCart() {

@@ -1,13 +1,28 @@
 <?php
 use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 $this->registerJs(
         '$("document").ready(function(){
-            //
+            $("#checkout").on("click", ".create", function(e) {
+            alert($(this).data("id"));
+                $("#loader-show").showLoading();
+                $.post(
+                    "' . Url::to(['/order/ajax-make-order']) . '",
+                    {"id": $(this).data("id")}
+                ).done(function(result) {
+                    if (result) {
+                        $.pjax.reload({container: "#checkout"});
+                    }
+                    $("#loader-show").hideLoading();
+                });
+            });
         });'
 );
 ?>
-
+<?php
+Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000]);
+?>
 <div class="row checkout">
     <div class="col-md-9">
         <?php foreach ($orders as $order) { ?>
@@ -44,3 +59,4 @@ $this->registerJs(
         <?php } ?>
     </div>
 </div>
+<?php Pjax::end() ?>

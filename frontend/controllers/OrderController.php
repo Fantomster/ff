@@ -146,6 +146,7 @@ class OrderController extends DefaultController {
             $product_name = $product->baseProduct->product;
             $vendor = $product->organization;
             $units = $product->baseProduct->units;
+            $article = $product->baseProduct->article;
         } else {
             $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
             if (!$product) {
@@ -156,6 +157,7 @@ class OrderController extends DefaultController {
             $price = $product->price;
             $vendor = $product->vendor;
             $units = $product->units;
+            $article = $product->article;
         }
         $quantity = (int) $post['quantity'];
         $isNewOrder = true;
@@ -191,6 +193,7 @@ class OrderController extends DefaultController {
             $position->price = $price;
             $position->product_name = $product_name;
             $position->units = $units;
+            $position->article = $article;
             $position->save();
         }
         //$orders = $client->getCart();
@@ -252,49 +255,25 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxMakeOrder() {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
-        $post = Yii::$app->request->post();
-        $newContent = $post['content'];
-
-        if (isset($orders[$post['vendor_id']])) {
-            foreach ($orders[$post['vendor_id']]['content'] as &$product) {
-                if (isset($newContent[$product['product_id']])) {
-                    $product['quantity'] = $newContent[$product['product_id']]['quantity'];
+    public function actionAjaxMakeOrder($all = false) {
+        $client = $this->currentUser->organization;
+        
+        if (Yii::$app->request->post()) {
+            if (!$all) {
+                $order_id = Yii::$app->request->post('id');
+                $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                if ($order) {
+                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    $order->save();
                 }
-                if ($product['quantity'] == 0) {
-                    unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
+            } else {
+                $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                foreach ($orders as $order) {
+                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    $order->save();
                 }
             }
         }
-
-        $order = new Order();
-        $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-        $order->created_by_id = $this->currentUser->id;
-        $order->client_id = $this->currentUser->organization_id;
-        $order->vendor_id = $post['vendor_id'];
-        $order->save();
-
-        $totalPrice = 0;
-        foreach ($orders[$post['vendor_id']]['content'] as $position) {
-            $orderContent = new OrderContent();
-            $orderContent->order_id = $order->id;
-            $orderContent->product_id = $position['product_id'];
-            $orderContent->quantity = $position['quantity'];
-            $orderContent->price = (int) $position['price']; //временно для теста до фикса соответствующей модели
-            $orderContent->save();
-            $totalPrice += ($orderContent->price * $orderContent->quantity);
-        }
-
-        $order->total_price = $totalPrice;
-        $order->save();
-
-        unset($orders[$post['vendor_id']]);
-        $session['orders'] = $orders;
-
-        $message = "Заказ создан!";
-        return $this->renderAjax('_order-message', compact('message'));
     }
 
     public function actionRefreshCart() {
@@ -398,6 +377,33 @@ class OrderController extends DefaultController {
     public function actionCheckout() {
         $client = $this->currentUser->organization;
         $orders = $client->getCart();
+
+        if (isset($_POST['hasEditable'])) {
+            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            $posted = current($_POST['OrderContent']);
+            $post = ['OrderContent' => $posted];
+            if ($model->load($post)) {
+                $model->save();
+                $order = $model->order;
+                $totalPrice = 0;
+                foreach ($order->orderContent as $position) {
+                    $totalPrice += ($position->price * $position->quantity);
+                }
+                $order->total_price = $totalPrice;
+                $order->save();
+                return [
+                    'output' => $model->quantity, 
+                    'message' => '', 
+                    'positionTotal' => $model->price * $model->quantity, 
+                    'positionId' => $model->id, 
+                    'orderId' => $order->id,
+                    'orderTotal' => $totalPrice
+                        ];
+            } else {
+                return ['output' => '', 'message' => ''];
+            }
+        }
         
         return $this->render('checkout', compact('orders'));
     }

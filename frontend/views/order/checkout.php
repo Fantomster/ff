@@ -1,3 +1,13 @@
+<?php
+use yii\helpers\Url;
+
+$this->registerJs(
+        '$("document").ready(function(){
+            //
+        });'
+);
+?>
+
 <div class="row checkout">
     <div class="col-md-9">
         <?php foreach ($orders as $order) { ?>
@@ -14,8 +24,12 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <div class="form-inline">
-                                    <button class="btn btn-default btn-outline" data-toggle="collapse" data-target="#order<?= $order->id ?>">Содержимое заказа</button>
-                                    <button class="btn btn-success pull-right"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i> Оформить заказ</button>
+                                    <button class="btn btn-default" data-toggle="collapse" data-target="#order<?= $order->id ?>">Содержимое заказа</button>
+                                    <button class="btn btn-success pull-right create" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i> Оформить заказ</button>
+                                    <span style="font-size:16px; margin-top:5px; margin-right: 20px;" class="pull-right text-success">
+                                        Всего: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> руб
+                                    </span>
+                                    <!--<label class="pull-right">Всего: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> руб</label>-->
                                 </div>
                             </div>
                             <div id="order<?= $order->id ?>" class="panel-collapse collapse">

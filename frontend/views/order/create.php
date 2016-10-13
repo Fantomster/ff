@@ -125,6 +125,8 @@ $this->registerJs(
                         'filterModel' => $searchModel,
                         'filterPosition' => false,
                         'summary' => '',
+                        'tableOptions' => ['class' => 'table no-margin table-hover'],
+                        'options' => ['class' => 'table-responsive'],
                         'columns' => [
                             [
                                 'format' => 'raw',

@@ -76,7 +76,7 @@ use yii\helpers\Url;
     <tr align="center">
         <td><img src="http://f-keeper.ru/img/ico4-1.png" /></td>
         <td><img src="http://f-keeper.ru/img/ico5-1.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico6-1.png" /></td>
+        <td><img src="http://f-keeper.ru/img/ico2.png" /></td>
     </tr>
 
 
@@ -96,9 +96,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="http://f-keeper.ru/img/ico7-1.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico8-1.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico9-1.png" /></td>
+        <td><img src="http://f-keeper.ru/img/ico4.png" /></td>
+        <td><img src="http://f-keeper.ru/img/ico8.png" /></td>
+        <td><img src="http://f-keeper.ru/img/ico9.png" /></td>
     </tr>
 
 </table>

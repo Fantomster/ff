@@ -106,7 +106,7 @@ $form = ActiveForm::begin([
                                                         'model' => $searchModel,
                                                         'attribute' => 'date_from',
                                                         'attribute2' => 'date_to',
-                                                        'options' => ['placeholder' => 'Начальная дата', 'id' => 'dateFrom'],
+                                                        'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
                                                         'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
                                                         'type' => DatePicker::TYPE_RANGE,
                                                         

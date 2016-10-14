@@ -12,6 +12,8 @@ use Yii;
  * @property integer $quantity
  * @property integer $accepted_quantity
  * @property string $price
+ * @property string $product_name
+ * @property integer $units
  *
  * @property Order $order
  * @property CatalogBaseGoods $product
@@ -32,8 +34,8 @@ class OrderContent extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_id', 'product_id', 'quantity', 'price'], 'required'],
-            [['order_id', 'product_id', 'quantity', 'accepted_quantity'], 'integer'],
+            [['order_id', 'product_id', 'quantity', 'price', 'units', 'product_name'], 'required'],
+            [['order_id', 'product_id', 'quantity', 'accepted_quantity', 'units'], 'integer'],
             [['price'], 'number'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],

@@ -23,6 +23,7 @@ use Yii;
  * @property Organization $vendor
  * @property OrderContent[] $orderContent
  * @property OrderChat[] $orderChat
+ * @property integer positionsCount
  */
 class Order extends \yii\db\ActiveRecord
 {
@@ -32,6 +33,7 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_DONE = 4;
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
+    const STATUS_FORMING = 7;
     
     /**
      * @inheritdoc
@@ -62,7 +64,7 @@ class Order extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['client_id', 'vendor_id', 'created_by_id', 'status'], 'required'],
+            [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status'], 'integer'],
             [['total_price'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
@@ -158,5 +160,15 @@ class Order extends \yii\db\ActiveRecord
                 break;
         }
         return $text;
+    }
+    
+    public function getPositionCount() {
+        return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
+    }
+    
+    public function calculateTotalPrice() {
+        $this->total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        $this->save();
+        return $this->total_price;
     }
 }

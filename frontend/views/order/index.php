@@ -36,9 +36,9 @@ $this->registerCss("
     tr:hover{cursor: pointer;}
         ");
 ?>
-<div class="box box-info">
+<div class="box box-info order-history">
     <div class="box-header with-border">
-        <h3 class="box-title">Заказы</h3>
+        <h3 class="box-title"><i class="fa fa-history"></i>  <span>История заказов</span></h3>
     </div>
     <!-- /.box-header -->
     <div class="box-body">
@@ -46,32 +46,32 @@ $this->registerCss("
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-new-count">
                 <div class="info-box-content">
-                    <span class="info-box-text">Новые</span>
                     <span class="info-box-number"><?= $newCount ?></span>
+                    <span class="info-box-text">Новые</span>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-yellow">
+            <div class="info-box bg-processing">
                 <div class="info-box-content">
-                    <span class="info-box-text">Выполняются</span>
                     <span class="info-box-number"><?= $processingCount ?></span>
+                    <span class="info-box-text">Выполняются</span>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-fulfilled-count">
                 <div class="info-box-content">
-                    <span class="info-box-text">Завершено</span>
                     <span class="info-box-number"><?= $fulfilledCount ?></span>
+                    <span class="info-box-text">Завершено</span>
                 </div>
             </div>    
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
+                    <span class="info-box-number"><?= isset($totalPrice) ? $totalPrice : '0' ?> руб</span>
                     <span class="info-box-text">Всего выполнено на сумму</span>
-                    <span class="info-box-number"><?= $totalPrice ?> руб</span>
                 </div>
             </div>    
         </div>
@@ -89,19 +89,25 @@ $form = ActiveForm::begin([
             'method' => 'get',
         ]);
 ?>
-        <?= $form->field($searchModel, 'status')->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter']) ?>
+        <?= $form->field($searchModel, 'status')
+        ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter'])
+        ->label('Статус') ?>
         <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            echo $form->field($searchModel, 'vendor_id')->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter']);
+            echo $form->field($searchModel, 'vendor_id')
+                    ->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter'])
+                    ->label('Поставщики');
         } else {
-            echo $form->field($searchModel, 'client_id')->dropDownList($organization->getClients(), ['id' => 'orgFilter']);
+            echo $form->field($searchModel, 'client_id')
+                    ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
+                    ->label('Рестораны');
         } ?>
         <div class="form-group" style="width: 300px; height: 44px;">
         <?= DatePicker::widget([
                                                         'model' => $searchModel,
                                                         'attribute' => 'date_from',
                                                         'attribute2' => 'date_to',
-                                                        'options' => ['placeholder' => 'Start date', 'id' => 'dateFrom'],
-                                                        'options2' => ['placeholder' => 'End date', 'id' => 'dateTo'],
+                                                        'options' => ['placeholder' => 'Начальная дата', 'id' => 'dateFrom'],
+                                                        'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
                                                         'type' => DatePicker::TYPE_RANGE,
                                                         
                                                         'pluginOptions' => [
@@ -114,6 +120,7 @@ $form = ActiveForm::begin([
         <?php ActiveForm::end(); ?>
         <?=
         GridView::widget([
+            'id' => 'orderHistory',
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
             'filterPosition' => false,
@@ -175,7 +182,7 @@ $form = ActiveForm::begin([
                                 $statusClass = 'label-danger';
                                 break;
                         }
-                        return '<span class="label ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';
+                        return '<span class="label ' . $statusClass . ' status">' . Order::statusText($data->status) . '</span>';
                     },
                     'label' => 'Статус',
                 ],

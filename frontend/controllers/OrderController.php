@@ -150,7 +150,7 @@ class OrderController extends DefaultController {
         } else {
             $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
             if (!$product) {
-                return true;//$this->renderAjax('_orders', compact('orders'));
+                return true; //$this->renderAjax('_orders', compact('orders'));
             }
             $product_id = $product->id;
             $product_name = $product->product;
@@ -197,8 +197,9 @@ class OrderController extends DefaultController {
             $position->save();
         }
         //$orders = $client->getCart();
+        $alteringOrder->calculateTotalPrice();
 
-        return true;//$this->renderPartial('_orders', compact('orders'));
+        return true; //$this->renderPartial('_orders', compact('orders'));
     }
 
     public function actionAjaxRemovePosition() {
@@ -217,11 +218,12 @@ class OrderController extends DefaultController {
                     $order->delete();
                 }
             }
+            $order->calculateTotalPrice();
         }
 
         //$orders = $client->getCart();
 
-        return true;//$this->renderPartial('_orders', compact('orders'));
+        return true; //$this->renderPartial('_orders', compact('orders'));
     }
 
     public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null) {
@@ -239,10 +241,11 @@ class OrderController extends DefaultController {
                     $position->save();
                 }
             }
+            $order->calculateTotalPrice();
             //$orders = $client->getCart();
-            return true;//$this->renderPartial('_orders', compact('orders'));
+            return true; //$this->renderPartial('_orders', compact('orders'));
         }
-        
+
         if (Yii::$app->request->get()) {
             $order = Order::findOne(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             foreach ($order->orderContent as $position) {
@@ -255,29 +258,53 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxMakeOrder($all = false) {
+    public function actionAjaxMakeOrder() {
         $client = $this->currentUser->organization;
-        
+
         if (Yii::$app->request->post()) {
-            if (!$all) {
+            if (!Yii::$app->request->post('all')) {
                 $order_id = Yii::$app->request->post('id');
                 $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
                 if ($order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                    $order->createdBy = $this->currentUser->id;
+                    $order->created_by_id = $this->currentUser->id;
                     $order->save();
                 }
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
                 foreach ($orders as $order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                    $order->createdBy = $this->currentUser->id;
+                    $order->created_by_id = $this->currentUser->id;
                     $order->save();
                 }
             }
             return true;
         }
-        
+
+        return false;
+    }
+
+    public function actionAjaxDeleteOrder() {
+        $client = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            if (!Yii::$app->request->post('all')) {
+                $order_id = Yii::$app->request->post('id');
+                $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                if ($order) {
+                    OrderContent::deleteAll(['order_id' => $order->id]);
+                    $order->delete();
+                }
+            } else {
+                $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                foreach ($orders as $order) {
+                    OrderContent::deleteAll(['order_id' => $order->id]);
+                    $order->delete();
+                }
+            }
+            return true;
+        }
+
         return false;
     }
 
@@ -286,7 +313,7 @@ class OrderController extends DefaultController {
         $orders = $client->getCart();
         return $this->renderAjax('_cart', compact('orders'));
     }
-    
+
     public function actionIndex() {
         $searchModel = new OrderSearch();
         $today = new \DateTime();
@@ -360,13 +387,9 @@ class OrderController extends DefaultController {
                         $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
                     }
                 }
-                $totalPrice = 0;
-                foreach ($order->orderContent as $position) {
-                    $totalPrice += ($position->price * $position->quantity);
-                }
-                $order->total_price = $totalPrice;
-                $order->save();
-                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('order', 'organizationType'))];
+                $order->calculateTotalPrice(); //saves too
+                // $order->save();
+                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('user', 'order', 'organizationType'))];
             } else {
                 return ['output' => '', 'message' => ''];
             }
@@ -391,25 +414,21 @@ class OrderController extends DefaultController {
             if ($model->load($post)) {
                 $model->save();
                 $order = $model->order;
-                $totalPrice = 0;
-                foreach ($order->orderContent as $position) {
-                    $totalPrice += ($position->price * $position->quantity);
-                }
-                $order->total_price = $totalPrice;
+                $order->calculateTotalPrice();
                 $order->save();
                 return [
-                    'output' => $model->quantity, 
-                    'message' => '', 
-                    'positionTotal' => $model->price * $model->quantity, 
-                    'positionId' => $model->id, 
+                    'output' => $model->quantity,
+                    'message' => '',
+                    'positionTotal' => $model->price * $model->quantity,
+                    'positionId' => $model->id,
                     'orderId' => $order->id,
-                    'orderTotal' => $totalPrice
-                        ];
+                    'orderTotal' => $order->total_price,
+                ];
             } else {
                 return ['output' => '', 'message' => ''];
             }
         }
-        
+
         return $this->render('checkout', compact('orders'));
     }
 
@@ -448,26 +467,9 @@ class OrderController extends DefaultController {
     public function actionSendMessage() {
         $user = $this->currentUser;
         if (Yii::$app->request->post() && Yii::$app->request->post('message')) {
-            $name = $user->profile->full_name;
             $message = Yii::$app->request->post('message');
-            $channel = 'order' . Yii::$app->request->post('order_id');
-            $newMessage = new OrderChat();
-            $newMessage->order_id = Yii::$app->request->post('order_id');
-            $newMessage->sent_by_id = $user->id;
-            $newMessage->message = $message;
-            $newMessage->save();
-
-            $body = $this->renderPartial('_chat-message', [
-                'name' => $name,
-                'message' => $newMessage->message,
-                'time' => $newMessage->created_at,
-                'isSystem' => 0,
-            ]);
-
-            return Yii::$app->redis->executeCommand('PUBLISH', [
-                        'channel' => 'chat',
-                        'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
-            ]);
+            $order_id = Yii::$app->request->post('order_id');
+            $this->sendChatMessage($user, $order_id, $message);
         }
     }
 
@@ -477,6 +479,45 @@ class OrderController extends DefaultController {
             $organizationType = $this->currentUser->organization->type_id;
             return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
         }
+    }
+
+    private function sendChatMessage($user, $order_id, $message) {
+        //  $channel = 'order' . Yii::$app->request->post('order_id');
+        $newMessage = new OrderChat();
+        $newMessage->order_id = $order_id;
+        $newMessage->sent_by_id = $user->id;
+        $newMessage->message = $message;
+        $newMessage->save();
+        $name = $user->profile->full_name;
+
+        $body = $this->renderPartial('_chat-message', [
+            'name' => $name,
+            'message' => $newMessage->message,
+            'time' => $newMessage->created_at,
+            'isSystem' => 0,
+        ]);
+
+        $order = Order::findOne(['id' => $order_id]);
+
+        $clientUsers = $order->client->users;
+        $vendorUsers = $order->vendor->users;
+
+        foreach ($clientUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
+            ]);
+        }
+        foreach ($vendorUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
+            ]);
+        }
+
+        return true;
     }
 
     private function sendSystemMessage($user_id, $order_id, $message) {

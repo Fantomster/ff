@@ -20,7 +20,7 @@ $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $js = <<<JS
 
-    socket.on('order$order->id', function (data) {
+    socket.on('user$user->id', function (data) {
 
         var message = JSON.parse(data);
 

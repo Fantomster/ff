@@ -165,4 +165,10 @@ class Order extends \yii\db\ActiveRecord
     public function getPositionCount() {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
     }
+    
+    public function calculateTotalPrice() {
+        $this->total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        $this->save();
+        return $this->total_price;
+    }
 }

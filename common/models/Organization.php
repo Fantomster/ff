@@ -22,6 +22,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
+ * @property User $users
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -219,4 +220,10 @@ class Organization extends \yii\db\ActiveRecord {
         return Order::find()->where(['client_id' => $this->id, 'status' => Order::STATUS_FORMING])->all();
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUsers() {
+        return $this->hasMany(User::className(), ['organization_id' => 'id']);
+    }
 }

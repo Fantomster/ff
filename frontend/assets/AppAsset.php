@@ -27,5 +27,4 @@ class AppAsset extends AssetBundle {
         'fedemotta\datatables\DataTablesAsset',
         '\rmrevin\yii\fontawesome\AssetBundle',
     ];
-
 }

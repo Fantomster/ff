@@ -1198,7 +1198,144 @@ class VendorController extends DefaultController {
     }
 
     public function actionAnalytics() {
-        return $this->render('/site/underConstruction');
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $header_info_zakaz   = \common\models\Order::find()->
+                where(['vendor_id'=>$currentUser->organization_id])->count();
+        $header_info_clients = \common\models\RelationSuppRest::find()->
+                where(['supp_org_id'=>$currentUser->organization_id])->count();
+        $header_info_prodaji = \common\models\Order::find()->
+                where(['vendor_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])->count();
+        $header_info_poziciy = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
+                where(['in','order_id',\common\models\Order::find()->select('id')->where(['vendor_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])])->one()->quantity;
+        
+        $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
+                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                    select('rest_org_id')->
+                        where(['supp_org_id'=>$currentUser->organization_id,'invite'=>'1'])])->all(),'id','name');
+        $filter_status="";
+        $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
+        $filter_to_date = date("d-m-Y");
+        $filter_client = "";
+        //Продажи по продуктам
+        $query = Yii::$app->db->createCommand("
+            SELECT sum(price) as price, product_id FROM order_content WHERE order_id in (
+                SELECT id from `order` where 
+                (DATE_FORMAT(created_at,'%d-%m-%Y') between '" . 
+                $filter_from_date . "' and '" . $filter_to_date . "')" .
+                " and vendor_id = " . $currentUser->organization_id . 
+                ") group by product_id");
+        var_dump($query->sql);
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            //'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'product_id',
+                    'price'
+                ],
+            ],
+        ]);
+        if (Yii::$app->request->isAjax) {
+            
+                $filter_status=trim(\Yii::$app->request->get('filter_status'));
+                $filter_from_date=trim(\Yii::$app->request->get('filter_from_date'));
+                $filter_to_date=trim(\Yii::$app->request->get('filter_to_date'));
+                $filter_client=trim(\Yii::$app->request->get('filter_client'));
+                
+                $where ="";
+                empty($filter_status)?"":$where .= " and status='" . $filter_status . "'"; 
+                empty($filter_client)?"":$where .= " and client_id='" . $filter_client . "'";
+                // Объем продаж чарт
+                $area_chart = Yii::$app->db->createCommand("SELECT created_at,
+                (select sum(total_price) FROM `order` 
+                where DATE_FORMAT(created_at,'%m-%d-%Y') = tb.created_at and 
+                vendor_id = $currentUser->organization_id and ("
+                        . "DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                        $where . 
+                    ") AS `total_price`  
+                FROM (SELECT distinct(DATE_FORMAT(created_at,'%m-%d-%Y')) AS `created_at` 
+                FROM `order` where 
+                vendor_id = $currentUser->organization_id and("
+                        . "DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
+                $arr_create_at =[];
+                $arr_price =[];
+                foreach($area_chart as $area_charts){
+                    array_push($arr_create_at, $area_charts['created_at']);    
+                    array_push($arr_price, $area_charts['total_price']); 
+                }        
+        $query = Yii::$app->db->createCommand("
+            SELECT sum(price) as price, product_id FROM order_content WHERE order_id in (
+                SELECT id from `order` where 
+                (DATE_FORMAT(created_at,'%d-%m-%Y') between '" . 
+                $filter_from_date . "' and '" . $filter_to_date . "')" .
+                " and vendor_id = " . $currentUser->organization_id . 
+                $where . 
+                ") group by product_id"); 
+        var_dump($query->sql);
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            //'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'product_id',
+                    'price'
+                ],
+            ],
+        ]);
+                return $this->render('analytics/index',
+                compact('filter_restaurant',
+                        'header_info_zakaz',
+                        'header_info_clients',
+                        'header_info_prodaji',
+                        'header_info_poziciy',
+                        'filter_status',
+                        'filter_from_date',
+                        'filter_to_date',
+                        'filter_client',
+                        'arr_create_at',
+                        'arr_price',
+                        'dataProvider'
+                        ));        
+        }
+        
+        //Выборка - ВСЕ ЗАКАЗЫ за выбранные даты
+        $area_chart = Yii::$app->db->createCommand("SELECT created_at,
+        (select sum(total_price) FROM `order` 
+        where DATE_FORMAT(created_at,'%m-%d-%Y') = tb.created_at) AS `total_price`  
+        FROM (SELECT distinct(DATE_FORMAT(created_at,'%m-%d-%Y')) AS `created_at` 
+        FROM `order`)`tb`")->queryAll();
+        $arr_create_at =[];
+        $arr_price =[];
+        foreach($area_chart as $area_charts){
+            array_push($arr_create_at, $area_charts['created_at']);    
+            array_push($arr_price, $area_charts['total_price']); 
+        }
+        
+        
+        return $this->render('analytics/index',
+        compact('filter_restaurant',
+                'header_info_zakaz',
+                'header_info_clients',
+                'header_info_prodaji',
+                'header_info_poziciy',
+                'filter_status',
+                'filter_from_date',
+                'filter_to_date',
+                'filter_client',
+                'arr_create_at',
+                'arr_price',
+                'dataProvider'
+                ));
     }
 
     public function actionTutorial() {

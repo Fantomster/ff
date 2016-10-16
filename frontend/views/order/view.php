@@ -149,6 +149,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                         ],
                     ],
                         ] : [
+                            'format' => 'raw',
                     'attribute' => 'price',
                     'value' => function($data) {
                         return $data->price . ' <i class="fa fa-fw fa-rub"></i>';

@@ -140,6 +140,7 @@ $this->registerJs(
                                 'label' => 'Название продукта',
                             ],
                             [
+                                'format' => 'raw',
                                 'attribute' => 'price',
                                 'value' => function($data) {
                                     return $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];

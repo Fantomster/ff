@@ -17,7 +17,9 @@ $columns = [
     [
     'attribute' => 'product_id',
     'label'=>'Товар',
-    'value'=>'product_id',
+    'value'=>function ($data) {
+        return \common\models\CatalogBaseGoods::find()->where(['id'=>$data['product_id']])->one()->product;
+    },
     'contentOptions' => ['style' => 'vertical-align:middle;'],
     ],
     [

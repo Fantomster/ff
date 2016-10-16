@@ -1297,8 +1297,8 @@ class VendorController extends DefaultController {
         $arr_clients_price =[];
                 foreach($clients_query as $clients_querys){
                     $arr = array(
-                    'value' => $clients_querys['client_id'],
-                    'label' => $clients_querys['total_price'],
+                    'value' => $clients_querys['total_price'],
+                    'label' => \common\models\Organization::find()->where(['id'=>$clients_querys['client_id']])->one()->name,
                     'color' => hex()
                     );
                     array_push($arr_clients_price, $arr);
@@ -1348,16 +1348,18 @@ class VendorController extends DefaultController {
                 date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
                 " and vendor_id = " . $currentUser->organization_id . 
                 " group by client_id")->queryAll();
-        $arr_clients_price =[];
+                $arr_clients_price =[];
                 foreach($clients_query as $clients_querys){
                     $arr = array(
-                    'value' => $clients_querys['client_id'],
-                    'label' => $clients_querys['total_price'],
+                    //'value' => \common\models\Organization::find()->where(['id'=>$clients_querys['client_id']])->one()->name,
+                    'value' => $clients_querys['total_price'],
+                    'label' => \common\models\Organization::find()->where(['id'=>$clients_querys['client_id']])->one()->name,
                     'color' => hex()
                     );
                     array_push($arr_clients_price, $arr);
                 } 
-        $arr_clients_price = json_encode($arr_clients_price); 
+                
+        $arr_clients_price = json_encode($arr_clients_price, JSON_UNESCAPED_UNICODE); 
         //Выборка - ВСЕ ЗАКАЗЫ за выбранные даты
         $area_chart = Yii::$app->db->createCommand("SELECT created_at,
         (select sum(total_price) FROM `order` 

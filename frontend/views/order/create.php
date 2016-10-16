@@ -142,7 +142,7 @@ $this->registerJs(
                             [
                                 'attribute' => 'price',
                                 'value' => function($data) {
-                                    return $data['price'] . ' руб / ' . $data['units'];
+                                    return $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
                                 },
                                 'label' => 'Цена'
                             ],

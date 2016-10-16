@@ -71,7 +71,7 @@ $this->registerCss("
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
-                    <span class="info-box-number"><?= isset($totalPrice) ? $totalPrice : '0' ?> руб</span>
+                    <span class="info-box-number"><?= isset($totalPrice) ? $totalPrice : '0' ?> <i class="fa fa-fw fa-rub"></i></span>
                     <span class="info-box-text">Всего выполнено на сумму</span>
                 </div>
             </div>    

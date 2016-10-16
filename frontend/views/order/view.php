@@ -125,7 +125,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                     'pageSummary' => true,
                     'readonly' => false,
                     'content' => function($data) {
-                        return '<div class="text_content">' . htmlentities($data->price) . ' руб</div>';
+                        return '<div class="text_content">' . htmlentities($data->price) . ' <i class="fa fa-fw fa-rub"></i></div>';
                     },
                     'editableOptions' => [
                         'header' => 'Цена',
@@ -151,7 +151,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                         ] : [
                     'attribute' => 'price',
                     'value' => function($data) {
-                        return $data->price . ' руб';
+                        return $data->price . ' <i class="fa fa-fw fa-rub"></i>';
                     },
                     'label' => 'Цена',
                         ],

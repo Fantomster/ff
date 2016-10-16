@@ -213,12 +213,13 @@ class OrderController extends DefaultController {
                 if ($position->product_id == $post['product_id']) {
                     $position->delete();
                 }
-                $test = $order->positionCount;
                 if (!($order->positionCount)) {
-                    $order->delete();
+                    $orderDeleted = $order->delete();
                 }
             }
-            $order->calculateTotalPrice();
+            if (!$orderDeleted) {
+                $order->calculateTotalPrice();
+            }
         }
 
         //$orders = $client->getCart();

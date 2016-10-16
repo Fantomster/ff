@@ -37,15 +37,12 @@ class OrderController extends DefaultController {
                     'create',
                     'send-message',
                     'ajax-add-to-cart',
-                    'ajax-categories',
                     'ajax-clear-order',
                     'ajax-make-order',
-                    'ajax-modify-cart',
                     'ajax-order-action',
                     'ajax-order-refresh',
                     'ajax-refresh-buttons',
                     'ajax-show-order',
-                    'ajax-vendors',
                 ],
                 'rules' => [
 //                    [
@@ -83,13 +80,10 @@ class OrderController extends DefaultController {
                         'actions' => [
                             'create',
                             'ajax-add-to-cart',
-                            'ajax-categories',
                             'ajax-clear-order',
                             'ajax-make-order',
                             'ajax-modify-cart',
                             'ajax-order-refresh',
-                            'ajax-show-order',
-                            'ajax-vendors',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -107,8 +101,7 @@ class OrderController extends DefaultController {
     }
 
     public function actionCreate() {
-        $session = Yii::$app->session;
-//        $session->remove('orders');
+
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
@@ -117,8 +110,6 @@ class OrderController extends DefaultController {
         $selectedVendor = null;
         $searchString = '';
 
-//        $post = Yii::$app->request->post();
-//
         if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
             $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
@@ -132,11 +123,7 @@ class OrderController extends DefaultController {
 
         $dataProvider = $searchModel->search($params);
 
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
+        $orders = $client->getCart();
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
@@ -145,48 +132,11 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxCategories() {
-        $session = Yii::$app->session;
-        $client = $this->currentUser->organization;
-
-        $categories = $session['categories'];
-        $post = Yii::$app->request->post();
-        foreach ($categories as &$category) {
-            if ($category['id'] == $post['id']) {
-                $category['selected'] = $post['selected'];
-            }
-        }
-        $vendors = $client->getSuppliers($categories);
-        for ($i = 0; $i < count($vendors); $i++) {
-            $vendors[$i]['selected'] = 1;
-        }
-        $session['categories'] = $categories;
-        $session['vendors'] = $vendors;
-
-        return $this->renderPartial('_vendors', compact('vendors'));
-    }
-
-    public function actionAjaxVendors() {
-        $session = Yii::$app->session;
-        $client = $this->currentUser->organization;
-
-        $vendors = $session['vendors'];
-        $post = Yii::$app->request->post();
-        foreach ($vendors as &$vendor) {
-            if ($vendor['id'] == $post['id']) {
-                $vendor['selected'] = $post['selected'];
-            }
-        }
-        $session['vendors'] = $vendors;
-    }
-
     public function actionAjaxAddToCart() {
-        $session = Yii::$app->session;
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
+
+        $client = $this->currentUser->organization;
+        $orders = $client->getCart();
+
         $post = Yii::$app->request->post();
         $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
 
@@ -195,167 +145,173 @@ class OrderController extends DefaultController {
             $price = $product->price;
             $product_name = $product->baseProduct->product;
             $vendor = $product->organization;
+            $units = $product->baseProduct->units;
+            $article = $product->baseProduct->article;
         } else {
             $product = CatalogBaseGoods::findOne(['id' => $post['id'], 'cat_id' => $post['cat_id']]);
             if (!$product) {
-                return $this->renderAjax('_orders', compact('orders'));
+                return true; //$this->renderAjax('_orders', compact('orders'));
             }
             $product_id = $product->id;
             $product_name = $product->product;
             $price = $product->price;
             $vendor = $product->vendor;
+            $units = $product->units;
+            $article = $product->article;
         }
         $quantity = (int) $post['quantity'];
-        $newOrder = true;
-        foreach ($orders as &$order) {
-            if ($order['vendor_id'] == $vendor->id) {
-                $newOrder = false;
-                $newProduct = true;
-                foreach ($order['content'] as &$prod) {
-                    if ($prod['product_id'] == $product_id) {
-                        $newProduct = false;
-                        $prod['quantity'] += $quantity;
-                    }
-                }
-                if ($newProduct) {
-                    $order['content'][$product_id] = [
-                        'product_id' => $product_id,
-                        'product_name' => $product_name,
-                        'quantity' => $quantity,
-                        'price' => $price];
-                }
+        $isNewOrder = true;
+
+        foreach ($orders as $order) {
+            if ($order->vendor_id == $vendor->id) {
+                $isNewOrder = false;
+                $alteringOrder = $order;
             }
         }
-        if ($newOrder) {
-            $orders[$vendor->id] = [
-                'vendor_id' => $vendor->id,
-                'vendor_name' => $vendor->name,
-                'content' => [$product_id => [
-                        'product_id' => $product_id,
-                        'product_name' => $product_name,
-                        'quantity' => $quantity,
-                        'price' => $price]]
-            ];
+        if ($isNewOrder) {
+            $newOrder = new Order();
+            $newOrder->client_id = $client->id;
+            $newOrder->vendor_id = $vendor->id;
+            $newOrder->status = Order::STATUS_FORMING;
+            $newOrder->save();
+            $alteringOrder = $newOrder;
         }
-        $session['orders'] = $orders;
-        return $this->renderAjax('_orders', compact('orders'));
+
+        $isNewPosition = true;
+        foreach ($alteringOrder->orderContent as $position) {
+            if ($position->product_id == $product_id) {
+                $position->quantity += $quantity;
+                $position->save();
+                $isNewPosition = false;
+            }
+        }
+        if ($isNewPosition) {
+            $position = new OrderContent();
+            $position->order_id = $alteringOrder->id;
+            $position->product_id = $product_id;
+            $position->quantity = $quantity;
+            $position->price = $price;
+            $position->product_name = $product_name;
+            $position->units = $units;
+            $position->article = $article;
+            $position->save();
+        }
+        //$orders = $client->getCart();
+        $alteringOrder->calculateTotalPrice();
+
+        return true; //$this->renderPartial('_orders', compact('orders'));
     }
 
-    public function actionAjaxModifyCart() {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
-        $post = Yii::$app->request->post();
-        $newContent = $post['content'];
+    public function actionAjaxRemovePosition() {
 
-        if (isset($orders[$post['vendor_id']])) {
-            foreach ($orders[$post['vendor_id']]['content'] as &$product) {
-                if (isset($newContent[$product['product_id']])) {
-                    $product['quantity'] = $newContent[$product['product_id']]['quantity'];
+        $client = $this->currentUser->organization;
+        $post = Yii::$app->request->post();
+
+        if ($post && $post['vendor_id'] && $post['product_id']) {
+            $order = Order::find()->where(['vendor_id' => $post['vendor_id'], 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+            foreach ($order->orderContent as $position) {
+                if ($position->product_id == $post['product_id']) {
+                    $position->delete();
                 }
-                if ($product['quantity'] == 0) {
-                    unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
+                $test = $order->positionCount;
+                if (!($order->positionCount)) {
+                    $order->delete();
                 }
             }
-            if (empty($orders[$post['vendor_id']]['content'])) {
-                unset($orders[$post['vendor_id']]);
-                $session['orders'] = $orders;
-                $message = "Заказ отменен!";
-                return $this->renderAjax('_order-message', compact('message'));
-            }
-            $showOrder = $orders[$post['vendor_id']];
+            $order->calculateTotalPrice();
         }
-        $session['orders'] = $orders;
-        return $this->renderAjax('_show-order', compact('showOrder'));
+
+        //$orders = $client->getCart();
+
+        return true; //$this->renderPartial('_orders', compact('orders'));
+    }
+
+    public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null) {
+
+        $client = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            $quantity = Yii::$app->request->post('quantity');
+            $product_id = Yii::$app->request->post('product_id');
+            $vendor_id = Yii::$app->request->post('vendor_id');
+            $order = Order::find()->where(['vendor_id' => Yii::$app->request->post('vendor_id'), 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+            foreach ($order->orderContent as $position) {
+                if ($position->product_id == $product_id) {
+                    $position->quantity = $quantity;
+                    $position->save();
+                }
+            }
+            $order->calculateTotalPrice();
+            //$orders = $client->getCart();
+            return true; //$this->renderPartial('_orders', compact('orders'));
+        }
+
+        if (Yii::$app->request->get()) {
+            $order = Order::findOne(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            foreach ($order->orderContent as $position) {
+                if ($position->product_id == $product_id) {
+                    $quantity = $position->quantity;
+                    $product_name = $position->product_name;
+                }
+            }
+            return $this->renderAjax('_change-quantity', compact('vendor_id', 'product_id', 'quantity', 'product_name'));
+        }
     }
 
     public function actionAjaxMakeOrder() {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
-        $post = Yii::$app->request->post();
-        $newContent = $post['content'];
+        $client = $this->currentUser->organization;
 
-        if (isset($orders[$post['vendor_id']])) {
-            foreach ($orders[$post['vendor_id']]['content'] as &$product) {
-                if (isset($newContent[$product['product_id']])) {
-                    $product['quantity'] = $newContent[$product['product_id']]['quantity'];
+        if (Yii::$app->request->post()) {
+            if (!Yii::$app->request->post('all')) {
+                $order_id = Yii::$app->request->post('id');
+                $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                if ($order) {
+                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    $order->created_by_id = $this->currentUser->id;
+                    $order->save();
                 }
-                if ($product['quantity'] == 0) {
-                    unset($orders[$post['vendor_id']]['content'][$product['product_id']]);
+            } else {
+                $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                foreach ($orders as $order) {
+                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    $order->created_by_id = $this->currentUser->id;
+                    $order->save();
                 }
             }
-            if (empty($orders[$post['vendor_id']]['content'])) {
-                unset($orders[$post['vendor_id']]);
-                $session['orders'] = $orders;
-                $message = "Заказ отменен!";
-                return $this->renderAjax('_order-message', compact('message'));
+            return true;
+        }
+
+        return false;
+    }
+
+    public function actionAjaxDeleteOrder() {
+        $client = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            if (!Yii::$app->request->post('all')) {
+                $order_id = Yii::$app->request->post('id');
+                $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                if ($order) {
+                    OrderContent::deleteAll(['order_id' => $order->id]);
+                    $order->delete();
+                }
+            } else {
+                $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+                foreach ($orders as $order) {
+                    OrderContent::deleteAll(['order_id' => $order->id]);
+                    $order->delete();
+                }
             }
+            return true;
         }
 
-        $order = new Order();
-        $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-        $order->created_by_id = $this->currentUser->id;
-        $order->client_id = $this->currentUser->organization_id;
-        $order->vendor_id = $post['vendor_id'];
-        $order->save();
-
-        $totalPrice = 0;
-        foreach ($orders[$post['vendor_id']]['content'] as $position) {
-            $orderContent = new OrderContent();
-            $orderContent->order_id = $order->id;
-            $orderContent->product_id = $position['product_id'];
-            $orderContent->quantity = $position['quantity'];
-            $orderContent->price = $position['price']; //временно для теста до фикса соответствующей модели
-            $orderContent->save();
-            $totalPrice += ($orderContent->price * $orderContent->quantity);
-        }
-
-        $order->total_price = $totalPrice;
-        $order->save();
-
-        unset($orders[$post['vendor_id']]);
-        $session['orders'] = $orders;
-
-        $message = "Заказ создан!";
-        return $this->renderAjax('_order-message', compact('message'));
+        return false;
     }
 
-    public function actionAjaxShowOrder($vendor_id) {
-        $session = Yii::$app->session;
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
-        $showOrder = [];
-        foreach ($orders as $order) {
-            if ($order['vendor_id'] == $vendor_id) {
-                $showOrder = $order;
-            }
-        }
-        return $this->renderAjax('_show-order', compact('showOrder'));
-    }
-
-    public function actionAjaxClearOrder() {
-        $session = Yii::$app->session;
-        $orders = $session['orders'];
-        $post = Yii::$app->request->post();
-
-        if (isset($orders[$post['vendor_id']])) {
-            unset($orders[$post['vendor_id']]);
-        }
-        $session['orders'] = $orders;
-        $message = "Заказ отменен!";
-        return $this->renderAjax('_order-message', compact('message'));
-    }
-
-    public function actionAjaxOrderRefresh() {
-        $session = Yii::$app->session;
-        if ($session->has('orders')) {
-            $orders = $session['orders'];
-        } else {
-            $orders = [];
-        }
-        return $this->renderAjax('_orders', compact('orders'));
+    public function actionRefreshCart() {
+        $client = $this->currentUser->organization;
+        $orders = $client->getCart();
+        return $this->renderAjax('_cart', compact('orders'));
     }
 
     public function actionIndex() {
@@ -394,6 +350,12 @@ class OrderController extends DefaultController {
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+            $this->redirect(['/order/index']);
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+            $this->redirect(['/order/checkout']);
+        }
         $organizationType = $user->organization->type_id;
         if (isset($_POST['hasEditable'])) {
             $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
@@ -425,8 +387,9 @@ class OrderController extends DefaultController {
                         $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
                     }
                 }
-                $order->save();
-                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('order', 'organizationType'))];
+                $order->calculateTotalPrice(); //saves too
+                // $order->save();
+                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('user', 'order', 'organizationType'))];
             } else {
                 return ['output' => '', 'message' => ''];
             }
@@ -437,6 +400,36 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+    }
+
+    public function actionCheckout() {
+        $client = $this->currentUser->organization;
+        $orders = $client->getCart();
+
+        if (isset($_POST['hasEditable'])) {
+            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            $posted = current($_POST['OrderContent']);
+            $post = ['OrderContent' => $posted];
+            if ($model->load($post)) {
+                $model->save();
+                $order = $model->order;
+                $order->calculateTotalPrice();
+                $order->save();
+                return [
+                    'output' => $model->quantity,
+                    'message' => '',
+                    'positionTotal' => $model->price * $model->quantity,
+                    'positionId' => $model->id,
+                    'orderId' => $order->id,
+                    'orderTotal' => $order->total_price,
+                ];
+            } else {
+                return ['output' => '', 'message' => ''];
+            }
+        }
+
+        return $this->render('checkout', compact('orders'));
     }
 
     public function actionAjaxOrderAction() {
@@ -474,26 +467,9 @@ class OrderController extends DefaultController {
     public function actionSendMessage() {
         $user = $this->currentUser;
         if (Yii::$app->request->post() && Yii::$app->request->post('message')) {
-            $name = $user->profile->full_name;
             $message = Yii::$app->request->post('message');
-            $channel = 'order' . Yii::$app->request->post('order_id');
-            $newMessage = new OrderChat();
-            $newMessage->order_id = Yii::$app->request->post('order_id');
-            $newMessage->sent_by_id = $user->id;
-            $newMessage->message = $message;
-            $newMessage->save();
-
-            $body = $this->renderPartial('_chat-message', [
-                'name' => $name,
-                'message' => $newMessage->message,
-                'time' => $newMessage->created_at,
-                'isSystem' => 0,
-            ]);
-
-            return Yii::$app->redis->executeCommand('PUBLISH', [
-                        'channel' => 'chat',
-                        'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
-            ]);
+            $order_id = Yii::$app->request->post('order_id');
+            $this->sendChatMessage($user, $order_id, $message);
         }
     }
 
@@ -503,6 +479,45 @@ class OrderController extends DefaultController {
             $organizationType = $this->currentUser->organization->type_id;
             return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
         }
+    }
+
+    private function sendChatMessage($user, $order_id, $message) {
+        //  $channel = 'order' . Yii::$app->request->post('order_id');
+        $newMessage = new OrderChat();
+        $newMessage->order_id = $order_id;
+        $newMessage->sent_by_id = $user->id;
+        $newMessage->message = $message;
+        $newMessage->save();
+        $name = $user->profile->full_name;
+
+        $body = $this->renderPartial('_chat-message', [
+            'name' => $name,
+            'message' => $newMessage->message,
+            'time' => $newMessage->created_at,
+            'isSystem' => 0,
+        ]);
+
+        $order = Order::findOne(['id' => $order_id]);
+
+        $clientUsers = $order->client->users;
+        $vendorUsers = $order->vendor->users;
+
+        foreach ($clientUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
+            ]);
+        }
+        foreach ($vendorUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
+            ]);
+        }
+
+        return true;
     }
 
     private function sendSystemMessage($user_id, $order_id, $message) {

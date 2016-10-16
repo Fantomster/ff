@@ -77,9 +77,21 @@ $gridColumnsCatalog = [
         'contentOptions' => ['class' => ''],
         'format' => 'raw',
         'value'=>function ($data) {
-                $status_invite = $data->invite==0 ? '<span class="text-danger">Ожидается<br>подтверждение</span>':'<span class="text-primary">Подтвержден</span>';
-                return $status_invite;
-                },
+            /*$res = 1==2?1:2==1?2:1;
+            if(1==2){$res =  1;}else{if(2==1){$res =  2;}else{$res =  1;}}*/
+            if($data->invite==0){ 
+            $res = '<span class="text-danger">Ожидается<br>подтверждение</span>';
+            }else{
+                if(\common\models\User::find()->where(['email'=>\common\models\Organization::find()->
+                    where(['id'=>$data->supp_org_id])->one()->email])->exists())
+                    {    
+                        $res = '<span class="text-warning">Подтвержден /<br> Не авторизован</span>';
+                    }else{
+                        $res = '<span class="text-primary">Подтвержден</span>';
+                    }
+                } 
+                return $res;
+            },
         ],
         [
         'label'=>'Каталог',
@@ -502,17 +514,18 @@ $("body").on("hidden.bs.modal", "#view-supplier", function() {
 $("body").on("hidden.bs.modal", "#view-catalog", function() {
     $(this).data("bs.modal", null);
 })
-$("#view-supplier").on("click", ".save-form", function() {        
+$("#view-supplier").on("click", ".save-form", function() {      
+        
     var form = $("#supplier-form");
-    console.log(form.serialize())
     $.ajax({
     url: form.attr("action"),
     type: "POST",
-    //dataType: "json",
     data: form.serialize(),
     cache: false,
     success: function(response) {
+        $.pjax.reload({container: "#sp-list"});
             form.replaceWith(response);
+                  
         },
         failure: function(errMsg) {
         console.log(errMsg);

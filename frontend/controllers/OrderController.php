@@ -322,6 +322,7 @@ class OrderController extends DefaultController {
         $params = Yii::$app->request->getQueryParams();
         $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
             $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
             $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
@@ -329,6 +330,7 @@ class OrderController extends DefaultController {
             $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and client_id=' . $organization->id)->queryOne();
             $totalPrice = $query['total'];
         } else {
+            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
             $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();

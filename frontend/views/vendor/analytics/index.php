@@ -12,24 +12,7 @@ $this->registerCss('
 }
 ');
 ?>
-<?php 
-$columns = [
-    [
-    'attribute' => 'product_id',
-    'label'=>'Товар',
-    'value'=>function ($data) {
-        return \common\models\CatalogBaseGoods::find()->where(['id'=>$data['product_id']])->one()->product;
-    },
-    'contentOptions' => ['style' => 'vertical-align:middle;'],
-    ],
-    [
-    'attribute' => 'price',
-    'label'=>'Итого',
-    'value'=>'price',
-    'contentOptions' => ['style' => 'vertical-align:middle;'],
-    ]
-];
-?>
+
 <div class="box box-info">
     <div class="box-header with-border">
       <div class="col-md-12">
@@ -181,7 +164,28 @@ HTML;
             </div>
             <div class="box-body" style="display: block;">
             
-             <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
+             <?php // Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
+             <?php 
+            
+            $columns = [
+                [
+                'attribute' => 'product_id',
+                'label'=>'Товар',
+                'value'=>function ($data) {
+                    return \common\models\CatalogBaseGoods::find()->where(['id'=>$data['product_id']])->one()->product;
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle;'],
+                'footer'=>'ИТОГО: ',
+                ],
+                [
+                'attribute' => 'price',
+                'label'=>'Итого',
+                'value'=>'price',
+                'contentOptions' => ['style' => 'vertical-align:middle;'],
+                'footer'=>$total_price,
+                ]
+            ];
+            ?>
              <?=GridView::widget([
             'dataProvider' => $dataProvider,
             'filterPosition' => false,
@@ -197,7 +201,7 @@ HTML;
 'columns' =>$columns,
             ]);
             ?> 
-            <?php Pjax::end(); ?>
+            <?php // Pjax::end(); ?>
             </div>
             <!-- /.box-body -->
           </div>

@@ -237,6 +237,7 @@ var areaChartData = {
         }
       ]
     };
+
 var areaChartOptions = {
       //Boolean - If we should show the scale at all
       showScale: true,
@@ -282,6 +283,16 @@ var areaChartOptions = {
 var pieData = $arr_clients_price;
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData);
+if(1 < areaChartData.labels.length) {
+    chart = new Chart(areaChartOptions.ctx).Line(chartData, areaChartOptions.chartOptions);
+} else {
+    areaChartOptions.ctx.font = "20px " + Chart.defaults.global.tooltipTitleFontFamily;
+    areaChartOptions.ctx.textAlign = "center";
+    areaChartOptions.ctx.textBaseline = "middle";
+    areaChartOptions.ctx.fillStyle = Chart.defaults.global.scaleFontColor;
+    areaChartOptions.ctx.fillText("No data in chart.");
+}
+        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

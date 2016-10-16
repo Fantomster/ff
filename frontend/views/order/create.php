@@ -125,7 +125,8 @@ $this->registerJs(
                         'filterModel' => $searchModel,
                         'filterPosition' => false,
                         'summary' => '',
-                        'tableOptions' => ['class' => 'table no-margin table-hover'],
+                        //'tableOptions' => ['class' => 'table no-margin table-hover'],
+                        'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
                         'options' => ['class' => 'table-responsive'],
                         'columns' => [
                             [
@@ -139,16 +140,17 @@ $this->registerJs(
                                 'label' => 'Название продукта',
                             ],
                             [
+                                'format' => 'raw',
                                 'attribute' => 'price',
                                 'value' => function($data) {
-                                    return $data['price'] . ' руб / ' . $data['units'];
+                                    return $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
                                 },
                                 'label' => 'Цена'
                             ],
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::textInput('', 1, ['class' => 'quantity']);
+                                    return Html::textInput('', 1, ['class' => 'quantity form-control', 'style'=>'width: 200px;']);
                                 },
                                         'label' => 'Количество'
                                     ],

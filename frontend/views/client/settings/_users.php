@@ -86,6 +86,8 @@ GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
     'filterPosition' => false,
+    'options' => ['class' => 'table-responsive'],
+    'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
     'columns' => [
         [
             'attribute' => 'profile.full_name',

@@ -17,8 +17,8 @@ echo Html::hiddenInput('product_id', $product_id);
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Изменить количество</h4>
 </div>
-<div class="modal-body">
-    <?= Html::label($product_name) ?>
+<div class="modal-body form-inline" style="text-align: center;"> 
+    <?= Html::label("<b>$product_name</b> ($vendor_name)") ?>
                     <?=
                         TouchSpin::widget([
                             'name' => "quantity",

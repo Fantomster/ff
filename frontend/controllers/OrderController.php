@@ -248,13 +248,14 @@ class OrderController extends DefaultController {
 
         if (Yii::$app->request->get()) {
             $order = Order::findOne(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            $vendor_name = $order->vendor->name;
             foreach ($order->orderContent as $position) {
                 if ($position->product_id == $product_id) {
                     $quantity = $position->quantity;
                     $product_name = $position->product_name;
                 }
             }
-            return $this->renderAjax('_change-quantity', compact('vendor_id', 'product_id', 'quantity', 'product_name'));
+            return $this->renderAjax('_change-quantity', compact('vendor_id', 'product_id', 'quantity', 'product_name', 'vendor_name'));
         }
     }
 

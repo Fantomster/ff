@@ -15,7 +15,8 @@ echo GridView::widget([
     'id' => isset($any) ? 'orderContent' . $any['order_id'] : '',
     'dataProvider' => $dataProvider,
     'summary' => '',
-    'tableOptions' => ['class' => 'table no-margin table-hover'],
+    //'tableOptions' => ['class' => 'table no-margin table-hover'],
+    'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
     'options' => ['class' => 'table-responsive'],
     'panel' => false,
     'bootstrap' => false,
@@ -26,7 +27,7 @@ echo GridView::widget([
             'value' => function($data) {
                 return "<div class='grid-prod'>" . $data['product_name'] . "</div><div class='grid-article'>артикул: "
                         . $data['article'] . "</div><div>"
-                        . $data['price'] . ' руб / ' . $data['units'] . "</div>";
+                        . $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'] . "</div>";
             },
             'label' => 'Название продукта',
         ],
@@ -72,7 +73,7 @@ echo GridView::widget([
                     'format' => 'raw',
                     'value' => function($data) {
                         $total = $data['price'] * $data['quantity'];
-                        return "<span id=total$data[id]>$total</span> руб";
+                        return "<span id=total$data[id]>$total</span> ".'<i class="fa fa-fw fa-rub"></i>';
                     },
                 ],
             ]

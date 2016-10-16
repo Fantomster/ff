@@ -80,7 +80,8 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
             'filterModel' => $searchModel,
             'filterPosition' => false,
             'summary' => '',
-            'tableOptions' => ['class' => 'table no-margin'],
+            //'tableOptions' => ['class' => 'table no-margin'],
+            'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
             'options' => ['class' => 'table-responsive'],
             'panel' => false,
             'bootstrap' => false,
@@ -124,7 +125,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                     'pageSummary' => true,
                     'readonly' => false,
                     'content' => function($data) {
-                        return '<div class="text_content">' . htmlentities($data->price) . ' руб</div>';
+                        return '<div class="text_content">' . htmlentities($data->price) . ' <i class="fa fa-fw fa-rub"></i></div>';
                     },
                     'editableOptions' => [
                         'header' => 'Цена',
@@ -148,9 +149,10 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                         ],
                     ],
                         ] : [
+                            'format' => 'raw',
                     'attribute' => 'price',
                     'value' => function($data) {
-                        return $data->price . ' руб';
+                        return $data->price . ' <i class="fa fa-fw fa-rub"></i>';
                     },
                     'label' => 'Цена',
                         ],

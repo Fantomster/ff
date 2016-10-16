@@ -114,11 +114,11 @@ class OrderSearch extends Order {
                 $query->from(User::tableName() . ' createdBy');
             },
                 ], true);
-        if ($this->vendor_search_id) {
-            $query->where([Order::tableName() . '.vendor_id' => $this->vendor_search_id]);
-        } else {
-            $query->where([Order::tableName() . '.client_id' => $this->client_search_id]);
-        }
+//        if ($this->vendor_search_id) {
+//            $query->where([Order::tableName() . '.vendor_id' => $this->vendor_search_id]);
+//        } else {
+//            $query->where([Order::tableName() . '.client_id' => $this->client_search_id]);
+//        }
         $query->where(Order::tableName() . '.status!= :status', ['status' => Order::STATUS_FORMING]);
         
         $dataProvider = new ActiveDataProvider([
@@ -158,15 +158,15 @@ class OrderSearch extends Order {
 //        $query->andFilterWhere(['>=', Order::tableName() . '.created_at', $this->date_from]);
 //        $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $this->date_to]);
         
-        if (!$this->vendor_search_id) {
-            if ($this->vendor_id > 0) {
+        
+            if ($this->vendor_id) {
                 $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
             }
-        } else {
-            if ($this->client_id > 0) {
+        
+            if ($this->client_id) {
                 $query->andFilterWhere(['client_id' => $this->client_id]);
             }
-        }
+        
 
        // $testq = $dataProvider->
         

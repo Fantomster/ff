@@ -27,6 +27,9 @@ return [
 
                         ],
                 ],
+        'formatter' => [
+            'locale' => 'ru_RU',
+        ],
     ],
     'modules' => [
         'user' => [

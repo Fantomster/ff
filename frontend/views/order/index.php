@@ -181,6 +181,7 @@ $this->registerCss("
                     'attribute' => 'created_at',
                    // 'value' => 'created_at',
                     'value' => function($data) {
+                      //  Yii::$app->formatter->locale = 'ru-RU';
                         $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
                         return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                     },

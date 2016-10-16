@@ -1248,17 +1248,17 @@ class VendorController extends DefaultController {
         // Объем продаж чарт
                 $area_chart = Yii::$app->db->createCommand("SELECT created_at,
                 (select sum(total_price) FROM `order` 
-                where DATE_FORMAT(created_at,'%m-%d-%Y') = tb.created_at and 
+                where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
                 vendor_id = $currentUser->organization_id and ("
-                        . "DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
+                        . "DATE(created_at) between '" . 
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                         date('Y-m-d', strtotime($filter_to_date)) . "')" .
                         $where . 
                     ") AS `total_price`  
-                FROM (SELECT distinct(DATE_FORMAT(created_at,'%m-%d-%Y')) AS `created_at` 
+                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
                 FROM `order` where 
                 vendor_id = $currentUser->organization_id and("
-                        . "DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
+                        . "DATE(created_at) between '" . 
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                         date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
                 $arr_create_at =[];

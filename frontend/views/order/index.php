@@ -205,7 +205,7 @@ $this->registerCss("
                                 $statusClass = 'cancelled';
                                 break;
                         }
-                        return '<span class="status ' . $statusClass . '">⚪ ' . Order::statusText($data->status) . '</span>';
+                        return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data->status) . '</span>';//fa fa-circle-thin
                     },
                     'label' => 'Статус',
                 ],

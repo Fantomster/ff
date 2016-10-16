@@ -196,9 +196,8 @@ HTML;
             'striped' => true,
             'condensed' => false,
             'responsive' => false,
-            'hover' => false,
-            'showFooter'=>TRUE,
-'footerRowOptions'=>['class'=>'text-success','style'=>'font-weight:bold;text-decoration: underline;'],
+            'hover' => false,'showFooter'=>TRUE,
+'footerRowOptions'=>['style'=>'font-weight:bold;text-decoration: underline;'],
 'columns' =>$columns,
             ]);
             ?> 

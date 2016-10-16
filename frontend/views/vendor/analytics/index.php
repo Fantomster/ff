@@ -104,7 +104,7 @@ HTML;
         </div>
         <div class="col-lg-1 col-md-1 col-sm-2">
 <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-danger teaser']) ?>        
+<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-danger teaser']) ?>        
         </div>
     </div>
     <!-- /.box-body -->
@@ -164,7 +164,7 @@ HTML;
             </div>
             <div class="box-body" style="display: block;">
             
-             <?php // Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
+             <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
              <?php 
             
             $columns = [
@@ -193,15 +193,16 @@ HTML;
             'tableOptions' => ['class' => 'table no-margin'],
             'options' => ['class' => 'table-responsive'],
             'bordered' => false,
-            'striped' => true,
+            'striped' => false,
             'condensed' => false,
             'responsive' => false,
-            'hover' => false,'showFooter'=>TRUE,
-'footerRowOptions'=>['style'=>'font-weight:bold;text-decoration: underline;'],
+            'hover' => true,
+            'showFooter'=>TRUE,
+'footerRowOptions'=>['class'=>'text-success','style'=>'font-weight:bold;text-decoration: underline;'],
 'columns' =>$columns,
             ]);
             ?> 
-            <?php // Pjax::end(); ?>
+            <?php  Pjax::end(); ?>
             </div>
             <!-- /.box-body -->
           </div>
@@ -225,7 +226,7 @@ var areaChartData = {
       labels: $arr_create_at,
       datasets: [
         {
-          label: "Digital Goods",
+          label: "Объем продаж",
           fillColor: "rgba(0,0,0,.05)",
           strokeColor: "#84bf76",
           pointColor: "#000",
@@ -282,39 +283,66 @@ var areaChartOptions = {
 var pieData = $arr_clients_price;
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData);
-if(1 < areaChartData.labels.length) {
-    chart = new Chart(areaChartOptions.ctx).Line(chartData, areaChartOptions.chartOptions);
-} else {
-    areaChartOptions.ctx.font = "20px " + Chart.defaults.global.tooltipTitleFontFamily;
-    areaChartOptions.ctx.textAlign = "center";
-    areaChartOptions.ctx.textBaseline = "middle";
-    areaChartOptions.ctx.fillStyle = Chart.defaults.global.scaleFontColor;
-    areaChartOptions.ctx.fillText("No data in chart.");
-}
+/*if(!areaChartData.labels.length) {
+    //$('.chart').html('Нет данных')
+}*/
         
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
 <?php Pjax::end(); ?>
 <?php
+$filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
+$filter_clear_to_date = date("d-m-Y");
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").on("change", function () {
-        var filter_status = $("#filter_status").val();
-        var filter_from_date =  $("#filter-date").val();
-        var filter_to_date =  $("#filter-date-2").val();
-        var filter_client =  $("#filter_client").val();
-            $.pjax({
-             type: 'GET',
-             push: false,
-             url: "index.php?r=vendor/analytics",
-             container: "#analytics-list",
-             data: {
-                 filter_status: filter_status,
-                 filter_from_date: filter_from_date,
-                 filter_to_date: filter_to_date,
-                 filter_client: filter_client,
-                   }
-           });
+var filter_status = $("#filter_status").val();
+var filter_from_date =  $("#filter-date").val();
+var filter_to_date =  $("#filter-date-2").val();
+var filter_client =  $("#filter_client").val();
+    $.pjax({
+     type: 'GET',
+     push: false,
+     url: "index.php?r=vendor/analytics",
+     container: "#analytics-list",
+     data: {
+         filter_status: filter_status,
+         filter_from_date: filter_from_date,
+         filter_to_date: filter_to_date,
+         filter_client: filter_client,
+           }
+   });
 });
+$("#reset").on("click", function () {
+    $("#filter_status").val('');
+    $("#filter-date").val('$filter_clear_from_date');
+    $("#filter-date-2").val('$filter_clear_to_date');
+    $("#filter_client").val('');       
+    $.pjax({
+     type: 'GET',
+     push: false,
+     url: "index.php?r=vendor/analytics",
+     container: "#analytics-list",
+     data: {
+         filter_status: '',
+         filter_from_date: '$filter_clear_from_date',
+         filter_to_date: '$filter_clear_to_date',
+         filter_client: '',
+           }
+   });
+}); 
+$.pjax({
+     type: 'GET',
+     push: false,
+     url: "index.php?r=vendor/analytics",
+     container: "#product-analytic-list",
+     data: {
+         filter_status: '',
+         filter_from_date: '$filter_clear_from_date',
+         filter_to_date: '$filter_clear_to_date',
+         filter_client: '',
+           }
+   });
 JS;
 $this->registerJs($customJs, View::POS_READY);
+

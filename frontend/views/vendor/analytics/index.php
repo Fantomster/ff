@@ -331,7 +331,7 @@ $("#reset").on("click", function () {
            }
    });
 }); 
-$.pjax({
+/*$.pjax({
      type: 'GET',
      push: false,
      url: "index.php?r=vendor/analytics",
@@ -342,7 +342,7 @@ $.pjax({
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
            }
-   });
+   });*/
 JS;
 $this->registerJs($customJs, View::POS_READY);
 

@@ -284,13 +284,8 @@ var pieData = $arr_clients_price;
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData);
 if(1 < areaChartData.labels.length) {
-    chart = new Chart(areaChartOptions.ctx).Line(chartData, areaChartOptions.chartOptions);
-} else {
-    areaChartOptions.ctx.font = "20px " + Chart.defaults.global.tooltipTitleFontFamily;
-    areaChartOptions.ctx.textAlign = "center";
-    areaChartOptions.ctx.textBaseline = "middle";
-    areaChartOptions.ctx.fillStyle = Chart.defaults.global.scaleFontColor;
-    areaChartOptions.ctx.fillText("No data in chart.");
+    console.log('none')
+    //chart = new Chart(areaChartOptions.ctx).Line(chartData, areaChartOptions.chartOptions);
 }
         
 JS;
@@ -300,22 +295,22 @@ $this->registerJs($customJs, View::POS_READY);
 <?php
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").on("change", function () {
-        var filter_status = $("#filter_status").val();
-        var filter_from_date =  $("#filter-date").val();
-        var filter_to_date =  $("#filter-date-2").val();
-        var filter_client =  $("#filter_client").val();
-            $.pjax({
-             type: 'GET',
-             push: false,
-             url: "index.php?r=vendor/analytics",
-             container: "#analytics-list",
-             data: {
-                 filter_status: filter_status,
-                 filter_from_date: filter_from_date,
-                 filter_to_date: filter_to_date,
-                 filter_client: filter_client,
-                   }
-           });
+var filter_status = $("#filter_status").val();
+var filter_from_date =  $("#filter-date").val();
+var filter_to_date =  $("#filter-date-2").val();
+var filter_client =  $("#filter_client").val();
+    $.pjax({
+     type: 'GET',
+     push: false,
+     url: "index.php?r=vendor/analytics",
+     container: "#analytics-list",
+     data: {
+         filter_status: filter_status,
+         filter_from_date: filter_from_date,
+         filter_to_date: filter_to_date,
+         filter_client: filter_client,
+           }
+   });
 });
 JS;
 $this->registerJs($customJs, View::POS_READY);

@@ -1283,7 +1283,11 @@ class VendorController extends DefaultController {
                 " and vendor_id = " . $currentUser->organization_id . 
                 $where .
                 ") group by product_id)tb")->queryScalar();
-        
+        $total_price = Yii::$app->db->createCommand("SELECT sum(total_price) as total from `order` where " . 
+                        "DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        date('Y-m-d', strtotime($filter_to_date)) . "'" . $where)->queryOne();
+        $total_price = $total_price['total'];
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -1315,11 +1319,7 @@ class VendorController extends DefaultController {
                     array_push($arr_clients_price, $arr);
                 } 
         $arr_clients_price = json_encode($arr_clients_price);
-        $total_price = Yii::$app->db->createCommand("SELECT sum(total_price) as total from `order` where " . 
-                        "DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                        date('Y-m-d', strtotime($filter_to_date)) . "'" . $where)->queryOne();
-        $total_price = $total_price['total'];
+        
         return $this->render('analytics/index',
         compact('filter_restaurant',
                 'header_info_zakaz',

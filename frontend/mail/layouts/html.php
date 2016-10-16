@@ -18,9 +18,9 @@ use yii\helpers\Html;
         <?php $this->head() ?>
     </head>
 
-    <body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; background-image: url('http://f-keeper.ru/mail/img/pattern.png'); margin: 0; padding: 0;">
+    <body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; background-image: url('http://f-keeper.ru/img/pattern.png'); margin: 0; padding: 0;">
         <?php $this->beginBody() ?>
-        <div style="width: 600px; box-shadow: 0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; margin: 40px auto; padding: 0;">
+        <div style="width: 600px; box-shadow: 0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -webkit-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -moz-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; margin: 40px auto; padding: 0;border: 1px solid #e4e4e4;">
             <!-- HEADER -->
             <table style="display: table; border-spacing: 0px; width: 100%; margin: 0; padding: 0;">
                 <tr style="margin: 0; padding: 0;">
@@ -30,14 +30,11 @@ use yii\helpers\Html;
                         <div style="max-width: 600px; display: block; background-color: #fff; margin: 0 auto; padding: 15px;">
                             <table style="display: table; border-spacing: 0px; width: 100%; margin: 0; padding: 0;">
                                 <tr style="margin: 0; padding: 0;">
-                                    <td style="margin: 0; padding: 0;"><img src="http://f-keeper.ru/mail/img/logo.png" style="max-width: 100%; margin: 0; padding: 0;" /></td>
-                                    <td style="margin: 0; padding: 0;">
-                                        <ul style="font-weight: normal; font-size: 14px; line-height: 1.6; text-align: right; margin: 0 0 10px; padding: 0;">
-                                            <li style="display: inline-block; list-style-position: inside; margin: 8px 0 0 5px; padding: 0;"><a href="#d41d8cd98f00b204e9800998ecf8427e" style="color: #3f3e3e; margin: 0; padding: 0;">Вход / Регистрация</a></li>
-                                            <li style="display: inline-block; list-style-position: inside; margin: 8px 0 0 5px; padding: 0;"><a href="#d41d8cd98f00b204e9800998ecf8427e" style="color: #3f3e3e; margin: 0; padding: 0;">О компании</a></li>
-                                        </ul>
-                                    </td>
-
+                                    <td style="margin: 0; padding: 0;text-align:center;"><img src="http://f-keeper.ru/img/logo.png" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" /></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small>Революция в работе с поставщиками
+                                            Закупка в 2 клика.</small></td>
                                 </tr>
                             </table>
                         </div>
@@ -75,18 +72,18 @@ use yii\helpers\Html;
                     <td style="margin: 0; padding: 0;">
                         <div style="margin: 0; padding: 0;">
                             <ul style="width: 100%; text-align: center; font-weight: normal; font-size: 14px; line-height: 1.6; list-style-type: none; margin: 0 0 10px; padding: 0;">
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="http://f-keeper.ru/mail/img/phone.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;">8-499-404-10-18</a></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="http://f-keeper.ru/mail/img/mail.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;">info@f-keeper.ru</a></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="http://f-keeper.ru/mail/img/web.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;">http://f-keeper.ru</a></li>
+                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="http://f-keeper.ru/img/phone.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><span style="color: #3f3e3e; margin: 0; padding: 0; text-decoration: underline;">8-499-404-10-18</span></li>
+                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="http://f-keeper.ru/img/mail.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="mailto:info@f-keeper.ru" style="color: #3f3e3e; margin: 0; padding: 0;">info@f-keeper.ru</a></li>
+                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="http://f-keeper.ru/img/web.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="http://f-keeper.ru" style="color: #3f3e3e; margin: 0; padding: 0;">www.f-keeper.ru</a></li>
                             </ul>
 
-                            <ul style="width: 100%; text-align: center; font-weight: normal; font-size: 14px; line-height: 1.6; list-style-type: none; margin: 0 0 10px; padding: 0;">
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/mail/img/yout.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/mail/img/insta.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/mail/img/face.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/mail/img/twit.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/mail/img/vk.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
-                            </ul>
+                            <!--                            <ul style="width: 100%; text-align: center; font-weight: normal; font-size: 14px; line-height: 1.6; list-style-type: none; margin: 0 0 10px; padding: 0;">
+                                                            <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/img/yout.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
+                                                            <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/img/insta.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
+                                                            <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/img/face.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
+                                                            <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/img/twit.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
+                                                            <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><a href="http://f-keeper.ru/mail/hero.html" style="color: #3f3e3e; margin: 0; padding: 0;"><img src="http://f-keeper.ru/img/vk.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /></a></li>
+                                                        </ul>-->
                         </div>
                         <span style="display: block; clear: both; margin: 0; padding: 0;"></span>	
                     </td>
@@ -119,6 +116,9 @@ use yii\helpers\Html;
 
 
         </div>
+        <p style="font-size: 8px;text-align: center;width: 600px;margin: 0 auto;line-height: 12px;">Вы получили это письмо, т.к. зарегистрированы на сайте <a style="color:#84BF76" href="http://f-keeper.ru">f-keeper.ru</a>. Если вы хотите изменить настройки уведомлений, авторизуйтесь на сайте, зайдите в раздел "Настройки/Почтовые уведомления" и отключите получение нежелательных рассылок.
+
+            Если вы больше не хотите получать уведомления, вы можете отписаться от получения рассылок перейдя по этой ссылке.</p>        
         <?php $this->endBody() ?>
     </body>
 </html>

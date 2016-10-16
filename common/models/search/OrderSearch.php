@@ -119,6 +119,8 @@ class OrderSearch extends Order {
         } else {
             $query->where([Order::tableName() . '.client_id' => $this->client_search_id]);
         }
+        $query->where(Order::tableName() . '.status!= :status', ['status' => Order::STATUS_FORMING]);
+        
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);

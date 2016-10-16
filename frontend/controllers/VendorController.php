@@ -1216,28 +1216,23 @@ class VendorController extends DefaultController {
         $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
         $filter_to_date = date("d-m-Y");
         $filter_client = "";
-        //Продажи по продуктам
-        $query = Yii::$app->db->createCommand("
-            SELECT sum(price) as price, product_id FROM order_content WHERE order_id in (
-                SELECT id from `order` where 
-                (DATE_FORMAT(created_at,'%d-%m-%Y') between '" . 
-                $filter_from_date . "' and '" . $filter_to_date . "')" .
-                " and vendor_id = " . $currentUser->organization_id . 
-                ") group by product_id");
-        var_dump($query->sql);
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            //'totalCount' => $totalCount,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'product_id',
-                    'price'
-                ],
-            ],
-        ]);
+        //pieChart
+        function hex(){
+        $hex = '#';
+        foreach(array('r', 'g', 'b') as $color){
+            //случайное число в диапазоне 0 и 255.
+            $val = mt_rand(0, 255);
+            //преобразуем число в Hex значение.
+            $dechex = dechex($val);
+            //с 0, если длина меньше 2
+            if(strlen($dechex) < 2){
+                $dechex = "0" . $dechex;
+            }
+            //объединяем
+            $hex .= $dechex;
+        }
+        return $hex;
+        }       
         if (Yii::$app->request->isAjax) {
             
                 $filter_status=trim(\Yii::$app->request->get('filter_status'));
@@ -1271,27 +1266,44 @@ class VendorController extends DefaultController {
                     array_push($arr_price, $area_charts['total_price']); 
                 }        
         $query = Yii::$app->db->createCommand("
-            SELECT sum(price) as price, product_id FROM order_content WHERE order_id in (
+            SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
                 SELECT id from `order` where 
-                (DATE_FORMAT(created_at,'%d-%m-%Y') between '" . 
-                $filter_from_date . "' and '" . $filter_to_date . "')" .
+                (DATE(created_at) between '" . 
+                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
                 " and vendor_id = " . $currentUser->organization_id . 
                 $where . 
-                ") group by product_id"); 
-        var_dump($query->sql);
+                ") group by product_id");
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
-            //'totalCount' => $totalCount,
+            //'totalCount' => $query_count-sql,
             'pagination' => [
-                'pageSize' => 20,
+                'pageSize' => 10,
             ],
-            'sort' => [
+            /*'sort' => [
                 'attributes' => [
                     'product_id',
                     'price'
                 ],
-            ],
+            ],*/
         ]);
+        
+        $clients_query = Yii::$app->db->createCommand("
+            SELECT client_id,sum(total_price) as total_price FROM `order` WHERE  
+                (DATE(created_at) between '" . 
+                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
+                $where .
+                " and vendor_id = " . $currentUser->organization_id . 
+                " group by client_id")->queryAll();
+        $arr_clients_price =[];
+                foreach($clients_query as $clients_querys){
+                    $arr = array(
+                    'value' => $clients_querys['client_id'],
+                    'label' => $clients_querys['total_price'],
+                    'color' => hex()
+                    );
+                    array_push($arr_clients_price, $arr);
+                } 
+        $arr_clients_price = json_encode($arr_clients_price);
                 return $this->render('analytics/index',
                 compact('filter_restaurant',
                         'header_info_zakaz',
@@ -1304,10 +1316,48 @@ class VendorController extends DefaultController {
                         'filter_client',
                         'arr_create_at',
                         'arr_price',
-                        'dataProvider'
+                        'dataProvider',
+                        'arr_clients_price'
                         ));        
         }
+        //Продажи по продуктам
+        $query = Yii::$app->db->createCommand("
+            SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
+                SELECT id from `order` where 
+                (DATE(created_at) between '" . 
+                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                " and vendor_id = " . $currentUser->organization_id . 
+                ") group by product_id");
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            //'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+            /*'sort' => [
+                'attributes' => [
+                    'product_id',
+                    'price'
+                ],
+            ],*/
+        ]);
         
+        $clients_query = Yii::$app->db->createCommand("
+            SELECT client_id,sum(total_price) as total_price FROM `order` WHERE  
+                (DATE(created_at) between '" . 
+                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                " and vendor_id = " . $currentUser->organization_id . 
+                " group by client_id")->queryAll();
+        $arr_clients_price =[];
+                foreach($clients_query as $clients_querys){
+                    $arr = array(
+                    'value' => $clients_querys['client_id'],
+                    'label' => $clients_querys['total_price'],
+                    'color' => hex()
+                    );
+                    array_push($arr_clients_price, $arr);
+                } 
+        $arr_clients_price = json_encode($arr_clients_price); 
         //Выборка - ВСЕ ЗАКАЗЫ за выбранные даты
         $area_chart = Yii::$app->db->createCommand("SELECT created_at,
         (select sum(total_price) FROM `order` 
@@ -1334,7 +1384,8 @@ class VendorController extends DefaultController {
                 'filter_client',
                 'arr_create_at',
                 'arr_price',
-                'dataProvider'
+                'dataProvider',
+                'arr_clients_price'
                 ));
     }
 

@@ -124,6 +124,7 @@ HTML;
     </div>
     <!-- /.box-body -->
 </div>
+
 <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
 <div class="row">
         <div class="col-md-6">
@@ -177,6 +178,7 @@ HTML;
               </div>
             </div>
             <div class="box-body" style="display: block;">
+            
              <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
              <?=GridView::widget([
             'dataProvider' => $dataProvider,
@@ -188,7 +190,9 @@ HTML;
             'striped' => true,
             'condensed' => false,
             'responsive' => false,
-            'hover' => false,
+            'hover' => false,'showFooter'=>TRUE,
+'footerRowOptions'=>['style'=>'font-weight:bold;text-decoration: underline;'],
+'columns' =>$columns,
             ]);
             ?> 
             <?php Pjax::end(); ?>
@@ -268,23 +272,7 @@ var areaChartOptions = {
     areaChart.Line(areaChartData, areaChartOptions);
         
         
-var pieData = [
- {
-  value: 25,
-  label: 'Java',
-  color: '#811bd6'
- },
- {
-  value: 10,
-  label: 'Scala',
-  color: '#9cbaba'
- },
- {
-  value: 35,
-  label: 'HTML',
-  color: '#6ae128'
- }
-]
+var pieData = $arr_clients_price;
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData);
 JS;

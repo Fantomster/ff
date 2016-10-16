@@ -125,7 +125,8 @@ $this->registerJs(
                         'filterModel' => $searchModel,
                         'filterPosition' => false,
                         'summary' => '',
-                        'tableOptions' => ['class' => 'table no-margin table-hover'],
+                        //'tableOptions' => ['class' => 'table no-margin table-hover'],
+                        'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
                         'options' => ['class' => 'table-responsive'],
                         'columns' => [
                             [
@@ -148,7 +149,7 @@ $this->registerJs(
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::textInput('', 1, ['class' => 'quantity']);
+                                    return Html::textInput('', 1, ['class' => 'quantity form-control', 'style'=>'width: 200px;']);
                                 },
                                         'label' => 'Количество'
                                     ],

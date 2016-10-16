@@ -503,14 +503,14 @@ label {
     color: #eee;
 }
 #orderHistory {
-    padding-left: 25px;
-    padding-right: 25px;
+    padding-left: 17px;
+    padding-right: 17px;
 }
-#orderHistory .status {
+/*#orderHistory .status {
     width: 70%;
     display: block;
     min-width: 50px;
-}
+}*/
 .order-history .info-box {
     box-shadow: 0 1px 9px rgba(0,0,0,0.1);
 }
@@ -541,4 +541,41 @@ label {
 }
 .datepicker table tr td.active.active:hover {
     background-color: @dark-green-fk;
+}
+th > a {
+    color: #3f3e3e;
+}
+th > a:hover {
+    color: @light-green-fk;
+}
+.table.dataTable,
+.form-control {
+    border-radius: 3px;
+}
+.table {
+    font-size: 13px;
+}
+.pagination > .active > a, 
+.pagination > .active > span, 
+.pagination > .active > a:hover, 
+.pagination > .active > span:hover, 
+.pagination > .active > a:focus, 
+.pagination > .active > span:focus {
+    background-color: @light-green-fk;
+    border-color: @light-green-fk;
+}
+.status.new {
+    color: #f39c12;
+}
+.status.processing {
+    color: #00c0ef;
+}
+.status.done {
+    color: #00a65a;
+}
+.status.cancelled {
+    color: #dd4b39;
+}
+.not-set {
+    font-style: normal;
 }

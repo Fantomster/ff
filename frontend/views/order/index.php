@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Url;
 use yii\grid\GridView;
 use common\models\Order;
@@ -75,24 +76,33 @@ $this->registerCss("
                 </div>
             </div>    
         </div>
-                <div style="clear: both;">
+        <div style="clear: both;">
         </div>
-        <?php Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]); 
-$form = ActiveForm::begin([
-            'options' => [
-                'data-pjax' => true,
-                'id' => 'search-form',
-                'class' => "navbar-form",
-                'role' => 'search',
-            ],
-            'enableClientValidation' => false,
-            'method' => 'get',
+            </div>
+    <!-- /.box-body -->
+</div>
+<div class="box box-info order-history">
+    <div class="box-body">
+        <?php
+        Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
+        $form = ActiveForm::begin([
+                    'options' => [
+                        'data-pjax' => true,
+                        'id' => 'search-form',
+                        'class' => "navbar-form",
+                        'role' => 'search',
+                    ],
+                    'enableClientValidation' => false,
+                    'method' => 'get',
         ]);
-?>
-        <?= $form->field($searchModel, 'status')
-        ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter'])
-        ->label('Статус') ?>
-        <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+        ?>
+        <?=
+                $form->field($searchModel, 'status')
+                ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter'])
+                ->label('Статус')
+        ?>
+        <?php
+        if ($organization->type_id == Organization::TYPE_RESTAURANT) {
             echo $form->field($searchModel, 'vendor_id')
                     ->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter'])
                     ->label('Поставщики');
@@ -100,22 +110,24 @@ $form = ActiveForm::begin([
             echo $form->field($searchModel, 'client_id')
                     ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
                     ->label('Рестораны');
-        } ?>
+        }
+        ?>
         <div class="form-group" style="width: 300px; height: 44px;">
-        <?= DatePicker::widget([
-                                                        'model' => $searchModel,
-                                                        'attribute' => 'date_from',
-                                                        'attribute2' => 'date_to',
-                                                        'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
-                                                        'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
-                                                        'type' => DatePicker::TYPE_RANGE,
-                                                        
-                                                        'pluginOptions' => [
-                                                            'format' => 'dd.mm.yyyy',
-                                                            'autoclose' => true,
-                                                            'endDate' => "0d",
-                                                        ]
-                                                    ]) ?>
+            <?=
+            DatePicker::widget([
+                'model' => $searchModel,
+                'attribute' => 'date_from',
+                'attribute2' => 'date_to',
+                'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
+                'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                'type' => DatePicker::TYPE_RANGE,
+                'pluginOptions' => [
+                    'format' => 'dd.mm.yyyy',
+                    'autoclose' => true,
+                    'endDate' => "0d",
+                ]
+            ])
+            ?>
         </div>
         <?php ActiveForm::end(); ?>
         <?=
@@ -125,13 +137,15 @@ $form = ActiveForm::begin([
             'filterModel' => $searchModel,
             'filterPosition' => false,
             'summary' => '',
-            'tableOptions' => ['class' => 'table no-margin table-hover'],
+//            'tableOptions' => ['class' => 'table no-margin table-hover'],
             'options' => ['class' => 'table-responsive'],
+            'tableOptions' => ['class'=>'table table-bordered table-striped dataTable']  ,
+//            'options' => 'dataTable',
             'columns' => [
                 [
                     'attribute' => 'id',
                     'value' => 'id',
-                    'label' => '#',
+                    'label' => '№',
                 ],
                 $organization->type_id == Organization::TYPE_RESTAURANT ? [
                     'attribute' => 'vendor.name',
@@ -153,13 +167,22 @@ $form = ActiveForm::begin([
                     'label' => 'Заказ принял',
                 ],
                 [
+                    'format' => 'raw',
                     'attribute' => 'total_price',
-                    'value' => 'total_price',
+                    //'value' => 'total_price',
+                    'value' => function($data) {
+                        return $data->total_price . '<i class="fa fa-fw fa-rub"></i>';
+                    },
                     'label' => 'Сумма',
                 ],
                 [
+                    'format' => 'raw',
                     'attribute' => 'created_at',
-                    'value' => 'created_at',
+                   // 'value' => 'created_at',
+                    'value' => function($data) {
+                        $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
+                        return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                    },
                     'label' => 'Дата создания',
                 ],
                 [
@@ -169,20 +192,20 @@ $form = ActiveForm::begin([
                         switch ($data->status) {
                             case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
                             case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                $statusClass = 'label-warning';
+                                $statusClass = 'new';
                                 break;
                             case Order::STATUS_PROCESSING:
-                                $statusClass = 'label-info';
+                                $statusClass = 'processing';
                                 break;
                             case Order::STATUS_DONE:
-                                $statusClass = 'label-success';
+                                $statusClass = 'done';
                                 break;
                             case Order::STATUS_REJECTED:
                             case Order::STATUS_CANCELLED:
-                                $statusClass = 'label-danger';
+                                $statusClass = 'cancelled';
                                 break;
                         }
-                        return '<span class="label ' . $statusClass . ' status">' . Order::statusText($data->status) . '</span>';
+                        return '<span class="status ' . $statusClass . '">⚪ ' . Order::statusText($data->status) . '</span>';
                     },
                     'label' => 'Статус',
                 ],
@@ -192,10 +215,8 @@ $form = ActiveForm::begin([
     },
         ]);
         ?>
-        <?php Pjax::end() ?>
+<?php Pjax::end() ?>
         <!-- /.table-responsive -->
     </div>
     <!-- /.box-body -->
-    <div class="box-footer clearfix">
-    </div>
 </div>

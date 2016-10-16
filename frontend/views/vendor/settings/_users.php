@@ -91,6 +91,8 @@ GridView::widget([
     'filterModel' => $searchModel,
     'filterPosition' => false,
     'summary' => '',
+    'options' => ['class' => 'table-responsive'],
+    'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
     'columns' => [
         [
             'attribute' => 'profile.full_name',

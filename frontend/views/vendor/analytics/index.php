@@ -283,9 +283,9 @@ var areaChartOptions = {
 var pieData = $arr_clients_price;
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData);
-if(!areaChartData.labels.length) {
+/*if(!areaChartData.labels.length) {
     //$('.chart').html('Нет данных')
-}
+}*/
         
 JS;
 $this->registerJs($customJs, View::POS_READY);

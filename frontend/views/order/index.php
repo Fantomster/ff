@@ -120,6 +120,7 @@ $this->registerCss("
                 'attribute2' => 'date_to',
                 'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
                 'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                'separator' => 'по',
                 'type' => DatePicker::TYPE_RANGE,
                 'pluginOptions' => [
                     'format' => 'dd.mm.yyyy',

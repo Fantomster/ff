@@ -20,6 +20,16 @@ use kartik\select2\Select2;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 $this->title = 'Мои каталоги';
+$this->registerCss('
+.text-info {
+    color: #378a5f;
+}
+.hpanel .panel-body:hover {
+-webkit-box-shadow: 0px 0px 26px -5px rgba(0,0,0,0.1);
+-moz-box-shadow: 0px 0px 26px -5px rgba(0,0,0,0.1);
+box-shadow: 0px 0px 26px -5px rgba(0,0,0,0.1);
+}
+');
 ?>
 <?php
 Modal::begin([
@@ -46,8 +56,8 @@ Modal::begin([
                             <p class="small">Этот каталог содержит все ваши продукты доступные на f-keeper</p>
                         </div>
                         <div class="col-md-6 text-right">
-                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default btn-sm m-t']) ?>
-                            <?= Html::a('<i class="fa fa-fw fa-clone"></i>', ['vendor/step-1-clone', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t btn-sm clone-catalog']) ?>
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Редактировать', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default btn-sm m-t']) ?>
+                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дублировать', ['vendor/step-1-clone', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t btn-sm clone-catalog']) ?>
                         </div>
                     </div>
                 </div>
@@ -62,7 +72,7 @@ Modal::begin([
                 <div class="box box-info">
             <div class="box-header with-border">
               <div class="box-title pull-left">
-                <?= Html::a('Новый каталог', ['vendor/step-1'],['class'=>'btn btn-sm btn-fk-success']) ?>
+                 <?= Html::a('Новый каталог', ['vendor/step-1'],['class'=>'btn btn-md fk-button']) ?>
               </div>
             </div>
             <!-- /.box-header -->
@@ -75,7 +85,7 @@ Modal::begin([
                     <div class="col-md-4">
                         <?= Html::label('Ресторан', null, ['class' => 'label','style'=>'color:#555']) ?>
                         <?= Html::dropDownList('restaurant', null,
-                            $relation,['prompt' => '','class' => 'form-control','id'=>'restaurant']) ?>                        
+                            $relation,['prompt' => 'Все','class' => 'form-control','id'=>'restaurant']) ?>                        
                     </div>
                 </div>
             </div>
@@ -116,9 +126,9 @@ Modal::begin([
                                                 'class'=>'m-t'
                                             ]);
                                             ?>
-                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t btn-sm','data-pjax'=>'0']) ?>
-                                            <?= Html::a('<i class="fa fa-fw fa-clone"></i>', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
-                                            <?= Html::button('<i class="fa fa-fw fa-trash-o"></i>', ['class' => 'btn btn-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
+                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Редактировать', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дублировать', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', ['class' => 'btn btn-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
                                         </div>
                                     </div>
                                 </div>

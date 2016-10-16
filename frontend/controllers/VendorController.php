@@ -1246,7 +1246,7 @@ class VendorController extends DefaultController {
                         
         }
         // Объем продаж чарт
-                $area_chart = Yii::$app->db->createCommand("SELECT created_at,
+                $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
                 (select sum(total_price) FROM `order` 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
                 vendor_id = $currentUser->organization_id and ("

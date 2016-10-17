@@ -10,6 +10,7 @@ $this->registerCss('
 .box-analytics {border:1px solid #eee}.input-group.input-daterange .input-group-addon {
     border-left: 0px;
 }
+tfoot tr{border-top:2px solid #ccc}
 ');
 ?>
 
@@ -114,7 +115,7 @@ HTML;
 <div class="row">
         <div class="col-md-6">
           <!-- AREA CHART -->
-          <div class="box box-primary">
+          <div class="box box-warning">
             <div class="box-header with-border">
               <h3 class="box-title">Объем продаж</h3>
 
@@ -135,7 +136,7 @@ HTML;
         <!-- /.col (LEFT) -->
         <div class="col-md-6">
           <!-- pie CHART -->
-          <div class="box box-danger">
+          <div class="box box-warning">
             <div class="box-header with-border">
               <h3 class="box-title">Продажи по клиентам</h3>
 
@@ -153,7 +154,7 @@ HTML;
       </div>
       <div class="col-md-6">
           <!-- pie CHART -->
-          <div class="box box-danger">
+          <div class="box box-warning">
             <div class="box-header with-border">
               <h3 class="box-title">Продажи по товарам</h3>
 

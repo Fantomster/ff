@@ -1301,12 +1301,15 @@ class VendorController extends DefaultController {
             'pagination' => [
                 'pageSize' => 7,
             ],
-            /*'sort' => [
+            'sort' => [
                 'attributes' => [
                     'product_id',
                     'price'
                 ],
-            ],*/
+                'defaultOrder' => [
+                    'price' => SORT_DESC
+                    ]
+            ],
         ]);
         
         $clients_query = Yii::$app->db->createCommand("

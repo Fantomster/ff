@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use yii\helpers\Json;
 use common\models\User;
+use common\models\Order;
 use common\models\Organization;
 use common\models\Role;
 use common\models\Profile;
@@ -1380,12 +1381,12 @@ class VendorController extends DefaultController {
                 . "vendor_id = $currentUser->organization_id and ("
                     . "DATE(created_at) between '" . 
                     date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "')");
+                    date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_DONE);
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
                 . "vendor_id = $currentUser->organization_id and ("
                     . "DATE(created_at) between '" . 
                     date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryScalar();
+                    date('Y-m-d', strtotime($filter_to_date)) . "')and status<>" . Order::STATUS_DONE . ")`tb`")->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,

@@ -58,6 +58,19 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
+            $("#checkout").on("click", ".remove", function(e) {
+            e.preventDefault();
+                $("#loader-show").showLoading();
+                $.post(
+                    "' . Url::to(['/order/ajax-remove-position']) . '",
+                    {"product_id": $(this).data("product_id"), "vendor_id": $(this).data("vendor_id")}
+                ).done(function(result) {
+                    if (result) {
+                        //$.pjax.reload({container: "#checkout"});
+                    }
+                    $("#loader-show").hideLoading();
+                });
+            });
         });'
 );
 
@@ -107,7 +120,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
                                     </div>
                                     <div id="order<?= $order->id ?>" class="panel-collapse collapse">
                                         <div class="panel-body">
-                                            <?= $this->render('_checkoutContent', ['content' => $order->orderContent]) ?>
+                                            <?= $this->render('_checkoutContent', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
                                         </div>
                                     </div>
                                 </div>

@@ -221,6 +221,16 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
     /**
+     * @return integer
+     */
+    public function getCartCount() {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return [];
+        }
+        return Order::find()->where(['client_id' => $this->id, 'status' => Order::STATUS_FORMING])->count();
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getUsers() {

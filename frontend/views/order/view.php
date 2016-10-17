@@ -19,43 +19,6 @@ $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $js = <<<JS
-
-    socket.on('user$user->id', function (data) {
-
-        var message = JSON.parse(data);
-
-        messageBody = $.parseHTML( message.body );
-       // alert(messageBody);
-        
-        $( ".direct-chat-messages" ).prepend( message.body );
-        
-        if (message.isSystem) {
-            $.post(
-                    "$urlButtons",
-                    {"order_id": $order->id}
-                ).done(function(result) {
-                    $('#actionButtons').html(result);
-                });
-        }
-
-    });
-        
-$('#chat-form').submit(function() {
-
-     var form = $(this);
-
-     $.ajax({
-          url: form.attr('action'),
-          type: 'post',
-          data: form.serialize(),
-          success: function (response) {
-               $("#message-field").val("");
-          }
-     });
-
-     return false;
-});
-        
 $('#actionButtons').on('click', '.btnOrderAction', function() { 
         $.post(
                 "$urlOrderAction",
@@ -166,8 +129,13 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
     </div>
     <!-- /.box-body -->
     <div class="box-footer clearfix" id="actionButtons">
-        <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>    
+        <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   
     </div>
+        <?php 
+            echo Html::beginForm(Url::to(['/order/ajax-refresh-buttons']), 'post', ['id' => 'actionButtonsForm']);
+            echo Html::hiddenInput('order_id', $order->id);
+            echo Html::endForm();
+        ?>
 
 </div>
 

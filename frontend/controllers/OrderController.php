@@ -35,14 +35,16 @@ class OrderController extends DefaultController {
                     'index',
                     'view',
                     'create',
+                    'checkout',
                     'send-message',
+                    'refresh-cart',
                     'ajax-add-to-cart',
-                    'ajax-clear-order',
+                    'ajax-delete-order',
                     'ajax-make-order',
                     'ajax-order-action',
-                    'ajax-order-refresh',
+                    'ajax-change-quantity',
                     'ajax-refresh-buttons',
-                    'ajax-show-order',
+                    'ajax-remove-position',
                 ],
                 'rules' => [
 //                    [
@@ -79,11 +81,13 @@ class OrderController extends DefaultController {
                     [
                         'actions' => [
                             'create',
+                            'checkout',
+                            'refresh-cart',
                             'ajax-add-to-cart',
-                            'ajax-clear-order',
+                            'ajax-delete-order',
                             'ajax-make-order',
-                            'ajax-modify-cart',
-                            'ajax-order-refresh',
+                            'ajax-change-quantity',
+                            'ajax-remove-position',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -93,9 +97,9 @@ class OrderController extends DefaultController {
                         ],
                     ],
                 ],
-                'denyCallback' => function($rule, $action) {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-        }
+//                'denyCallback' => function($rule, $action) {
+//            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+//        }
             ],
         ];
     }
@@ -198,6 +202,8 @@ class OrderController extends DefaultController {
         }
         //$orders = $client->getCart();
         $alteringOrder->calculateTotalPrice();
+        $cartCount = $client->getCartCount();
+        $this->sendCartChange($client, $cartCount);
 
         return true; //$this->renderPartial('_orders', compact('orders'));
     }
@@ -220,6 +226,8 @@ class OrderController extends DefaultController {
             if (!$orderDeleted) {
                 $order->calculateTotalPrice();
             }
+            $cartCount = $client->getCartCount();
+            $this->sendCartChange($client, $cartCount);
         }
 
         //$orders = $client->getCart();
@@ -280,6 +288,8 @@ class OrderController extends DefaultController {
                     $order->save();
                 }
             }
+            $cartCount = $client->getCartCount();
+            $this->sendCartChange($client, $cartCount);
             return true;
         }
 
@@ -304,6 +314,8 @@ class OrderController extends DefaultController {
                     $order->delete();
                 }
             }
+            $cartCount = $client->getCartCount();
+            $this->sendCartChange($client, $cartCount);
             return true;
         }
 
@@ -525,7 +537,7 @@ class OrderController extends DefaultController {
     }
 
     private function sendSystemMessage($user_id, $order_id, $message) {
-        $channel = 'order' . $order_id;
+//        $channel = 'order' . $order_id;
         $newMessage = new OrderChat();
         $newMessage->order_id = $order_id;
         $newMessage->message = $message;
@@ -534,10 +546,48 @@ class OrderController extends DefaultController {
         $newMessage->save();
         $body = $this->renderPartial('_chat-message', ['name' => '', 'message' => $newMessage->message, 'time' => $newMessage->created_at, 'isSystem' => 1]);
 
-        return Yii::$app->redis->executeCommand('PUBLISH', [
+//        return Yii::$app->redis->executeCommand('PUBLISH', [
+//                    'channel' => 'chat',
+//                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
+//        ]);
+        
+        $order = Order::findOne(['id' => $order_id]);
+
+        $clientUsers = $order->client->users;
+        $vendorUsers = $order->vendor->users;
+
+        foreach ($clientUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
                     'channel' => 'chat',
                     'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
-        ]);
+            ]);
+        }
+        foreach ($vendorUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                    'channel' => 'chat',
+                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
+            ]);
+        }
+
+        return true;
+        
+    }
+    
+    private function sendCartChange($client, $cartCount) {
+        $clientUsers = $client->users;
+
+        foreach ($clientUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                    'channel' => 'chat',
+                    'message' => Json::encode(['body' => $cartCount, 'channel' => $channel, 'isSystem' => 2])
+            ]);
+        }
+
+        return true;
+        
     }
 
 }

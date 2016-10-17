@@ -1,12 +1,15 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
+use common\models\Organization;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
 
 if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
+    $organization = $user->organization;
     $homeUrl = Yii::$app->urlManager->baseUrl;
     $js = <<<JS
 
@@ -15,6 +18,49 @@ if (!Yii::$app->user->isGuest) {
    socket.on('connect', function(){
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});
     });
+    socket.on('user$user->id', function (data) {
+
+        var message = JSON.parse(data);
+
+        messageBody = $.parseHTML( message.body );
+        
+        $( ".direct-chat-messages" ).prepend( message.body );
+        
+        if (message.isSystem) {
+            if (message.isSystem == 1) {
+            form = $("#actionButtonsForm");
+            $.post(
+                    form.attr("action"),
+                    form.serialize()
+                ).done(function(result) {
+                    $('#actionButtons').html(result);
+                });
+            } else if (message.isSystem == 2) {
+                $("#cartCount").html(message.body);
+                try {
+                    $.pjax.reload({container: "#checkout"});
+                } catch(e) {
+                }
+            }
+        }
+
+    });
+        
+$('#chat-form').submit(function() {
+
+     var form = $(this);
+
+     $.ajax({
+          url: form.attr('action'),
+          type: 'post',
+          data: form.serialize(),
+          success: function (response) {
+               $("#message-field").val("");
+          }
+     });
+
+     return false;
+});
         
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
@@ -45,7 +91,13 @@ JS;
             <div class="navbar-custom-menu">
 
                 <ul class="nav navbar-nav">
-
+                    <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
+                        <li>
+                            <a href="<?= Url::to(['order/checkout']) ?>">
+                                <i class="fa fa-shopping-cart"></i><span class="label label-primary" id="cartCount"><?= $organization->getCartCount() ?></span>
+                            </a>
+                        </li>
+                    <?php } ?>
                     <!-- Messages: style can be found in dropdown.less-->
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">

@@ -170,7 +170,10 @@ $this->registerCss('
            'striped' => false,
            'condensed' => false,
            'responsive' => false,
-           'hover' => true
+           'hover' => true,
+           'rowOptions' => function ($model, $key, $index, $grid) {
+                return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
+            },
            ]);
            ?> 
         <?php  Pjax::end(); ?>

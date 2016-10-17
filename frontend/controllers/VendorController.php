@@ -1259,11 +1259,11 @@ class VendorController extends DefaultController {
                 $arr_create_at =[];
                 $arr_price =[];
                 if(count($area_chart)==1){
-                array_push($arr_create_at, $filter_from_date);    
+                array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));  
                 array_push($arr_price, 0);
                 }
                 foreach($area_chart as $area_charts){
-                    array_push($arr_create_at, $area_charts['created_at']);    
+                    array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
                     array_push($arr_price, $area_charts['total_price']); 
                 } 
                 
@@ -1368,11 +1368,12 @@ class VendorController extends DefaultController {
             $arr_create_at =[];
             $arr_price =[];
         if(count($area_chart)==1){
-        array_push($arr_create_at, $filter_from_date);    
+        array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));   
         array_push($arr_price, 0);
         }
         foreach($area_chart as $area_charts){
-            array_push($arr_create_at, $area_charts['created_at']);    
+            
+            array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
             array_push($arr_price, $area_charts['total_price']); 
         } 
         // <------ГРАФИК ПРОДАЖ
@@ -1396,7 +1397,7 @@ class VendorController extends DefaultController {
          */
         $stats = Yii::$app->db->createCommand("SELECT
             (SELECT sum(total_price) FROM `order`
-            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(total_price, '%Y-%m-%d') = CURDATE()) as 'curDay',
+            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
             (SELECT sum(total_price) FROM `order` 
              WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
             as 'curMonth',

@@ -49,7 +49,7 @@ $this->registerCss('
                 <div class="panel-body" style="min-height: 307px;height:100%;">
                     <div>
                             <small class="stat-label text-bold">Текущий месяц</small>
-                            <h2 class="m-xs text-success font-bold">
+                            <h2 class="m-xs text-success font-bold  text-bold">
                             <?=$stats['curMonth']?$stats['curMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                             </h2>
                     </div>
@@ -170,7 +170,10 @@ $this->registerCss('
            'striped' => false,
            'condensed' => false,
            'responsive' => false,
-           'hover' => true
+           'hover' => true,
+           'rowOptions' => function ($model, $key, $index, $grid) {
+                return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
+            },
            ]);
            ?> 
         <?php  Pjax::end(); ?>

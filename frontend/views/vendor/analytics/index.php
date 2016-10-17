@@ -211,7 +211,9 @@ HTML;
           </div>
           <!-- /.box -->
       </div>
+      
 </div>
+
 <?php
 
 $arr_create_at =   json_encode($arr_create_at);
@@ -277,7 +279,7 @@ var areaChartOptions = {
       //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
       maintainAspectRatio: true,
       //Boolean - whether to make the chart responsive to window resizing
-      responsive: false
+      responsive: true
     };
   //Create the line chart
     areaChart.Line(areaChartData, areaChartOptions);

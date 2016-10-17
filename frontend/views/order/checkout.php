@@ -12,7 +12,7 @@ $this->registerJs(
                     {"id": $(this).data("id"), "all": 0 }
                 ).done(function(result) {
                     if (result) {
-                        $.pjax.reload({container: "#checkout"});
+                        //$.pjax.reload({container: "#checkout"});
                     }
                     $("#loader-show").hideLoading();
                 });
@@ -24,7 +24,7 @@ $this->registerJs(
                     {"id": $(this).data("id"), "all":0 }
                 ).done(function(result) {
                     if (result) {
-                        $.pjax.reload({container: "#checkout"});
+                        //$.pjax.reload({container: "#checkout"});
                     }
                     $("#loader-show").hideLoading();
                 });
@@ -36,7 +36,7 @@ $this->registerJs(
                     {"all":1 }
                 ).done(function(result) {
                     if (result) {
-                        $.pjax.reload({container: "#checkout"});
+                        //$.pjax.reload({container: "#checkout"});
                     }
                     $("#loader-show").hideLoading();
                 });
@@ -48,7 +48,7 @@ $this->registerJs(
                     {"all":1 }
                 ).done(function(result) {
                     if (result) {
-                        $.pjax.reload({container: "#checkout"});
+                        //$.pjax.reload({container: "#checkout"});
                     }
                     $("#loader-show").hideLoading();
                 });

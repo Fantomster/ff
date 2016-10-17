@@ -172,18 +172,18 @@ $this->registerCss("
                     'attribute' => 'total_price',
                     //'value' => 'total_price',
                     'value' => function($data) {
-                        return $data->total_price . '<i class="fa fa-fw fa-rub"></i>';
+                        return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
                     },
                     'label' => 'Сумма',
                 ],
                 [
                     'format' => 'raw',
                     'attribute' => 'created_at',
-                   // 'value' => 'created_at',
+                    'header' => '<i class="fa fa-fw fa-calendar""></i>  Дата создания',
                     'value' => function($data) {
                       //  Yii::$app->formatter->locale = 'ru-RU';
                         $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                        return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                        return $date;
                     },
                     'label' => 'Дата создания',
                 ],

@@ -27,9 +27,8 @@ $this->registerJs('
             }
         });
         $(".box-body").on("click", "td", function (e) {
-            var id = $(this).closest("tr").data("id");
-            if(e.target == this)
-                location.href = "' . Url::to(['order/view']) . '&id=" + id;
+            var id = $(this).parent("tr").data("id");
+            location.href = "' . Url::to(['order/view']) . '&id=" + id;
         });
     });
         ');

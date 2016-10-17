@@ -14,11 +14,11 @@ $this->registerCss('
 ');
 ?>
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-8">
       <!-- AREA CHART -->
       <div class="box box-info">
         <div class="box-header with-border">
-            <h3 class="box-title">Объем продаж</h3><br><small>ЗА ПОСЛЕДНИЕ 2 МЕСЯЦА</small>
+            <h3 class="box-title">Объем продаж</h3><br><small>За месяц</small>
 
           <div class="box-tools pull-right">
             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -29,6 +29,64 @@ $this->registerCss('
           <div class="chart">
             <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
           </div>
+        </div>
+        <!-- /.box-body -->
+      </div>
+      <!-- /.box -->
+    </div>
+    <div class="col-md-4">
+      <!-- AREA CHART -->
+      <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Статистика</h3>
+
+          <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="box-body" style="display: block;">
+                <div class="panel-body" style="min-height: 307px;height:100%;">
+                    <div>
+                            <small class="stat-label text-bold">Текущий месяц</small>
+                            <h2 class="m-xs text-success font-bold">
+                            <?=$stats['curMonth']?$stats['curMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                            </h2>
+                    </div>
+                    <?php
+                    $months = array(1 => 'Январь', 2 => 'Февраль', 3 => 'Март', 4 => 'Апрель', 
+                    5 => 'Май', 6 => 'Июнь', 7 => 'Июль', 8 => 'Август', 
+                    9 => 'Сентябрь', 10 => 'Октябрь', 11 => 'Ноябрь', 12 => 'Декабрь');
+                    ?>
+                    <div class="row">
+                            <div class="col-xs-6">
+                                    <small class="stat-label text-bold">Сегодня</small>
+                                    <h4 class="text-success">
+                            <?=$stats['curDay']?$stats['curDay'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                                    </h4> <!-- <i class="fa fa-level-up text-success"></i> -->
+                            </div>
+                            <div class="col-xs-6">
+                                    <small class="stat-label text-bold">Текущая неделя</small>
+                                    <h4 class="text-success">
+                                    <?=$stats['curWeek']?$stats['curWeek'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                                    </h4>
+                            </div>
+                    </div>
+                    <div class="row">
+                            <div class="col-xs-6">
+                                    <small class="stat-label text-bold">За <?=$months[date('n', strtotime(" -1 months"))];?></small>
+                                    <h4 class="text-success">
+                                    <?=$stats['lastMonth']?$stats['lastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                                    </h4>
+                            </div>
+                            <div class="col-xs-6">
+                                    <small class="stat-label text-bold"> За <?=$months[date('n', strtotime(" -2 months"))];?></small>
+                                    <h4 class="text-success">
+                                    <?=$stats['TwoLastMonth']?$stats['TwoLastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                                    </h4>
+                            </div>
+                    </div>   
+            </div> 
         </div>
         <!-- /.box-body -->
       </div>

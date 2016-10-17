@@ -1349,7 +1349,7 @@ class VendorController extends DefaultController {
     public function actionIndex() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         //ГРАФИК ПРОДАЖ -----> 
-        $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
+        $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = date("d-m-Y");
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
             (select sum(total_price) FROM `order` 
@@ -1376,6 +1376,40 @@ class VendorController extends DefaultController {
             array_push($arr_price, $area_charts['total_price']); 
         } 
         // <------ГРАФИК ПРОДАЖ
+        //------>Статистика 
+        /*
+        SELECT
+        (SELECT sum(total_price) FROM `order`
+        WHERE DATE_FORMAT(total_price, '%Y-%m-%d') = CURDATE()) as 'curDay',
+        (SELECT sum(total_price) FROM `order` 
+         WHERE (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
+        as 'curMonth',
+        (SELECT sum(total_price) FROM `order` 
+        WHERE YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
+         as 'curWeek',
+        (SELECT sum(total_price) FROM `order` 
+        WHERE MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+        as 'lastMonth',
+        (SELECT sum(total_price) FROM `order` 
+        WHERE MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+        as 'TwoLastMonth'
+         */
+        $stats = Yii::$app->db->createCommand("SELECT
+            (SELECT sum(total_price) FROM `order`
+            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(total_price, '%Y-%m-%d') = CURDATE()) as 'curDay',
+            (SELECT sum(total_price) FROM `order` 
+             WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
+            as 'curMonth',
+            (SELECT sum(total_price) FROM `order` 
+            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
+             as 'curWeek',
+            (SELECT sum(total_price) FROM `order` 
+            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            as 'lastMonth',
+            (SELECT sum(total_price) FROM `order` 
+            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            as 'TwoLastMonth'")->queryOne();
+        // <-------Статистика 
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
         $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
                 . "vendor_id = $currentUser->organization_id and ("
@@ -1416,7 +1450,8 @@ class VendorController extends DefaultController {
                 'filter_from_date',
                 'filter_to_date',
                 'arr_create_at',
-                'arr_price'
+                'arr_price',
+                'stats'
                 ));
     }
     

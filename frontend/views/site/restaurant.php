@@ -138,39 +138,6 @@ $this->title = 'Ресторанам';
 					</div>
 				</div>
 			</div>
-			
-<!--			<div class="rew__block">
-				<div class="inside__block">
-					<div class="container-fluid">
-					
-						<div class="col-md-6">
-							<div class="rew__inside">
-								<img src="images/rew.jpg" alt=""/>
-								<div class="rew__descript">
-									<h3>Максим Гусарков</h3>
-									<span>Chef, La Taberna del Albardero</span>
-									<p>“This is the kind of product we need to see in all of our kitchens. It makes inventory easy. It'll be nice not to use pen and paper to manage my kitchen.”</p>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div class="rew__inside">
-								<img src="images/rew.jpg" alt=""/>
-								<div class="rew__descript">
-									<h3>Максим Гусарков</h3>
-									<span>Chef, La Taberna del Albardero</span>
-									<p>“This is the kind of product we need to see in all of our kitchens. It makes inventory easy. It'll be nice not to use pen and paper to manage my kitchen.”</p>
-								</div>
-							</div>
-						</div>
-					
-					
-					</div>
-				</div>
-			
-			</div>-->
-			
-			
 			<div class="logo__block_outside">
 				<span><img src="images/logo-1.png" alt=""/></span>
 				<span><img src="images/logo-2.png" alt=""/></span>
@@ -231,9 +198,6 @@ $this->title = 'Ресторанам';
                     'class' => 'send__btn',
                 ])
                 ?>
-                <div class="regist">
-                    <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
-                </div>
             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
                 <?php ActiveForm::end(); ?>
             <?php endif; ?>

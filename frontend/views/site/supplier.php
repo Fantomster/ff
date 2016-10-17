@@ -14,23 +14,6 @@ $this->title = 'Поставщикам';
 					<h1>Автоматизация работы с закупщиками.<br/>Закупщики, заказы и аналитика, в одном месте.</h1>
 					<h2>Будущее уже сегодня!</h2>
 				</div>
-				<!-- <div class="buttons__block">
-					<a class="for__restaurants" href="#"><span>для ресторанов</span></a>
-					<a class="for__suppliers" href="#"><span>для поставщиков</span></a>
-					<div class="clear"></div>
-					<div class="watch_video">
-						<a href="#" data-toggle="modal" data-target="#myModal" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
-					</div>
-					
-					
-					<div id="myModal" class="modal fade">
-						<div class="modal-dialog">
-								<div class="video__block">
-									<iframe width="100%" height="500px" src="https://www.youtube.com/embed/xkScMQHqORk" frameborder="0" allowfullscreen></iframe>
-								</div>
-						</div>
-					</div>
-				</div> -->
 			</div>
 			<div class="overlay"></div>
 		</header><!-- .header-->
@@ -121,15 +104,7 @@ $this->title = 'Поставщикам';
 						
 					</div>
 				</div>
-				
-			
-			
-			
-			
 			</div>
-			
-			
-			
 			<div class="white__bottom_block">
 				<div class="inside__wh_block">
 					<div class="container-fluid">
@@ -215,9 +190,6 @@ $this->title = 'Поставщикам';
                     'class' => 'send__btn',
                 ])
                 ?>
-                <div class="regist">
-                    <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
-                </div>
             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
                 <?php ActiveForm::end(); ?>
             <?php endif; ?>

@@ -1285,7 +1285,8 @@ class VendorController extends DefaultController {
                 $where .
                 ") group by product_id)tb")->queryScalar();
         $total_price = Yii::$app->db->createCommand("SELECT sum(total_price) as total from `order` where " . 
-                        "DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
+                        "vendor_id = " . $currentUser->organization_id . 
+                        " and DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                         date('Y-m-d', strtotime($filter_to_date)) . "'" . $where)->queryOne();
         $total_price = $total_price['total'];

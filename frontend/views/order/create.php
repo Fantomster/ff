@@ -141,8 +141,8 @@ $this->registerJs(
                                 'format' => 'raw',
                                 'attribute' => 'product',
                                 'value' => function($data) {
-                                    return "<div class='grid-prod'>" . $data['product'] . "</div><div>"
-                                            . $data['name'] . "</div><div class='grid-article'>артикул: "
+                                    return "<div class='grid-prod'>" . $data['product'] . "</div><div>Поставщик: "
+                                            . $data['name'] . "</div><div class='grid-article'>Артикул: "
                                             . $data['article'] . "</div>";
                                 },
                                 'label' => 'Название продукта',

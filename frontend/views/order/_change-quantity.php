@@ -39,7 +39,7 @@ echo Html::hiddenInput('product_id', $product_id);
                         ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Закрыть</a>
+    <a href="#" class="btn btn-default" data-dismiss="modal">Закрыть</a>
     <?= Html::button('Сохранить', ['class' => 'btn btn-success save', 'data' => ['dismiss' => "modal"]]) ?>
 </div>
 <?php

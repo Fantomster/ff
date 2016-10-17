@@ -3,6 +3,7 @@
 use yii\data\ArrayDataProvider;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
+use yii\helpers\Html;
 
 $dataProvider = new ArrayDataProvider([
     'key' => 'id',
@@ -16,7 +17,7 @@ echo GridView::widget([
     'dataProvider' => $dataProvider,
     'summary' => '',
     //'tableOptions' => ['class' => 'table no-margin table-hover'],
-    'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
+    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
     'options' => ['class' => 'table-responsive'],
     'panel' => false,
     'bootstrap' => false,
@@ -76,9 +77,22 @@ echo GridView::widget([
                     'format' => 'raw',
                     'value' => function($data) {
                         $total = $data['price'] * $data['quantity'];
-                        return "<span id=total$data[id]>$total</span> ".'<i class="fa fa-fw fa-rub"></i>';
+                        return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i>';
                     },
                 ],
-            ]
-        ]);
-        
+                [
+                    'format' => 'raw',
+                    'value' => function ($data) use ($vendor_id) {
+                        $link = Html::a('<i class="fa fa-trash m-r-xxs"></i> Удалить', '#', [
+                                    'class' => 'btn btn-outline btn-danger remove',
+                                    'data-product_id' => $data['product_id'],
+                                    'data-vendor_id' => $vendor_id,
+                        ]);
+                        return $link;
+                    },
+                            'contentOptions' => ['class' => 'width150 text-center'],
+                            'headerOptions' => ['class' => 'width150']
+                        ],
+                    ]
+                ]);
+                

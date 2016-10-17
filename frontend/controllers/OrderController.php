@@ -214,6 +214,7 @@ class OrderController extends DefaultController {
         $post = Yii::$app->request->post();
 
         if ($post && $post['vendor_id'] && $post['product_id']) {
+            $orderDeleted = false;
             $order = Order::find()->where(['vendor_id' => $post['vendor_id'], 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
             foreach ($order->orderContent as $position) {
                 if ($position->product_id == $post['product_id']) {
@@ -223,7 +224,9 @@ class OrderController extends DefaultController {
                     $orderDeleted = $order->delete();
                 }
             }
-            $order->calculateTotalPrice();
+            if (!$orderDeleted) {
+                $order->calculateTotalPrice();
+            }
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
         }
@@ -249,8 +252,7 @@ class OrderController extends DefaultController {
                 }
             }
             $order->calculateTotalPrice();
-            //$orders = $client->getCart();
-            return true; //$this->renderPartial('_orders', compact('orders'));
+            return true; 
         }
 
         if (Yii::$app->request->get()) {

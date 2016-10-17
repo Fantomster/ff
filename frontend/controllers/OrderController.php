@@ -305,7 +305,7 @@ class OrderController extends DefaultController {
                                 'from' => 'top',
                                 'align' => 'center',
                             ],
-                            'delay' => 3000,
+                            'delay' => 1500,
                             'animate' => [
                                 'enter' => 'animated fadeInDown',
                                 'exit' => 'animated fadeOutUp',
@@ -474,7 +474,7 @@ class OrderController extends DefaultController {
 
     public function actionCheckout() {
         $client = $this->currentUser->organization;
-        $orders = $client->getCart();
+        $totalCart = 0;
 
         if (isset($_POST['hasEditable'])) {
             $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
@@ -486,6 +486,10 @@ class OrderController extends DefaultController {
                 $order = $model->order;
                 $order->calculateTotalPrice();
                 $order->save();
+                $orders = $client->getCart();
+                foreach ($orders as $order) {
+                    $totalCart += $order->total_price;
+                }
                 return [
                     'output' => $model->quantity,
                     'message' => '',
@@ -493,13 +497,19 @@ class OrderController extends DefaultController {
                     'positionId' => $model->id,
                     'orderId' => $order->id,
                     'orderTotal' => $order->total_price,
+                    'totalCart' => $totalCart,
                 ];
             } else {
                 return ['output' => '', 'message' => ''];
             }
         }
 
-        return $this->render('checkout', compact('orders'));
+        $orders = $client->getCart();
+        foreach ($orders as $order) {
+            $totalCart += $order->total_price;
+        }
+
+        return $this->render('checkout', compact('orders', 'totalCart'));
     }
 
     public function actionAjaxOrderAction() {

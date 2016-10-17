@@ -123,7 +123,7 @@ class OrderSearch extends Order {
         
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id'=>SORT_ASC]]
+            'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]]
         ]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];

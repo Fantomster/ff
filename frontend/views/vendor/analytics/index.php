@@ -147,7 +147,7 @@ HTML;
               </div>
             </div>
             <div class="box-body" style="display: block;">
-              <canvas id="pieChart" style="height: 287px; width: 574px;" height="287" width="574"></canvas>
+              <canvas id="pieChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
             </div>
             <!-- /.box-body -->
           </div>
@@ -165,7 +165,7 @@ HTML;
               </div>
             </div>
             <div class="box-body" style="display: block;">
-            
+                <div>
              <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
              <?php 
             
@@ -205,6 +205,7 @@ HTML;
             ]);
             ?> 
             <?php  Pjax::end(); ?>
+                </div>
             </div>
             <!-- /.box-body -->
           </div>
@@ -260,7 +261,7 @@ var areaChartOptions = {
       //Boolean - Whether to show a dot for each point
       pointDot: false,
       //Number - Radius of each point dot in pixels
-      pointDotRadius: 4,
+      pointDotRadius: 5,
       //Number - Pixel width of point dot stroke
       pointDotStrokeWidth: 1,
       //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
@@ -276,13 +277,14 @@ var areaChartOptions = {
       //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
       maintainAspectRatio: true,
       //Boolean - whether to make the chart responsive to window resizing
-      responsive: true
+      responsive: false
     };
   //Create the line chart
     areaChart.Line(areaChartData, areaChartOptions);
         
         
 var pieData = $arr_clients_price;
+
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData);
 /*if(!areaChartData.labels.length) {

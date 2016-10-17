@@ -65,13 +65,7 @@ class VendorController extends DefaultController {
         ];
     }
 
-    /*
-     *  index
-     */
-
-    public function actionIndex() {
-        return $this->render('/site/underConstruction');
-    }
+    
 
     /*
      *  Main settings page
@@ -1347,7 +1341,86 @@ class VendorController extends DefaultController {
                 'total_price'
                 ));
     }
+    /*
+     *  index
+     */
 
+    public function actionIndex() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        //ГРАФИК ПРОДАЖ -----> 
+        $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
+        $filter_to_date = date("d-m-Y");
+        $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
+            (select sum(total_price) FROM `order` 
+            where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
+            vendor_id = $currentUser->organization_id and ("
+                    . "DATE(created_at) between '" . 
+                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                    date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                ") AS `total_price`  
+            FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
+            FROM `order` where 
+            vendor_id = $currentUser->organization_id and("
+                    . "DATE(created_at) between '" . 
+                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                    date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryAll();
+            $arr_create_at =[];
+            $arr_price =[];
+        if(count($area_chart)==1){
+        array_push($arr_create_at, $filter_from_date);    
+        array_push($arr_price, 0);
+        }
+        foreach($area_chart as $area_charts){
+            array_push($arr_create_at, $area_charts['created_at']);    
+            array_push($arr_price, $area_charts['total_price']); 
+        } 
+        // <------ГРАФИК ПРОДАЖ
+        //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
+        $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
+                . "vendor_id = $currentUser->organization_id and ("
+                    . "DATE(created_at) between '" . 
+                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                    date('Y-m-d', strtotime($filter_to_date)) . "')");
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
+                . "vendor_id = $currentUser->organization_id and ("
+                    . "DATE(created_at) between '" . 
+                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                    date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryScalar();
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'client_id',
+                    'vendor_id',
+                    'created_by_id',
+                    'accepted_by_id',
+                    'status',
+                    'total_price',
+                    'created_at'
+                ],
+                'defaultOrder' => [
+                    'created_at' => SORT_DESC
+                    ]
+            ],
+        ]);
+        // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
+        
+        return $this->render('dashbord/index',compact(
+                'dataProvider',
+                'filter_from_date',
+                'filter_to_date',
+                'arr_create_at',
+                'arr_price'
+                ));
+    }
+    
+    
+    
     public function actionTutorial() {
         return $this->render('/site/underConstruction');
     }

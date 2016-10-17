@@ -25,7 +25,16 @@ if (!Yii::$app->user->isGuest) {
         messageBody = $.parseHTML( message.body );
         
         $( ".direct-chat-messages" ).prepend( message.body );
-        
+        senderId = $("#sender_id").val();
+        messageWrapper = $("#msg" + message.id);
+        if (senderId == message.sender_id) {
+            messageWrapper.addClass("right");
+            messageWrapper.find(".direct-chat-name").removeClass("pull-left").addClass("pull-right");
+            messageWrapper.find(".direct-chat-timestamp").removeClass("pull-right").addClass("pull-left");
+        } else {
+            messageWrapper.find(".direct-chat-name").removeClass("pull-right").addClass("pull-left");
+            messageWrapper.find(".direct-chat-timestamp").removeClass("pull-left").addClass("pull-right");
+        }
         if (message.isSystem) {
             if (message.isSystem == 1) {
             form = $("#actionButtonsForm");

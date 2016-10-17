@@ -126,7 +126,7 @@ $this->registerJs(
                         'filterPosition' => false,
                         'summary' => '',
                         //'tableOptions' => ['class' => 'table no-margin table-hover'],
-                        'tableOptions' => ['class'=>'table table-bordered table-striped dataTable'],
+                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                         'options' => ['class' => 'table-responsive'],
                         'columns' => [
                             [
@@ -150,7 +150,7 @@ $this->registerJs(
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::textInput('', 1, ['class' => 'quantity form-control', 'style'=>'width: 200px;']);
+                                    return Html::textInput('', 1, ['class' => 'quantity form-control', 'style' => 'width: 200px;']);
                                 },
                                         'label' => 'Количество'
                                     ],
@@ -158,13 +158,15 @@ $this->registerJs(
                                     [
                                         'format' => 'raw',
                                         'value' => function ($data) {
-                                            $link = Html::a('<span class="glyphicon glyphicon-plus"></span>', '#', [
-                                                        'class' => 'add-to-cart',
+                                            $link = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
+                                                        'class' => 'add-to-cart btn btn-success',
                                                         'data-id' => $data['id'],
                                                         'data-cat' => $data['cat_id'],
                                             ]);
                                             return $link;
                                         },
+                                        'contentOptions' => ['class' => 'width100'],
+                                        'headerOptions' => ['class' => 'width100']
                                             ],
                                         ],
                                     ])
@@ -182,7 +184,7 @@ $this->registerJs(
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body" id="orders">
-                <?= $this->render('_cart', compact('orders')) ?>
+                                <?= $this->render('_cart', compact('orders')) ?>
                             </div>
                         </div>
                     </div>

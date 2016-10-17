@@ -56,6 +56,9 @@ class OrderCatalogSearch extends \yii\base\Model {
                     'product',
                     'price',
                 ],
+                'defaultOrder' => [
+                    'product' => SORT_ASC
+                    ]
             ],
         ]);
         return $dataProvider;

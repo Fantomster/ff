@@ -1266,7 +1266,8 @@ class VendorController extends DefaultController {
                 foreach($area_chart as $area_charts){
                     array_push($arr_create_at, $area_charts['created_at']);    
                     array_push($arr_price, $area_charts['total_price']); 
-                }        
+                } 
+                //var_dump($area_chart);
         $query = Yii::$app->db->createCommand("
             SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
                 SELECT id from `order` where 

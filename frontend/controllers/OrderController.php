@@ -47,26 +47,6 @@ class OrderController extends DefaultController {
                     'ajax-remove-position',
                 ],
                 'rules' => [
-//                    [
-//                        'allow' => false,
-//                        'roles' => ['?'],
-//                        'actions' => [
-//                            'index',
-//                            'view',
-//                            'create',
-//                            'send-message',
-//                            'ajax-add-to-cart',
-//                            'ajax-categories',
-//                            'ajax-clear-order',
-//                            'ajax-make-order',
-//                            'ajax-modify-cart',
-//                            'ajax-order-action',
-//                            'ajax-order-refresh',
-//                            'ajax-refresh-buttons',
-//                            'ajax-show-order',
-//                            'ajax-vendors',
-//                        ],
-//                    ],
                     [
                         'actions' => ['index', 'view', 'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
                         'allow' => true,
@@ -320,30 +300,6 @@ class OrderController extends DefaultController {
                             . '</div></div></div>',
                         ]
                     ]
-                    /*
-                     * 
-                     * <div class="modal-content">
-    <button type="button" class="close" data-notify="dismiss" aria-hidden="true">×</button>
-    <h4 class="modal-title">Заказ успешно оформлен</h4>
-</div>
-<div class="modal-body form-inline" style="text-align: center;"> 
-                     </div>
-</div>
-                     * 
-                     * 
-	template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
-		'<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
-		'<span data-notify="icon"></span> ' +
-		'<span data-notify="title">{1}</span> ' +
-		'<span data-notify="message">{2}</span>' +
-		'<div class="progress" data-notify="progressbar">' +
-			'<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
-		'</div>' +
-		'<a href="{3}" target="{4}" data-notify="url"></a>' +
-	'</div>' 
-});
-                     */
-                    
             ];
         }
 

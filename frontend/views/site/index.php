@@ -1,5 +1,6 @@
 <?php
 /* @var $this yii\web\View */
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
@@ -15,7 +16,7 @@ $this->title = 'F-keeper';
         </div>
         <div class="buttons__block">
             <?= Html::a('<span>для ресторанов</span>', ["/site/restaurant"], ['class' => 'for__restaurants']) ?>
-            <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
+<?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
             <div class="watch_video">
                 <a href="#" data-toggle="modal" data-target="#myModal" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
@@ -43,7 +44,7 @@ $this->title = 'F-keeper';
                     <div class="how_its_work">
                         <h3>как это работает</h3>
                         <p>F-keeper это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. F-keeper, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.</p>
-                        <?= Html::a('Для ресторанов', ["/site/restaurant"]) ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
+<?= Html::a('Для ресторанов', ["/site/restaurant"]) ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
                     </div>
                 </div>	
                 <div class="col-md-7">
@@ -83,7 +84,7 @@ $this->title = 'F-keeper';
         <h4>Автоматизируйте свой бизнес сейчас</h4>
         <span>Вы в одном шаге, расскажите о себе</span>
         <div class="contact__form">
-            <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
+<?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
 
                 <div class="alert alert-success">
                     <p><?= $flash ?></p>
@@ -130,9 +131,9 @@ $this->title = 'F-keeper';
                     'class' => 'send__btn',
                 ])
                 ?>
-            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
+                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
                 <?php ActiveForm::end(); ?>
-            <?php endif; ?>
+<?php endif; ?>
         </div>
 
     </div>

@@ -70,11 +70,14 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                                 'max' => PHP_INT_MAX,
                                 'step' => 1,
                                 'decimals' => 0,
-                                'buttonup_class' => 'btn btn-primary',
-                                'buttondown_class' => 'btn btn-info',
+                                'buttonup_class' => 'btn btn-default',
+                                'buttondown_class' => 'btn btn-default',
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
+                        ],
+                        'submitButton' => [
+                            'class' => 'btn btn-sm btn-success kv-editable-submit',
                         ],
                         'pluginEvents' => [
                             "editableSuccess" => "function(event, val, form, data) { $('#actionButtons').html(data.buttons); }",

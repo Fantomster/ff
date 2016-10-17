@@ -60,6 +60,9 @@ echo GridView::widget([
                             'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                         ],
                     ],
+                    'submitButton' => [
+                        'class' => 'btn btn-sm btn-success kv-editable-submit',
+                    ],
                     'pluginEvents' => [
                         "editableSuccess" => "function(event, val, form, data) { "
                         . "$('#orderTotal' + data.orderId).html(data.orderTotal); "

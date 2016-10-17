@@ -23,12 +23,11 @@ if (!Yii::$app->user->isGuest) {
         var message = JSON.parse(data);
 
         messageBody = $.parseHTML( message.body );
-       // alert(messageBody);
         
         $( ".direct-chat-messages" ).prepend( message.body );
         
         if (message.isSystem) {
-            if (message.isSystem = 1) {
+            if (message.isSystem == 1) {
             form = $("#actionButtonsForm");
             $.post(
                     form.attr("action"),
@@ -37,7 +36,7 @@ if (!Yii::$app->user->isGuest) {
                     $('#actionButtons').html(result);
                 });
             } else if (message.isSystem == 2) {
-                $("#cartCount").html(message.body);alert(1);
+                $("#cartCount").html(message.body);
                 try {
                     $.pjax.reload({container: "#checkout"});
                 } catch(e) {

@@ -49,7 +49,7 @@ $this->registerCss('
                 <div class="panel-body" style="min-height: 307px;height:100%;">
                     <div>
                             <small class="stat-label text-bold">Текущий месяц</small>
-                            <h2 class="m-xs text-success font-bold">
+                            <h2 class="m-xs text-success font-bold  text-bold">
                             <?=$stats['curMonth']?$stats['curMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                             </h2>
                     </div>

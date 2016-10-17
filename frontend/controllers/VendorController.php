@@ -1396,7 +1396,7 @@ class VendorController extends DefaultController {
          */
         $stats = Yii::$app->db->createCommand("SELECT
             (SELECT sum(total_price) FROM `order`
-            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(total_price, '%Y-%m-%d') = CURDATE()) as 'curDay',
+            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
             (SELECT sum(total_price) FROM `order` 
              WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
             as 'curMonth',

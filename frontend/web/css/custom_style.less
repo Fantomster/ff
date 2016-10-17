@@ -490,6 +490,8 @@ label {
 }
 .grid-prod {
     color: @dark-green-fk;
+    font-size: 15px;
+    font-weight: bold;
 }
 .grid-article {
     font-size: 12px;
@@ -542,6 +544,9 @@ label {
 .padding-right-15 {
     padding-right: 15px;
 }
+.margin-right-15 {
+    margin-right: 15px;
+}
 .order-history .form-group {
     padding-right: 35px;
 }
@@ -563,6 +568,9 @@ label {
 
 a {
     color: @dark-green-fk;
+}
+a:hover {
+    color: @light-green-fk;
 }
 .content-wrapper .right-side {
     background-color: #fefefe;
@@ -612,4 +620,29 @@ label {
 }
 .main-header .navbar-nav {
     font-size: 18px;
+}
+.table > tbody > tr > td {
+    vertical-align: middle;
+}
+.width150 {
+    width: 150px;
+}
+.btn-success {
+    background-color: @light-green-fk;
+    border: 0;
+}
+.btn-success:hover {
+    background-color: @dark-green-fk;
+    border: 0;
+}
+.btn-gray {
+    background-color: @gray-fk;
+    color: #fff;
+}
+.btn-gray:hover {
+    background-color: lighten(@gray-fk, 10%);
+    color: #fff;
+}
+.kv-editable-link {
+    color: @dark-green-fk;
 }

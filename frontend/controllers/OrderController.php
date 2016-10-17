@@ -290,7 +290,61 @@ class OrderController extends DefaultController {
             }
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
-            return true;
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return [
+                'success' => true,
+                'growl' => [
+                        'options' => [
+                            'title' => 'Заказ успешно оформлен',
+                        ],
+                        'settings' => [
+                            'element' => 'body',
+                            'type' => 'Заказ успешно оформлен',
+                            'allow_dismiss' => true,
+                            'placement' => [
+                                'from' => 'top',
+                                'align' => 'center',
+                            ],
+                            'delay' => 3000,
+                            'animate' => [
+                                'enter' => 'animated fadeInDown',
+                                'exit' => 'animated fadeOutUp',
+                            ],
+                            'offset' => 100,
+                            'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
+                            . '<div class="modal-content">'
+                            . '<div class="modal-header">'
+                            . '<h4 class="modal-title">{0}</h4></div>'
+                            . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
+                            . '<span class="glyphicon glyphicon-thumbs-up"></span>'
+                            . '</div></div></div>',
+                        ]
+                    ]
+                    /*
+                     * 
+                     * <div class="modal-content">
+    <button type="button" class="close" data-notify="dismiss" aria-hidden="true">×</button>
+    <h4 class="modal-title">Заказ успешно оформлен</h4>
+</div>
+<div class="modal-body form-inline" style="text-align: center;"> 
+                     </div>
+</div>
+                     * 
+                     * 
+	template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+		'<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+		'<span data-notify="icon"></span> ' +
+		'<span data-notify="title">{1}</span> ' +
+		'<span data-notify="message">{2}</span>' +
+		'<div class="progress" data-notify="progressbar">' +
+			'<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+		'</div>' +
+		'<a href="{3}" target="{4}" data-notify="url"></a>' +
+	'</div>' 
+});
+                     */
+                    
+            ];
         }
 
         return false;
@@ -550,7 +604,7 @@ class OrderController extends DefaultController {
 //                    'channel' => 'chat',
 //                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
 //        ]);
-        
+
         $order = Order::findOne(['id' => $order_id]);
 
         $clientUsers = $order->client->users;
@@ -559,35 +613,33 @@ class OrderController extends DefaultController {
         foreach ($clientUsers as $user) {
             $channel = 'user' . $user->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
-                    'channel' => 'chat',
-                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
             ]);
         }
         foreach ($vendorUsers as $user) {
             $channel = 'user' . $user->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
-                    'channel' => 'chat',
-                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
             ]);
         }
 
         return true;
-        
     }
-    
+
     private function sendCartChange($client, $cartCount) {
         $clientUsers = $client->users;
 
         foreach ($clientUsers as $user) {
             $channel = 'user' . $user->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
-                    'channel' => 'chat',
-                    'message' => Json::encode(['body' => $cartCount, 'channel' => $channel, 'isSystem' => 2])
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $cartCount, 'channel' => $channel, 'isSystem' => 2])
             ]);
         }
 
         return true;
-        
     }
 
 }

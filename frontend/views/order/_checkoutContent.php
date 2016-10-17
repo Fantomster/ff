@@ -25,7 +25,7 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product_name',
             'value' => function($data) {
-                return "<div class='grid-prod'>" . $data['product_name'] . "</div><div class='grid-article'>артикул: "
+                return "<div class='grid-prod'>" . $data['product_name'] . "</div><div class='grid-article'>Артикул: "
                         . $data['article'] . "</div><div>"
                         . $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'] . "</div>";
             },

@@ -15,6 +15,7 @@ tfoot tr{border-top:2px solid #ccc}
 ?>
 
 <div class="box box-info">
+    
     <div class="box-header with-border">
       <div class="col-md-12">
         <h3 class="box-title">Аналитика</h3>
@@ -22,38 +23,38 @@ tfoot tr{border-top:2px solid #ccc}
       </div>
     </div>
     <!-- /.box-header -->
-    <div class="box-body">
+    <div class="box-body order-history">
         <div class="col-md-3 col-sm-6 col-xs-12">
-           <div class="info-box box-analytics">
-               <div class="info-box-content">
-                   <span class="info-box-text">Заказы</span>
-                   <span class="info-box-number text-success"><?=$header_info_zakaz;?></span>
-               </div>
-           </div>
+            <div class="info-box bg-total-price">
+                <div class="info-box-content">
+                    <span class="info-box-number"><?=$header_info_zakaz;?></span>
+                    <span class="info-box-text">Заказы</span>
+                </div>
+            </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
-           <div class="info-box box-analytics">
-               <div class="info-box-content">
-                   <span class="info-box-text">Клиенты</span>
-                   <span class="info-box-number text-success"><?=$header_info_clients;?></span>
-               </div>
-           </div>
+            <div class="info-box bg-total-price">
+                <div class="info-box-content">
+                    <span class="info-box-number"><?=$header_info_clients;?></span>
+                    <span class="info-box-text">Клиенты</span>
+                </div>
+            </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
-           <div class="info-box box-analytics">
-               <div class="info-box-content">
-                   <span class="info-box-text">Продажи</span>
-                   <span class="info-box-number text-success"><?=$header_info_prodaji;?></span>
-               </div>
-           </div>
+            <div class="info-box bg-total-price">
+                <div class="info-box-content">
+                    <span class="info-box-number"><?=$header_info_prodaji;?></span>
+                    <span class="info-box-text">Продажи</span>
+                </div>
+            </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
-           <div class="info-box box-analytics">
-               <div class="info-box-content">
-                   <span class="info-box-text">Позиций</span>
-                   <span class="info-box-number text-success"><?=$header_info_poziciy;?></span>
-               </div>
-           </div>
+            <div class="info-box bg-total-price">
+                <div class="info-box-content">
+                    <span class="info-box-number"><?=$header_info_poziciy;?></span>
+                    <span class="info-box-text">Позиций</span>
+                </div>
+            </div>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6">
 <?= Html::label('Статус заказа', null, ['class' => 'label','style'=>'color:#555']) ?>
@@ -85,7 +86,7 @@ HTML;
     'type' => DatePicker::TYPE_RANGE,
     'name2' => 'filter_to_date',
     'value2' => $filter_to_date,
-    'separator' => '<i class="glyphicon glyphicon-resize-horizontal"></i>',
+    'separator' => 'по',
     'layout' => $layout,
     'pluginOptions' => [
         'autoclose'=>true,
@@ -115,7 +116,7 @@ HTML;
 <div class="row">
         <div class="col-md-6">
           <!-- AREA CHART -->
-          <div class="box box-warning">
+          <div class="box box-info">
             <div class="box-header with-border">
               <h3 class="box-title">Объем продаж</h3>
 
@@ -136,7 +137,7 @@ HTML;
         <!-- /.col (LEFT) -->
         <div class="col-md-6">
           <!-- pie CHART -->
-          <div class="box box-warning">
+          <div class="box box-info">
             <div class="box-header with-border">
               <h3 class="box-title">Продажи по клиентам</h3>
 
@@ -154,7 +155,7 @@ HTML;
       </div>
       <div class="col-md-6">
           <!-- pie CHART -->
-          <div class="box box-warning">
+          <div class="box box-info">
             <div class="box-header with-border">
               <h3 class="box-title">Продажи по товарам</h3>
 

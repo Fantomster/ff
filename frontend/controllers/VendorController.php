@@ -1263,10 +1263,15 @@ class VendorController extends DefaultController {
                         date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
                 $arr_create_at =[];
                 $arr_price =[];
+                if(count($area_chart)==1){
+                array_push($arr_create_at, $filter_from_date);    
+                array_push($arr_price, 0);
+                }
                 foreach($area_chart as $area_charts){
                     array_push($arr_create_at, $area_charts['created_at']);    
                     array_push($arr_price, $area_charts['total_price']); 
-                }        
+                } 
+                
         $query = Yii::$app->db->createCommand("
             SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
                 SELECT id from `order` where 

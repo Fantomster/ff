@@ -27,5 +27,7 @@ class AppAsset extends AssetBundle {
         'frontend\assets\BootboxAsset',
         'fedemotta\datatables\DataTablesAsset',
         '\rmrevin\yii\fontawesome\AssetBundle',
+        'kartik\growl\GrowlAsset',
+        'kartik\base\AnimateAsset',
     ];
 }

@@ -42,6 +42,12 @@ $this->registerJs(
                     $("#createForm").submit();
                 }, 300);
             });
+            $("#createOrder").on("pjax:complete", function() {
+                var searchInput = $("#searchString");
+                var strLength = searchInput.val().length * 2;
+                searchInput.focus();
+                searchInput[0].setSelectionRange(strLength, strLength);
+            });
             $("#orders").on("click", ".btn-danger", function(e) {
                 $("#loader-show").showLoading();
                 $.post(
@@ -91,7 +97,7 @@ $this->registerJs(
                             'options' => [
                                 'data-pjax' => true,
                                 'id' => 'createForm',
-                                'class' => "navbar-form",
+                                'class' => "navbar-form no-padding no-margin",
                                 'role' => 'search',
                             ],
                             'method' => 'get',
@@ -102,13 +108,15 @@ $this->registerJs(
                             $form->field($searchModel, 'searchString')
                             ->textInput([
                                 'id' => 'searchString',
-                                'class' => 'form-control',
+                                'class' => 'form-control margin-right-15',
                                 'placeholder' => 'Поиск'])
                             ->label(false)
                     ?>
                     <?=
                             $form->field($searchModel, 'selectedCategory')
-                            ->dropDownList($client->getRestaurantCategories(), ['id' => 'selectedCategory'])
+                            ->dropDownList($client->getRestaurantCategories(), [
+                                'id' => 'selectedCategory',
+                                'style' => 'margin-right:15px'])
                             ->label(false)
                     ?>
                     <?=
@@ -145,14 +153,18 @@ $this->registerJs(
                                 'value' => function($data) {
                                     return $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
                                 },
-                                'label' => 'Цена'
+                                'label' => 'Цена',
+                                'contentOptions' => ['class' => 'width150'],
+                                'headerOptions' => ['class' => 'width150']
                             ],
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::textInput('', 1, ['class' => 'quantity form-control', 'style' => 'width: 200px;']);
+                                    return Html::textInput('', 1, ['class' => 'quantity form-control']);
                                 },
-                                        'label' => 'Количество'
+                                        'label' => 'Количество',
+                                        'contentOptions' => ['class' => 'width150'],
+                                        'headerOptions' => ['class' => 'width150']
                                     ],
                                     //'note',
                                     [
@@ -165,15 +177,15 @@ $this->registerJs(
                                             ]);
                                             return $link;
                                         },
-                                        'contentOptions' => ['class' => 'width100'],
-                                        'headerOptions' => ['class' => 'width100']
+                                                'contentOptions' => ['class' => 'width150 text-center'],
+                                                'headerOptions' => ['class' => 'width150']
                                             ],
                                         ],
                                     ])
                                     ?>
                                 </div>
                                 </form>
-                                <?php Pjax::end(); ?>
+                <?php Pjax::end(); ?>
                             </div>
                         </div>
                     </div>
@@ -184,7 +196,7 @@ $this->registerJs(
                             </div>
                             <!-- /.box-header -->
                             <div class="box-body" id="orders">
-                                <?= $this->render('_cart', compact('orders')) ?>
+                <?= $this->render('_cart', compact('orders')) ?>
                             </div>
                         </div>
                     </div>

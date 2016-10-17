@@ -1259,11 +1259,11 @@ class VendorController extends DefaultController {
                 $arr_create_at =[];
                 $arr_price =[];
                 if(count($area_chart)==1){
-                array_push($arr_create_at, $filter_from_date);    
+                array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));  
                 array_push($arr_price, 0);
                 }
                 foreach($area_chart as $area_charts){
-                    array_push($arr_create_at, $area_charts['created_at']);    
+                    array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
                     array_push($arr_price, $area_charts['total_price']); 
                 } 
                 
@@ -1368,11 +1368,12 @@ class VendorController extends DefaultController {
             $arr_create_at =[];
             $arr_price =[];
         if(count($area_chart)==1){
-        array_push($arr_create_at, $filter_from_date);    
+        array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));   
         array_push($arr_price, 0);
         }
         foreach($area_chart as $area_charts){
-            array_push($arr_create_at, $area_charts['created_at']);    
+            
+            array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
             array_push($arr_price, $area_charts['total_price']); 
         } 
         // <------ГРАФИК ПРОДАЖ

@@ -30,6 +30,7 @@ $('#actionButtons').on('click', '.btnOrderAction', function() {
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 ?>
+
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Заказ <?= ($organizationType == Organization::TYPE_RESTAURANT) ? 'у ' . $order->vendor->name : 'для ' . $order->client->name ?></h3>
@@ -153,10 +154,13 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
             <?php
             foreach ($order->orderChat as $chat) {
                 echo $this->render('_chat-message', [
+                    'id' => $chat->id,
                     'name' => $chat->sentBy->profile->full_name,
+                    'sender_id' => $chat->sent_by_id,
                     'message' => $chat->message,
                     'time' => $chat->created_at,
                     'isSystem' => $chat->is_system,
+                    'ajax' => 0,
                     'organizationType' => $chat->sentBy->organization->type_id]);
             }
             ?>
@@ -172,6 +176,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
         ?>
         <div class="input-group">
             <?= Html::hiddenInput('order_id', $order->id); ?>
+            <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
             <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
             <?=
             Html::textInput('message', null, [

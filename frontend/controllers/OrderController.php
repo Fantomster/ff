@@ -223,9 +223,7 @@ class OrderController extends DefaultController {
                     $orderDeleted = $order->delete();
                 }
             }
-            if (!$orderDeleted) {
-                $order->calculateTotalPrice();
-            }
+            $order->calculateTotalPrice();
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
         }
@@ -561,10 +559,13 @@ class OrderController extends DefaultController {
         $name = $user->profile->full_name;
 
         $body = $this->renderPartial('_chat-message', [
+            'id' => $newMessage->id,
             'name' => $name,
             'message' => $newMessage->message,
             'time' => $newMessage->created_at,
             'isSystem' => 0,
+            'sender_id' => $user->id,
+            'ajax' => 1,
         ]);
 
         $order = Order::findOne(['id' => $order_id]);
@@ -572,18 +573,18 @@ class OrderController extends DefaultController {
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-        foreach ($clientUsers as $user) {
-            $channel = 'user' . $user->id;
+        foreach ($clientUsers as $clientUser) {
+            $channel = 'user' . $clientUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
-                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0, 'id' => $newMessage->id, 'sender_id' => $user->id])
             ]);
         }
-        foreach ($vendorUsers as $user) {
-            $channel = 'user' . $user->id;
+        foreach ($vendorUsers as $vendorUser) {
+            $channel = 'user' . $vendorUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
-                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0])
+                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0, 'id' => $newMessage->id, 'sender_id' => $user->id])
             ]);
         }
 
@@ -598,7 +599,14 @@ class OrderController extends DefaultController {
         $newMessage->is_system = 1;
         $newMessage->sent_by_id = $user_id;
         $newMessage->save();
-        $body = $this->renderPartial('_chat-message', ['name' => '', 'message' => $newMessage->message, 'time' => $newMessage->created_at, 'isSystem' => 1]);
+        $body = $this->renderPartial('_chat-message', [
+            'name' => '', 
+            'message' => $newMessage->message, 
+            'time' => $newMessage->created_at, 
+            'isSystem' => 1, 
+            'sender_id' => $user_id,
+            'ajax' => 1,
+                ]);
 
 //        return Yii::$app->redis->executeCommand('PUBLISH', [
 //                    'channel' => 'chat',
@@ -610,15 +618,15 @@ class OrderController extends DefaultController {
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-        foreach ($clientUsers as $user) {
-            $channel = 'user' . $user->id;
+        foreach ($clientUsers as $clientUser) {
+            $channel = 'user' . $clientUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
                 'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
             ]);
         }
-        foreach ($vendorUsers as $user) {
-            $channel = 'user' . $user->id;
+        foreach ($vendorUsers as $vendorUser) {
+            $channel = 'user' . $vendorUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
                 'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])

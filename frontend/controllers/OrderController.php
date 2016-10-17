@@ -223,9 +223,7 @@ class OrderController extends DefaultController {
                     $orderDeleted = $order->delete();
                 }
             }
-            if (!$orderDeleted) {
-                $order->calculateTotalPrice();
-            }
+            $order->calculateTotalPrice();
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
         }

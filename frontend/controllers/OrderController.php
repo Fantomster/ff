@@ -35,14 +35,16 @@ class OrderController extends DefaultController {
                     'index',
                     'view',
                     'create',
+                    'checkout',
                     'send-message',
+                    'refresh-cart',
                     'ajax-add-to-cart',
-                    'ajax-clear-order',
+                    'ajax-delete-order',
                     'ajax-make-order',
                     'ajax-order-action',
-                    'ajax-order-refresh',
+                    'ajax-change-quantity',
                     'ajax-refresh-buttons',
-                    'ajax-show-order',
+                    'ajax-remove-position',
                 ],
                 'rules' => [
 //                    [
@@ -79,11 +81,13 @@ class OrderController extends DefaultController {
                     [
                         'actions' => [
                             'create',
+                            'checkout',
+                            'refresh-cart',
                             'ajax-add-to-cart',
-                            'ajax-clear-order',
+                            'ajax-delete-order',
                             'ajax-make-order',
-                            'ajax-modify-cart',
-                            'ajax-order-refresh',
+                            'ajax-change-quantity',
+                            'ajax-remove-position',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -93,9 +97,9 @@ class OrderController extends DefaultController {
                         ],
                     ],
                 ],
-                'denyCallback' => function($rule, $action) {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-        }
+//                'denyCallback' => function($rule, $action) {
+//            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+//        }
             ],
         ];
     }

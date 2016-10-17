@@ -1244,7 +1244,7 @@ class VendorController extends DefaultController {
                 $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
                 (select sum(total_price) FROM `order` 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
-                vendor_id = $currentUser->organization_id and ("
+                vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
                         . "DATE(created_at) between '" . 
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                         date('Y-m-d', strtotime($filter_to_date)) . "')" .
@@ -1252,7 +1252,7 @@ class VendorController extends DefaultController {
                     ") AS `total_price`  
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
                 FROM `order` where 
-                vendor_id = $currentUser->organization_id and("
+                vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
                         . "DATE(created_at) between '" . 
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                         date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
@@ -1272,7 +1272,7 @@ class VendorController extends DefaultController {
                 SELECT id from `order` where 
                 (DATE(created_at) between '" . 
                 date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                " and vendor_id = " . $currentUser->organization_id . 
+                "and status<>" . Order::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id . 
                 $where . 
                 ") group by product_id");
         $totalCount = Yii::$app->db->createCommand("
@@ -1281,12 +1281,12 @@ class VendorController extends DefaultController {
                 SELECT id from `order` where 
                 (DATE(created_at) between '" . 
                 date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                " and vendor_id = " . $currentUser->organization_id . 
+                "and status<>" . Order::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id . 
                 $where .
                 ") group by product_id)tb")->queryScalar();
         $total_price = Yii::$app->db->createCommand("SELECT sum(total_price) as total from `order` where " . 
                         "vendor_id = " . $currentUser->organization_id . 
-                        " and DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
+                        " and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                         date('Y-m-d', strtotime($filter_to_date)) . "'" . $where)->queryOne();
         $total_price = $total_price['total'];
@@ -1313,7 +1313,7 @@ class VendorController extends DefaultController {
                 date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
                 $where .
                 " and vendor_id = " . $currentUser->organization_id . 
-                " group by client_id")->queryAll();
+                " and status<>" . Order::STATUS_FORMING . " group by client_id")->queryAll();
         $arr_clients_price =[];
                 foreach($clients_query as $clients_querys){
                     $arr = array(
@@ -1354,14 +1354,14 @@ class VendorController extends DefaultController {
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
             (select sum(total_price) FROM `order` 
             where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
-            vendor_id = $currentUser->organization_id and ("
+            vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
                     . "DATE(created_at) between '" . 
                     date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                     date('Y-m-d', strtotime($filter_to_date)) . "')" .
                 ") AS `total_price`  
             FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
             FROM `order` where 
-            vendor_id = $currentUser->organization_id and("
+            vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
                     . "DATE(created_at) between '" . 
                     date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
                     date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryAll();
@@ -1381,12 +1381,12 @@ class VendorController extends DefaultController {
                 . "vendor_id = $currentUser->organization_id and ("
                     . "DATE(created_at) between '" . 
                     date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_DONE);
+                    date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING);
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
                 . "vendor_id = $currentUser->organization_id and ("
                     . "DATE(created_at) between '" . 
                     date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "')and status<>" . Order::STATUS_DONE . ")`tb`")->queryScalar();
+                    date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,

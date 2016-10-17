@@ -92,9 +92,6 @@ $this->registerCss('
                             case Order::STATUS_DONE:
                                 $statusClass = 'done';
                                 break;
-                            case Order::STATUS_FORMING:
-                                $statusClass = 'done';
-                                break;
                             case Order::STATUS_REJECTED:
                             case Order::STATUS_CANCELLED:
                                 $statusClass = 'cancelled';

@@ -137,10 +137,8 @@ $this->registerCss("
             'filterModel' => $searchModel,
             'filterPosition' => false,
             'summary' => '',
-//            'tableOptions' => ['class' => 'table no-margin table-hover'],
             'options' => ['class' => 'table-responsive'],
             'tableOptions' => ['class'=>'table table-bordered table-striped dataTable']  ,
-//            'options' => 'dataTable',
             'columns' => [
                 [
                     'attribute' => 'id',
@@ -169,7 +167,6 @@ $this->registerCss("
                 [
                     'format' => 'raw',
                     'attribute' => 'total_price',
-                    //'value' => 'total_price',
                     'value' => function($data) {
                         return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
                     },
@@ -178,11 +175,9 @@ $this->registerCss("
                 [
                     'format' => 'raw',
                     'attribute' => 'created_at',
-                    'header' => '<i class="fa fa-fw fa-calendar""></i>  Дата создания',
                     'value' => function($data) {
-                      //  Yii::$app->formatter->locale = 'ru-RU';
                         $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                        return $date;
+                        return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                     },
                     'label' => 'Дата создания',
                 ],

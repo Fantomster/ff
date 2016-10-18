@@ -74,10 +74,6 @@ $this->registerJs(
         });'
 );
 
-$totalCart = 0;
-foreach ($orders as $order) {
-    $totalCart += $order->total_price;
-}
 ?>
 <?php
 Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000]);

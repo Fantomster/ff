@@ -66,8 +66,10 @@ echo GridView::widget([
                     ],
                     'pluginEvents' => [
                         "editableSuccess" => "function(event, val, form, data) { "
+                      //  . '$.pjax.reload({container: "#checkout"});'
                         . "$('#orderTotal' + data.orderId).html(data.orderTotal); "
                         . "$('#total' + data.positionId).html(data.positionTotal); "
+                        . "$('.total-cart span').html(data.totalCart);"
                         . "}",
                     ],
                 ];

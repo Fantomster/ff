@@ -11,13 +11,13 @@ use Yii;
  * @property integer $vendor_id
  * @property string $delivery_charge
  * @property string $min_free_delivery_charge
- * @property boolean $delivery_mon
- * @property boolean $delivery_tue
- * @property boolean $delivery_wed
- * @property boolean $delivery_thu
- * @property boolean $delivery_fri
- * @property boolean $delivery_sat
- * @property boolean $delivery_sun
+ * @property boolean $mon
+ * @property boolean $tue
+ * @property boolean $wed
+ * @property boolean $thu
+ * @property boolean $fri
+ * @property boolean $sat
+ * @property boolean $sun
  * @property string $min_order_price
  * @property string $created_at
  * @property string $updated_at
@@ -55,7 +55,7 @@ class Delivery extends \yii\db\ActiveRecord
         return [
             [['vendor_id'], 'required'],
             [['vendor_id'], 'integer'],
-            [['delivery_mon', 'delivery_tue', 'delivery_wed', 'delivery_thu', 'delivery_fri', 'delivery_sat', 'delivery_sun'], 'boolean'],
+            [['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], 'boolean'],
             [['delivery_charge', 'min_free_delivery_charge', 'min_order_price'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
         ];
@@ -71,13 +71,13 @@ class Delivery extends \yii\db\ActiveRecord
             'vendor_id' => 'Vendor ID',
             'delivery_charge' => 'Стоимость доставки',
             'min_free_delivery_charge' => 'Cтоимость заказа для бесплатной доставки',
-            'delivery_mon' => 'Пнд',
-            'delivery_tue' => 'Втр',
-            'delivery_wed' => 'Срд',
-            'delivery_thu' => 'Чтв',
-            'delivery_fri' => 'Птн',
-            'delivery_sat' => 'Сбт',
-            'delivery_sun' => 'Вск',
+            'mon' => 'Пн',
+            'tue' => 'Вт',
+            'wed' => 'Ср',
+            'thu' => 'Чт',
+            'fri' => 'Пт',
+            'sat' => 'Сб',
+            'sun' => 'Вс',
             'min_order_price' => 'Минимальная стоимость заказа',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

@@ -69,114 +69,57 @@ use kartik\money\MaskMoney;
         <div class="form-group">
             <label class="col-sm-4 control-label">Дни доставки</label>
             <div class="col-sm-5">
-                <!--?=
-                        $form->field($delivery, 'delivery_mon')
-                        ->label(false)
-                        ->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'pluginOptions' => ['threeState' => false],
-                        ])
-                ?-->
                 <?php
                 echo CheckboxX::widget([
-                    'name' => 'Delivery[delivery_mon]', 
+                    'name' => 'Delivery[mon]', 
                     'id' => 'mon', 
                     'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->delivery_mon,
+                    'value' => $delivery->mon,
                     ]);
-                echo '<label class="control-label" for="Delivery[delivery_mon]">Пнд</label>';
+                echo '<label class="control-label" for="Delivery[mon]">Пн</label>';
                 echo CheckboxX::widget([
-                    'name' => 'Delivery[delivery_tue]', 
+                    'name' => 'Delivery[tue]', 
                     'id' => 'tue', 
                     'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->delivery_tue,
+                    'value' => $delivery->tue,
                     ]);
-                echo '<label class="control-label" for="Delivery[delivery_tue]">Втр</label>';
+                echo '<label class="control-label" for="Delivery[tue]">Вт</label>';
                 echo CheckboxX::widget([
-                    'name' => 'Delivery[delivery_wed]', 
+                    'name' => 'Delivery[wed]', 
                     'id' => 'wed', 
                     'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->delivery_wed,
+                    'value' => $delivery->wed,
                     ]);
-                echo '<label class="control-label" for="Delivery[delivery_wed]">Срд</label>';
+                echo '<label class="control-label" for="Delivery[wed]">Ср</label>';
                 echo CheckboxX::widget([
-                    'name' => 'Delivery[delivery_thu]', 
+                    'name' => 'Delivery[thu]', 
                     'id' => 'thu', 
                     'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->delivery_thu
+                    'value' => $delivery->thu
                     ]);
-                echo '<label class="control-label" for="Delivery[delivery_thu]">Чтв</label>';
+                echo '<label class="control-label" for="Delivery[thu]">Чт</label>';
                 echo CheckboxX::widget([
-                    'name' => 'Delivery[delivery_fri]', 
+                    'name' => 'Delivery[fri]', 
                     'id' => 'fri', 
                     'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->delivery_fri,
+                    'value' => $delivery->fri,
                     ]);
-                echo '<label class="control-label" for="Delivery[delivery_fri]">Птн</label>';
+                echo '<label class="control-label" for="Delivery[fri]">Пт</label>';
                 echo CheckboxX::widget([
-                    'name' => 'Delivery[delivery_sat]', 
+                    'name' => 'Delivery[sat]', 
                     'id' => 'sat', 
                     'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->delivery_sat,
+                    'value' => $delivery->sat,
                     ]);
-                echo '<label class="control-label" for="Delivery[delivery_sat]">Сбт</label>';
+                echo '<label class="control-label" for="Delivery[sat]">Сб</label>';
                 echo CheckboxX::widget([
-                    'name' => 'Delivery[delivery_sun]', 
+                    'name' => 'Delivery[sun]', 
                     'id' => 'sun', 
                     'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->delivery_sun,
+                    'value' => $delivery->sun,
                     ]);
-                echo '<label class="control-label" for="Delivery[delivery_sun]">Вск</label>';
+                echo '<label class="control-label" for="Delivery[sun]">Вс</label>';
                 ?>
-                <!--
-                <?=
-                        $form->field($delivery, 'delivery_tue')
-                        ->label(false)
-                        ->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'pluginOptions' => ['threeState' => false]
-                        ])
-                ?>
-                <?=
-                        $form->field($delivery, 'delivery_wed')
-                        ->label(false)
-                        ->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'pluginOptions' => ['threeState' => false]
-                        ])
-                ?>
-                <?=
-                        $form->field($delivery, 'delivery_thu')
-                        ->label(false)
-                        ->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'pluginOptions' => ['threeState' => false]
-                        ])
-                ?>
-                <?=
-                        $form->field($delivery, 'delivery_fri')
-                        ->label(false)
-                        ->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'pluginOptions' => ['threeState' => false]
-                        ])
-                ?>
-                <?=
-                        $form->field($delivery, 'delivery_sat')
-                        ->label(false)
-                        ->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'pluginOptions' => ['threeState' => false]
-                        ])
-                ?>
-                <?=
-                        $form->field($delivery, 'delivery_sun')
-                        ->label(false)
-                        ->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'pluginOptions' => ['threeState' => false]
-                        ])
-                ?>-->
             </div>
         </div>
         <div class="box-footer">

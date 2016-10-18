@@ -38,10 +38,12 @@ class OrderCatalogSearch extends \yii\base\Model {
         $query = "SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cbg.price, cbg.cat_id, org.name, cbg.article FROM "
                 . "catalog_base_goods AS cbg LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
                 . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%') "
+                . "AND (cbg.status = 1) AND (cbg.deleted = 0) "
                 . "UNION ALL (SELECT cbg.id, cbg.product, cbg.supp_org_id, cbg.units, cg.price, cg.cat_id, org.name, cbg.article FROM "
                 . "catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
                 . "LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
-                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%'))";
+                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%')"
+                . "AND (cbg.status = 1) AND (cbg.deleted = 0))";
 
         $count = Yii::$app->db->createCommand($query)->queryScalar();
 

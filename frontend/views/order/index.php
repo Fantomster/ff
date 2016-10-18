@@ -134,6 +134,7 @@ $this->registerCss("
         GridView::widget([
             'id' => 'orderHistory',
             'dataProvider' => $dataProvider,
+            'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => '-'],
             'filterModel' => $searchModel,
             'filterPosition' => false,
             'summary' => '',

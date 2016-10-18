@@ -66,6 +66,9 @@ $this->registerJs(
             $("body").on("hidden.bs.modal", "#changeQuantity", function() {
                 $(this).data("bs.modal", null);
             });
+            $("body").on("submit", "#quantityForm", function() {
+                return false;
+            });
             $("#changeQuantity").on("click", ".save", function() {
                 $("#loader-show").showLoading();
                 var form = $("#quantityForm");

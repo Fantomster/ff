@@ -272,7 +272,9 @@ class Organization extends \yii\db\ActiveRecord {
         if (!isset($delivery->sat) || !$delivery->sat) {
             $result[] = 6;
         }
-
+        if (count($result) == 7) {
+            $result = [];
+        }
         return $result;
     }
 

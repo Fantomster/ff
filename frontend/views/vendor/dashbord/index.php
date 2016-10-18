@@ -74,13 +74,13 @@ $this->registerCss('
                     </div>
                     <div class="row">
                             <div class="col-xs-6">
-                                    <small class="stat-label text-bold">За <?=$months[date('n', strtotime(" -1 months"))];?></small>
+                                    <small class="stat-label text-bold"><?=$months[date('n', strtotime(" -1 months"))];?></small>
                                     <h4 class="text-success">
                                     <?=$stats['lastMonth']?$stats['lastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                                     </h4>
                             </div>
                             <div class="col-xs-6">
-                                    <small class="stat-label text-bold"> За <?=$months[date('n', strtotime(" -2 months"))];?></small>
+                                    <small class="stat-label text-bold"><?=$months[date('n', strtotime(" -2 months"))];?></small>
                                     <h4 class="text-success">
                                     <?=$stats['TwoLastMonth']?$stats['TwoLastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                                     </h4>

@@ -274,7 +274,7 @@ $(document).on('click', '.clone-catalog', function(e) {
             className: "success-fk",
             callback: function(result) {
 		if(result){
-           //location.href = Url;
+                location.href = Url;
         }
     }})
 });        

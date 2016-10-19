@@ -312,6 +312,7 @@ var filter_client =  $("#filter_client").val();
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=vendor/analytics",
      container: "#analytics-list",
      data: {
@@ -330,6 +331,7 @@ $("#reset").on("click", function () {
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=vendor/analytics",
      container: "#analytics-list",
      data: {
@@ -343,6 +345,7 @@ $("#reset").on("click", function () {
 $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=vendor/analytics",
      container: "#product-analytic-list",
      data: {

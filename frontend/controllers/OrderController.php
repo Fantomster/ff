@@ -426,6 +426,7 @@ class OrderController extends DefaultController {
                     }
                 } else {
                     $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                    $order->accepted_by_id = $user->id;
                     if ($quantityChanged) {
                         $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
                     } else {
@@ -501,10 +502,10 @@ class OrderController extends DefaultController {
                 case 'confirm':
                     if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
-                        $order->accepted_by_id = $user_id;
                         $systemMessage = 'Клиент подтвердил заказ!';
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $systemMessage = 'Поставщик подтвердил заказ!';
+                        $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
                         $systemMessage = 'Клиент получил заказ!';

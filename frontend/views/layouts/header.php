@@ -45,7 +45,7 @@ if (!Yii::$app->user->isGuest) {
                     $('#actionButtons').html(result);
                 });
             } else if (message.isSystem == 2) {
-                $("#cartCount").html(message.body);
+                $(".cartCount").html(message.body);
                 try {
                     $.pjax.reload({container: "#checkout"});
                 } catch(e) {
@@ -80,10 +80,15 @@ JS;
 <?php } ?>
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini">APP</span><span class="logo-lg"><img src="images/logo-admin.png" /></span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini">FK</span><span class="logo-lg"><b>Food</b>Keeper</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
-
+        <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </a>
         <?php if (Yii::$app->user->isGuest) { ?>
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
@@ -103,7 +108,7 @@ JS;
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                         <li>
                             <a href="<?= Url::to(['order/checkout']) ?>">
-                                <i class="fa fa-shopping-cart"></i><span class="label label-primary" id="cartCount"><?= $organization->getCartCount() ?></span>
+                                <i class="fa fa-shopping-cart"></i><span class="label label-primary cartCount"><?= $organization->getCartCount() ?></span>
                             </a>
                         </li>
                     <?php } ?>
@@ -111,7 +116,7 @@ JS;
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
-                            <span class="label label-success">4</span>
+                            <span class="label label-danger">4</span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="header">You have 4 messages</li>
@@ -232,10 +237,31 @@ JS;
                         </ul>
                     </li>
                     <!-- Tasks: style can be found in dropdown.less -->
+                    <li class="dropdown user user-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                            <img src="images/no-avatar.jpg" class="user-image" alt="User Image">
+                            <span class="hidden-xs"><?= $user->profile->full_name ?></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <!-- User image -->
+                            <li class="user-header">
+                                <img src="images/no-avatar.jpg" class="img-circle" alt="User Image">
+
+                                <p>
+                                    <?= $user->profile->full_name ?> - <?= $user->role->name ?>
+                                    <small><?= $organization->name ?></small>
+                                </p>
+                            </li>
+                            <!-- Menu Body -->
+
+                            <!-- Menu Footer-->
+
+                        </ul>
+                    </li>
                     <li class="dropdown tasks-menu">
                         <?=
                         Html::a(
-                                '<i class="fa fa-sign-out"></i>', ['/user/logout'], ['data-method' => 'post']
+                                '<i class="fa fa-sign-out"></i> Выход', ['/user/logout'], ['data-method' => 'post']
                         )
                         ?>
                     </li>

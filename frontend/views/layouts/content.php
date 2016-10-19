@@ -7,10 +7,7 @@ $this->registerCss('#loader-show {position:absolute;width:100%;height:100%;displ
 ?>
 <div class="content-wrapper">
     <div id="loader-show"></div>
-    <section class="content">
-        <?= Alert::widget() ?>
         <?= $content ?>
-    </section>
 </div>
 
 <footer class="main-footer">

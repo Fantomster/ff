@@ -1445,4 +1445,7 @@ class VendorController extends DefaultController {
         return $this->render('/site/underConstruction');
     }
 
+    public function actionSupport() {
+        return $this->render('/site/underConstruction');
+    }
 }

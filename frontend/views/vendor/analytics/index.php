@@ -106,7 +106,7 @@ HTML;
         </div>
         <div class="col-lg-1 col-md-1 col-sm-2">
 <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-danger teaser']) ?>        
+<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
         </div>
     </div>
     <!-- /.box-body -->

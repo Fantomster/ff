@@ -236,4 +236,46 @@ class Organization extends \yii\db\ActiveRecord {
     public function getUsers() {
         return $this->hasMany(User::className(), ['organization_id' => 'id']);
     }
+
+    /**
+     * @return array
+     */
+    public function getDisabledDeliveryDays() {
+        $result = [];
+        if ($this->type_id !== Organization::TYPE_SUPPLIER) {
+            return $result;
+        }
+        if (!isset($this->delivery)) {
+            $delivery = new Delivery();
+            $delivery->vendor_id = $this->id;
+            $delivery->save();
+        }
+        $delivery = $this->delivery;
+        if (!isset($delivery->sun) || !$delivery->sun) {
+            $result[] = 0;
+        }
+        if (!isset($delivery->mon) || !$delivery->mon) {
+            $result[] = 1;
+        }
+        if (!isset($delivery->tue) || !$delivery->tue) {
+            $result[] = 2;
+        }
+        if (!isset($delivery->wed) || !$delivery->wed) {
+            $result[] = 3;
+        }
+        if (!isset($delivery->thu) || !$delivery->thu) {
+            $result[] = 4;
+        }
+        if (!isset($delivery->fri) || !$delivery->fri) {
+            $result[] = 5;
+        }
+        if (!isset($delivery->sat) || !$delivery->sat) {
+            $result[] = 6;
+        }
+        if (count($result) == 7) {
+            $result = [];
+        }
+        return $result;
+    }
+
 }

@@ -248,6 +248,27 @@ class OrderController extends DefaultController {
         }
     }
 
+    public function actionAjaxSetComment($order_id = null) {
+
+        $client = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            $order_id = Yii::$app->request->post('order_id');
+            $order = Order::find()->where(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+            if ($order && $order->load(Yii::$app->request->post())) {
+                $order->save();
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return $this->successNotify("Комментарий добавлен");
+            }
+            return false; 
+        }
+
+        if (Yii::$app->request->get()) {
+            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            return $this->renderAjax('_add-comment', compact('order'));
+        }
+    }
+
     public function actionAjaxMakeOrder() {
         $client = $this->currentUser->organization;
 
@@ -271,36 +292,7 @@ class OrderController extends DefaultController {
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            return [
-                'success' => true,
-                'growl' => [
-                        'options' => [
-                            'title' => 'Заказ успешно оформлен',
-                        ],
-                        'settings' => [
-                            'element' => 'body',
-                            'type' => 'Заказ успешно оформлен',
-                            'allow_dismiss' => true,
-                            'placement' => [
-                                'from' => 'top',
-                                'align' => 'center',
-                            ],
-                            'delay' => 1500,
-                            'animate' => [
-                                'enter' => 'animated fadeInDown',
-                                'exit' => 'animated fadeOutUp',
-                            ],
-                            'offset' => 100,
-                            'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
-                            . '<div class="modal-content">'
-                            . '<div class="modal-header">'
-                            . '<h4 class="modal-title">{0}</h4></div>'
-                            . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
-                            . '<span class="glyphicon glyphicon-thumbs-up"></span>'
-                            . '</div></div></div>',
-                        ]
-                    ]
-            ];
+            return $this->successNotify("Заказ успешно оформлен");
         }
 
         return false;
@@ -330,6 +322,29 @@ class OrderController extends DefaultController {
         }
 
         return false;
+    }
+    
+    public function actionAjaxSetDelivery() {
+        if (Yii::$app->request->post()) {
+            $client = $this->currentUser->organization;
+            $order_id = Yii::$app->request->post('order_id');
+            $delivery_date = Yii::$app->request->post('delivery_date');
+            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            $oldDateSet = isset($order->requested_delivery);
+            if ($order) {
+                //$timestamp = \DateTime::createFromFormat('d.m.Y H:i:s', $delivery_date. ' 23:59:59');
+                $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date. ' 23:59:59'));  
+
+                $order->requested_delivery = $timestamp;
+                $order->save();
+            }
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            if ($oldDateSet) {
+                return $this->successNotify('Дата доставки изменена');
+            } else {
+                return $this->successNotify('Дата доставки установлена');
+            }
+        }
     }
 
     public function actionRefreshCart() {
@@ -385,6 +400,7 @@ class OrderController extends DefaultController {
         $organizationType = $user->organization->type_id;
         if (isset($_POST['hasEditable'])) {
             $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
+            $initialQuantity = $model->initial_quantity;
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             $posted = current($_POST['OrderContent']);
             $post = ['OrderContent' => $posted];
@@ -399,6 +415,9 @@ class OrderController extends DefaultController {
                     return ['output' => '', 'message' => ''];
                 }
                 $value = ($quantityChanged) ? $model->quantity : $model->price;
+                if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($model->initial_quantity)) {
+                    $model->initial_quantity = $initialQuantity;
+                }
                 $model->save();
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
                     $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
@@ -407,6 +426,7 @@ class OrderController extends DefaultController {
                     }
                 } else {
                     $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                    $order->accepted_by_id = $user->id;
                     if ($quantityChanged) {
                         $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
                     } else {
@@ -482,10 +502,10 @@ class OrderController extends DefaultController {
                 case 'confirm':
                     if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
-                        $order->accepted_by_id = $user_id;
                         $systemMessage = 'Клиент подтвердил заказ!';
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $systemMessage = 'Поставщик подтвердил заказ!';
+                        $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
                         $systemMessage = 'Клиент получил заказ!';
@@ -618,4 +638,37 @@ class OrderController extends DefaultController {
         return true;
     }
 
+    private function successNotify ($title) {
+            return [
+                'success' => true,
+                'growl' => [
+                        'options' => [
+//                            'title' => 'test',
+                        ],
+                        'settings' => [
+                            'element' => 'body',
+                            'type' => $title, //'Заказ успешно оформлен',
+                            'allow_dismiss' => true,
+                            'placement' => [
+                                'from' => 'top',
+                                'align' => 'center',
+                            ],
+                            'delay' => 1500,
+                            'animate' => [
+                                'enter' => 'animated fadeInDown',
+                                'exit' => 'animated fadeOutUp',
+                            ],
+                            'offset' => 75,
+                            'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
+                            . '<div class="modal-content">'
+                            . '<div class="modal-header">'
+                            . '<h4 class="modal-title">{0}</h4></div>'
+                            . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
+                            . '<span class="glyphicon glyphicon-thumbs-up"></span>'
+                            . '</div></div></div>',
+                        ]
+                    ]
+            ];
+        
+    }
 }

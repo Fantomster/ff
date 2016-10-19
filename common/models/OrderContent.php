@@ -10,7 +10,7 @@ use Yii;
  * @property integer $order_id
  * @property integer $product_id
  * @property integer $quantity
- * @property integer $accepted_quantity
+ * @property integer $initial_quantity
  * @property string $price
  * @property string $product_name
  * @property integer $units
@@ -35,7 +35,7 @@ class OrderContent extends \yii\db\ActiveRecord
     {
         return [
             [['order_id', 'product_id', 'quantity', 'price', 'units', 'product_name'], 'required'],
-            [['order_id', 'product_id', 'quantity', 'accepted_quantity', 'units'], 'integer'],
+            [['order_id', 'product_id', 'quantity', 'initial_quantity', 'units'], 'integer'],
             [['price'], 'number'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
@@ -51,7 +51,7 @@ class OrderContent extends \yii\db\ActiveRecord
             'order_id' => 'Order ID',
             'product_id' => 'Product ID',
             'quantity' => 'Количество',
-            'accepted_quantity' => 'Accepted quantity',
+            'initial_quantity' => 'Запрошенное количество',
             'price' => 'Цена',
         ];
     }

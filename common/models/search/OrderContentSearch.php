@@ -19,7 +19,7 @@ class OrderContentSearch extends OrderContent
     public function rules()
     {
         return [
-            [['id', 'order_id', 'product_id', 'quantity', 'price', 'accepted_quantity'], 'integer'],
+            [['id', 'order_id', 'product_id', 'quantity', 'price', 'initial_quantity'], 'integer'],
             [['product.product'], 'safe'],
         ];
     }
@@ -85,7 +85,7 @@ class OrderContentSearch extends OrderContent
             'product_id' => $this->product_id,
             'quantity' => $this->quantity,
             'price' => $this->price,
-            'accepted_quantity' => $this->accepted_quantity,
+            'initial_quantity' => $this->initial_quantity,
         ]);
 
         return $dataProvider;

@@ -66,7 +66,8 @@ tfoot tr{border-top:2px solid #ccc}
                                 '4' => 'Завершен',
                                 '5' => 'Отменен заказчиком',
                                 '6' => 'Отменен поставщиком',
-                            ],['prompt' => '','class' => 'form-control','id'=>'filter_status']) ?>         
+                            ],['prompt' => 'Все','class' => 'form-control','id'=>'filter_status',
+                               'options'=>[\Yii::$app->request->get('filter_status')=>["Selected"=>true]]]) ?>         
         </div>
         <div class="col-lg-5 col-md-5 col-sm-6"> 
 <?php 
@@ -82,10 +83,10 @@ HTML;
 <?=DatePicker::widget([
     'name' => 'filter_from_date',
     'id'=>'filter-date',
-    'value' => $filter_from_date,
+    'value' => \Yii::$app->request->get('filter_from_date')?\Yii::$app->request->get('filter_from_date'):$filter_from_date,
     'type' => DatePicker::TYPE_RANGE,
     'name2' => 'filter_to_date',
-    'value2' => $filter_to_date,
+    'value2' => \Yii::$app->request->get('filter_to_date')?\Yii::$app->request->get('filter_to_date'):$filter_to_date,
     'separator' => '<i class="fa fa-arrows-h" aria-hidden="true"></i>',
     'layout' => $layout,
     'pluginOptions' => [
@@ -102,11 +103,11 @@ HTML;
         <div class="col-lg-3 col-md-3 col-sm-6">
 <?= Html::label('Клиент', null, ['class' => 'label','style'=>'color:#555']) ?>
 <?= Html::dropDownList('filter_client', null,
-                            $filter_restaurant,['prompt' => '','class' => 'form-control','id'=>'filter_client']) ?>        
+                            $filter_restaurant,['prompt' => 'Все','class' => 'form-control','id'=>'filter_client','options'=>[\Yii::$app->request->get('filter_client')=>["Selected"=>true]]]) ?>        
         </div>
         <div class="col-lg-1 col-md-1 col-sm-2">
 <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-danger teaser']) ?>        
+<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
         </div>
     </div>
     <!-- /.box-body -->
@@ -302,13 +303,16 @@ $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").on("change", function () {
+$("#filter_status,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
 var filter_client =  $("#filter_client").val();
+
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=vendor/analytics",
      container: "#analytics-list",
      data: {
@@ -317,7 +321,7 @@ var filter_client =  $("#filter_client").val();
          filter_to_date: filter_to_date,
          filter_client: filter_client,
            }
-   });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
 });
 $("#reset").on("click", function () {
     $("#filter_status").val('');
@@ -327,6 +331,7 @@ $("#reset").on("click", function () {
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=vendor/analytics",
      container: "#analytics-list",
      data: {
@@ -336,10 +341,11 @@ $("#reset").on("click", function () {
          filter_client: '',
            }
    });
-}); 
+}).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') }); 
 $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=vendor/analytics",
      container: "#product-analytic-list",
      data: {
@@ -348,7 +354,7 @@ $.pjax({
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
            }
-   });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 

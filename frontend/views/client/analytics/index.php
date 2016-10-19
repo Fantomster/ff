@@ -106,7 +106,7 @@ HTML;
         </div>
         <div class="col-lg-1 col-md-1 col-sm-2">
 <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-danger teaser']) ?>        
+<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
         </div>
     </div>
 </div>
@@ -339,6 +339,7 @@ $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").on("change", function () {
+$("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").attr('disabled','disabled')      
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
@@ -347,6 +348,7 @@ var filter_employee =  $("#filter_employee").val();
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=client/analytics",
      container: "#analytics-list",
      data: {
@@ -356,7 +358,7 @@ var filter_employee =  $("#filter_employee").val();
          filter_supplier: filter_supplier,
          filter_employee: filter_employee,
            }
-   });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").removeAttr('disabled') });
 });
 $("#reset").on("click", function () {
     $("#filter_status").val('');
@@ -367,6 +369,7 @@ $("#reset").on("click", function () {
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=client/analytics",
      container: "#analytics-list",
      data: {

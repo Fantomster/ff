@@ -301,12 +301,16 @@ $this->registerJs($customJs, View::POS_READY);
 $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
 $customJs = <<< JS
+var timer;
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
 var filter_client =  $("#filter_client").val();
+
     $.pjax({
      type: 'GET',
      push: false,
@@ -319,6 +323,7 @@ var filter_client =  $("#filter_client").val();
          filter_client: filter_client,
            }
    }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
+  }, 1000);
 });
 $("#reset").on("click", function () {
     $("#filter_status").val('');

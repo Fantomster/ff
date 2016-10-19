@@ -302,6 +302,7 @@ $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").on("change", function () {
+$("#filter_status,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
@@ -317,7 +318,7 @@ var filter_client =  $("#filter_client").val();
          filter_to_date: filter_to_date,
          filter_client: filter_client,
            }
-   });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
 });
 $("#reset").on("click", function () {
     $("#filter_status").val('');
@@ -336,7 +337,7 @@ $("#reset").on("click", function () {
          filter_client: '',
            }
    });
-}); 
+}).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') }); 
 $.pjax({
      type: 'GET',
      push: false,
@@ -348,7 +349,7 @@ $.pjax({
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
            }
-   });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 

@@ -339,6 +339,7 @@ $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").on("change", function () {
+$("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").attr('disabled','disabled')      
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
@@ -356,7 +357,7 @@ var filter_employee =  $("#filter_employee").val();
          filter_supplier: filter_supplier,
          filter_employee: filter_employee,
            }
-   });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").removeAttr('disabled') });
 });
 $("#reset").on("click", function () {
     $("#filter_status").val('');

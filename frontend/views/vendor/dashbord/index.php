@@ -21,8 +21,7 @@ $this->registerCss('
             <h3 class="box-title">Объем продаж</h3><br><small>За месяц</small>
 
           <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-            </button>
+            <?= Html::a('Аналитика', ['vendor/analytics'],['class'=>'btn btn-success btn-sm']) ?>
           </div>
         </div>
         <div class="box-body" style="display: block;">
@@ -41,8 +40,7 @@ $this->registerCss('
             <h3 class="box-title">Статистика</h3>
 
           <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-            </button>
+            
           </div>
         </div>
         <div class="box-body" style="display: block;">
@@ -99,7 +97,7 @@ $this->registerCss('
           <h3 class="box-title">История заказов</h3>
 
           <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            <?= Html::a('История заказов', ['order/index'],['class'=>'btn btn-success btn-sm']) ?>
             </button>
           </div>
         </div>

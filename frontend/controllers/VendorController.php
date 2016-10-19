@@ -1378,23 +1378,6 @@ class VendorController extends DefaultController {
         } 
         // <------ГРАФИК ПРОДАЖ
         //------>Статистика 
-        /*
-        SELECT
-        (SELECT sum(total_price) FROM `order`
-        WHERE DATE_FORMAT(total_price, '%Y-%m-%d') = CURDATE()) as 'curDay',
-        (SELECT sum(total_price) FROM `order` 
-         WHERE (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
-        as 'curMonth',
-        (SELECT sum(total_price) FROM `order` 
-        WHERE YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
-         as 'curWeek',
-        (SELECT sum(total_price) FROM `order` 
-        WHERE MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
-        as 'lastMonth',
-        (SELECT sum(total_price) FROM `order` 
-        WHERE MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
-        as 'TwoLastMonth'
-         */
         $stats = Yii::$app->db->createCommand("SELECT
             (SELECT sum(total_price) FROM `order`
             WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
@@ -1426,7 +1409,7 @@ class VendorController extends DefaultController {
             'sql' => $query->sql,
             'totalCount' => $totalCount,
             'pagination' => [
-                'pageSize' => 20,
+                'pageSize' => 10,
             ],
             'sort' => [
                 'attributes' => [

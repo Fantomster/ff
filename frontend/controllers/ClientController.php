@@ -7,6 +7,7 @@ use yii\web\HttpException;
 use frontend\controllers\Controller;
 use common\models\User;
 use common\models\Role;
+use common\models\Order;
 use common\models\Organization;
 use common\models\OrganizationType;
 use common\models\RelationCategory;
@@ -594,7 +595,178 @@ class ClientController extends DefaultController {
     }
     
     public function actionAnalytics() {
-        return $this->render('/site/underConstruction');
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        
+        $header_info_zakaz   = \common\models\Order::find()->
+                where(['client_id'=>$currentUser->organization_id])->count();
+        $header_info_suppliers = \common\models\RelationSuppRest::find()->
+                where(['rest_org_id'=>$currentUser->organization_id,'invite'=>RelationSuppRest::INVITE_ON])->count();
+        $header_info_purchases= \common\models\Order::find()->
+                where(['client_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])->count();
+        $header_info_items = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
+                where(['in','order_id',\common\models\Order::find()->select('id')->where(['client_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])])->one()->quantity;
+        
+        $filter_get_supplier = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
+                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                    select('supp_org_id')->
+                        where(['rest_org_id'=>$currentUser->organization_id,'invite'=>'1'])])->all(),'id','name');
+        $filter_get_employee = yii\helpers\ArrayHelper::map(\common\models\Profile::find()->
+                where(['in', 'user_id', \common\models\User::find()->
+                    select('id')->
+                        where(['organization_id'=>$currentUser->organization_id])])->all(),'user_id','full_name');
+        $filter_status="";
+        $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
+        $filter_to_date = date("d-m-Y");
+        $where = "";
+        //pieChart
+        function hex(){
+        $hex = '#';
+        foreach(array('r', 'g', 'b') as $color){
+            //случайное число в диапазоне 0 и 255.
+            $val = mt_rand(0, 255);
+            //преобразуем число в Hex значение.
+            $dechex = dechex($val);
+            //с 0, если длина меньше 2
+            if(strlen($dechex) < 2){
+                $dechex = "0" . $dechex;
+            }
+            //объединяем
+            $hex .= $dechex;
+        }
+        return $hex;
+        } 
+        if (Yii::$app->request->isAjax) {
+                $filter_status=trim(\Yii::$app->request->get('filter_status'));
+                $filter_supplier=trim(\Yii::$app->request->get('filter_supplier'));
+                $filter_employee=trim(\Yii::$app->request->get('filter_employee'));
+                $filter_from_date=trim(\Yii::$app->request->get('filter_from_date'));
+                $filter_to_date=trim(\Yii::$app->request->get('filter_to_date'));
+                
+                empty($filter_status)?"":$where .= " and status='" . $filter_status . "'"; 
+                empty($filter_supplier)?"":$where .= " and vendor_id='" . $filter_supplier . "'";
+                empty($filter_employee)?"":$where .= " and created_by_id='" . $filter_employee . "'";
+                        
+        }
+        
+        $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
+                (select sum(total_price) FROM `order` 
+                where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
+                client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
+                        . "DATE(created_at) between '" . 
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        date('Y-m-d', strtotime($filter_to_date)) . "') " .
+                        $where . 
+                    ") AS `total_price`  
+                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
+                FROM `order` where 
+                client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
+                        . "DATE(created_at) between '" . 
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        date('Y-m-d', strtotime($filter_to_date)) . "') " . $where . ")`tb`")->queryAll();
+                $arr_create_at =[];
+                $arr_price =[];
+                if(count($area_chart)==1){
+                array_push($arr_create_at, 0);  
+                array_push($arr_price, 0);
+                }
+                
+                foreach($area_chart as $area_charts){
+                    array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
+                    array_push($arr_price, $area_charts['total_price']); 
+                   
+                }
+        /*
+         * 
+         * PIE CHART Аналитика по поставщикам
+         * 
+         */
+         $vendors_total_price_sql = Yii::$app->db->createCommand("
+            SELECT vendor_id,sum(total_price) as total_price FROM `order` WHERE  
+                (DATE(created_at) between '" . 
+                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
+                $where .
+                " and client_id = " . $currentUser->organization_id . 
+                " and status<>" . Order::STATUS_FORMING . " group by vendor_id")->queryAll();
+        $vendors_total_price =[];
+                foreach($vendors_total_price_sql as $vendors_total_price_sql_arr){
+                    $arr = array(
+                    'value' => $vendors_total_price_sql_arr['total_price'],
+                    'label' => \common\models\Organization::find()->where(['id'=>$vendors_total_price_sql_arr['vendor_id']])->one()->name,
+                    'color' => hex()
+                    );
+                    array_push($vendors_total_price, $arr);
+                } 
+        $vendors_total_price = json_encode($vendors_total_price);      
+         /*
+          * 
+          * PIE CHART Аналитика по поставщикам END
+          * 
+          */
+        
+          /*
+           * 
+           * GridView Аналитика ТОП продуктов
+           * 
+           */
+        $query = Yii::$app->db->createCommand("
+            SELECT sum(price*quantity) as price,sum(quantity) as quantity, product_id FROM order_content WHERE order_id in (
+                SELECT id from `order` where 
+                (DATE(created_at) between '" . 
+                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                "and status<>" . Order::STATUS_FORMING . " and client_id = " . $currentUser->organization_id . 
+                $where . 
+                ") group by product_id order by sum(price*quantity) desc");
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'pagination' => [
+                'pageSize' => 7,
+            ]
+        ]);
+          /*
+           * 
+           * GridView Аналитика ТОП продуктов END
+           * 
+           */
+        
+           /*
+           * 
+           * BarChart заказы по поставщикам
+           * 
+           */
+        $chart_bar_value =[];
+        $chart_bar_label =[];
+        foreach($vendors_total_price_sql as $vendors_bar_total_price_sql_arr){
+                    $arr = array($vendors_bar_total_price_sql_arr['total_price']);
+                    array_push($chart_bar_value, $arr);
+                    $arr = array(\common\models\Organization::find()->where(['id'=>$vendors_bar_total_price_sql_arr['vendor_id']])->one()->name);
+                    array_push($chart_bar_label, $arr);
+                } 
+        $chart_bar_value = json_encode($chart_bar_value);
+        $chart_bar_label = json_encode($chart_bar_label);
+        /*
+           * 
+           * BarChart заказы по поставщикам END
+           * 
+           */
+        return $this->render('analytics/index',compact(
+                'header_info_zakaz',
+                'header_info_suppliers',
+                'header_info_purchases',
+                'header_info_items',
+                'filter_get_supplier',
+                'filter_get_employee',
+                'filter_supplier',
+                'filter_employee',
+                'filter_status',
+                'filter_from_date',
+                'filter_to_date',
+                'arr_create_at',
+                'arr_price',
+                'vendors_total_price',
+                'dataProvider',
+                'chart_bar_value',
+                'chart_bar_label'
+                ));
     }
     
     public function actionTutorial() {

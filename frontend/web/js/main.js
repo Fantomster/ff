@@ -8,31 +8,4 @@ $(function () {
     }
 
     $('.modal').on('show.bs.modal', reposition);
-
-    $(window).on('resize', function () {
-        $('.modal:visible').each(reposition);
-        if (!window.matchMedia('(max-width: 767px)').matches) {
-            if (!$('body').hasClass('sidebar-collapse')) {
-                $('.invite-form').show();
-            } else {
-                $('.invite-form').hide();
-            }
-        }
-    });
-
-    $('body').on('click', '.sidebar-toggle', function () {
-        if (window.matchMedia('(max-width: 767px)').matches) {
-            if (!$('body').hasClass('sidebar-open')) {
-                $('.invite-form').show();
-            } else {
-                $('.invite-form').hide();
-            }
-        } else {
-            if ($('body').hasClass('sidebar-collapse')) {
-                $('.invite-form').show();
-            } else {
-                $('.invite-form').hide();
-            }
-        }
-    });
 });

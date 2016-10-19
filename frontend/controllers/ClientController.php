@@ -71,13 +71,7 @@ class ClientController extends DefaultController {
         ];
     }
 
-    /*
-     *  index
-     */
-
-    public function actionIndex() {
-        return $this->render('/site/underConstruction');
-    }
+    
 
     /*
      *  Main settings page
@@ -775,5 +769,71 @@ class ClientController extends DefaultController {
     
     public function actionEvents() {
         return $this->render('/site/underConstruction');
+    }
+    
+    /*
+     *  index DASHBOARD
+     */
+
+    public function actionIndex() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $suppliers_where ="";
+        /*
+         * 
+         * Поставщики
+         * 
+         */
+        $sql_dataProvider = Yii::$app->db->createCommand("SELECT supp_org_id FROM `relation_supp_rest` WHERE "
+                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON);
+        $suppliers_count = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT supp_org_id FROM `relation_supp_rest` WHERE "
+                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . ")`tb`")->queryScalar();
+        $suppliers_dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $sql_dataProvider->sql,
+            'totalCount' => $suppliers_count,
+            'pagination' => [
+                'pageSize' => 5,
+            ],
+        ]);
+        /*
+         * 
+         * Поставщики END
+         * 
+         */
+        
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
+        $filter_to_date = date("d-m-Y");
+        //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
+        $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
+                . "client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING);
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
+                . "client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 7,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'client_id',
+                    'vendor_id',
+                    'created_by_id',
+                    'accepted_by_id',
+                    'status',
+                    'total_price',
+                    'created_at'
+                ],
+                'defaultOrder' => [
+                    'created_at' => SORT_DESC
+                    ]
+            ],
+        ]);
+        // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
+        return $this->render('dashboard/index',compact(
+                'dataProvider',
+                'suppliers_dataProvider'
+                ));
     }
 }

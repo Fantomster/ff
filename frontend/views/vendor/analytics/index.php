@@ -66,7 +66,7 @@ tfoot tr{border-top:2px solid #ccc}
                                 '4' => 'Завершен',
                                 '5' => 'Отменен заказчиком',
                                 '6' => 'Отменен поставщиком',
-                            ],['prompt' => '','class' => 'form-control','id'=>'filter_status']) ?>         
+                            ],['prompt' => 'Все','class' => 'form-control','id'=>'filter_status']) ?>         
         </div>
         <div class="col-lg-5 col-md-5 col-sm-6"> 
 <?php 
@@ -102,7 +102,7 @@ HTML;
         <div class="col-lg-3 col-md-3 col-sm-6">
 <?= Html::label('Клиент', null, ['class' => 'label','style'=>'color:#555']) ?>
 <?= Html::dropDownList('filter_client', null,
-                            $filter_restaurant,['prompt' => '','class' => 'form-control','id'=>'filter_client']) ?>        
+                            $filter_restaurant,['prompt' => 'Все','class' => 'form-control','id'=>'filter_client']) ?>        
         </div>
         <div class="col-lg-1 col-md-1 col-sm-2">
 <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>

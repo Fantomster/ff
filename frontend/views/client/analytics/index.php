@@ -348,6 +348,7 @@ var filter_employee =  $("#filter_employee").val();
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=client/analytics",
      container: "#analytics-list",
      data: {
@@ -368,6 +369,7 @@ $("#reset").on("click", function () {
     $.pjax({
      type: 'GET',
      push: false,
+     timeout: 10000,
      url: "index.php?r=client/analytics",
      container: "#analytics-list",
      data: {

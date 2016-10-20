@@ -112,7 +112,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
           <h3 class="box-title">Аналитика заказов</h3>
 
           <div class="box-tools pull-right">
-            <?= Html::a('Аналитика', ['client/analytics'],['class'=>'btn btn-outline-success btn-sm']) ?>
+            <?= Html::a('Аналитика', ['client/analytics'],['class'=>'btn btn-success btn-sm']) ?>
           </div>
         </div>
         <div class="box-body" style="display: block;">
@@ -129,7 +129,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         <div class="box-header with-border">
           <h3 class="box-title">История заказов</h3>
           <div class="box-tools pull-right">
-            <?= Html::a('История заказов', ['order/index'],['class'=>'btn btn-outline-success btn-sm']) ?>
+            <?= Html::a('История заказов', ['order/index'],['class'=>'btn btn-success btn-sm']) ?>
           </div>
         </div>
         <div class="box-body" style="display: block;">
@@ -199,6 +199,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
            'condensed' => false,
            'responsive' => false,
            'hover' => true,
+           'summary' => false,
            'rowOptions' => function ($model, $key, $index, $grid) {
                 return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
             },

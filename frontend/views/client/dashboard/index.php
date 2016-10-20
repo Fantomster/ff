@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\date\DatePicker;
 use kartik\grid\GridView;
 use common\models\Order;
@@ -27,13 +28,14 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 }
 ');
 ?>
-<div class="box box-info">   
-    <div class="box-header with-border">
-      <div class="col-md-12">
-        <h3 class="box-title">Рабочий стол</h3>
-      </div>
-    </div>
-    <!-- /.box-header -->
+<section class="content-header">
+    <h1>
+        Главная
+        <small>Рабочий стол</small>
+    </h1>
+</section>
+<section class="content">
+<div class="box box-info">
     <div class="box-body order-history">
         <div class="col-md-6 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
@@ -73,9 +75,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         <div class="box-body" style="display: block;">
         <?php
         $columns1 = [
-        ['attribute' => 'supp_org_id','label'=>'Поставщик','value'=>function($data) {
-            return Organization::find()->where(['id'=>$data['supp_org_id']])->one()->name;            
-        }],
+        ['attribute' => 'name','label'=>'Поставщик','value'=>'name'],
         ['attribute' => 'client_id','format'=>'raw','label'=>'','value'=>function($data) {
             return Html::a('заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
@@ -211,6 +211,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
       <!-- /.box -->
     </div>    
 </div>
+</section>
 <?php
 $chart_dates =   json_encode(array_reverse($chart_dates));
 $chart_price =   json_encode(array_reverse($chart_price));

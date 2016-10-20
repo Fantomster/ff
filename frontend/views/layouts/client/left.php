@@ -55,7 +55,7 @@ $cartCount = $user->organization->getCartCount();
                             ]
                             ],
                         ['label' => 'Поддержка', 'icon' => 'fa fa-support', 'url' => ['client/support']],
-                        ['label' => 'Отправить приглашение', 'options' => ['class' => 'header']],
+                        ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options' => ['class' => 'header']],
                     ],
                 ]
         )

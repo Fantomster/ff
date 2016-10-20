@@ -78,18 +78,27 @@ class ClientController extends DefaultController {
      */
 
     public function actionSettings() {
+        $organization = $this->currentUser->organization;
+
+        return $this->render('settings', compact('organization'));
+    }
+
+    /*
+     *  user list page
+     */
+
+    public function actionEmployees() {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
         $params = Yii::$app->request->getQueryParams();
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
-        $organization = $this->currentUser->organization;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('settings', compact('searchModel', 'dataProvider', 'organization'));
+            return $this->renderPartial('employees', compact('searchModel', 'dataProvider'));
         } else {
-            return $this->render('settings', compact('searchModel', 'dataProvider', 'organization'));
+            return $this->render('employees', compact('searchModel', 'dataProvider'));
         }
     }
 

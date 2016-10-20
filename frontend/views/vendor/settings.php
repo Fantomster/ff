@@ -54,21 +54,21 @@ $this->registerJs(
 <div class="nav-tabs-custom settings">
 <?= Tabs::widget([
     'items' => [
-        [
-            'label' => 'Общие',
-            'content' => $this->render('settings/_info', compact('organization')),
-            'active' => true,
-            'options' => ['id' => 'info'],
-        ],
+//        [
+//            'label' => 'Общие',
+//            'content' => $this->render('settings/_info', compact('organization')),
+//            'active' => true,
+//            'options' => ['id' => 'info'],
+//        ],
         [
             'label' => 'Пользователи',
             'content' => $this->render('settings/_users', compact('dataProvider', 'searchModel')),
         ],
-        [
-            'label' => 'Доставка',
-            'content' => $this->render('settings/_delivery', compact('delivery')),
-            'options' => ['id' => 'delivery'],
-        ],
+//        [
+//            'label' => 'Доставка',
+//            'content' => $this->render('settings/_delivery', compact('delivery')),
+//            'options' => ['id' => 'delivery'],
+//        ],
     ],
 ]) ?>
 </div>

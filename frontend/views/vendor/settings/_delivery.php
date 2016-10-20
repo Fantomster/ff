@@ -4,7 +4,6 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Url;
 use kartik\checkbox\CheckboxX;
-use kartik\money\MaskMoney;
 ?>
     <div class="box box-info">
         <div class="box-header">

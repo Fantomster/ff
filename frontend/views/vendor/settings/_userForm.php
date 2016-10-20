@@ -13,7 +13,7 @@ $form = ActiveForm::begin([
             'options' => [
                 'class' => 'user-form',
             ],
-            'validationUrl' => Url::toRoute('client/ajax-validate-user'),
+            'validationUrl' => Url::toRoute('vendor/ajax-validate-user'),
         ]);
 ?>
 <div class="modal-header">

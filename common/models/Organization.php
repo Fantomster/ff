@@ -230,6 +230,13 @@ class Organization extends \yii\db\ActiveRecord {
         return Order::find()->where(['client_id' => $this->id, 'status' => Order::STATUS_FORMING])->count();
     }
 
+    /*
+     * @return integer
+     */
+    public function getNewOrdersCount() {
+        return 20;
+    } 
+    
     /**
      * @return \yii\db\ActiveQuery
      */

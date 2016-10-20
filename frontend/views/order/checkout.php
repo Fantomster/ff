@@ -128,7 +128,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
                     <div class="box-header with-border">
                         <h3 class="box-title">Заказ у <?= $order->vendor->name ?></h3>
                         <div class="pull-right">
-                            <a class="btn btn-outline btn-xs btn-danger delete" style="margin-right:10px;" data-id="<?= $order->id ?>"><i class="fa fa-trash m-r-xxs" style="margin-top:-2px;"></i> Удалить все</a>
+                            <a class="btn btn-outline btn-xs btn-danger delete" style="margin-right:10px;" data-id="<?= $order->id ?>"><i class="fa fa-trash m-r-xxs" style="margin-top:-2px;"></i> Удалить заказ</a>
                         </div>
                     </div>
                     <!-- /.box-header -->

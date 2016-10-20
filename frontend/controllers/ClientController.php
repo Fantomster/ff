@@ -767,6 +767,10 @@ class ClientController extends DefaultController {
         return $this->render('/site/underConstruction');
     }
     
+    public function actionSupport() {
+        return $this->render('/site/underConstruction');
+    }
+    
     public function actionEvents() {
         return $this->render('/site/underConstruction');
     }
@@ -831,9 +835,46 @@ class ClientController extends DefaultController {
             ],
         ]);
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
+        // chart АНАЛИТИКА по неделям прошедшим
+        $curent_monday = date('Y-m-d', strtotime(date('Y').'W'.date('W').'1')); // текущая неделя - понедельник
+        $curent_sunday = date('Y-m-d', strtotime(date('Y').'W'.date('W').'7')); // текущая неделя - воскресение
+        $i=0;
+        $max_i = 4; //Сколько недель показывать от текущей
+        $mon=0;
+        $sun=6;
+        $query ="";
+        while ($i < $max_i+1)
+        {
+        $i++;
+        $while_monday = date('Y-m-d', strtotime("$curent_monday $mon day"));
+        $while_sunday = date('Y-m-d', strtotime("$curent_monday $sun day"));
+        $dates = date('m/d', strtotime("$curent_monday $sun day"));;
+        $query .="SELECT sum(total_price) as price,'$dates' as dates from `order` where "
+                        . "client_id = $currentUser->organization_id and ("
+                        . "DATE(created_at) between '" . 
+                        date('Y-m-d', strtotime($while_monday)) . "' and '" . 
+                        date('Y-m-d', strtotime($while_sunday)) . "') ";
+        $i>$max_i?"":$query .=" UNION ALL \n";
+        $mon=$mon-7;
+        $sun=$sun-7;
+        }
+        $query = Yii::$app->db->createCommand($query)->queryAll();
+        $chart_dates =[];
+        $chart_price =[];
+        foreach($query as $querys){
+            if(empty($querys['price'])){
+            array_push($chart_price, 0);     
+            }else{
+            array_push($chart_price, $querys['price']);    
+            }    
+            array_push($chart_dates, $querys['dates']); 
+        } 
+       // var_dump($chart_price);
         return $this->render('dashboard/index',compact(
                 'dataProvider',
-                'suppliers_dataProvider'
+                'suppliers_dataProvider',
+                'chart_dates',
+                'chart_price'
                 ));
     }
 }

@@ -76,8 +76,12 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         ['attribute' => 'supp_org_id','label'=>'Поставщик','value'=>function($data) {
             return Organization::find()->where(['id'=>$data['supp_org_id']])->one()->name;            
         }],
-        ['attribute' => 'client_id','label'=>'','value'=>function($data) {
-            return $data['supp_org_id'];           
+        ['attribute' => 'client_id','format'=>'raw','label'=>'','value'=>function($data) {
+            return Html::a('заказ', ['order/create',
+                'OrderCatalogSearch[searchString]'=>"",
+                'OrderCatalogSearch[selectedCategory]'=>"",
+                'OrderCatalogSearch[selectedVendor]'=>$data['supp_org_id'],
+                ],['class'=>'btn btn-outline-success btn-sm pull-right','data-pjax'=>0]);           
         }]
         ];
         ?>
@@ -93,9 +97,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
            'condensed' => false,
            'responsive' => false,
            'hover' => true,
-           'rowOptions' => function ($model, $key, $index, $grid) {
-                return ['id' => $model['supp_org_id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
-            },
+           'summary' => false,
            ]);
            ?> 
         <?php  Pjax::end(); ?>
@@ -114,7 +116,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
           </div>
         </div>
         <div class="box-body" style="display: block;">
-        
+      <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>  
         </div>
         <!-- /.box-body -->
       </div>
@@ -210,3 +212,71 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
       <!-- /.box -->
     </div>    
 </div>
+<?php
+$chart_dates =   json_encode(array_reverse($chart_dates));
+$chart_price =   json_encode(array_reverse($chart_price));
+$customJs = <<< JS
+    
+// Get context with jQuery - using jQuery's .get() method.
+var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
+// This will get the first returned node in the jQuery collection.
+var areaChart = new Chart(areaChartCanvas);
+var areaChartData = {
+      labels: $chart_dates,
+      datasets: [
+        {
+          label: "Объем продаж",
+          fillColor: "rgba(0,0,0,.05)",
+          strokeColor: "#84bf76",
+          pointColor: "#000",
+          pointStrokeColor: "#000",
+          pointHighlightFill: "#000",
+          pointHighlightStroke: "#000",
+          data: $chart_price
+        }
+      ]
+    };
+
+var areaChartOptions = {
+      //Boolean - If we should show the scale at all
+      showScale: true,
+      //Boolean - Whether grid lines are shown across the chart
+      scaleShowGridLines: true,
+      //String - Colour of the grid lines
+      scaleGridLineColor: "rgba(0,0,0,.05)",
+      //Number - Width of the grid lines
+      scaleGridLineWidth: 1,
+      //Boolean - Whether to show horizontal lines (except X axis)
+      scaleShowHorizontalLines: true,
+      //Boolean - Whether to show vertical lines (except Y axis)
+      scaleShowVerticalLines: true,
+      //Boolean - Whether the line is curved between points
+      bezierCurve: true,
+      //Number - Tension of the bezier curve between points
+      bezierCurveTension: 0.3,
+      //Boolean - Whether to show a dot for each point
+      pointDot: false,
+      //Number - Radius of each point dot in pixels
+      pointDotRadius: 5,
+      //Number - Pixel width of point dot stroke
+      pointDotStrokeWidth: 1,
+      //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
+      pointHitDetectionRadius: 20,
+      //Boolean - Whether to show a stroke for datasets
+      datasetStroke: true,
+      //Number - Pixel width of dataset stroke
+      datasetStrokeWidth: 2,
+      //Boolean - Whether to fill the dataset with a color
+      datasetFill: true,
+      //String - A legend template
+      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+      //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
+      maintainAspectRatio: true,
+      //Boolean - whether to make the chart responsive to window resizing
+      responsive: true
+    };
+  //Create the line chart
+    areaChart.Line(areaChartData, areaChartOptions);       
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

@@ -9,7 +9,6 @@ frontend\assets\MainAsset::register($this);
 $isIndex = ($this->context->id === 'site') && ($this->context->action->id === 'index');
 if ($isIndex) {
     $js = <<<JS
-
 function heightDetect() {
 		$(".login__block").css("height", $(window).height());
 	};

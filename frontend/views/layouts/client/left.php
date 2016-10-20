@@ -43,7 +43,7 @@ $cartCount = $user->organization->getCartCount();
                         ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['client/messages']],
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['client/analytics']],
                         ['label' => 'Обучающее видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['client/tutorial']],
-                        ['label' => 'Акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
+                        ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
                         [
                             'label' => 'Настройки',
                             'icon' => 'fa fa-gears',

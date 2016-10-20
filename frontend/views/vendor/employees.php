@@ -77,7 +77,7 @@ $this->registerJs(
                 'tag' => 'a',
                 'data-target' => '#add-user',
                 'class' => 'btn btn-primary pull-right margin-right-15',
-                'href' => Url::to(['/client/ajax-create-user']),
+                'href' => Url::to(['/vendor/ajax-create-user']),
             ],
         ])
         ?>
@@ -113,7 +113,7 @@ $this->registerJs(
                     'attribute' => 'profile.full_name',
                     'format' => 'raw',
                     'value' => function ($data) {
-                        $link = Html::a($data->profile->full_name, ['client/ajax-update-user', 'id' => $data->id], [
+                        $link = Html::a($data->profile->full_name, ['vendor/ajax-update-user', 'id' => $data->id], [
                                     'data' => [
                                         'target' => '#add-user',
                                         'toggle' => 'modal',

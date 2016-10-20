@@ -71,8 +71,6 @@ class ClientController extends DefaultController {
         ];
     }
 
-    
-
     /*
      *  Main settings page
      */
@@ -80,7 +78,17 @@ class ClientController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
 
-        return $this->render('settings', compact('organization'));
+        if ($organization->load(Yii::$app->request->get())) {
+            if ($organization->validate()) {
+                $organization->save();
+            }
+        }
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('settings', compact('organization'));
+        } else {
+            return $this->render('settings', compact('organization'));
+        }
     }
 
     /*
@@ -100,39 +108,6 @@ class ClientController extends DefaultController {
         } else {
             return $this->render('employees', compact('searchModel', 'dataProvider'));
         }
-    }
-
-    /*
-     *  Organization validate
-     */
-
-    public function actionAjaxValidateOrganization() {
-        $this->loadCurrentUser();
-        $organization = $this->currentUser->organization;
-
-        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
-            if ($organization->validate()) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return json_encode(ActiveForm::validate($organization));
-            }
-        }
-    }
-
-    /*
-     *  Organization save
-     */
-
-    public function actionAjaxUpdateOrganization() {
-        $this->loadCurrentUser();
-        $organization = $this->currentUser->organization;
-
-        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
-            if ($organization->validate()) {
-                $organization->save();
-            }
-        }
-
-        return $this->renderAjax('settings/_info', compact('organization'));
     }
 
     /*
@@ -293,7 +268,7 @@ class ClientController extends DefaultController {
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
-                    $units = (int)htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                    $units = (int) htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                     if (empty($article)) {
                         $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
@@ -317,14 +292,14 @@ class ClientController extends DefaultController {
                         exit;
                     }
                     if (empty($units)) {
-                        $units=(int)1;
+                        $units = (int) 1;
                     }
-                    if (is_int($units)==false) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате<br>(только целое число)'.$units];
+                    if (is_int($units) == false) {
+                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате<br>(только целое число)' . $units];
                         return $result;
                         exit;
                     }
-                    if ($units<1) {
+                    if ($units < 1) {
                         $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара доолжно быть целым, положительным числом'];
                         return $result;
                         exit;
@@ -407,7 +382,7 @@ class ClientController extends DefaultController {
                         $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                         $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         if (empty($units)) {
-                            $units=1;
+                            $units = 1;
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                         $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
@@ -538,25 +513,24 @@ class ClientController extends DefaultController {
                                     where(['rest_org_id' => $currentUser->organization_id,
                                         'supp_org_id' => $supplier_org_id])])->all(), 'id');
         if (Yii::$app->request->isAjax) {
-            if(!empty($user)){
+            if (!empty($user)) {
                 $post = Yii::$app->request->post();
-                if($user->status==0 && $post){ 
-                 $organization->load($post);
-                 if($organization->validate()){
-                    $organization->save();
-                        if($user->email != $organization->email){
-                        $user->email = $organization->email;  
-                        $user->save();
-                        $currentUser->sendInviteToVendor($user);
-                        }else{
-                            if(Yii::$app->request->post('resend_email')==1){
-                                $currentUser->sendInviteToVendor($user);    
-                            }  
-                        } 
-                        
-                    }else{
-                    $message = 'Не верно заполнена форма!';
-                    return $this->renderAjax('suppliers/_success', ['message' => $message]);    
+                if ($user->status == 0 && $post) {
+                    $organization->load($post);
+                    if ($organization->validate()) {
+                        $organization->save();
+                        if ($user->email != $organization->email) {
+                            $user->email = $organization->email;
+                            $user->save();
+                            $currentUser->sendInviteToVendor($user);
+                        } else {
+                            if (Yii::$app->request->post('resend_email') == 1) {
+                                $currentUser->sendInviteToVendor($user);
+                            }
+                        }
+                    } else {
+                        $message = 'Не верно заполнена форма!';
+                        return $this->renderAjax('suppliers/_success', ['message' => $message]);
                     }
                 }
             }
@@ -574,13 +548,13 @@ class ClientController extends DefaultController {
                 return $this->renderAjax('suppliers/_success', ['message' => $message]);
             }
         }
-        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data','user'));
+        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data', 'user'));
     }
 
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        
+
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::BASE_CATALOG) {
             $searchModel = new CatalogBaseGoods;
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $id, NULL);
@@ -596,128 +570,128 @@ class ClientController extends DefaultController {
     public function actionMessages() {
         return $this->render('/site/underConstruction');
     }
-    
+
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        
-        $header_info_zakaz   = \common\models\Order::find()->
-                where(['client_id'=>$currentUser->organization_id])->count();
+
+        $header_info_zakaz = \common\models\Order::find()->
+                        where(['client_id' => $currentUser->organization_id])->count();
         $header_info_suppliers = \common\models\RelationSuppRest::find()->
-                where(['rest_org_id'=>$currentUser->organization_id,'invite'=>RelationSuppRest::INVITE_ON])->count();
-        $header_info_purchases= \common\models\Order::find()->
-                where(['client_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])->count();
+                        where(['rest_org_id' => $currentUser->organization_id, 'invite' => RelationSuppRest::INVITE_ON])->count();
+        $header_info_purchases = \common\models\Order::find()->
+                        where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
         $header_info_items = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
-                where(['in','order_id',\common\models\Order::find()->select('id')->where(['client_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])])->one()->quantity;
-        
+                        where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
+
         $filter_get_supplier = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
-                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                    select('supp_org_id')->
-                        where(['rest_org_id'=>$currentUser->organization_id,'invite'=>'1'])])->all(),'id','name');
+                                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                                    select('supp_org_id')->
+                                    where(['rest_org_id' => $currentUser->organization_id, 'invite' => '1'])])->all(), 'id', 'name');
         $filter_get_employee = yii\helpers\ArrayHelper::map(\common\models\Profile::find()->
-                where(['in', 'user_id', \common\models\User::find()->
-                    select('id')->
-                        where(['organization_id'=>$currentUser->organization_id])])->all(),'user_id','full_name');
-        $filter_status="";
+                                where(['in', 'user_id', \common\models\User::find()->
+                                    select('id')->
+                                    where(['organization_id' => $currentUser->organization_id])])->all(), 'user_id', 'full_name');
+        $filter_status = "";
         $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
         $filter_to_date = date("d-m-Y");
         $where = "";
+
         //pieChart
-        function hex(){
-        $hex = '#';
-        foreach(array('r', 'g', 'b') as $color){
-            //случайное число в диапазоне 0 и 255.
-            $val = mt_rand(0, 255);
-            //преобразуем число в Hex значение.
-            $dechex = dechex($val);
-            //с 0, если длина меньше 2
-            if(strlen($dechex) < 2){
-                $dechex = "0" . $dechex;
+        function hex() {
+            $hex = '#';
+            foreach (array('r', 'g', 'b') as $color) {
+                //случайное число в диапазоне 0 и 255.
+                $val = mt_rand(0, 255);
+                //преобразуем число в Hex значение.
+                $dechex = dechex($val);
+                //с 0, если длина меньше 2
+                if (strlen($dechex) < 2) {
+                    $dechex = "0" . $dechex;
+                }
+                //объединяем
+                $hex .= $dechex;
             }
-            //объединяем
-            $hex .= $dechex;
+            return $hex;
         }
-        return $hex;
-        } 
+
         if (Yii::$app->request->isAjax) {
-                $filter_status=trim(\Yii::$app->request->get('filter_status'));
-                $filter_supplier=trim(\Yii::$app->request->get('filter_supplier'));
-                $filter_employee=trim(\Yii::$app->request->get('filter_employee'));
-                $filter_from_date=trim(\Yii::$app->request->get('filter_from_date'));
-                $filter_to_date=trim(\Yii::$app->request->get('filter_to_date'));
-                
-                empty($filter_status)?"":$where .= " and status='" . $filter_status . "'"; 
-                empty($filter_supplier)?"":$where .= " and vendor_id='" . $filter_supplier . "'";
-                empty($filter_employee)?"":$where .= " and created_by_id='" . $filter_employee . "'";
-                        
+            $filter_status = trim(\Yii::$app->request->get('filter_status'));
+            $filter_supplier = trim(\Yii::$app->request->get('filter_supplier'));
+            $filter_employee = trim(\Yii::$app->request->get('filter_employee'));
+            $filter_from_date = trim(\Yii::$app->request->get('filter_from_date'));
+            $filter_to_date = trim(\Yii::$app->request->get('filter_to_date'));
+
+            empty($filter_status) ? "" : $where .= " and status='" . $filter_status . "'";
+            empty($filter_supplier) ? "" : $where .= " and vendor_id='" . $filter_supplier . "'";
+            empty($filter_employee) ? "" : $where .= " and created_by_id='" . $filter_employee . "'";
         }
-        
+
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
                 (select sum(total_price) FROM `order` 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
                 client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
-                        . "DATE(created_at) between '" . 
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        . "DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "') " .
-                        $where . 
-                    ") AS `total_price`  
+                        $where .
+                        ") AS `total_price`  
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
                 FROM `order` where 
                 client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
-                        . "DATE(created_at) between '" . 
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        . "DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "') " . $where . ")`tb`")->queryAll();
-                $arr_create_at =[];
-                $arr_price =[];
-                if(count($area_chart)==1){
-                array_push($arr_create_at, 0);  
-                array_push($arr_price, 0);
-                }
-                
-                foreach($area_chart as $area_charts){
-                    array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
-                    array_push($arr_price, $area_charts['total_price']); 
-                   
-                }
+        $arr_create_at = [];
+        $arr_price = [];
+        if (count($area_chart) == 1) {
+            array_push($arr_create_at, 0);
+            array_push($arr_price, 0);
+        }
+
+        foreach ($area_chart as $area_charts) {
+            array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));
+            array_push($arr_price, $area_charts['total_price']);
+        }
         /*
          * 
          * PIE CHART Аналитика по поставщикам
          * 
          */
-         $vendors_total_price_sql = Yii::$app->db->createCommand("
+        $vendors_total_price_sql = Yii::$app->db->createCommand("
             SELECT vendor_id,sum(total_price) as total_price FROM `order` WHERE  
-                (DATE(created_at) between '" . 
-                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
-                $where .
-                " and client_id = " . $currentUser->organization_id . 
-                " and status<>" . Order::STATUS_FORMING . " group by vendor_id")->queryAll();
-        $vendors_total_price =[];
-                foreach($vendors_total_price_sql as $vendors_total_price_sql_arr){
-                    $arr = array(
-                    'value' => $vendors_total_price_sql_arr['total_price'],
-                    'label' => \common\models\Organization::find()->where(['id'=>$vendors_total_price_sql_arr['vendor_id']])->one()->name,
-                    'color' => hex()
-                    );
-                    array_push($vendors_total_price, $arr);
-                } 
-        $vendors_total_price = json_encode($vendors_total_price);      
-         /*
-          * 
-          * PIE CHART Аналитика по поставщикам END
-          * 
-          */
-        
-          /*
-           * 
-           * GridView Аналитика ТОП продуктов
-           * 
-           */
+                (DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
+                        $where .
+                        " and client_id = " . $currentUser->organization_id .
+                        " and status<>" . Order::STATUS_FORMING . " group by vendor_id")->queryAll();
+        $vendors_total_price = [];
+        foreach ($vendors_total_price_sql as $vendors_total_price_sql_arr) {
+            $arr = array(
+                'value' => $vendors_total_price_sql_arr['total_price'],
+                'label' => \common\models\Organization::find()->where(['id' => $vendors_total_price_sql_arr['vendor_id']])->one()->name,
+                'color' => hex()
+            );
+            array_push($vendors_total_price, $arr);
+        }
+        $vendors_total_price = json_encode($vendors_total_price);
+        /*
+         * 
+         * PIE CHART Аналитика по поставщикам END
+         * 
+         */
+
+        /*
+         * 
+         * GridView Аналитика ТОП продуктов
+         * 
+         */
         $query = Yii::$app->db->createCommand("
             SELECT sum(price*quantity) as price,sum(quantity) as quantity, product_id FROM order_content WHERE order_id in (
                 SELECT id from `order` where 
-                (DATE(created_at) between '" . 
+                (DATE(created_at) between '" .
                 date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                "and status<>" . Order::STATUS_FORMING . " and client_id = " . $currentUser->organization_id . 
-                $where . 
+                "and status<>" . Order::STATUS_FORMING . " and client_id = " . $currentUser->organization_id .
+                $where .
                 ") group by product_id order by sum(price*quantity) desc");
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
@@ -725,72 +699,56 @@ class ClientController extends DefaultController {
                 'pageSize' => 7,
             ]
         ]);
-          /*
-           * 
-           * GridView Аналитика ТОП продуктов END
-           * 
-           */
-        
-           /*
-           * 
-           * BarChart заказы по поставщикам
-           * 
-           */
-        $chart_bar_value =[];
-        $chart_bar_label =[];
-        foreach($vendors_total_price_sql as $vendors_bar_total_price_sql_arr){
-                    $arr = array($vendors_bar_total_price_sql_arr['total_price']);
-                    array_push($chart_bar_value, $arr);
-                    $arr = array(\common\models\Organization::find()->where(['id'=>$vendors_bar_total_price_sql_arr['vendor_id']])->one()->name);
-                    array_push($chart_bar_label, $arr);
-                } 
+        /*
+         * 
+         * GridView Аналитика ТОП продуктов END
+         * 
+         */
+
+        /*
+         * 
+         * BarChart заказы по поставщикам
+         * 
+         */
+        $chart_bar_value = [];
+        $chart_bar_label = [];
+        foreach ($vendors_total_price_sql as $vendors_bar_total_price_sql_arr) {
+            $arr = array($vendors_bar_total_price_sql_arr['total_price']);
+            array_push($chart_bar_value, $arr);
+            $arr = array(\common\models\Organization::find()->where(['id' => $vendors_bar_total_price_sql_arr['vendor_id']])->one()->name);
+            array_push($chart_bar_label, $arr);
+        }
         $chart_bar_value = json_encode($chart_bar_value);
         $chart_bar_label = json_encode($chart_bar_label);
         /*
-           * 
-           * BarChart заказы по поставщикам END
-           * 
-           */
-        return $this->render('analytics/index',compact(
-                'header_info_zakaz',
-                'header_info_suppliers',
-                'header_info_purchases',
-                'header_info_items',
-                'filter_get_supplier',
-                'filter_get_employee',
-                'filter_supplier',
-                'filter_employee',
-                'filter_status',
-                'filter_from_date',
-                'filter_to_date',
-                'arr_create_at',
-                'arr_price',
-                'vendors_total_price',
-                'dataProvider',
-                'chart_bar_value',
-                'chart_bar_label'
-                ));
+         * 
+         * BarChart заказы по поставщикам END
+         * 
+         */
+        return $this->render('analytics/index', compact(
+                                'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+        ));
     }
-    
+
     public function actionTutorial() {
         return $this->render('/site/underConstruction');
     }
-    
+
     public function actionSupport() {
         return $this->render('/site/underConstruction');
     }
-    
+
     public function actionEvents() {
         return $this->render('/site/underConstruction');
     }
-    
+
     /*
      *  index DASHBOARD
      */
 
     public function actionIndex() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $suppliers_where ="";
+        $suppliers_where = "";
         /*
          * 
          * Поставщики
@@ -822,7 +780,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
          * Поставщики END
          * 
          */
-        
+
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = date("d-m-Y");
@@ -830,7 +788,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
                 . "client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING);
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                . "client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
+                        . "client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -850,50 +808,48 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 ],
                 'defaultOrder' => [
                     'created_at' => SORT_DESC
-                    ]
+                ]
             ],
         ]);
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
         // chart АНАЛИТИКА по неделям прошедшим
-        $curent_monday = date('Y-m-d', strtotime(date('Y').'W'.date('W').'1')); // текущая неделя - понедельник
-        $curent_sunday = date('Y-m-d', strtotime(date('Y').'W'.date('W').'7')); // текущая неделя - воскресение
-        $i=0;
+        $curent_monday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '1')); // текущая неделя - понедельник
+        $curent_sunday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '7')); // текущая неделя - воскресение
+        $i = 0;
         $max_i = 5; //Сколько недель показывать от текущей
-        $mon=0;
-        $sun=6;
-        $query ="";
-        while ($i < $max_i+1)
-        {
-        $i++;
-        $while_monday = date('Y-m-d', strtotime("$curent_monday $mon day"));
-        $while_sunday = date('Y-m-d', strtotime("$curent_monday $sun day"));
-        $dates = date('m/d', strtotime("$curent_monday $sun day"));;
-        $query .="SELECT sum(total_price) as price,'$dates' as dates from `order` where "
-                        . "client_id = $currentUser->organization_id and ("
-                        . "DATE(created_at) between '" . 
-                        date('Y-m-d', strtotime($while_monday)) . "' and '" . 
-                        date('Y-m-d', strtotime($while_sunday)) . "') ";
-        $i>$max_i?"":$query .=" UNION ALL \n";
-        $mon=$mon-7;
-        $sun=$sun-7;
+        $mon = 0;
+        $sun = 6;
+        $query = "";
+        while ($i < $max_i + 1) {
+            $i++;
+            $while_monday = date('Y-m-d', strtotime("$curent_monday $mon day"));
+            $while_sunday = date('Y-m-d', strtotime("$curent_monday $sun day"));
+            $dates = date('m/d', strtotime("$curent_monday $sun day"));
+            ;
+            $query .="SELECT sum(total_price) as price,'$dates' as dates from `order` where "
+                    . "client_id = $currentUser->organization_id and ("
+                    . "DATE(created_at) between '" .
+                    date('Y-m-d', strtotime($while_monday)) . "' and '" .
+                    date('Y-m-d', strtotime($while_sunday)) . "') ";
+            $i > $max_i ? "" : $query .=" UNION ALL \n";
+            $mon = $mon - 7;
+            $sun = $sun - 7;
         }
         $query = Yii::$app->db->createCommand($query)->queryAll();
-        $chart_dates =[];
-        $chart_price =[];
-        foreach($query as $querys){
-            if(empty($querys['price'])){
-            array_push($chart_price, 0);     
-            }else{
-            array_push($chart_price, $querys['price']);    
-            }    
-            array_push($chart_dates, $querys['dates']); 
-        } 
-       // var_dump($chart_price);
-        return $this->render('dashboard/index',compact(
-                'dataProvider',
-                'suppliers_dataProvider',
-                'chart_dates',
-                'chart_price'
-                ));
+        $chart_dates = [];
+        $chart_price = [];
+        foreach ($query as $querys) {
+            if (empty($querys['price'])) {
+                array_push($chart_price, 0);
+            } else {
+                array_push($chart_price, $querys['price']);
+            }
+            array_push($chart_dates, $querys['dates']);
+        }
+        // var_dump($chart_price);
+        return $this->render('dashboard/index', compact(
+                                'dataProvider', 'suppliers_dataProvider', 'chart_dates', 'chart_price'
+        ));
     }
+
 }

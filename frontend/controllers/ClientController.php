@@ -796,10 +796,20 @@ class ClientController extends DefaultController {
          * Поставщики
          * 
          */
-        $sql_dataProvider = Yii::$app->db->createCommand("SELECT supp_org_id FROM `relation_supp_rest` WHERE "
-                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON);
-        $suppliers_count = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT supp_org_id FROM `relation_supp_rest` WHERE "
-                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . ")`tb`")->queryScalar();
+        $searchString="";
+        $where = "";
+        if (Yii::$app->request->isAjax) {
+                $searchString=trim(\Yii::$app->request->get('searchString'));
+                
+                empty($searchString)?"":$where .= " and name like '%" . $searchString . "%'";
+                        
+        }
+        $sql_dataProvider = Yii::$app->db->createCommand("SELECT supp_org_id, name FROM `relation_supp_rest` join `organization`
+on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
+                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where");
+        $suppliers_count = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT supp_org_id, name FROM `relation_supp_rest` join `organization`
+on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
+                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where)`tb`")->queryScalar();
         $suppliers_dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $sql_dataProvider->sql,
             'totalCount' => $suppliers_count,

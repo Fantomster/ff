@@ -1429,7 +1429,7 @@ class VendorController extends DefaultController {
         ]);
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
         
-        return $this->render('dashbord/index',compact(
+        return $this->render('dashboard/index',compact(
                 'dataProvider',
                 'filter_from_date',
                 'filter_to_date',

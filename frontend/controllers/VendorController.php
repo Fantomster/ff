@@ -66,20 +66,44 @@ class VendorController extends DefaultController {
         ];
     }
 
-    
-
     /*
      *  Main settings page
      */
 
     public function actionSettings() {
+        $organization = $this->currentUser->organization;
+
+        if ($organization->load(Yii::$app->request->get())) {
+            if ($organization->validate()) {
+                $organization->save();
+            }
+        }
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('settings', compact('organization'));
+        } else {
+            return $this->render('settings', compact('organization'));
+        }
+    }
+
+    public function actionEmployees() {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
         $params = Yii::$app->request->getQueryParams();
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('employees', compact('searchModel', 'dataProvider'));
+        } else {
+            return $this->render('employees', compact('searchModel', 'dataProvider'));
+        }
+    }
+
+    public function actionDelivery() {
         $organization = $this->currentUser->organization;
+
         $delivery = $organization->delivery;
         if (!$delivery) {
             $delivery = new \common\models\Delivery();
@@ -87,10 +111,16 @@ class VendorController extends DefaultController {
             $delivery->save();
         }
 
+        if ($delivery->load(Yii::$app->request->get())) {
+            if ($delivery->validate()) {
+                $delivery->save();
+            }
+        }
+
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('settings', compact('searchModel', 'dataProvider', 'organization', 'delivery'));
+            return $this->renderPartial('delivery', compact('delivery'));
         } else {
-            return $this->render('settings', compact('searchModel', 'dataProvider', 'organization', 'delivery'));
+            return $this->render('delivery', compact('delivery'));
         }
     }
 
@@ -182,45 +212,45 @@ class VendorController extends DefaultController {
         } else {
             $searchString = "";
             $restaurant = "";
-            $type="";
+            $type = "";
             $relation_supp_rest = new RelationSuppRest;
             $relation = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
-                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                    select('rest_org_id')->
-                        where(['supp_org_id'=>$currentUser->organization_id,'invite'=>'1'])])->all(),'id','name');
-            $arrCatalog = Catalog::find()->select(['id','status','name','created_at'])->
-                        where(['supp_org_id'=>$currentUser->organization_id,'type'=>2])->all();
-            
-            if (Yii::$app->request->isPost) {      
+                                    where(['in', 'id', \common\models\RelationSuppRest::find()->
+                                        select('rest_org_id')->
+                                        where(['supp_org_id' => $currentUser->organization_id, 'invite' => '1'])])->all(), 'id', 'name');
+            $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
+                            where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->all();
+
+            if (Yii::$app->request->isPost) {
                 $searchString = htmlspecialchars(trim(\Yii::$app->request->post('searchString')));
                 $restaurant = htmlspecialchars(trim(\Yii::$app->request->post('restaurant')));
                 //echo $restaurant;
-                if(!empty($restaurant)){
-                $arrCatalog = Catalog::find()->select(['id','status','name','created_at','type','id'])->
-                        where(['supp_org_id'=>$currentUser->organization_id])->
-                        andFilterWhere(['id'=>\common\models\RelationSuppRest::find()->
-                                select(['cat_id'])->
-                                where(['supp_org_id'=>$currentUser->organization_id,
-                                       'rest_org_id'=>$restaurant])])->one();
-                    if(empty($arrCatalog)){
-                        $arrCatalog==""; 
-                    }else{
-                        if($arrCatalog->type==1){
-                           $type = 1;  //ресторан подключен к главному каталогу
-                        }else{
-                           $catalog_id = $arrCatalog->id;  
-                           $arrCatalog = Catalog::find()->select(['id','status','name','created_at'])->
-                            where(['supp_org_id'=>$currentUser->organization_id,'id'=>$catalog_id])->all();
+                if (!empty($restaurant)) {
+                    $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'type', 'id'])->
+                                    where(['supp_org_id' => $currentUser->organization_id])->
+                                    andFilterWhere(['id' => \common\models\RelationSuppRest::find()->
+                                        select(['cat_id'])->
+                                        where(['supp_org_id' => $currentUser->organization_id,
+                                            'rest_org_id' => $restaurant])])->one();
+                    if (empty($arrCatalog)) {
+                        $arrCatalog == "";
+                    } else {
+                        if ($arrCatalog->type == 1) {
+                            $type = 1;  //ресторан подключен к главному каталогу
+                        } else {
+                            $catalog_id = $arrCatalog->id;
+                            $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
+                                            where(['supp_org_id' => $currentUser->organization_id, 'id' => $catalog_id])->all();
                         }
                     }
-                }else{
-                $arrCatalog = Catalog::find()->select(['id','status','name','created_at'])->
-                        where(['supp_org_id'=>$currentUser->organization_id,'type'=>2])->
-                        andFilterWhere(['LIKE', 'name', $searchString])->all();
-                    }
-                return $this->render("catalogs", compact("relation_supp_rest", "currentUser","relation","searchString","restaurant",'arrCatalog','type'));
+                } else {
+                    $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
+                                    where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->
+                                    andFilterWhere(['LIKE', 'name', $searchString])->all();
+                }
+                return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'arrCatalog', 'type'));
             }
-            return $this->render("catalogs", compact("relation_supp_rest", "currentUser","relation","searchString","restaurant",'type','arrCatalog'));
+            return $this->render("catalogs", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog'));
         }
     }
 
@@ -315,47 +345,50 @@ class VendorController extends DefaultController {
 
     public function actionClients() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        
+
         $arr_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
-                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                    select('rest_org_id')->
-                        where(['supp_org_id'=>$currentUser->organization_id])])->all(),'id','name');
-        
+                                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                                    select('rest_org_id')->
+                                    where(['supp_org_id' => $currentUser->organization_id])])->all(), 'id', 'name');
+
         $arr_catalog = yii\helpers\ArrayHelper::map(\common\models\Catalog::find()->
-                where(['supp_org_id'=>$currentUser->organization_id])->all(),'id','name');
-        
-        $filter_restaurant="";
-        $filter_catalog="";
-        $filter_invite="";
+                                where(['supp_org_id' => $currentUser->organization_id])->all(), 'id', 'name');
+
+        $filter_restaurant = "";
+        $filter_catalog = "";
+        $filter_invite = "";
         $searchModel = new RelationSuppRest;
         if (
-            !empty(\Yii::$app->request->get('filter_restaurant')) || 
-            !empty(\Yii::$app->request->get('filter_catalog')) || 
-            \Yii::$app->request->get('filter_invite')!="") { 
-            
-        $filter_restaurant = trim(\Yii::$app->request->get('filter_restaurant'));
-        $filter_catalog = trim(\Yii::$app->request->get('filter_catalog'));
-        $filter_invite = trim(\Yii::$app->request->get('filter_invite'));
-        
-        $query = (new \yii\db\Query());
-        $query->select("id,rest_org_id,cat_id,status,invite");
-        $query->from("relation_supp_rest");
-        $query->where(["supp_org_id" => $currentUser->organization_id]);
-        if(!empty($filter_restaurant)) $query->andWhere(["rest_org_id" => $filter_restaurant]);
-        if(!empty($filter_catalog)) $query->andWhere(["cat_id" => $filter_catalog]);
-        if($filter_invite !="") $query->andWhere(["invite" => $filter_invite]);
-        /*$totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
-                . "WHERE supp_org_id = $currentUser->organization_id " 
-                //. "and id in (select id from organization where name like '" . $search . "%')"
-                . "")->queryScalar();*/
-        }else{
-        $query = (new \yii\db\Query());
-        $query->select("id,rest_org_id,cat_id,status,invite");
-        $query->from("relation_supp_rest");
-        $query->where(["supp_org_id" => $currentUser->organization_id]);
-        /*$totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
-                . "WHERE supp_org_id = $currentUser->organization_id " 
-                . "")->queryScalar();*/
+                !empty(\Yii::$app->request->get('filter_restaurant')) ||
+                !empty(\Yii::$app->request->get('filter_catalog')) ||
+                \Yii::$app->request->get('filter_invite') != "") {
+
+            $filter_restaurant = trim(\Yii::$app->request->get('filter_restaurant'));
+            $filter_catalog = trim(\Yii::$app->request->get('filter_catalog'));
+            $filter_invite = trim(\Yii::$app->request->get('filter_invite'));
+
+            $query = (new \yii\db\Query());
+            $query->select("id,rest_org_id,cat_id,status,invite");
+            $query->from("relation_supp_rest");
+            $query->where(["supp_org_id" => $currentUser->organization_id]);
+            if (!empty($filter_restaurant))
+                $query->andWhere(["rest_org_id" => $filter_restaurant]);
+            if (!empty($filter_catalog))
+                $query->andWhere(["cat_id" => $filter_catalog]);
+            if ($filter_invite != "")
+                $query->andWhere(["invite" => $filter_invite]);
+            /* $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
+              . "WHERE supp_org_id = $currentUser->organization_id "
+              //. "and id in (select id from organization where name like '" . $search . "%')"
+              . "")->queryScalar(); */
+        }else {
+            $query = (new \yii\db\Query());
+            $query->select("id,rest_org_id,cat_id,status,invite");
+            $query->from("relation_supp_rest");
+            $query->where(["supp_org_id" => $currentUser->organization_id]);
+            /* $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
+              . "WHERE supp_org_id = $currentUser->organization_id "
+              . "")->queryScalar(); */
         }
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $query,
@@ -374,38 +407,38 @@ class VendorController extends DefaultController {
                 ],
             ],
         ]);
-        return $this->render('clients', compact('searchModel', 'dataProvider','arr_catalog','arr_restaurant'));
+        return $this->render('clients', compact('searchModel', 'dataProvider', 'arr_catalog', 'arr_restaurant'));
     }
 
     public function actionBasecatalog() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchString="";
+        $searchString = "";
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->id;
         $currentCatalog = $baseCatalog;
-        if (Yii::$app->request->isGet) {       
-        $searchString = trim(\Yii::$app->request->get('searchString'));
-        $query = (new \yii\db\Query())
-        ->select("id,article,product,units,category_id,price,status")
-        ->from("catalog_base_goods")
-        ->where("cat_id = $baseCatalog")
-        ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
-        ->andWhere("deleted=0")
-        ->createCommand();  
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog "
-                . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
-                . "")->queryScalar();
-        }else{
-        $query = (new \yii\db\Query())
-        ->select("id,article,product,units,category_id,price,status")
-        ->from("catalog_base_goods")
-        ->where("cat_id = $baseCatalog")
-        ->andWhere("deleted=0")
-        ->createCommand();
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog " 
-                . "and deleted=0"
-                . "")->queryScalar();
+        if (Yii::$app->request->isGet) {
+            $searchString = trim(\Yii::$app->request->get('searchString'));
+            $query = (new \yii\db\Query())
+                    ->select("id,article,product,units,category_id,price,status")
+                    ->from("catalog_base_goods")
+                    ->where("cat_id = $baseCatalog")
+                    ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
+                    ->andWhere("deleted=0")
+                    ->createCommand();
+            $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $baseCatalog "
+                            . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
+                            . "")->queryScalar();
+        } else {
+            $query = (new \yii\db\Query())
+                    ->select("id,article,product,units,category_id,price,status")
+                    ->from("catalog_base_goods")
+                    ->where("cat_id = $baseCatalog")
+                    ->andWhere("deleted=0")
+                    ->createCommand();
+            $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $baseCatalog "
+                            . "and deleted=0"
+                            . "")->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
@@ -428,6 +461,7 @@ class VendorController extends DefaultController {
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog'));
     }
+
     public function actionImportToXls($id) {
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
@@ -467,11 +501,11 @@ class VendorController extends DefaultController {
                     if (!in_array($unique, $arr)) {
                         $sql = "insert into " . CatalogBaseGoods::tableName() .
                                 "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`created_at`) VALUES "
-                              //.  "($id,0,$currentUser->organization_id,':article',':product','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
-                              . "($id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
+                                //.  "($id,0,$currentUser->organization_id,':article',':product','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
+                                . "($id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
                         $command = \Yii::$app->db->createCommand($sql);
-                        /*$command->bindParam(":article",$row_article,PDO::PARAM_STR);
-                        $command->bindParam(":product",$row_product,PDO::PARAM_STR);*/
+                        /* $command->bindParam(":article",$row_article,PDO::PARAM_STR);
+                          $command->bindParam(":product",$row_product,PDO::PARAM_STR); */
                         $command->execute();
                     }
                 }
@@ -866,33 +900,33 @@ class VendorController extends DefaultController {
         }
 
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->id;
-        /*$searchModel = new CatalogBaseGoods;
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $baseCatalog->id);*/
-        $searchString="";
-        if (Yii::$app->request->isGet) {       
-        $searchString = trim(\Yii::$app->request->get('searchString'));
-        $query = (new \yii\db\Query())
-        ->select("id,article,product,units,category_id,price,status")
-        ->from("catalog_base_goods")
-        ->where("cat_id = $baseCatalog")
-        ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
-        ->andWhere("deleted=0")
-        ->createCommand();  
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog "
-                . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
-                . "")->queryScalar();
-        }else{
-        $query = (new \yii\db\Query())
-        ->select("id,article,product,units,category_id,price,status")
-        ->from("catalog_base_goods")
-        ->where("cat_id = $baseCatalog")
-        ->andWhere("deleted=0")
-        ->createCommand();
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $baseCatalog " 
-                . "and deleted=0"
-                . "")->queryScalar();
+        /* $searchModel = new CatalogBaseGoods;
+          $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $baseCatalog->id); */
+        $searchString = "";
+        if (Yii::$app->request->isGet) {
+            $searchString = trim(\Yii::$app->request->get('searchString'));
+            $query = (new \yii\db\Query())
+                    ->select("id,article,product,units,category_id,price,status")
+                    ->from("catalog_base_goods")
+                    ->where("cat_id = $baseCatalog")
+                    ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
+                    ->andWhere("deleted=0")
+                    ->createCommand();
+            $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $baseCatalog "
+                            . "and (article like '%" . $searchString . "%' or product like '%" . $searchString . "%') and deleted=0"
+                            . "")->queryScalar();
+        } else {
+            $query = (new \yii\db\Query())
+                    ->select("id,article,product,units,category_id,price,status")
+                    ->from("catalog_base_goods")
+                    ->where("cat_id = $baseCatalog")
+                    ->andWhere("deleted=0")
+                    ->createCommand();
+            $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $baseCatalog "
+                            . "and deleted=0"
+                            . "")->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
@@ -1075,68 +1109,6 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_setPercentCatalog', compact('catalogGoods', 'cat_id'));
     }
 
-    /*
-     *  Organization validate
-     */
-
-    public function actionAjaxValidateOrganization() {
-        $organization = $this->currentUser->organization;
-
-        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
-            if ($organization->validate()) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return json_encode(ActiveForm::validate($organization));
-            }
-        }
-    }
-
-    /*
-     *  Organization save
-     */
-
-    public function actionAjaxUpdateOrganization() {
-        $organization = $this->currentUser->organization;
-
-        if (Yii::$app->request->isAjax && $organization->load(Yii::$app->request->post())) {
-            if ($organization->validate()) {
-                $organization->save();
-            }
-        }
-
-        return $this->renderAjax('settings/_info', compact('organization'));
-    }
-
-    /*
-     *  Delivery info validate
-     */
-
-    public function actionAjaxValidateDelivery() {
-        $delivery = $this->currentUser->organization->delivery;
-
-        if (Yii::$app->request->isAjax && $delivery->load(Yii::$app->request->post())) {
-            if ($delivery->validate()) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return json_encode(ActiveForm::validate($delivery));
-            }
-        }
-    }
-
-    /*
-     *  Delivery info save
-     */
-
-    public function actionAjaxUpdateDelivery() {
-        $delivery = $this->currentUser->organization->delivery;
-
-        if (Yii::$app->request->isAjax && $delivery->load(Yii::$app->request->post())) {
-            if ($delivery->validate()) {
-                $delivery->save();
-            }
-        }
-
-        return $this->renderAjax('settings/_delivery', compact('delivery'));
-    }
-
     public function actionViewClient($id) {
         $client_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1180,7 +1152,7 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $search = Yii::$app->request->post('search');
         $restaurant = Yii::$app->request->post('restaurant');
-        
+
         return $this->renderAjax('catalogs/_listCatalog', compact('currentUser', 'search', 'restaurant'));
     }
 
@@ -1194,100 +1166,101 @@ class VendorController extends DefaultController {
 
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $header_info_zakaz   = \common\models\Order::find()->
-                where(['vendor_id'=>$currentUser->organization_id])->count();
+        $header_info_zakaz = \common\models\Order::find()->
+                        where(['vendor_id' => $currentUser->organization_id])->count();
         $header_info_clients = \common\models\RelationSuppRest::find()->
-                where(['supp_org_id'=>$currentUser->organization_id])->count();
+                        where(['supp_org_id' => $currentUser->organization_id])->count();
         $header_info_prodaji = \common\models\Order::find()->
-                where(['vendor_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])->count();
+                        where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
         $header_info_poziciy = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
-                where(['in','order_id',\common\models\Order::find()->select('id')->where(['vendor_id'=>$currentUser->organization_id,'status'=>\common\models\Order::STATUS_DONE])])->one()->quantity;
-        
+                        where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
+
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
-                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                    select('rest_org_id')->
-                        where(['supp_org_id'=>$currentUser->organization_id,'invite'=>'1'])])->all(),'id','name');
-        $filter_status="";
+                                where(['in', 'id', \common\models\RelationSuppRest::find()->
+                                    select('rest_org_id')->
+                                    where(['supp_org_id' => $currentUser->organization_id, 'invite' => '1'])])->all(), 'id', 'name');
+        $filter_status = "";
         $filter_from_date = date("d-m-Y", strtotime(" -2 months"));
         $filter_to_date = date("d-m-Y");
         $filter_client = "";
         $where = "";
+
         //pieChart
-        function hex(){
-        $hex = '#';
-        foreach(array('r', 'g', 'b') as $color){
-            //случайное число в диапазоне 0 и 255.
-            $val = mt_rand(0, 255);
-            //преобразуем число в Hex значение.
-            $dechex = dechex($val);
-            //с 0, если длина меньше 2
-            if(strlen($dechex) < 2){
-                $dechex = "0" . $dechex;
+        function hex() {
+            $hex = '#';
+            foreach (array('r', 'g', 'b') as $color) {
+                //случайное число в диапазоне 0 и 255.
+                $val = mt_rand(0, 255);
+                //преобразуем число в Hex значение.
+                $dechex = dechex($val);
+                //с 0, если длина меньше 2
+                if (strlen($dechex) < 2) {
+                    $dechex = "0" . $dechex;
+                }
+                //объединяем
+                $hex .= $dechex;
             }
-            //объединяем
-            $hex .= $dechex;
+            return $hex;
         }
-        return $hex;
-        }       
+
         if (Yii::$app->request->isAjax) {
-            
-                $filter_status=trim(\Yii::$app->request->get('filter_status'));
-                $filter_from_date=trim(\Yii::$app->request->get('filter_from_date'));
-                $filter_to_date=trim(\Yii::$app->request->get('filter_to_date'));
-                $filter_client=trim(\Yii::$app->request->get('filter_client'));
-                
-                empty($filter_status)?"":$where .= " and status='" . $filter_status . "'"; 
-                empty($filter_client)?"":$where .= " and client_id='" . $filter_client . "'";
-                        
+
+            $filter_status = trim(\Yii::$app->request->get('filter_status'));
+            $filter_from_date = trim(\Yii::$app->request->get('filter_from_date'));
+            $filter_to_date = trim(\Yii::$app->request->get('filter_to_date'));
+            $filter_client = trim(\Yii::$app->request->get('filter_client'));
+
+            empty($filter_status) ? "" : $where .= " and status='" . $filter_status . "'";
+            empty($filter_client) ? "" : $where .= " and client_id='" . $filter_client . "'";
         }
         // Объем продаж чарт
-                $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
+        $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
                 (select sum(total_price) FROM `order` 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
                 vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
-                        . "DATE(created_at) between '" . 
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        . "DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                        $where . 
-                    ") AS `total_price`  
+                        $where .
+                        ") AS `total_price`  
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
                 FROM `order` where 
                 vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
-                        . "DATE(created_at) between '" . 
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                        . "DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
-                $arr_create_at =[];
-                $arr_price =[];
-                if(count($area_chart)==1){
-                array_push($arr_create_at, 0);  
-                array_push($arr_price, 0);
-                }
-                foreach($area_chart as $area_charts){
-                    array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
-                    array_push($arr_price, $area_charts['total_price']); 
-                } 
-                
+        $arr_create_at = [];
+        $arr_price = [];
+        if (count($area_chart) == 1) {
+            array_push($arr_create_at, 0);
+            array_push($arr_price, 0);
+        }
+        foreach ($area_chart as $area_charts) {
+            array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));
+            array_push($arr_price, $area_charts['total_price']);
+        }
+
         $query = Yii::$app->db->createCommand("
             SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
                 SELECT id from `order` where 
-                (DATE(created_at) between '" . 
+                (DATE(created_at) between '" .
                 date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                "and status<>" . Order::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id . 
-                $where . 
+                "and status<>" . Order::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id .
+                $where .
                 ") group by product_id");
         $totalCount = Yii::$app->db->createCommand("
             SELECT COUNT(*) from (
             SELECT sum(price*quantity) as price, product_id FROM order_content WHERE order_id in (
                 SELECT id from `order` where 
-                (DATE(created_at) between '" . 
-                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                "and status<>" . Order::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id . 
-                $where .
-                ") group by product_id)tb")->queryScalar();
-        $total_price = Yii::$app->db->createCommand("SELECT sum(total_price) as total from `order` where " . 
-                        "vendor_id = " . $currentUser->organization_id . 
-                        " and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at,'%Y-%m-%d') between '" . 
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
+                (DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                        "and status<>" . Order::STATUS_FORMING . " and vendor_id = " . $currentUser->organization_id .
+                        $where .
+                        ") group by product_id)tb")->queryScalar();
+        $total_price = Yii::$app->db->createCommand("SELECT sum(total_price) as total from `order` where " .
+                        "vendor_id = " . $currentUser->organization_id .
+                        " and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at,'%Y-%m-%d') between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "'" . $where)->queryOne();
         $total_price = $total_price['total'];
         $dataProvider = new \yii\data\SqlDataProvider([
@@ -1303,45 +1276,32 @@ class VendorController extends DefaultController {
                 ],
                 'defaultOrder' => [
                     'price' => SORT_DESC
-                    ]
+                ]
             ],
         ]);
-        
+
         $clients_query = Yii::$app->db->createCommand("
             SELECT client_id,sum(total_price) as total_price FROM `order` WHERE  
-                (DATE(created_at) between '" . 
-                date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
-                $where .
-                " and vendor_id = " . $currentUser->organization_id . 
-                " and status<>" . Order::STATUS_FORMING . " group by client_id")->queryAll();
-        $arr_clients_price =[];
-                foreach($clients_query as $clients_querys){
-                    $arr = array(
-                    'value' => $clients_querys['total_price'],
-                    'label' => \common\models\Organization::find()->where(['id'=>$clients_querys['client_id']])->one()->name,
-                    'color' => hex()
-                    );
-                    array_push($arr_clients_price, $arr);
-                } 
+                (DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" . date('Y-m-d', strtotime($filter_to_date)) . "') " .
+                        $where .
+                        " and vendor_id = " . $currentUser->organization_id .
+                        " and status<>" . Order::STATUS_FORMING . " group by client_id")->queryAll();
+        $arr_clients_price = [];
+        foreach ($clients_query as $clients_querys) {
+            $arr = array(
+                'value' => $clients_querys['total_price'],
+                'label' => \common\models\Organization::find()->where(['id' => $clients_querys['client_id']])->one()->name,
+                'color' => hex()
+            );
+            array_push($arr_clients_price, $arr);
+        }
         $arr_clients_price = json_encode($arr_clients_price);
-        
-        return $this->render('analytics/index',
-        compact('filter_restaurant',
-                'header_info_zakaz',
-                'header_info_clients',
-                'header_info_prodaji',
-                'header_info_poziciy',
-                'filter_status',
-                'filter_from_date',
-                'filter_to_date',
-                'filter_client',
-                'arr_create_at',
-                'arr_price',
-                'dataProvider',
-                'arr_clients_price',
-                'total_price'
-                ));
+
+        return $this->render('analytics/index', compact('filter_restaurant', 'header_info_zakaz', 'header_info_clients', 'header_info_prodaji', 'header_info_poziciy', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price'
+        ));
     }
+
     /*
      *  index
      */
@@ -1355,27 +1315,27 @@ class VendorController extends DefaultController {
             (select sum(total_price) FROM `order` 
             where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
             vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
-                    . "DATE(created_at) between '" . 
-                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                ") AS `total_price`  
+                        . "DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                        date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                        ") AS `total_price`  
             FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
             FROM `order` where 
             vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
-                    . "DATE(created_at) between '" . 
-                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryAll();
-            $arr_create_at =[];
-            $arr_price =[];
-        if(count($area_chart)==1){
-        array_push($arr_create_at, 0);   
-        array_push($arr_price, 0);
+                        . "DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                        date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryAll();
+        $arr_create_at = [];
+        $arr_price = [];
+        if (count($area_chart) == 1) {
+            array_push($arr_create_at, 0);
+            array_push($arr_price, 0);
         }
-        foreach($area_chart as $area_charts){
-            
-            array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));    
-            array_push($arr_price, $area_charts['total_price']); 
-        } 
+        foreach ($area_chart as $area_charts) {
+
+            array_push($arr_create_at, Yii::$app->formatter->asDatetime($area_charts['created_at'], "php:j M Y"));
+            array_push($arr_price, $area_charts['total_price']);
+        }
         // <------ГРАФИК ПРОДАЖ
         //------>Статистика 
         $stats = Yii::$app->db->createCommand("SELECT
@@ -1397,14 +1357,14 @@ class VendorController extends DefaultController {
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
         $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
                 . "vendor_id = $currentUser->organization_id and ("
-                    . "DATE(created_at) between '" . 
-                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING);
+                . "DATE(created_at) between '" .
+                date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING);
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                . "vendor_id = $currentUser->organization_id and ("
-                    . "DATE(created_at) between '" . 
-                    date('Y-m-d', strtotime($filter_from_date)) . "' and '" . 
-                    date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
+                        . "vendor_id = $currentUser->organization_id and ("
+                        . "DATE(created_at) between '" .
+                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                        date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -1424,23 +1384,16 @@ class VendorController extends DefaultController {
                 ],
                 'defaultOrder' => [
                     'created_at' => SORT_DESC
-                    ]
+                ]
             ],
         ]);
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
-        
-        return $this->render('dashboard/index',compact(
-                'dataProvider',
-                'filter_from_date',
-                'filter_to_date',
-                'arr_create_at',
-                'arr_price',
-                'stats'
-                ));
+
+        return $this->render('dashboard/index', compact(
+                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats'
+        ));
     }
-    
-    
-    
+
     public function actionTutorial() {
         return $this->render('/site/underConstruction');
     }
@@ -1448,4 +1401,5 @@ class VendorController extends DefaultController {
     public function actionSupport() {
         return $this->render('/site/underConstruction');
     }
+
 }

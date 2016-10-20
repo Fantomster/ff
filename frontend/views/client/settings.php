@@ -1,31 +1,13 @@
 <?php
-
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
-//use yii\bootstrap\ActiveForm;
 use kartik\form\ActiveForm;
-use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
-                var form = $("#generalSettings");
-                $.get(
-                    form.attr("action")
-                )
-                .done(function(result) {
-                    form.replaceWith(result);
-                });                
-            });
-            $(".settings").on("click", "#saveOrg", function() {
-                var form = $("#generalSettings");
-                $.post(
-                    form.attr("action"),
-                    form.serialize()
-                )
-                .done(function(result) {
-                    form.replaceWith(result);
-                });
+                $.pjax.reload({container: "#settingsInfo"});            
             });
             $(".settings").on("change paste keyup", ".form-control", function() {
                 $("#cancelOrg").prop( "disabled", false );
@@ -46,7 +28,7 @@ yii\bootstrap\Alert::widget([
 ?>
 <section class="content-header">
     <h1>
-        Общие
+        <i class="fa fa-gears"></i> Общие
         <small>Информация об организации</small>
     </h1>
     <?=
@@ -64,11 +46,14 @@ yii\bootstrap\Alert::widget([
 <section class="content">
     <div class="box box-info settings">
         <?php
+        Pjax::begin(['enablePushState' => false, 'id' => 'settingsInfo', 'timeout' => 3000]);
         $form = ActiveForm::begin([
                     'id' => 'generalSettings',
                     'enableAjaxValidation' => false,
-                    'action' => Url::toRoute(['client/ajax-update-organization']),
-                    'validationUrl' => Url::toRoute('client/ajax-validate-organization')
+                    'options' => [
+                        'data-pjax' => true,
+                    ],
+                    'method' => 'get',
         ]);
         ?>
         <div class="box-body">
@@ -119,28 +104,12 @@ yii\bootstrap\Alert::widget([
             ?>
         </div>
         <div class="box-footer clearfix">
-            <?= Html::button('Сохранить изменения', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
+            <?= Html::submitButton('Сохранить изменения', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
             <?= Html::button('Отменить изменения', ['class' => 'btn btn-default', 'id' => 'cancelOrg', 'disabled' => true]) ?>
         </div>
-        <?php ActiveForm::end(); ?>
         <?php
-//        Tabs::widget([
-//            'items' => [
-//                [
-//                    'label' => 'Общие',
-//                    'content' => $this->render('settings/_info', compact('organization')),
-//                    'active' => true,
-//                ],
-//                [
-//                    'label' => 'Работники',
-//                    'content' => $this->render('settings/_users', compact('dataProvider', 'searchModel')),
-//                ],
-////        [
-////            'label' => 'Бюджет',
-////            'content' => $this->render('settings/_budget'),
-////        ],
-//            ],
-//        ])
+        ActiveForm::end();
+        Pjax::end();
         ?>
     </div>
 </section>

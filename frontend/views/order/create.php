@@ -5,8 +5,8 @@ use yii\helpers\Url;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
-use kartik\widgets\Select2;
 use yii\widgets\ActiveForm;
+use yii\widgets\Breadcrumbs;
 
 $this->registerJs(
         '$("document").ready(function(){
@@ -30,7 +30,6 @@ $this->registerJs(
                     if (result) {
                         $.pjax.reload({container: "#cart"});
                     }
-//                    $("#orders").html(result);
                     $("#loader-show").hideLoading();
                 });
             });
@@ -55,7 +54,6 @@ $this->registerJs(
                     {vendor_id: $(this).parent().data("vendor_id"), product_id: $(this).parent().data("product_id")}
                 )
                 .done(function (result) {
-//                    $("#orders").html(result);
                     if (result) {
                         $.pjax.reload({container: "#cart"});
                     }
@@ -86,124 +84,142 @@ $this->registerJs(
         });'
 );
 ?>
-<div class="row">
-    <div class="col-md-9">
-        <div class="box box-info" id="createP">
-            <div class="box-header with-border">
-                <h3 class="box-title">Список товаров</h3>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">    
-                <?php
-                Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 3000]);
-                $form = ActiveForm::begin([
-                            'options' => [
-                                'data-pjax' => true,
-                                'id' => 'createForm',
-                                'class' => "navbar-form no-padding no-margin",
-                                'role' => 'search',
-                            ],
-                            'method' => 'get',
-                ]);
-                ?>
-                <div>
-                    <?=
-                            $form->field($searchModel, 'searchString')
-                            ->textInput([
-                                'id' => 'searchString',
-                                'class' => 'form-control margin-right-15',
-                                'placeholder' => 'Поиск'])
-                            ->label(false)
-                    ?>
-                    <?=
-                            $form->field($searchModel, 'selectedCategory')
-                            ->dropDownList($client->getRestaurantCategories(), [
-                                'id' => 'selectedCategory',
-                                'style' => 'margin-right:15px'])
-                            ->label(false)
-                    ?>
-                    <?=
-                            $form->field($searchModel, 'selectedVendor')
-                            ->dropDownList($vendors, ['id' => 'selectedVendor'])
-                            ->label(false)
-                    ?>
-                    <?php ActiveForm::end(); ?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-opencart"></i> Разместить заказ
+        <small>Создание заказов из списка доступных товаров</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            'Разместить заказ',
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="box box-info" id="createP">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Список товаров</h3>
                 </div>
-                <div style="padding-right: 10px; float: left; width: 100%" id="products">
-                    <?=
-                    GridView::widget([
-                        'dataProvider' => $dataProvider,
-                        'filterModel' => $searchModel,
-                        'filterPosition' => false,
-                        'summary' => '',
-                        //'tableOptions' => ['class' => 'table no-margin table-hover'],
-                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
-                        'options' => ['class' => 'table-responsive'],
-                        'columns' => [
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'product',
-                                'value' => function($data) {
-                                    return "<div class='grid-prod'>" . $data['product'] . "</div><div>Поставщик: "
-                                            . $data['name'] . "</div><div class='grid-article'>Артикул: "
-                                            . $data['article'] . "</div>";
-                                },
-                                'label' => 'Название продукта',
-                            ],
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'price',
-                                'value' => function($data) {
-                                    return $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
-                                },
-                                'label' => 'Цена',
-                                'contentOptions' => ['class' => 'width150'],
-                                'headerOptions' => ['class' => 'width150']
-                            ],
-                            [
-                                'format' => 'raw',
-                                'value' => function($data) {
-                                    return Html::textInput('', 1, ['class' => 'quantity form-control']);
-                                },
-                                        'label' => 'Количество',
-                                        'contentOptions' => ['class' => 'width150'],
-                                        'headerOptions' => ['class' => 'width150']
-                                    ],
-                                    //'note',
-                                    [
-                                        'format' => 'raw',
-                                        'value' => function ($data) {
-                                            $link = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
-                                                        'class' => 'add-to-cart btn btn-success',
-                                                        'data-id' => $data['id'],
-                                                        'data-cat' => $data['cat_id'],
-                                            ]);
-                                            return $link;
-                                        },
-                                                'contentOptions' => ['class' => 'width150 text-center'],
-                                                'headerOptions' => ['class' => 'width150']
-                                            ],
+                <!-- /.box-header -->
+                <div class="box-body">    
+                    <?php
+                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 3000]);
+                    $form = ActiveForm::begin([
+                                'options' => [
+                                    'data-pjax' => true,
+                                    'id' => 'createForm',
+                                    'class' => "navbar-form no-padding no-margin",
+                                    'role' => 'search',
+                                ],
+                                'method' => 'get',
+                    ]);
+                    ?>
+                    <div>
+                        <?=
+                                $form->field($searchModel, 'searchString')
+                                ->textInput([
+                                    'id' => 'searchString',
+                                    'class' => 'form-control margin-right-15',
+                                    'placeholder' => 'Поиск'])
+                                ->label(false)
+                        ?>
+                        <?=
+                                $form->field($searchModel, 'selectedCategory')
+                                ->dropDownList($client->getRestaurantCategories(), [
+                                    'id' => 'selectedCategory',
+                                    'style' => 'margin-right:15px'])
+                                ->label(false)
+                        ?>
+                        <?=
+                                $form->field($searchModel, 'selectedVendor')
+                                ->dropDownList($vendors, ['id' => 'selectedVendor'])
+                                ->label(false)
+                        ?>
+                        <?php ActiveForm::end(); ?>
+                    </div>
+                    <div style="padding-right: 10px; float: left; width: 100%" id="products">
+                        <?=
+                        GridView::widget([
+                            'dataProvider' => $dataProvider,
+                            'filterModel' => $searchModel,
+                            'filterPosition' => false,
+                            'summary' => '',
+                            //'tableOptions' => ['class' => 'table no-margin table-hover'],
+                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+                            'options' => ['class' => 'table-responsive'],
+                            'columns' => [
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'product',
+                                    'value' => function($data) {
+                                        return "<div class='grid-prod'>" . $data['product'] . "</div><div>Поставщик: "
+                                                . $data['name'] . "</div><div class='grid-article'>Артикул: "
+                                                . $data['article'] . "</div>";
+                                    },
+                                    'label' => 'Название продукта',
+                                ],
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'price',
+                                    'value' => function($data) {
+                                        return $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
+                                    },
+                                    'label' => 'Цена',
+                                    'contentOptions' => ['class' => 'width150'],
+                                    'headerOptions' => ['class' => 'width150']
+                                ],
+                                [
+                                    'format' => 'raw',
+                                    'value' => function($data) {
+                                        return Html::textInput('', 1, ['class' => 'quantity form-control']);
+                                    },
+                                            'label' => 'Количество',
+                                            'contentOptions' => ['class' => 'width150'],
+                                            'headerOptions' => ['class' => 'width150']
                                         ],
-                                    ])
-                                    ?>
+                                        //'note',
+                                        [
+                                            'format' => 'raw',
+                                            'value' => function ($data) {
+                                                $link = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
+                                                            'class' => 'add-to-cart btn btn-success',
+                                                            'data-id' => $data['id'],
+                                                            'data-cat' => $data['cat_id'],
+                                                ]);
+                                                return $link;
+                                            },
+                                                    'contentOptions' => ['class' => 'width150 text-center'],
+                                                    'headerOptions' => ['class' => 'width150']
+                                                ],
+                                            ],
+                                        ])
+                                        ?>
+                                    </div>
+                                    </form>
+                                    <?php Pjax::end(); ?>
                                 </div>
-                                </form>
-                <?php Pjax::end(); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="box box-info ">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Корзина</h3>
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body" id="orders">
+                                    <?= $this->render('_cart', compact('orders')) ?>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="box box-info ">
-                            <div class="box-header with-border">
-                                <h3 class="box-title">Корзина</h3>
-                            </div>
-                            <!-- /.box-header -->
-                            <div class="box-body" id="orders">
-                <?= $this->render('_cart', compact('orders')) ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </section>
                 <?=
                 Modal::widget([
                     'id' => 'changeQuantity',

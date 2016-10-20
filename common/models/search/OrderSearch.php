@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use common\models\Order;
 use common\models\User;
 use common\models\Organization;
+use common\models\Profile;
 
 /**
  * OrderSearch represents the model behind the search form about `common\models\Order`.
@@ -41,7 +42,7 @@ class OrderSearch extends Order {
      * @inheritdoc
      */
     public function attributes() {
-        return array_merge(parent::attributes(), ['acceptedBy.profile.full_name', 'vendor.name', 'client.name', 'createdBy.profile.full_name']);
+        return array_merge(parent::attributes(), ['acceptedByProfile.full_name', 'vendor.name', 'client.name', 'createdByProfile.full_name']);
     }
 
     /**
@@ -65,17 +66,17 @@ class OrderSearch extends Order {
 
         $filter_date_from = strtotime($this->date_from);
         $filter_date_to = strtotime($this->date_to);
-        
+
         $test1 = \DateTime::createFromFormat('d.m.Y', $this->date_from);
-        if ($test1) { 
+        if ($test1) {
             $t1_f = $test1->format('Y-m-d');
         }
         $test2 = \DateTime::createFromFormat('d.m.Y', $this->date_to);
-        if ($test2) { 
+        if ($test2) {
             $test2->add(new \DateInterval('P1D'));
             $t2_f = $test2->format('Y-m-d');
         }
-        
+
         switch ($this->status) {
             case 1: //new
                 $this->status_array = [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
@@ -105,28 +106,25 @@ class OrderSearch extends Order {
             ]);
         }
         $query->joinWith([
-            'acceptedBy' => function ($query) {
-                $query->from(User::tableName() . ' acceptedBy');
+            'createdByProfile' => function($query) {
+                $query->from(Profile::tableName(). ' createdByProfile');
             },
                 ], true);
         $query->joinWith([
-            'createdBy' => function ($query) {
-                $query->from(User::tableName() . ' createdBy');
+            'acceptedByProfile' => function($query) {
+                $query->from(Profile::tableName(). ' acceptedByProfile');
             },
                 ], true);
-//        if ($this->vendor_search_id) {
-//            $query->where([Order::tableName() . '.vendor_id' => $this->vendor_search_id]);
-//        } else {
-//            $query->where([Order::tableName() . '.client_id' => $this->client_search_id]);
-//        }
         $query->where(Order::tableName() . '.status!= :status', ['status' => Order::STATUS_FORMING]);
-        
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]]
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
         $addSortAttributes = $this->vendor_search_id ? ['client.name'] : ['vendor.name'];
+        $addSortAttributes[] = 'createdByProfile.full_name';
+        $addSortAttributes[] = 'acceptedByProfile.full_name';
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
                 'asc' => [$addSortAttribute => SORT_ASC],
@@ -147,7 +145,7 @@ class OrderSearch extends Order {
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
-        
+
         if (isset($t1_f)) {
             $query->andFilterWhere(['>=', Order::tableName() . '.created_at', $t1_f]);
         }
@@ -157,19 +155,19 @@ class OrderSearch extends Order {
 
 //        $query->andFilterWhere(['>=', Order::tableName() . '.created_at', $this->date_from]);
 //        $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $this->date_to]);
-        
-        
-            if ($this->vendor_id) {
-                $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
-            }
-        
-            if ($this->client_id) {
-                $query->andFilterWhere(['client_id' => $this->client_id]);
-            }
-        
 
-       // $testq = $dataProvider->
-        
+
+        if ($this->vendor_id) {
+            $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
+        }
+
+        if ($this->client_id) {
+            $query->andFilterWhere(['client_id' => $this->client_id]);
+        }
+
+
+        // $testq = $dataProvider->
+
         return $dataProvider;
     }
 

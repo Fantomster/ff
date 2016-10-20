@@ -21,15 +21,17 @@ use Yii;
  * @property string $comment
  * 
  * @property User $acceptedBy
- * @property Organization $client
  * @property User $createdBy
+ * @property string $createdByProfile
+ * @property string $acceptedByProfile
+ * @property Organization $client
  * @property Organization $vendor
  * @property OrderContent[] $orderContent
  * @property OrderChat[] $orderChat
  * @property integer positionsCount
  */
-class Order extends \yii\db\ActiveRecord
-{
+class Order extends \yii\db\ActiveRecord {
+
     const STATUS_AWAITING_ACCEPT_FROM_VENDOR = 1;
     const STATUS_AWAITING_ACCEPT_FROM_CLIENT = 2;
     const STATUS_PROCESSING = 3;
@@ -37,20 +39,18 @@ class Order extends \yii\db\ActiveRecord
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
-    
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'order';
     }
 
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -60,12 +60,11 @@ class Order extends \yii\db\ActiveRecord
             ],
         ];
     }
-    
+
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
             [['client_id', 'vendor_id', 'created_by_id', 'status'], 'integer'],
@@ -82,8 +81,7 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'client_id' => 'Client ID',
@@ -100,51 +98,59 @@ class Order extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAcceptedBy()
-    {
+    public function getAcceptedBy() {
         return $this->hasOne(User::className(), ['id' => 'accepted_by_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getClient()
-    {
+    public function getClient() {
         return $this->hasOne(Organization::className(), ['id' => 'client_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->hasOne(User::className(), ['id' => 'created_by_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getVendor()
-    {
+    public function getCreatedByProfile() {
+        return $this->hasOne(Profile::className(), ['user_id' => 'created_by_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAcceptedByProfile() {
+        return $this->hasOne(Profile::className(), ['user_id' => 'accepted_by_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVendor() {
         return $this->hasOne(Organization::className(), ['id' => 'vendor_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrderContent()
-    {
+    public function getOrderContent() {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrderChat()
-    {
+    public function getOrderChat() {
         return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy(['created_at' => SORT_DESC]);
     }
-    
+
     public static function statusText($status) {
         $text = 'Неопределен';
         switch ($status) {
@@ -165,14 +171,15 @@ class Order extends \yii\db\ActiveRecord
         }
         return $text;
     }
-    
+
     public function getPositionCount() {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
     }
-    
+
     public function calculateTotalPrice() {
         $this->total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         $this->save();
         return $this->total_price;
     }
+
 }

@@ -156,13 +156,13 @@ $this->registerCss("
                     'label' => 'Ресторан',
                         ],
                 [
-                    'attribute' => 'createdBy.profile.full_name',
-                    'value' => 'createdBy.profile.full_name',
+                    'attribute' => 'createdByProfile.full_name',
+                    'value' => 'createdByProfile.full_name',
                     'label' => 'Заказ создал',
                 ],
                 [
-                    'attribute' => 'acceptedBy.profile.full_name',
-                    'value' => 'acceptedBy.profile.full_name',
+                    'attribute' => 'acceptedByProfile.full_name',
+                    'value' => 'acceptedByProfile.full_name',
                     'label' => 'Заказ принял',
                 ],
                 [

@@ -116,7 +116,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
           </div>
         </div>
         <div class="box-body" style="display: block;">
-      <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>  
+            <canvas id="areaChart" style="height: 200px; width: 514px;" height="200" width="514"></canvas>  
         </div>
         <!-- /.box-body -->
       </div>
@@ -128,7 +128,6 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
       <div class="box box-info">
         <div class="box-header with-border">
           <h3 class="box-title">История заказов</h3>
-
           <div class="box-tools pull-right">
             <?= Html::a('История заказов', ['order/index'],['class'=>'btn btn-outline-success btn-sm']) ?>
           </div>
@@ -216,7 +215,19 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 $chart_dates =   json_encode(array_reverse($chart_dates));
 $chart_price =   json_encode(array_reverse($chart_price));
 $customJs = <<< JS
-    
+var timer;
+$('#search').on("keyup put paste change", function () {
+window.clearTimeout(timer);
+   timer = setTimeout(function () {
+       $.pjax({
+        type: 'get',
+        push: false,
+        url: 'index.php?r=client/index',
+        container: '#suppliers-list',
+        data: { searchString: $('#search').val()}
+      })
+   }, 700);
+});    
 // Get context with jQuery - using jQuery's .get() method.
 var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
 // This will get the first returned node in the jQuery collection.
@@ -225,7 +236,7 @@ var areaChartData = {
       labels: $chart_dates,
       datasets: [
         {
-          label: "Объем продаж",
+          label: $chart_price,
           fillColor: "rgba(0,0,0,.05)",
           strokeColor: "#84bf76",
           pointColor: "#000",
@@ -238,6 +249,7 @@ var areaChartData = {
     };
 
 var areaChartOptions = {
+    tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value%>",
       //Boolean - If we should show the scale at all
       showScale: true,
       //Boolean - Whether grid lines are shown across the chart
@@ -269,7 +281,7 @@ var areaChartOptions = {
       //Boolean - Whether to fill the dataset with a color
       datasetFill: true,
       //String - A legend template
-      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+      //legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
       //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
       maintainAspectRatio: true,
       //Boolean - whether to make the chart responsive to window resizing

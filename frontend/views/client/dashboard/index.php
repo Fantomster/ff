@@ -109,7 +109,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
     <div class="col-md-8">
       <div class="box box-info">
         <div class="box-header with-border">
-          <h3 class="box-title">Аналитика за неделю</h3>
+          <h3 class="box-title">Аналитика заказов</h3>
 
           <div class="box-tools pull-right">
             <?= Html::a('Аналитика', ['client/analytics'],['class'=>'btn btn-outline-success btn-sm']) ?>

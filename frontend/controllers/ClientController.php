@@ -839,7 +839,7 @@ class ClientController extends DefaultController {
         $curent_monday = date('Y-m-d', strtotime(date('Y').'W'.date('W').'1')); // текущая неделя - понедельник
         $curent_sunday = date('Y-m-d', strtotime(date('Y').'W'.date('W').'7')); // текущая неделя - воскресение
         $i=0;
-        $max_i = 4; //Сколько недель показывать от текущей
+        $max_i = 5; //Сколько недель показывать от текущей
         $mon=0;
         $sun=6;
         $query ="";

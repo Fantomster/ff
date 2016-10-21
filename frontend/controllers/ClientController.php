@@ -409,7 +409,7 @@ class ClientController extends DefaultController {
                         if (!empty(trim($note))) {
                             $sql = "insert into " . GoodsNotes::tableName() . "(
 				      `rest_org_id`,`catalog_goods_id`,`note`,`created_at`) VALUES (
-				      $currentUser->organization_id, $lastInsert_goods_id, '$note',NOW())";
+				      $currentUser->organization_id, $lastInsert_base_goods_id, '$note',NOW())";
                             \Yii::$app->db->createCommand($sql)->execute();
                         }
                     }

@@ -9,7 +9,7 @@ use Yii;
  *
  * @property integer $id
  * @property integer $rest_org_id
- * @property integer $catalog_goods_id
+ * @property integer $catalog_base_goods_id
  * @property string $note
  * @property string $created_at
  * @property string $updated_at
@@ -42,8 +42,8 @@ class GoodsNotes extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['rest_org_id', 'catalog_goods_id'], 'required'],
-            [['rest_org_id', 'catalog_goods_id'], 'integer'],
+            [['rest_org_id', 'catalog_base_goods_id'], 'required'],
+            [['rest_org_id', 'catalog_base_goods_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['note'], 'string', 'max' => 500],
         ];
@@ -57,7 +57,7 @@ class GoodsNotes extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'rest_org_id' => 'Rest Org ID',
-            'catalog_goods_id' => 'Catalog Goods ID',
+            'catalog_base_goods_id' => 'Catalog Goods ID',
             'note' => 'Note',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

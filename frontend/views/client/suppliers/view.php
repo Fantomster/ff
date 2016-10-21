@@ -56,7 +56,7 @@ Modal::widget([
             [
             'label'=>'Организация',
             'format' => 'raw',
-            'contentOptions' => ['class'=>'grid-prod'],
+            'contentOptions' => ['class'=>'text-bold','style' => 'vertical-align:middle;width:45%;font-size:14px'],
             'value'=>function ($data) {
             $res = common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->name;
             return Html::a(Html::encode($res), ['client/view-supplier', 'id' => $data->supp_org_id], [
@@ -70,17 +70,18 @@ Modal::widget([
             ],
             [
             'label'=>'Статус сотрудничества',
+            'contentOptions' => ['style' => 'vertical-align:middle;width:45%;'],
             'format' => 'raw',
             'value'=>function ($data) {
                 if($data->invite==0){ 
-                $res = '<span class="status new">Ожидается<br>подтверждение</span>';
+                $res = '<span class="text-primary"><i class="fa fa-circle-thin"></i> Ожидается подтверждение</span>';
                 }else{
                     if(\common\models\User::find()->where(['email'=>\common\models\Organization::find()->
                         where(['id'=>$data->supp_org_id])->one()->email])->exists())
                         {    
-                            $res = '<span class="status processing">Подтвержден /<br> Не авторизован</span>';
+                            $res = '<span class="text-yellow"><i class="fa fa-circle-thin"></i> Подтвержден / Не авторизован</span>';
                         }else{
-                            $res = '<span class="status done">Подтвержден</span> ';
+                            $res = '<span class="text-success"><i class="fa fa-circle-thin"></i> Подтвержден</span> ';
                         }
                     } 
                     return $res;
@@ -88,7 +89,7 @@ Modal::widget([
             ],
             [
             'label'=>'',
-            'contentOptions' => ['class'=>'text-center','style' => 'vertical-align:middle;width:165px;'],
+            'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:139px;'],
             'format' => 'raw',
             'value'=>function ($data) {
             $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
@@ -106,7 +107,7 @@ Modal::widget([
             $result .= $data->cat_id==0 ? 'Каталог не назначен' :
                 Html::a('Каталог', ['client/view-catalog', 'id' => $data->cat_id], [
                 'class'=>'btn btn-default btn-sm',
-                'style'=>'margin-right:10px;text-center',
+                'style'=>'text-center',
                 'data-pjax'=>0,
                 'data' => [
                 'target' => '#view-catalog',

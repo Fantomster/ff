@@ -207,6 +207,9 @@ class Organization extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getDelivery() {
+        if ($this->type_id !== Organization::TYPE_SUPPLIER) {
+            return null;
+        }
         return $this->hasOne(Delivery::className(), ['vendor_id' => 'id']);
     }
 

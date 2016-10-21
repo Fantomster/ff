@@ -5,7 +5,7 @@ use yii\helpers\Url;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
-use yii\widgets\ActiveForm;
+use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 
 $this->registerJs(
@@ -123,10 +123,19 @@ $this->registerJs(
                     ?>
                     <div>
                         <?=
-                                $form->field($searchModel, 'searchString')
+                                $form->field($searchModel, 'searchString', [
+                                    'addon' => [
+                                        'prepend' => [
+                                            'content' => '<i class="fa fa-search"></i>',
+                                        ],
+                                    ],
+                                    'options' => [
+                                        'class' => "margin-right-15 form-group",
+                                    ],
+                                ])
                                 ->textInput([
                                     'id' => 'searchString',
-                                    'class' => 'form-control margin-right-15',
+                                    'class' => 'form-control',
                                     'placeholder' => 'Поиск'])
                                 ->label(false)
                         ?>
@@ -134,7 +143,7 @@ $this->registerJs(
                                 $form->field($searchModel, 'selectedCategory')
                                 ->dropDownList($client->getRestaurantCategories(), [
                                     'id' => 'selectedCategory',
-                                    'style' => 'margin-right:15px'])
+                                    'class' => 'form-control margin-right-15'])
                                 ->label(false)
                         ?>
                         <?=
@@ -160,8 +169,8 @@ $this->registerJs(
                                     'attribute' => 'product',
                                     'value' => function($data) {
                                         return "<div class='grid-prod'>" . $data['product'] . "</div><div>Поставщик: "
-                                                . $data['name'] . "</div><div class='grid-article'>Артикул: "
-                                                . $data['article'] . "</div>";
+                                                . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
+                                                . $data['article'] . "</span></div>";
                                     },
                                     'label' => 'Название продукта',
                                 ],
@@ -169,7 +178,7 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'attribute' => 'price',
                                     'value' => function($data) {
-                                        return $data['price'] . ' <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
+                                        return '<b>'.$data['price'] . '</b> <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
                                     },
                                     'label' => 'Цена',
                                     'contentOptions' => ['class' => 'width150'],

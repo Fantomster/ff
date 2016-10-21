@@ -197,12 +197,21 @@ $this->registerJs(
                                         [
                                             'format' => 'raw',
                                             'value' => function ($data) {
-                                                $link = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
-                                                            'class' => 'add-to-cart btn btn-success',
+                                                $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i>', '#', [
+                                                            'class' => 'add-note btn btn-default margin-right-5',
+                                                            'data' => [
+                                                                'id' => $data['id'],
+                                                                'cat' => $data['cat_id'],
+                                                                'toggle' => 'tooltip',
+                                                                'original-title' => 'Добавить заметку к товару'
+                                                                ],
+                                                ]);
+                                                $btnAdd = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
+                                                            'class' => 'add-to-cart btn btn-outline-success',
                                                             'data-id' => $data['id'],
                                                             'data-cat' => $data['cat_id'],
                                                 ]);
-                                                return $link;
+                                                return $btnNote . $btnAdd;
                                             },
                                                     'contentOptions' => ['class' => 'width150 text-center'],
                                                     'headerOptions' => ['class' => 'width150']

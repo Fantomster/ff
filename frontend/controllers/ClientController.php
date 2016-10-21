@@ -851,5 +851,26 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                                 'dataProvider', 'suppliers_dataProvider', 'chart_dates', 'chart_price'
         ));
     }
-
+    public function actionSuppliersView() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchModel = new RelationSuppRest;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_SUPPLIERS);
+        $user = new User;
+        $profile = new Profile;
+        $relationCategory = new RelationCategory;
+        $organization = new Organization;
+        return $this->render("suppliers/view", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
+    
+    }
+    public function actionSuppliersAdd() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchModel = new RelationSuppRest;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_SUPPLIERS);
+        $user = new User;
+        $profile = new Profile;
+        $relationCategory = new RelationCategory;
+        $organization = new Organization;
+        return $this->render("suppliers/add", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
+    
+    }
 }

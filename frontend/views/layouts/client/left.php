@@ -36,8 +36,8 @@ $cartCount = $user->organization->getCartCount();
                             'url' => '#',//['client/suppliers'],
                             'options' => ['class' => 'treeview'],
                             'items' => [
-                                ['label' => 'Мои поставщики', 'icon' => 'fa fa-circle-o', 'url' => ['client/suppliers', '#' => 'tabMySuppliers']],
-                                ['label' => 'Добавить поставщика', 'icon' => 'fa fa-circle-o', 'url' => ['client/suppliers', '#' => 'tabAddSuppliers']]
+                                ['label' => 'Мои поставщики', 'icon' => 'fa fa-circle-o', 'url' => ['client/suppliers-view']],
+                                ['label' => 'Добавить поставщика', 'icon' => 'fa fa-circle-o', 'url' => ['client/suppliers-add']]
                             ]
                             ],
                         ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['client/messages']],

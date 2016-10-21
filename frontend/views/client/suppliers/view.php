@@ -1,0 +1,173 @@
+<?php
+use yii\widgets\Breadcrumbs;
+use kartik\grid\GridView;
+use yii\helpers\Html;
+use yii\helpers\url;
+use yii\web\View;
+use yii\bootstrap\ActiveForm;
+use yii\bootstrap\Modal;
+use yii\widgets\Pjax;
+use kartik\select2\Select2;
+use common\models\Category;
+kartik\select2\Select2Asset::register($this);
+?>
+<?php
+$this->title = 'Поставщики';
+$this->params['breadcrumbs'][] = $this->title;
+
+$this->registerCss('');	
+?>
+<?=
+Modal::widget([
+    'id' => 'view-catalog',
+    'size' => 'modal-lg',
+    'clientOptions' => false,   
+])
+?>
+<?=
+Modal::widget([
+    'id' => 'view-supplier',
+    'size' => 'modal-md',
+    'clientOptions' => false,   
+])
+?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-users"></i> Поставщики
+        <small>Список всех ваших поставщиков</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb'
+        ],
+        'links' => [
+            'Поставщики'
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Мои поставщики</h3>
+        <span class="pull-right"></span>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <?php 
+        $gridColumnsCatalog = [
+            [
+            'label'=>'Организация',
+            'format' => 'raw',
+            'value'=>function ($data) {
+            $res = common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->name;
+            return Html::a(Html::encode($res), ['client/view-supplier', 'id' => $data->supp_org_id], [
+                'data' => [
+                'target' => '#view-supplier',
+                'toggle' => 'modal',
+                'backdrop' => 'static',
+                          ],
+                ]);
+            }
+            ],
+            [
+            'label'=>'email',
+            'contentOptions' => ['class' => ''],
+            'value'=>function ($data) {
+            return common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->email;
+            }
+            ],
+            [
+            'label'=>'Статус сотрудничества',
+            'contentOptions' => ['class' => ''],
+            'format' => 'raw',
+            'value'=>function ($data) {
+                if($data->invite==0){ 
+                $res = '<span class="text-danger">Ожидается<br>подтверждение</span>';
+                }else{
+                    if(\common\models\User::find()->where(['email'=>\common\models\Organization::find()->
+                        where(['id'=>$data->supp_org_id])->one()->email])->exists())
+                        {    
+                            $res = '<span class="text-warning">Подтвержден /<br> Не авторизован</span>';
+                        }else{
+                            $res = '<span class="text-primary">Подтвержден</span>';
+                        }
+                    } 
+                    return $res;
+                },
+            ],
+            [
+            'label'=>'Каталог',
+            'contentOptions' => ['class' => 'text-wrap'],
+            'format' => 'raw',
+            'value'=>function ($data) {
+            $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
+            $data->invite==0 ? $result = '' :
+            $result = $data->cat_id==0 ? 'Каталог не назначен' :
+                Html::a('<i class="fa fa-list-alt" aria-hidden="true"></i>', ['client/view-catalog', 'id' => $data->cat_id], [
+                'data' => [
+                'target' => '#view-catalog',
+                'toggle' => 'modal',
+                'backdrop' => 'static',
+                   ],
+                ]);
+            return $result;
+            }
+            ],
+        ];
+        ?>
+        <div class="panel-body">
+            <div class="box-body table-responsive no-padding">
+            <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'sp-list'])?>
+            <?=GridView::widget([
+                'dataProvider' => $dataProvider,
+                'filterModel' => $searchModel,
+                'filterPosition' => false,
+                'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+                'columns' => $gridColumnsCatalog, 
+                'tableOptions' => ['class' => 'table no-margin'],
+                'options' => ['class' => 'table-responsive'],
+                'bordered' => false,
+                'striped' => true,
+                'condensed' => false,
+                'responsive' => false,
+                'hover' => false,
+            ]);
+            ?>  
+            <?php Pjax::end(); ?> 
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<?php           
+$customJs = <<< JS
+$("body").on("hidden.bs.modal", "#view-supplier", function() {
+    $(this).data("bs.modal", null);
+    //$.pjax.reload({container: "#sp-list"});
+})
+$("body").on("hidden.bs.modal", "#view-catalog", function() {
+    $(this).data("bs.modal", null);
+})
+$("#view-supplier").on("click", ".save-form", function() {      
+        
+    var form = $("#supplier-form");
+    $.ajax({
+    url: form.attr("action"),
+    type: "POST",
+    data: form.serialize(),
+    cache: false,
+    success: function(response) {
+        $.pjax.reload({container: "#sp-list"});
+            form.replaceWith(response);
+                  
+        },
+        failure: function(errMsg) {
+        console.log(errMsg);
+    }
+    });
+});
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

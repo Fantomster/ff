@@ -49,7 +49,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         </div>
         <div class="col-md-4 col-sm-4 col-xs-12">
             <div class="info-box bg-total-price">
-                <a href="index.php?r=client/suppliers">
+                <a href="index.php?r=client/suppliers-view">
                     <div class="info-box-content">
                         <i class="fa fa-users" style="font-size: 24px;"></i>
                         <p class="info-box-text">Управление вашими поставщиками</p>

@@ -30,7 +30,7 @@ $this->registerJs(
                 searchInput.focus();
                 searchInput[0].setSelectionRange(strLength, strLength);
             });
-            $("#add-user").on("click", ".edit", function() {
+            $(".content").on("click", ".edit", function() {
                 var form = $("#user-form");
                 $.post(
                     form.attr("action"),

@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use common\models\Order;
 use common\models\Organization;
 use common\models\Profile;
@@ -13,6 +14,20 @@ $this->registerCss('
 
 ');
 ?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-home"></i> Главная
+        <small>Рабочий стол</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="row">
     <div class="col-md-8">
       <!-- AREA CHART -->
@@ -182,6 +197,7 @@ $this->registerCss('
       <!-- /.box -->
     </div>
 </div>
+</section>
 <?php
 $arr_create_at =   json_encode($arr_create_at);
 $arr_price =   json_encode($arr_price);

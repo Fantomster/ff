@@ -30,29 +30,39 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 ?>
 <section class="content-header">
     <h1>
-        Главная
+        <i class="fa fa-home"></i> Главная
         <small>Рабочий стол</small>
     </h1>
 </section>
 <section class="content">
 <div class="box box-info">
     <div class="box-body order-history">
-        <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="col-md-4 col-sm-4 col-xs-12">
             <div class="info-box bg-total-price">
                 <a href="index.php?r=order/create">
                     <div class="info-box-content">
-                        <i class="fa fa-truck" style="font-size: 28px;"></i>
+                        <i class="fa fa-opencart" style="font-size: 24px;"></i>
                         <p class="info-box-text">Разместить заказ</p>
                     </div>                    
                 </a>
             </div>
         </div>
-        <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="col-md-4 col-sm-4 col-xs-12">
             <div class="info-box bg-total-price">
                 <a href="index.php?r=client/suppliers">
                     <div class="info-box-content">
-                        <i class="fa fa-users" style="font-size: 28px;"></i>
+                        <i class="fa fa-users" style="font-size: 24px;"></i>
                         <p class="info-box-text">Управление вашими поставщиками</p>
+                    </div>                    
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12">
+            <div class="info-box bg-total-price">
+                <a href="index.php?r=client/settings">
+                    <div class="info-box-content">
+                        <i class="fa fa-gears" style="font-size: 24px;"></i>
+                        <p class="info-box-text">Настройки профилей</p>
                     </div>                    
                 </a>
             </div>
@@ -116,7 +126,9 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
           </div>
         </div>
         <div class="box-body" style="display: block;">
-            <canvas id="areaChart" style="height: 200px; width: 514px;" height="200" width="514"></canvas>  
+            <div class="chart">
+            <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+          </div> 
         </div>
         <!-- /.box-body -->
       </div>

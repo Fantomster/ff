@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\date\DatePicker;
 use kartik\grid\GridView;
 use yii\helpers\Html;
@@ -11,15 +12,37 @@ $this->registerCss('
     border-left: 0px;
 }
 tfoot tr{border-top:2px solid #ccc}
+.info-box-content:hover{color:#378a5f;}
+.info-box-content{color:#84bf76;-webkit-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
+-moz-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
+box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
+.order-history .info-box {
+     box-shadow: none; 
+}
+.info-box {
+     box-shadow: none;
+     border:1px solid #eee;
+}
 ');
 ?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-signal"></i> Аналитика
+        <small>Аналитика в одном месте</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            'Аналитика'
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="box box-info">
-    
-    <div class="box-header with-border">
-      <div class="col-md-12">
-        <h3 class="box-title">Аналитика</h3>
-      </div>
-    </div>
     <!-- /.box-header -->
     <div class="box-body order-history">
         <div class="col-md-3 col-sm-6 col-xs-12">
@@ -231,6 +254,7 @@ HTML;
       <!-- /.box -->
     </div>
 </div>
+</section>
 <?php
 
 $arr_create_at =   json_encode($arr_create_at);

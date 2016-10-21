@@ -772,7 +772,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             'sql' => $sql_dataProvider->sql,
             'totalCount' => $suppliers_count,
             'pagination' => [
-                'pageSize' => 5,
+                'pageSize' => 4,
             ],
         ]);
         /*

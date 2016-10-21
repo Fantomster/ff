@@ -165,7 +165,7 @@ $this->registerCss("
                         'attribute' => 'vendor.name',
                         'value' => 'vendor.name',
                         'label' => 'Поставщик',
-                        'headerOptions' => ['class'=>'sorting',],
+                        //'headerOptions' => ['class'=>'sorting',],
                             ] : [
                         'attribute' => 'client.name',
                         'value' => 'client.name',

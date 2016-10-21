@@ -45,11 +45,21 @@ class OrderCatalogSearch extends \yii\base\Model {
                 . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%')"
                 . "AND (cbg.status = 1) AND (cbg.deleted = 0))";
 
-        $count = Yii::$app->db->createCommand($query)->queryScalar();
+        $query1 = "SELECT COUNT(cbg.id) FROM "
+                . "catalog_base_goods AS cbg LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
+                . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%') "
+                . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
+        $count1 = Yii::$app->db->createCommand($query1)->queryScalar();
+        $query2 = "SELECT COUNT(cbg.id) FROM "
+                . "catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
+                . "LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
+                . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE '%$this->searchString%' OR cbg.article LIKE '%$this->searchString%')"
+                . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
+        $count2 = Yii::$app->db->createCommand($query2)->queryScalar();
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query,
-            'totalCount' => $count,
+            'totalCount' => $count1 + $count2,
             'pagination' => [
                 'pageSize' => 20,
             ],

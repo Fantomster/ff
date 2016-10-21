@@ -48,7 +48,7 @@ h6,
     .main-header {
         .navbar {
             background-color: @light-green-fk;
-            
+
             /*.navbar-variant(@light-blue-fk; #fff);*/
             .sidebar-toggle {
                 color: #fff;
@@ -89,14 +89,14 @@ h6,
         }
     }
 
-/*    .sidebar-menu > li.active > a {
-        border-left: none;
-        background: @dark-green-fk !important;
-    }
-
-    .sidebar-menu > li > a {
-        color: rgba(216, 215, 215, 0.6);
-    }*/
+    /*    .sidebar-menu > li.active > a {
+            border-left: none;
+            background: @dark-green-fk !important;
+        }
+    
+        .sidebar-menu > li > a {
+            color: rgba(216, 215, 215, 0.6);
+        }*/
 
     //Content Header
     .content-header {
@@ -693,4 +693,29 @@ table.dataTable thead th, table.dataTable thead td {
     color: #fff;
     background-color: @dark-green-fk;
     border-color: @dark-green-fk;
+}
+.table {  
+    th {  
+        a {
+            &:after {
+                opacity: 0.3;
+                content: "\e150";
+                display: inline-block;
+                float: right;
+                font-family: 'Glyphicons Halflings';
+            }
+        }
+        .asc {
+            &:after {
+                opacity: 1;
+                content: "\e155";
+            }
+        }
+        .desc {
+            &:after {
+                opacity: 1;
+                content: "\e156";
+            }
+        }
+    }
 }

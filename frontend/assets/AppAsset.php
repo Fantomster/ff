@@ -14,12 +14,13 @@ class AppAsset extends AssetBundle {
     public $css = [
         'css/site.css',
         'css/custom_style.less', 
-        'https://fonts.googleapis.com/css?family=Open+Sans'
+        'css/datatables.min.css',
     ];
     public $js = [
         'js/js.cookie.js',
         'js/socket.io-1.4.5.js',
         'js/main.js',
+        'js/datatables.min.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

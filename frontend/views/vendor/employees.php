@@ -16,7 +16,7 @@ $role = new Role();
 $this->registerJs(
         '$("document").ready(function(){
             var timer = null;
-            $("#users-list").on("change keyup paste cut", "input", function() {
+            $(".content").on("change keyup paste cut", "#searchString", function() {
                 if (timer) {
                     clearTimeout(timer);
                 }
@@ -30,7 +30,7 @@ $this->registerJs(
                 searchInput.focus();
                 searchInput[0].setSelectionRange(strLength, strLength);
             });
-            $("#add-user").on("click", ".edit", function() {
+            $(".content").on("click", ".edit", function() {
                 var form = $("#user-form");
                 $.post(
                     form.attr("action"),

@@ -216,8 +216,8 @@ $this->registerJs(
                                                 ]);
                                                 return $btnNote . $btnAdd;
                                             },
-                                                    'contentOptions' => ['class' => 'width180 text-center'],
-                                                    'headerOptions' => ['class' => 'width180']
+                                                    'contentOptions' => ['class' => 'text-center'],
+                                                    'headerOptions' => ['class' => 'width175']
                                                 ],
                                             ],
                                         ])

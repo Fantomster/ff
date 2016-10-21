@@ -50,8 +50,8 @@ Modal::widget([
 	   <div class="handsontable" id="CreateCatalog"></div>   
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
-        <button id="invite" type="button" class="btn btn-info">Отправить</button>
+        <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
+        <button id="invite" type="button" class="btn btn-success">Отправить</button>
       </div>
     </div>
   </div>
@@ -81,16 +81,17 @@ yii\bootstrap\Alert::widget([
     ])
     ?>
 </section>
-
+<?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
 <section class="content">
-<div class="row">
-    <div class="col-md-12">
         <div class="box box-info">
             <!-- /.box-header -->
             <div class="box-body">
-                <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
+                <div class="col-md-6">
+                
                     <?= $form->field($user, 'email')?>
                     <?= $form->field($profile, 'full_name')->label('ФИО')?>
+                    </div>
+                <div class="col-md-6">
                     <?= $form->field($organization, 'name')->label('Организация')?>
                     <?= $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
                         'data' => Category::allCategory(),
@@ -103,28 +104,33 @@ yii\bootstrap\Alert::widget([
                         ],
                     ]);
                     ?>
-                <div class="form-group">
-                <?=Html::a('Добавить продукты', ['#'], [
-                  'class' => 'btn btn-primary btn-sm',
-                  'disabled' => 'disabled',
-                  'name' => 'addSupplier',
-                  'id' => 'addProduct',
-                  'data' => [
-                  'target' => '#modal_addProduct',
-                  'toggle' => 'modal',
-                  'backdrop' => 'static',
-                     ],
-                  ]);?>
                 </div>
-                <div class="form-group">
-                    <?= Html::submitButton('Пригласить', ['class' => 'btn btn-primary hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier','id' => 'inviteSupplier']) ?>
-                </div>				
-                <?php ActiveForm::end(); ?>
-            </div>           
-        </div>
+                			
+                
+            </div> 
+            <div class="box-footer">  
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <?=Html::a('Добавить товары', ['#'], [
+                          'class' => 'btn btn-success btn-sm',
+                          'disabled' => 'disabled',
+                          'name' => 'addSupplier',
+                          'id' => 'addProduct',
+                          'data' => [
+                          'target' => '#modal_addProduct',
+                          'toggle' => 'modal',
+                          'backdrop' => 'static',
+                             ],
+                          ]);?>
+                        </div>
+                        <div class="form-group">
+                            <?= Html::submitButton('Пригласить', ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier','id' => 'inviteSupplier']) ?>
+                        </div>	    
+                </div>
+            </div>
     </div>
-</div>
 </section>
+<?php ActiveForm::end(); ?>
 <?php
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
 $this->registerCssFile('modules/handsontable/dist/bootstrap.css');

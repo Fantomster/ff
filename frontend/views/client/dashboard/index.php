@@ -74,7 +74,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
           <h3 class="box-title">Мои поставщики</h3>
 
           <div class="box-tools pull-right">
-            <?= Html::a('Мои поставщики', ['client/suppliers'],['class'=>'btn btn-success btn-sm']) ?>
+            <?= Html::a('Мои поставщики', ['client/suppliers-view'],['class'=>'btn btn-success btn-sm']) ?>
           </div>
         </div>
           <div class="box-header with-border">

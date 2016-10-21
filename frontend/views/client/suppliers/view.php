@@ -49,10 +49,6 @@ Modal::widget([
 </section>
 <section class="content">
 <div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title">Мои поставщики</h3>
-        <span class="pull-right"></span>
-    </div>
     <!-- /.box-header -->
     <div class="box-body">
         <?php 
@@ -60,6 +56,7 @@ Modal::widget([
             [
             'label'=>'Организация',
             'format' => 'raw',
+            'contentOptions' => ['class'=>'grid-prod'],
             'value'=>function ($data) {
             $res = common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->name;
             return Html::a(Html::encode($res), ['client/view-supplier', 'id' => $data->supp_org_id], [
@@ -72,49 +69,67 @@ Modal::widget([
             }
             ],
             [
-            'label'=>'email',
-            'contentOptions' => ['class' => ''],
-            'value'=>function ($data) {
-            return common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->email;
-            }
-            ],
-            [
             'label'=>'Статус сотрудничества',
-            'contentOptions' => ['class' => ''],
             'format' => 'raw',
             'value'=>function ($data) {
                 if($data->invite==0){ 
-                $res = '<span class="text-danger">Ожидается<br>подтверждение</span>';
+                $res = '<span class="status new">Ожидается<br>подтверждение</span>';
                 }else{
                     if(\common\models\User::find()->where(['email'=>\common\models\Organization::find()->
                         where(['id'=>$data->supp_org_id])->one()->email])->exists())
                         {    
-                            $res = '<span class="text-warning">Подтвержден /<br> Не авторизован</span>';
+                            $res = '<span class="status processing">Подтвержден /<br> Не авторизован</span>';
                         }else{
-                            $res = '<span class="text-primary">Подтвержден</span>';
+                            $res = '<span class="status done">Подтвержден</span> ';
                         }
                     } 
                     return $res;
                 },
             ],
             [
-            'label'=>'Каталог',
-            'contentOptions' => ['class' => 'text-wrap'],
+            'label'=>'',
+            'contentOptions' => ['class'=>'text-center','style' => 'vertical-align:middle;width:165px;'],
             'format' => 'raw',
             'value'=>function ($data) {
             $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
             $data->invite==0 ? $result = '' :
-            $result = $data->cat_id==0 ? 'Каталог не назначен' :
-                Html::a('<i class="fa fa-list-alt" aria-hidden="true"></i>', ['client/view-catalog', 'id' => $data->cat_id], [
+            $result = Html::a('Заказ', ['order/create',
+                'OrderCatalogSearch[searchString]'=>"",
+                'OrderCatalogSearch[selectedCategory]'=>"",
+                'OrderCatalogSearch[selectedVendor]'=>$data->supp_org_id,
+                ],[
+                    'class'=>'btn btn-outline-success btn-sm',
+                    'data-pjax'=>0, 
+                    'style'=>'margin-right:10px;text-center'
+                  ]);
+            $data->invite==0 ? $result .= '' :
+            $result .= $data->cat_id==0 ? 'Каталог не назначен' :
+                Html::a('Каталог', ['client/view-catalog', 'id' => $data->cat_id], [
+                'class'=>'btn btn-default btn-sm',
+                'style'=>'margin-right:10px;text-center',
+                'data-pjax'=>0,
                 'data' => [
                 'target' => '#view-catalog',
                 'toggle' => 'modal',
                 'backdrop' => 'static',
                    ],
                 ]);
+            
             return $result;
             }
-            ],
+            ]/*,
+            ['attribute' => '',
+                'format'=>'raw',
+                'contentOptions' => ['class'=>'text-center','style' => 'vertical-align:middle;width:50px;'],
+                'value'=>function($data) {
+            $data->invite==0 ? $result = '' :
+            $result = Html::a('заказ', ['order/create',
+                'OrderCatalogSearch[searchString]'=>"",
+                'OrderCatalogSearch[selectedCategory]'=>"",
+                'OrderCatalogSearch[selectedVendor]'=>$data->supp_org_id,
+                ],['class'=>'btn btn-outline-success btn-sm pull-right','data-pjax'=>0]); 
+            return $result;
+            }]*/
         ];
         ?>
         <div class="panel-body">
@@ -126,13 +141,10 @@ Modal::widget([
                 'filterPosition' => false,
                 'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
                 'columns' => $gridColumnsCatalog, 
-                'tableOptions' => ['class' => 'table no-margin'],
+                'filterPosition' => false,
+                'summary' => '',
                 'options' => ['class' => 'table-responsive'],
-                'bordered' => false,
-                'striped' => true,
-                'condensed' => false,
-                'responsive' => false,
-                'hover' => false,
+                'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
             ]);
             ?>  
             <?php Pjax::end(); ?> 

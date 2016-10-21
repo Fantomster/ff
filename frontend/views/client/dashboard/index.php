@@ -80,7 +80,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
           <div class="box-header with-border">
             <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
           </div>
-        <div class="box-body" style="display: block;">
+            <div class="box-body">
         <?php
         $columns1 = [
         ['attribute' => 'name','value'=>'name','label' => 'Поставщики',],
@@ -109,7 +109,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
            ]);
            ?> 
         <?php  Pjax::end(); ?>
-        </div>
+            </div>
         <!-- /.box-body -->
       </div>
       <!-- /.box -->
@@ -163,10 +163,9 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         'format' => 'raw',
         'attribute' => 'total_price',
         'value' => function($data) {
-            return $data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
+            return "<strong>".$data['total_price'] . '<i class="fa fa-fw fa-rub"></i></strong>';
         },
         'label' => 'Сумма',
-        'headerOptions' => ['class' => 'desc'],
     ],
     [
         'format' => 'raw',

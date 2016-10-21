@@ -80,7 +80,7 @@ Modal::widget([
                         {    
                             $res = '<span class="status processing">Подтвержден /<br> Не авторизован</span>';
                         }else{
-                            $res = '<span class="status done">Подтвержден</span>';
+                            $res = '<span class="status done">Подтвержден</span> ';
                         }
                     } 
                     return $res;

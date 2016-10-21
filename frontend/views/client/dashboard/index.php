@@ -83,7 +83,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         <div class="box-body" style="display: block;">
         <?php
         $columns1 = [
-        ['attribute' => 'name','value'=>'name','header' => false,],
+        ['attribute' => 'name','value'=>'name','label' => 'Поставщики',],
         ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
             return Html::a('заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
@@ -103,7 +103,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
            'bordered' => false,
            'striped' => false,
            'condensed' => false,
-           'responsive' => false,
+           'responsive' => true,
            'hover' => true,
            'summary' => false,
            ]);

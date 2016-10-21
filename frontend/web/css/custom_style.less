@@ -48,7 +48,7 @@ h6,
     .main-header {
         .navbar {
             background-color: @light-green-fk;
-            
+
             /*.navbar-variant(@light-blue-fk; #fff);*/
             .sidebar-toggle {
                 color: #fff;
@@ -89,14 +89,14 @@ h6,
         }
     }
 
-/*    .sidebar-menu > li.active > a {
-        border-left: none;
-        background: @dark-green-fk !important;
-    }
-
-    .sidebar-menu > li > a {
-        color: rgba(216, 215, 215, 0.6);
-    }*/
+    /*    .sidebar-menu > li.active > a {
+            border-left: none;
+            background: @dark-green-fk !important;
+        }
+    
+        .sidebar-menu > li > a {
+            color: rgba(216, 215, 215, 0.6);
+        }*/
 
     //Content Header
     .content-header {
@@ -503,6 +503,9 @@ label {
 .margin-right-15 {
     margin-right: 15px;
 }
+.margin-right-5 {
+    margin-right: 5px;
+}
 .order-history .form-group {
     padding-right: 35px;
 }
@@ -594,6 +597,9 @@ table.dataTable thead th, table.dataTable thead td {
 }
 .width150 {
     width: 150px;
+}
+.width180 {
+    width: 180px;
 }
 .btn-success {
     background-color: @light-green-fk;
@@ -693,4 +699,40 @@ table.dataTable thead th, table.dataTable thead td {
     color: #fff;
     background-color: @dark-green-fk;
     border-color: @dark-green-fk;
+}
+.btn-outline-default {
+    color: #444;
+    background-image: none;
+    background-color: transparent;
+    border-color: #ddd;
+}
+.btn-outline-default:hover {
+    color: #fff;
+    background-color: #ddd;
+    border-color: #ddd;
+}
+.table {  
+    th {  
+        a {
+            &:after {
+                opacity: 0.3;
+                content: "\e150";
+                display: inline-block;
+                float: right;
+                font-family: 'Glyphicons Halflings';
+            }
+        }
+        .asc {
+            &:after {
+                opacity: 1;
+                content: "\e155";
+            }
+        }
+        .desc {
+            &:after {
+                opacity: 1;
+                content: "\e156";
+            }
+        }
+    }
 }

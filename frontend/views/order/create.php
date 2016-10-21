@@ -178,7 +178,7 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'attribute' => 'price',
                                     'value' => function($data) {
-                                        return '<b>'.$data['price'] . '</b> <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
+                                        return '<b>' . $data['price'] . '</b> <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
                                     },
                                     'label' => 'Цена',
                                     'contentOptions' => ['class' => 'width150'],
@@ -197,15 +197,27 @@ $this->registerJs(
                                         [
                                             'format' => 'raw',
                                             'value' => function ($data) {
-                                                $link = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
-                                                            'class' => 'add-to-cart btn btn-success',
+                                                $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i>', '#', [
+                                                            'class' => 'add-note btn btn-default margin-right-5',
+                                                            'data' => [
+                                                                'id' => $data['id'],
+                                                                'cat' => $data['cat_id'],
+                                                                'toggle' => 'tooltip',
+                                                                'original-title' => 'Добавить заметку к товару',
+                                                                'target' => "#changeQuantity",
+                                                                'toggle' => "modal",
+                                                                'backdrop' => "static",
+                                                            ],
+                                                ]);
+                                                $btnAdd = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
+                                                            'class' => 'add-to-cart btn btn-outline-success',
                                                             'data-id' => $data['id'],
                                                             'data-cat' => $data['cat_id'],
                                                 ]);
-                                                return $link;
+                                                return $btnNote . $btnAdd;
                                             },
-                                                    'contentOptions' => ['class' => 'width150 text-center'],
-                                                    'headerOptions' => ['class' => 'width150']
+                                                    'contentOptions' => ['class' => 'width180 text-center'],
+                                                    'headerOptions' => ['class' => 'width180']
                                                 ],
                                             ],
                                         ])
@@ -232,6 +244,12 @@ $this->registerJs(
                 <?=
                 Modal::widget([
                     'id' => 'changeQuantity',
+                    'clientOptions' => false,
+                ])
+                ?>
+                <?=
+                Modal::widget([
+                    'id' => 'addNote',
                     'clientOptions' => false,
                 ])
                 ?>

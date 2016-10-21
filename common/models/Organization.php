@@ -255,11 +255,6 @@ class Organization extends \yii\db\ActiveRecord {
         if ($this->type_id !== Organization::TYPE_SUPPLIER) {
             return $result;
         }
-        if (!isset($this->delivery)) {
-            $delivery = new Delivery();
-            $delivery->vendor_id = $this->id;
-            $delivery->save();
-        }
         $delivery = $this->delivery;
         if (!isset($delivery->sun) || !$delivery->sun) {
             $result[] = 0;
@@ -288,4 +283,12 @@ class Organization extends \yii\db\ActiveRecord {
         return $result;
     }
 
+    public function afterSave($insert, $changedAttributes) {
+        if ($insert && ($this->type_id = self::TYPE_SUPPLIER)) {
+            $delivery = new Delivery();
+            $delivery->vendor_id = $this->id;
+            $delivery->save();
+        }
+        parent::afterSave($insert, $changedAttributes);
+    }
 }

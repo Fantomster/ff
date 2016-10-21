@@ -56,6 +56,15 @@ Modal::widget([
     </div>
   </div>
 </div>
+<?=
+yii\bootstrap\Alert::widget([
+    'options' => [
+        'class' => 'alert-warning',
+    ],
+    'body' => 'Для того, чтобы начать работу с новым поставщиком, посмотрите видео инструкцию. '
+    . '<a class="btn btn-default btn-sm" href="#">Смотреть!</a>',
+]);
+?>
 <section class="content-header">
     <h1>
         <i class="fa fa-users"></i> Добавить поставщика
@@ -72,12 +81,13 @@ Modal::widget([
     ])
     ?>
 </section>
+
 <section class="content">
-<div class="box box-info">
-    <!-- /.box-header -->
-    <div class="box-body">
-        <div class="row">
-            <div class="col-lg-5">
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-info">
+            <!-- /.box-header -->
+            <div class="box-body">
                 <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
                     <?= $form->field($user, 'email')?>
                     <?= $form->field($profile, 'full_name')->label('ФИО')?>
@@ -109,9 +119,9 @@ Modal::widget([
                 <div class="form-group">
                     <?= Html::submitButton('Пригласить', ['class' => 'btn btn-primary hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier','id' => 'inviteSupplier']) ?>
                 </div>				
-                <?php ActiveForm::end(); ?>		
-            </div>
-        </div>           
+                <?php ActiveForm::end(); ?>
+            </div>           
+        </div>
     </div>
 </div>
 </section>

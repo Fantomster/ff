@@ -25,7 +25,6 @@ class AppAsset extends AssetBundle {
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
         'frontend\assets\BootboxAsset',
-        'fedemotta\datatables\DataTablesAsset',
         '\rmrevin\yii\fontawesome\AssetBundle',
         'kartik\growl\GrowlAsset',
         'kartik\base\AnimateAsset',

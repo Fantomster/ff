@@ -231,19 +231,19 @@ if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))
   });
 }
 function bootboxDialogShow(msg){
-bootbox.dialog({
-    message: msg,
-    title: 'Уведомление',
-    buttons: {
-        success: {
-          label: "Окей!",
-          className: "btn-success btn-md",
-          callback: function() {
-            //location.reload();    
-          }
+    bootbox.dialog({
+        message: msg,
+        title: 'Уведомление',
+        buttons: {
+            success: {
+              label: "Окей!",
+              className: "btn-success btn-md",
+              callback: function() {
+                //location.reload();    
+              }
+            },
         },
-    },
-});
+    });
 }
 $('#profile-full_name').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');

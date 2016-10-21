@@ -11,21 +11,19 @@ use yii\web\View;
 use yii\widgets\Pjax;
 frontend\assets\AdminltePluginsAsset::register($this);
 $this->registerCss('
-.box-analytics {border:1px solid #eee}.input-group.input-daterange .input-group-addon {
-    border-left: 0px;
-}
+.box-analytics {border:1px solid #eee}.input-group.input-daterange .input-group-addon {border-left: 0px;}
 tfoot tr{border-top:2px solid #ccc}
-.info-box-content:hover{color:#378a5f;}
-.info-box-content{color:#84bf76;-webkit-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
+.info-box-content:hover{color:#65af53;
+-webkit-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.6);
+-moz-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.6);
+box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.6);}
+.info-box-content{color:#84bf76;
+-webkit-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
 -moz-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
 box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
-.order-history .info-box {
-     box-shadow: none; 
-}
-.info-box {
-     box-shadow: none;
-     border:1px solid #eee;
-}
+.order-history .info-box {box-shadow: none;}
+.info-box {box-shadow: none;border:1px solid #eee;}
+.info-box-text{margin: 0;padding-top:10px;color:#555}
 ');
 ?>
 <section class="content-header">
@@ -41,7 +39,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
             <div class="info-box bg-total-price">
                 <a href="index.php?r=order/create">
                     <div class="info-box-content">
-                        <i class="fa fa-opencart" style="font-size: 24px;"></i>
+                        <i class="fa fa-opencart" style="font-size: 22px;"></i>
                         <p class="info-box-text">Разместить заказ</p>
                     </div>                    
                 </a>
@@ -51,7 +49,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
             <div class="info-box bg-total-price">
                 <a href="index.php?r=client/suppliers-view">
                     <div class="info-box-content">
-                        <i class="fa fa-users" style="font-size: 24px;"></i>
+                        <i class="fa fa-users" style="font-size: 22px;"></i>
                         <p class="info-box-text">Управление вашими поставщиками</p>
                     </div>                    
                 </a>
@@ -61,7 +59,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
             <div class="info-box bg-total-price">
                 <a href="index.php?r=client/settings">
                     <div class="info-box-content">
-                        <i class="fa fa-gears" style="font-size: 24px;"></i>
+                        <i class="fa fa-gears" style="font-size: 22px;"></i>
                         <p class="info-box-text">Настройки профилей</p>
                     </div>                    
                 </a>
@@ -85,8 +83,8 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         <div class="box-body" style="display: block;">
         <?php
         $columns1 = [
-        ['attribute' => 'name','label'=>'Поставщик','value'=>'name'],
-        ['attribute' => 'client_id','format'=>'raw','label'=>'','value'=>function($data) {
+        ['attribute' => 'name','value'=>'name','header' => false,],
+        ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
             return Html::a('заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
                 'OrderCatalogSearch[selectedCategory]'=>"",
@@ -168,6 +166,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
             return $data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
         },
         'label' => 'Сумма',
+        'headerOptions' => ['class' => 'desc'],
     ],
     [
         'format' => 'raw',

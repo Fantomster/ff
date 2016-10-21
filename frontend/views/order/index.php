@@ -154,7 +154,7 @@ $this->registerCss("
                 'filterPosition' => false,
                 'summary' => '',
                 'options' => ['class' => 'table-responsive'],
-                'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+                'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                 'columns' => [
                     [
                         'attribute' => 'id',
@@ -165,6 +165,7 @@ $this->registerCss("
                         'attribute' => 'vendor.name',
                         'value' => 'vendor.name',
                         'label' => 'Поставщик',
+                        'headerOptions' => ['class'=>'sorting',],
                             ] : [
                         'attribute' => 'client.name',
                         'value' => 'client.name',

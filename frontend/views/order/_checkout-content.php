@@ -1,9 +1,9 @@
 <?php
-
 use yii\data\ArrayDataProvider;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 $dataProvider = new ArrayDataProvider([
     'key' => 'id',
@@ -66,7 +66,7 @@ echo GridView::widget([
                     ],
                     'pluginEvents' => [
                         "editableSuccess" => "function(event, val, form, data) { "
-                      //  . '$.pjax.reload({container: "#checkout"});'
+                        //  . '$.pjax.reload({container: "#checkout"});'
                         . "$('#orderTotal' + data.orderId).html(data.orderTotal); "
                         . "$('#total' + data.positionId).html(data.positionTotal); "
                         . "$('.total-cart span').html(data.totalCart);"
@@ -77,23 +77,32 @@ echo GridView::widget([
                 ],
                 [
                     'format' => 'raw',
-                    'value' => function($data) {
-                        $total = $data['price'] * $data['quantity'];
-                        return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i>';
-                    },
-                ],
-                [
-                    'format' => 'raw',
                     'value' => function ($data) use ($vendor_id) {
-                        $link = Html::a('<i class="fa fa-trash m-r-xxs"></i> Удалить', '#', [
+                        $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i> Заметка', Url::to(['order/ajax-set-note', 'product_id' => $data['product_id']]), [
+                                    'class' => 'add-note btn btn-default margin-right-5',
+                                    'data' => [
+                                        'id' => $data['product_id'],
+                                        'target' => "#changeNote",
+                                        'toggle' => "modal",
+                                        'backdrop' => "static",
+                                    ],
+                        ]);
+                        $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> Удалить', '#', [
                                     'class' => 'btn btn-outline btn-danger remove',
                                     'data-product_id' => $data['product_id'],
                                     'data-vendor_id' => $vendor_id,
                         ]);
-                        return $link;
+                        return $btnNote . $btnDelete;
                     },
-                            'contentOptions' => ['class' => 'width150 text-center'],
-                            'headerOptions' => ['class' => 'width150']
+                            'contentOptions' => ['class' => 'text-center'],
+                            'headerOptions' => ['style' => 'width:200px']
+                        ],
+                        [
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                $total = $data['price'] * $data['quantity'];
+                                return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i>';
+                            },
                         ],
                     ]
                 ]);

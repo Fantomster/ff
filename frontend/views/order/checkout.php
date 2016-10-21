@@ -83,7 +83,7 @@ $this->registerJs(
                     }
                 });
             });
-            $("body").on("hidden.bs.modal", "#changeComment", function() {
+            $("body").on("hidden.bs.modal", "#changeComment, #changeNote", function() {
                 $(this).data("bs.modal", null);
             });
             $("body").on("submit", "#commentForm", function() {
@@ -92,6 +92,20 @@ $this->registerJs(
             $("#changeComment").on("click", ".saveComment", function() {
                 $("#loader-show").showLoading();
                 var form = $("#commentForm");
+                $.post(
+                    form.attr("action"),
+                    form.serialize()
+                )
+                .done(function (result) {
+                    if (result) {
+                        $.notify(result.growl.options, result.growl.settings);
+                    }
+                    $("#loader-show").hideLoading();
+                });
+            });
+            $("#changeNote").on("click", ".saveNote", function() {
+                $("#loader-show").showLoading();
+                var form = $("#noteForm");
                 $.post(
                     form.attr("action"),
                     form.serialize()
@@ -173,6 +187,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
                                                         'data-order_id' => $order->id,
                                                     ],
                                                     'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                                                    'layout' => '{picker}{input}{remove}',
                                                     'pluginOptions' => [
                                                         'daysOfWeekDisabled' => $order->vendor->getDisabledDeliveryDays(),
                                                         'format' => 'dd.mm.yyyy',
@@ -190,7 +205,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
                                     </div>
                                     <div id="order<?= $order->id ?>" class="panel-collapse collapse">
                                         <div class="panel-body">
-                                            <?= $this->render('_checkoutContent', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
+                                            <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
                                         </div>
                                     </div>
                                 </div>
@@ -205,6 +220,12 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
     <?=
     Modal::widget([
         'id' => 'changeComment',
+        'clientOptions' => false,
+    ])
+    ?>
+    <?=
+    Modal::widget([
+        'id' => 'changeNote',
         'clientOptions' => false,
     ])
     ?>

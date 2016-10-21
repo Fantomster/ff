@@ -214,10 +214,10 @@ $this->registerJs(
                                                             'data-id' => $data['id'],
                                                             'data-cat' => $data['cat_id'],
                                                 ]);
-                                                return $btnNote . $btnAdd;
+                                                return $btnAdd;
                                             },
                                                     'contentOptions' => ['class' => 'text-center'],
-                                                    'headerOptions' => ['class' => 'width175']
+                                                    'headerOptions' => ['class' => 'width150']
                                                 ],
                                             ],
                                         ])

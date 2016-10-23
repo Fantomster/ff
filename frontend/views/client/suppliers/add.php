@@ -18,21 +18,8 @@ $this->params['breadcrumbs'][] = $this->title;
 $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;height:400px;overflow: hidden;}
 .hide{dosplay:none}
-');		
-?>
-<?=
-Modal::widget([
-    'id' => 'view-catalog',
-    'size' => 'modal-lg',
-    'clientOptions' => false,   
-])
-?>
-<?=
-Modal::widget([
-    'id' => 'view-supplier',
-    'size' => 'modal-md',
-    'clientOptions' => false,   
-])
+');	
+
 ?>
 <div id="modal_addProduct" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">

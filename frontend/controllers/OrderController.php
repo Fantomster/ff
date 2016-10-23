@@ -10,6 +10,7 @@ use common\models\Order;
 use common\models\Role;
 use common\models\OrderContent;
 use common\models\Organization;
+use common\models\GoodsNotes;
 use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use yii\helpers\Json;
@@ -266,6 +267,34 @@ class OrderController extends DefaultController {
         if (Yii::$app->request->get()) {
             $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             return $this->renderAjax('_add-comment', compact('order'));
+        }
+    }
+
+    public function actionAjaxSetNote($product_id = null) {
+
+        $client = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            $post = Yii::$app->request->post('GoodsNotes');
+            $product_id = $post['catalog_base_goods_id'];
+            $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
+            if ($note && $note->load(Yii::$app->request->post())) {
+                $note->save();
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return $this->successNotify("Комментарий к товару добавлен");
+            }
+            return false; 
+        }
+
+        if (Yii::$app->request->get()) {
+            $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
+            if (!$note) {
+                $note = new GoodsNotes();
+                $note->rest_org_id = $client->id;
+                $note->catalog_base_goods_id = $product_id;
+                $note->save();
+            }
+            return $this->renderAjax('_add-note', compact('note'));
         }
     }
 

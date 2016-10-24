@@ -452,6 +452,7 @@ class OrderController extends DefaultController {
                     $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                     if ($quantityChanged) {
                         $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
+                        $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
                     }
                 } else {
                     $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
@@ -461,6 +462,7 @@ class OrderController extends DefaultController {
                     } else {
                         $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
                     }
+                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
                 }
                 $order->calculateTotalPrice(); //saves too
                 // $order->save();
@@ -763,4 +765,26 @@ class OrderController extends DefaultController {
             ];
         
     }
+    
+    public function sendOrderChange($sender, $recipient, $order_id) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+		// send email
+        $senderOrg = $sender->organization;
+        $email = $recipient->email;
+        $subject = "f-keeper: измененения в заказе №" . $order_id;
+        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        //return $result;
+    }
+    
 }

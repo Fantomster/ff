@@ -193,7 +193,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
 
         </div>
         <div class="col-md-4">
-            <div class="box">
+            <div class="box box-info">
                 <div class="box-header">
                     <h3 class="box-title">Итого</h3>
                 </div>
@@ -217,7 +217,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
 
         </div>
         <div class="col-md-4">
-            <div class="box box-warning direct-chat direct-chat-warning">
+            <div class="box box-info direct-chat direct-chat-success">
                 <div class="box-header with-border">
                     <h3 class="box-title">Чат заказа</h3>
                 </div>
@@ -261,8 +261,8 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                         ?>                     
                         <span class="input-group-btn">
                             <?=
-                            Html::submitButton('Послать', [
-                                'class' => 'btn btn-warning btn-flat'
+                            Html::submitButton('<i class="fa fa-paper-plane" style="margin-top:-3px;"></i> Отправить', [
+                                'class' => 'btn btn-success'
                             ])
                             ?>
                         </span>

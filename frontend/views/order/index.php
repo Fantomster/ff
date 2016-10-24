@@ -1,5 +1,5 @@
 <?php
-
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
 use common\models\Order;
@@ -103,29 +103,36 @@ $this->registerCss("
                         'options' => [
                             'data-pjax' => true,
                             'id' => 'search-form',
-                            'class' => "navbar-form",
+                            //'class' => "navbar-form",
                             'role' => 'search',
                         ],
                         'enableClientValidation' => false,
                         'method' => 'get',
             ]);
             ?>
+            <div class="row">
+            <div class="col-lg-2 col-md-3 col-sm-6">
             <?=
                     $form->field($searchModel, 'status')
                     ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter'])
-                    ->label('Статус')
+                    ->label('Статус', ['class' => 'label','style'=>'color:#555'])
             ?>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
             <?php
             if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                 echo $form->field($searchModel, 'vendor_id')
                         ->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter'])
-                        ->label('Поставщики');
+                        ->label('Поставщики', ['class' => 'label','style'=>'color:#555']);
             } else {
                 echo $form->field($searchModel, 'client_id')
                         ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
-                        ->label('Рестораны');
+                        ->label('Рестораны', ['class' => 'label','style'=>'color:#555']);
             }
             ?>
+            </div>
+            <div class="col-lg-5 col-md-6 col-sm-6"> 
+                <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label','style'=>'color:#555']) ?>
             <div class="form-group" style="width: 300px; height: 44px;">
                 <?=
                 DatePicker::widget([
@@ -134,7 +141,7 @@ $this->registerCss("
                     'attribute2' => 'date_to',
                     'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
                     'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
-                    'separator' => '-',
+                    'separator' => '<i class="fa fa-arrows-h" aria-hidden="true"></i>',
                     'type' => DatePicker::TYPE_RANGE,
                     'pluginOptions' => [
                         'format' => 'dd.mm.yyyy',
@@ -144,7 +151,10 @@ $this->registerCss("
                 ])
                 ?>
             </div>
+            </div>
+            </div>
             <?php ActiveForm::end(); ?>
+            <div class="row">
             <?=
             GridView::widget([
                 'id' => 'orderHistory',
@@ -228,6 +238,7 @@ $this->registerCss("
         },
             ]);
             ?>
+            </div>
             <?php Pjax::end() ?>
             <!-- /.table-responsive -->
         </div>

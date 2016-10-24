@@ -283,7 +283,7 @@ class OrderController extends DefaultController {
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                 return $this->successNotify("Комментарий к товару добавлен");
             }
-            return false; 
+            return false;
         }
 
         if (Yii::$app->request->get()) {
@@ -475,6 +475,69 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+    }
+    
+    public function actionEdit($id) {
+        $order = Order::findOne(['id' => $id]);
+        $user = $this->currentUser;
+        if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+            $this->redirect(['/order/index']);
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+            $this->redirect(['/order/checkout']);
+        }
+        $organizationType = $user->organization->type_id;
+        if (isset($_POST['hasEditable'])) {
+            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
+            $initialQuantity = $model->initial_quantity;
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            $posted = current($_POST['OrderContent']);
+            $post = ['OrderContent' => $posted];
+            $allowedStatuses = [
+                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                Order::STATUS_PROCESSING
+            ];
+            if ($model->load($post) && in_array($order->status, $allowedStatuses)) {
+                $quantityChanged = isset($posted['quantity']);
+                if (!$quantityChanged && ($order->status == Order::STATUS_PROCESSING)) {
+                    return ['output' => '', 'message' => ''];
+                }
+                $value = ($quantityChanged) ? $model->quantity : $model->price;
+                if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($model->initial_quantity)) {
+                    $model->initial_quantity = $initialQuantity;
+                }
+                $model->save();
+                if ($organizationType == Organization::TYPE_RESTAURANT) {
+                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                    if ($quantityChanged) {
+                        $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
+                    }
+                } else {
+                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                    $order->accepted_by_id = $user->id;
+                    if ($quantityChanged) {
+                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
+                    } else {
+                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
+                    }
+                }
+                $order->calculateTotalPrice(); //saves too
+                // $order->save();
+                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('user', 'order', 'organizationType'))];
+            } else {
+                return ['output' => '', 'message' => ''];
+            }
+        }
+
+        $searchModel = new OrderContentSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        return $this->render('edit', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
     }
 
     public function actionCheckout() {

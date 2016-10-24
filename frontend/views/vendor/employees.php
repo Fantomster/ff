@@ -66,8 +66,29 @@ $this->registerJs(
     ?>
 </section>
 <section class="content">
-    <div class="box box-info settings">
         <?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list', 'timeout' => 3000]); ?>
+    <div class="box box-info settings">
+        <div class="box-header">
+        <?php
+        $form = ActiveForm::begin([
+                    'options' => [
+                        'data-pjax' => true,
+                        'id' => 'search-form',
+                        'role' => 'search',
+                    ],
+                    'method' => 'get',
+        ]);
+        ?>
+            <div class="row">
+                
+            <div class="col-md-3">
+        <?=
+        $form->field($searchModel, 'searchString')->textInput([
+            'id' => 'search-string',
+            'class' => 'form-control',
+            'placeholder' => 'Поиск'])->label(false)
+        ?>
+            </div><div class="col-md-9">
         <?=
         Modal::widget([
             'id' => 'add-user',
@@ -76,29 +97,15 @@ $this->registerJs(
                 'label' => ' Добавить пользователя',
                 'tag' => 'a',
                 'data-target' => '#add-user',
-                'class' => 'btn btn-primary pull-right margin-right-15',
+                'class' => 'btn btn-success pull-right',
                 'href' => Url::to(['/vendor/ajax-create-user']),
             ],
         ])
         ?>
-        <?php
-        $form = ActiveForm::begin([
-                    'options' => [
-                        'data-pjax' => true,
-                        'id' => 'search-form',
-                        'class' => "navbar-form",
-                        'role' => 'search',
-                    ],
-                    'method' => 'get',
-        ]);
-        ?>
-        <?=
-        $form->field($searchModel, 'searchString')->textInput([
-            'id' => 'search-string',
-            'class' => 'form-control',
-            'placeholder' => 'Поиск'])->label(false)
-        ?>
+            </div>
         <?php ActiveForm::end(); ?>
+        </div>
+       <div class="box-body no-padding">
         <!--?= Html::button('Добавить пользователя', ['id' => 'add-user', 'class' => 'btn btn-primary']) ?-->
         <?=
         GridView::widget([
@@ -106,7 +113,7 @@ $this->registerJs(
             'filterModel' => $searchModel,
             'filterPosition' => false,
             'options' => ['class' => 'table-responsive'],
-            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
             'summary' => '',
             'columns' => [
                 [
@@ -137,8 +144,9 @@ $this->registerJs(
                     ],
                 ]);
                 ?>
-                <?php Pjax::end(); ?>
             </div>
+            </div>
+                <?php Pjax::end(); ?>
             <?php
             Modal::begin([
                 'id' => 'user-edit',

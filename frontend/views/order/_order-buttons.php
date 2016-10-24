@@ -5,44 +5,44 @@ use common\models\Organization;
 switch ($order->status) {
     case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR: 
 ?>
-<a href="#" class="btn btn-danger btnOrderAction" data-action="cancel">Отменить</a>
+<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel">Отменить</a>
 <?php if ($organizationType == Organization::TYPE_RESTAURANT) { ?>
-<a href="#" class="btn btn-default disabled">Ожидаем подтверждения заказа</a>   
+<a href="#" class="btn btn-warning disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения заказа</a>   
 <?php } else { ?>
-<a href="#" class="btn btn-primary btnOrderAction" data-action="confirm">Подтвердить</a>       
+<a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm">Подтвердить</a>       
 <?php }
         break;
     case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
 ?>
-<a href="#" class="btn btn-danger btnOrderAction" data-action="cancel">Отменить</a>       
+<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel">Отменить</a>       
 <?php if ($organizationType == Organization::TYPE_SUPPLIER) { ?>
-<a href="#" class="btn btn-default disabled">Ожидаем подтверждения заказа</a>   
+<a href="#" class="btn btn-warning disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения заказа</a>   
 <?php } else { ?>
-<a href="#" class="btn btn-primary btnOrderAction" data-action="confirm">Подтвердить</a>       
+<a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm">Подтвердить</a>       
 <?php }  
         break;
     case Order::STATUS_PROCESSING:
 ?>
-<a href="#" class="btn btn-danger btnOrderAction" data-action="cancel">Отменить</a>       
+<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel">Отменить</a>       
 <?php if ($organizationType == Organization::TYPE_SUPPLIER) { ?>
-<a href="#" class="btn btn-default disabled">Исполняется</a>  
+<a href="#" class="btn btn-processing disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Исполняется</a>  
 <?php } else { ?>
-<a href="#" class="btn btn-primary btnOrderAction" data-action="confirm">Получен</a> 
+<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm">Получен</a> 
 <?php }  
         break;
     case Order::STATUS_DONE;
 ?>
-<a href="#" class="btn btn-success disabled">Выполнен</a>       
+<a href="#" class="btn btn-success disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Выполнен</a>       
 <?php   
         break;
     case Order::STATUS_REJECTED;
 ?>
-<a href="#" class="btn btn-danger disabled">Отклонен</a>       
+<a href="#" class="btn btn-danger disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Отклонен</a>       
 <?php   
         break;
     case Order::STATUS_CANCELLED;
 ?>
-<a href="#" class="btn btn-danger disabled">Отменен</a>       
+<a href="#" class="btn btn-danger disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Отменен</a>       
 <?php   
         break;
 }

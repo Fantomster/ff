@@ -124,7 +124,7 @@ $this->registerJs(
 <?php
 Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000]);
 ?>
-<section class="content-header checkout-header" style="height: 65px;">
+<section class="content-header">
     <h1>
         <i class="fa fa-shopping-cart"></i></i> Корзина
         <small>Список готовящихся заказов</small>
@@ -143,14 +143,16 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
         ],
     ])
     ?>
-    <div class="btn-group pull-right" role="group" id="createAll">
-        <button class="btn btn-success m-t-xs" type="button"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i> Оформить все заказы</button>
-        <button type="button" class="btn btn-success  btn-outline m-t-xs total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
-    </div>
-    <button class="btn btn-danger btn-outline  m-t-xs m-r pull-right" type="button" id="deleteAll" style="margin-right: 10px;"><i class="fa fa-trash" style="margin-top:-3px;"></i> Очистить корзину</button>    
 </section>
 <section class="content">
     <div class="box box-info">
+        <div class="box-header checkout-header">
+                <div class="btn-group" role="group" id="createAll">
+                    <button class="btn btn-success m-t-xs" type="button"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i> Оформить все заказы</button>
+                    <button type="button" class="btn btn-success  btn-outline m-t-xs total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
+                </div>
+                <button class="btn btn-danger btn-outline  m-t-xs m-r pull-right" type="button" id="deleteAll" style="margin-right: 10px;"><i class="fa fa-trash" style="margin-top:-3px;"></i> Очистить корзину</button>    
+        </div>
         <div class="box-body">
             <div class="checkout">
                 <?php foreach ($orders as $order) { ?>

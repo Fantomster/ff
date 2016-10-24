@@ -870,7 +870,25 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $profile = new Profile;
         $relationCategory = new RelationCategory;
         $organization = new Organization;
+        Yii::$app->session->set('asdf',10000);
         return $this->render("suppliers/add", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
     
     }
+    public function actionSuppliersAddNew() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $user = new User;
+        return $this->render("suppliers/addNew",compact("user"));
+    }
+    public function actionSuppliersAddNewStep2() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $user = new User;
+        $profile = new Profile;
+        return $this->render("suppliers/addNew",compact("user","profile"));
+    }
+    public function actionSuppliersAddNewStep3() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $user = new User;
+        return $this->render("suppliers/addNew",compact("user"));
+    }
+    
 }

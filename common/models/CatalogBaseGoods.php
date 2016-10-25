@@ -67,6 +67,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['product'], 'string', 'max' => 255],
             [['note'], 'string', 'max' => 255],
             [['units'], 'number'],
+            [['units'], 'number', 'min' => 1],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
                 /* [['price'],'filter','filter'=>function ($value) {
                   $price = $value/100;

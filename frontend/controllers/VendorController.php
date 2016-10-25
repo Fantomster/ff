@@ -503,7 +503,7 @@ class VendorController extends DefaultController {
                     $row_note = trim($rowData[0][4]);
 
                     if (!empty($row_article && $row_product && $row_price)) {
-                        if(!$row_units){$row_units=1;}
+                        if(empty($row_units) || $row_units<1){$row_units=1;}
 
                         if (in_array($row_article, $arr)) {
                             $sql = "update {{%catalog_base_goods}} set "
@@ -538,7 +538,7 @@ class VendorController extends DefaultController {
                             $command->bindParam(":cat_id",$id,\PDO::PARAM_INT);
                             $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
                             $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-                            $command->bindParam(":units",$row_product,\PDO::PARAM_INT);
+                            $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
                             $command->bindParam(":price",$row_price);
                             $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                             $command->execute();
@@ -588,17 +588,40 @@ class VendorController extends DefaultController {
 
             for ($row = 2; $row <= $highestRow; ++$row) {
                 $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-                $row_article = htmlspecialchars(trim($rowData[0][0]));
-                $row_product = htmlspecialchars(trim($rowData[0][1]));
-                $row_units = htmlspecialchars(trim($rowData[0][2]));
-                $row_price = htmlspecialchars(trim($rowData[0][3]));
+                $row_article = trim($rowData[0][0]);
+                $row_product = trim($rowData[0][1]);
+                $row_units = trim($rowData[0][2]);
+                $row_price = trim($rowData[0][3]);
                 $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
+                $row_note = trim($rowData[0][4]);
                 if (!empty($row_article && $row_product && $row_units && $row_price)) {
 
-                    $sql = "insert into " . CatalogBaseGoods::tableName() .
-                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`created_at`) VALUES "
+                    /*$sql = "insert into " . CatalogBaseGoods::tableName() .
+                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`note`,`status`,`created_at`) VALUES "
                             . "($lastInsert_base_cat_id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
                     \Yii::$app->db->createCommand($sql)->execute();
+                    */
+                    $sql = "insert into {{%catalog_base_goods}}" .
+                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                            . "`units`,`price`,`note`,`status`,`created_at`) VALUES ("
+                            . ":cat_id,"
+                            . "0,"
+                            . $currentUser->organization_id .","
+                            . ":article,"
+                            . ":product,"
+                            . ":units,"
+                            . ":price,"
+                            . ":note," 
+                            . CatalogBaseGoods::STATUS_ON .","
+                            . "NOW())";
+                    $command = \Yii::$app->db->createCommand($sql);
+                    $command->bindParam(":cat_id",$lastInsert_base_cat_id,\PDO::PARAM_INT);
+                    $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
+                    $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
+                    $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
+                    $command->bindParam(":price",$row_price);
+                    $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
+                    $command->execute();
                 }
             }
             unlink($path);

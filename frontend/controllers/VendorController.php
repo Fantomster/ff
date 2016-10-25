@@ -521,7 +521,6 @@ class VendorController extends DefaultController {
                             $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                             $command->execute();
                         }else{
-
                             $sql = "insert into {{%catalog_base_goods}}" .
                                     "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
                                     . "`units`,`price`,`note`,`status`,`created_at`) VALUES ("

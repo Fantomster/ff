@@ -34,6 +34,11 @@ $this->registerCss('
     border: 0;
     -webkit-box-shadow: none;
     box-shadow: none;
+}
+@media (max-width: 1440px){
+.text-label{
+display:none;
+}
 }');		
 ?>
 <?=Modal::widget([
@@ -115,7 +120,7 @@ $exportColumns = [
                                 'showConfirmAlert'=>false,
                                 'showColumnSelector'=>false,
                                 'dropdownOptions' => [
-                                    'label' => 'Скачать каталог',
+                                    'label' => '<span class="text-label">Скачать каталог</span>',
                                     'class' => ['btn btn-default btn-sm pull-right']
                                     ],
                                 'exportConfig' => [
@@ -173,7 +178,7 @@ $exportColumns = [
                         'clientOptions' => false,
                         'size'=>'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> Загрузить каталог (XLS)',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-default btn-sm pull-right',
@@ -183,7 +188,7 @@ $exportColumns = [
                     ])
                 ?>
                 <?= Html::a(
-                   '<i class="fa fa-list-alt"></i> Скачать шаблон (XLS)',
+                   '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>',
                    Url::to('@web/upload/template.xlsx'),
                    ['class' => 'btn btn-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
                ) ?>   
@@ -193,7 +198,7 @@ $exportColumns = [
                        'clientOptions' => false,
                        'size'=>'modal-md',
                        'toggleButton' => [
-                           'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
+                           'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> <span class="text-label">Инструкция</span>',
                            'tag' => 'a',
                            'data-target' => '#info',
                            'class' => 'btn btn-default btn-sm pull-right',

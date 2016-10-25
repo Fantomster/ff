@@ -1,5 +1,6 @@
 <?php
 use kartik\grid\GridView;
+use kartik\editable\Editable;
 use yii\helpers\Html;
 use kartik\export\ExportMenu;
 use yii\bootstrap\Modal;
@@ -14,7 +15,31 @@ use kartik\checkbox\CheckboxX;
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <?php 
-$this->title = 'Основной каталог';
+$this->title = 'Главный каталог';
+
+$this->registerCss('
+.panel {
+    margin-bottom: 0px;
+}.kv-editable-form-inline .kv-editable-close {
+         margin: 2px 4px 0 0; 
+}.panel .kv-editable-form-inline {
+    padding: 0; 
+}.table > tbody > tr > td{padding: 4px;}.panel-default {
+    border: 0;
+}.kv-editable-content .form-group {
+    margin: 0;
+}.panel {
+    margin-bottom: 0px;
+    background: none;
+    border: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+@media (max-width: 1440px){
+.text-label{
+display:none;
+}
+}');		
 ?>
 <?=Modal::widget([
 	'id' => 'add-edit-product',
@@ -29,16 +54,26 @@ $exportColumns = [
     'value'=>'article',
     ],
     [
-    'label'=>'Продукт',
-    'value'=>'product',
+    'label'=>'Наименование',
+    'value'=>function ($data) {return Helpers::trunctateText($data['product'], 4);},
     ],
     [
-    'label'=>'кол-во',
+    'label'=>'Кратность',
     'value'=>'units',
     ],
     [
     'label'=>'Цена',
     'value'=>'price',
+    ],
+    [
+    'label'=>'Категория',
+    'value'=>function ($data) {
+        return $data['category_id']==0 ? $category_name='':$category_name=Category::get_value($data['category_id'])->name;
+        },
+    ],
+    [
+    'label'=>'Комментарий',
+    'value'=>function ($data) { return $data['note']?$data['note']:''; },
     ]
 ]
 ?>           
@@ -67,7 +102,7 @@ $exportColumns = [
                     'id' => 'add-product',
                     'clientOptions' => false,
                     'toggleButton' => [
-                        'label' => '<i class="fa fa-plus"></i> Новый продукт',
+                        'label' => '<i class="fa fa-plus"></i> Новый товар',
                         'tag' => 'a',
                         'data-target' => '#add-product',
                         'class' => 'btn btn-fk-success btn-sm pull-right',
@@ -85,7 +120,7 @@ $exportColumns = [
                                 'showConfirmAlert'=>false,
                                 'showColumnSelector'=>false,
                                 'dropdownOptions' => [
-                                    'label' => 'Скачать каталог',
+                                    'label' => '<span class="text-label">Скачать каталог</span>',
                                     'class' => ['btn btn-default btn-sm pull-right']
                                     ],
                                 'exportConfig' => [
@@ -93,7 +128,7 @@ $exportColumns = [
                                     ExportMenu::FORMAT_TEXT => false,
                                     ExportMenu::FORMAT_EXCEL => false,
                                     ExportMenu::FORMAT_PDF => false,
-                                    ExportMenu::FORMAT_CSV => [
+                                    ExportMenu::FORMAT_CSV => false,/*[
                                         'label' => Yii::t('kvexport', 'CSV'),
                                         'icon' => 'file-code-o',
                                         'iconOptions' => ['class' => 'text-primary'],
@@ -103,7 +138,7 @@ $exportColumns = [
                                         'mime' => 'application/csv;charset=UTF-8',
                                         'extension' => 'csv',
                                         'writer' => 'CSV'
-                                    ],
+                                    ],*/
                                     ExportMenu::FORMAT_EXCEL_X => [
                                         'label' => Yii::t('kvexport', 'Excel'),
                                         'icon' => 'file-excel-o',
@@ -143,7 +178,7 @@ $exportColumns = [
                         'clientOptions' => false,
                         'size'=>'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> Импорт',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-default btn-sm pull-right',
@@ -153,7 +188,7 @@ $exportColumns = [
                     ])
                 ?>
                 <?= Html::a(
-                   '<i class="fa fa-list-alt"></i> Скачать шаблон',
+                   '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>',
                    Url::to('@web/upload/template.xlsx'),
                    ['class' => 'btn btn-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
                ) ?>   
@@ -163,7 +198,7 @@ $exportColumns = [
                        'clientOptions' => false,
                        'size'=>'modal-md',
                        'toggleButton' => [
-                           'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
+                           'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> <span class="text-label">Инструкция</span>',
                            'tag' => 'a',
                            'data-target' => '#info',
                            'class' => 'btn btn-default btn-sm pull-right',
@@ -188,6 +223,33 @@ $exportColumns = [
                             'value'=>'product',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                             ],
+                            /*[
+                            'class'=>'kartik\grid\EditableColumn',
+                            'attribute'=>'Товар',
+                            'pageSummary'=>false,
+                            'value' => function ($data, $row) {
+                                return $data['product'];
+                            },
+                            'refreshGrid' => true,
+                            'editableOptions'=>[
+                                //'data' =>'ooooo',
+                                'buttonsTemplate'=>
+                                '<button type="button" class="btn btn-sm btn-success kv-editable-submit" title="Применить">'
+                                    . '<i class="glyphicon glyphicon-save"></i>'
+                                . '</button>'
+                                . '<button type="button" class="btn btn-sm btn-default kv-editable-close" title="Отмена">'
+                                    . '<i class="glyphicon glyphicon-remove"></i>'
+                                . '</button>',
+                                'resetButton'=>false,
+                                'inlineSettings' => [
+                                'closeButton' =>false         
+                            ],
+                                'asPopover' => false,
+                                    'name' => 'product',
+                                    'header'=>'Наименование',
+                                    'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
+                                ],*/
+                            
                             [
                             'attribute' => 'units',
                             'label'=>'Кратность',
@@ -267,7 +329,15 @@ $exportColumns = [
                         ];
                         ?> 
                         <div class="panel-body">
+                            <?php if (Yii::$app->session->hasFlash('success')): ?>
+                                <div class="alert alert-success alert-dismissable">
+                                <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                                <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+                                <?= Yii::$app->session->getFlash('success') ?>
+                                </div>
+                              <?php endif; ?>
                             <div class="box-body table-responsive no-padding">
+                              
                             <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list','timeout' => 10000,]); ?>
                             <?=GridView::widget([
                                 'dataProvider' => $dataProvider,
@@ -280,6 +350,7 @@ $exportColumns = [
                                 'condensed' => false,
                                 'responsive' => false,
                                 'hover' => false,
+           'resizableColumns'=>false,
                                 'export' => [
                                     'fontAwesome' => true,
                                 ],

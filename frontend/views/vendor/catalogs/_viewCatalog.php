@@ -73,6 +73,7 @@ $gridColumnsCatalog = [
         'condensed' => false,
         'responsive' => false,
         'hover' => false,
+           'resizableColumns'=>false,
     
 ]);
 ?> 

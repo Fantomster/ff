@@ -233,6 +233,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
             dataType: "json",
             data: {'email' : input.val()},
             success: function(response) {
+        console.log(response)
                 if(response.success){
 	                if(response.eventType==1){
 		            var fio = response.fio;
@@ -388,6 +389,7 @@ e.preventDefault();
 	});
 	var catalog = data;
 	catalog = JSON.stringify(catalog);
+        //console.log($("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}))
 	$.ajax({
 		  url: 'index.php?r=client/create',
 		  type: 'POST',

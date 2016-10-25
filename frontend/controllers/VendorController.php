@@ -418,7 +418,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isGet) {
             $searchString = trim(\Yii::$app->request->get('searchString'));
             $query = (new \yii\db\Query())
-                    ->select("id,article,product,units,category_id,price,status")
+                    ->select("id,article,product,units,category_id,price,note,status")
                     ->from("catalog_base_goods")
                     ->where("cat_id = $baseCatalog")
                     ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
@@ -430,7 +430,7 @@ class VendorController extends DefaultController {
                             . "")->queryScalar();
         } else {
             $query = (new \yii\db\Query())
-                    ->select("id,article,product,units,category_id,price,status")
+                    ->select("id,article,product,units,category_id,price,note,status")
                     ->from("catalog_base_goods")
                     ->where("cat_id = $baseCatalog")
                     ->andWhere("deleted=0")
@@ -453,6 +453,7 @@ class VendorController extends DefaultController {
                     'units',
                     'category_id',
                     'price',
+                    'note',
                     'status',
                 ],
             ],
@@ -465,7 +466,7 @@ class VendorController extends DefaultController {
     public function actionImportToXls($id) {
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
-            $unique = \Yii::$app->request->post('importUnique');
+            $unique = 'article';
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile');
             $path = $importModel->upload();
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -481,35 +482,77 @@ class VendorController extends DefaultController {
             $highestRow = $sheet->getHighestRow();
             $highestColumn = $sheet->getHighestColumn();
             //импорт таблицы начиная со второй строки
-            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id])->asArray()->all();
+            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id,'deleted'=>0])->asArray()->all();
             $count_array = count($sql_array_products);
             $arr = [];
             for ($i = 0; $i < $count_array; $i++) {
                 array_push($arr, $sql_array_products[$i][$unique]);
             }
-            for ($row = 2; $row <= $highestRow; ++$row) {
+            //var_dump($arr);
+            $transaction = Yii::$app->db->beginTransaction();
+            try
+            {
+                for ($row = 2; $row <= $highestRow; ++$row) {
 
-                $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-                $row_article = trim($rowData[0][0]);
-                $row_product = trim($rowData[0][1]);
-                $row_units = htmlspecialchars(trim($rowData[0][2]));
-                $row_price = htmlspecialchars(trim($rowData[0][3]));
-                $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
+                    $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
+                    $row_article = trim($rowData[0][0]);
+                    $row_product = trim($rowData[0][1]);
+                    $row_units = trim($rowData[0][2]);
+                    $row_price = trim($rowData[0][3]);
+                    $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
+                    $row_note = trim($rowData[0][4]);
 
-                if (!empty($row_article && $row_product && $row_units && $row_price)) {
-                    $unique = \Yii::$app->request->post('importUnique') == 'product' ? $row_product : $row_article;
-                    if (!in_array($unique, $arr)) {
-                        $sql = "insert into " . CatalogBaseGoods::tableName() .
-                                "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`created_at`) VALUES "
-                                //.  "($id,0,$currentUser->organization_id,':article',':product','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
-                                . "($id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
-                        $command = \Yii::$app->db->createCommand($sql);
-                        /* $command->bindParam(":article",$row_article,PDO::PARAM_STR);
-                          $command->bindParam(":product",$row_product,PDO::PARAM_STR); */
-                        $command->execute();
+                    if (!empty($row_article && $row_product && $row_price)) {
+                        if(empty($row_units) || $row_units<1){$row_units=1;}
+
+                        if (in_array($row_article, $arr)) {
+                            $sql = "update {{%catalog_base_goods}} set "
+                                    . "article=:article,"
+                                    . "product=:product,"
+                                    . "units=:units,"
+                                    . "price=:price,"
+                                    . "note=:note "
+                            . "where article='{$row_article}'";
+                            $command = \Yii::$app->db->createCommand($sql);
+                            $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
+                            $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
+                            $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
+                            $command->bindParam(":price",$row_price);
+                            $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
+                            $command->execute();
+                        }else{
+                            $sql = "insert into {{%catalog_base_goods}}" .
+                                    "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                                    . "`units`,`price`,`note`,`status`,`created_at`) VALUES ("
+                                    . ":cat_id,"
+                                    . "0,"
+                                    . $currentUser->organization_id .","
+                                    . ":article,"
+                                    . ":product,"
+                                    . ":units,"
+                                    . ":price,"
+                                    . ":note," 
+                                    . CatalogBaseGoods::STATUS_ON .","
+                                    . "NOW())";
+                            $command = \Yii::$app->db->createCommand($sql);
+                            $command->bindParam(":cat_id",$id,\PDO::PARAM_INT);
+                            $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
+                            $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
+                            $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
+                            $command->bindParam(":price",$row_price);
+                            $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
+                            $command->execute();
+                        }
                     }
                 }
+                $transaction->commit();
             }
+            catch(Exception $e)
+            {
+                $transaction->rollback();
+                \Yii::$app->getSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
+            }
+                
             unlink($path);
             //не нашел другого способа как обновить без перезагрузки =(((
             //Есть идея через pjax обновлять модальное окно с редиректом при успехе _success.php
@@ -545,17 +588,40 @@ class VendorController extends DefaultController {
 
             for ($row = 2; $row <= $highestRow; ++$row) {
                 $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-                $row_article = htmlspecialchars(trim($rowData[0][0]));
-                $row_product = htmlspecialchars(trim($rowData[0][1]));
-                $row_units = htmlspecialchars(trim($rowData[0][2]));
-                $row_price = htmlspecialchars(trim($rowData[0][3]));
+                $row_article = trim($rowData[0][0]);
+                $row_product = trim($rowData[0][1]);
+                $row_units = trim($rowData[0][2]);
+                $row_price = trim($rowData[0][3]);
                 $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
+                $row_note = trim($rowData[0][4]);
                 if (!empty($row_article && $row_product && $row_units && $row_price)) {
 
-                    $sql = "insert into " . CatalogBaseGoods::tableName() .
-                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`created_at`) VALUES "
+                    /*$sql = "insert into " . CatalogBaseGoods::tableName() .
+                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`note`,`status`,`created_at`) VALUES "
                             . "($lastInsert_base_cat_id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
                     \Yii::$app->db->createCommand($sql)->execute();
+                    */
+                    $sql = "insert into {{%catalog_base_goods}}" .
+                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                            . "`units`,`price`,`note`,`status`,`created_at`) VALUES ("
+                            . ":cat_id,"
+                            . "0,"
+                            . $currentUser->organization_id .","
+                            . ":article,"
+                            . ":product,"
+                            . ":units,"
+                            . ":price,"
+                            . ":note," 
+                            . CatalogBaseGoods::STATUS_ON .","
+                            . "NOW())";
+                    $command = \Yii::$app->db->createCommand($sql);
+                    $command->bindParam(":cat_id",$lastInsert_base_cat_id,\PDO::PARAM_INT);
+                    $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
+                    $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
+                    $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
+                    $command->bindParam(":price",$row_price);
+                    $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
+                    $command->execute();
                 }
             }
             unlink($path);
@@ -853,7 +919,7 @@ class VendorController extends DefaultController {
         if ($cat_type == Catalog::BASE_CATALOG) {
             $sql = "insert into " . CatalogGoods::tableName() .
                     "(`cat_id`,`base_goods_id`,`price`,`created_at`) "
-                    . "SELECT " . $cat_id . ", id, price, NOW() from " . CatalogBaseGoods::tableName() . " WHERE cat_id = $cat_id_old";
+                    . "SELECT " . $cat_id . ", id, price, NOW() from " . CatalogBaseGoods::tableName() . " WHERE cat_id = $cat_id_old and deleted<>1";
             \Yii::$app->db->createCommand($sql)->execute();
         }
         if ($cat_type == Catalog::CATALOG) {

@@ -197,6 +197,7 @@ HTML;
             'options' => ['class' => 'table-responsive'],
             'bordered' => false,
             'striped' => false,
+           'resizableColumns'=>false,
             'condensed' => false,
             'responsive' => false,
             'hover' => true,

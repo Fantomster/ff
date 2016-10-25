@@ -40,7 +40,7 @@ $this->registerCss('
         <div class="box-header with-border">
             <div class="text-center">
                 <ul class="nav fk-tab nav-tabs pull-left">
-                    <?='<li class="active">'.Html::a('E-mail поставщика <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>';
+                    <?='<li class="active">'.Html::a('E-mail поставщика <i class="fa fa-fw fa-hand-o-right"></i>',['client/suppliers-add-new'],['class'=>'btn btn-default']).'</li>';
                     ?>
                     <?='<li class="disabled">'.Html::a('Информация об организации').'</li>';
                     ?>
@@ -48,7 +48,7 @@ $this->registerCss('
                     ?>
                 </ul>
                 <ul class="fk-prev-next pull-right">
-                  <?='<li class="fk-next">'.Html::a('Продолжить',['#'],['class' => 'step-2']).'</li>';?>
+                  <?='<li class="fk-next">'.Html::a('Продолжить',['client/suppliers-add-new'],['class' => 'next']).'</li>';?>
                 </ul>
             </div>
         </div>
@@ -65,6 +65,36 @@ $this->registerCss('
         </div>
     </div>
 </section>
-$this->registerJs('
-
-');
+<?php
+$customJs = <<< JS
+function bootboxDialogShow(msg){
+    bootbox.dialog({
+        message: msg,
+        title: 'Уведомление',
+        buttons: {
+            success: {
+              label: "Окей!",
+              className: "btn-success btn-md",
+              callback: function() {
+                //location.reload();    
+              }
+            },
+        },
+    });
+}        
+$(".next").click(function(e){
+e.preventDefault();
+    $.ajax({
+        url: $(this).attr("href"),
+        type: "POST",
+        dataType: "json",
+        data: $("#new-supplier" ).serialize(),
+        cache: false,
+        success: function(response) {
+            bootboxDialogShow(response.message);
+            }
+    });
+});
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

@@ -351,9 +351,11 @@ class ClientController extends DefaultController {
                      * 1) Делаем связь категорий поставщика
                      * 
                      * */
-                    foreach ($categorys as $arrCategorys) {
-                        $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                        \Yii::$app->db->createCommand($sql)->execute();
+                    if(!empty($categorys)){
+                        foreach ($categorys as $arrCategorys) {
+                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+                            \Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     /**
                      *
@@ -381,7 +383,7 @@ class ClientController extends DefaultController {
                         $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                         $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                         $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
-                        if (empty($units)) {
+                        if (empty($units) || $units<1) {
                             $units = 1;
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
@@ -406,9 +408,9 @@ class ClientController extends DefaultController {
                         $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
                         \Yii::$app->db->createCommand($sql)->execute();
 
-                        if (!empty(trim($note))) {
+                        if (!empty($note)) {
                             $sql = "insert into " . GoodsNotes::tableName() . "(
-				      `rest_org_id`,`catalog_goods_id`,`note`,`created_at`) VALUES (
+				      `rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES (
 				      $currentUser->organization_id, $lastInsert_base_goods_id, '$note',NOW())";
                             \Yii::$app->db->createCommand($sql)->execute();
                         }
@@ -870,13 +872,29 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $profile = new Profile;
         $relationCategory = new RelationCategory;
         $organization = new Organization;
-        Yii::$app->session->set('asdf',10000);
+        
         return $this->render("suppliers/add", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
     
     }
     public function actionSuppliersAddNew() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User;
+        if (Yii::$app->request->isAjax) {
+           //Yii::$app->session->remove('email');
+           Yii::$app->response->format = Response::FORMAT_JSON;
+           $post = Yii::$app->request->post();
+           $user->load($post);
+           if ($user->validate()) {
+                Yii::$app->session->set('email',$user->email); 
+                $result = ['success' => true, 'message' => Yii::$app->session->get('email')];
+                return $result;
+                exit;
+           }else{
+                $result = ['success' => false, 'message' => 'Ошибка: Заполните поле <strong>e-mail</storng>'];
+                return $result;
+                exit;    
+           }
+        }
         return $this->render("suppliers/addNew",compact("user"));
     }
     public function actionSuppliersAddNewStep2() {

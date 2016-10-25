@@ -104,6 +104,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
            'striped' => false,
            'condensed' => false,
            'responsive' => true,
+           'resizableColumns'=>false,
            'hover' => true,
            'summary' => false,
            ]);
@@ -210,6 +211,8 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
            'responsive' => false,
            'hover' => true,
            'summary' => false,
+                
+           'resizableColumns'=>false,
            'rowOptions' => function ($model, $key, $index, $grid) {
                 return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
             },

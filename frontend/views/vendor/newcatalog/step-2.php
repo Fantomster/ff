@@ -131,6 +131,7 @@ $this->title = 'Добавить продукты';
             'condensed' => false,
             'responsive' => false,
             'hover' => false,
+           'resizableColumns'=>false,
         ]);
         ?>
         <?php  Pjax::end(); ?>

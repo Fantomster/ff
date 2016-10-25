@@ -146,6 +146,7 @@ Modal::widget([
                 'summary' => '',
                 'options' => ['class' => 'table-responsive'],
                 'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+           'resizableColumns'=>false,
             ]);
             ?>  
             <?php Pjax::end(); ?> 

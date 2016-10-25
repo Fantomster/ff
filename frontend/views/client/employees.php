@@ -111,6 +111,7 @@ $this->registerJs(
         GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
+           'resizableColumns'=>false,
             'filterPosition' => false,
             'options' => ['class' => 'table-responsive'],
             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],

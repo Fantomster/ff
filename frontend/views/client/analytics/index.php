@@ -242,6 +242,7 @@ HTML;
             'bordered' => false,
             'striped' => false,
             'condensed' => false,
+           'resizableColumns'=>false,
             'responsive' => false,
             'hover' => true,
             'summary' => false,

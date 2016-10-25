@@ -185,6 +185,7 @@ $this->registerCss('
            'condensed' => false,
            'responsive' => false,
            'hover' => true,
+           'resizableColumns'=>false,
            'rowOptions' => function ($model, $key, $index, $grid) {
                 return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
             },

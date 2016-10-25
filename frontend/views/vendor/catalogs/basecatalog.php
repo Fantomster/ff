@@ -350,6 +350,7 @@ $exportColumns = [
                                 'condensed' => false,
                                 'responsive' => false,
                                 'hover' => false,
+           'resizableColumns'=>false,
                                 'export' => [
                                     'fontAwesome' => true,
                                 ],

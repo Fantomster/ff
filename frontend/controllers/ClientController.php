@@ -870,13 +870,29 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $profile = new Profile;
         $relationCategory = new RelationCategory;
         $organization = new Organization;
-        Yii::$app->session->set('asdf',10000);
+        
         return $this->render("suppliers/add", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
     
     }
     public function actionSuppliersAddNew() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User;
+        if (Yii::$app->request->isAjax) {
+           //Yii::$app->session->remove('email');
+           Yii::$app->response->format = Response::FORMAT_JSON;
+           $post = Yii::$app->request->post();
+           $user->load($post);
+           if ($user->validate()) {
+                Yii::$app->session->set('email',$user->email); 
+                $result = ['success' => true, 'message' => Yii::$app->session->get('email')];
+                return $result;
+                exit;
+           }else{
+                $result = ['success' => false, 'message' => 'Ошибка: Заполните поле <strong>e-mail</storng>'];
+                return $result;
+                exit;    
+           }
+        }
         return $this->render("suppliers/addNew",compact("user"));
     }
     public function actionSuppliersAddNewStep2() {

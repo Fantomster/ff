@@ -21,6 +21,7 @@ use yii\data\ActiveDataProvider;
  * @property string $created_at
  * @property string $updated_at
  * @property file $importCatalog
+ * @property string $note
  * 
  * @property Organization $vendor
  */
@@ -64,6 +65,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['cat_id', 'category_id', 'status', 'market_place', 'deleted'], 'integer'],
             [['article'], 'string', 'max' => 50],
             [['product'], 'string', 'max' => 255],
+            [['note'], 'string', 'max' => 255],
             [['units'], 'number'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
                 /* [['price'],'filter','filter'=>function ($value) {
@@ -82,12 +84,13 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'cat_id' => 'Каталог',
             'category_id' => 'Категория',
             'article' => 'Артикул',
-            'product' => 'Продукт',
+            'product' => 'Товар',
             'units' => 'Кратность',
             'price' => 'Цена (руб.)',
             'status' => 'Статус',
             'market_place' => 'Market_place',
             'deleted' => 'Deleted',
+            'note' => 'Комментарий',
                 //'importCatalog'=>'Files'
         ];
     }
@@ -102,7 +105,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }
     
     public function search($params, $id) {
-        $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
+        $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price','note', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
         //$query->andFilterWhere(['like', 'product', '']);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -117,6 +120,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 'units',
                 'price',
                 'status',
+                'note',
             ]
         ]);
 

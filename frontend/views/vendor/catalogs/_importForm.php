@@ -4,7 +4,7 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use kartik\file\FileInput;
 use yii\web\View;
-use kartik\select2\Select2;
+//use kartik\select2\Select2;
 
 $this->registerCss('.select2-container .select2-selection--single .select2-selection__rendered {margin-top: 0px;}');
 ?>
@@ -19,15 +19,15 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
     <h4 class="modal-title">Импорт продуктов</h4>
 </div>
 <div class="modal-body">
-<?= $form->field($importModel, 'importFile')->fileInput() ?>
-<?='<label class="control-label" for="importUnique">Уникальное поле</label>' ?>
+<?= $form->field($importModel, 'importFile')->fileInput()->label('Загрузите свой каталог') ?>
+<?php /*='<label class="control-label" for="importUnique">Уникальное поле</label>' ?>
 <?=Select2::widget([
     'name' => 'importUnique',
     'value' => 'product',
     'data' => ['product'=>'Продукт','article'=>'Артикул'],
     'options' => ['multiple' => false],
     'hideSearch'=>true
-]) ?>
+]) */?>
 </div>
 <div class="modal-footer">
     <a href="#" class="btn btn-default" data-dismiss="modal">Отмена</a>

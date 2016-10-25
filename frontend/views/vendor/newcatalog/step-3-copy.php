@@ -39,7 +39,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
                 <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
                 <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
                 <?='<li class="active">'.Html::a('Изменить цены <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>'?>
             </ul>
             <ul class="fk-prev-next pull-right">
               <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-2','id'=>$cat_id]).'</li>'?>

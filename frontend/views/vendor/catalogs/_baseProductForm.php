@@ -16,10 +16,10 @@ $form = ActiveForm::begin([
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord? 'Новый продукт' : 'Редактировать продукт' ?></h4>
+    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord? 'Новый товар' : 'Корректировка товара' ?></h4>
 </div>
 <div class="modal-body">
-	<?= $form->field($catalogBaseGoods, 'article') ?>
+    <?= $form->field($catalogBaseGoods, 'article') ?>
 
     <?= $form->field($catalogBaseGoods, 'product') ?>
 
@@ -28,6 +28,8 @@ $form = ActiveForm::begin([
     <?= $form->field($catalogBaseGoods, 'price') ?>
 
     <?= $form->field($catalogBaseGoods, 'category_id')->dropDownList(common\models\Category::allCategory(),['prompt' => '']) ?>
+    
+    <?= $form->field($catalogBaseGoods, 'note')->textarea(['rows' => 3])->label('Комментарий к товару') ?>
     
     <?= $catalogBaseGoods->isNewRecord? $form->field($catalogBaseGoods, 'cat_id')->hiddenInput(['value'=> Yii::$app->request->get('id')])->label(false):'' ?>
 </div>

@@ -24,7 +24,7 @@ $this->title = 'Редактировать продукты';
         <?='<li>'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>'?>
         <?='<li class="active">'.Html::a('Редактировать',['vendor/step-3','id'=>$cat_id]).'</li>'?>
         <?='<li>'.Html::a('test',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Назначить',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>'?>
     </ul>
 </div>
 <?php Pjax::begin(['id' => 'pjax-container']); ?>

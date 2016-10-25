@@ -15,7 +15,7 @@ use kartik\checkbox\CheckboxX;
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <?php 
-$this->title = 'Основной каталог';
+$this->title = 'Главный каталог';
 
 $this->registerCss('
 .panel {

@@ -35,6 +35,7 @@ class OrderController extends DefaultController {
                 'only' => [
                     'index',
                     'view',
+                    'edit',
                     'create',
                     'checkout',
                     'send-message',
@@ -49,7 +50,7 @@ class OrderController extends DefaultController {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
+                        'actions' => ['index', 'view', 'edit' ,'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [

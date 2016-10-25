@@ -52,7 +52,7 @@ $cartCount = $user->organization->getCartCount();
                             'options' => ['class' => "treeview"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'fa fa-circle-o', 'url' => ['client/settings']],
-                                ['label' => 'Работники', 'icon' => 'fa fa-circle-o', 'url' => ['client/employees']],
+                                ['label' => 'Сотрудники', 'icon' => 'fa fa-circle-o', 'url' => ['client/employees']],
                             ]
                             ],
                         ['label' => 'Поддержка', 'icon' => 'fa fa-support', 'url' => ['client/support']],

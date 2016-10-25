@@ -50,7 +50,7 @@ $this->registerJs(
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Работники
+        <i class="fa fa-gears"></i> Сотрудники
         <small>Список работников организации</small>
     </h1>
     <?=
@@ -60,7 +60,7 @@ $this->registerJs(
         ],
         'links' => [
             'Настройки',
-            'Работники',
+            'Сотрудники',
         ],
     ])
     ?>

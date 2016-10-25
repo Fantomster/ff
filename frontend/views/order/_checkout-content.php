@@ -77,7 +77,9 @@ echo GridView::widget([
                 ],
                 [
                     'format' => 'raw',
+                    'header' => 'Цена',
                     'value' => function ($data) use ($vendor_id) {
+                                $total = $data['price'] * $data['quantity'];
                         $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i> Заметка', Url::to(['order/ajax-set-note', 'product_id' => $data['product_id']]), [
                                     'class' => 'add-note btn btn-default margin-right-5',
                                     'data' => [
@@ -92,17 +94,10 @@ echo GridView::widget([
                                     'data-product_id' => $data['product_id'],
                                     'data-vendor_id' => $vendor_id,
                         ]);
-                        return $btnNote . $btnDelete;
+                        return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i> <div class="pull-right">' . $btnNote . $btnDelete . '</div>';
                     },
-                            'contentOptions' => ['class' => 'text-center'],
-                            'headerOptions' => ['style' => 'width:200px']
-                        ],
-                        [
-                            'format' => 'raw',
-                            'value' => function($data) {
-                                $total = $data['price'] * $data['quantity'];
-                                return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i>';
-                            },
+//                            'contentOptions' => ['class' => 'text-center'],
+//                            'headerOptions' => ['style' => 'width:200px']
                         ],
                     ]
                 ]);

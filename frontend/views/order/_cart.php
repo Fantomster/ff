@@ -10,7 +10,12 @@ foreach ($orders as $order) {
     ?>
     <div class="box box-info ">
         <div class="box-header with-border">
-            <h3 class="box-title"><?= $order->vendor->name . "&nbsp;<span class='badge'>" . count($order->orderContent) . "</span>" ?></h3>
+            <div class="col-md-10">
+                <h3 class="box-title"><?= $order->vendor->name ?></h3>
+            </div><div class="col-md-2">
+                 <span class='badge'><?= count($order->orderContent) ?></span>
+            </div>
+            <!--<h3 class="box-title"><?= $order->vendor->name . "<span class='badge'>" . count($order->orderContent) . "</span>" ?></h3>-->
         </div>
         <!-- /.box-header -->
         <div class="box-body">

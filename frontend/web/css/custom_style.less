@@ -507,9 +507,6 @@ label {
 .margin-right-5 {
     margin-right: 5px;
 }
-.order-history .form-group {
-    padding-right: 35px;
-}
 .order-history .input-group.input-daterange .input-group-addon {
     border-left: 0;
 }
@@ -646,6 +643,35 @@ table.dataTable thead th, table.dataTable thead td {
     background-color: #d9534f;
     border-color: #d9534f;
 }
+.btn-outline-primary {
+    color: #3c8dbc;
+    background-color: transparent;
+    border-color: #3c8dbc;
+}
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: #3c8dbc;
+    border-color: #3c8dbc;
+}
+.btn-outline-processing {
+    color: #00c0ef;
+    background-color: transparent;
+    border-color: #00c0ef;
+}
+.btn-outline-processing:hover {
+    color: #fff;
+    background-color: #00c0ef;
+    border-color: #00c0ef;
+}
+.btn-processing {
+    color: #fff;
+    background-color: #00c0ef;
+    border-color: #00c0ef;
+}
+.btn-processing .badge {
+    color: #00c0ef;
+    background-color: #fff;
+}
 .text-light-green {
     color: @light-green-fk;
 }
@@ -769,4 +795,16 @@ table.dataTable thead th, table.dataTable thead td {
 }
 .form-group {
     margin-bottom: 0px;
+}
+.direct-chat-success .right>.direct-chat-text {
+    background: @light-green-fk;
+    border-color: @light-green-fk;
+    color: #fff;
+}
+.direct-chat-success .right>.direct-chat-text:after, .direct-chat-success .right>.direct-chat-text:before {
+    border-left-color: @light-green-fk;
+}
+#message-field {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
 }

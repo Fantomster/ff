@@ -13,13 +13,15 @@ use common\models\CatalogBaseGoods;
  */
 class OrderContentSearch extends OrderContent
 {
+    public $total;
+    
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'order_id', 'product_id', 'quantity', 'price', 'initial_quantity'], 'integer'],
+            [['id', 'order_id', 'product_id', 'quantity', 'price', 'initial_quantity', 'total'], 'integer'],
             [['product.product'], 'safe'],
         ];
     }
@@ -52,7 +54,10 @@ class OrderContentSearch extends OrderContent
     {
         $query = OrderContent::find();
         $productTable = CatalogBaseGoods::tableName();
+        $contentTable = OrderContent::tableName();
 
+        $query->select([$contentTable.'.*, product.product, (' . $contentTable.'.quantity * ' . $contentTable . '.price) AS total']);
+        
         // add conditions that should always apply here
         $query->joinWith(['product' => function ($query) use ($productTable) {
             $query->from(['product' => $productTable]);
@@ -62,7 +67,7 @@ class OrderContentSearch extends OrderContent
             'query' => $query,
         ]);
 
-        $addSortAttributes = ['product.product', 'quantity', 'price'];
+        $addSortAttributes = ['product.product', 'quantity', 'price', 'total'];
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
                 'asc' => [$addSortAttribute => SORT_ASC],

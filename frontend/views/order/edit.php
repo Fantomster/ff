@@ -21,8 +21,13 @@ $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $js = <<<JS
-        $('.content').on('change keyup paste cut', '.quantity', function() {
+//        $('.content').on('change keyup paste cut', '.quantity', function() {
+//            dataEdited = 1;
+//            alert(1);
+//        });
+        $('.content').on('change keyup paste cut', '.price', function() {
             dataEdited = 1;
+            alert(2);
         });
         $(window).on('beforeunload', function(e) {
             if(dataEdited) {
@@ -54,75 +59,32 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     ?>
 </section>
 <section class="content">
-            <?php $form = ActiveForm::begin([
-                    'id' => 'generalSettings',
-                    'enableAjaxValidation' => false,
-                    'options' => [
-                        'data-pjax' => true,
-                    ],
-                    'method' => 'post',
-                    'action' => Url::to(['order/edit', 'id' => $order->id]),
-        ]);
-        ?> 
+    <?php
+    $form = ActiveForm::begin([
+                'id' => 'generalSettings',
+                'enableAjaxValidation' => false,
+                'options' => [
+                    'data-pjax' => true,
+                ],
+                'method' => 'post',
+                'action' => Url::to(['order/edit', 'id' => $order->id]),
+    ]);
+    ?> 
     <div class="box box-info">
         <div class="box-header">
             <?= Html::submitButton() ?>
         </div>
         <div class="box-body">
             <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
-            <?=
-            GridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'filterPosition' => false,
-                'summary' => '',
-                //'tableOptions' => ['class' => 'table no-margin'],
-                'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
-                'options' => ['class' => 'table-responsive'],
-                'panel' => false,
-                'bootstrap' => false,
-                'columns' => [
-                    'product.product',
-                    [
-                        'attribute' => 'quantity',
-                        'content' => function($data) {
-                            return
-                                    TouchSpin::widget([
-                                        'name' => "OrderContent[$data->product_id][quantity]",
-                                        'id' => "qty$data->product_id",
-                                        'pluginOptions' => [
-                                            'initval' => $data->quantity,
-                                            'min' => 1,
-                                            'max' => PHP_INT_MAX,
-                                            'step' => 1,
-                                            'decimals' => 0,
-                                            'buttonup_class' => 'btn btn-default',
-                                            'buttondown_class' => 'btn btn-default',
-                                            'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                            'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                                        ],
-                                        'options' => ['class' => 'quantity'],
-                            ]) . Html::hiddenInput("OrderContent[$data->product_id][product_id]", $data->product_id);
-                        },
-                            ],
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'price',
-                                'value' => function($data) {
-                                    return $data->price . ' <i class="fa fa-fw fa-rub"></i>';
-                                },
-                                'label' => 'Цена',
-                            ],
-                        //'accepted_quantity',
-                        ],
-                    ]);
+            <div id="orderGrid">
+                <?= $this->render('_edit-grid', compact('dataProvider', 'searchModel')) ?>
+            </div>
+                            <?php Pjax::end(); ?>
+                            <!-- /.table-responsive -->
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <?php
+                    ActiveForm::end();
                     ?>
-                    <?php Pjax::end(); ?>
-            <!-- /.table-responsive -->
-        </div>
-        <!-- /.box-body -->
-    </div>
-            <?php
-        ActiveForm::end();
-        ?>
 </section>

@@ -67,14 +67,14 @@ class OrderSearch extends Order {
         $filter_date_from = strtotime($this->date_from);
         $filter_date_to = strtotime($this->date_to);
 
-        $test1 = \DateTime::createFromFormat('d.m.Y', $this->date_from);
-        if ($test1) {
-            $t1_f = $test1->format('Y-m-d');
+        $from = \DateTime::createFromFormat('d.m.Y', $this->date_from);
+        if ($from) {
+            $t1_f = $from->format('Y-m-d');
         }
-        $test2 = \DateTime::createFromFormat('d.m.Y', $this->date_to);
-        if ($test2) {
-            $test2->add(new \DateInterval('P1D'));
-            $t2_f = $test2->format('Y-m-d');
+        $to = \DateTime::createFromFormat('d.m.Y', $this->date_to);
+        if ($to) {
+            $to->add(new \DateInterval('P1D'));
+            $t2_f = $to->format('Y-m-d');
         }
 
         switch ($this->status) {
@@ -153,10 +153,6 @@ class OrderSearch extends Order {
             $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $t2_f]);
         }
 
-//        $query->andFilterWhere(['>=', Order::tableName() . '.created_at', $this->date_from]);
-//        $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $this->date_to]);
-
-
         if ($this->vendor_id) {
             $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         }
@@ -164,9 +160,6 @@ class OrderSearch extends Order {
         if ($this->client_id) {
             $query->andFilterWhere(['client_id' => $this->client_id]);
         }
-
-
-        // $testq = $dataProvider->
 
         return $dataProvider;
     }

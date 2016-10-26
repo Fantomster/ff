@@ -19,6 +19,8 @@ use Yii;
  * @property string $requested_delivery
  * @property string $actual_delivery
  * @property string $comment
+ * @property string $discount
+ * @property integer $discount_type
  * 
  * @property User $acceptedBy
  * @property User $createdBy
@@ -39,6 +41,8 @@ class Order extends \yii\db\ActiveRecord {
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
+    const DISCOUNT_FIXED = 1;
+    const DISCOUNT_PERCENT = 2;
 
     /**
      * @inheritdoc
@@ -67,8 +71,8 @@ class Order extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['client_id', 'vendor_id', 'status'], 'required'],
-            [['client_id', 'vendor_id', 'created_by_id', 'status'], 'integer'],
-            [['total_price'], 'number'],
+            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type'], 'integer'],
+            [['total_price', 'discount'], 'number'],
             [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['accepted_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['accepted_by_id' => 'id']],
@@ -171,13 +175,41 @@ class Order extends \yii\db\ActiveRecord {
         }
         return $text;
     }
+    
+    public static function discountDropDown() {
+        return [
+            '' => 'Без скидки',
+            '1' => 'Скидка (р)',
+            '2' => 'Скидка (%)',
+        ];
+    }
 
     public function getPositionCount() {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
     }
 
+    public function calculateDelivery() {
+        $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
+        if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
+            return $this->vendor->delivery->delivery_charge;
+        }
+        return 0;
+    }
+    
     public function calculateTotalPrice() {
-        $this->total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+        if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {
+            $total_price -= $this->discount;
+        }
+        if ($this->discount && ($this->discount_type == self::DISCOUNT_PERCENT)) {
+            $total_price = $total_price * (100 - $this->discount) / 100;
+        }
+        $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
+        if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
+            $total_price += $this->vendor->delivery->delivery_charge;
+        }
+        $this->total_price = $total_price;
         $this->save();
         return $this->total_price;
     }

@@ -71,7 +71,7 @@ class Organization extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
-            'type_id' => 'Type',
+            'type_id' => 'Тип бизнеса',
             'name' => 'Название организации',
             'city' => 'Город',
             'address' => 'Адрес',

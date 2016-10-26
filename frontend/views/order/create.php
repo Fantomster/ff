@@ -7,6 +7,7 @@ use yii\widgets\Pjax;
 use yii\grid\GridView;
 use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
+use kartik\widgets\TouchSpin;
 
 $this->registerJs(
         '$("document").ready(function(){
@@ -187,6 +188,21 @@ $this->registerJs(
                                 [
                                     'format' => 'raw',
                                     'value' => function($data) {
+//                                        return TouchSpin::widget([
+//                            'name' => "OrderContent[$data->product_id][quantity]",
+//                            'pluginOptions' => [
+//                                'initval' => $data->quantity,
+//                                'min' => 1,
+//                                'max' => PHP_INT_MAX,
+//                                'step' => 1,
+//                                'decimals' => 0,
+//                                'buttonup_class' => 'btn btn-default',
+//                                'buttondown_class' => 'btn btn-default',
+//                                'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
+//                                'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
+//                            ],
+//                            'options' => ['class' => 'quantity form-control'],
+//                        ]);
                                         return Html::textInput('', 1, ['class' => 'quantity form-control']);
                                     },
                                             'label' => 'Количество',

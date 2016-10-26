@@ -40,7 +40,7 @@ $this->registerCss("
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-history"></i>  История заказов
+        <i class="fa fa-history"></i>  Заказы
         <small>Список всех созданных заказов</small>
     </h1>
     <?=

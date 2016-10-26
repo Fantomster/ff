@@ -19,7 +19,7 @@ $cartCount = $user->organization->getCartCount();
                         ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
                         ['label' => 'Рабочий стол', 'icon' => 'fa fa-home', 'url' => ['client/index']],
                         ['label' => 'Разместить заказ' . Html::tag('span', $cartCount, ['class' => 'label label-primary pull-right cartCount']), 'icon' => 'fa fa-opencart', 'url' => ['order/create']],
-                        ['label' => 'История заказов' . Html::tag('span', $newOrdersCount, ['class' => 'label bg-yellow pull-right']), 'icon' => 'fa fa-history', 'url' => ['order/index']],
+                        ['label' => 'Заказы' . Html::tag('span', $newOrdersCount, ['class' => 'label bg-yellow pull-right']), 'icon' => 'fa fa-history', 'url' => ['order/index']],
                         [
                             'label' => 'Поставщики', 
                             'icon' => 'fa fa-users', 

@@ -27,7 +27,7 @@ switch ($order->status) {
 <?php if ($organizationType == Organization::TYPE_SUPPLIER) { ?>
 <a href="#" class="btn btn-processing disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Исполняется</a>  
 <?php } else { ?>
-<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm">Получен</a> 
+<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm">Получить</a> 
 <?php }  
         break;
     case Order::STATUS_DONE;

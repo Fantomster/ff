@@ -125,8 +125,8 @@ echo GridView::widget([
                 } else {
                     //show discount
                     ?>
+    <div>
                     <?php
-
                 }
                 echo Html::submitButton('Сохранить', ['class' => 'btn btn-success pull-right'])."</div>";
                 ActiveForm::end();

@@ -10,16 +10,6 @@ $cartCount = $user->organization->getCartCount();
 <aside class="main-sidebar">
 
     <section class="sidebar">
-        <div class="user-panel">
-            <div class="pull-left image">
-                <img src="images/no-avatar.jpg" class="img-circle" alt="User Image">
-            </div>
-            <div class="pull-left info">
-                <p><?= $user->profile->full_name ?></p>
-                <small><?= $user->role->name ?></small>
-            </div>
-        </div>
-
         <?=
         dmstr\widgets\Menu::widget(
                 [

@@ -90,7 +90,7 @@ echo GridView::widget([
                                     ],
                         ]);
                         $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> Удалить', '#', [
-                                    'class' => 'btn btn-outline btn-danger remove',
+                                    'class' => 'btn btn-outline-danger remove',
                                     'data-product_id' => $data['product_id'],
                                     'data-vendor_id' => $vendor_id,
                         ]);

@@ -133,22 +133,18 @@ class Organization extends \yii\db\ActiveRecord {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return [];
         }
-        $query = RelationCategory::find()
+        $query = RelationSuppRest::find()
                 ->select(['organization.id', 'organization.name'])
-                ->distinct()
-                ->leftJoin('relation_supp_rest', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
-                ->joinWith('vendor', false)
-                ->where(['relation_category.rest_org_id' => $this->id]);
+                ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
+                ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
+                ->where(['relation_supp_rest.rest_org_id' => $this->id]);
         if ($category_id) {
-            $query = $query->andWhere(['category_id' => $category_id]);
+            $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }
-
         $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
                                 ->asArray()
                                 ->all(), 'id', 'name');
-        //if ($all) {
         $vendors[''] = 'Все поставщики';
-        //}
         ksort($vendors);
         return $vendors;
     }

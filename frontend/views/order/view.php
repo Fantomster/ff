@@ -7,14 +7,18 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 
-$quantityEditable = (in_array($order->status, [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-            Order::STATUS_PROCESSING]));
-$priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array($order->status, [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
-
+if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
+    $quantityEditable = false;
+    $priceEditable = false;
+} else {
+    $quantityEditable = (in_array($order->status, [
+                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                Order::STATUS_PROCESSING]));
+    $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array($order->status, [
+                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
+}
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
@@ -56,6 +60,12 @@ $js = <<<JS
             dataEdited = 0;
             $(this).submit();
         });
+        $('.content').on('click', '.deletePosition', function(e) {
+            e.preventDefault();
+            target = $(this).data("target");
+            $(target)
+            alert($(target));
+        });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \yii2assets\printthis\PrintThisAsset::register($this);
@@ -91,7 +101,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             <span>Заказчик:</span>
                             <address>
                                 <strong><?= $order->client->name ?></strong><br>
-<?= $order->client->city ?><br>
+                                <?= $order->client->city ?><br>
                                 адрес: <?= $order->client->address ?><br>
                                 телефон: <?= $order->client->phone ?>
                             </address>
@@ -102,7 +112,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             </p>
                             <p class="text-left">
                                 <strong>Запрошенная дата доставки:</strong><br>
-<?= $order->requested_delivery ?>
+                                <?= $order->requested_delivery ?>
                             </p>
                         </div>
                         <div class="col-xs-6 text-right">
@@ -110,7 +120,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             <span>Поставщик:</span>
                             <address>
                                 <strong><?= $order->vendor->name ?></strong><br>
-<?= $order->vendor->city ?><br>
+                                <?= $order->vendor->city ?><br>
                                 адрес: <?= $order->vendor->address ?><br>
                                 телефон: <?= $order->vendor->phone ?>
                             </address>
@@ -123,17 +133,17 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
+                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
                     <div id="orderGrid">
                         <?php
                         if ($quantityEditable || $priceEditable) {
-                            echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'priceEditable', 'order'));
+                            echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'quantityEditable', 'priceEditable', 'order'));
                         } else {
                             echo $this->render('_view-grid', compact('dataProvider', 'order'));
                         }
                         ?>
                     </div>
-<?php Pjax::end(); ?>
+                    <?php Pjax::end(); ?>
                     <!-- /.table-responsive -->
                 </div>
                 <!-- /.box-body -->
@@ -189,7 +199,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                     ])
                     ?>
                     <div class="input-group">
-                        <?= Html::hiddenInput('order_id', $order->id); ?>
+                        <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
                         <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
                         <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
                         <?=
@@ -207,7 +217,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             ?>
                         </span>
                     </div>
-<?= Html::endForm() ?>
+                    <?= Html::endForm() ?>
                 </div>
                 <!-- /.box-footer-->
             </div>    
@@ -216,19 +226,19 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
 </section>
 <!-- Modal -->
 <div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
-      </div>
-      <div class="modal-body">
-      Вы изменили заказ, но не сохранили изменения!
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
-        <button type="button" class="btn btn-danger changed">Уйти</button>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
+            </div>
+            <div class="modal-body">
+                Вы изменили заказ, но не сохранили изменения!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
+                <button type="button" class="btn btn-danger changed">Уйти</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>

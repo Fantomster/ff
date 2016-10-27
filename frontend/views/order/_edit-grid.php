@@ -57,6 +57,7 @@ echo GridView::widget([
                             'options' => ['class' => 'viewData'],
                         ]) . Html::hiddenInput("OrderContent[$data->id][id]", $data->id);
             },
+                    'contentOptions' => ['class' => 'width150'],
                 ],
                 ($priceEditable) ?
                         [
@@ -77,14 +78,16 @@ echo GridView::widget([
                                         'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                                     ],
                                     'options' => ['class' => 'viewData'],
-                                ]);
+                        ]);
                     },
+                            'contentOptions' => ['class' => 'width150'],
                                 ] : [ 'format' => 'raw',
                             'attribute' => 'price',
                             'value' => function($data) {
                                 return $data->price . ' <i class="fa fa-fw fa-rub"></i>';
                             },
                             'label' => 'Цена',
+                            'contentOptions' => ['class' => 'width150'],
                                 ],
                         [
                             'format' => 'raw',
@@ -93,70 +96,71 @@ echo GridView::widget([
                                 return $data->total . ' <i class="fa fa-fw fa-rub"></i>';
                             },
                             'label' => 'Общая стоимость',
+                            'contentOptions' => ['class' => 'width150'],
                         ],
-                                    [
-                                        'format' => 'raw',
-                                        'value' => function($data) {
-                                            return '<a href="#" class="deletePosition btn btn-outline-danger" data-target="#qnty'.$data->id.'"><i class="fa fa-trash m-r-xxs"></i></a>';
-                                        }
-                                    ],
+                        [
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return '<a href="#" class="deletePosition btn btn-outline-danger" data-target="#qnty' . $data->id . '"><i class="fa fa-trash m-r-xxs"></i> Удалить</a>';
+                            },
+                            'contentOptions' => ['class' => 'text-center width150'],
+                        ],
                     ],
                 ]);
-                            $discountTypes = Order::discountDropDown();
+                $discountTypes = Order::discountDropDown();
                 if ($priceEditable) {
                     //editable discount
                     ?>
-<div class="pull-right">
-<table class="table table-bordered table-striped dataTable" style="width: 400px">
-    <tr>
-        <td>
-            <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
-        </td><td>
-            <?= $form->field($order, 'discount')->label(false) ?>
-        </td>
-    </tr><tr>
-        <td>
-            Стоимость доставки
-        </td><td>
-            <?= $order->calculateDelivery() . ' <i class="fa fa-fw fa-rub"></i>' ?>
-        </td>
-    </tr><tr>
-        <td>
-            Стоимость заказа
-        </td><td>
-            <?= $order->total_price . ' <i class="fa fa-fw fa-rub"></i>' ?>
-        </td>
-    </tr>
-</table>
-                    <?php
-
-                } else {
-                    //show discount
-                    ?>
-    <div class="pull-right">
-<table class="table table-bordered table-striped dataTable" style="width: 400px">
-    <tr>
-        <td>
-            <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>
-        </td><td>
-            <?= ($order->discount) ? $order->discount : '-' ?>
-        </td>
-    </tr><tr>
-        <td>
-            Стоимость доставки
-        </td><td>
-            <?= $order->calculateDelivery() . ' <i class="fa fa-fw fa-rub"></i>' ?>
-        </td>
-    </tr><tr>
-        <td>
-            Стоимость заказа
-        </td><td>
-            <?= $order->total_price . ' <i class="fa fa-fw fa-rub"></i>' ?>
-        </td>
-    </tr>
-</table>
-                    <?php
-                }
-                echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right'])."</div>";
-                ActiveForm::end();
-                
+                    <div class="pull-right">
+                        <table class="table table-bordered table-striped dataTable" style="width: 400px">
+                            <tr>
+                                <td>
+                                    <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
+                                </td><td>
+                                    <?= $form->field($order, 'discount')->label(false) ?>
+                                </td>
+                            </tr><tr>
+                                <td>
+                                    Стоимость доставки
+                                </td><td>
+                                    <?= $order->calculateDelivery() . ' <i class="fa fa-fw fa-rub"></i>' ?>
+                                </td>
+                            </tr><tr>
+                                <td>
+                                    Стоимость заказа
+                                </td><td>
+                                    <?= $order->total_price . ' <i class="fa fa-fw fa-rub"></i>' ?>
+                                </td>
+                            </tr>
+                        </table>
+                        <?php
+                    } else {
+                        //show discount
+                        ?>
+                        <div class="pull-right">
+                            <table class="table table-bordered table-striped dataTable" style="width: 400px">
+                                <tr>
+                                    <td>
+                                        <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>
+                                    </td><td>
+                                        <?= ($order->discount) ? $order->discount : '-' ?>
+                                    </td>
+                                </tr><tr>
+                                    <td>
+                                        Стоимость доставки
+                                    </td><td>
+                                        <?= $order->calculateDelivery() . ' <i class="fa fa-fw fa-rub"></i>' ?>
+                                    </td>
+                                </tr><tr>
+                                    <td>
+                                        Стоимость заказа
+                                    </td><td>
+                                        <?= $order->total_price . ' <i class="fa fa-fw fa-rub"></i>' ?>
+                                    </td>
+                                </tr>
+                            </table>
+                            <?php
+                        }
+                        echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right']) . "</div>";
+                        ActiveForm::end();
+                        

@@ -236,6 +236,12 @@ a {
 .box.box-info {
     border-top-color: @light-green-fk;
 }
+.box-order-content {
+    border-top-width: 0;
+    -webkit-box-shadow: 0px 0px 24px -11px rgba(0,0,0,0.41);
+    -moz-box-shadow: 0px 0px 24px -11px rgba(0,0,0,0.41);
+    box-shadow: 0px 0px 24px -11px rgba(0,0,0,0.41);
+}
 .hpanel .panel-body {
     background: #fff;
     border: 1px solid #e4e5e7;
@@ -448,24 +454,6 @@ label {
     color: #fff;
     background: @light-green-fk;
 }
-#orders .btn-danger,
-.checkout-header .btn-danger,
-.checkout .btn-danger {
-    color: #d9534f;
-    border-color: #d43f3a;
-}
-#orders .btn-danger:hover, 
-#orders .btn-danger:focus, 
-#orders .btn-danger:active,
-.checkout-header .btn-danger:hover,
-.checkout-header .btn-danger:focus,
-.checkout-header .btn-danger:active,
-.checkout .btn-danger:hover,
-.checkout .btn-danger:focus,
-.checkout .btn-danger:active {
-    color: #eee;
-    border-color: #d43f3a;
-}
 .checkout .comment {
     background-color: #fff;
 }
@@ -581,9 +569,6 @@ th > a:hover {
 .not-set {
     font-style: normal;
 }
-.box.box-info {
-    border-top-color: @light-green-fk;
-}
 label {
     font-weight: normal;
 }
@@ -623,9 +608,11 @@ table.dataTable thead th, table.dataTable thead td {
 }
 .direct-chat-text {
     margin-left: 5px;
+    display: inline-block;
 }
 .right .direct-chat-text {
     margin-right: 5px;
+    float: right;
 }
 .direct-chat-name {    
     font-weight: 600;    
@@ -815,13 +802,17 @@ table.dataTable thead th, table.dataTable thead td {
         left: 230px!important;
         top: 10px!important;
     }
-}
-@media (min-width: 768px) {
     .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>a>span:not(.pull-right), .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>.treeview-menu {
         display: block !important;
         position: absolute;
         width: 210px;
         left: 50px;
+    }
+    .order-history .info-box-number {
+        font-size: 18px;
+        .fa-rub {
+            font-size: 15px;
+        }
     }
 }
 @media (min-width: 768px) and (max-width: 1480px){
@@ -829,6 +820,6 @@ table.dataTable thead th, table.dataTable thead td {
         width: 160px;
     }
     .navbar-form .input-group > .form-control {
-    width: 160px;
-}
+        width: 160px;
+    }
 }

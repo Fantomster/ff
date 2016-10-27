@@ -58,7 +58,7 @@ $this->registerCss("
     <div class="box box-info order-history">
         <div class="box-body">
 
-            <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box">
                     <div class="info-box-content">
                         <span class="info-box-number status new"><?= $newCount ?></span>
@@ -66,7 +66,7 @@ $this->registerCss("
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box">
                     <div class="info-box-content">
                         <span class="info-box-number status processing"><?= $processingCount ?></span>
@@ -74,7 +74,7 @@ $this->registerCss("
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box">
                     <div class="info-box-content">
                         <span class="info-box-number status done"><?= $fulfilledCount ?></span>
@@ -82,7 +82,7 @@ $this->registerCss("
                     </div>
                 </div>    
             </div>
-            <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="col-md-6 col-sm-6 col-xs-12 col-lg-3">
                 <div class="info-box bg-total-price">
                     <div class="info-box-content">
                         <span class="info-box-number"><?= isset($totalPrice) ? $totalPrice : '0' ?> <i class="fa fa-fw fa-rub"></i></span>

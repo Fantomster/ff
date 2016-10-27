@@ -580,7 +580,7 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
-        return $this->renderPartial('_view-grid', compact('dataProvider'));
+        return $this->renderPartial('_view-grid', compact('dataProvider', 'order'));
     }
     
     public function actionAjaxOrderAction() {

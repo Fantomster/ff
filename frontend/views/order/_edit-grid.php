@@ -125,7 +125,28 @@ echo GridView::widget([
                 } else {
                     //show discount
                     ?>
-    <div>
+    <div class="pull-right">
+<table class="table table-bordered table-striped dataTable" style="width: 400px">
+    <tr>
+        <td>
+            <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>
+        </td><td>
+            <?= ($order->discount) ? $order->discount : '-' ?>
+        </td>
+    </tr><tr>
+        <td>
+            Стоимость доставки
+        </td><td>
+            <?= $order->calculateDelivery() . ' <i class="fa fa-fw fa-rub"></i>' ?>
+        </td>
+    </tr><tr>
+        <td>
+            Стоимость заказа
+        </td><td>
+            <?= $order->total_price . ' <i class="fa fa-fw fa-rub"></i>' ?>
+        </td>
+    </tr>
+</table>
                     <?php
                 }
                 echo Html::submitButton('Сохранить', ['class' => 'btn btn-success pull-right'])."</div>";

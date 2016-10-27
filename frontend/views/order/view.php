@@ -117,7 +117,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                         if ($quantityEditable || $priceEditable) {
                             echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'priceEditable', 'order'));
                         } else {
-                            echo $this->render('_view-grid', compact('dataProvider'));
+                            echo $this->render('_view-grid', compact('dataProvider', 'order'));
                         }
                         ?>
                     </div>

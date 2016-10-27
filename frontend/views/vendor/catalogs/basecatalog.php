@@ -345,6 +345,7 @@ $exportColumns = [
                                 'columns' => $gridColumnsBaseCatalog, 
                                 'tableOptions' => ['class' => 'table no-margin'],
                                 'options' => ['class' => 'table-responsive'],
+                                'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
                                 'bordered' => false,
                                 'striped' => true,
                                 'condensed' => false,

@@ -498,12 +498,13 @@ class VendorController extends DefaultController {
                     $row_article = trim($rowData[0][0]);
                     $row_product = trim($rowData[0][1]);
                     $row_units = trim($rowData[0][2]);
+                    $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $row_units));
                     $row_price = trim($rowData[0][3]);
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
                     $row_note = trim($rowData[0][4]);
 
                     if (!empty($row_article && $row_product && $row_price)) {
-                        if(empty($row_units) || $row_units<1){$row_units=1;}
+                        if(empty($row_units) || $row_units<0){$row_units=0;}
 
                         if (in_array($row_article, $arr)) {
                             $sql = "update {{%catalog_base_goods}} set "
@@ -516,7 +517,7 @@ class VendorController extends DefaultController {
                             $command = \Yii::$app->db->createCommand($sql);
                             $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
                             $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-                            $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
+                            $command->bindParam(":units",$row_units);
                             $command->bindParam(":price",$row_price);
                             $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                             $command->execute();
@@ -538,7 +539,7 @@ class VendorController extends DefaultController {
                             $command->bindParam(":cat_id",$id,\PDO::PARAM_INT);
                             $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
                             $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-                            $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
+                            $command->bindParam(":units",$row_units);
                             $command->bindParam(":price",$row_price);
                             $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                             $command->execute();
@@ -591,22 +592,19 @@ class VendorController extends DefaultController {
                 $row_article = trim($rowData[0][0]);
                 $row_product = trim($rowData[0][1]);
                 $row_units = trim($rowData[0][2]);
+                $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $row_units));
                 $row_price = trim($rowData[0][3]);
                 $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
                 $row_note = trim($rowData[0][4]);
-                if (!empty($row_article && $row_product && $row_units && $row_price)) {
+                if (!empty($row_article && $row_product && $row_price)) {
+                        if(empty($row_units) || $row_units<0){$row_units=0;}
 
-                    /*$sql = "insert into " . CatalogBaseGoods::tableName() .
-                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`note`,`status`,`created_at`) VALUES "
-                            . "($lastInsert_base_cat_id,0,$currentUser->organization_id,'{$row_article}','{$row_product}','{$row_units}','{$row_price}'," . CatalogBaseGoods::STATUS_ON . ",NOW())";
-                    \Yii::$app->db->createCommand($sql)->execute();
-                    */
                     $sql = "insert into {{%catalog_base_goods}}" .
                             "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
                             . "`units`,`price`,`note`,`status`,`created_at`) VALUES ("
-                            . ":cat_id,"
+                            . $lastInsert_base_cat_id . ","
                             . "0,"
-                            . $currentUser->organization_id .","
+                            . $currentUser->organization_id . ","
                             . ":article,"
                             . ":product,"
                             . ":units,"
@@ -615,10 +613,9 @@ class VendorController extends DefaultController {
                             . CatalogBaseGoods::STATUS_ON .","
                             . "NOW())";
                     $command = \Yii::$app->db->createCommand($sql);
-                    $command->bindParam(":cat_id",$lastInsert_base_cat_id,\PDO::PARAM_INT);
                     $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
                     $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-                    $command->bindParam(":units",$row_units,\PDO::PARAM_INT);
+                    $command->bindParam(":units",$row_units);
                     $command->bindParam(":price",$row_price);
                     $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                     $command->execute();

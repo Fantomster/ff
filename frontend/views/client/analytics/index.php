@@ -12,7 +12,6 @@ $this->registerCss('
     border-left: 0px;
 }
 tfoot tr{border-top:2px solid #ccc}
-.info-box-content:hover{color:#378a5f;}
 .info-box-content{color:#84bf76;-webkit-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
 -moz-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
 box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
@@ -22,6 +21,9 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 .info-box {
      box-shadow: none;
      border:1px solid #eee;
+}
+.info-box-text {
+    color: #555;
 }
 ');
 ?>

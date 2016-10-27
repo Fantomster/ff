@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\url;
@@ -10,22 +11,6 @@ use kartik\select2\Select2;
 use common\models\Category;
 kartik\select2\Select2Asset::register($this);
 ?>
-<?php
-$this->title = 'Мои поставщики';
-$this->params['breadcrumbs'][] = $this->title;
-
-$this->registerCss('
-.Handsontable_table{position: relative;width: 100%;height:400px;overflow: hidden;}
-.hide{dosplay:none}
-');	
-?>
-<?=
-Modal::widget([
-    'id' => 'view-catalog',
-    'size' => 'modal-lg',
-    'clientOptions' => false,   
-])
-?>
 <?=
 Modal::widget([
     'id' => 'view-supplier',
@@ -33,151 +18,22 @@ Modal::widget([
     'clientOptions' => false,   
 ])
 ?>
-<div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title">Мои поставщики</h3>
-        <span class="pull-right"></span>
-    </div>
-    <!-- /.box-header -->
-    <div class="box-body">
-        <div class="panel-body">
-            <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#tabMySuppliers">Мои поставщики</a></li>
-                <li><a data-toggle="tab" href="#tabAddSuppliers">Добавить поставщика</a></li>    
-            </ul>
-        <div>
-        <div class="tab-content">
-            <div id="tabMySuppliers" class="tab-pane fade in active">
-
-    <?php 
-$gridColumnsCatalog = [
-        [
-        'label'=>'Организация',
-        'format' => 'raw',
-        'value'=>function ($data) {
-        $res = common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->name;
-        return Html::a(Html::encode($res), ['client/view-supplier', 'id' => $data->supp_org_id], [
-            'data' => [
-            'target' => '#view-supplier',
-            'toggle' => 'modal',
-            'backdrop' => 'static',
-                      ],
-            ]);
-        }
-        ],
-        [
-        'label'=>'email',
-        'contentOptions' => ['class' => ''],
-        'value'=>function ($data) {
-        return common\models\Organization::find()->where(['id'=>$data->supp_org_id])->one()->email;
-        }
-        ],
-        [
-        'label'=>'Статус сотрудничества',
-        'contentOptions' => ['class' => ''],
-        'format' => 'raw',
-        'value'=>function ($data) {
-            /*$res = 1==2?1:2==1?2:1;
-            if(1==2){$res =  1;}else{if(2==1){$res =  2;}else{$res =  1;}}*/
-            if($data->invite==0){ 
-            $res = '<span class="text-danger">Ожидается<br>подтверждение</span>';
-            }else{
-                if(\common\models\User::find()->where(['email'=>\common\models\Organization::find()->
-                    where(['id'=>$data->supp_org_id])->one()->email])->exists())
-                    {    
-                        $res = '<span class="text-warning">Подтвержден /<br> Не авторизован</span>';
-                    }else{
-                        $res = '<span class="text-primary">Подтвержден</span>';
-                    }
-                } 
-                return $res;
-            },
-        ],
-        [
-        'label'=>'Каталог',
-        'contentOptions' => ['class' => 'text-wrap'],
-        'format' => 'raw',
-        'value'=>function ($data) {
-        $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
-        $data->invite==0 ? $result = '' :
-        $result = $data->cat_id==0 ? 'Каталог не назначен' :
-            Html::a('<i class="fa fa-list-alt" aria-hidden="true"></i>', ['client/view-catalog', 'id' => $data->cat_id], [
-            'data' => [
-            'target' => '#view-catalog',
-            'toggle' => 'modal',
-            'backdrop' => 'static',
-               ],
-            ]);
-        return $result;
-        }
-        ],
-];
+<?=
+Modal::widget([
+    'id' => 'view-catalog',
+    'size' => 'modal-lg',
+    'clientOptions' => false,
+])
 ?>
-                <div class="panel-body">
-                    <div class="box-body table-responsive no-padding">
-                    <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'sp-list'])?>
-                    <?=GridView::widget([
-                        'dataProvider' => $dataProvider,
-                        'filterModel' => $searchModel,
-                        'filterPosition' => false,
-                        'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
-                        'columns' => $gridColumnsCatalog, 
-                        'tableOptions' => ['class' => 'table no-margin'],
-                        'options' => ['class' => 'table-responsive'],
-                        'bordered' => false,
-                        'striped' => true,
-                        'condensed' => false,
-                        'responsive' => false,
-                        'hover' => false,
-                    ]);
-                    ?>  
-                    <?php Pjax::end(); ?> 
-                    </div>
-                </div>
-            </div>
-            <div id="tabAddSuppliers" class="tab-pane fade">
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-lg-5">
-                            <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
-                                <?= $form->field($user, 'email')?>
-                                <?= $form->field($profile, 'full_name')->label('ФИО')?>
-                                <?= $form->field($organization, 'name')->label('Организация')?>
-                                <?= $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
-                                    'data' => Category::allCategory(),
-                                    'theme' => 'krajee',
-                                    //'language' => 'ru',
-                                    'hideSearch' => true,
-                                    'options' => ['multiple' => true,'placeholder' => 'Выберите категорию'],
-                                    'pluginOptions' => [
-                                        'allowClear' => true,
-                                    ],
-                                ]);
-                                ?>
-                            <div class="form-group">
-                            <?=Html::a('Добавить продукты', ['#'], [
-                              'class' => 'btn btn-primary btn-sm',
-                              'disabled' => 'disabled',
-                              'name' => 'addSupplier',
-                              'id' => 'addProduct',
-                              'data' => [
-                              'target' => '#modal_addProduct',
-                              'toggle' => 'modal',
-                              'backdrop' => 'static',
-                                 ],
-                              ]);?>
-                            </div>
-                            <div class="form-group">
-                                <?= Html::submitButton('Пригласить', ['class' => 'btn btn-primary hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier','id' => 'inviteSupplier']) ?>
-                            </div>				
-                            <?php ActiveForm::end(); ?>		
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> 
+<?php
+$this->title = 'Поставщики';
+$this->params['breadcrumbs'][] = $this->title;
+$this->registerCss('
+.Handsontable_table{position: relative;width: 100%;height:400px;overflow: hidden;}
+.hide{dosplay:none}
+');	
+
+?>
 <div id="modal_addProduct" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <!-- Modal content-->
@@ -194,12 +50,185 @@ $gridColumnsCatalog = [
 	   <div class="handsontable" id="CreateCatalog"></div>   
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
-        <button id="invite" type="button" class="btn btn-info">Отправить</button>
+        <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
+        <button id="invite" type="button" class="btn btn-success">Отправить</button>
       </div>
     </div>
   </div>
 </div>
+<?php /*
+yii\bootstrap\Alert::widget([
+    'options' => [
+        'class' => 'alert-warning',
+    ],
+    'body' => 'Для того, чтобы начать работу с новым поставщиком, посмотрите видео инструкцию. '
+    . '<a class="btn btn-default btn-sm" href="#">Смотреть!</a>',
+]); */
+?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-users"></i> Поставщики
+        <small>Находите и добавляйте в Вашу систему новых поставщиков</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb'
+        ],
+        'links' => [
+            'Поставщики'
+        ],
+    ])
+    ?>
+</section>
+
+
+<?php 
+        $gridColumnsCatalog = [
+            [
+            'attribute'=>'organization_name',
+            'label'=>'Организация',
+            'format' => 'raw',
+            'contentOptions' => ['class'=>'text-bold','style' => 'vertical-align:middle;width:45%;font-size:14px'],
+            'value'=>function ($data) {
+            return Html::a(Html::encode($data["organization_name"]), ['client/view-supplier', 'id' => $data["supp_org_id"]], [
+                'data' => [
+                'target' => '#view-supplier',
+                'toggle' => 'modal',
+                'backdrop' => 'static',
+                          ],
+                ]);
+            }
+            ],
+            [
+            'attribute'=>'status_invite',
+            'label'=>'Статус сотрудничества',
+            'contentOptions' => ['style' => 'vertical-align:middle;width:45%;'],
+            'format' => 'raw',
+            'value'=> function ($data) {
+                if($data["status_invite"]==1){return '<span class="text-danger">Ожидается<br>подтверждение</span>';}
+                if($data["status_invite"]==2){return '<span class="text-warning">Подтвержден /<br> Не авторизован</span>';}
+                if($data["status_invite"]==3){return '<span class="text-primary">Подтвержден</span>';}
+                }
+            ],
+            [
+            'label'=>'',
+            'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:139px;'],
+            'format' => 'raw',
+            'value'=>function ($data) {
+            $data["invite"]==0 ? $result = '' :
+            $result = Html::a('Заказ', ['order/create',
+                'OrderCatalogSearch[searchString]'=>"",
+                'OrderCatalogSearch[selectedCategory]'=>"",
+                'OrderCatalogSearch[selectedVendor]'=>$data["supp_org_id"],
+                ],[
+                    'class'=>'btn btn-outline-success btn-sm',
+                    'data-pjax'=>0, 
+                    'style'=>'margin-right:10px;text-center'
+                  ]);
+            $data["invite"]==0 ? $result .= '' :
+            $result .= $data["cat_id"]==0 ? '' :
+                Html::a('Каталог', ['client/view-catalog', 'id' => $data["cat_id"]], [
+                'class'=>'btn btn-default btn-sm',
+                'style'=>'text-center',
+                'data-pjax'=>0,
+                'data' => [
+                'target' => '#view-catalog',
+                'toggle' => 'modal',
+                'backdrop' => 'static',
+                   ],
+                ]);
+            
+            return $result;
+            }
+            ]
+        ];
+        ?>
+<section class="content">
+    <div class="row">
+    <div class="col-md-8">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                  <h3 class="box-title">Список поставщиков</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-6">
+                    <?=Html::input('text', 'search', $searchString, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="box-body table-responsive no-padding">
+                        <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'sp-list'])?>
+                        <?=GridView::widget([
+                            'dataProvider' => $dataProvider,
+                            'filterPosition' => false,
+                            'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+                            'columns' => $gridColumnsCatalog, 
+                            'filterPosition' => false,
+                            'summary' => '',
+                            'options' => ['class' => 'table-responsive'],
+                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+                       'resizableColumns'=>false,
+                        ]);
+                        ?>  
+                        <?php Pjax::end(); ?> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'add-supplier-list'])?>
+                <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
+        <div class="box box-info">
+            <div class="box-header with-border">
+              <h3 class="box-title">Добавить поставщика</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                    <?= $form->field($user, 'email')?>
+                    <?= $form->field($profile, 'full_name')->label('ФИО')?>
+                    <?= $form->field($organization, 'name')->label('Организация')?>
+                    <?= $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
+                        'data' => Category::allCategory(),
+                        'theme' => 'krajee',
+                        //'language' => 'ru',
+                        'hideSearch' => true,
+                        'options' => ['multiple' => true,'placeholder' => 'Выберите категорию'],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                        ],
+                    ]);
+                    ?>
+            </div> 
+            <div class="box-footer">
+                <div class="form-group">
+                    <?=Html::a('Добавить товары', ['#'], [
+                      'class' => 'btn btn-success btn-sm',
+                      'disabled' => 'disabled',
+                      'name' => 'addProduct',
+                      'id' => 'addProduct',
+                      'data' => [
+                      'target' => '#modal_addProduct',
+                      'toggle' => 'modal',
+                      'backdrop' => 'static',
+                         ],
+                      ]);?>
+                </div>
+                <div class="form-group">
+                    <?= Html::submitButton('Пригласить', ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier','id' => 'inviteSupplier']) ?>
+                </div>	    
+            </div>
+        </div>
+        <?php ActiveForm::end(); ?>
+        <?php Pjax::end(); ?>
+    </div>
+    </div>
+</section>
+
 <?php
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
 $this->registerCssFile('modules/handsontable/dist/bootstrap.css');
@@ -215,40 +244,40 @@ $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js')
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 //$this->registerJsFile('modules/alerts.js');
 $customJs = <<< JS
-/** 
- * Forward port jQuery.live()
- * Wrapper for newer jQuery.on()
- * Uses optimized selector context 
- * Only add if live() not already existing.
-*/
-if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))) {
-  jQuery.fn.extend({
-      live: function (event, callback) {
-         if (this.selector) {
-              jQuery(document).on(event, this.selector, callback);
-          }
-      }
-  });
-}
+var timer;
+$('#search').on("keyup", function () {
+window.clearTimeout(timer);
+   timer = setTimeout(function () {
+       $.pjax({
+        type: 'GET',
+        push: false,
+        timeout: 10000,
+        url: 'index.php?r=client/suppliers',
+        container: '#sp-list',
+        data: {searchString: $('#search').val()}
+      })
+   }, 700);
+});
+$(".modal").removeAttr("tabindex");
 function bootboxDialogShow(msg){
-    bootbox.dialog({
-        message: msg,
-        title: 'Уведомление',
-        buttons: {
-            success: {
-              label: "Окей!",
-              className: "btn-success btn-md",
-              callback: function() {
-                //location.reload();    
-              }
-            },
+bootbox.dialog({
+    message: msg,
+    title: 'Уведомление',
+    buttons: {
+        success: {
+          label: "Окей!",
+          className: "btn-success btn-md",
+          callback: function() {
+            //location.reload();    
+          }
         },
-    });
+    },
+});
 }
 $('#profile-full_name').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');
 $('#relationcategory-category_id').attr('disabled','disabled');
-$('.select2-search__field').css('width','100%')
+$('.select2-search__field').css('width','100%');
 $('#addProduct').attr('disabled','disabled');
 $('#modal_addProduct').on('shown.bs.modal', function() {
 var data = [];
@@ -282,6 +311,7 @@ for ( var i = 0; i < 60; i++ ) {
   manualColumnResize: true,
   autoWrapRow: true,
   minSpareRows: 1,
+  Controller: true,
   tableClassName: ['table-hover']
   })   
 });
@@ -315,110 +345,93 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
             dataType: "json",
             data: {'email' : input.val()},
             success: function(response) {
+            console.log(response)
                 if(response.success){
 	                if(response.eventType==1){
-		            var fio = response.fio;
+		        var fio = response.fio;
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
 	                $('#organization-name').val(organization);
 	                $('#addProduct').removeClass('hide');
 	                $('#inviteSupplier').addClass('hide');
-					$('#inviteSupplier').attr('disabled','disabled');
-		            $('#addProduct').attr('disabled','disabled');
-		            
-		            $('#profile-full_name').attr('readonly','readonly');
-		            $('#organization-name').attr('readonly','readonly');
+		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
-		            console.log(response.message);	    
+		            console.log('type = 1'); 	    
 	                }
 	                
 	                if(response.eventType==2){
-		            var fio = response.fio;
+		        var fio = response.fio;
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
 	                $('#organization-name').val(organization); 
 	                $('#addProduct').removeClass('hide');
 	                $('#inviteSupplier').addClass('hide');
-	                $('#inviteSupplier').attr('disabled','disabled');
-		            $('#addProduct').attr('disabled','disabled');
-		            
-		            $('#profile-full_name').attr('readonly','readonly');
-		            $('#organization-name').attr('readonly','readonly');
+		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
-		            console.log(response.message);   
+		            console.log('type = 2');    
 	                }
 	                
 	                if(response.eventType==3){
-		            var fio = response.fio;
+		        var fio = response.fio;
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
 	                $('#organization-name').val(organization);  
 		            $('#addProduct').removeClass('hide');
-	                $('#inviteSupplier').addClass('hide');
-		            $('#inviteSupplier').attr('disabled','disabled');
-		            $('#addProduct').removeAttr('disabled');
-		            
-		            $('#profile-full_name').attr('readonly','readonly');
-		            $('#organization-name').attr('readonly','readonly');
+                            $('#inviteSupplier').addClass('hide');
+		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').removeAttr('disabled');
-		            //bootboxDialogShow(response.message);
-		            console.log(response.message);    
+                            console.log('type = 3');     
 	                }
 	                
 	                if(response.eventType==4){
 		            $('#addProduct').removeClass('hide');
-	                $('#inviteSupplier').addClass('hide');
-		            $('#inviteSupplier').attr('disabled','disabled');
-		            $('#addProduct').attr('disabled','disabled'); 
-		            
-		            $('#profile-full_name').attr('readonly','readonly');
-		            $('#organization-name').attr('readonly','readonly');
+                            $('#inviteSupplier').addClass('hide'); 
+		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
-		            console.log(response.message);  
+		            console.log('type = 4');  
 	                }
 	                if(response.eventType==5){
-		            $('#addProduct').removeClass('hide');
-	                $('#inviteSupplier').addClass('hide');
-		            $('#inviteSupplier').attr('disabled','disabled');
-		            $('#addProduct').removeAttr('disabled');
-		            
-		            $('#profile-full_name').removeAttr('readonly');
-		            $('#organization-name').removeAttr('readonly');
 		            $('#relationcategory-category_id').removeAttr('disabled');
-		            //bootboxDialogShow(response.message);
-		            console.log(response.message);    
+                            $('#addProduct').removeClass('hide');
+                            $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
+		            $('#profile-full_name, #organization-name').removeAttr('readonly','readonly');
+                            console.log('type = 5');    
 	                }
 	                if(response.eventType==6){
-		            var fio = response.fio;
-	                var organization = response.organization;
+		        var fio = response.fio;
+                        var organization = response.organization;
 	                $('#profile-full_name').val(fio);
 	                $('#organization-name').val(organization); 
 	                $('#addProduct').addClass('hide');
-	                $('#inviteSupplier').removeClass('hide');  
-		            $('#inviteSupplier').removeAttr('disabled');
-		            $('#addProduct').attr('disabled','disabled');
-		            
-		            $('#profile-full_name').attr('readonly','readonly');
-		            $('#organization-name').attr('readonly','readonly');
+	                $('#inviteSupplier').removeClass('hide');
+		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').removeAttr('disabled');
-		            //bootboxDialogShow(response.message);
-		            console.log(response.message);    
+		            console.log('type = 6');    
 	                }
                 }else{
-	                //bootboxDialogShow(response.message);
-		            console.log(response.message); 
+		    console.log(response.message); 
                 }
             },
             error: function(response) {
-               // bootboxDialogShow(response.message);
-		        console.log(response.message); 
+		    console.log(response.message); 
             }
         }); 
 	}
 });
+$('#profile-full_name,#organization-name').on('keyup paste put', function(e){
+        console.log('ok');
+    if($('#profile-full_name').val().length<2 || $('#organization-name').val().length<2){
+        $('#inviteSupplier').attr('disabled','disabled');
+        $('#addProduct').attr('disabled','disabled'); 
+        }else{
+        $('#inviteSupplier').removeAttr('disabled');
+        $('#addProduct').removeAttr('disabled');   
+        }
+});
+        
 $('#inviteSupplier').click(function(e){
 e.preventDefault();	
     $.ajax({
@@ -437,7 +450,8 @@ e.preventDefault();
                           label: "Завершить",
                           className: "btn-success",
                           callback: function() {
-                              location.reload();    
+                              $('#loader-show').hideLoading();
+                              location.reload();   
                           }
                         },
                       }
@@ -479,8 +493,10 @@ e.preventDefault();
 		  success: function (response) {
                         if(response.success){
                           $('#loader-show').hideLoading();
+                          $.pjax.reload({container: "#add-supplier-list"});
+                          $.pjax.reload({container: "#sp-list"});
 			  $('#modal_addProduct').modal('hide'); 
-			  bootbox.dialog({
+                          bootbox.dialog({
 			  message: response.message,
 			  title: "Уведомление",
 			  buttons: {
@@ -488,34 +504,23 @@ e.preventDefault();
 			      label: "Завершить",
 			      className: "btn-success",
 			      callback: function() {
-                                  
-				  location.reload();    
+                               location.reload();     
 			      }
 			    },
 			  }
 			});
 		  }else{
                   $('#loader-show').hideLoading();
-		  //$('#invite').removeAttr('readonly');
 		  bootboxDialogShow(response.message);
 		  console.log(response.message); 	  
 		  }
 	  },
-      error: function(response) {
-      $('#loader-show').hideLoading();
-      console.log(response.message);
-      }
-	});
-});
-$("body").on("hidden.bs.modal", "#view-supplier", function() {
-    $(this).data("bs.modal", null);
-    //$.pjax.reload({container: "#sp-list"});
-})
-$("body").on("hidden.bs.modal", "#view-catalog", function() {
-    $(this).data("bs.modal", null);
-})
-$("#view-supplier").on("click", ".save-form", function() {      
-        
+        error: function(response) {
+            $('#loader-show').hideLoading();
+            }
+        });
+});       
+$("#view-supplier").on("click", ".save-form", function() {             
     var form = $("#supplier-form");
     $.ajax({
     url: form.attr("action"),
@@ -531,7 +536,13 @@ $("#view-supplier").on("click", ".save-form", function() {
         console.log(errMsg);
     }
     });
-});
+});  
+$("body").on("hidden.bs.modal", "#view-supplier", function() {
+    $(this).data("bs.modal", null);
+})
+$("body").on("hidden.bs.modal", "#view-catalog", function() {
+    $(this).data("bs.modal", null);
+})
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -268,7 +268,7 @@ class ClientController extends DefaultController {
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
-                    $units = (int) htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                    $units = trim($arrCatalogs['dataItem']['units']);
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                     if (empty($article)) {
                         $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
@@ -291,19 +291,17 @@ class ClientController extends DefaultController {
                         return $result;
                         exit;
                     }
-                    if (empty($units)) {
-                        $units = (int) 1;
+                    if (empty($units) || $units<0) {
+                        $units = 0;
                     }
-                    if (is_int($units) == false) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате<br>(только целое число)' . $units];
+                    $units = str_replace(',', '.', $units);
+                    if (!empty($units) && !preg_match($numberPattern, $units)) {
+                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате' . $units];
                         return $result;
                         exit;
                     }
-                    if ($units < 1) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара доолжно быть целым, положительным числом'];
-                        return $result;
-                        exit;
-                    }
+                    
+                    
                 }
                 $email = $user->email;
                 $fio = $profile->full_name;
@@ -383,8 +381,16 @@ class ClientController extends DefaultController {
                         $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                         $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                         $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
-                        if (empty($units) || $units<1) {
-                            $units = 1;
+                        $units = str_replace(',', '.', $units);
+                        if (substr($units, -3, 1) == '.') {
+                            $units = explode('.', $units);
+                            $last = array_pop($units);
+                            $units = join($units, '') . '.' . $last;
+                        } else {
+                            $units = str_replace('.', '', $units);
+                        }
+                        if (empty($units) || $units<0) {
+                            $units = 0;
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                         $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));

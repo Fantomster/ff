@@ -50,7 +50,7 @@ $this->title = 'Добавить продукты';
             [
             'attribute' => 'units',
             'label'=>'Кратность',
-            'value'=>'units',
+            'value'=>function ($data) { return empty($data['units'])?'':$data['units'];},
             'contentOptions' => ['style' => 'vertical-align:middle;width:120px;'],    
             ],
             [
@@ -126,6 +126,7 @@ $this->title = 'Добавить продукты';
             'columns' => $gridColumnsBaseCatalog,
             'tableOptions' => ['class' => 'table no-margin'],
             'options' => ['class' => 'table-responsive'],
+            'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
             'bordered' => false,
             'striped' => true,
             'condensed' => false,
@@ -148,6 +149,7 @@ window.clearTimeout(timer);
        $.pjax({
         type: "GET",
         push: false,
+        timeout: 10000,
         url: "index.php?r=vendor/step-2&id=' . $cat_id . '",
         container: "#pjax-container",
         data: {searchString: $("#search").val()}

@@ -55,7 +55,7 @@ $exportColumns = [
     ],
     [
     'label'=>'Наименование',
-    'value'=>function ($data) {return Helpers::trunctateText($data['product'], 4);},
+    'value'=>function ($data) {return $data['product'];},
     ],
     [
     'label'=>'Кратность',

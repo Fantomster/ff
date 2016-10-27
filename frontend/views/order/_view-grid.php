@@ -1,9 +1,10 @@
 <?php
 
 use kartik\grid\GridView;
+use common\models\Order;
 
 $dataProvider->sort = false;
-
+$discountTypes = Order::discountDropDown();
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterPosition' => false,

@@ -42,7 +42,6 @@ $js = <<<JS
                 $('#orderGrid').html(result);
                 $('#toPrint').printThis();
             });
-            
         });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);

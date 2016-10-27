@@ -227,7 +227,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
-        <button type="button" class="btn btn-primary changed">Уйти</button>
+        <button type="button" class="btn btn-danger changed">Уйти</button>
       </div>
     </div>
   </div>

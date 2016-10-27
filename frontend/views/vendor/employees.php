@@ -51,7 +51,7 @@ $this->registerJs(
 <section class="content-header">
     <h1>
         <i class="fa fa-gears"></i> Сотрудники
-        <small>Список работников организации</small>
+        <small>Список сотрудников организации</small>
     </h1>
     <?=
     Breadcrumbs::widget([

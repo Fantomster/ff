@@ -37,7 +37,8 @@
         "kartik-v/yii2-widgets": "*",
         "kop/yii2-scroll-pager": "dev-master",
         "kartik-v/yii2-field-range": "*",
-        "yii2assets/yii2-printthis": "^1.0"
+        "yii2assets/yii2-printthis": "^1.0",
+        "skeeks/yii2-assets-auto-compress": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

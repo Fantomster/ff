@@ -17,6 +17,7 @@ $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array
 
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
+$urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $js = <<<JS
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
             $.post(
@@ -34,8 +35,18 @@ $js = <<<JS
                 return 'You have already inputed some text. Sure to leave?';
             }
         });
+        $('.content').on('click', '#btnPrint', function() {
+            $.get(
+                "$urlGetGrid"
+            ).done(function(result) {
+                $('#orderGrid').html(result);
+                $('#toPrint').printThis();
+            });
+            
+        });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
+\yii2assets\printthis\PrintThisAsset::register($this);
 ?>
 
 <section class="content-header">
@@ -131,6 +142,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                         <?= $order->total_price ?></p>
                     <div id="actionButtons">
 <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   
+                        <a href="#" class="btn btn-outline-default" id="btnPrint">Распечатать</a>
                     </div>
                 </div>
             </div>

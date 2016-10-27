@@ -562,6 +562,27 @@ class OrderController extends DefaultController {
         return $this->render('checkout', compact('orders', 'totalCart'));
     }
 
+    public function actionAjaxOrderGrid($id) {
+        $order = Order::findOne(['id' => $id]);
+        $user = $this->currentUser;
+        if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+            $this->redirect(['/order/index']);
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+            $this->redirect(['/order/checkout']);
+        }
+        $organizationType = $user->organization->type_id;
+
+        $order->calculateTotalPrice();
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        return $this->renderPartial('_view-grid', compact('dataProvider'));
+    }
+    
     public function actionAjaxOrderAction() {
         if (Yii::$app->request->post()) {
             $user_id = $this->currentUser->id;

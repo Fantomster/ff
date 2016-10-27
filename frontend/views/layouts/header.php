@@ -42,6 +42,7 @@ if (!Yii::$app->user->isGuest) {
                     form.serialize()
                 ).done(function(result) {
                     $('#actionButtons').html(result);
+                    $.pjax.reload({container: "#orderContent"});
                 });
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);

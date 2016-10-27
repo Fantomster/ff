@@ -466,11 +466,11 @@ class OrderController extends DefaultController {
                 $order->discount = $discount['discount'];
             }
             if ($orderChanged && ($organizationType == Organization::TYPE_RESTAURANT)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил детали заказа №' . $order->id);
                 //$this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
             } elseif ($orderChanged && ($organizationType == Organization::TYPE_SUPPLIER)) {
-                $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил детали заказа №' . $order->id);
                 //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);

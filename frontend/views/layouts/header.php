@@ -253,6 +253,7 @@ JS;
 
                                 <p>
                                     <?= $user->profile->full_name ?> - <?= $user->role->name ?>
+                                    <small><?= $user->email ?></small>
                                     <small><?= $organization->name ?></small>
                                 </p>
                             </li>

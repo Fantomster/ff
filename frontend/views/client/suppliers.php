@@ -146,7 +146,7 @@ yii\bootstrap\Alert::widget([
         ?>
 <section class="content">
     <div class="row">
-    <div class="col-md-8">
+    <div class="col-sm-12 col-md-8">
         <div class="box box-info">
             <div class="box-header with-border">
                   <h3 class="box-title">Список поставщиков</h3>
@@ -180,7 +180,7 @@ yii\bootstrap\Alert::widget([
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-sm-12 col-md-4">
         <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'add-supplier-list'])?>
                 <?php $form = ActiveForm::begin(['id'=>'SuppliersFormSend']); ?>
         <div class="box box-info">
@@ -293,7 +293,9 @@ for ( var i = 0; i < 60; i++ ) {
         {data: 'product', wordWrap:true},
 	{
             data: 'units', 
-            type: 'numeric'
+            type: 'numeric',
+            format: '0.00',
+            language: 'ru-RU'
         },
 	{
             data: 'price', 

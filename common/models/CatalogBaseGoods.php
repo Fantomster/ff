@@ -13,7 +13,7 @@ use yii\data\ActiveDataProvider;
  * @property integer $category_id
  * @property string $article
  * @property string $product
- * @property integer $units
+ * @property number $units
  * @property integer $price
  * @property integer $status
  * @property integer $market_place
@@ -66,13 +66,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['article'], 'string', 'max' => 50],
             [['product'], 'string', 'max' => 255],
             [['note'], 'string', 'max' => 255],
-            [['units'], 'number'],
-            [['units'], 'number', 'min' => 1],
-            [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-                /* [['price'],'filter','filter'=>function ($value) {
-                  $price = $value/100;
-                  return $value;
-                  }], */
+            [['units','price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
         ];
     }
 
@@ -100,11 +94,11 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     {
     if (parent::beforeSave($insert)) {
             $this->price = str_replace(",", ".", $this->price);
+            $this->units = str_replace(",", ".", $this->units);
             return true;
         }
         return false;
     }
-    
     public function search($params, $id) {
         $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price','note', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
         //$query->andFilterWhere(['like', 'product', '']);

@@ -137,6 +137,8 @@ hot = new Handsontable(container, {
     {
         data: 'units', 
         type: 'numeric',
+        format: '0.00',
+        language: 'ru-RU'
     },
     {
         data: 'price', 

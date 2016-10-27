@@ -23,7 +23,7 @@ use yii\helpers\Html;
         <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
         <?php $this->head() ?>
     </head>
-    <body class="hold-transition skin-blue sidebar-mini">
+    <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">
     <?php $this->beginBody() ?>
     <div class="wrapper">
     
@@ -44,7 +44,14 @@ use yii\helpers\Html;
         ) ?>
 
     </div>
-
+<?php
+$js = <<<JS
+$('.sidebar-toggle').on('click', function(e){
+    $.post("index.php?r=client/sidebar", {"sidebar-collapse": true})
+});       
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
     <?php $this->endBody() ?>
     </body>
     </html>

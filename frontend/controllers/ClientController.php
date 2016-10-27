@@ -570,17 +570,54 @@ class ClientController extends DefaultController {
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::BASE_CATALOG) {
-            $searchModel = new CatalogBaseGoods;
-            $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $id, NULL);
-            return $this->renderAjax('suppliers/_viewBaseCatalog', compact('searchModel', 'dataProvider', 'cat_id'));
+        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,name as product,units,catalog_base_goods.price,catalog_base_goods.status "
+                . " FROM `catalog` "
+                . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
+                . " WHERE "
+                . " catalog_base_goods.cat_id = $id and deleted != 1");
+        $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
+                . " FROM `catalog` "
+                . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
+                . " WHERE "
+                . " catalog_base_goods.cat_id = $id and deleted != 1")->queryScalar();
         }
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::CATALOG) {
-            $searchModel = new CatalogGoods;
-            $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $id);
-            return $this->renderAjax('suppliers/_viewCatalog', compact('searchModel', 'dataProvider', 'cat_id'));
+        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,name as product,units,catalog_goods.price as price, catalog_base_goods.status "
+                . " FROM `catalog` "
+                . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
+                . " WHERE "
+                . " catalog_goods.cat_id = $id and deleted != 1");
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
+                . " FROM `catalog` "
+                . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
+                . " WHERE "
+                . " catalog_goods.cat_id = $id and deleted != 1")->queryScalar();
         }
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 7,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'article',
+                    'product',
+                    'units',
+                    'price',
+                    'status'
+                ],
+                'defaultOrder' => [
+                    'product' => SORT_DESC
+                ]
+            ],
+        ]);
+        return $this->renderAjax('suppliers/_viewCatalog', compact('searchModel', 'dataProvider', 'cat_id'));
+        
     }
 
     public function actionMessages() {

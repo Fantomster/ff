@@ -8,12 +8,7 @@ use yii\widgets\Pjax;
 ?>
 <?php
 $form = ActiveForm::begin([
-    'id' => 'view-catalog',
-    'enableAjaxValidation' => false,
-    'action' => Url::toRoute(['client/view-catalog', 'id' => $cat_id]),
-    'options' => [
-        'class' => 'view-catalog',
-    ],
+    'id' => 'view-catalog'
 ]);
 ?>
 <div class="modal-header">
@@ -41,8 +36,9 @@ $gridColumnsCatalog = [
     ],
     [
     'label'=>'Цена',
+    'format' => 'raw',
     'value'=>function ($data) {
-    return $data->price." руб.";
+    return $data->price."<i class=\"fa fa-fw fa-rub\"></i>";
     },
     ],
     [

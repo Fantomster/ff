@@ -198,7 +198,7 @@ class ClientController extends DefaultController {
     public function actionAjaxDeleteUser() {
         //
     }
-
+/*
     public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchModel = new RelationSuppRest;
@@ -209,7 +209,7 @@ class ClientController extends DefaultController {
         $organization = new Organization;
         return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
     }
-
+*/
     /**
      *
      * Типы callback-ов:
@@ -548,6 +548,14 @@ class ClientController extends DefaultController {
 
                 $message = 'Сохранено';
                 return $this->renderAjax('suppliers/_success', ['message' => $message]);
+            }else{
+                $post = Yii::$app->request->post();
+                if ($post) {
+                $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
+                \Yii::$app->db->createCommand($sql)->execute();
+                $message = 'Сохранено';
+                return $this->renderAjax('suppliers/_success', ['message' => $message]);    
+                }
             }
         }
         return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data', 'user'));
@@ -853,60 +861,65 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                                 'dataProvider', 'suppliers_dataProvider', 'chart_dates', 'chart_price'
         ));
     }
-    public function actionSuppliersView() {
+    public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchModel = new RelationSuppRest;
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_SUPPLIERS);
         $user = new User;
         $profile = new Profile;
         $relationCategory = new RelationCategory;
         $organization = new Organization;
-        return $this->render("suppliers/view", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
-    
-    }
-    public function actionSuppliersAdd() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchModel = new RelationSuppRest;
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_SUPPLIERS);
-        $user = new User;
-        $profile = new Profile;
-        $relationCategory = new RelationCategory;
-        $organization = new Organization;
-        
-        return $this->render("suppliers/add", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
-    
-    }
-    public function actionSuppliersAddNew() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $user = new User;
+        $searchString="";
+        $where = "";
         if (Yii::$app->request->isAjax) {
-           //Yii::$app->session->remove('email');
-           Yii::$app->response->format = Response::FORMAT_JSON;
-           $post = Yii::$app->request->post();
-           $user->load($post);
-           if ($user->validate()) {
-                Yii::$app->session->set('email',$user->email); 
-                $result = ['success' => true, 'message' => Yii::$app->session->get('email')];
-                return $result;
-                exit;
-           }else{
-                $result = ['success' => false, 'message' => 'Ошибка: Заполните поле <strong>e-mail</storng>'];
-                return $result;
-                exit;    
-           }
+                $searchString=trim(\Yii::$app->request->get('searchString'));
+                empty($searchString)?"":$where .= " and organization.name like '%" . $searchString . "%'";
         }
-        return $this->render("suppliers/addNew",compact("user"));
-    }
-    public function actionSuppliersAddNewStep2() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $user = new User;
-        $profile = new Profile;
-        return $this->render("suppliers/addNew",compact("user","profile"));
-    }
-    public function actionSuppliersAddNewStep3() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $user = new User;
-        return $this->render("suppliers/addNew",compact("user"));
+        $query = Yii::$app->db->createCommand("SELECT 
+            relation_supp_rest.id,
+            organization.name as 'organization_name',
+            relation_supp_rest.cat_id,
+            catalog.name as 'catalog_name',
+            relation_supp_rest.created_at,
+            relation_supp_rest.supp_org_id,
+            invite,
+            case 
+                when invite=0 then 1 else
+                    case when (select count(*) from user where email=`organization`.`email`)=1 then 2 else 3 end
+                    end as status_invite,
+            `relation_supp_rest`.`status` 
+            FROM {{%relation_supp_rest}}"
+                . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
+                . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
+                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where");
+        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM "
+                . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
+                . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
+                . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
+                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`")->queryScalar();
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'supp_org_id',
+                    'cat_id',
+                    'invite',
+                    'status',
+                    'created_at',
+                    'organization_name',
+                    'catalog_name',
+                    'status_invite'
+                ],
+                'defaultOrder' => [
+                    'created_at' => SORT_DESC
+                ]
+            ],
+        ]);
+        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "searchString", "dataProvider"));
+    
     }
     
 }

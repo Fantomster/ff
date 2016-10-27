@@ -30,7 +30,8 @@ $cartCount = $user->organization->getCartCount();
                         ['label' => 'Рабочий стол', 'icon' => 'fa fa-home', 'url' => ['client/index']],
                         ['label' => 'Разместить заказ' . Html::tag('span', $cartCount, ['class' => 'label label-primary pull-right cartCount']), 'icon' => 'fa fa-opencart', 'url' => ['order/create']],
                         ['label' => 'История заказов' . Html::tag('span', $newOrdersCount, ['class' => 'label bg-yellow pull-right']), 'icon' => 'fa fa-history', 'url' => ['order/index']],
-                        [
+                        ['label' => 'Поставщики', 'icon' => 'fa fa-users', 'url' => ['client/suppliers']],
+                        /*[
                             'label' => 'Поставщики', 
                             'icon' => 'fa fa-users', 
                             'url' => '#',//['client/suppliers'],
@@ -40,7 +41,7 @@ $cartCount = $user->organization->getCartCount();
                                 ['label' => 'Добавить поставщика', 'icon' => 'fa fa-circle-o', 'url' => ['client/suppliers-add']],
                                 //['label' => 'Добавить поставщика(new)', 'icon' => 'fa fa-circle-o', 'url' => ['client/suppliers-add-new']]
                             ]
-                            ],
+                            ],*/
                         ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['client/messages']],
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['client/analytics']],
                         ['label' => 'Обучающее видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['client/tutorial']],

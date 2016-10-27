@@ -6,6 +6,7 @@ use kartik\select2\Select2;
 use common\models\Category;
 use yii\helpers\ArrayHelper;
 use kartik\checkbox\CheckboxX;
+kartik\select2\Select2Asset::register($this);
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -75,52 +76,43 @@ $form = ActiveForm::begin([
         <div class="col-md-6">
             <?=empty($user)?'':
                 CheckboxX::widget([
-                                    'name'=>'resend_email',
-                                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                    'value'=>0,
-                                    'autoLabel' => true,
-                                    'options'=>['id'=>'resend_email'],
-                                    'pluginOptions'=>[
-                                        'threeState'=>false,
-                                        'theme' => 'krajee-flatblue',
-                                        'enclosedLabel' => true,
-                                        'size'=>'md',
-                                        ]
-                                ]) . 
+                    'name'=>'resend_email',
+                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                    'value'=>0,
+                    'autoLabel' => true,
+                    'options'=>['id'=>'resend_email'],
+                    'pluginOptions'=>[
+                        'threeState'=>false,
+                        'theme' => 'krajee-flatblue',
+                        'enclosedLabel' => true,
+                        'size'=>'md',
+                        ]
+                ]) . 
                 '<label class="control-label" for="resend_email">Отправить приглашение</label>';
             ?>
         </div>
     </div>
-    <?php 
-    
-        
-    ?>
+    <div class="row">
+        <div class="col-md-12">
     <?php 
     echo '<label class="control-label">Категория</label>';
     echo Select2::widget([
         'name'=>'relationCategory',
         'value' => $load_data,
+        'theme' => Select2::THEME_BOOTSTRAP,
+        'language' => 'ru',
         'data' => ArrayHelper::map(Category::find()->all(),'id','name'),
         'options' => ['placeholder' => 'Выбрать категорию...', 'multiple' => true],
         'pluginOptions' => [
-            'tags' => true,
+            'allowClear' => false
         ],
     ]);
     ?>
-    <?php /*= $form->field($relationCategory, 'category_id')->widget(Select2::classname(), [
-        'value' => $load_data,
-        'data' => Category::allCategory(),
-        'theme' => Select2::THEME_BOOTSTRAP,
-        'language' => 'ru',
-        'options' => ['multiple' => true,'placeholder' => 'Выбрать категорию...'],
-        'pluginOptions' => [
-            'allowClear' => true
-        ],
-    ]);*/
-    ?>
+        </div>
+    </div>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Закрыть</a>
+    <a href="#" class="btn btn-gray" data-dismiss="modal">Закрыть</a>
     <?= Html::button('Сохранить', ['class' => 'btn btn-success save-form']) ?>
 </div>
 <?php ActiveForm::end(); ?>

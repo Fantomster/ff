@@ -54,6 +54,7 @@ Modal::widget([
         <?php 
         $gridColumnsCatalog = [
             [
+            'attribute'=>'supp_org_id',
             'label'=>'Организация',
             'format' => 'raw',
             'contentOptions' => ['class'=>'text-bold','style' => 'vertical-align:middle;width:45%;font-size:14px'],
@@ -69,6 +70,7 @@ Modal::widget([
             }
             ],
             [
+            'attribute'=>'status',
             'label'=>'Статус сотрудничества',
             'contentOptions' => ['style' => 'vertical-align:middle;width:45%;'],
             'format' => 'raw',

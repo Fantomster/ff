@@ -35,6 +35,7 @@ class OrderController extends DefaultController {
                 'only' => [
                     'index',
                     'view',
+                    'edit',
                     'create',
                     'checkout',
                     'send-message',
@@ -49,7 +50,7 @@ class OrderController extends DefaultController {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
+                        'actions' => ['index', 'view', 'edit', 'send-message', 'ajax-order-action', 'ajax-refresh-buttons',],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [
@@ -233,7 +234,7 @@ class OrderController extends DefaultController {
                 }
             }
             $order->calculateTotalPrice();
-            return true; 
+            return true;
         }
 
         if (Yii::$app->request->get()) {
@@ -261,7 +262,7 @@ class OrderController extends DefaultController {
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                 return $this->successNotify("Комментарий добавлен");
             }
-            return false; 
+            return false;
         }
 
         if (Yii::$app->request->get()) {
@@ -352,7 +353,7 @@ class OrderController extends DefaultController {
 
         return false;
     }
-    
+
     public function actionAjaxSetDelivery() {
         if (Yii::$app->request->post()) {
             $client = $this->currentUser->organization;
@@ -362,7 +363,7 @@ class OrderController extends DefaultController {
             $oldDateSet = isset($order->requested_delivery);
             if ($order) {
                 //$timestamp = \DateTime::createFromFormat('d.m.Y H:i:s', $delivery_date. ' 23:59:59');
-                $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date. ' 23:59:59'));  
+                $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 23:59:59'));
 
                 $order->requested_delivery = $timestamp;
                 $order->save();
@@ -427,119 +428,61 @@ class OrderController extends DefaultController {
             $this->redirect(['/order/checkout']);
         }
         $organizationType = $user->organization->type_id;
-        if (isset($_POST['hasEditable'])) {
-            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
-            $initialQuantity = $model->initial_quantity;
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            $posted = current($_POST['OrderContent']);
-            $post = ['OrderContent' => $posted];
-            $allowedStatuses = [
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_PROCESSING
-            ];
-            if ($model->load($post) && in_array($order->status, $allowedStatuses)) {
-                $quantityChanged = isset($posted['quantity']);
-                if (!$quantityChanged && ($order->status == Order::STATUS_PROCESSING)) {
-                    return ['output' => '', 'message' => ''];
-                }
-                $value = ($quantityChanged) ? $model->quantity : $model->price;
-                if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($model->initial_quantity)) {
-                    $model->initial_quantity = $initialQuantity;
-                }
-                $model->save();
-                if ($organizationType == Organization::TYPE_RESTAURANT) {
-                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+
+        if (Yii::$app->request->post()) {
+            $orderChanged = false;
+            $content = Yii::$app->request->post('OrderContent');
+            $discount = Yii::$app->request->post('Order');
+            foreach ($content as $position) {
+                $product = OrderContent::findOne(['id' => $position['id']]);
+                $initialQuantity = $product->initial_quantity;
+                $allowedStatuses = [
+                    Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                    Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                    Order::STATUS_PROCESSING
+                ];
+                $quantityChanged = ($position['quantity'] != $product->quantity);
+                $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
+                if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+                    $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
-                        $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
-                        $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
+                        $product->quantity = $position['quantity'];
                     }
-                } else {
-                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
-                    $order->accepted_by_id = $user->id;
-                    if ($quantityChanged) {
-                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
-                    } else {
-                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
+                    if ($priceChanged) {
+                        $product->price = $position['price'];
                     }
-                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
+                    if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
+                        $product->initial_quantity = $initialQuantity;
+                    }
+                    $product->save();
                 }
-                $order->calculateTotalPrice(); //saves too
-                // $order->save();
-                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('user', 'order', 'organizationType'))];
-            } else {
-                return ['output' => '', 'message' => ''];
+            }
+            if (isset($discount['discount_type']) && isset($discount['discount'])) {
+                $order->discount_type = $discount['discount_type'];
+                $order->discount = $discount['discount'];
+            }
+            if ($orderChanged && ($organizationType == Organization::TYPE_RESTAURANT)) {
+                $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил детали заказа №' . $order->id);
+                //$this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
+            } elseif ($orderChanged && ($organizationType == Organization::TYPE_SUPPLIER)) {
+                $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                $order->accepted_by_id = $user->id;
+                $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил детали заказа №' . $order->id);
+                //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
         }
 
+        $order->calculateTotalPrice();
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
-        return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
-    }
-    
-    public function actionEdit($id) {
-        $order = Order::findOne(['id' => $id]);
-        $user = $this->currentUser;
-        if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        } else {
+            return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
         }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
-            $this->redirect(['/order/index']);
-        }
-        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
-            $this->redirect(['/order/checkout']);
-        }
-        $organizationType = $user->organization->type_id;
-        if (isset($_POST['hasEditable'])) {
-            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
-            $initialQuantity = $model->initial_quantity;
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            $posted = current($_POST['OrderContent']);
-            $post = ['OrderContent' => $posted];
-            $allowedStatuses = [
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_PROCESSING
-            ];
-            if ($model->load($post) && in_array($order->status, $allowedStatuses)) {
-                $quantityChanged = isset($posted['quantity']);
-                if (!$quantityChanged && ($order->status == Order::STATUS_PROCESSING)) {
-                    return ['output' => '', 'message' => ''];
-                }
-                $value = ($quantityChanged) ? $model->quantity : $model->price;
-                if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($model->initial_quantity)) {
-                    $model->initial_quantity = $initialQuantity;
-                }
-                $model->save();
-                if ($organizationType == Organization::TYPE_RESTAURANT) {
-                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                    if ($quantityChanged) {
-                        $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
-                    }
-                } else {
-                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
-                    $order->accepted_by_id = $user->id;
-                    if ($quantityChanged) {
-                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
-                    } else {
-                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
-                    }
-                }
-                $order->calculateTotalPrice(); //saves too
-                // $order->save();
-                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('user', 'order', 'organizationType'))];
-            } else {
-                return ['output' => '', 'message' => ''];
-            }
-        }
-
-        $searchModel = new OrderContentSearch();
-        $params = Yii::$app->request->getQueryParams();
-        $params['OrderContentSearch']['order_id'] = $order->id;
-        $dataProvider = $searchModel->search($params);
-        return $this->render('edit', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
     }
 
     public function actionCheckout() {
@@ -582,6 +525,27 @@ class OrderController extends DefaultController {
         return $this->render('checkout', compact('orders', 'totalCart'));
     }
 
+    public function actionAjaxOrderGrid($id) {
+        $order = Order::findOne(['id' => $id]);
+        $user = $this->currentUser;
+        if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+            $this->redirect(['/order/index']);
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+            $this->redirect(['/order/checkout']);
+        }
+        $organizationType = $user->organization->type_id;
+
+        $order->calculateTotalPrice();
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        return $this->renderPartial('_view-grid', compact('dataProvider', 'order'));
+    }
+    
     public function actionAjaxOrderAction() {
         if (Yii::$app->request->post()) {
             $user_id = $this->currentUser->id;
@@ -682,13 +646,13 @@ class OrderController extends DefaultController {
         $newMessage->sent_by_id = $user_id;
         $newMessage->save();
         $body = $this->renderPartial('_chat-message', [
-            'name' => '', 
-            'message' => $newMessage->message, 
-            'time' => $newMessage->created_at, 
-            'isSystem' => 1, 
+            'name' => '',
+            'message' => $newMessage->message,
+            'time' => $newMessage->created_at,
+            'isSystem' => 1,
             'sender_id' => $user_id,
             'ajax' => 1,
-                ]);
+        ]);
 
 //        return Yii::$app->redis->executeCommand('PUBLISH', [
 //                    'channel' => 'chat',
@@ -732,40 +696,39 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function successNotify ($title) {
-            return [
-                'success' => true,
-                'growl' => [
-                        'options' => [
+    private function successNotify($title) {
+        return [
+            'success' => true,
+            'growl' => [
+                'options' => [
 //                            'title' => 'test',
-                        ],
-                        'settings' => [
-                            'element' => 'body',
-                            'type' => $title, //'Заказ успешно оформлен',
-                            'allow_dismiss' => true,
-                            'placement' => [
-                                'from' => 'top',
-                                'align' => 'center',
-                            ],
-                            'delay' => 1500,
-                            'animate' => [
-                                'enter' => 'animated fadeInDown',
-                                'exit' => 'animated fadeOutUp',
-                            ],
-                            'offset' => 75,
-                            'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
-                            . '<div class="modal-content">'
-                            . '<div class="modal-header">'
-                            . '<h4 class="modal-title">{0}</h4></div>'
-                            . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
-                            . '<span class="glyphicon glyphicon-thumbs-up"></span>'
-                            . '</div></div></div>',
-                        ]
-                    ]
-            ];
-        
+                ],
+                'settings' => [
+                    'element' => 'body',
+                    'type' => $title, //'Заказ успешно оформлен',
+                    'allow_dismiss' => true,
+                    'placement' => [
+                        'from' => 'top',
+                        'align' => 'center',
+                    ],
+                    'delay' => 1500,
+                    'animate' => [
+                        'enter' => 'animated fadeInDown',
+                        'exit' => 'animated fadeOutUp',
+                    ],
+                    'offset' => 75,
+                    'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
+                    . '<div class="modal-content">'
+                    . '<div class="modal-header">'
+                    . '<h4 class="modal-title">{0}</h4></div>'
+                    . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
+                    . '<span class="glyphicon glyphicon-thumbs-up"></span>'
+                    . '</div></div></div>',
+                ]
+            ]
+        ];
     }
-    
+
     public function sendOrderChange($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -773,7 +736,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-		// send email
+        // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: измененения в заказе №" . $order_id;
@@ -786,5 +749,5 @@ class OrderController extends DefaultController {
         $mailer->viewPath = $oldViewPath;
         //return $result;
     }
-    
+
 }

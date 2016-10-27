@@ -76,11 +76,13 @@ JS;
     ?>
     <script type="text/javascript">
         var socket;
+        var dataEdited = 0;
+        var link = '#';
     </script>
 <?php } ?>
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini"><b>F</b>K</span><span class="logo-lg"><b>Food</b>Keeper</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini"><b>f</b>k</span><span class="logo-lg"><b>f</b>-keeper</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
         <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">

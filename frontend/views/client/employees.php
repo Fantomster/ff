@@ -50,8 +50,8 @@ $this->registerJs(
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Работники
-        <small>Список работников организации</small>
+        <i class="fa fa-gears"></i> Сотрудники
+        <small>Список сотрудников организации</small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -60,7 +60,7 @@ $this->registerJs(
         ],
         'links' => [
             'Настройки',
-            'Работники',
+            'Сотрудники',
         ],
     ])
     ?>

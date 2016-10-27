@@ -10,16 +10,6 @@ $cartCount = $user->organization->getCartCount();
 <aside class="main-sidebar">
 
     <section class="sidebar">
-        <div class="user-panel">
-            <div class="pull-left image">
-                <img src="images/no-avatar.jpg" class="img-circle" alt="User Image">
-            </div>
-            <div class="pull-left info">
-                <p><?= $user->profile->full_name ?></p>
-                <small><?= $user->role->name ?></small>
-            </div>
-        </div>
-
         <?=
         dmstr\widgets\Menu::widget(
                 [
@@ -28,7 +18,7 @@ $cartCount = $user->organization->getCartCount();
                     'items' => [
                         ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
                         ['label' => 'Рабочий стол', 'icon' => 'fa fa-home', 'url' => ['vendor/index']],
-                        ['label' => 'История заказов' . Html::tag('span', $newOrdersCount, ['class' => 'label bg-yellow pull-right']), 'icon' => 'fa fa-history', 'url' => ['order/index']],
+                        ['label' => 'Заказы' . Html::tag('span', $newOrdersCount, ['class' => 'label bg-yellow pull-right']), 'icon' => 'fa fa-history', 'url' => ['order/index']],
                         ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs']],
                         ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
                         ['label' => 'Мои клиенты', 'icon' => 'fa fa-users', 'url' => ['vendor/clients']],
@@ -42,7 +32,7 @@ $cartCount = $user->organization->getCartCount();
                             'options' => ['class' => "treeview"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'fa fa-circle-o', 'url' => ['vendor/settings']],
-                                ['label' => 'Работники', 'icon' => 'fa fa-circle-o', 'url' => ['vendor/employees']],
+                                ['label' => 'Сотрудники', 'icon' => 'fa fa-circle-o', 'url' => ['vendor/employees']],
                                 ['label' => 'Доставка', 'icon' => 'fa fa-circle-o', 'url' => ['vendor/delivery']],
                             ]
                             ],
@@ -53,7 +43,7 @@ $cartCount = $user->organization->getCartCount();
         )
         ?>
         <form action="#" method="get" style="margin: 15px;" class="invite-form">
-            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите своих поставщиков">
+            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
                 <input type="text" class="form-control" placeholder="Email">
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-success btn-flat"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i></button>

@@ -1,7 +1,5 @@
 <?php
 
-use kartik\grid\GridView;
-use kartik\editable\Editable;
 use yii\widgets\Pjax;
 use common\models\Order;
 use common\models\Organization;
@@ -19,17 +17,48 @@ $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array
 
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
+$urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $js = <<<JS
-$('#actionButtons').on('click', '.btnOrderAction', function() { 
-        $.post(
+        $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            $.post(
                 "$urlOrderAction",
                     {"action": $(this).data("action"), "order_id": $order->id}
-                ).done(function(result) {
+            ).done(function(result) {
                     $('#actionButtons').html(result);
-                });
-    });
+            });
+        });
+        $('.content').on('change keyup paste cut', '.viewData', function() {
+            dataEdited = 1;
+        });
+        $(document).on('click', 'a', function(e) {
+            if (dataEdited) {
+                e.preventDefault();
+                link = $(this).attr('href');
+                if (link != '#') {
+                    $('#dataChanged').modal('show')       
+                }
+            }
+        });
+        $(document).on('click', '.changed', function() {
+            document.location = link;
+        });
+        $('.content').on('click', '#btnPrint', function(e) {
+            e.preventDefault();
+            $.get(
+                "$urlGetGrid"
+            ).done(function(result) {
+                $('#orderGrid').html(result);
+                $('#toPrint').printThis();
+            });
+        });
+        $('.content').on('submit', function(e) {
+            e.preventDefault();
+            dataEdited = 0;
+            $(this).submit();
+        });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
+\yii2assets\printthis\PrintThisAsset::register($this);
 ?>
 
 <section class="content-header">
@@ -62,7 +91,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             <span>Заказчик:</span>
                             <address>
                                 <strong><?= $order->client->name ?></strong><br>
-                                <?= $order->client->city ?><br>
+<?= $order->client->city ?><br>
                                 адрес: <?= $order->client->address ?><br>
                                 телефон: <?= $order->client->phone ?>
                             </address>
@@ -73,7 +102,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             </p>
                             <p class="text-left">
                                 <strong>Запрошенная дата доставки:</strong><br>
-                                <?= $order->requested_delivery ?>
+<?= $order->requested_delivery ?>
                             </p>
                         </div>
                         <div class="col-xs-6 text-right">
@@ -81,7 +110,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             <span>Поставщик:</span>
                             <address>
                                 <strong><?= $order->vendor->name ?></strong><br>
-                                <?= $order->vendor->city ?><br>
+<?= $order->vendor->city ?><br>
                                 адрес: <?= $order->vendor->address ?><br>
                                 телефон: <?= $order->vendor->phone ?>
                             </address>
@@ -94,98 +123,17 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
-                    <?=
-                    GridView::widget([
-                        'dataProvider' => $dataProvider,
-                        'filterModel' => $searchModel,
-                        'filterPosition' => false,
-                        'summary' => '',
-                        //'tableOptions' => ['class' => 'table no-margin'],
-                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
-                        'options' => ['class' => 'table-responsive'],
-                        'panel' => false,
-                        'bootstrap' => false,
-                        'columns' => [
-                            'product.product',
-                            ($quantityEditable) ?
-                                    [
-                                'class' => 'kartik\grid\EditableColumn',
-                                'attribute' => 'quantity',
-                                'pageSummary' => true,
-                                'readonly' => false,
-                                'content' => function($data) {
-                                    return '<div class="text_content">' . htmlentities($data->quantity) . '</div>';
-                                },
-                                'editableOptions' => [
-                                    'header' => 'Количество',
-                                    'inputType' => Editable::INPUT_SPIN,
-                                    'asPopover' => false,
-                                    'options' => [
-                                        'pluginOptions' => [
-                                            'initval' => 'quantity',
-                                            'min' => 0,
-                                            'max' => PHP_INT_MAX,
-                                            'step' => 1,
-                                            'decimals' => 0,
-                                            'buttonup_class' => 'btn btn-default',
-                                            'buttondown_class' => 'btn btn-default',
-                                            'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                            'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                                        ],
-                                    ],
-                                    'submitButton' => [
-                                        'class' => 'btn btn-sm btn-success kv-editable-submit',
-                                    ],
-                                    'pluginEvents' => [
-                                        "editableSuccess" => "function(event, val, form, data) { $('#actionButtons').html(data.buttons); }",
-                                    ],
-                                ],
-                                    ] : 'quantity',
-                            ($priceEditable) ?
-                                    [
-                                'class' => 'kartik\grid\EditableColumn',
-                                'attribute' => 'price',
-                                'pageSummary' => true,
-                                'readonly' => false,
-                                'content' => function($data) {
-                                    return '<div class="text_content">' . htmlentities($data->price) . ' <i class="fa fa-fw fa-rub"></i></div>';
-                                },
-                                'editableOptions' => [
-                                    'header' => 'Цена',
-                                    'inputType' => Editable::INPUT_SPIN,
-                                    'asPopover' => false,
-                                    'options' => [
-                                        'pluginOptions' => [
-                                            'initval' => 'price',
-                                            'min' => 0,
-                                            'max' => PHP_INT_MAX,
-                                            'step' => 0.01,
-                                            'decimals' => 2,
-                                            'buttonup_class' => 'btn btn-primary',
-                                            'buttondown_class' => 'btn btn-info',
-                                            'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                            'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                                        ],
-                                    ],
-                                    'pluginEvents' => [
-                                        "editableSuccess" => "function(event, val, form, data) { $('#actionButtons').html(data.buttons); }",
-                                    ],
-                                ],
-                                    ] : [
-                                'format' => 'raw',
-                                'attribute' => 'price',
-                                'value' => function($data) {
-                                    return $data->price . ' <i class="fa fa-fw fa-rub"></i>';
-                                },
-                                'label' => 'Цена',
-                                    ],
-                        //'accepted_quantity',
-                        ],
-                    ]);
-                    ?>
-
-                    <?php Pjax::end(); ?>
+                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
+                    <div id="orderGrid">
+                        <?php
+                        if ($quantityEditable || $priceEditable) {
+                            echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'priceEditable', 'order'));
+                        } else {
+                            echo $this->render('_view-grid', compact('dataProvider', 'order'));
+                        }
+                        ?>
+                    </div>
+<?php Pjax::end(); ?>
                     <!-- /.table-responsive -->
                 </div>
                 <!-- /.box-body -->
@@ -197,16 +145,8 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 <div class="box-header">
                     <h3 class="box-title">Итого</h3>
                 </div>
-                <div class="box-body">
-                    <p class="text-left m-b-sm"><b>Дата создания заказа:</b><br>
-                        <?= $order->created_at ?></p>
-                    <p class="text-left m-b-sm"><b>Стоимость доставки:</b><br>
-                        <?= $order->vendor->delivery->delivery_charge ?></p>
-                    <p class="text-left m-b-sm"><b>Стоимость заказа:</b><br>
-                        <?= $order->total_price ?></p>
-                    <div id="actionButtons">
+                <div class="box-body" id="actionButtons">
                     <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   
-                    </div>
                 </div>
             </div>
             <?php
@@ -267,10 +207,28 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             ?>
                         </span>
                     </div>
-                    <?= Html::endForm() ?>
+<?= Html::endForm() ?>
                 </div>
                 <!-- /.box-footer-->
             </div>    
         </div>
     </div>
 </section>
+<!-- Modal -->
+<div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
+      </div>
+      <div class="modal-body">
+      Вы изменили заказ, но не сохранили изменения!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
+        <button type="button" class="btn btn-danger changed">Уйти</button>
+      </div>
+    </div>
+  </div>
+</div>

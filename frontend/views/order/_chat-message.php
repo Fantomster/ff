@@ -1,5 +1,5 @@
-<?php 
-    $isSender = (Yii::$app->user->identity->id == $sender_id) && !$ajax;
+<?php
+$isSender = (Yii::$app->user->identity->id == $sender_id) && !$ajax;
 ?>
 <?php if ($isSystem) { ?>
     <div class="direct-chat-msg system">
@@ -7,8 +7,10 @@
             <span class="direct-chat-name pull-left"><i>System</i></span>
             <span class="direct-chat-timestamp pull-right"><?= Yii::$app->formatter->asTime($time, "php:Y-m-d H:i:s") ?></span>
         </div>
-        <div class="direct-chat-text">
-            <i><?= $message ?></i>
+        <div class="direct-chat-text container-fluid">
+            <div>
+                <i><?= $message ?></i>
+            </div>
         </div>
     </div>
 
@@ -19,7 +21,7 @@
             <span class="direct-chat-timestamp<?= $isSender ? " pull-left" : " pull-right" ?>"><?= Yii::$app->formatter->asTime($time, "php:Y-m-d H:i:s") ?></span>
         </div>
         <div class="direct-chat-text">
-            <?= $message ?>
+            <span><?= $message ?></span>
         </div>
     </div>
 <?php } ?>

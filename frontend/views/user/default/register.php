@@ -35,7 +35,7 @@ $this->title = Yii::t('user', 'Register');
                             $form->field($organization, 'type_id')
                             ->label(false)
                             ->dropDownList(OrganizationType::getList(), [
-                                'prompt' => 'ресторан / поставщик',
+                                'prompt' => 'Выберите тип бизнеса',
                                 'class' => 'form-control'])
                     ?>
                     <?=

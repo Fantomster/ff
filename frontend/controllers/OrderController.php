@@ -445,8 +445,12 @@ class OrderController extends DefaultController {
                 $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
                 if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
-                    $product->quantity = $position['quantity'];
-                    $product->price = $position['price'];
+                    if ($quantityChanged) {
+                        $product->quantity = $position['quantity'];
+                    }
+                    if ($priceChanged) {
+                        $product->price = $position['price'];
+                    }
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }

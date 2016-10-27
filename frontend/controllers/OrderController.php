@@ -469,57 +469,16 @@ class OrderController extends DefaultController {
             }
         }
 
-//        if (isset($_POST['hasEditable'])) {
-//            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
-//            $initialQuantity = $model->initial_quantity;
-//            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-//            $posted = current($_POST['OrderContent']);
-//            $post = ['OrderContent' => $posted];
-//            $allowedStatuses = [
-//                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
-//                Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-//                Order::STATUS_PROCESSING
-//            ];
-//            if ($model->load($post) && in_array($order->status, $allowedStatuses)) {
-//                $quantityChanged = isset($posted['quantity']);
-//                if (!$quantityChanged && ($order->status == Order::STATUS_PROCESSING)) {
-//                    return ['output' => '', 'message' => ''];
-//                }
-//                $value = ($quantityChanged) ? $model->quantity : $model->price;
-//                if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($model->initial_quantity)) {
-//                    $model->initial_quantity = $initialQuantity;
-//                }
-//                $model->save();
-//                if ($organizationType == Organization::TYPE_RESTAURANT) {
-//                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-//                    if ($quantityChanged) {
-//                        $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
-//                        $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
-//                    }
-//                } else {
-//                    $order->status = $order->status == Order::STATUS_PROCESSING ? $order->status == Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
-//                    $order->accepted_by_id = $user->id;
-//                    if ($quantityChanged) {
-//                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил количество товара ' . $model->product->product . ' на ' . $model->quantity);
-//                    } else {
-//                        $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил цену товара ' . $model->product->product . ' на ' . $model->price);
-//                    }
-//                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
-//                }
-//                $order->calculateTotalPrice(); //saves too
-//                // $order->save();
-//                return ['output' => $value, 'message' => '', 'buttons' => $this->renderPartial('_order-buttons', compact('user', 'order', 'organizationType'))];
-//            } else {
-//                return ['output' => '', 'message' => ''];
-//            }
-//        }
-
         $order->calculateTotalPrice();
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
-        return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        } else {
+            return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        }
     }
 
     public function actionCheckout() {

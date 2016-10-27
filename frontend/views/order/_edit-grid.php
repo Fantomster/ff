@@ -8,7 +8,7 @@ use kartik\form\ActiveForm;
 use common\models\Order;
 
 $form = ActiveForm::begin([
-            'id' => 'generalSettings',
+            'id' => 'editOrder',
             'enableAjaxValidation' => false,
             'options' => [
                 'data-pjax' => true,

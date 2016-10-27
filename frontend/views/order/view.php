@@ -35,13 +35,19 @@ $js = <<<JS
                 return 'You have already inputed some text. Sure to leave?';
             }
         });
-        $('.content').on('click', '#btnPrint', function() {
+        $('.content').on('click', '#btnPrint', function(e) {
+            e.preventDefault();
             $.get(
                 "$urlGetGrid"
             ).done(function(result) {
                 $('#orderGrid').html(result);
                 $('#toPrint').printThis();
             });
+        });
+        $('.content').on('submit', function(e) {
+            e.preventDefault();
+            dataEdited = 0;
+            $(this).submit();
         });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
@@ -132,17 +138,8 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 <div class="box-header">
                     <h3 class="box-title">Итого</h3>
                 </div>
-                <div class="box-body">
-                    <p class="text-left m-b-sm"><b>Дата создания заказа:</b><br>
-                        <?= $order->created_at ?></p>
-                    <p class="text-left m-b-sm"><b>Стоимость доставки:</b><br>
-                        <?= $order->vendor->delivery->delivery_charge ?></p>
-                    <p class="text-left m-b-sm"><b>Стоимость заказа:</b><br>
-                        <?= $order->total_price ?></p>
-                    <div id="actionButtons">
-<?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   
-                        <a href="#" class="btn btn-outline-default" id="btnPrint">Распечатать</a>
-                    </div>
+                <div class="box-body" id="actionButtons">
+                    <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   
                 </div>
             </div>
             <?php

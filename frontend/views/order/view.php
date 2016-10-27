@@ -31,7 +31,7 @@ $js = <<<JS
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
-                    //
+                    dataEdited = 0;
                 });
             } else {
             $.post(

@@ -55,7 +55,7 @@ $exportColumns = [
     ],
     [
     'label'=>'Наименование',
-    'value'=>function ($data) {return Helpers::trunctateText($data['product'], 4);},
+    'value'=>function ($data) {return $data['product'];},
     ],
     [
     'label'=>'Кратность',
@@ -440,6 +440,7 @@ window.clearTimeout(timer);
        $.pjax({
         type: 'GET',
         push: false,
+        timeout: 10000,
         url: 'index.php?r=vendor/basecatalog&id=$currentCatalog',
         container: '#products-list',
         data: {searchString: $('#search').val()}

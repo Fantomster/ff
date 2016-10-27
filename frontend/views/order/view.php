@@ -24,12 +24,23 @@ $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 $js = <<<JS
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            if ($(this).data("action") == "confirm" && dataEdited) {
+                var form = $("#editOrder");
+                extData = "&orderAction=confirm"; 
+                $.post(
+                    form.attr("action"),
+                    form.serialize() + extData
+                ).done(function(result) {
+                    //
+                });
+            } else {
             $.post(
                 "$urlOrderAction",
                     {"action": $(this).data("action"), "order_id": $order->id}
             ).done(function(result) {
                     $('#actionButtons').html(result);
             });
+            }
         });
         $('.content').on('change keyup paste cut', '.viewData', function() {
             dataEdited = 1;

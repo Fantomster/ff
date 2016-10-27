@@ -481,6 +481,14 @@ class OrderController extends DefaultController {
             if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = Order::STATUS_CANCELLED;
             }
+
+            if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
+                if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                    $systemMessage = 'Клиент получил заказ!';
+                    $order->status = Order::STATUS_DONE;
+                    $this->sendSystemMessage($user->id, $order->id, $systemMessage);
+                }
+            }
         }
 
         $order->calculateTotalPrice();

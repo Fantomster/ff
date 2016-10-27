@@ -77,6 +77,7 @@ JS;
     <script type="text/javascript">
         var socket;
         var dataEdited = 0;
+        var link = '#';
     </script>
 <?php } ?>
 <header class="main-header">

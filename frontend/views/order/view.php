@@ -30,10 +30,17 @@ $js = <<<JS
         $('.content').on('change keyup paste cut', '.viewData', function() {
             dataEdited = 1;
         });
-        $(window).on('beforeunload', function(e) {
-            if(dataEdited) {
-                return 'You have already inputed some text. Sure to leave?';
+        $(document).on('click', 'a', function(e) {
+            if (dataEdited) {
+                e.preventDefault();
+                link = $(this).attr('href');
+                if (link != '#') {
+                    $('#dataChanged').modal('show')       
+                }
             }
+        });
+        $(document).on('click', '.changed', function() {
+            document.location = link;
         });
         $('.content').on('click', '#btnPrint', function(e) {
             e.preventDefault();
@@ -207,3 +214,21 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
         </div>
     </div>
 </section>
+<!-- Modal -->
+<div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
+      </div>
+      <div class="modal-body">
+      Вы изменили заказ, но не сохранили изменения!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
+        <button type="button" class="btn btn-primary changed">Уйти</button>
+      </div>
+    </div>
+  </div>
+</div>

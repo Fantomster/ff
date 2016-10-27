@@ -98,7 +98,8 @@ echo GridView::widget([
                                         'format' => 'raw',
                                         'value' => function($data) {
                                             return '<a href="#" class="deletePosition btn btn-outline-danger" data-target="#qnty'.$data->id.'"><i class="fa fa-trash m-r-xxs"></i></a>';
-                                        }
+                                        },
+                                        'contentOptions' => ['class' => 'text-center'],        
                                     ],
                     ],
                 ]);

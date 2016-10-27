@@ -440,7 +440,7 @@ window.clearTimeout(timer);
        $.pjax({
         type: 'GET',
         push: false,
-        timeout: 10000;
+        timeout: 10000,
         url: 'index.php?r=vendor/basecatalog&id=$currentCatalog',
         container: '#products-list',
         data: {searchString: $('#search').val()}

@@ -25,6 +25,7 @@ echo GridView::widget([
     'options' => ['class' => 'table-responsive'],
     'panel' => false,
     'bootstrap' => false,
+    'resizableColumns' => false,
     'columns' => [
         [
             'format' => 'raw',
@@ -63,6 +64,7 @@ echo GridView::widget([
                     'content' => function($data) {
                         return TouchSpin::widget([
                                     'name' => "OrderContent[$data->id][price]",
+                                    'id' => "qnty$data->id",
                                     'pluginOptions' => [
                                         'initval' => $data->price,
                                         'min' => 0,
@@ -92,6 +94,12 @@ echo GridView::widget([
                             },
                             'label' => 'Общая стоимость',
                         ],
+                                    [
+                                        'format' => 'raw',
+                                        'value' => function($data) {
+                                            return '<a href="#" class="deletePosition btn btn-outline-danger" data-target="#qnty'.$data->id.'"><i class="fa fa-trash m-r-xxs"></i></a>';
+                                        }
+                                    ],
                     ],
                 ]);
                             $discountTypes = Order::discountDropDown();

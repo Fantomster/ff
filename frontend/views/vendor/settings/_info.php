@@ -60,8 +60,8 @@ use yii\helpers\Url;
     ?>
 
     <div class="box-footer">
-        <?= Html::button('Сохранить изменения', ['class' => 'btn btn-success', 'id' => 'saveOrg', 'disabled' => true]) ?>
-        <?= Html::button('Отменить изменения', ['class' => 'btn btn-danger', 'id' => 'cancelOrg', 'disabled' => true]) ?>
+        <?= Html::button('<i class="icon fa fa-save"></i> Сохранить изменения', ['class' => 'btn btn-success', 'id' => 'saveOrg', 'disabled' => true]) ?>
+        <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-danger', 'id' => 'cancelOrg', 'disabled' => true]) ?>
     </div>				
     <?php ActiveForm::end(); ?>    
 </div>

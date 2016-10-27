@@ -157,6 +157,6 @@ echo GridView::widget([
 </table>
                     <?php
                 }
-                echo Html::submitButton('Сохранить', ['class' => 'btn btn-success pull-right'])."</div>";
+                echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right'])."</div>";
                 ActiveForm::end();
                 

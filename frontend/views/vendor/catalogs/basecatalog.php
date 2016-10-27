@@ -102,7 +102,7 @@ $exportColumns = [
                     'id' => 'add-product',
                     'clientOptions' => false,
                     'toggleButton' => [
-                        'label' => '<i class="fa fa-plus"></i> Новый товар',
+                        'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
                         'tag' => 'a',
                         'data-target' => '#add-product',
                         'class' => 'btn btn-fk-success btn-sm pull-right',

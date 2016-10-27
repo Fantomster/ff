@@ -52,7 +52,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         </div>
         <div class="panel-body">
     <?= Html::a(
-        'Сохранить',
+        '<i class="icon fa fa-save"></i> Сохранить',
         ['#'],
         ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px'],'id'=>'save', 'name'=>'save']
     ) ?>

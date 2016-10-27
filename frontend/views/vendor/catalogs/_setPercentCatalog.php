@@ -18,7 +18,7 @@ $form = ActiveForm::begin([
     <?=$form->field($catalogGoods, 'discount_percent')->textInput(['class' => 'form-control input-md']); ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Отмена</a>
-    <?= Html::button('Сохранить', ['class' => 'btn btn-primary set']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+    <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-primary set']) ?>
 </div>
 <?php ActiveForm::end(); ?>

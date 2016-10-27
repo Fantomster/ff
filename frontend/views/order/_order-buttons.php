@@ -14,31 +14,31 @@ use common\models\Organization;
     switch ($order->status) {
         case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
             ?>
-            <a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel">Отменить</a>
+    <a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>
             <?php if ($organizationType == Organization::TYPE_RESTAURANT) { ?>
-                <a href="#" class="btn btn-warning disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения заказа</a>   
+                <a href="#" class="btn btn-warning disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>   
             <?php } else { ?>
-                <a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm">Подтвердить</a>       
+                <a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm"><i class="icon fa fa-thumbs-o-up"></i> Подтвердить</a>       
             <?php
             }
             break;
         case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
             ?>
-            <a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel">Отменить</a>       
+            <a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>       
             <?php if ($organizationType == Organization::TYPE_SUPPLIER) { ?>
-                <a href="#" class="btn btn-warning disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения заказа</a>   
+                <a href="#" class="btn btn-warning disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>   
             <?php } else { ?>
-                <a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm">Подтвердить</a>       
+                <a href="#" class="btn btn-outline-processing btnOrderAction" data-action="confirm"><i class="icon fa fa-thumbs-o-up"></i> Подтвердить</a>       
             <?php
             }
             break;
         case Order::STATUS_PROCESSING:
             ?>
-            <a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel">Отменить</a>       
+            <a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>       
             <?php if ($organizationType == Organization::TYPE_SUPPLIER) { ?>
                 <a href="#" class="btn btn-processing disabled"><span class='badge'><i class="icon fa fa-info"></i></span>&nbsp; Исполняется</a>  
             <?php } else { ?>
-                <a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm">Получить</a> 
+                <a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm"><i class="icon fa fa-check"></i> Получить</a> 
             <?php
             }
             break;
@@ -59,5 +59,5 @@ use common\models\Organization;
         break;
 }
 ?>
-    <a href="#" class="btn btn-outline-default" id="btnPrint">Распечатать</a>
+            <a href="#" class="btn btn-outline-default" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>
 </div>

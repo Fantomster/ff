@@ -921,5 +921,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "searchString", "dataProvider"));
     
     }
-    
+    public function actionSidebar() {
+        Yii::$app->session->get('sidebar-collapse')?
+        Yii::$app->session->set('sidebar-collapse', false):
+        Yii::$app->session->set('sidebar-collapse', true);    
+    }
 }

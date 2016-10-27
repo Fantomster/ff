@@ -6,7 +6,6 @@ use common\models\Organization;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
-
 if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
@@ -70,7 +69,6 @@ $('#chat-form').submit(function() {
 
      return false;
 });
-        
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
     ?>

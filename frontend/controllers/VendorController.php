@@ -1467,5 +1467,9 @@ class VendorController extends DefaultController {
     public function actionSupport() {
         return $this->render('/site/underConstruction');
     }
-
+    public function actionSidebar() {
+        Yii::$app->session->get('sidebar-collapse')?
+        Yii::$app->session->set('sidebar-collapse', false):
+        Yii::$app->session->set('sidebar-collapse', true);    
+    }
 }

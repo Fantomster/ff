@@ -60,6 +60,12 @@ $js = <<<JS
             dataEdited = 0;
             $(this).submit();
         });
+        $('.content').on('click', '.deletePosition', function(e) {
+            e.preventDefault();
+            target = $(this).data("target");
+            $(target)
+            alert($(target));
+        });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \yii2assets\printthis\PrintThisAsset::register($this);
@@ -193,7 +199,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                     ])
                     ?>
                     <div class="input-group">
-                        <?= Html::hiddenInput('order_id', $order->id); ?>
+                        <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
                         <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
                         <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
                         <?=

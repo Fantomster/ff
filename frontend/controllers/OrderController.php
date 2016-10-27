@@ -555,7 +555,7 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         return $this->renderPartial('_view-grid', compact('dataProvider', 'order'));
     }
-    
+
     public function actionAjaxOrderAction() {
         if (Yii::$app->request->post()) {
             $user_id = $this->currentUser->id;
@@ -633,14 +633,28 @@ class OrderController extends DefaultController {
             $channel = 'user' . $clientUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
-                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0, 'id' => $newMessage->id, 'sender_id' => $user->id])
+                'message' => Json::encode([
+                    'body' => $body,
+                    'channel' => $channel,
+                    'isSystem' => 0,
+                    'id' => $newMessage->id,
+                    'sender_id' => $user->id,
+                    'order_id' => $order_id,
+                ])
             ]);
         }
         foreach ($vendorUsers as $vendorUser) {
             $channel = 'user' . $vendorUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
-                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 0, 'id' => $newMessage->id, 'sender_id' => $user->id])
+                'message' => Json::encode([
+                    'body' => $body,
+                    'channel' => $channel,
+                    'isSystem' => 0,
+                    'id' => $newMessage->id,
+                    'sender_id' => $user->id,
+                    'order_id' => $order_id,
+                ])
             ]);
         }
 
@@ -678,14 +692,24 @@ class OrderController extends DefaultController {
             $channel = 'user' . $clientUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
-                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
+                'message' => Json::encode([
+                    'body' => $body,
+                    'channel' => $channel,
+                    'isSystem' => 1,
+                    'order_id' => $order_id,
+                ])
             ]);
         }
         foreach ($vendorUsers as $vendorUser) {
             $channel = 'user' . $vendorUser->id;
             Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'chat',
-                'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
+                'message' => Json::encode([
+                    'body' => $body,
+                    'channel' => $channel,
+                    'isSystem' => 1,
+                    'order_id' => $order_id,
+                ])
             ]);
         }
 

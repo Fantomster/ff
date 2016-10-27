@@ -153,8 +153,8 @@ $this->registerJs(
             </div>
         </div>
         <div class="box-footer">
-            <?= Html::submitButton('Сохранить изменения', ['class' => 'btn btn-success', 'id' => 'saveDlv', 'disabled' => true]) ?>
-            <?= Html::button('Отменить изменения', ['class' => 'btn btn-danger', 'id' => 'cancelDlv', 'disabled' => true]) ?>
+            <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить изменения', ['class' => 'btn btn-success', 'id' => 'saveDlv', 'disabled' => true]) ?>
+            <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-danger', 'id' => 'cancelDlv', 'disabled' => true]) ?>
         </div>				
         <?php
         ActiveForm::end();

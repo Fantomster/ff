@@ -94,7 +94,7 @@ $this->registerJs(
             'id' => 'add-user',
             'clientOptions' => false,
             'toggleButton' => [
-                'label' => ' Добавить пользователя',
+                'label' => '<i class="icon fa fa-user-plus"></i>  Добавить сотрудника',
                 'tag' => 'a',
                 'data-target' => '#add-user',
                 'class' => 'btn btn-success pull-right',

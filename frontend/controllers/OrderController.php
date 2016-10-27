@@ -454,7 +454,11 @@ class OrderController extends DefaultController {
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
                         $product->initial_quantity = $initialQuantity;
                     }
-                    $product->save();
+                    if ($product->quantity == 0) {
+                        $product->delete();
+                    } else {
+                        $product->save();
+                    }
                 }
             }
             if (isset($discount['discount_type']) && isset($discount['discount'])) {
@@ -470,6 +474,12 @@ class OrderController extends DefaultController {
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил детали заказа №' . $order->id);
                 //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
+            }
+            if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_SUPPLIER)) {
+                $order->status = Order::STATUS_REJECTED;
+            }
+            if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
+                $order->status = Order::STATUS_CANCELLED;
             }
         }
 

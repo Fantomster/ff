@@ -8,7 +8,7 @@ return [
     'id' => 'f-keeper',
     'name' => 'f-keeper',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log',],// 'assetsAutoCompress'
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
@@ -27,6 +27,10 @@ return [
                 ],
             ],
         ],
+//        'assetsAutoCompress' =>
+//        [
+//            'class'         => '\skeeks\yii2\assetsAuto\AssetsAutoCompressComponent',
+//        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],

@@ -30,7 +30,7 @@ use Yii;
  * @property Organization $vendor
  * @property OrderContent[] $orderContent
  * @property OrderChat[] $orderChat
- * @property integer positionsCount
+ * @property integer positionCount
  */
 class Order extends \yii\db\ActiveRecord {
 

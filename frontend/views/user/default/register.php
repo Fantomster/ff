@@ -1,9 +1,5 @@
 <?php
 
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
-use common\models\OrganizationType;
-
 /**
  * @var yii\web\View $this
  * @var yii\widgets\ActiveForm $form
@@ -26,53 +22,11 @@ $this->title = Yii::t('user', 'Register');
                     <p><?= $flash ?></p>
                 </div>
 
-            <?php else: ?>
-                <?php
-                $form = ActiveForm::begin(['id' => 'login-form']);
-                ?>
-                <div class="form-group">
-                    <?=
-                            $form->field($organization, 'type_id')
-                            ->label(false)
-                            ->dropDownList(OrganizationType::getList(), [
-                                'prompt' => 'Выберите тип бизнеса',
-                                'class' => 'form-control'])
-                    ?>
-                    <?=
-                            $form->field($organization, 'name')
-                            ->label(false)
-                            ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
-                    ?>
-                    <?=
-                            $form->field($user, 'email')
-                            ->label(false)
-                            ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
-                    ?>
-                    <?=
-                            $form->field($profile, 'full_name')
-                            ->label(false)
-                            ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
-                    ?>
-                    <?=
-                            $form->field($user, 'newPassword')
-                            ->label(false)
-                            ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
-                    ?>
-                </div>
-                <?=
-                Html::a('Зарегистрироваться', '#', [
-                    'data' => [
-                        'method' => 'post',
-                    ],
-                    'class' => 'send__btn',
-                ])
-                ?>
-                <div class="regist">
-                    <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
-                </div>
-            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
-                <?php ActiveForm::end(); ?>
-            <?php endif; ?>
+            <?php 
+            else:
+                echo $this->render('_register-form', compact("user", "profile", "organization"));
+            endif; 
+            ?>
         </div>
     </div>
 

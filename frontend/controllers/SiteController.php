@@ -93,7 +93,9 @@ class SiteController extends Controller {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
+        $profile->scenario = 'register';
         $organization = new Organization();
+        $organization->scenario = 'register';
         return $this->render('index', compact("user", "profile", "organization"));
     }
 
@@ -116,14 +118,18 @@ class SiteController extends Controller {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
+        $profile->scenario = 'register';
         $organization = new Organization();
+        $organization->scenario = 'register';
         return $this->render('restaurant', compact("user", "profile", "organization"));
     }
     public function actionSupplier() {
         $user = new User();
         $user->scenario = 'register';
         $profile = new Profile();
+        $profile->scenario = 'register';
         $organization = new Organization();
+        $organization->scenario = 'register';
         return $this->render('supplier', compact("user", "profile", "organization"));
     }
 }

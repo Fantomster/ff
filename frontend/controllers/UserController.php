@@ -48,8 +48,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         /** @var \common\models\Organization $organization */
         // set up new user/profile/organization objects
         $user = $this->module->model("User", ["scenario" => "register"]);
-        $profile = $this->module->model("Profile");
-        $organization = $this->module->model("Organization");
+        $profile = $this->module->model("Profile", ["scenario" => "register"]);
+        $organization = $this->module->model("Organization", ["scenario" => "register"]);
 
         // load post data
         $post = Yii::$app->request->post();

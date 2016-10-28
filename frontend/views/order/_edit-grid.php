@@ -54,7 +54,7 @@ echo GridView::widget([
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                            'options' => ['class' => 'viewData'],
+                            'options' => ['class' => 'viewData', 'id' => 'qnty'.$data->id],
                         ]) . Html::hiddenInput("OrderContent[$data->id][id]", $data->id);
             },
                     'contentOptions' => ['class' => 'width150'],

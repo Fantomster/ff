@@ -487,6 +487,7 @@ class OrderController extends DefaultController {
                     $systemMessage = 'Клиент получил заказ!';
                     $order->status = Order::STATUS_DONE;
                     $this->sendSystemMessage($user->id, $order->id, $systemMessage);
+                    //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
                 }
             }
         }

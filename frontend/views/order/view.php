@@ -74,8 +74,14 @@ $js = <<<JS
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
             target = $(this).data("target");
-            $(target)
-            alert($(target));
+            $(target).val(0);
+            var form = $("#editOrder");
+            $.post(
+                form.attr("action"),
+                form.serialize()
+            ).done(function(result) {
+                dataEdited = 0;
+            });
         });
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);

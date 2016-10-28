@@ -478,24 +478,10 @@ a:focus {
         height: 100%;
         z-index: -1;
     }
-    // .header-nav .logo__block-icon {
-    // 	background: url(../images/logo-rut.png) no-repeat;	
-    // 	background-size: 180px 69px;
-    // 	display: block;
-    // 	width: 180px;
-    // 	height: 34px;
-    // }
-    // .header-nav .logo__block-icon:hover {
-    // 	background-position: 0 -34px;
-    // }
     .header-nav .logo__block {
         float: left;
         margin: 0 90px 0 0;
     }
-    // .header-nav .phone__block {
-    // 	float: left;
-    // 	padding: 10px 0 0 0;
-    // }
     .header-nav .phone__block .phone__block-number {
         color: #fff;
         font-size: 14px;
@@ -1225,14 +1211,6 @@ a:focus {
     background: #3f3e3e;
     padding: 70px 0;
 }
-
-// .footer__logo a {
-// 	background: url(../images/logo-rut.png) no-repeat;	
-// 	background-size: 180px 69px;
-// 	display: block;
-// 	width: 180px;
-// 	height: 34px;
-// }
 .footer__logo a:hover {
     background-position: 0 -34px;
 }
@@ -1323,13 +1301,6 @@ a:focus {
     position: relative;
     z-index: 1000;
 }
-// .header_nav .logo__block-icon {
-// 	background: url(../images/logo-rut.png) no-repeat;	
-// 	background-size: 180px 69px;
-// 	display: block;
-// 	width: 180px;
-// 	height: 34px;
-// }
 .header_nav .logo__block-icon:hover {
     background-position: 0 -34px;
 }

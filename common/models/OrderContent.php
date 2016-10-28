@@ -35,9 +35,9 @@ class OrderContent extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['order_id', 'product_id', 'quantity', 'price', 'units', 'product_name'], 'required'],
-            [['order_id', 'product_id', 'units'], 'integer'],
-            [['price', 'quantity', 'initial_quantity'], 'number'],
+            [['order_id', 'product_id', 'quantity', 'price', 'product_name'], 'required'],
+            [['order_id', 'product_id'], 'integer'],
+            [['price', 'quantity', 'initial_quantity', 'units'], 'number'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => CatalogBaseGoods::className(), 'targetAttribute' => ['product_id' => 'id']],
         ];

@@ -48,7 +48,7 @@ $this->registerJs(
                 searchInput.focus();
                 searchInput[0].setSelectionRange(strLength, strLength);
             });
-            $("#orders").on("click", ".btn-danger", function(e) {
+            $("#orders").on("click", ".delete-position", function(e) {
                 $("#loader-show").showLoading();
                 $.post(
                     "' . Url::to(['/order/ajax-remove-position']) . '",
@@ -188,22 +188,23 @@ $this->registerJs(
                                 [
                                     'format' => 'raw',
                                     'value' => function($data) {
-//                                        return TouchSpin::widget([
-//                            'name' => "OrderContent[$data->product_id][quantity]",
-//                            'pluginOptions' => [
-//                                'initval' => $data->quantity,
-//                                'min' => 1,
-//                                'max' => PHP_INT_MAX,
-//                                'step' => 1,
-//                                'decimals' => 0,
-//                                'buttonup_class' => 'btn btn-default',
-//                                'buttondown_class' => 'btn btn-default',
-//                                'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-//                                'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-//                            ],
-//                            'options' => ['class' => 'quantity form-control'],
-//                        ]);
-                                        return Html::textInput('', 1, ['class' => 'quantity form-control']);
+                                        return TouchSpin::widget([
+                                                    'name' => '',
+                                                    'pluginOptions' => [
+                                                        'initval' => 1,
+                                                        'min' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.1,
+                                                        'max' => PHP_INT_MAX,
+                                                        'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
+                                                        'decimals' => 1,
+                                                        'forcestepdivisibility' => (isset($data['units']) && ($data['units'])) ? 'floor' : 'none',
+                                                        'buttonup_class' => 'btn btn-default',
+                                                        'buttondown_class' => 'btn btn-default',
+                                                        'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
+                                                        'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
+                                                    ],
+                                                    'options' => ['class' => 'quantity form-control '],
+                                        ]);
+                                        // return Html::textInput('', 1, ['class' => 'quantity form-control']);
                                     },
                                             'label' => 'Количество',
                                             'contentOptions' => ['class' => 'width150'],

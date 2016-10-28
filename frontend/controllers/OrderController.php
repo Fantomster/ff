@@ -145,7 +145,7 @@ class OrderController extends DefaultController {
             $units = $product->units;
             $article = $product->article;
         }
-        $quantity = (int) $post['quantity'];
+        $quantity = $post['quantity'];
         $isNewOrder = true;
 
         foreach ($orders as $order) {
@@ -244,9 +244,10 @@ class OrderController extends DefaultController {
                 if ($position->product_id == $product_id) {
                     $quantity = $position->quantity;
                     $product_name = $position->product_name;
+                    $units = $position->units;
                 }
             }
-            return $this->renderAjax('_change-quantity', compact('vendor_id', 'product_id', 'quantity', 'product_name', 'vendor_name'));
+            return $this->renderAjax('_change-quantity', compact('vendor_id', 'product_id', 'quantity', 'product_name', 'vendor_name', 'units'));
         }
     }
 
@@ -514,6 +515,7 @@ class OrderController extends DefaultController {
             $posted = current($_POST['OrderContent']);
             $post = ['OrderContent' => $posted];
             if ($model->load($post)) {
+                $model->quantity = $model->quantity - $model->quantity % $model->units;
                 $model->save();
                 $order = $model->order;
                 $order->calculateTotalPrice();

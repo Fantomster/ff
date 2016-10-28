@@ -253,7 +253,7 @@ $exportColumns = [
                             [
                             'attribute' => 'units',
                             'label'=>'Кратность',
-                            'value'=>'units',
+                            'value'=>function ($data) { return empty($data['units']) ? '' : $data['units'];},
                             'contentOptions' => ['style' => 'vertical-align:middle;width:120px;'],    
                             ],
                             [
@@ -417,6 +417,7 @@ $exportColumns = [
                         'columns' => $gridColumnsCatalog, 
                         'tableOptions' => ['class' => 'table no-margin'],
                         'options' => ['class' => 'table-responsive'],
+                        'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
                         'bordered' => false,
                         'striped' => true,
                         'condensed' => false,

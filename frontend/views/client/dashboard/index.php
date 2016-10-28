@@ -107,6 +107,9 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
            'resizableColumns'=>false,
            'hover' => true,
            'summary' => false,
+            'pager' => [
+                'maxButtonCount'=>5,    // Set maximum number of page buttons that can be displayed
+            ],
            ]);
            ?> 
         <?php  Pjax::end(); ?>
@@ -147,8 +150,8 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
           <?php 
         $columns = [
     ['attribute' => 'id','label'=>'№','value'=>'id'],
-    ['attribute' => 'client_id','label'=>'Ресторан','value'=>function($data) {
-        return Organization::find()->where(['id'=>$data['client_id']])->one()->name;           
+    ['attribute' => 'vendor_id','label'=>'Поставщик','value'=>function($data) {
+        return Organization::find()->where(['id'=>$data['vendor_id']])->one()->name;           
     }],
     ['attribute' => 'created_by_id','label'=>'Заказ создал','value'=>function($data) {
         return $data['created_by_id']?

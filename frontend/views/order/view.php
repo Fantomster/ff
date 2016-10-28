@@ -68,8 +68,13 @@ $js = <<<JS
         });
         $('.content').on('submit', function(e) {
             e.preventDefault();
-            dataEdited = 0;
-            $(this).submit();
+            var form = $("#editOrder");
+            $.post(
+                form.attr("action"),
+                form.serialize()
+            ).done(function(result) {
+                dataEdited = 0;
+            });
         });
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
@@ -83,6 +88,9 @@ $js = <<<JS
                 dataEdited = 0;
             });
         });
+        $(document).on('pjax:complete', function() {
+            dataEdited = 0;
+        })
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \yii2assets\printthis\PrintThisAsset::register($this);

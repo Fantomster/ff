@@ -390,10 +390,10 @@ class ClientController extends DefaultController {
                             $units = str_replace('.', '', $units);
                         }
                         if (empty($units) || $units<0) {
-                            $units = 0;
+                            $units = 'NULL';
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
-                        $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
+                        $note = trim($arrCatalogs['dataItem']['note']);
                         $price = str_replace(',', '.', $price);
                         if (substr($price, -3, 1) == '.') {
                             $price = explode('.', $price);
@@ -402,10 +402,32 @@ class ClientController extends DefaultController {
                         } else {
                             $price = str_replace('.', '', $price);
                         }
-                        $sql = "insert into " . CatalogBaseGoods::tableName() . "(
+                        /*$sql = "insert into " . CatalogBaseGoods::tableName() . "(
 				      `cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
 				      $lastInsert_base_cat_id,0,'$get_supp_org_id','$article','$product','$units','$price',1,0,0,NOW())";
-                        \Yii::$app->db->createCommand($sql)->execute();
+                        \Yii::$app->db->createCommand($sql)->execute();*/
+                        $sql = "insert into {{%catalog_base_goods}}" .
+                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                            . "`units`,`price`,`note`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
+                            . $lastInsert_base_cat_id . ","
+                            . "0,"
+                            . $get_supp_org_id . ","
+                            . ":article,"
+                            . ":product,"
+                            . ":units,"
+                            . ":price,"
+                            . ":note,"
+                            . CatalogBaseGoods::STATUS_ON .","
+                            . "0,"
+                            . "0,"
+                            . "NOW())";
+                        $command = \Yii::$app->db->createCommand($sql);
+                        $command->bindParam(":article",$article,\PDO::PARAM_STR);
+                        $command->bindParam(":product",$product,\PDO::PARAM_STR);
+                        $command->bindParam(":units",$units);
+                        $command->bindParam(":price",$price);
+                        $command->bindParam(":note",$note);
+                        $command->execute();
                         $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
 
                         $sql = "insert into " . CatalogGoods::tableName() . "(

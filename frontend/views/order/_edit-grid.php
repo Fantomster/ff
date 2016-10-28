@@ -45,16 +45,17 @@ echo GridView::widget([
                             'name' => "OrderContent[$data->id][quantity]",
                             'pluginOptions' => [
                                 'initval' => $data->quantity,
-                                'min' => 1,
+                                'min' => (isset($data->units) && ($data->units)) ? $data->units : 0.1,
                                 'max' => PHP_INT_MAX,
-                                'step' => 1,
-                                'decimals' => 0,
+                                'step' => (isset($data->units) && ($data->units)) ? $data->units : 1,
+                                'decimals' => 1,
+                                'forcestepdivisibility' => (isset($data->units) && ($data->units)) ? 'floor' : 'none',
                                 'buttonup_class' => 'btn btn-default',
                                 'buttondown_class' => 'btn btn-default',
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                            'options' => ['class' => 'viewData'],
+                            'options' => ['class' => 'viewData', 'id' => 'qnty'.$data->id],
                         ]) . Html::hiddenInput("OrderContent[$data->id][id]", $data->id);
             },
                     'contentOptions' => ['class' => 'width150'],
@@ -65,13 +66,13 @@ echo GridView::widget([
                     'content' => function($data) {
                         return TouchSpin::widget([
                                     'name' => "OrderContent[$data->id][price]",
-                                    'id' => "qnty$data->id",
                                     'pluginOptions' => [
                                         'initval' => $data->price,
                                         'min' => 0,
                                         'max' => PHP_INT_MAX,
-                                        'step' => 0.01,
+                                        'step' => 1,
                                         'decimals' => 2,
+                                        'forcestepdivisibility' => 'none',
                                         'buttonup_class' => 'btn btn-default',
                                         'buttondown_class' => 'btn btn-default',
                                         'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',

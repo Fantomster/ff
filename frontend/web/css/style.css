@@ -1425,5 +1425,5 @@ a:focus {
     box-shadow: none !important;
 }
 .has-success .select2-container--bootstrap .select2-dropdown, .has-success .select2-container--bootstrap .select2-selection {
-    border-color: #ccc;
+    border-color: #ccc !important;
 }

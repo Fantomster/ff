@@ -5,7 +5,10 @@ use yii\widgets\ActiveForm;
 use common\models\OrganizationType;
 use kartik\select2\Select2;
 
-$form = ActiveForm::begin(['id' => 'register-form']);
+$form = ActiveForm::begin([
+    'id' => 'register-form',
+    'enableAjaxValidation' => true,
+    ]);
 ?>
 <div class="form-group">
     <?=

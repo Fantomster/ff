@@ -64,29 +64,30 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // validate for ajax request
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
+                $test = ActiveForm::validate($user, $profile, $organization);
                 return ActiveForm::validate($user, $profile, $organization);
             }
 
             // validate for normal request
-            if ($user->validate() && $profile->validate() && $organization->validate()) {
-
-                // perform registration
-                $role = $this->module->model("Role");
-                $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
-                $profile->setUser($user->id)->save();
-                $organization->save();
-                $user->setOrganization($organization->id)->save();
-                $this->afterRegister($user);
-
-                // set flash
-                // don't use $this->refresh() because user may automatically be logged in and get 403 forbidden
-                $successText = Yii::t("user", "Successfully registered [ {displayName} ]", ["displayName" => $user->getDisplayName()]);
-                $guestText = "";
-                if (Yii::$app->user->isGuest) {
-                    $guestText = Yii::t("user", " - Please check your email to confirm your account");
-                }
-                Yii::$app->session->setFlash("Register-success", $successText . $guestText);
-            }
+//            if ($user->validate() && $profile->validate() && $organization->validate()) {
+//
+//                // perform registration
+//                $role = $this->module->model("Role");
+//                $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
+//                $profile->setUser($user->id)->save();
+//                $organization->save();
+//                $user->setOrganization($organization->id)->save();
+//                $this->afterRegister($user);
+//
+//                // set flash
+//                // don't use $this->refresh() because user may automatically be logged in and get 403 forbidden
+//                $successText = Yii::t("user", "Successfully registered [ {displayName} ]", ["displayName" => $user->getDisplayName()]);
+//                $guestText = "";
+//                if (Yii::$app->user->isGuest) {
+//                    $guestText = Yii::t("user", " - Please check your email to confirm your account");
+//                }
+//                Yii::$app->session->setFlash("Register-success", $successText . $guestText);
+//            }
         }
 
         return $this->render("register", compact("user", "profile", "organization"));

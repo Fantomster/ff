@@ -1453,3 +1453,6 @@ a:focus {
     -webkit-box-shadow: none !important;
     box-shadow: none !important;
 }
+.has-success .select2-container--bootstrap .select2-dropdown, .has-success .select2-container--bootstrap .select2-selection {
+    border-color: #ccc;
+}

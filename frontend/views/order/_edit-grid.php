@@ -66,7 +66,6 @@ echo GridView::widget([
                     'content' => function($data) {
                         return TouchSpin::widget([
                                     'name' => "OrderContent[$data->id][price]",
-                                    'id' => "qnty$data->id",
                                     'pluginOptions' => [
                                         'initval' => $data->price,
                                         'min' => 0,

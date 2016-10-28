@@ -41,6 +41,13 @@ $gridColumnsCatalog = [
     },
     ],
     [
+    'label'=>'Единица измерения',
+    'format' => 'raw',
+    'value'=>function ($data) {
+    return $data['ed'];
+    },
+    ],
+    [
     'attribute' => 'Наличие',
     'format' => 'raw',
     'contentOptions' => ['style' => 'width:50px;vertical-align:middle'],

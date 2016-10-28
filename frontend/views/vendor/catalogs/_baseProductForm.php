@@ -26,7 +26,9 @@ $form = ActiveForm::begin([
     <?= $form->field($catalogBaseGoods, 'units') ?>
 
     <?= $form->field($catalogBaseGoods, 'price') ?>
-
+    
+    <?= $form->field($catalogBaseGoods, 'ed') ?>
+    
     <?= $form->field($catalogBaseGoods, 'category_id')->dropDownList(common\models\Category::allCategory(),['prompt' => '']) ?>
     
     <?= $form->field($catalogBaseGoods, 'note')->textarea(['rows' => 3])->label('Комментарий к товару') ?>

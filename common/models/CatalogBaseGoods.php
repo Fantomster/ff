@@ -22,6 +22,7 @@ use yii\data\ActiveDataProvider;
  * @property string $updated_at
  * @property file $importCatalog
  * @property string $note
+ * @property string $ed
  * 
  * @property Organization $vendor
  */
@@ -61,11 +62,12 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['cat_id','article','price','product'], 'required'],
+            [['cat_id','article','price','product','ed'], 'required'],
             [['cat_id', 'category_id', 'status', 'market_place', 'deleted'], 'integer'],
             [['article'], 'string', 'max' => 50],
             [['product'], 'string', 'max' => 255],
             [['note'], 'string', 'max' => 255],
+            [['ed'], 'string', 'max' => 255],
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
         ];
@@ -87,6 +89,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'market_place' => 'Market_place',
             'deleted' => 'Deleted',
             'note' => 'Комментарий',
+            'ed' => 'Единица измерения',
                 //'importCatalog'=>'Files'
         ];
     }
@@ -101,7 +104,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return false;
     }
     public function search($params, $id) {
-        $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price','note', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
+        $query = CatalogBaseGoods::find()->select(['id', 'cat_id', 'category_id', 'article', 'product', 'units', 'price','note','ed', 'status', 'market_place'])->where(['cat_id' => $id, 'deleted' => '0']);
         //$query->andFilterWhere(['like', 'product', '']);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -117,6 +120,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 'price',
                 'status',
                 'note',
+                'ed',
             ]
         ]);
 

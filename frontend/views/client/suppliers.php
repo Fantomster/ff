@@ -282,12 +282,12 @@ $('#addProduct').attr('disabled','disabled');
 $('#modal_addProduct').on('shown.bs.modal', function() {
 var data = [];
 for ( var i = 0; i < 60; i++ ) {
-    data.push({article: '', product: '', units: '', price: '', notes: ''});
+    data.push({article: '', product: '', units: '', price: '',  ed: '', notes: '',});
 }
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Комментарий'],
+  colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Единица измерения', 'Комментарий'],
   columns: [
         {data: 'article'},
         {data: 'product', wordWrap:true},
@@ -303,6 +303,7 @@ for ( var i = 0; i < 60; i++ ) {
             format: '0.00',
             language: 'ru-RU'
         },
+        {data: 'ed', allowEmpty: false},
         {data: 'note'}
     ],
   className : 'Handsontable_table',
@@ -353,13 +354,13 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		        var fio = response.fio;
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
-	                $('#organization-name').val(organization);
+	                $('#organization-name').val(organization); 
 	                $('#addProduct').removeClass('hide');
 	                $('#inviteSupplier').addClass('hide');
 		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
-		            console.log('type = 1'); 	    
+		            console.log(organization);    
 	                }
 	                
 	                if(response.eventType==2){
@@ -467,7 +468,7 @@ $('#invite').click(function(e){
  $('#loader-show').showLoading();
 e.preventDefault();
 	var i, items, item, dataItem, data = [];
-	var cols = [ 'article', 'product', 'units', 'price', 'note'];
+	var cols = [ 'article', 'product', 'units', 'price', 'ed', 'note'];
 	$('#CreateCatalog tr').each(function() {
 	  items = $(this).children('td');
 	  if(items.length === 0) {
@@ -480,7 +481,7 @@ e.preventDefault();
 	      dataItem[cols[i]] = item.html();
 	    }
 	  }
-	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]] || dataItem[cols[3]] || dataItem[cols[4]]){
+	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]] || dataItem[cols[3]] || dataItem[cols[4]] || dataItem[cols[5]]){
 	    data.push({dataItem});    
 	  }	    
 	});

@@ -272,6 +272,12 @@ $exportColumns = [
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                             ],
                             [
+                            'attribute' => 'ed',
+                            'label'=>'Ед. измерения',
+                            'value'=>'ed',
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            ],
+                            [
                             'attribute' => 'status',
                             'label'=>'Наличие',
                             'format' => 'raw',

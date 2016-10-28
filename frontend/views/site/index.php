@@ -79,7 +79,7 @@ $this->title = 'F-keeper';
     <div class="contact__block">
 
         <h4>Автоматизируйте свой бизнес сейчас</h4>
-        <span>Вы в одном шаге, расскажите о себе</span>
+        <p>Вы в одном шаге, расскажите о себе</p>
         <div class="contact__form">
 <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
 
@@ -89,7 +89,7 @@ $this->title = 'F-keeper';
 
             <?php 
             else:
-                echo $this->render('_register-form', compact("user", "profile", "organization"));
+                echo $this->render('/user/default/_register-form', compact("user", "profile", "organization"));
             endif; 
             ?>
         </div>

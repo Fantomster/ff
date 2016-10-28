@@ -198,18 +198,6 @@ class ClientController extends DefaultController {
     public function actionAjaxDeleteUser() {
         //
     }
-/*
-    public function actionSuppliers() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchModel = new RelationSuppRest;
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_SUPPLIERS);
-        $user = new User;
-        $profile = new Profile;
-        $relationCategory = new RelationCategory;
-        $organization = new Organization;
-        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "dataProvider"));
-    }
-*/
     /**
      *
      * Типы callback-ов:
@@ -270,6 +258,7 @@ class ClientController extends DefaultController {
                     $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                     $units = trim($arrCatalogs['dataItem']['units']);
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                    $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                     if (empty($article)) {
                         $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
                         return $result;
@@ -296,11 +285,15 @@ class ClientController extends DefaultController {
                     }
                     $units = str_replace(',', '.', $units);
                     if (!empty($units) && !preg_match($numberPattern, $units)) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате' . $units];
+                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате'];
                         return $result;
                         exit;
                     }
-                    
+                    if (empty($ed)) {
+                        $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'];
+                        return $result;
+                        exit;
+                    }
                     
                 }
                 $email = $user->email;
@@ -371,7 +364,6 @@ class ClientController extends DefaultController {
                     $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'" . Organization::getOrganization($currentUser->organization_id)->name . "'," . Catalog::CATALOG . ",NOW())";
                     \Yii::$app->db->createCommand($sql)->execute();
                     $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
-
                     /**
                      *
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
@@ -394,6 +386,7 @@ class ClientController extends DefaultController {
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                         $note = trim($arrCatalogs['dataItem']['note']);
+                        $ed = trim($arrCatalogs['dataItem']['ed']);
                         $price = str_replace(',', '.', $price);
                         if (substr($price, -3, 1) == '.') {
                             $price = explode('.', $price);
@@ -402,13 +395,9 @@ class ClientController extends DefaultController {
                         } else {
                             $price = str_replace('.', '', $price);
                         }
-                        /*$sql = "insert into " . CatalogBaseGoods::tableName() . "(
-				      `cat_id`,`category_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
-				      $lastInsert_base_cat_id,0,'$get_supp_org_id','$article','$product','$units','$price',1,0,0,NOW())";
-                        \Yii::$app->db->createCommand($sql)->execute();*/
                         $sql = "insert into {{%catalog_base_goods}}" .
                             "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                            . "`units`,`price`,`note`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
+                            . "`units`,`price`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
                             . $lastInsert_base_cat_id . ","
                             . "0,"
                             . $get_supp_org_id . ","
@@ -417,6 +406,7 @@ class ClientController extends DefaultController {
                             . ":units,"
                             . ":price,"
                             . ":note,"
+                            . ":ed,"
                             . CatalogBaseGoods::STATUS_ON .","
                             . "0,"
                             . "0,"
@@ -426,7 +416,8 @@ class ClientController extends DefaultController {
                         $command->bindParam(":product",$product,\PDO::PARAM_STR);
                         $command->bindParam(":units",$units);
                         $command->bindParam(":price",$price);
-                        $command->bindParam(":note",$note);
+                        $command->bindParam(":note",$note,\PDO::PARAM_STR);
+                        $command->bindParam(":ed",$ed,\PDO::PARAM_STR);
                         $command->execute();
                         $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
 
@@ -593,7 +584,7 @@ class ClientController extends DefaultController {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::BASE_CATALOG) {
-        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,catalog_base_goods.price,catalog_base_goods.status "
+        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status "
                 . " FROM `catalog` "
                 . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
                 . " WHERE "
@@ -605,7 +596,7 @@ class ClientController extends DefaultController {
                 . " catalog_base_goods.cat_id = $id and deleted != 1")->queryScalar();
         }
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::CATALOG) {
-        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,catalog_goods.price as price, catalog_base_goods.status "
+        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status "
                 . " FROM `catalog` "
                 . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
@@ -631,7 +622,8 @@ class ClientController extends DefaultController {
                     'product',
                     'units',
                     'price',
-                    'status'
+                    'status',
+                    'ed'
                 ],
                 'defaultOrder' => [
                     'product' => SORT_DESC

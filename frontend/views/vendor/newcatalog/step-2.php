@@ -62,6 +62,11 @@ $this->title = 'Добавить продукты';
             },
             ],
             [
+            'attribute' => 'ed',
+            'label'=>'Ед. измерения',
+            'value'=>function ($data) { return $data['ed'];},
+            ],
+            [
             'label'=>'Категория',
             'value'=>function ($data) {
                         $data['category_id']==0 ? $category_name='':$category_name=common\models\Category::get_value($data['category_id'])->name;

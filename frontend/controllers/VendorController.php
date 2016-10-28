@@ -272,6 +272,7 @@ class VendorController extends DefaultController {
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                 $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
@@ -279,12 +280,17 @@ class VendorController extends DefaultController {
                     exit;
                 }
                 if (empty($product)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Продукт</strong>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указано <strong>Наименование</strong>']];
                     return $result;
                     exit;
                 }
                 if (empty($price)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указана <strong>Цена</strong> продукта']];
+                    return $result;
+                    exit;
+                }
+                if (empty($ed)) {
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указана <strong>Единица измерения</strong> товара']];
                     return $result;
                     exit;
                 }
@@ -332,10 +338,37 @@ class VendorController extends DefaultController {
                     $price = str_replace('.', '', $price);
                 }
 
-                $sql = "insert into " . CatalogBaseGoods::tableName() . "(
+                /*$sql = "insert into " . CatalogBaseGoods::tableName() . "(
             `cat_id`,`supp_org_id`,`article`,`product`,`units`,`price`,`category_id`,`status`,`market_place`,`deleted`,`created_at`) VALUES (
             $lastInsert_base_cat_id,$currentUser->organization_id,'$article','$product','$units','$price','$category_name',1,0,0,NOW())";
-                \Yii::$app->db->createCommand($sql)->execute();
+                \Yii::$app->db->createCommand($sql)->execute();*/
+                
+                $sql = "insert into {{%catalog_base_goods}}" .
+                    "(`cat_id`,`supp_org_id`,`article`,`product`,"
+                    . "`units`,`price`,`category_name`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
+                    . $lastInsert_base_cat_id . ","
+                    . $currentUser->organization_id . ","
+                    . ":article,"
+                    . ":product,"
+                    . ":units,"
+                    . ":price,"
+                    . ":category_id,"
+                    . ":note,"
+                    . ":ed,"
+                    . CatalogBaseGoods::STATUS_ON .","
+                    . "0,"
+                    . "0,"
+                    . "NOW())";
+                $command = \Yii::$app->db->createCommand($sql);
+                $command->bindParam(":article",$article,\PDO::PARAM_STR);
+                $command->bindParam(":product",$product,\PDO::PARAM_STR);
+                $command->bindParam(":units",$units);
+                $command->bindParam(":price",$price);
+                $command->bindParam(":category_id",$category_name);
+                $command->bindParam(":note",$note,\PDO::PARAM_STR);
+                $command->bindParam(":ed",$ed,\PDO::PARAM_STR);
+                $command->execute();
+                $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
             }
             $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Мои поздравления!', 'body' => 'Вы успешно создали свой первый каталог!']];
             return $result;
@@ -418,7 +451,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isGet) {
             $searchString = trim(\Yii::$app->request->get('searchString'));
             $query = (new \yii\db\Query())
-                    ->select("id,article,product,units,category_id,price,note,status")
+                    ->select("id,article,product,units,category_id,price,ed,note,status")
                     ->from("catalog_base_goods")
                     ->where("cat_id = $baseCatalog")
                     ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
@@ -430,7 +463,7 @@ class VendorController extends DefaultController {
                             . "")->queryScalar();
         } else {
             $query = (new \yii\db\Query())
-                    ->select("id,article,product,units,category_id,price,note,status")
+                    ->select("id,article,product,units,category_id,price,ed,note,status")
                     ->from("catalog_base_goods")
                     ->where("cat_id = $baseCatalog")
                     ->andWhere("deleted=0")
@@ -453,6 +486,7 @@ class VendorController extends DefaultController {
                     'units',
                     'category_id',
                     'price',
+                    'ed',
                     'note',
                     'status',
                 ],
@@ -492,7 +526,7 @@ class VendorController extends DefaultController {
             $transaction = Yii::$app->db->beginTransaction();
             try
             {
-                for ($row = 2; $row <= $highestRow; ++$row) {
+                for ($row = 1; $row <= $highestRow; ++$row) {
 
                     $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
                     $row_article = trim($rowData[0][0]);
@@ -501,9 +535,10 @@ class VendorController extends DefaultController {
                     $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $row_units));
                     $row_price = trim($rowData[0][3]);
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
-                    $row_note = trim($rowData[0][4]);
+                    $row_ed = trim($rowData[0][4]);
+                    $row_note = trim($rowData[0][5]);
 
-                    if (!empty($row_article && $row_product && $row_price)) {
+                    if (!empty($row_article && $row_product && $row_price && $row_ed)) {
                         if(empty($row_units) || $row_units<0){$row_units=0;}
 
                         if (in_array($row_article, $arr)) {
@@ -512,6 +547,7 @@ class VendorController extends DefaultController {
                                     . "product=:product,"
                                     . "units=:units,"
                                     . "price=:price,"
+                                    . "ed=:ed,"
                                     . "note=:note "
                             . "where article='{$row_article}' and cat_id=$id";
                             $command = \Yii::$app->db->createCommand($sql);
@@ -519,12 +555,13 @@ class VendorController extends DefaultController {
                             $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
                             $command->bindParam(":units",$row_units);
                             $command->bindParam(":price",$row_price);
+                            $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
                             $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                             $command->execute();
                         }else{
                             $sql = "insert into {{%catalog_base_goods}}" .
                                     "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                                    . "`units`,`price`,`note`,`status`,`created_at`) VALUES ("
+                                    . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
                                     . ":cat_id,"
                                     . "0,"
                                     . $currentUser->organization_id .","
@@ -532,6 +569,7 @@ class VendorController extends DefaultController {
                                     . ":product,"
                                     . ":units,"
                                     . ":price,"
+                                    . ":ed,"
                                     . ":note," 
                                     . CatalogBaseGoods::STATUS_ON .","
                                     . "NOW())";
@@ -541,6 +579,7 @@ class VendorController extends DefaultController {
                             $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
                             $command->bindParam(":units",$row_units);
                             $command->bindParam(":price",$row_price);
+                            $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
                             $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                             $command->execute();
                         }
@@ -595,13 +634,14 @@ class VendorController extends DefaultController {
                 $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $row_units));
                 $row_price = trim($rowData[0][3]);
                 $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
-                $row_note = trim($rowData[0][4]);
-                if (!empty($row_article && $row_product && $row_price)) {
-                        if(empty($row_units) || $row_units<0){$row_units=0;}
+                $row_ed = trim($rowData[0][4]);
+                $row_note = trim($rowData[0][5]);
+                if (!empty($row_article && $row_product && $row_price && $row_ed)) {
+                        if(empty($row_units) || $row_units<0){$row_units='NULL';}
 
                     $sql = "insert into {{%catalog_base_goods}}" .
                             "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                            . "`units`,`price`,`note`,`status`,`created_at`) VALUES ("
+                            . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
                             . $lastInsert_base_cat_id . ","
                             . "0,"
                             . $currentUser->organization_id . ","
@@ -609,6 +649,7 @@ class VendorController extends DefaultController {
                             . ":product,"
                             . ":units,"
                             . ":price,"
+                            . ":ed,"
                             . ":note," 
                             . CatalogBaseGoods::STATUS_ON .","
                             . "NOW())";
@@ -617,6 +658,7 @@ class VendorController extends DefaultController {
                     $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
                     $command->bindParam(":units",$row_units);
                     $command->bindParam(":price",$row_price);
+                    $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
                     $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
                     $command->execute();
                 }
@@ -969,7 +1011,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isGet) {
             $searchString = trim(\Yii::$app->request->get('searchString'));
             $query = (new \yii\db\Query())
-                    ->select("id,article,product,units,category_id,price,status")
+                    ->select("id,article,product,units,category_id,price,ed,status")
                     ->from("catalog_base_goods")
                     ->where("cat_id = $baseCatalog")
                     ->andWhere("article like '%" . $searchString . "%' or product like '%" . $searchString . "%'")
@@ -981,7 +1023,7 @@ class VendorController extends DefaultController {
                             . "")->queryScalar();
         } else {
             $query = (new \yii\db\Query())
-                    ->select("id,article,product,units,category_id,price,status")
+                    ->select("id,article,product,units,category_id,price,ed,status")
                     ->from("catalog_base_goods")
                     ->where("cat_id = $baseCatalog")
                     ->andWhere("deleted=0")
@@ -1004,6 +1046,7 @@ class VendorController extends DefaultController {
                     'units',
                     'category_id',
                     'price',
+                    'ed',
                     'status',
                 ],
             ],
@@ -1019,16 +1062,32 @@ class VendorController extends DefaultController {
                         andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->
                             where(['supp_org_id' => $currentUser->organization_id, 'deleted' => 1])])->all();
         $arr = \yii\helpers\ArrayHelper::toArray($arr);
+        
+        $sql = "SELECT " 
+                . "catalog.id as id,"
+                . "article,"
+                . "catalog_base_goods.product as product,"
+                . "catalog_base_goods.id as base_goods_id,"
+                . "catalog_goods.id as goods_id,"
+                . "units,"
+                . "ed,"
+                . "catalog_base_goods.price as base_price,"
+                . "catalog_goods.price as price,"
+                . "catalog_base_goods.status"
+            . " FROM `catalog` "
+            . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+            . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
+            . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";
+        $arr = \Yii::$app->db->createCommand($sql)->queryAll();
+        
         $array = [];
         foreach ($arr as $arrs) {
-            $c_article = CatalogBaseGoods::find()->where(['id' => $arrs['base_goods_id']])->one()->article;
-            $c_product = CatalogBaseGoods::find()->where(['id' => $arrs['base_goods_id']])->one()->product;
+            $c_article = $arrs['article'];
+            $c_product = $arrs['product'];
             $c_base_goods_id = $arrs['base_goods_id'];
-            $c_goods_id = $arrs['id'];
-            $c_base_price = CatalogBaseGoods::find()->where(['id' => $arrs['base_goods_id']])->one()->price;
+            $c_goods_id = $arrs['goods_id'];
+            $c_base_price = $arrs['base_price'];
             $c_price = $arrs['price'];
-            $c_discount = $arrs['discount'];
-            $c_discount_percent = $arrs['discount_percent'];
 
             array_push($array, [
                 'article' => $c_article,
@@ -1037,9 +1096,7 @@ class VendorController extends DefaultController {
                 'goods_id' => $c_goods_id,
                 'base_price' => $c_base_price,
                 'price' => $c_price,
-                'total_price' => $c_price,
-                'discount' => $c_discount,
-                'discount_percent' => $c_discount_percent]);
+                'total_price' => $c_price]);
         }
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1086,9 +1143,7 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchModel = new CatalogGoods();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $cat_id);
-        $exportModel = new CatalogBaseGoods;
-        $exportProvider = $exportModel->search(Yii::$app->request->queryParams, $cat_id, NULL);
-        return $this->render('newcatalog/step-3', compact('searchModel', 'dataProvider', 'exportModel', 'exportProvider', 'cat_id'));
+        return $this->render('newcatalog/step-3', compact('searchModel', 'dataProvider', 'exportModel'));
     }
 
     public function actionStep3UpdateProduct($id) {

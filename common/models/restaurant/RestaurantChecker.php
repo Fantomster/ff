@@ -11,25 +11,37 @@ use common\models\RelationSuppRest;
 class RestaurantChecker
 {
 	public static function checkEmail($email)
-    {
+    {           
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            
 		if(User::find()->select('email')->where(['email' => $email])->exists())
 		{
-		//$currentUser = User::findIdentity(Yii::$app->user->id);
-		//todo: переделать , брать все из $currentUser
-		$rest_org_id = User::getOrganizationUser(Yii::$app->user->id);    
-		$userProfile = User::find()->select('id,organization_id,status,email')->where(['email' => $email])->one();
-		$userProfileFullName = Profile::find()->select('full_name')->where(['user_id' => $userProfile['id']])->one();
-		$userProfileFullName =$userProfileFullName['full_name'];
-		$userProfileOrgId = $userProfile['organization_id']; //организация
-		$userProfileStatus = $userProfile['status']; //статус
-		$userOrg = Organization::find()->select('type_id,name')->where(['id' => $userProfileOrgId])->one();
-		$userOrgName = $userOrg['name'];
-		$userOrgTypeId = $userOrg['type_id']; //тип организации 1 или 2
+		$sql = "SELECT "
+                        . "`user`.`id` as user_id, "
+                        . "`profile`.`full_name` as user_full_name, "
+                        . "`user`.`organization_id` as organization_id, "
+                        . "`organization`.`type_id` as organization_type_id, "
+                        . "`organization`.`name` as organization_name, "
+                        . "`user`.`status` as user_status, "
+                        . "`user`.`email` as user_email "
+                . " FROM {{%user}} "
+                . " LEFT JOIN {{%organization}} on `user`.`organization_id` = `organization`.`id` "
+                . " LEFT JOIN {{%profile}} on `user`.`id` = `profile`.`user_id`"
+                . " WHERE `user`.`email` = :email";
+                $vendor_info = \Yii::$app->db->createCommand($sql);
+                $vendor_info->bindParam(":email",$email,\PDO::PARAM_STR);
+                $vendor_info->queryOne();
+                $vendor_info = $vendor_info->queryOne();
+                $userProfileFullName = $vendor_info['user_full_name'];
+                $userProfileStatus = $vendor_info['user_status'];
+                $userProfileOrgId = $vendor_info['organization_id'];
+                $userOrgTypeId = $vendor_info['organization_type_id'];
+                $userOrgName = $vendor_info['organization_name'];
 			if($userOrgTypeId==2)
 			{
-				if(RelationSuppRest::find()->where(['rest_org_id' => $rest_org_id,'supp_org_id'=>$userProfileOrgId])->exists())
+				if(RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userProfileOrgId])->exists())
 				{
-				$userRelationSuppRest = RelationSuppRest::find()->select('invite')->where(['rest_org_id' => $rest_org_id,'supp_org_id'=>$userProfileOrgId])->one();
+				$userRelationSuppRest = RelationSuppRest::find()->select('invite')->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userProfileOrgId])->one();
 					if($userRelationSuppRest['invite']==RelationSuppRest::INVITE_ON)
 					{
 	
@@ -62,7 +74,14 @@ class RestaurantChecker
 
 					}else{
 					//поставщик авторизован
-					$result = ['success'=>true,'eventType'=>6,'message'=>'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>','fio' => $userProfileFullName,'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
+					$result = [
+                                            'success'=>true,
+                                            'eventType'=>6,
+                                            'message'=>'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>',
+                                            'fio' => $userProfileFullName,
+                                            'organization' => $userOrgName,
+                                            'org_id'=>$userProfileOrgId
+                                                   ];
 			
 					return $result;
 

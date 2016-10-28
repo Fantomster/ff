@@ -113,7 +113,7 @@ var arr = [];
 var data = [];
         
 for ( var i = 0; i < 60; i++ ) {
-    data.push({article: '', product: '', units: '', price: '', category: ''});
+    data.push({article: '', product: '', units: '', price: '', ed: '', category: ''});
 }
 var container = document.getElementById('CreateCatalog');
 
@@ -128,8 +128,8 @@ hot = new Handsontable(container, {
   beforeChange: function () {
       //console.log('beforeChange');
   },
-  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Категория'],
-  colWidths: [40, 180, 45, 45, 80],
+  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Единица измерения', 'Категория'],
+  colWidths: [40, 180, 45, 45, 40,  80],
   renderAllRows: true,
   columns: [
     {data: 'article'},
@@ -146,6 +146,7 @@ hot = new Handsontable(container, {
         format: '0.00',
         language: 'ru-RU'
     },
+    {data: 'ed', wordWrap:true},
     {
         data: 'category', 
         type: 'dropdown',

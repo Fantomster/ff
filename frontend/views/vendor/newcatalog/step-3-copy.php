@@ -101,8 +101,8 @@ $(window).resize(function(){
 var save = document.getElementById('save'), hot, originalColWidths = [], colWidths = [];         
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
-  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Цена каталога','Скидка в рублях','Скидка %','Итоговая цена'],
-  colWidths: [50,50, 90, 50, 50, 50, 50, 50],
+  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Цена каталога', 'Ед. измерения','Скидка в рублях','Скидка %','Итоговая цена'],
+  colWidths: [50,50, 90, 50, 50, 50, 50, 50, 50],
   renderAllRows: true,
   maxRows: $arr_count,
    fillHandle: false,
@@ -130,7 +130,8 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
         type: 'numeric',
         format: '0.00 $',
         language: 'ru-RU'
-    }, 
+    },
+    {data: 'ed',readOnly: true}, 
     {
         data: 'discount',
         type: 'numeric',
@@ -153,25 +154,25 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
             var change = changes[0];
             var line = change[0];
             a = parseFloat(this.getDataAtCell(line, 4));
-            b = parseFloat(this.getDataAtCell(line, 5));
-            c = parseInt(this.getDataAtCell(line, 6));
+            b = parseFloat(this.getDataAtCell(line, 6));
+            c = parseInt(this.getDataAtCell(line, 7));
             if(c>100)c=100;
             if(c<-100)c=-100;
             if(changes[0][1]=='price'){ 
-            this.setDataAtCell(change[0], 5, '0,00', 'sum');
-            this.setDataAtCell(change[0], 6, '0', 'sum');
-            this.setDataAtCell(change[0], 7, a, 'sum');
+            this.setDataAtCell(change[0], 6, '0,00', 'sum');
+            this.setDataAtCell(change[0], 7, '0', 'sum');
+            this.setDataAtCell(change[0], 8, a, 'sum');
             }
             if(changes[0][1]=='discount'){ 
-            this.setDataAtCell(change[0], 6, 0, 'sum');
+            this.setDataAtCell(change[0], 7, 0, 'sum');
             value = a - b;
-            this.setDataAtCell(change[0], 7, value, 'sum');
+            this.setDataAtCell(change[0], 8, value, 'sum');
             }
             if(changes[0][1]=='discount_percent'){
-            this.setDataAtCell(change[0], 5, '0,00', 'sum');
-            this.setDataAtCell(change[0], 6, c, 'sum');
+            this.setDataAtCell(change[0], 6, '0,00', 'sum');
+            this.setDataAtCell(change[0], 7, c, 'sum');
             valueTwo = a - (a/100 * c);
-            this.setDataAtCell(change[0], 7, valueTwo, 'sum');   
+            this.setDataAtCell(change[0], 8, valueTwo, 'sum');   
             }
         }      
       }
@@ -182,7 +183,7 @@ hot.updateSettings({colWidths: colWidths});
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
-  var cols = ['goods_id',2, 3, 4, 5,6,7,'total_price'];
+  var cols = ['goods_id',2, 3, 4, 5,6,7,8,'total_price'];
     $.each(dataTable, function( rowKey, object) {
         if (!hot.isEmptyRow(rowKey)){
             cleanedData[rowKey] = object;

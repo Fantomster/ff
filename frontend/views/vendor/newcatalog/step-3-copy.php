@@ -12,7 +12,11 @@ use kartik\export\ExportMenu;
 use kartik\editable\Editable;
 use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
-$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
+$this->registerCss('.handsontable .htCore .htDimmed {
+   background-color: #ececec !important;
+    cursor: not-allowed;
+    color: #696969;
+ }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
 $this->title = 'Редактировать продукты';
 
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
@@ -145,7 +149,6 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
     {data: 'total_price',readOnly: true,type: 'numeric',format: '0.00',language: 'ru-RU'},
   ],
   className : 'Handsontable_table',
-  tableClassName: ['table-hover'],
   rowHeaders : true,
   stretchH : 'all',
   startRows: 1,

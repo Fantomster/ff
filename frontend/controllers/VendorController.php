@@ -1087,6 +1087,7 @@ class VendorController extends DefaultController {
             $c_base_goods_id = $arrs['base_goods_id'];
             $c_goods_id = $arrs['goods_id'];
             $c_base_price = $arrs['base_price'];
+            $c_ed = $arrs['ed'];
             $c_price = $arrs['price'];
 
             array_push($array, [
@@ -1096,6 +1097,7 @@ class VendorController extends DefaultController {
                 'goods_id' => $c_goods_id,
                 'base_price' => $c_base_price,
                 'price' => $c_price,
+                'ed' => $c_ed,
                 'total_price' => $c_price]);
         }
         if (Yii::$app->request->isAjax) {

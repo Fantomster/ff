@@ -1,5 +1,6 @@
 <?php
 use kartik\grid\GridView;
+use yii\widgets\Breadcrumbs;
 use kartik\editable\Editable;
 use yii\helpers\Html;
 use kartik\export\ExportMenu;
@@ -18,23 +19,6 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 $this->title = 'Главный каталог';
 
 $this->registerCss('
-.panel {
-    margin-bottom: 0px;
-}.kv-editable-form-inline .kv-editable-close {
-         margin: 2px 4px 0 0; 
-}.panel .kv-editable-form-inline {
-    padding: 0; 
-}.table > tbody > tr > td{padding: 4px;}.panel-default {
-    border: 0;
-}.kv-editable-content .form-group {
-    margin: 0;
-}.panel {
-    margin-bottom: 0px;
-    background: none;
-    border: 0;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-}
 @media (max-width: 1440px){
 .text-label{
 display:none;
@@ -55,7 +39,7 @@ $exportColumns = [
     ],
     [
     'label'=>'Наименование',
-    'value'=>function ($data) {return $data['product'];},
+    'value'=>'product',
     ],
     [
     'label'=>'Кратность',
@@ -66,23 +50,38 @@ $exportColumns = [
     'value'=>'price',
     ],
     [
-    'label'=>'Категория',
-    'value'=>function ($data) {
-        return $data['category_id']==0 ? $category_name='':$category_name=Category::get_value($data['category_id'])->name;
-        },
+    'label'=>'Единица измерения',
+    'value'=>'price',
     ],
     [
     'label'=>'Комментарий',
     'value'=>function ($data) { return $data['note']?$data['note']:''; },
     ]
 ]
-?>           
+?>  
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Главный каталог
+        <small>Это ваш главный каталог</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            [
+            'label' => 'Каталоги',
+            'url' => ['vendor/catalogs'],
+            ],
+            'Главный каталог',
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title">Главный Каталог</h3>
-        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
     
-    </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
@@ -95,7 +94,12 @@ $exportColumns = [
         <div id="tabCatalog" class="tab-pane fade in active">
             <div class="panel-body">
                 <div class="col-sm-4">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                              <i class="fa fa-search"></i>
+                            </span>
                     <?=Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left','placeholder'=>'Поиск','id'=>'search']) ?>
+                    </div>
                 </div>   
                 <?=
                 Modal::widget([
@@ -121,7 +125,7 @@ $exportColumns = [
                                 'showColumnSelector'=>false,
                                 'dropdownOptions' => [
                                     'label' => '<span class="text-label">Скачать каталог</span>',
-                                    'class' => ['btn btn-default btn-sm pull-right']
+                                    'class' => ['btn btn-outline-default btn-sm pull-right']
                                     ],
                                 'exportConfig' => [
                                     ExportMenu::FORMAT_HTML => false,
@@ -181,7 +185,7 @@ $exportColumns = [
                             'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
-                            'class' => 'btn btn-default btn-sm pull-right',
+                            'class' => 'btn btn-outline-default btn-sm pull-right',
                             'href' => Url::to(['/vendor/import-to-xls','id' => Yii::$app->request->get('id')]),
                             'style' => 'margin-right:10px;',
                         ],
@@ -190,7 +194,7 @@ $exportColumns = [
                 <?= Html::a(
                    '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>',
                    Url::to('@web/upload/template.xlsx'),
-                   ['class' => 'btn btn-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
+                   ['class' => 'btn btn-outline-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
                ) ?>   
                <?=
                    Modal::widget([
@@ -201,7 +205,7 @@ $exportColumns = [
                            'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> <span class="text-label">Инструкция</span>',
                            'tag' => 'a',
                            'data-target' => '#info',
-                           'class' => 'btn btn-default btn-sm pull-right',
+                           'class' => 'btn btn-outline-default btn-sm pull-right',
                            'href' => Url::to(['#']),
                            'style' => 'margin-right:10px;',
                        ],
@@ -349,10 +353,11 @@ $exportColumns = [
                                 'dataProvider' => $dataProvider,
                                 'filterPosition' => false,
                                 'columns' => $gridColumnsBaseCatalog, 
-                                'tableOptions' => ['class' => 'table no-margin'],
                                 'options' => ['class' => 'table-responsive'],
+                                'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                                 'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
                                 'bordered' => false,
+                                'summary' => false,
                                 'striped' => true,
                                 'condensed' => false,
                                 'responsive' => false,
@@ -421,9 +426,10 @@ $exportColumns = [
                         'filterModel' => $searchModel2,
                         'filterPosition' => false,
                         'columns' => $gridColumnsCatalog, 
-                        'tableOptions' => ['class' => 'table no-margin'],
                         'options' => ['class' => 'table-responsive'],
+                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                         'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
+                        'summary' => false,
                         'bordered' => false,
                         'striped' => true,
                         'condensed' => false,
@@ -438,6 +444,7 @@ $exportColumns = [
         </div>
     </div>
 </div>
+</section>
 <?php
 $customJs = <<< JS
 var timer;

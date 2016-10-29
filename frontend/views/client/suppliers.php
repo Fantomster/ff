@@ -107,17 +107,17 @@ yii\bootstrap\Alert::widget([
             'format' => 'raw',
             'value'=> function ($data) {
                 if($data["status_invite"]==1){return '<span class="text-danger">Ожидается<br>подтверждение</span>';}
-                if($data["status_invite"]==2){return '<span class="text-warning">Подтвержден /<br> Не авторизован</span>';}
-                if($data["status_invite"]==3){return '<span class="text-primary">Подтвержден</span>';}
+                if($data["status_invite"]==2){return '<span class="text-yellow">Подтвержден /<br> Не авторизован</span>';}
+                if($data["status_invite"]==3){return '<span class="text-success">Подтвержден</span>';}
                 }
             ],
             [
             'label'=>'',
-            'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:139px;'],
+            'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:155px;'],
             'format' => 'raw',
             'value'=>function ($data) {
             $data["invite"]==0 ? $result = '' :
-            $result = Html::a('Заказ', ['order/create',
+            $result = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
                 'OrderCatalogSearch[selectedCategory]'=>"",
                 'OrderCatalogSearch[selectedVendor]'=>$data["supp_org_id"],
@@ -129,7 +129,7 @@ yii\bootstrap\Alert::widget([
             $data["invite"]==0 ? $result .= '' :
             $result .= $data["cat_id"]==0 ? '' :
                 Html::a('Каталог', ['client/view-catalog', 'id' => $data["cat_id"]], [
-                'class'=>'btn btn-default btn-sm',
+                'class'=>'btn btn-outline-default btn-sm',
                 'style'=>'text-center',
                 'data-pjax'=>0,
                 'data' => [

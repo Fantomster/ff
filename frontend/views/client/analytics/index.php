@@ -117,7 +117,7 @@ HTML;
                 'type' => DatePicker::TYPE_RANGE,
                 'name2' => 'filter_to_date',
                 'value2' => $filter_to_date,
-                'separator' => '<i class="fa fa-arrows-h" aria-hidden="true"></i>',
+                'separator' => '-',
                 'layout' => $layout,
                 'pluginOptions' => [
                     'autoclose'=>true,
@@ -144,7 +144,7 @@ HTML;
           <h3 class="box-title">Объем заказов</h3>
 
           <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            
             </button>
           </div>
         </div>
@@ -164,7 +164,7 @@ HTML;
           <h3 class="box-title">Заказы по поставщикам</h3>
 
           <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            
             </button>
           </div>
         </div>
@@ -184,7 +184,7 @@ HTML;
           <h3 class="box-title">Объем по поставщикам</h3>
 
           <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            
             </button>
           </div>
         </div>
@@ -204,7 +204,7 @@ HTML;
           <h3 class="box-title">Статистика по товарам</h3>
 
           <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            
             </button>
           </div>
         </div>
@@ -231,7 +231,7 @@ HTML;
                 'format'=>'raw',
                 'label'=>'Итого',
                 'value'=>function ($data) { return $data['price']."<i class=\"fa fa-fw fa-rub\"></i>";},
-                'contentOptions' => ['style' => 'vertical-align:middle;'],
+                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],
                 ]
             ];
             ?>

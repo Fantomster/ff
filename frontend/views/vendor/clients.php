@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use dosamigos\switchinput\SwitchBox;
@@ -86,10 +87,25 @@ $gridColumnsClients = [
     
 ];
 ?>
-
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Мои клиенты
+        <small></small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            'Мои клиенты'
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="box box-info">
     <div class="box-header with-border">
-        <h3 class="box-title">Мои Клиенты</h3>
         <?=
         Modal::widget([
             'id' => 'add-client',
@@ -126,9 +142,9 @@ $gridColumnsClients = [
                                 '1' => 'Подтвержден',
                             ],['prompt' => '','class' => 'form-control','id'=>'filter_invite']) ?> 
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-3 col-md-2 col-lg-1">
                     <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-                    <?= Html::button('Сбросить фильтр', ['class' => 'form-control clear_filters btn btn-primary teaser']) ?>
+                    <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
                 </div>
             </div>
         <div class="panel-body">
@@ -138,8 +154,8 @@ $gridColumnsClients = [
                     'filterPosition' => false,
                     'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
                     'columns' => $gridColumnsClients, 
-                    'tableOptions' => ['class' => 'table no-margin'],
                     'options' => ['class' => 'table-responsive'],
+                    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                     'bordered' => false,
                     'striped' => true,
                     'condensed' => false,
@@ -151,6 +167,7 @@ $gridColumnsClients = [
         </div>
     </div>
 </div>
+</section>
 <?php
 $customJs = <<< JS
 $('#filter_restaurant').on("change", function () {

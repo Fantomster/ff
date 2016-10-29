@@ -548,8 +548,8 @@ class VendorController extends DefaultController {
                                     . "units=:units,"
                                     . "price=:price,"
                                     . "ed=:ed,"
-                                    . "note=:note "
-                            . "where article='{$row_article}' and cat_id=$id";
+                                    . "note=:note"
+                            . " where article='{$row_article}' and cat_id=$id";
                             $command = \Yii::$app->db->createCommand($sql);
                             $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
                             $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
@@ -1075,8 +1075,8 @@ class VendorController extends DefaultController {
                 . "catalog_goods.price as price,"
                 . "catalog_base_goods.status"
             . " FROM `catalog` "
-            . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-            . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
+            . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+            . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
             . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";
         $arr = \Yii::$app->db->createCommand($sql)->queryAll();
         
@@ -1108,7 +1108,7 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
 
                 if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный продукт']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный товар']];
                     return $result;
                     exit;
                 }

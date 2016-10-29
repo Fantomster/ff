@@ -141,7 +141,7 @@ $this->registerCss('
             return $data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
         },
         'label' => 'Сумма',
-        //'headerOptions' => ['class' => 'desc'],
+        'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],        
     ],
     [
         'format' => 'raw',

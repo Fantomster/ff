@@ -1,5 +1,5 @@
 <?php
-
+use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
@@ -38,6 +38,23 @@ Modal::begin([
     ]);
 ?>
 <?php Modal::end(); ?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Мои каталоги
+        <small>Создавайте, добавляйте и редактируйте свои каталоги</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            'Мои каталоги'
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="catalog-index">
     	<div class="box box-info">
             <div class="box-header with-border">
@@ -72,7 +89,7 @@ Modal::begin([
                 <div class="box box-info">
             <div class="box-header with-border">
               <div class="box-title pull-left">
-                 <?= Html::a('Новый каталог', ['vendor/step-1'],['class'=>'btn btn-md fk-button']) ?>
+                 <?= Html::a('<i class="fa fa-plus-circle"></i> Новый каталог', ['vendor/step-1'],['class'=>'btn btn-md fk-button']) ?>
               </div>
             </div>
             <!-- /.box-header -->
@@ -80,7 +97,12 @@ Modal::begin([
                 <div class="row">
                     <div class="col-md-4">
                         <?= Html::label('&nbsp;', null, ['class' => 'label','style'=>'color:#555']) ?>
-                        <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                              <i class="fa fa-search"></i>
+                            </span>
+                        <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search'])?>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <?= Html::label('Ресторан', null, ['class' => 'label','style'=>'color:#555']) ?>
@@ -126,9 +148,9 @@ Modal::begin([
                                                 'class'=>'m-t'
                                             ]);
                                             ?>
-                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t btn-sm','data-pjax'=>'0']) ?>
-                                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дублировать', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
-                                            <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', ['class' => 'btn btn-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
+                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дублировать', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', ['class' => 'btn btn-outline-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
                                         </div>
                                     </div>
                                 </div>
@@ -142,7 +164,7 @@ Modal::begin([
             </div>
 
 </div>
-
+</section>
 <?php
 $customJs = <<< JS
 var timer;

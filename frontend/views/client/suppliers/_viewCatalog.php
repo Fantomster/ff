@@ -66,10 +66,11 @@ $gridColumnsCatalog = [
 	//'filterModel' => $searchModel,
 	'filterPosition' => false,
 	'columns' => $gridColumnsCatalog, 
-        'tableOptions' => ['class' => 'table no-margin'],
         'options' => ['class' => 'table-responsive'],
+            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
         'bordered' => false,
         'striped' => true,
+        'summary' => false,
         'condensed' => false,
         'responsive' => false,
         'hover' => false,
@@ -81,6 +82,6 @@ $gridColumnsCatalog = [
 </div>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-default" data-dismiss="modal">Закрыть</a>
+    <a href="#" class="btn btn-gray" data-dismiss="modal">Закрыть</a>
 </div>
 <?php ActiveForm::end(); ?>

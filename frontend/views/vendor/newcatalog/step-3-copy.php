@@ -10,6 +10,8 @@ use yii\web\View;
 use common\models\Users;
 use kartik\export\ExportMenu;
 use kartik\editable\Editable;
+use nirvana\showloading\ShowLoadingAsset;
+ShowLoadingAsset::register($this);
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
 $this->title = 'Редактировать продукты';
 
@@ -93,6 +95,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
   });
 }      
 var data = $arr;
+console.log($arr);
 var container = document.getElementById('handsontable');
 height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
@@ -103,7 +106,7 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   data: JSON.parse(JSON.stringify(data)),
   colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Цена каталога', 'Ед. измерения','Скидка в рублях','Скидка %','Итоговая цена'],
   colWidths: [50,50, 90, 50, 50, 50, 50, 50, 50],
-  renderAllRows: true,
+  renderAllRows: false,
   maxRows: $arr_count,
    fillHandle: false,
    minSpareCols: 0,
@@ -115,8 +118,8 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   sortIndicator: true,
   rowHeaders: true,
   columns: [
-    {data: 'goods_id',readOnly: true},
     {data: 'article',readOnly: true},
+    {data: 'goods_id',readOnly: true},
     {data: 'product', wordWrap:true,readOnly: true},  
     {
         data: 'base_price', 
@@ -183,7 +186,7 @@ hot.updateSettings({colWidths: colWidths});
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
-  var cols = ['goods_id',2, 3, 4, 5,6,7,8,'total_price'];
+  var cols = [1,'goods_id',3, 4, 5,6,7,8,'total_price'];
     $.each(dataTable, function( rowKey, object) {
         if (!hot.isEmptyRow(rowKey)){
             cleanedData[rowKey] = object;
@@ -195,6 +198,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
             data.push({dataItem});
         }    
     });
+    $('#loader-show').showLoading();
     $.ajax({
           url: "index.php?r=vendor/step-3-copy&id=$cat_id",
           type: 'POST',
@@ -206,6 +210,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                 var url = "index.php?r=vendor/step-4&id=$cat_id";
                 $(location).attr("href",url);
               }else{
+                $('#loader-show').hideLoading();
                 bootbox.dialog({
                     message: response.alert.body,
                     title: response.alert.title,

@@ -478,24 +478,10 @@ a:focus {
         height: 100%;
         z-index: -1;
     }
-    // .header-nav .logo__block-icon {
-    // 	background: url(../images/logo-rut.png) no-repeat;	
-    // 	background-size: 180px 69px;
-    // 	display: block;
-    // 	width: 180px;
-    // 	height: 34px;
-    // }
-    // .header-nav .logo__block-icon:hover {
-    // 	background-position: 0 -34px;
-    // }
     .header-nav .logo__block {
         float: left;
         margin: 0 90px 0 0;
     }
-    // .header-nav .phone__block {
-    // 	float: left;
-    // 	padding: 10px 0 0 0;
-    // }
     .header-nav .phone__block .phone__block-number {
         color: #fff;
         font-size: 14px;
@@ -850,7 +836,7 @@ a:focus {
     text-transform: uppercase;
     margin: 0 0 30px 0;
 }
-.contact__block span {
+.contact__block p {
     display: block;
     text-align: center;
     font-size: 18px;
@@ -1225,14 +1211,6 @@ a:focus {
     background: #3f3e3e;
     padding: 70px 0;
 }
-
-// .footer__logo a {
-// 	background: url(../images/logo-rut.png) no-repeat;	
-// 	background-size: 180px 69px;
-// 	display: block;
-// 	width: 180px;
-// 	height: 34px;
-// }
 .footer__logo a:hover {
     background-position: 0 -34px;
 }
@@ -1323,13 +1301,6 @@ a:focus {
     position: relative;
     z-index: 1000;
 }
-// .header_nav .logo__block-icon {
-// 	background: url(../images/logo-rut.png) no-repeat;	
-// 	background-size: 180px 69px;
-// 	display: block;
-// 	width: 180px;
-// 	height: 34px;
-// }
 .header_nav .logo__block-icon:hover {
     background-position: 0 -34px;
 }
@@ -1419,20 +1390,40 @@ a:focus {
     display: block;
     padding: 2px 5px 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#register-form .select2-container--bootstrap .select2-selection--single {
+    height: 46px !important;
+    line-height: 46px !important;
+    padding: 0 24px 0 12px;
+    text-transform: uppercase; 
+    font-size: 12px !important;
+}
+.select2-container--bootstrap.select2-container--focus .select2-selection:active,
+.select2-container--bootstrap.select2-container--focus .select2-selection:focus {
+    border-color: #84bf76;
+}
+.select2-container--bootstrap .select2-results__option--highlighted[aria-selected] {
+    background-color: #6ea262 !important;
+    color: #fff;
+}
+.select2-container--bootstrap.select2-container--focus .select2-selection, .select2-container--bootstrap.select2-container--open .select2-selection:focus {
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    -webkit-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+    border-color: #84bf76 !important;
+}
+.select2-container--bootstrap .select2-dropdown {
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    border-color: #84bf76 !important;
+    overflow-x: hidden;
+    margin-top: -1px;
+}
+.has-error .form-control:focus {
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+.has-success .select2-container--bootstrap .select2-dropdown, .has-success .select2-container--bootstrap .select2-selection {
+    border-color: #ccc !important;
+}

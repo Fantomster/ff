@@ -29,6 +29,13 @@ class User extends \amnah\yii2\user\models\User {
         $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite', 'manageNew']];
         $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
         $rules[] = [['email'], 'unique', 'on'=>'sendInviteFromVendor', 'message' => 'ooo'];
+//        $rules[] = [['email'], 'required', 'message' => 'Пожалуйста, напишите ваш адрес электронной почты'];
+        
+        //переопределим сообщения валидации быдланским способом
+        $pos = array_search(['email', 'required'], $rules);
+        $rules[$pos]['message'] = 'Пожалуйста, напишите ваш адрес электронной почты';
+        $pos = array_search([['newPassword'], 'required', 'on' => ['register', 'reset']], $rules);
+        $rules[$pos]['message'] = 'Пожалуйста, введите пароль';
         
         return $rules;
     }

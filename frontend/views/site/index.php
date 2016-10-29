@@ -2,9 +2,6 @@
 /* @var $this yii\web\View */
 
 use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\widgets\ActiveForm;
-use common\models\OrganizationType;
 
 $this->title = 'F-keeper';
 ?>
@@ -82,7 +79,7 @@ $this->title = 'F-keeper';
     <div class="contact__block">
 
         <h4>Автоматизируйте свой бизнес сейчас</h4>
-        <span>Вы в одном шаге, расскажите о себе</span>
+        <p>Вы в одном шаге, расскажите о себе</p>
         <div class="contact__form">
 <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
 
@@ -90,50 +87,11 @@ $this->title = 'F-keeper';
                     <p><?= $flash ?></p>
                 </div>
 
-            <?php else: ?>
-                <?php
-                $form = ActiveForm::begin(['id' => 'login-form', 'action' => Url::toRoute('user/register')]);
-                ?>
-                <div class="form-group">
-                    <?=
-                            $form->field($organization, 'type_id')
-                            ->label(false)
-                            ->dropDownList(OrganizationType::getList(), [
-                                'prompt' => 'ресторан / поставщик',
-                                'class' => 'form-control'])
-                    ?>
-                    <?=
-                            $form->field($organization, 'name')
-                            ->label(false)
-                            ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
-                    ?>
-                    <?=
-                            $form->field($user, 'email')
-                            ->label(false)
-                            ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
-                    ?>
-                    <?=
-                            $form->field($profile, 'full_name')
-                            ->label(false)
-                            ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
-                    ?>
-                    <?=
-                            $form->field($user, 'newPassword')
-                            ->label(false)
-                            ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
-                    ?>
-                </div>
-                <?=
-                Html::a('Зарегистрироваться', '#', [
-                    'data' => [
-                        'method' => 'post',
-                    ],
-                    'class' => 'send__btn',
-                ])
-                ?>
-                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
-                <?php ActiveForm::end(); ?>
-<?php endif; ?>
+            <?php 
+            else:
+                echo $this->render('/user/default/_register-form', compact("user", "profile", "organization"));
+            endif; 
+            ?>
         </div>
 
     </div>

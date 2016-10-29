@@ -41,6 +41,8 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
+            ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
+            ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
             [['type_id', 'name'], 'required'],
             [['type_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],

@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\bootstrap\Modal;
@@ -13,15 +14,32 @@ use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
 $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога '
 ?>
-<div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title"><?= $catalog->isNewRecord? 
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
         'Создание нового каталога' : 
         'Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
-        </h3>
-        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
-    </div>
-    <!-- /.box-header -->
+        <small></small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            [
+            'label' => 'Каталоги',
+            'url' => ['vendor/catalogs'],
+            ],
+            $catalog->isNewRecord? 
+        'Создание нового каталога' : 
+        'Редактирование каталога',
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
+<div class="box box-info">
     <div class="box-body">
         <div class="panel-body">
             <div class="text-center">
@@ -64,7 +82,8 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
         <?php $form = ActiveForm::end();?>
         <?php Pjax::end(); ?>
     </div>
-</div>    
+</div> 
+</section>
 <?php
 if($catalog->isNewRecord){$router = 'index.php?r=vendor/step-1';}else{$router = 'index.php?r=vendor/step-1-update&id='.$cat_id;}
 $this->registerJs('

@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use yii\helpers\Html;
@@ -32,12 +33,28 @@ $this->registerJsFile('modules/handsontable/dist/handsontable.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
-
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <small></small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            [
+            'label' => 'Каталоги',
+            'url' => ['vendor/catalogs'],
+            ],
+            'Редактирование каталога',
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
-        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
-    </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
@@ -74,6 +91,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         </div>
     </div>
 </div>
+</section>
 <?=Modal::widget([
 'id' => 'discount-all-product',
 'clientOptions' => false,

@@ -6,7 +6,7 @@ use kartik\date\DatePicker;
 use yii\bootstrap\Modal;
 use yii\widgets\Breadcrumbs;
 
-kartik\growl\GrowlAsset::register($this);
+//kartik\growl\GrowlAsset::register($this);
 
 $this->registerJs(
         '$("document").ready(function(){

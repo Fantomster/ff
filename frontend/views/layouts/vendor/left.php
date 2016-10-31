@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\web\View;
+use yii\helpers\Url;
+
 $user = Yii::$app->user->identity;
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
@@ -42,23 +44,22 @@ $cartCount = $user->organization->getCartCount();
                 ]
         )
         ?>
-        <form action="#" method="get" style="margin: 15px;" class="invite-form hide">
+
+        <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm"  class="hide">
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="top" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
-                <input type="text" class="form-control" placeholder="Email">
+                <input type="text" class="form-control" placeholder="Email" name="email">
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-success btn-flat"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i></button>
+                    <button type="button" class="btn btn-success btn-flat" id="inviteFriend"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i></button>
                 </span>
             </div>
-            </a>
         </form>
     </section>
-
 </aside>
 <?php
 $sidebar_js = <<< JS
 $(window).resize(function(){
-$('.invite-form').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');    
-}); $('.invite-form').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');         
+$('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');    
+}); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');         
 JS;
 $this->registerJs($sidebar_js, View::POS_READY);
-?> 
+?>

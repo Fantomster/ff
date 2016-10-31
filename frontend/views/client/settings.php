@@ -20,7 +20,7 @@ $this->registerJs(
 <?=
 yii\bootstrap\Alert::widget([
     'options' => [
-        'class' => 'alert-warning',
+        'class' => 'alert-warning fade in',
     ],
     'body' => 'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '
     . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',

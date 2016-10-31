@@ -253,6 +253,31 @@ class Organization extends \yii\db\ActiveRecord {
         return $result;
     } 
     
+    public function getEarliestOrderDate() {
+        $today = new \DateTime();
+        $result = $today->format('d.m.Y');
+        switch ($this->type_id) {
+            case self::TYPE_RESTAURANT:
+                $firstOrder = Order::find()
+                    ->where(['client_id' => $this->id])
+                    ->orderBy(['created_at' => SORT_ASC])
+                    ->limit(1)
+                    ->one();
+                break;
+            case self::TYPE_SUPPLIER:
+                $firstOrder = Order::find()
+                    ->where(['vendor_id' => $this->id])
+                    ->orderBy(['created_at' => SORT_ASC])
+                    ->limit(1)
+                    ->one();
+                break;
+        }
+        if ($firstOrder) {
+            $result = $firstOrder->created_at;
+        }
+        return $result;
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */

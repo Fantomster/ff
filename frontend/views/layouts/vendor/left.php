@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
 $newOrdersCount = $user->organization->getNewOrdersCount();
@@ -42,11 +43,11 @@ $cartCount = $user->organization->getCartCount();
                 ]
         )
         ?>
-        <form action="#" method="get" style="margin: 15px;" class="invite-form">
+        <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm">
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
-                <input type="text" class="form-control" placeholder="Email">
+                <input type="text" class="form-control" placeholder="Email" name="email">
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-success btn-flat"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i></button>
+                    <button type="button" class="btn btn-success btn-flat" id="inviteFriend"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i></button>
                 </span>
             </div>
             </a>

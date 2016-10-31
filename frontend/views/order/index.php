@@ -144,7 +144,7 @@ $this->registerCss("
                     'separator' => '-',
                     'type' => DatePicker::TYPE_RANGE,
                     'pluginOptions' => [
-                        'format' => 'dd.mm.yyyy',
+                        'format' => 'dd.mm.yyyy',//'d M yyyy',//
                         'autoclose' => true,
                         'endDate' => "0d",
                     ]

@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-
+use yii\web\View;
 $user = Yii::$app->user->identity;
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
@@ -42,8 +42,8 @@ $cartCount = $user->organization->getCartCount();
                 ]
         )
         ?>
-        <form action="#" method="get" style="margin: 15px;" class="invite-form">
-            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
+        <form action="#" method="get" style="margin: 15px;" class="invite-form hide">
+            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="top" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
                 <input type="text" class="form-control" placeholder="Email">
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-success btn-flat"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i></button>
@@ -54,3 +54,11 @@ $cartCount = $user->organization->getCartCount();
     </section>
 
 </aside>
+<?php
+$sidebar_js = <<< JS
+$(window).resize(function(){
+$('.invite-form').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');    
+}); $('.invite-form').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');         
+JS;
+$this->registerJs($sidebar_js, View::POS_READY);
+?> 

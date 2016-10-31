@@ -41,9 +41,9 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
 <section class="content">
 <div class="box box-info">
     <div class="box-body">
-        <div class="panel-body">
-            <div class="text-center">
-                <ul class="nav fk-tab nav-tabs pull-left">
+        <div class="row">
+            <div class="col-md-8">
+                <ul class="nav fk-tab nav-tabs">
                     <?=$catalog->isNewRecord?
                     '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>':
                     '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1','id'=>$cat_id]).'</li>' 
@@ -61,10 +61,12 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
                     '<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>' 
                     ?>
                 </ul>
-                <ul class="fk-prev-next pull-right">
+            </div>
+        
+            <div class="col-md-4">
+                <ul class="fk-prev-next">
                   <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
-                
             </div>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>  

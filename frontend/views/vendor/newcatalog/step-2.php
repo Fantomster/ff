@@ -52,7 +52,7 @@ $this->registerCss('
             </ul>
             <ul class="fk-prev-next pull-right">
               <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Далее',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
             </ul>
         </div>
         

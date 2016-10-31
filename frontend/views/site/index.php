@@ -5,6 +5,18 @@ use yii\helpers\Html;
 
 $this->title = 'F-keeper';
 ?>
+  <div id="myModal2" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="cartoonVideo" width="560" height="315" src="https://www.youtube.com/embed/4j5Wam9B5mQ" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 <header class="header" style="background-image: url(images/header-banner.jpg)">
     <div class="inside__block">
         <div class="site__title"> 
@@ -16,17 +28,11 @@ $this->title = 'F-keeper';
 <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
             <div class="watch_video">
-                <a href="#" data-toggle="modal" data-target="#myModal" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
+                <a href="#" data-toggle="modal" data-target="#myModal2" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
             </div>
 
 
-            <div id="myModal" class="modal fade">
-                <div class="modal-dialog">
-                    <div class="video__block">
-                        <iframe width="100%" height="500px" src="https://www.youtube.com/embed/xkScMQHqORk" frameborder="0" allowfullscreen></iframe>
-                    </div>
-                </div>
-            </div>
+              
         </div>
     </div>
     <a href="#bottom" class="show__bottom"></a>
@@ -96,3 +102,16 @@ $this->title = 'F-keeper';
 
     </div>
 </main><!-- .content -->
+<?php
+$this->registerJs('
+    var url = $("#cartoonVideo").attr(\'src\');
+
+    $("#myModal2").on(\'hide.bs.modal\', function(){
+        $("#cartoonVideo").attr(\'src\', \'\');
+    });
+
+    $("#myModal2").on(\'show.bs.modal\', function(){
+        $("#cartoonVideo").attr(\'src\', url);
+    });     
+');
+?>

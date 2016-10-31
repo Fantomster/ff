@@ -15,35 +15,33 @@ ShowLoadingAsset::register($this);
 $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога'
 ?>
 <section class="content-header">
-    <h1>
-        <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
-        'Создание нового каталога' : 
-        'Редактирование каталога <strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>' ?>
-        <small></small>
-    </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'links' => [
-            [
-            'label' => 'Каталоги',
-            'url' => ['vendor/catalogs'],
+        <h1>
+            <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
+            'Создание нового каталога' : 
+            'Редактирование каталога <small>'.common\models\Catalog::get_value($cat_id)->name.'</small>' ?>      
+        </h1>
+        <?=
+        Breadcrumbs::widget([
+            'options' => [
+                'class' => 'breadcrumb',
             ],
-            $catalog->isNewRecord? 
-        'Шаг 1. Создание нового каталога' : 
-        'Шаг 1. Редактирование каталога',
-        ],
-    ])
-    ?>
+            'links' => [
+                [
+                'label' => 'Каталоги',
+                'url' => ['vendor/catalogs'],
+                ],
+                $catalog->isNewRecord? 
+            'Шаг 1. Создание нового каталога' : 
+            'Шаг 1. Редактирование каталога',
+            ],
+        ])
+        ?>
 </section>
 <section class="content">
 <div class="box box-info">
     <div class="box-body">
-        <div class="panel-body">
-            <div class="text-center">
-                <ul class="nav fk-tab nav-tabs pull-left">
+            <div class="panel-body">
+                <ul class="nav fk-tab nav-tabs  pull-left">
                     <?=$catalog->isNewRecord?
                     '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>':
                     '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1','id'=>$cat_id]).'</li>' 
@@ -61,11 +59,11 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
                     '<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>' 
                     ?>
                 </ul>
+        
+            
                 <ul class="fk-prev-next pull-right">
-                  <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['#'],['class' => 'step-2']).'</li>'?>
+                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Далее',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
-                
-            </div>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>  
         <?php $form = ActiveForm::begin([

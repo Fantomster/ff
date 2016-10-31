@@ -25,6 +25,12 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 .info-box {box-shadow: none;border:1px solid #eee;}
 .info-box-text{margin: 0;padding-top:10px;color:#555}
 ');
+$this->registerCss('
+@media (max-width: 1320px){
+       th{
+        min-width:140px;
+        }
+    }');
 ?>
 <section class="content-header">
     <h1>

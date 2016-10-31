@@ -86,7 +86,7 @@ $this->registerJs(
         $form->field($searchModel, 'searchString', [
                         'addon' => ['prepend' => ['content' => '<i class="fa fa-search"></i>']]
                     ])->textInput([
-            'id' => 'search-string',
+            'id' => 'searchString',
             'class' => 'form-control',
             'placeholder' => 'Поиск'])->label(false)
         ?>

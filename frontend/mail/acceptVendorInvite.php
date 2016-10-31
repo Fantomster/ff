@@ -8,16 +8,16 @@ use yii\helpers\Url;
  * @var \amnah\yii2\user\models\UserToken $userToken
  * @var string $restaurant
  */
+
 ?>
 
 <p><img src="http://f-keeper.ru/img/header-bg-client.jpg" style="width: 100%;"/></p>
 
-<h3 style="font-weight: 500;font-size: 27px;">Здравствуйте, <small style="font-size: 60%;color: #787878;line-height: 0;text-transform: none;"><?= $client->profile->full_name ?>.</small></h3>
+<h3 style="font-weight: 500;font-size: 27px;">Здравствуйте!</h3>
 <p>Наш ресторан, <u><?= $vendor ?></u>, стал использовать очень удобный инструмент для автоматизации работы с вами. 
     <br />
-    Я приглашаю Вас, <u><?= $client->organization->name ?></u>, присоединиться, и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу.</p>
+    Я приглашаю Вас присоединиться и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу.</p>
 
-<p>При отправке этого письма, автоматически был создан аккаунт для вас в <a href="http://f-keeper.ru" style="color: #84bf76;">F-keeper</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения.</p>
 <br />
 <div style="width: 100%; text-align: center;">
     <a href="<?= Url::toRoute(["/user/register"], true) ?>"

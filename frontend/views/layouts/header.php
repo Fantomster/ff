@@ -117,6 +117,7 @@ JS;
                         </li>
                     <?php } ?>
                     <!-- Messages: style can be found in dropdown.less-->
+                    <?php if (false) { ?>
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
@@ -240,6 +241,7 @@ JS;
                             <li class="footer"><a href="#">View all</a></li>
                         </ul>
                     </li>
+                    <?php } ?>
                     <!-- Tasks: style can be found in dropdown.less -->
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">

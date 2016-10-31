@@ -235,7 +235,22 @@ class Organization extends \yii\db\ActiveRecord {
      * @return integer
      */
     public function getNewOrdersCount() {
-        return 20;
+        $result = 0;
+        switch ($this->type_id) {
+            case self::TYPE_RESTAURANT:
+                $result = Order::find()->where([
+                    'client_id' => $this->id, 
+                    'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                        )->count();
+                break;
+            case self::TYPE_SUPPLIER:
+                $result = Order::find()->where([
+                    'vendor_id' => $this->id, 
+                    'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                        )->count();
+                break;
+        }
+        return $result;
     } 
     
     /**

@@ -302,6 +302,11 @@ class OrderController extends DefaultController {
 
     public function actionAjaxMakeOrder() {
         $client = $this->currentUser->organization;
+        $cartCount = $client->getCartCount();
+        
+        if (!$cartCount) {
+            return false;
+        }
 
         if (Yii::$app->request->post()) {
             if (!Yii::$app->request->post('all')) {

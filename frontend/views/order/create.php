@@ -226,15 +226,16 @@ $this->registerJs(
                                                                 'backdrop' => "static",
                                                             ],
                                                 ]);
-                                                $btnAdd = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Добавить', '#', [
+                                                $btnAdd = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i>', '#', [
                                                             'class' => 'add-to-cart btn btn-outline-success',
                                                             'data-id' => $data['id'],
                                                             'data-cat' => $data['cat_id'],
+                                                            'title' => 'Добавить в корзину',
                                                 ]);
                                                 return $btnAdd;
                                             },
                                                     'contentOptions' => ['class' => 'text-center'],
-                                                    'headerOptions' => ['class' => 'width150']
+                                                    'headerOptions' => ['style' => 'width: 50px;']
                                                 ],
                                             ],
                                         ])

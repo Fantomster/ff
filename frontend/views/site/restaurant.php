@@ -128,7 +128,7 @@ $this->title = 'Ресторанам';
                     </div>
                 </div>
 
-                <a class="btn__nav" href="#">начать сейчас</a>
+                <a class="btn__nav" href="<?= yii\helpers\Url::to(['/user/register']) ?>">начать сейчас</a>
 
             </div>
         </div>

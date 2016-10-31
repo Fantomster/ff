@@ -224,14 +224,14 @@ HTML;
                 'attribute' => 'quantity',
                 'label'=>'Кол-во',
                 'value'=>'quantity',
-                'contentOptions' => ['style' => 'vertical-align:middle;'],
+                'contentOptions' => ['style' => 'vertical-align:middle;width:18%'],
                 ],
                 [
                 'attribute' => 'price',
                 'format'=>'raw',
                 'label'=>'Итого',
                 'value'=>function ($data) { return $data['price']."<i class=\"fa fa-fw fa-rub\"></i>";},
-                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],
+                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:21%'],
                 ]
             ];
             ?>

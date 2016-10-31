@@ -20,10 +20,10 @@ $this->title = 'F-keeper';
             </div>
 
 
-            <div id="myModal" class="modal fade">
+            <div id="myModal" class="modal fade" style="z-index:9999">
                 <div class="modal-dialog">
                     <div class="video__block">
-                        <iframe width="100%" height="500px" src="https://www.youtube.com/embed/xkScMQHqORk" frameborder="0" allowfullscreen></iframe>
+                        <iframe width="100%" height="500px"  src="https://www.youtube.com/watch?v=4j5Wam9B5mQ&feature=youtu.be" frameborder="0" allowfullscreen></iframe>
                     </div>
                 </div>
             </div>

@@ -66,7 +66,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
             </ul>
             <ul class="fk-prev-next pull-right">
               <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-4','id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Далее',['vendor/step-4','id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
             </ul>
         </div>
         <div class="panel-body">

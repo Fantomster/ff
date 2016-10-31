@@ -11,8 +11,11 @@ use yii\web\View;
 use yii\widgets\Pjax;
 frontend\assets\AdminltePluginsAsset::register($this);
 $this->registerCss('
-
-');
+@media (max-width: 1320px){
+       th{
+        min-width:135px;
+        }
+    }');
 ?>
 <section class="content-header">
     <h1>

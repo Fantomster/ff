@@ -9,9 +9,6 @@ use yii\helpers\Url;
  * @var string $restaurant
  */
 
-//, <small style="font-size: 60%;color: #787878;line-height: 0;text-transform: none;"><?= $client->profile->full_name ?>.</small>
-//<p>При отправке этого письма, автоматически был создан аккаунт для вас в <a href="http://f-keeper.ru" style="color: #84bf76;">F-keeper</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения.</p>
-//, <u><?= $client->organization->name ?></u>,
 ?>
 
 <p><img src="http://f-keeper.ru/img/header-bg-client.jpg" style="width: 100%;"/></p>

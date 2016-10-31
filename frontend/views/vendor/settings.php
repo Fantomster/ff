@@ -58,28 +58,34 @@ yii\bootstrap\Alert::widget([
         <div class="box-body">
 
             <?=
-                    $form->field($organization, 'name')
+                    $form->field($organization, 'name', [
+                        'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
+                    ])
                     ->label(false)
                     ->textInput(['placeholder' => $organization->getAttributeLabel('name')])
             ?>
 
             <?=
-                    $form->field($organization, 'city')
+                    $form->field($organization, 'city', [
+                        'addon' => ['prepend' => ['content' => '<i class="fa fa-map"></i>']]
+                    ])
                     ->label(false)
                     ->textInput(['placeholder' => $organization->getAttributeLabel('city')])
             ?>
 
             <?=
-                    $form->field($organization, 'address')
+                    $form->field($organization, 'address', [
+                        'addon' => ['prepend' => ['content' => '<i class="fa fa-compass"></i>']]
+                    ])
                     ->label(false)
                     ->textInput(['placeholder' => $organization->getAttributeLabel('address')])
             ?>
 
-            <?=
+            <?php /*
                     $form->field($organization, 'zip_code')
                     ->label(false)
                     ->textInput(['placeholder' => $organization->getAttributeLabel('zip_code')])
-            ?>
+             */ ?>
 
             <?=
                     $form->field($organization, 'phone', [
@@ -91,13 +97,17 @@ yii\bootstrap\Alert::widget([
             ?>
 
             <?=
-                    $form->field($organization, 'email')
+                    $form->field($organization, 'email', [
+                        'addon' => ['prepend' => ['content' => '<i class="fa fa-envelope"></i>']]
+                    ])
                     ->label(false)
                     ->textInput(['placeholder' => $organization->getAttributeLabel('email')])
             ?>
 
             <?=
-                    $form->field($organization, 'website')
+                    $form->field($organization, 'website', [
+                        'addon' => ['prepend' => ['content' => '<i class="fa fa-globe"></i>']]
+                    ])
                     ->label(false)
                     ->textInput(['placeholder' => $organization->getAttributeLabel('website')])
             ?>

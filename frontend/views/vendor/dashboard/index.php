@@ -11,8 +11,11 @@ use yii\web\View;
 use yii\widgets\Pjax;
 frontend\assets\AdminltePluginsAsset::register($this);
 $this->registerCss('
-
-');
+@media (max-width: 1320px){
+       th{
+        min-width:135px;
+        }
+    }');
 ?>
 <section class="content-header">
     <h1>
@@ -29,7 +32,7 @@ $this->registerCss('
 </section>
 <section class="content">
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-8  hidden-xs">
       <!-- AREA CHART -->
       <div class="box box-info">
         <div class="box-header with-border">

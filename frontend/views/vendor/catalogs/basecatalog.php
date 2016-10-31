@@ -201,7 +201,7 @@ $exportColumns = [
                    Url::to('@web/upload/template.xlsx'),
                    ['class' => 'btn btn-outline-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
                ) ?>   
-               <?=
+               <?php /*
                    Modal::widget([
                        'id' => 'info',
                        'clientOptions' => false,
@@ -214,7 +214,7 @@ $exportColumns = [
                            'href' => Url::to(['#']),
                            'style' => 'margin-right:10px;',
                        ],
-                   ])
+                   ]) */
                ?>
                 </div>
                 <div class="panel-body">

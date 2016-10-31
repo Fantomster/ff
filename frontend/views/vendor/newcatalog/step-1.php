@@ -12,7 +12,7 @@ use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
 use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
-$catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога '
+$catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога'
 ?>
 <section class="content-header">
     <h1>
@@ -32,8 +32,8 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
             'url' => ['vendor/catalogs'],
             ],
             $catalog->isNewRecord? 
-        'Создание нового каталога' : 
-        'Редактирование каталога',
+        'Шаг 1. Создание нового каталога' : 
+        'Шаг 1. Редактирование каталога',
         ],
     ])
     ?>

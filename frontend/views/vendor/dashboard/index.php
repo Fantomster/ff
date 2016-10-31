@@ -53,10 +53,6 @@ $this->registerCss('
       <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">Статистика</h3>
-
-          <div class="box-tools pull-right">
-            
-          </div>
         </div>
         <div class="box-body" style="display: block;">
                 <div class="panel-body" style="min-height: 307px;height:100%;">

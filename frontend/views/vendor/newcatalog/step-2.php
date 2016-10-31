@@ -12,6 +12,13 @@ use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
 use kartik\checkbox\CheckboxX;
 $this->title = 'Добавить продукты';
+$this->registerCss('
+    @media (max-width: 1300px){
+       th{
+        min-width:110px;
+        }
+    }');
+
 ?>
 <section class="content-header">
     <h1>
@@ -28,7 +35,7 @@ $this->title = 'Добавить продукты';
             'label' => 'Каталоги',
             'url' => ['vendor/catalogs'],
             ],
-            'Редактирование каталога',
+            'Шаг 2. Редактирование каталога',
         ],
     ])
     ?>
@@ -61,7 +68,7 @@ $this->title = 'Добавить продукты';
             'attribute' => 'product',
             'label'=>'Наименование',
             'value'=>'product',
-            'contentOptions' => ['style' => 'vertical-align:middle;'],
+            'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
             ],
             [
             'attribute' => 'units',
@@ -93,7 +100,7 @@ $this->title = 'Добавить продукты';
             'attribute' => 'status',
             'label'=>'Наличие',
             'format' => 'raw',
-            'contentOptions' => ['style' => 'width:50px;'],    
+            'contentOptions' => ['style' => ''],    
             'value'=>function ($data) {$data['status']==common\models\CatalogBaseGoods::STATUS_OFF?
                     $product_status='<span class="text-danger">Нет</span>':
                     $product_status='<span class="text-success">Есть</span>';
@@ -134,7 +141,12 @@ $this->title = 'Добавить продукты';
         <div class="panel-body">
             <div class="row">
                 <div class="col-sm-4">
+                      <div class="input-group">
+                            <span class="input-group-addon">
+                              <i class="fa fa-search"></i>
+                            </span>
                     <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                      </div>
                 </div> 
             </div>
         </div>

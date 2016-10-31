@@ -19,11 +19,16 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 $this->title = 'Главный каталог';
 
 $this->registerCss('
-@media (max-width: 1440px){
+@media (max-width: 1485px){
 .text-label{
 display:none;
 }
-}');		
+}
+@media (max-width: 1320px){
+       th{
+        min-width:110px;
+        }
+    }');		
 ?>
 <?=Modal::widget([
 	'id' => 'add-edit-product',
@@ -225,7 +230,7 @@ $exportColumns = [
                             'attribute' => 'product',
                             'label'=>'Наименование',
                             'value'=>'product',
-                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                             ],
                             /*[
                             'class'=>'kartik\grid\EditableColumn',
@@ -258,7 +263,7 @@ $exportColumns = [
                             'attribute' => 'units',
                             'label'=>'Кратность',
                             'value'=>function ($data) { return empty($data['units']) ? '' : $data['units'];},
-                            'contentOptions' => ['style' => 'vertical-align:middle;width:120px;'],    
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],    
                             ],
                             [
                             'attribute' => 'category_id',
@@ -285,7 +290,7 @@ $exportColumns = [
                             'attribute' => 'status',
                             'label'=>'Наличие',
                             'format' => 'raw',
-                            'contentOptions' => ['style' => 'vertical-align:middle;width:100px;'],
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
                             'value' => function ($data) {
                                 $link = CheckboxX::widget([
                                     'name'=>'status_'.$data['id'],

@@ -20,7 +20,7 @@ $cartCount = $user->organization->getCartCount();
                         ['label' => 'Рабочий стол', 'icon' => 'fa fa-home', 'url' => ['vendor/index']],
                         ['label' => 'Заказы' . ($newOrdersCount ? Html::tag('span', $newOrdersCount, ['class' => 'label bg-yellow pull-right']) : ''), 'icon' => 'fa fa-history', 'url' => ['order/index']],
                         ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'],'options' =>['class' => 'hidden-xs']],
-                        //['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
+                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
                         ['label' => 'Мои клиенты', 'icon' => 'fa fa-users', 'url' => ['vendor/clients']],
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['vendor/analytics'],'options' =>['class' => 'hidden-xs']],
                         //['label' => 'Обучающее видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['vendor/tutorial']],

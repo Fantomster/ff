@@ -124,6 +124,32 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         //return $result;
     }
+    
+    /**
+     * Send email invite to restaurant
+     * @param User $client
+     * @return int
+     */
+    public function sendInviteToFriend($email) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+		// send email
+        $we = $this->organization->name;
+        $subject = "Приглашение на f-keeper";
+        $result = $mailer->compose('friendInvite', compact("subject", "we"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        return $result;
+    }
+    
     /**
      *  Send confirmation email to your new employee
      *  @param User $user
@@ -152,6 +178,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
+    
     public static function getOrganizationUser($user_ids) {
 		$user_orgganization = User::find()->select('organization_id')->where(['id' => $user_ids])->one();
 		return $user_orgganization['organization_id'];

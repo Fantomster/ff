@@ -586,17 +586,16 @@ class VendorController extends DefaultController {
                     }
                 }
                 $transaction->commit();
+                unlink($path);
+                return $this->redirect(['vendor/basecatalog', 'id' => $id]);
             }
             catch(Exception $e)
             {
                 $transaction->rollback();
-                \Yii::$app->getSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
+                \Yii::$app->setSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
             }
                 
-            unlink($path);
-            //не нашел другого способа как обновить без перезагрузки =(((
-            //Есть идея через pjax обновлять модальное окно с редиректом при успехе _success.php
-            return $this->redirect(['vendor/basecatalog', 'id' => $id]);
+            
         }
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));
     }

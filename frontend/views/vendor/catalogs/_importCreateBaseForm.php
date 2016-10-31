@@ -24,7 +24,7 @@ use yii\web\View;
        Url::to('@web/upload/template.xlsx'),
        ['class' => 'btn btn-default btn-sm pull-left','style' => ['margin-right'=>'10px;']]
    ) ?> 
-    <a href="#" class="btn btn-default" data-dismiss="modal">Отмена</a>
-    <?= Html::submitButton('Импорт',['class' => 'btn btn-success import']) ?>
+    <?= Html::submitButton('<i class="glyphicon glyphicon-import"></i> Импорт',['class' => 'btn btn-success import']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="fa fa-ban"></i> Отмена</a>
 </div>
 <?php ActiveForm::end(); ?>

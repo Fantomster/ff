@@ -127,12 +127,12 @@ $gridColumnsClients = [
                 <div class="col-sm-3">
                     <?= Html::label('Ресторан', 'filter_restaurant', ['class' => 'label filter_catalog','style'=>'color:#555']) ?>
                     <?= Html::dropDownList('filter_restaurant', null,
-                            $arr_restaurant,['prompt' => '','class' => 'form-control','id'=>'filter_restaurant']) ?> 
+                            $arr_restaurant,['prompt' => 'Все','class' => 'form-control','id'=>'filter_restaurant']) ?> 
                 </div>
                 <div class="col-sm-3">
                     <?= Html::label('Каталог', 'filter_catalog', ['class' => 'label filter_catalog','style'=>'color:#555']) ?>
                     <?= Html::dropDownList('filter_catalog', null,
-                            $arr_catalog,['prompt' => '','class' => 'form-control','id'=>'filter_catalog']) ?>  
+                            $arr_catalog,['prompt' => 'Все','class' => 'form-control','id'=>'filter_catalog']) ?>  
                 </div>
                 <div class="col-sm-3">
                     <?= Html::label('Статус', 'filter_invite', ['class' => 'label filter_invite','style'=>'color:#555']) ?>
@@ -140,7 +140,7 @@ $gridColumnsClients = [
                             [
                                 '0' => 'Не подтвержден',
                                 '1' => 'Подтвержден',
-                            ],['prompt' => '','class' => 'form-control','id'=>'filter_invite']) ?> 
+                            ],['prompt' => 'Все','class' => 'form-control','id'=>'filter_invite']) ?> 
                 </div>
                 <div class="col-sm-3 col-md-2 col-lg-1">
                     <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>

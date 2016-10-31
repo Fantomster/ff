@@ -48,7 +48,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
             'label' => 'Каталоги',
             'url' => ['vendor/catalogs'],
             ],
-            'Редактирование каталога',
+            'Шаг 3. Редактирование каталога',
         ],
     ])
     ?>
@@ -66,7 +66,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
             </ul>
             <ul class="fk-prev-next pull-right">
               <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('Сохранить и продолжить',['vendor/step-4','id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Далее',['vendor/step-4','id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
             </ul>
         </div>
         <div class="panel-body">
@@ -74,6 +74,18 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
                 <h4>ШАГ 3</h4>
                 <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
             </div> 
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="input-group">
+                            <span class="input-group-addon">
+                              <i class="fa fa-search"></i>
+                            </span>
+                    <?=Html::input('text', 'search_field', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search_field']) ?>
+                    </div>
+                </div> 
+            </div>
+        </div>
+        <div class="panel-body">
             <?php /*=Html::a('<i class="fa fa-pencil m-r-xs"></i> установить скидку на весь ассортимент', 
                     [
                     'vendor/ajax-set-percent','id'=>$cat_id
@@ -117,8 +129,8 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
   });
 }      
 var data = $arr;
-console.log($arr);
 var container = document.getElementById('handsontable');
+var searchFiled = document.getElementById('search_field');        
 height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
         $("#handsontable").height($('.content-wrapper').height() - $("#handsontable").offset().top)
@@ -128,16 +140,17 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   data: JSON.parse(JSON.stringify(data)),
   colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Цена каталога', 'Ед. измерения','Скидка в рублях','Скидка %','Итоговая цена'],
   colWidths: [50,50, 90, 50, 50, 50, 50, 50, 50],
+  search: true,
   renderAllRows: false,
   maxRows: $arr_count,
    fillHandle: false,
    minSpareCols: 0,
    minSpareRows: 0,
-   columnSorting: {
+   /*columnSorting: {
     column: 0,
     sortOrder: false   
-  },
-  sortIndicator: true,
+  },*/
+  //sortIndicator: true,
   rowHeaders: true,
   columns: [
     {data: 'article',readOnly: true},
@@ -203,7 +216,30 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   });
 colWidths[1] = 0.1;
 hot.updateSettings({colWidths: colWidths});
-        
+function getRowsFromObjects(queryResult) {
+    rows = [];
+    for (var i = 0, l = queryResult.length; i < l; i++) {
+      //                        debugger
+      rows.push(queryResult[i].row);
+
+    }
+    console.log('rows', rows);
+    return rows;
+  }
+
+  Handsontable.Dom.addEvent(searchFiled, 'keyup', function(event) {
+    //                    debugger
+    hot.loadData(data);
+
+    var queryResult = hot.search.query(this.value);
+    rows = getRowsFromObjects(queryResult);
+    var filtered = data.filter(function(_, index) {
+      return !searchFiled.value || rows.indexOf(index) >= 0;
+    });
+
+    hot.loadData(filtered);
+    hot.render();
+  });        
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};

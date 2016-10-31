@@ -2,9 +2,16 @@
 
 use common\models\Order;
 use common\models\Organization;
+$this->registerCss('
+@media (max-width: 1320px){
+       th{
+        min-width:135px;
+        }
+    }');
+
 ?>
 <p class="text-left m-b-sm"><b>Дата создания заказа:</b><br>
-    <?= $order->created_at ?></p>
+    <?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>
 <p class="text-left m-b-sm"><b>Стоимость доставки:</b><br>
     <?= $order->vendor->delivery->delivery_charge ?></p>
 <p class="text-left m-b-sm"><b>Стоимость заказа:</b><br>

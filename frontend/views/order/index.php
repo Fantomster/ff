@@ -144,7 +144,7 @@ $this->registerCss("
                     'separator' => '-',
                     'type' => DatePicker::TYPE_RANGE,
                     'pluginOptions' => [
-                        'format' => 'dd.mm.yyyy',
+                        'format' => 'dd.mm.yyyy',//'d M yyyy',//
                         'autoclose' => true,
                         'endDate' => "0d",
                     ]
@@ -155,6 +155,7 @@ $this->registerCss("
             </div>
             <?php ActiveForm::end(); ?>
             <div class="row">
+                <div class="col-md-12">
             <?=
             GridView::widget([
                 'id' => 'orderHistory',
@@ -238,7 +239,7 @@ $this->registerCss("
         },
             ]);
             ?>
-            </div>
+                </div></div>
             <?php Pjax::end() ?>
             <!-- /.table-responsive -->
         </div>

@@ -32,9 +32,14 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             'allow' => true,
             'roles' => ['?'],
         ];
+        $behaviors['access']['rules'][] = [
+            'actions' => ['ajax-invite-friend'],
+            'allow' => true,
+            'roles' => ['@'],
+        ];
         $behaviors['access']['denyCallback'] = function($rule, $action) {
-                $this->redirect(['/site/index']);
-            };
+            $this->redirect(['/site/index']);
+        };
         return $behaviors;
     }
 
@@ -146,6 +151,47 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         }
 
         return $this->render('login', compact("model"));
+    }
+
+    public function actionAjaxInviteFriend() {
+        $currentUser = Yii::$app->user->identity;
+        if (Yii::$app->request->isAjax) {
+            $email = Yii::$app->request->post('email');
+            if ($currentUser->sendInviteToFriend($email)) {
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return [
+                    'success' => true,
+                    'growl' => [
+                        'options' => [
+//                            'title' => 'test',
+                        ],
+                        'settings' => [
+                            'element' => 'body',
+                            'type' => 'Приглашение выслано!',
+                            'allow_dismiss' => true,
+                            'placement' => [
+                                'from' => 'top',
+                                'align' => 'center',
+                            ],
+                            'delay' => 1500,
+                            'animate' => [
+                                'enter' => 'animated fadeInDown',
+                                'exit' => 'animated fadeOutUp',
+                            ],
+                            'offset' => 75,
+                            'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
+                            . '<div class="modal-content">'
+                            . '<div class="modal-header">'
+                            . '<h4 class="modal-title">{0}</h4></div>'
+                            . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
+                            . '<span class="glyphicon glyphicon-thumbs-up"></span>'
+                            . '</div></div></div>',
+                        ]
+                    ]
+                ];
+            }
+        }
+        return false;
     }
 
 }

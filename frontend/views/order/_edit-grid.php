@@ -102,9 +102,9 @@ echo GridView::widget([
                         [
                             'format' => 'raw',
                             'value' => function($data) {
-                                return '<a href="#" class="deletePosition btn btn-outline-danger" data-target="#qnty' . $data->id . '"><i class="fa fa-trash m-r-xxs"></i> Удалить</a>';
+                                return '<a href="#" class="deletePosition btn btn-outline-danger" data-target="#qnty' . $data->id . '" title="Удалить позицию"><i class="fa fa-trash m-r-xxs"></i></a>';
                             },
-                            'contentOptions' => ['class' => 'text-center width150'],
+                            'contentOptions' => ['class' => 'text-center', 'style' => 'width: 50px;'],
                         ],
                     ],
                 ]);

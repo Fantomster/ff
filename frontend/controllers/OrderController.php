@@ -302,6 +302,11 @@ class OrderController extends DefaultController {
 
     public function actionAjaxMakeOrder() {
         $client = $this->currentUser->organization;
+        $cartCount = $client->getCartCount();
+        
+        if (!$cartCount) {
+            return false;
+        }
 
         if (Yii::$app->request->post()) {
             if (!Yii::$app->request->post('all')) {
@@ -385,11 +390,12 @@ class OrderController extends DefaultController {
     }
 
     public function actionIndex() {
+        $organization = $this->currentUser->organization;
         $searchModel = new OrderSearch();
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");;
         $params = Yii::$app->request->getQueryParams();
-        $organization = $this->currentUser->organization;
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
             $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
             $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;

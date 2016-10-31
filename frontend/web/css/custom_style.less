@@ -120,12 +120,12 @@ a {
     background-color: #fefefe;
 }
 .handsontable thead th {
-    background-color: @sidebar-dark-bg;
-    color: #fff;
+    background-color: #ecf0f5;
+    color: @sidebar-dark-bg;
     padding:3px 0;
 }
 .handsontable tbody th {
-    background-color: rgba(63,62,62,0.1);
+    background-color: #ecf0f5;
     color: #555;
 }
 .handsontable th, .handsontable td{
@@ -704,7 +704,7 @@ table.dataTable thead th, table.dataTable thead td {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
-.sidebar-mini.sidebar-collapse .invite-form {
+.sidebar-mini.sidebar-collapse #inviteForm {
     display:none;
 }
 
@@ -825,4 +825,33 @@ table.dataTable thead th, table.dataTable thead td {
 }
 .navbar-nav > .user-menu > .dropdown-menu > li.user-header {
     height: auto;
+}
+a:hover, a:active, a:focus {
+    outline: none;
+    text-decoration: none;
+    color: @gray-fk;
+}
+.main-footer {
+    background: #f1f0ee;
+    padding: 15px;
+    color: #444;
+    border-top: 1px solid #d2d6de;
+}
+.bootstrap-touchspin .form-control {
+    width: 100px;
+}
+@media (max-width: 768px) {
+    .margin-right-15 {
+        margin-right: 0;
+    }
+}
+@media (max-width: 1225px) {
+    .hidden-fk {
+        display: none;
+    }
+}
+@media (max-width: 1150px) {
+    .hidden-fk {
+        display: none;
+    }
 }

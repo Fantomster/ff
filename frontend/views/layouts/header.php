@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Organization;
 
+kartik\growl\GrowlAsset::register($this);
+
 /* @var $this \yii\web\View */
 /* @var $content string */
 if (!Yii::$app->user->isGuest) {
@@ -73,6 +75,17 @@ $('#chat-form').submit(function() {
 
      return false;
 });
+            
+            $(document).on("click", "#inviteFriend", function() {
+                form = $("#inviteForm");
+                $.post(
+                    form.attr("action"),
+                    form.serialize()
+                ).done(function(result) {
+                    $("#email").val('');
+                    $.notify(result.growl.options, result.growl.settings);
+                });
+            });
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
@@ -117,6 +130,7 @@ JS;
                         </li>
                     <?php } ?>
                     <!-- Messages: style can be found in dropdown.less-->
+                    <?php if (false) { ?>
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
@@ -240,6 +254,7 @@ JS;
                             <li class="footer"><a href="#">View all</a></li>
                         </ul>
                     </li>
+                    <?php } ?>
                     <!-- Tasks: style can be found in dropdown.less -->
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">

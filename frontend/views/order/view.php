@@ -22,6 +22,7 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
+
 $js = <<<JS
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
             if ($(this).data("action") == "confirm" && dataEdited) {
@@ -137,7 +138,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             </p>
                             <p class="text-left">
                                 <strong>Запрошенная дата доставки:</strong><br>
-                                <?= $order->requested_delivery ?>
+                                <?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:j M Y") : '' ?>
                             </p>
                         </div>
                         <div class="col-xs-6 text-right">
@@ -150,8 +151,8 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                                 телефон: <?= $order->vendor->phone ?>
                             </address>
                             <p class="text-right">
-                                <span><strong>Дата создания заказа:</strong><br><?= $order->created_at ?></span><br>
-                                <span><strong>Дата доставки:</strong><br><?= $order->actual_delivery ?></span>
+                                <span><strong>Дата создания заказа:</strong><br><?=  Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></span><br>
+                                <span><strong>Дата доставки:</strong><br><?= $order->actual_delivery ? Yii::$app->formatter->asDatetime($order->actual_delivery, "php:j M Y") : '' ?></span>
                             </p>
                         </div>
                     </div>

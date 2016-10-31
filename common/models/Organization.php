@@ -235,8 +235,48 @@ class Organization extends \yii\db\ActiveRecord {
      * @return integer
      */
     public function getNewOrdersCount() {
-        return 20;
+        $result = 0;
+        switch ($this->type_id) {
+            case self::TYPE_RESTAURANT:
+                $result = Order::find()->where([
+                    'client_id' => $this->id, 
+                    'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                        )->count();
+                break;
+            case self::TYPE_SUPPLIER:
+                $result = Order::find()->where([
+                    'vendor_id' => $this->id, 
+                    'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                        )->count();
+                break;
+        }
+        return $result;
     } 
+    
+    public function getEarliestOrderDate() {
+        $today = new \DateTime();
+        $result = $today->format('d.m.Y');
+        switch ($this->type_id) {
+            case self::TYPE_RESTAURANT:
+                $firstOrder = Order::find()
+                    ->where(['client_id' => $this->id])
+                    ->orderBy(['created_at' => SORT_ASC])
+                    ->limit(1)
+                    ->one();
+                break;
+            case self::TYPE_SUPPLIER:
+                $firstOrder = Order::find()
+                    ->where(['vendor_id' => $this->id])
+                    ->orderBy(['created_at' => SORT_ASC])
+                    ->limit(1)
+                    ->one();
+                break;
+        }
+        if ($firstOrder) {
+            $result = $firstOrder->created_at;
+        }
+        return $result;
+    }
     
     /**
      * @return \yii\db\ActiveQuery

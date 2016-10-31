@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use yii\helpers\Html;
@@ -10,7 +11,13 @@ use yii\web\View;
 use common\models\Users;
 use kartik\export\ExportMenu;
 use kartik\editable\Editable;
-$this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
+use nirvana\showloading\ShowLoadingAsset;
+ShowLoadingAsset::register($this);
+$this->registerCss('.handsontable .htCore .htDimmed {
+   background-color: #ececec !important;
+    cursor: not-allowed;
+    color: #696969;
+ }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
 $this->title = 'Редактировать продукты';
 
 $this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
@@ -26,12 +33,28 @@ $this->registerJsFile('modules/handsontable/dist/handsontable.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
-
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <small></small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            [
+            'label' => 'Каталоги',
+            'url' => ['vendor/catalogs'],
+            ],
+            'Редактирование каталога',
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
-        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
-    </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
@@ -68,6 +91,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         </div>
     </div>
 </div>
+</section>
 <?=Modal::widget([
 'id' => 'discount-all-product',
 'clientOptions' => false,
@@ -93,6 +117,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
   });
 }      
 var data = $arr;
+console.log($arr);
 var container = document.getElementById('handsontable');
 height = $('.content-wrapper').height() - $("#handsontable").offset().top;
 $(window).resize(function(){
@@ -103,7 +128,7 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   data: JSON.parse(JSON.stringify(data)),
   colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Цена каталога', 'Ед. измерения','Скидка в рублях','Скидка %','Итоговая цена'],
   colWidths: [50,50, 90, 50, 50, 50, 50, 50, 50],
-  renderAllRows: true,
+  renderAllRows: false,
   maxRows: $arr_count,
    fillHandle: false,
    minSpareCols: 0,
@@ -115,8 +140,8 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   sortIndicator: true,
   rowHeaders: true,
   columns: [
-    {data: 'goods_id',readOnly: true},
     {data: 'article',readOnly: true},
+    {data: 'goods_id',readOnly: true},
     {data: 'product', wordWrap:true,readOnly: true},  
     {
         data: 'base_price', 
@@ -142,7 +167,6 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
     {data: 'total_price',readOnly: true,type: 'numeric',format: '0.00',language: 'ru-RU'},
   ],
   className : 'Handsontable_table',
-  tableClassName: ['table-hover'],
   rowHeaders : true,
   stretchH : 'all',
   startRows: 1,
@@ -183,7 +207,7 @@ hot.updateSettings({colWidths: colWidths});
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
-  var cols = ['goods_id',2, 3, 4, 5,6,7,8,'total_price'];
+  var cols = [1,'goods_id',3, 4, 5,6,7,8,'total_price'];
     $.each(dataTable, function( rowKey, object) {
         if (!hot.isEmptyRow(rowKey)){
             cleanedData[rowKey] = object;
@@ -195,6 +219,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
             data.push({dataItem});
         }    
     });
+    $('#loader-show').showLoading();
     $.ajax({
           url: "index.php?r=vendor/step-3-copy&id=$cat_id",
           type: 'POST',
@@ -206,6 +231,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                 var url = "index.php?r=vendor/step-4&id=$cat_id";
                 $(location).attr("href",url);
               }else{
+                $('#loader-show').hideLoading();
                 bootbox.dialog({
                     message: response.alert.body,
                     title: response.alert.title,

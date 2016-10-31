@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\date\DatePicker;
 use kartik\grid\GridView;
 use yii\helpers\Html;
@@ -11,17 +12,40 @@ $this->registerCss('
     border-left: 0px;
 }
 tfoot tr{border-top:2px solid #ccc}
+.info-box-content{color:#84bf76;-webkit-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
+-moz-box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);
+box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
+.order-history .info-box {
+     box-shadow: none; 
+}
+.info-box {
+     box-shadow: none;
+     border:1px solid #eee;
+}
+.info-box-text {
+    color: #555;
+}
 ');
 ?>
-
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Аналитика
+        <small>Вся аналитика в одном месте</small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            'Аналитика'
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="box box-info">
-    
-    <div class="box-header with-border">
-      <div class="col-md-12">
-        <h3 class="box-title">Аналитика</h3>
-        <i class="fa fa-refresh pull-right text-success" aria-hidden="true"></i>
-      </div>
-    </div>
+
     <!-- /.box-header -->
     <div class="box-body order-history">
         <div class="col-md-3 col-sm-6 col-xs-12">
@@ -87,7 +111,7 @@ HTML;
     'type' => DatePicker::TYPE_RANGE,
     'name2' => 'filter_to_date',
     'value2' => \Yii::$app->request->get('filter_to_date')?\Yii::$app->request->get('filter_to_date'):$filter_to_date,
-    'separator' => '<i class="fa fa-arrows-h" aria-hidden="true"></i>',
+    'separator' => '-',
     'layout' => $layout,
     'pluginOptions' => [
         'autoclose'=>true,
@@ -122,8 +146,6 @@ HTML;
               <h3 class="box-title">Объем продаж</h3>
 
               <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
               </div>
             </div>
             <div class="box-body" style="display: block;">
@@ -143,8 +165,6 @@ HTML;
               <h3 class="box-title">Продажи по клиентам</h3>
 
               <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
               </div>
             </div>
             <div class="box-body" style="display: block;">
@@ -161,8 +181,6 @@ HTML;
               <h3 class="box-title">Продажи по товарам</h3>
 
               <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
               </div>
             </div>
             <div class="box-body" style="display: block;">
@@ -172,7 +190,7 @@ HTML;
             
             $columns = [
                 [
-                'attribute' => 'product_id',
+                //'attribute' => 'product_id',
                 'label'=>'Товар',
                 'value'=>function ($data) {
                     return \common\models\CatalogBaseGoods::find()->where(['id'=>$data['product_id']])->one()->product;
@@ -181,11 +199,12 @@ HTML;
                 'footer'=>'ИТОГО: ',
                 ],
                 [
-                'attribute' => 'price',
+                //'attribute' => 'price',
+                'format'=>'raw',
                 'label'=>'Итого',
-                'value'=>'price',
-                'contentOptions' => ['style' => 'vertical-align:middle;'],
-                'footer'=>$total_price,
+                'value'=> function($data) { return $data['price'] . "<i class=\"fa fa-fw fa-rub\"></i>";},
+                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],
+                'footer'=>$total_price . "<i class=\"fa fa-fw fa-rub\"></i>",
                 ]
             ];
             ?>
@@ -200,11 +219,12 @@ HTML;
            'resizableColumns'=>false,
             'condensed' => false,
             'responsive' => false,
+            'summary'=>false,
             'hover' => true,
             'showFooter'=>TRUE,
-'footerRowOptions'=>['class'=>'text-success','style'=>'font-weight:bold;text-decoration: underline;'],
-'columns' =>$columns,
-            ]);
+            'footerRowOptions'=>['class'=>'text-success','style'=>'font-weight:bold;text-decoration: underline;'],
+            'columns' =>$columns,
+                        ]);
             ?> 
             <?php  Pjax::end(); ?>
                 </div>
@@ -215,7 +235,7 @@ HTML;
       </div>
       
 </div>
-
+</section>
 <?php
 
 $arr_create_at =   json_encode($arr_create_at);
@@ -341,8 +361,8 @@ $("#reset").on("click", function () {
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
            }
-   });
-}).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') }); 
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
+})
 $.pjax({
      type: 'GET',
      push: false,
@@ -355,7 +375,7 @@ $.pjax({
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
            }
-   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
+   })
 JS;
 $this->registerJs($customJs, View::POS_READY);
 

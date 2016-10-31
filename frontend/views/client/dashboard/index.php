@@ -85,7 +85,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         $columns1 = [
         ['attribute' => 'name','value'=>'name','label' => 'Поставщики',],
         ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
-            return Html::a('заказ', ['order/create',
+            return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
                 'OrderCatalogSearch[selectedCategory]'=>"",
                 'OrderCatalogSearch[selectedVendor]'=>$data['supp_org_id'],

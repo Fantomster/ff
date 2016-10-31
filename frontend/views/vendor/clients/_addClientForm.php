@@ -18,7 +18,7 @@ $form = ActiveForm::begin([
     <?= $form->field($user, 'email') ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Отмена</a>
-    <?= Html::button('Отправить', ['class' => 'btn btn-primary adds-client']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal">Отмена</a>
+    <?= Html::button('Отправить', ['class' => 'btn btn-success adds-client']) ?>
 </div>
 <?php ActiveForm::end(); ?>

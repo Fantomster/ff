@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use dosamigos\switchinput\SwitchBox;
@@ -12,12 +13,28 @@ use common\models\Users;
 use kartik\checkbox\CheckboxX;
 $this->title = 'Назначить каталог';
 ?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <small></small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            [
+            'label' => 'Каталоги',
+            'url' => ['vendor/catalogs'],
+            ],
+            'Редактирование каталога',
+        ],
+    ])
+    ?>
+</section>
+<section class="content">
 <div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title">Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
-        <!--button class="btn btn-default btn-sm pull-right" onclick="window.history.back();">Вернуться к списку каталогов</button-->
-        <span class="pull-right"><?=Html::a('<i class="fa fa-fw fa-chevron-left"></i>  Вернуться к списку каталогов',['vendor/catalogs'])?></span>
-    </div>
     <!-- /.box-header -->
     <div class="box-body">
         <div class="panel-body">
@@ -89,10 +106,12 @@ $this->title = 'Назначить каталог';
             'filterModel' => $searchModel,
             'filterPosition' => false,
             'columns' => $gridColumns,
-            'tableOptions' => ['class' => 'table no-margin'],
             'options' => ['class' => 'table-responsive'],
+            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+            'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
             'bordered' => false,
             'striped' => true,
+            'summary' => false,
             'condensed' => false,
             'responsive' => false,
             'hover' => false, 
@@ -102,6 +121,7 @@ $this->title = 'Назначить каталог';
         </div>
     </div>
 </div>
+</section>
 <?php
 $this->registerJs('
 /** 

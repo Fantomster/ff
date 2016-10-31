@@ -33,6 +33,6 @@ $form = ActiveForm::begin([
 </div>
 <div class="modal-footer">
     <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success edit']) ?>
-    <a href="#" class="btn btn-danger" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
 </div>
 <?php ActiveForm::end(); ?>

@@ -96,62 +96,65 @@ $this->registerJs(
                     ],
                 ])
         ?>
-        <div class="form-group">
-            <label class="col-sm-4 control-label">Дни доставки</label>
-            <div class="col-sm-5">
-                <?php
-                echo CheckboxX::widget([
-                    'name' => 'Delivery[mon]',
-                    'id' => 'mon',
-                    'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->mon,
-                ]);
-                echo '<label class="control-label" for="Delivery[mon]">Пн</label>';
-                echo CheckboxX::widget([
-                    'name' => 'Delivery[tue]',
-                    'id' => 'tue',
-                    'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->tue,
-                ]);
-                echo '<label class="control-label" for="Delivery[tue]">Вт</label>';
-                echo CheckboxX::widget([
-                    'name' => 'Delivery[wed]',
-                    'id' => 'wed',
-                    'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->wed,
-                ]);
-                echo '<label class="control-label" for="Delivery[wed]">Ср</label>';
-                echo CheckboxX::widget([
-                    'name' => 'Delivery[thu]',
-                    'id' => 'thu',
-                    'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->thu
-                ]);
-                echo '<label class="control-label" for="Delivery[thu]">Чт</label>';
-                echo CheckboxX::widget([
-                    'name' => 'Delivery[fri]',
-                    'id' => 'fri',
-                    'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->fri,
-                ]);
-                echo '<label class="control-label" for="Delivery[fri]">Пт</label>';
-                echo CheckboxX::widget([
-                    'name' => 'Delivery[sat]',
-                    'id' => 'sat',
-                    'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->sat,
-                ]);
-                echo '<label class="control-label" for="Delivery[sat]">Сб</label>';
-                echo CheckboxX::widget([
-                    'name' => 'Delivery[sun]',
-                    'id' => 'sun',
-                    'pluginOptions' => ['threeState' => false],
-                    'value' => $delivery->sun,
-                ]);
-                echo '<label class="control-label" for="Delivery[sun]">Вс</label>';
-                ?>
+        <div class="box-body">
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Дни доставки</label>
+                <div class="col-sm-5">
+                    <?php
+                    echo CheckboxX::widget([
+                        'name' => 'Delivery[mon]',
+                        'id' => 'mon',
+                        'pluginOptions' => ['threeState' => false],
+                        'value' => $delivery->mon,
+                    ]);
+                    echo '<label class="control-label" for="Delivery[mon]">Пн</label>';
+                    echo CheckboxX::widget([
+                        'name' => 'Delivery[tue]',
+                        'id' => 'tue',
+                        'pluginOptions' => ['threeState' => false],
+                        'value' => $delivery->tue,
+                    ]);
+                    echo '<label class="control-label" for="Delivery[tue]">Вт</label>';
+                    echo CheckboxX::widget([
+                        'name' => 'Delivery[wed]',
+                        'id' => 'wed',
+                        'pluginOptions' => ['threeState' => false],
+                        'value' => $delivery->wed,
+                    ]);
+                    echo '<label class="control-label" for="Delivery[wed]">Ср</label>';
+                    echo CheckboxX::widget([
+                        'name' => 'Delivery[thu]',
+                        'id' => 'thu',
+                        'pluginOptions' => ['threeState' => false],
+                        'value' => $delivery->thu
+                    ]);
+                    echo '<label class="control-label" for="Delivery[thu]">Чт</label>';
+                    echo CheckboxX::widget([
+                        'name' => 'Delivery[fri]',
+                        'id' => 'fri',
+                        'pluginOptions' => ['threeState' => false],
+                        'value' => $delivery->fri,
+                    ]);
+                    echo '<label class="control-label" for="Delivery[fri]">Пт</label>';
+                    echo CheckboxX::widget([
+                        'name' => 'Delivery[sat]',
+                        'id' => 'sat',
+                        'pluginOptions' => ['threeState' => false],
+                        'value' => $delivery->sat,
+                    ]);
+                    echo '<label class="control-label" for="Delivery[sat]">Сб</label>';
+                    echo CheckboxX::widget([
+                        'name' => 'Delivery[sun]',
+                        'id' => 'sun',
+                        'pluginOptions' => ['threeState' => false],
+                        'value' => $delivery->sun,
+                    ]);
+                    echo '<label class="control-label" for="Delivery[sun]">Вс</label>';
+                    ?>
+                </div>
             </div>
         </div>
+        
         <div class="box-footer">
             <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить изменения', ['class' => 'btn btn-success', 'id' => 'saveDlv', 'disabled' => true]) ?>
             <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-danger', 'id' => 'cancelDlv', 'disabled' => true]) ?>

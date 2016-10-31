@@ -32,7 +32,7 @@ $this->registerCss('
 </section>
 <section class="content">
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-8  hidden-xs">
       <!-- AREA CHART -->
       <div class="box box-info">
         <div class="box-header with-border">

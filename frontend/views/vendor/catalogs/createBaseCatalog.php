@@ -1,4 +1,5 @@
 <?php
+use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\url;
@@ -38,18 +39,35 @@ $this->registerJsFile('modules/handsontable/dist/handsontable.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
+<?=
+yii\bootstrap\Alert::widget([
+    'options' => [
+        'class' => 'alert-warning',
+    ],
+    'body' => 'Для того, чтобы начать продавать, загрузите Ваш первый каталог. '
+    . '<a class="btn btn-default btn-sm" href="#">Видео инструкция</a>',
+]);
+?>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-list-alt"></i> Создание главного каталога
+        <small></small>
+    </h1>
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            'Создание главного каталога'
+        ],
+    ])
+    ?>
+</section>
+
+<section class="content">
 <div class="box box-info">
-    <div class="box-header with-border">
-        <h3 class="box-title">Создание главного каталога</h3>
-    </div>
-    <!-- /.box-header -->
     <div class="box-body">
-        <div class="panel-body">
-            <div class="callout callout-fk-info">
-                   <h4>Загрузите ваш первый каталог</h4>
-                   <p>Вы можете добавить все свои продукты в эту таблицу. Это работает точно так же, как <strong>Excel</strong>.</p>
-            </div> 
-        </div>
         <div class="panel-body">
     <?= Html::a(
         '<i class="icon fa fa-save"></i> Сохранить',
@@ -62,7 +80,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
             'clientOptions' => false,
             'size'=>'modal-md',
             'toggleButton' => [
-                'label' => '<i class="glyphicon glyphicon-import"></i> Импорт',
+                'label' => '<i class="glyphicon glyphicon-import"></i> Загрузить каталог',
                 'tag' => 'a',
                 'data-target' => '#importToXls',
                 'class' => 'btn btn-default pull-right',
@@ -76,7 +94,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         Url::to('@web/upload/template.xlsx'),
         ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px']]
     ) ?>
-    <?=
+    <?php /* 
         Modal::widget([
             'id' => 'info',
             'clientOptions' => false,
@@ -89,7 +107,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
                 'href' => Url::to(['#']),
                 'style' => 'margin-right:5px;',
             ],
-        ])
+        ]) */
     ?>
         </div>
         <div class="panel-body">
@@ -97,6 +115,7 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
         </div>
     </div>
 </div>
+</section>
 <?php
 //$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
 $catgrs = \yii\helpers\ArrayHelper::getColumn(common\models\Category::find()->all(), 'name');

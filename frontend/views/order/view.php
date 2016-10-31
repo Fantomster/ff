@@ -22,6 +22,7 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
+
 $js = <<<JS
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
             if ($(this).data("action") == "confirm" && dataEdited) {

@@ -2,6 +2,13 @@
 
 use common\models\Order;
 use common\models\Organization;
+$this->registerCss('
+@media (max-width: 1320px){
+       th{
+        min-width:135px;
+        }
+    }');
+
 ?>
 <p class="text-left m-b-sm"><b>Дата создания заказа:</b><br>
     <?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>

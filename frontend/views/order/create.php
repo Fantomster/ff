@@ -154,7 +154,7 @@ $this->registerJs(
                         ?>
                         <?php ActiveForm::end(); ?>
                     </div>
-                    <div style="padding-right: 10px; float: left; width: 100%" id="products">
+                    <div id="products">
                         <?=
                         GridView::widget([
                             'dataProvider' => $dataProvider,

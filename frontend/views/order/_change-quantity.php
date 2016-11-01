@@ -35,7 +35,7 @@ echo Html::hiddenInput('product_id', $product_id);
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
-                            'options' => ['style' => 'width: 100px;'],
+                          //  'options' => ['style' => 'width: 100px;'],
                         ])
                         ?>
 </div>

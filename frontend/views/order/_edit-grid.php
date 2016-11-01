@@ -113,7 +113,7 @@ echo GridView::widget([
                     //editable discount
                     ?>
                     <div class="pull-right">
-                        <table class="table table-bordered table-striped dataTable" style="width: 400px">
+                        <table class="table table-bordered table-striped dataTable">
                             <tr>
                                 <td>
                                     <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
@@ -139,7 +139,7 @@ echo GridView::widget([
                         //show discount
                         ?>
                         <div class="pull-right">
-                            <table class="table table-bordered table-striped dataTable" style="width: 400px">
+                            <table class="table table-bordered table-striped dataTable">
                                 <tr>
                                     <td>
                                         <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>

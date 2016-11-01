@@ -44,8 +44,11 @@ $cartCount = $user->organization->getCartCount();
                 ]
         )
         ?>
-
+        
         <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm"  class="hide">
+            <ul class="sidebar-menu">
+                <li class="header"><span>ОТПРАВИТЬ ПРИГЛАШЕНИЕ</span></li>
+            </ul>
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="top" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
                 <input type="text" class="form-control" placeholder="Email" name="email">
                 <span class="input-group-btn">

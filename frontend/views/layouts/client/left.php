@@ -45,11 +45,13 @@ $cartCount = $user->organization->getCartCount();
         )
         ?>
         <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm" class="hide">
-            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="top" title="" style="color: rgb(255, 255, 255);display:none; font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
+            <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="top" title="" style="color: rgb(255, 255, 255);font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
                 <input type="text" class="form-control" placeholder="Email">
-                    <span class="input-group-btn">
-                    <button type="button" class="btn btn-success btn-flat" id="inviteFriend"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i></button>
-                    </span>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-success btn-flat" id="inviteFriend">
+                        <i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i>
+                    </button>
+                </span>
             </div>
         </form>
     </section>
@@ -59,7 +61,7 @@ $cartCount = $user->organization->getCartCount();
 $sidebar_js = <<< JS
 $(window).resize(function(){
 $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');    
-}); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');        
+}); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');   
 JS;
 $this->registerJs($sidebar_js, View::POS_READY);
 ?>        

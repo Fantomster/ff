@@ -167,7 +167,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
                         <div class="box-header with-border">
                             <div class="row">
                                 <div class="col-md-8 col-sm-8 col-xs-8">
-                                    <h3 class="box-title">Заказ у <?= $order->vendor->name ?></h3>
+                                    <h3 class="box-title">Заказ у <?= $order->vendor->name ?> на сумму <span id="orderTotal<?= $order->id ?>" class="text-success"><?= $order->total_price ?></span><i class="fa fa-fw fa-rub text-success"></i></h3>
                                 </div>
                                 <div class="col-md-4 col-sm-4 col-xs-4">
                                     <div class="pull-right">
@@ -183,13 +183,10 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
                                     <div class="panel-heading">
                                         <div class="form-inline">
                                             <div class="row">
-                                                <div class="col-md-4 col-xs-4">
+                                                <div class="col-md-4 col-sm-4 col-xs-12">
                                                         <button class="btn btn-default" data-toggle="collapse" data-target="#order<?= $order->id ?>">Содержимое заказа</button>
-                                                    <div style="font-size:16px; padding-top: 7px;" class="text-success">
-                                                        Всего: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> <i class="fa fa-fw fa-rub"></i>
-                                                    </div>
                                                 </div>
-                                                <div class="col-md-8 col-xs-8">
+                                                <div class="col-md-3 col-sm-4 col-xs-6">
                                                         <?=
                                                         DatePicker::widget([
                                                             'name' => '',
@@ -209,14 +206,16 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
                                                             ]
                                                         ])
                                                         ?>
-                                                        <a class="btn btn-default comment"
+                                                </div>
+                                                <div class="col-md-5 col-sm-4 col-xs-6">
+                                                        <button class="btn btn-success create pull-right" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
+                                                        <a class="btn btn-default comment pull-right"
                                                            data-target="#changeComment"
                                                            data-toggle="modal"
                                                            data-backdrop="static"
                                                            href="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>">
                                                             <i class="fa fa-comment" style="margin-top:-3px;"></i><span class="hidden-fk"> Комментарий к заказу</span>
                                                         </a>
-                                                        <button class="btn btn-success create" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
                                                 </div>
                                             </div>
                                         </div>

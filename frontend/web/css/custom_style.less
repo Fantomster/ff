@@ -472,6 +472,17 @@ label {
 .checkout-header .total-cart:active {
     color: #eee;
 }
+.checkout .create,
+.checkout .comment {
+    margin-left: 3px;
+}
+@media (max-width: 768px) {
+    .checkout .date,
+    .checkout .create,
+    .checkout .comment {
+        margin-top: 3px;
+    }
+}
 #orderHistory {
     padding-left: 17px;
     padding-right: 17px;
@@ -840,6 +851,14 @@ a:hover, a:active, a:focus {
 .bootstrap-touchspin .form-control {
     min-width: 100px;
 }
+.krajee-datepicker {
+    min-width: 120px;
+}
+@media (max-width: 390px) {
+    .krajee-datepicker {
+        min-width: 50px;
+    }
+}
 @media (max-width: 768px) {
     .margin-right-15 {
         margin-right: 0;
@@ -853,5 +872,27 @@ a:hover, a:active, a:focus {
 @media (max-width: 1150px) {
     .hidden-fk {
         display: none;
+    }
+}
+#actionButtons {
+    .disabled {
+        margin-bottom: 15px;
+    }
+    .btnOrderAction {
+        margin-right: 7px;
+    }
+}
+#toPrint {
+    .order-table {
+        min-width: 700px;
+    }
+    .kv-grid-container {
+        margin-bottom: 30px;
+    }
+    .tbl-discount {
+        td {
+            font-size: 14px;
+            text-align: center;
+        }
     }
 }

@@ -81,6 +81,6 @@ $gridColumnsCatalog = [
 </div>   
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-default" data-dismiss="modal">Закрыть</a>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
 </div>
 <?php ActiveForm::end(); ?>

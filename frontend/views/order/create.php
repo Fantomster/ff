@@ -103,7 +103,7 @@ $this->registerJs(
 </section>
 <section class="content">
     <div class="row">
-        <div class="col-md-9">
+        <div class="col-lg-9 col-md-8 col-sm-12">
             <div class="box box-info" id="createP">
                 <div class="box-header with-border">
                     <h3 class="box-title">Список товаров</h3>
@@ -246,7 +246,7 @@ $this->registerJs(
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-lg-3 col-md-4 col-sm-12">
                             <div class="box box-info ">
                                 <div class="box-header with-border">
                                     <h3 class="box-title">Корзина</h3>

@@ -20,11 +20,16 @@ $cartCount = $user->organization->getCartCount();
                     'items' => [
                         ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
                         ['label' => 'Рабочий стол', 'icon' => 'fa fa-home', 'url' => ['vendor/index']],
-                        ['label' => 'Заказы' . ($newOrdersCount ? Html::tag('span', $newOrdersCount, ['class' => 'label bg-yellow pull-right']) : ''), 'icon' => 'fa fa-history', 'url' => ['order/index']],
-                        ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'],'options' =>['class' => 'hidden-xs']],
-                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
+                        [
+                            'label' => 'Заказы',
+                            'icon' => 'fa fa-history',
+                            'url' => ['order/index'],
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
+                        ],
+                        ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
+//                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
                         ['label' => 'Мои клиенты', 'icon' => 'fa fa-users', 'url' => ['vendor/clients']],
-                        ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['vendor/analytics'],'options' =>['class' => 'hidden-xs']],
+                        ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
                         //['label' => 'Обучающее видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['vendor/tutorial']],
                         //['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['vendor/events']],
                         [
@@ -37,7 +42,7 @@ $cartCount = $user->organization->getCartCount();
                                 ['label' => 'Сотрудники', 'icon' => 'fa fa-circle-o', 'url' => ['vendor/employees']],
                                 ['label' => 'Доставка', 'icon' => 'fa fa-circle-o', 'url' => ['vendor/delivery']],
                             ]
-                            ],
+                        ],
                         //['label' => 'Поддержка', 'icon' => 'fa fa-support', 'url' => ['vendor/support']],
                         ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options' => ['class' => 'header']],
                     ],

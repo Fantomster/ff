@@ -252,7 +252,7 @@ $this->registerJs(
                         <div class="col-lg-3 col-md-4 col-sm-12">
                             <div class="box box-info ">
                                 <div class="box-header with-border">
-                                    <h3 class="box-title">Корзина</h3>
+                                    <h3 class="box-title"><i class="fa fa-shopping-cart m-r-xs"></i> Корзина</h3>
                                 </div>
                                 <!-- /.box-header -->
                                 <div class="box-body" id="orders">

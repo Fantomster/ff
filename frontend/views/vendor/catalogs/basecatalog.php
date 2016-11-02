@@ -56,7 +56,7 @@ $exportColumns = [
     ],
     [
     'label'=>'Единица измерения',
-    'value'=>'price',
+    'value'=>'ed',
     ],
     [
     'label'=>'Комментарий',
@@ -362,7 +362,6 @@ $exportColumns = [
                                 'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                                 'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
                                 'bordered' => false,
-                                'summary' => false,
                                 'striped' => true,
                                 'condensed' => false,
                                 'responsive' => false,

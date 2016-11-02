@@ -40,7 +40,7 @@ switch ($order->status) {
         $statusInfo .= '<a href="#" class="btn btn-danger disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Отменен</a>';
         break;
 }
-$actionButtons .= '<a href="#" class="btn btn-outline-default" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>';
+//$actionButtons .= '<a href="#" class="btn btn-outline-default" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>';
 ?>
 <p class="text-left m-b-sm"><b>Дата создания заказа:</b><br>
     <?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>

@@ -42,4 +42,29 @@ return [
         */
     ],
     'params' => $params,
+    'modules' => [
+        'user' => [
+            'class' => 'amnah\yii2\user\Module',
+            'loginEmail' => true,
+            'requireEmail' => true,
+            'requireUsername' => false,
+            'loginUsername' => false, 
+            'controllerMap' => [
+                'default' => 'amnah\yii2\user\controllers\DefaultController',
+            ],
+        ],
+    ],
+    'on beforeAction' => function ($event) {
+        if (Yii::$app->user->isGuest) {
+            if ($event->action->id !== 'login') {
+                $event->isValid = false;
+                Yii::$app->response->redirect(['/user/default/login']);
+            }
+            return;
+        }
+        if (!Yii::$app->user->can('admin')) {
+            $event->isValid = false;
+            Yii::$app->response->statusCode = 403;
+        }
+    },
 ];

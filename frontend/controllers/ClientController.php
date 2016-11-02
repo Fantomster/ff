@@ -824,24 +824,29 @@ class ClientController extends DefaultController {
         $searchString="";
         $where = "";
         if (Yii::$app->request->isAjax) {
-                $searchString=trim(\Yii::$app->request->get('searchString'));
+                $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
                 
-                empty($searchString)?"":$where .= " and name like '%" . $searchString . "%'";
+                empty($searchString)?"":$where .= " and name LIKE :name";
                         
         }
-        $sql_dataProvider = Yii::$app->db->createCommand("SELECT supp_org_id, name FROM `relation_supp_rest` join `organization`
+        $sql = "SELECT supp_org_id, name FROM `relation_supp_rest` join `organization`
 on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
-                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where");
-        $suppliers_count = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT supp_org_id, name FROM `relation_supp_rest` join `organization`
+                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where";
+        $query = \Yii::$app->db->createCommand($sql);
+        $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM `relation_supp_rest` join `organization`
 on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
-                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where)`tb`")->queryScalar();
+                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where", 
+                    [':name' => $searchString])->queryScalar();
+        
         $suppliers_dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $sql_dataProvider->sql,
-            'totalCount' => $suppliers_count,
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'params' => [':name' => $searchString],
             'pagination' => [
                 'pageSize' => 4,
             ],
         ]);
+        
         /*
          * 
          * Поставщики END
@@ -927,8 +932,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $searchString="";
         $where = "";
         if (Yii::$app->request->isAjax) {
-                $searchString=trim(\Yii::$app->request->get('searchString'));
-                empty($searchString)?"":$where .= " and organization.name like '%" . $searchString . "%'";
+                $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+                empty($searchString)?"":$where .= " and organization.name LIKE :name";
         }
         $query = Yii::$app->db->createCommand("SELECT 
             relation_supp_rest.id,
@@ -951,10 +956,12 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
                 . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
                 . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`")->queryScalar();
+                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`", 
+                    [':name' => $searchString])->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
+            'params' => [':name' => $searchString],
             'pagination' => [
                 'pageSize' => 10,
             ],

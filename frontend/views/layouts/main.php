@@ -112,7 +112,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="phone__block">
                             <span class="phone__block-number">
-                                <span class="glyphicon glyphicon-phone"></span>8-499-404-10-18
+                                <span class="glyphicon glyphicon-phone"></span><a style="color:#fff;text-decoration:none;" href="tel:84994041018">8-499-404-10-18</a>
                             </span>
                         </div>
                         <div class="registr-block">

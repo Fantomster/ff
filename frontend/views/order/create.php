@@ -164,6 +164,9 @@ $this->registerJs(
                             //'tableOptions' => ['class' => 'table no-margin table-hover'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             'options' => ['class' => 'table-responsive'],
+                            'pager' => [
+                                'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
+                            ],
                             'columns' => [
                                 [
                                     'format' => 'raw',

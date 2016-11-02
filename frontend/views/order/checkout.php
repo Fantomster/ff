@@ -148,13 +148,13 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000])
     <div class="box box-info">
         <div class="box-header checkout-header">
             <div class="row">
-                <div class="col-md-6 col-sm-6 col-xs-6">
+                <div class="col-md-6 col-sm-6 col-xs-9">
                     <div class="btn-group" role="group" id="createAll">
                         <button class="btn btn-success m-t-xs" type="button"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span></button>
                         <button type="button" class="btn btn-success  btn-outline m-t-xs total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-6 col-xs-6">
+                <div class="col-md-6 col-sm-6 col-xs-3">
                     <button class="btn btn-danger m-t-xs m-r pull-right" type="button" id="deleteAll" style="margin-right: 10px;"><i class="fa fa-trash" style="margin-top:-3px;"></i><span class="hidden-xs"> Очистить корзину</span></button>    
 
                 </div>

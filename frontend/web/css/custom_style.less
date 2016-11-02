@@ -454,28 +454,34 @@ label {
     color: #fff;
     background: @light-green-fk;
 }
-.checkout .comment {
-    background-color: #fff;
+.checkout {
+    .box-title {
+        line-height: 1.6;
+    }
+    .comment {
+        background-color: #fff;
+    }
+    .comment:hover {
+        background-color: #e7e7e7;
+        border-color: #adadad;
+    }
+    .create,
+    .comment {
+        margin-left: 3px;
+    }
 }
-.checkout .comment:hover {
-    background-color: #e7e7e7;
-    border-color: #adadad;
-}
-.checkout-header .total-cart {
-    color: @dark-green-fk;
-    border-color: @dark-green-fk;
-    background-color: #fff;
-    border: 1px solid @light-green-fk;
-}
-.checkout-header .total-cart:hover,
-.checkout-header .total-cart:focus,
-.checkout-header .total-cart:active {
-    color: #eee;
-}
-.checkout .create,
-.checkout .comment {
-    margin-left: 3px;
-}
+.checkout-header {
+    .total-cart {
+        color: @dark-green-fk;
+        border-color: @dark-green-fk;
+        background-color: #fff;
+        border: 1px solid @light-green-fk;
+    }
+    .total-cart:hover,
+        .total-cart:focus,
+        .total-cart:active {
+        color: #eee;
+    }}
 @media (max-width: 768px) {
     .checkout .date,
     .checkout .create,

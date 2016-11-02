@@ -114,21 +114,21 @@ echo GridView::widget([
                     ?>
                         <table class="table table-bordered table-striped dataTable tbl-discount">
                             <tr>
-                                <td>
+                                <th>
                                     <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
-                                </td><td>
+                                </th><td>
                                     <?= $form->field($order, 'discount')->label(false) ?>
                                 </td>
                             </tr><tr>
-                                <td>
+                                <th>
                                     Стоимость доставки
-                                </td><td>
+                                </th><td>
                                     <?= $order->calculateDelivery() . ' <i class="fa fa-fw fa-rub"></i>' ?>
                                 </td>
                             </tr><tr>
-                                <td>
+                                <th>
                                     Стоимость заказа
-                                </td><td>
+                                </th><td>
                                     <?= $order->total_price . ' <i class="fa fa-fw fa-rub"></i>' ?>
                                 </td>
                             </tr>
@@ -160,6 +160,6 @@ echo GridView::widget([
                             </table>
                             <?php
                         }
-                        echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success']);
+                        echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right']);
                         ActiveForm::end();
                         

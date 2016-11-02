@@ -40,8 +40,8 @@ echo Html::hiddenInput('product_id', $product_id);
                         ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
     <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success save', 'data' => ['dismiss' => "modal"]]) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
 </div>
 <?php
 ActiveForm::end();

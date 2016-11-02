@@ -180,6 +180,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
             <div class="box box-info">
                 <div class="box-header">
                     <h3 class="box-title">Итого</h3>
+                    <a href="#" class="btn btn-outline-default pull-right btn-xs" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>
                 </div>
                 <div class="box-body" id="actionButtons">
                     <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   

@@ -36,7 +36,7 @@ $form = ActiveForm::begin([
     <?= $catalogBaseGoods->isNewRecord? $form->field($catalogBaseGoods, 'cat_id')->hiddenInput(['value'=> Yii::$app->request->get('id')])->label(false):'' ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
     <?= Html::button($catalogBaseGoods->isNewRecord ? '<i class="icon fa fa-plus-circle"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', ['class' => $catalogBaseGoods->isNewRecord ? 'btn btn-success edit' : 'btn btn-success edit']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
 </div>
 <?php ActiveForm::end(); ?>

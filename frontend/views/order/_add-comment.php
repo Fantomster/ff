@@ -17,12 +17,12 @@ echo Html::hiddenInput('order_id', $order->id);
 </div>
 <div class="modal-body form-inline" style="text-align: center;"> 
     <?=
-        $form->field($order, 'comment')->label(false)->textarea(['style' => 'width: 400px; height: 100px;']);
+        $form->field($order, 'comment', ['options' => ['style' => 'width: 100%;']])->label(false)->textarea(['style' => 'width: 100%; min-width: 300px; height: 100px;']);
     ?>
 </div>
 <div class="modal-footer">
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
     <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success saveComment', 'data' => ['dismiss' => "modal"]]) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
 </div>
 <?php
 ActiveForm::end();

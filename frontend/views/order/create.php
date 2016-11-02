@@ -164,6 +164,9 @@ $this->registerJs(
                             //'tableOptions' => ['class' => 'table no-margin table-hover'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             'options' => ['class' => 'table-responsive'],
+                            'pager' => [
+                                'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
+                            ],
                             'columns' => [
                                 [
                                     'format' => 'raw',
@@ -249,7 +252,7 @@ $this->registerJs(
                         <div class="col-lg-3 col-md-4 col-sm-12">
                             <div class="box box-info ">
                                 <div class="box-header with-border">
-                                    <h3 class="box-title">Корзина</h3>
+                                    <h3 class="box-title"><i class="fa fa-shopping-cart m-r-xs"></i> Корзина</h3>
                                 </div>
                                 <!-- /.box-header -->
                                 <div class="box-body" id="orders">

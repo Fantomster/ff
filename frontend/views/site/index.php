@@ -8,11 +8,8 @@ $this->title = 'F-keeper';
   <div id="myModal2" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
                 <div class="modal-body">
-                    <iframe id="cartoonVideo" width="560" height="315" src="https://www.youtube.com/embed/4j5Wam9B5mQ" frameborder="0" allowfullscreen></iframe>
+                    <iframe style="min-width: 320px;width: 100%;" id="cartoonVideo" width="560" height="315" src="https://www.youtube.com/embed/4j5Wam9B5mQ" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>

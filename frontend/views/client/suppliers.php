@@ -116,8 +116,12 @@ yii\bootstrap\Alert::widget([
             'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:155px;'],
             'format' => 'raw',
             'value'=>function ($data) {
+            $result = "";
+            
+            
             $data["invite"]==0 ? $result = '' :
-            $result = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
+            $result .= $data["cat_id"]==0 ? '' :
+            Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
                 'OrderCatalogSearch[selectedCategory]'=>"",
                 'OrderCatalogSearch[selectedVendor]'=>$data["supp_org_id"],

@@ -84,7 +84,7 @@ $this->registerJs(
             <div class="col-md-3">
         <?=
         $form->field($searchModel, 'searchString')->textInput([
-            'id' => 'search-string',
+            'id' => 'searchString',
             'class' => 'form-control',
             'placeholder' => 'Поиск'])->label(false)
         ?>

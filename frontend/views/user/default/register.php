@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @var yii\web\View $this
  * @var yii\widgets\ActiveForm $form
@@ -9,6 +8,8 @@
  * @var common\models\Organization $organization
  * @var string $userDisplayName
  */
+use yii\helpers\Html;
+
 $module = $this->context->module;
 $this->title = Yii::t('user', 'Register');
 ?>
@@ -22,11 +23,14 @@ $this->title = Yii::t('user', 'Register');
                     <p><?= $flash ?></p>
                 </div>
 
-            <?php 
+                <?php
             else:
                 echo $this->render('_register-form', compact("user", "profile", "organization"));
-            endif; 
+            endif;
             ?>
+            <div class="regist">
+                <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
+            </div>
         </div>
     </div>
 

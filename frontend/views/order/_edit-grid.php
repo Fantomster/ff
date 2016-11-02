@@ -112,8 +112,7 @@ echo GridView::widget([
                 if ($priceEditable) {
                     //editable discount
                     ?>
-                    <div class="pull-right">
-                        <table class="table table-bordered table-striped dataTable">
+                        <table class="table table-bordered table-striped dataTable tbl-discount">
                             <tr>
                                 <td>
                                     <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>

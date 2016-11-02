@@ -21,7 +21,7 @@ echo GridView::widget([
     'filterModel' => $searchModel,
     'filterPosition' => false,
     'summary' => '',
-    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable order-table'],
     'options' => ['class' => 'table-responsive'],
     'panel' => false,
     'bootstrap' => false,
@@ -36,7 +36,7 @@ echo GridView::widget([
                         . "<div class='grid-article'>Артикул: <span>"
                         . $data->article . "</span></div>" . $note;
             },
-            'label' => 'Название продукта',
+            'label' => 'Товар',
         ],
         [
             'attribute' => 'quantity',
@@ -96,7 +96,7 @@ echo GridView::widget([
                             'value' => function($data) {
                                 return $data->total . ' <i class="fa fa-fw fa-rub"></i>';
                             },
-                            'label' => 'Общая стоимость',
+                            'label' => 'Стоимость',
                             'contentOptions' => ['class' => 'width150'],
                         ],
                         [
@@ -112,8 +112,7 @@ echo GridView::widget([
                 if ($priceEditable) {
                     //editable discount
                     ?>
-                    <div class="pull-right">
-                        <table class="table table-bordered table-striped dataTable" style="width: 400px">
+                        <table class="table table-bordered table-striped dataTable tbl-discount">
                             <tr>
                                 <td>
                                     <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
@@ -138,30 +137,29 @@ echo GridView::widget([
                     } else {
                         //show discount
                         ?>
-                        <div class="pull-right">
-                            <table class="table table-bordered table-striped dataTable" style="width: 400px">
+                            <table class="table dataTable tbl-discount">
                                 <tr>
-                                    <td>
+                                    <th>
                                         <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>
-                                    </td><td>
+                                    </th><td>
                                         <?= ($order->discount) ? $order->discount : '-' ?>
                                     </td>
                                 </tr><tr>
-                                    <td>
+                                    <th>
                                         Стоимость доставки
-                                    </td><td>
+                                    </th><td>
                                         <?= $order->calculateDelivery() . ' <i class="fa fa-fw fa-rub"></i>' ?>
                                     </td>
                                 </tr><tr>
-                                    <td>
+                                    <th>
                                         Стоимость заказа
-                                    </td><td>
+                                    </th><td>
                                         <?= $order->total_price . ' <i class="fa fa-fw fa-rub"></i>' ?>
                                     </td>
                                 </tr>
                             </table>
                             <?php
                         }
-                        echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right']) . "</div>";
+                        echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success']);
                         ActiveForm::end();
                         

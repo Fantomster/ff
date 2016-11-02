@@ -43,6 +43,7 @@ use yii\helpers\Html;
 
     </div>
 <?php
+echo $this->render('_yandex');
 $js = <<<JS
 $('.sidebar-toggle').on('click', function(e){
     $.post("index.php?r=vendor/sidebar", {"sidebar-collapse": true})

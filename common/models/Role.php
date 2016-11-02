@@ -36,6 +36,11 @@ class Role extends \amnah\yii2\user\models\Role {
      * @var int Supplier employee role
      */
     const ROLE_SUPPLIER_EMPLOYEE = 6;
+    /**
+     * @var int f-keeper manager role
+     */
+    const ROLE_FKEEPER_MANAGER = 7;
+    
     
     public static function getManagerRole($organization_type) {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [

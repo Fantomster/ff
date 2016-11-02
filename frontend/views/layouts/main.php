@@ -76,8 +76,6 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 //        });
 //JS2;
 //$this->registerJs($j2, \yii\web\View::POS_READY);
-
-
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -85,11 +83,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     <head>
         <meta charset="<?= Yii::$app->charset ?>"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <?= Html::csrfMetaTags() ?>
+<?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <link href="css/style.css" rel="stylesheet">
         <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
-        <?php $this->head() ?>
+<?php $this->head() ?>
         <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -104,7 +102,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         </style>
     </head>
     <body>	
-        <?php $this->beginBody() ?>
+<?php $this->beginBody() ?>
         <div class="wrapper">
             <header class="header-nav default <?= $isIndex ? '' : ' dark-bg' ?>" id="menu-fk">
                 <div class="inside__block">
@@ -119,28 +117,28 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="registr-block">
                             <div class="registr__block">
-                                <?= Html::a('вход / регистрация', ["/user/login"]) ?>
+<?= Html::a('вход / регистрация', ["/user/login"]) ?>
                             </div>
                         </div>
                         <div class="nav__block">
                             <span id="menu__burger">Меню</span>
-                            <?=
-                            yii\widgets\Menu::widget([
-                                'options' => ['class' => 'nav_menu'],
-                                'items' => [
-                                    ['label' => 'Главная', 'url' => ['/site/index']],
-                                    ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
-                                    ['label' => 'о компании', 'url' => ['/site/about']],
-                                    ['label' => 'контакты', 'url' => ['/site/contacts']],
-                                ]
-                            ])
-                            ?>
+<?=
+yii\widgets\Menu::widget([
+    'options' => ['class' => 'nav_menu'],
+    'items' => [
+        ['label' => 'Главная', 'url' => ['/site/index']],
+        ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
+        ['label' => 'о компании', 'url' => ['/site/about']],
+        ['label' => 'контакты', 'url' => ['/site/contacts']],
+    ]
+])
+?>
                         </div>
                     </div>
                 </div>
             </header><!-- .header-nav-->
 
-            <?= $content ?>
+<?= $content ?>
             <footer class="footer">
                 <div class="inside__block">
                     <div class="container-fluid">
@@ -215,7 +213,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             </footer><!-- .footer -->
 
         </div><!-- .wrapper -->
-        <?php $this->endBody() ?>
+<?php
+echo $this->render('_yandex');
+$this->endBody()
+?>
     </body>
 </html>
 <?php $this->endPage() ?>

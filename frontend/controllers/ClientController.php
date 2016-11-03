@@ -529,6 +529,7 @@ class ClientController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $organization = Organization::find()->where(['id' => $supplier_org_id])->one();
         $user = User::find()->where(['email' => $organization->email])->one();
+        !empty($user) ? $user->status==0 ? $userStatus = 1:$userStatus = 0:$userStatus = '';
         $load_data = ArrayHelper::getColumn(Category::find()->where(['in', 'id', \common\models\RelationCategory::find()->
                                     select('category_id')->
                                     where(['rest_org_id' => $currentUser->organization_id,
@@ -577,9 +578,16 @@ class ClientController extends DefaultController {
                 }
             }
         }
-        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data', 'user'));
+        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data', 'user','userStatus'));
     }
-
+    public function actionReSendEmailInvite($id){
+        if (Yii::$app->request->isAjax) {
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $organization = Organization::find()->where(['id' => $id])->one();
+            $user = User::find()->where(['email' => $organization->email])->one();
+            $currentUser->sendInviteToVendor($user);
+        }
+    }
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -945,7 +953,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             invite,
             case 
                 when invite=0 then 1 else
-                    case when (select count(*) from user where email=`organization`.`email`)=1 then 2 else 3 end
+                    case when (select count(*) from user where email=`organization`.`email` and status =0) = 1 then 2 else 3 end
                     end as status_invite,
             `relation_supp_rest`.`status` 
             FROM {{%relation_supp_rest}}"

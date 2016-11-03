@@ -115,12 +115,12 @@ Modal::begin([
                 <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'catalog-list',]); ?>
                     <?php  
                     if(empty($arrCatalog)){ ?>   
-                        <h4>Каталоги не найдены</h4>
+                        <div class="empty">Ничего не найдено.</div>
                     <?php 
                     }else{
                         if($type==1){ ?>
                             <div class="panel-body">
-                                <h4>Ресторан подключен к <strong>Главному каталогу</strong></h4>
+                                <h4 class="text-info">Ресторан подключен к <strong>Главному каталогу</strong></h4>
                             </div>
                         <?php 
                         }else{
@@ -131,7 +131,7 @@ Modal::begin([
                                         <div class="col-md-4 text-left">
                                         <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
                                                 '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
-                                        <p class="small m-b-none">Создан: <?=$arrCatalogs->created_at ?></p>
+                                        <p class="small m-b-none">Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
                                         </div>
                                         <div class="col-md-8 text-right">
                                                 <?php echo $link = SwitchBox::widget([

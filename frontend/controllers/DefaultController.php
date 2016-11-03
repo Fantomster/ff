@@ -53,10 +53,6 @@ class DefaultController extends Controller {
         if (!parent::beforeAction($action)) {
             return false;
         }
-//        $test = !(($this->action->id == 'index') && ($this->id == 'order'));
-//        if (($this->currentUser->id == 2) && !(($this->action->id == 'index') && ($this->id == 'order'))) {
-//            return $this->redirect(['order/index']);
-//        }
         return true;
     }
 

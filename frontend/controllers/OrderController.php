@@ -94,7 +94,6 @@ class OrderController extends DefaultController {
 
         $selectedCategory = null;
         $selectedVendor = null;
-        $searchString = '';
 
         if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';

@@ -124,15 +124,11 @@ $catgrs = json_encode($catgrs, JSON_UNESCAPED_UNICODE);
 
 $customJs = <<< JS
 var category = $catgrs;
-//var datas = { "programs": [array] };
 var arr = [];
-/*$.each(datas.programs[0], function(key,val) {
-    arr.push({'id': key, 'label' : val});
-});*/
 var data = [];
         
 for ( var i = 0; i < 60; i++ ) {
-    data.push({article: '', product: '', units: '', price: '', ed: '', category: ''});
+    data.push({article: '', product: '', units: '', price: '', ed: '', category: '', note: ''});
 }
 var container = document.getElementById('CreateCatalog');
 
@@ -147,8 +143,8 @@ hot = new Handsontable(container, {
   beforeChange: function () {
       //console.log('beforeChange');
   },
-  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Единица измерения', 'Категория'],
-  colWidths: [40, 180, 45, 45, 40,  80],
+  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Категория', 'Комментарий'],
+  colWidths: [40, 120, 45, 45, 65,  55,  80],
   renderAllRows: true,
   columns: [
     {data: 'article'},
@@ -165,12 +161,13 @@ hot = new Handsontable(container, {
         format: '0.00',
         language: 'ru-RU'
     },
-    {data: 'ed', wordWrap:true},
+    {data: 'ed'},
     {
         data: 'category', 
         type: 'dropdown',
         source: category
-    },    
+    },
+    {data: 'note'},   
     ],
   className : 'Handsontable_table',
   tableClassName: ['table-hover'],
@@ -183,7 +180,7 @@ hot = new Handsontable(container, {
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
-  var cols = ['article', 'product', 'units', 'price', 'category'];
+  var cols = ['article', 'product', 'units', 'price', 'ed', 'category', 'note'];
     $.each(dataTable, function( rowKey, object) {
         if (!hot.isEmptyRow(rowKey)){
             cleanedData[rowKey] = object;
@@ -195,6 +192,8 @@ Handsontable.Dom.addEvent(save, 'click', function() {
             data.push({dataItem});
         }
     });
+    //console.log(JSON.stringify(data));
+    //return false;
     $.ajax({
           url: 'index.php?r=vendor/supplier-start-catalog-create',
           type: 'POST',

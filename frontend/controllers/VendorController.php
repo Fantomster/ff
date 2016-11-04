@@ -273,6 +273,7 @@ class VendorController extends DefaultController {
                 $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
+                $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
                 $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
@@ -322,10 +323,13 @@ class VendorController extends DefaultController {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                 $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
+                $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
                 if (empty($category_name)) {
                     $category_name = 0;
                 } else {
+                    //$category_name = 0;
                     $category_name = empty(Category::find()->where(["name" => $category_name])->one()->id) ? 0 : Category::find()->where(["name" => $category_name])->one()->id;
                 }
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
@@ -340,7 +344,7 @@ class VendorController extends DefaultController {
 
                 $sql = "insert into {{%catalog_base_goods}}" .
                     "(`cat_id`,`supp_org_id`,`article`,`product`,"
-                    . "`units`,`price`,`category_name`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
+                    . "`units`,`price`,`category_id`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
                     . $lastInsert_base_cat_id . ","
                     . $currentUser->organization_id . ","
                     . ":article,"
@@ -365,7 +369,7 @@ class VendorController extends DefaultController {
                 $command->execute();
                 $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
             }
-            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Мои поздравления!', 'body' => 'Вы успешно создали свой первый каталог!']];
+            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Поздравляем!', 'body' => 'Вы успешно создали свой первый каталог!']];
             return $result;
             exit;
         }

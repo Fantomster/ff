@@ -33,7 +33,7 @@ class UtilsController extends Controller
                 $message->recipient_id = $order->client_id;
             }
             if ($message->save()) {
-                echo 'Recipient set for message #' . $message->id . ' \n';
+                echo 'Recipient set for message #' . $message->id . " \n";
             }
         }
     }

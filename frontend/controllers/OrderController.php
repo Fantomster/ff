@@ -481,7 +481,7 @@ class OrderController extends DefaultController {
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
-                $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? 'Клиент' : 'Поставщик';
+                $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                 $systemMessage = $initiator . ' отменил заказ!';
                 $this->sendSystemMessage($user, $order->id, $systemMessage);
                 if (isset($order->accepted_by_id)) {
@@ -494,20 +494,20 @@ class OrderController extends DefaultController {
             }
             if ($orderChanged && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $this->sendSystemMessage($user, $order->id, 'Клиент изменил детали заказа №' . $order->id);
+                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id);
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
                 }
             } elseif ($orderChanged && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
-                $this->sendSystemMessage($user, $order->id, 'Поставщик изменил детали заказа №' . $order->id);
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id);
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
                 if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
-                    $systemMessage = 'Клиент получил заказ!';
+                    $systemMessage = $order->client->name . ' получил заказ!';
                     $order->status = Order::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
                     $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order->id);
@@ -597,7 +597,7 @@ class OrderController extends DefaultController {
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
-                    $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? 'Клиент' : 'Поставщик';
+                    $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                     $systemMessage = $initiator . ' отменил заказ!';
                     if (isset($order->accepted_by_id)) {
                         $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
@@ -606,15 +606,15 @@ class OrderController extends DefaultController {
                 case 'confirm':
                     if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
-                        $systemMessage = 'Клиент подтвердил заказ!';
+                        $systemMessage = $order->client->name . ' подтвердил заказ!';
                         $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order->id);
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
-                        $systemMessage = 'Поставщик подтвердил заказ!';
+                        $systemMessage = $order->vendor->name . ' подтвердил заказ!';
                         $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
                         $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order->id);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
-                        $systemMessage = 'Клиент получил заказ!';
+                        $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
                         $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
                     }

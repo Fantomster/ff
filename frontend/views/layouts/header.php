@@ -100,14 +100,17 @@ $('#chat-form').submit(function() {
      return false;
 });
             
-            $(document).on("click", "#inviteFriend", function() {
+            $(document).on("submit", "#inviteForm", function(e) {
+                e.preventDefault();
                 form = $("#inviteForm");
                 $.post(
                     form.attr("action"),
                     form.serialize()
                 ).done(function(result) {
                     $("#email").val('');
-                    $.notify(result.growl.options, result.growl.settings);
+                    if (result.success) {
+                        $.notify(result.growl.options, result.growl.settings);
+                    }
                 });
             });
 JS;

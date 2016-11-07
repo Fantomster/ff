@@ -423,7 +423,7 @@ class OrderController extends DefaultController {
 
     public function actionView($id) {
         $order = Order::findOne(['id' => $id]);
-        $order->markViewed();
+        //$order->markViewed();
         //$this->refreshMessages();
         $user = $this->currentUser;
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -694,8 +694,8 @@ class OrderController extends DefaultController {
             ]);
         }
 
-        $order->markViewed();
-        $this->refreshMessages();
+//        $order->markViewed();
+//        $this->refreshMessages();
         return true;
     }
 
@@ -745,8 +745,8 @@ class OrderController extends DefaultController {
             ]);
         }
 
-        $order->markViewed();
-        $this->refreshMessages();
+//        $order->markViewed();
+//        $this->refreshMessages();
         return true;
     }
     

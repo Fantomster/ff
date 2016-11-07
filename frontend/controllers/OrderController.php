@@ -315,6 +315,7 @@ class OrderController extends DefaultController {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                     $order->created_by_id = $this->currentUser->id;
                     $order->save();
+                    $this->sendNewOrder($order->vendor);
                 }
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
@@ -322,6 +323,7 @@ class OrderController extends DefaultController {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                     $order->created_by_id = $this->currentUser->id;
                     $order->save();
+                    $this->sendNewOrder($order->vendor);
                 }
             }
             $cartCount = $client->getCartCount();
@@ -795,6 +797,20 @@ class OrderController extends DefaultController {
         return true;
     }
 
+    private function sendNewOrder($vendor) {
+        $vendorUsers = $vendor->users;
+
+        foreach ($vendorUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode(['channel' => $channel, 'isSystem' => 3])
+            ]);
+        }
+
+        return true;
+    }
+    
     private function successNotify($title) {
         return [
             'success' => true,

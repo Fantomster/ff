@@ -113,7 +113,7 @@ yii\bootstrap\Alert::widget([
             ],
             [
             'label'=>'',
-            'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:200px;'],
+            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;width:10%;min-width:217px;'],
             'format' => 'raw',
             'value'=>function ($data) {
             $result = "";
@@ -139,7 +139,12 @@ yii\bootstrap\Alert::widget([
                   ]);
             $data["invite"]==0 ? $result .= '' :
             $result .= $data["cat_id"]==0 ? '' :
-                Html::a('Каталог', ['client/view-catalog', 'id' => $data["cat_id"]], [
+                $data["status_invite"]==2 ?
+                Html::a('<i class="fa fa-pencil"></i> Каталог', ['client/view-catalog', 'id' => $data["cat_id"]], [
+                'class'=>'btn btn-outline-default btn-sm',
+                'style'=>'text-center',
+                'data-pjax'=>0]):
+                Html::a('<i class="fa fa-eye"></i> Каталог', ['client/view-catalog', 'id' => $data["cat_id"]], [
                 'class'=>'btn btn-outline-default btn-sm',
                 'style'=>'text-center',
                 'data-pjax'=>0,

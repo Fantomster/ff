@@ -423,6 +423,8 @@ class OrderController extends DefaultController {
 
     public function actionView($id) {
         $order = Order::findOne(['id' => $id]);
+        $order->markViewed();
+        //$this->refreshMessages();
         $user = $this->currentUser;
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
@@ -692,11 +694,12 @@ class OrderController extends DefaultController {
             ]);
         }
 
+        $order->markViewed();
+        $this->refreshMessages();
         return true;
     }
 
     private function sendSystemMessage($user_id, $order_id, $message) {
-//        $channel = 'order' . $order_id;
         $newMessage = new OrderChat();
         $newMessage->order_id = $order_id;
         $newMessage->message = $message;
@@ -711,11 +714,6 @@ class OrderController extends DefaultController {
             'sender_id' => $user_id,
             'ajax' => 1,
         ]);
-
-//        return Yii::$app->redis->executeCommand('PUBLISH', [
-//                    'channel' => 'chat',
-//                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
-//        ]);
 
         $order = Order::findOne(['id' => $order_id]);
 
@@ -747,9 +745,11 @@ class OrderController extends DefaultController {
             ]);
         }
 
+        $order->markViewed();
+        $this->refreshMessages();
         return true;
     }
-
+    
     private function sendCartChange($client, $cartCount) {
         $clientUsers = $client->users;
 

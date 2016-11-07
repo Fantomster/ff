@@ -2,18 +2,10 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var redis = require('redis');
-var mysql = require('mysql');
 
 server.listen(8890);
 
-var pool = mysql.createPool({
-    connectionLimit: 100,
-    host: 'localhost',
-    user: 'root',
-    password: 'f4simba',
-    database: 'f-keeper',
-    debug: false
-});
+var pool = require('./db');
 
 require('socketio-auth')(io, {
     authenticate: authenticate,

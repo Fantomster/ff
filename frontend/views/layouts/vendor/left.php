@@ -24,7 +24,7 @@ $cartCount = $user->organization->getCartCount();
                             'label' => 'Заказы',
                             'icon' => 'fa fa-history',
                             'url' => ['order/index'],
-                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
                         ],
                         ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],

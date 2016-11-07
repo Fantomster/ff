@@ -294,8 +294,7 @@ class Organization extends \yii\db\ActiveRecord {
         
         $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
                 . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'LEFT JOIN `order` ON `order`.`id` = `order_chat`.`order_id` '
-                . 'WHERE ((`order`.`client_id`='.$this->id.') OR (`order`.`vendor_id`='.$this->id.')) '
+                . 'WHERE (`order_chat`.`recipient_id` = '.$this->id.') '
                 . 'AND ((`order_chat`.`is_system`=0) '
                 . 'AND (`order_chat`.`viewed`=0)) '
                 . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
@@ -317,8 +316,9 @@ class Organization extends \yii\db\ActiveRecord {
     public function getUnreadNotifications() {
         $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
                 . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'LEFT JOIN `order` ON `order`.`id` = `order_chat`.`order_id` '
-                . 'WHERE ((`order`.`client_id`='.$this->id.') OR (`order`.`vendor_id`='.$this->id.')) AND ((`order_chat`.`is_system`=1) AND (`order_chat`.`viewed`=0)) '
+                . 'WHERE (`order_chat`.`recipient_id` = '.$this->id.') '
+                . 'AND ((`order_chat`.`is_system`=1) '
+                . 'AND (`order_chat`.`viewed`=0)) '
                 . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
                 . 'ORDER BY `order_chat`.`created_at`';
 
@@ -373,5 +373,9 @@ class Organization extends \yii\db\ActiveRecord {
             $delivery->save();
         }
         parent::afterSave($insert, $changedAttributes);
+    }
+
+    public function markViewed($orderId) {
+        return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id'=>$this->id]);
     }
 }

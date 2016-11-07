@@ -30,7 +30,7 @@ $cartCount = $user->organization->getCartCount();
                             'label' => 'Заказы',
                             'icon' => 'fa fa-history',
                             'url' => ['order/index'],
-                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
                         ],
                         ['label' => 'Поставщики', 'icon' => 'fa fa-users', 'url' => ['client/suppliers'], 'options' => ['class' => 'hidden-xs']],
 //                        [

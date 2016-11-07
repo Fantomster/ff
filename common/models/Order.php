@@ -213,8 +213,4 @@ class Order extends \yii\db\ActiveRecord {
         $this->save();
         return $this->total_price;
     }
-
-    public function markViewed() {
-        return OrderChat::updateAll(['viewed' => 1], 'order_id = '.$this->id);
-    }
 }

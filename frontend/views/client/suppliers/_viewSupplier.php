@@ -25,13 +25,13 @@ $form = ActiveForm::begin([
 <div class="modal-body">
     <div class="row">
         <div class="col-md-6">
-            <?=empty($user)?
+            <?=$userStatus==0?
                 $form->field($organization, 'name')->textInput(['readonly' => true]):
                 $form->field($organization, 'name');//->textInput(['readonly' => true]);
             ?>
         </div>
         <div class="col-md-6">
-            <?=empty($user)?
+            <?=$userStatus==0?
                 $form->field($organization, 'city')->textInput(['readonly' => true]):
                 $form->field($organization, 'city');//
             ?>
@@ -39,13 +39,13 @@ $form = ActiveForm::begin([
     </div>
     <div class="row">
         <div class="col-md-6">
-            <?=empty($user)?
+            <?=$userStatus==0?
                 $form->field($organization, 'address')->textInput(['readonly' => true]):
                 $form->field($organization, 'address');
             ?>
         </div>
         <div class="col-md-6">
-            <?=empty($user)?
+            <?=$userStatus==0?
                 $form->field($organization, 'zip_code')->textInput(['readonly' => true]):
                 $form->field($organization, 'zip_code');
             ?>
@@ -53,13 +53,13 @@ $form = ActiveForm::begin([
     </div>
     <div class="row">
         <div class="col-md-6">
-            <?=empty($user)?
+            <?=$userStatus==0?
                 $form->field($organization, 'phone')->textInput(['readonly' => true]):
                 $form->field($organization, 'phone');
             ?>
         </div>
         <div class="col-md-6">
-            <?=empty($user)?
+            <?=$userStatus==0?
                 $form->field($organization, 'email')->textInput(['readonly' => true]):
                 $form->field($organization, 'email'); 
             ?>
@@ -68,13 +68,13 @@ $form = ActiveForm::begin([
     </div>
     <div class="row">
         <div class="col-md-6">
-            <?=empty($user)?
+            <?=$userStatus==0?
                 $form->field($organization, 'website')->textInput(['readonly' => true]):
                 $form->field($organization, 'website');
             ?>
         </div>
         <div class="col-md-6">
-            <?=empty($user)?'':
+            <?=$userStatus==0?'':
                 CheckboxX::widget([
                     'name'=>'resend_email',
                     'initInputType' => CheckboxX::INPUT_CHECKBOX,

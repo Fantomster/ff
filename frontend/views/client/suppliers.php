@@ -113,12 +113,19 @@ yii\bootstrap\Alert::widget([
             ],
             [
             'label'=>'',
-            'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:155px;'],
+            'contentOptions' => ['style' => 'vertical-align:middle;width:10%;min-width:200px;'],
             'format' => 'raw',
             'value'=>function ($data) {
             $result = "";
             
-            
+            $data["status_invite"]==2?
+            $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
+                'id'=>$data["supp_org_id"],
+                ],[
+                    'class'=>'btn btn-outline-default btn-sm resend-invite',
+                    'data-pjax'=>0, 
+                    'style'=>'margin-right:10px;text-center'
+                  ]):'';
             $data["invite"]==0 ? $result = '' :
             $result .= $data["cat_id"]==0 ? '' :
             Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
@@ -469,7 +476,7 @@ e.preventDefault();
     });
 });
 $('#invite').click(function(e){	
- $('#loader-show').showLoading();
+$('#loader-show').showLoading();
 e.preventDefault();
 	var i, items, item, dataItem, data = [];
 	var cols = [ 'article', 'product', 'units', 'price', 'ed', 'note'];
@@ -543,11 +550,37 @@ $("#view-supplier").on("click", ".save-form", function() {
         console.log(errMsg);
     }
     });
-});  
+}); 
+$(document).on("click", ".resend-invite", function(e) {     
+    e.preventDefault();
+    var url = $(this).attr('href');
+    console.log(url);
+    bootbox.confirm({
+        title:"Приглашение на F-keeper",
+        message: "Отправить приглашение повторно?",
+        buttons: {
+            cancel: {
+                label: 'Закрыть',
+                className: 'btn-gray'
+            },
+            confirm: {
+                label: 'Отправить',
+                className: 'btn-success'
+            }
+            
+        },
+        callback: function (result) {
+         if(result)$.post(url, {} );
+        }
+    });
+});
 $("body").on("hidden.bs.modal", "#view-supplier", function() {
     $(this).data("bs.modal", null);
 })
 $("body").on("hidden.bs.modal", "#view-catalog", function() {
+    $(this).data("bs.modal", null);
+})
+$("body").on("hidden.bs.modal", "#resend", function() {
     $(this).data("bs.modal", null);
 })
 JS;

@@ -43,10 +43,14 @@ $gridColumnsClients = [
 		],
                 [
 		'label'=>'Последний заказ',
-		'value'=>function ($data) {
-                $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id'=>$data['rest_org_id'],'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
-                return $res;
-                }
+                'format' => 'raw',
+		'value'=>
+                    function($data) {
+                            $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id'=>$data['rest_org_id'],'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
+                            $date = Yii::$app->formatter->asDatetime($res, "php:j M Y");
+                            return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                        },
+                    
 		],
 		[
 		'label'=>'Текущий каталог',

@@ -235,7 +235,6 @@ HTML;
       </div>
       
 </div>
-</section>
 <?php
 
 $arr_create_at =   json_encode($arr_create_at);
@@ -319,6 +318,7 @@ JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
 <?php Pjax::end(); ?>
+</section>
 <?php
 $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");

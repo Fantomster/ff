@@ -89,7 +89,7 @@ $this->registerCss('
             <div class="box-body">
         <?php
         $columns1 = [
-        ['attribute' => 'name','value'=>'name','label' => 'Поставщики',],
+        ['attribute' => 'name','value'=>'name'],//,'label' => 'Поставщики',
         ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
             return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",

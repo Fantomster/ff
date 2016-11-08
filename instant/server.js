@@ -2,6 +2,7 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var redis = require('redis');
+var redisOptions = require('./redisOptions');
 
 server.listen(8890);
 
@@ -21,7 +22,7 @@ function authenticate(socket, data, callback) {
 }
 
 function postAuthenticate(socket, data) {
-    var redisClient = redis.createClient();
+    var redisClient = redis.createClient(redisOptions);
     redisClient.subscribe('chat');
 
     redisClient.on("message", function (channel, message) {

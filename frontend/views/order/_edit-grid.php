@@ -1,6 +1,7 @@
 <?php
 
-use kartik\grid\GridView;
+//use kartik\grid\GridView;
+use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use kartik\widgets\TouchSpin;
@@ -23,9 +24,9 @@ echo GridView::widget([
     'summary' => '',
     'tableOptions' => ['class' => 'table table-bordered table-striped dataTable order-table'],
     'options' => ['class' => 'table-responsive'],
-    'panel' => false,
-    'bootstrap' => false,
-    'resizableColumns' => false,
+//    'panel' => false,
+//    'bootstrap' => false,
+//    'resizableColumns' => false,
     'columns' => [
         [
             'format' => 'raw',

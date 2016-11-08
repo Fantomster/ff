@@ -49,13 +49,13 @@ class OrderCatalogSearch extends \yii\base\Model {
                 . "catalog_base_goods AS cbg LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
                 . "WHERE cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString) "
                 . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
-        $count1 = Yii::$app->db->createCommand($query1, [':searchString' => $this->searchString])->queryScalar();
+        $count1 = Yii::$app->db->createCommand($query1, [':searchString' => $searchString])->queryScalar();
         $query2 = "SELECT COUNT(cbg.id) FROM "
                 . "catalog_goods AS cg LEFT OUTER JOIN catalog_base_goods AS cbg ON cg.base_goods_id = cbg.id "
                 . "LEFT OUTER JOIN organization AS org ON cbg.supp_org_id = org.id "
                 . "WHERE cg.cat_id IN ($this->catalogs) AND (cbg.product LIKE :searchString OR cbg.article LIKE :searchString)"
                 . "AND (cbg.status = 1) AND (cbg.deleted = 0)";
-        $count2 = Yii::$app->db->createCommand($query2, [':searchString' => $this->searchString])->queryScalar();
+        $count2 = Yii::$app->db->createCommand($query2, [':searchString' => $searchString])->queryScalar();
 
         $dataProvider = new SqlDataProvider([
             'sql' => $query,

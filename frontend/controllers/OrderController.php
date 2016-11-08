@@ -314,6 +314,7 @@ class OrderController extends DefaultController {
                 if ($order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                     $order->created_by_id = $this->currentUser->id;
+                    $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
                     $this->sendNewOrder($order->vendor);
                 }
@@ -322,6 +323,7 @@ class OrderController extends DefaultController {
                 foreach ($orders as $order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                     $order->created_by_id = $this->currentUser->id;
+                    $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
                     $this->sendNewOrder($order->vendor);
                 }
@@ -616,6 +618,7 @@ class OrderController extends DefaultController {
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
+                        $order->actual_delivery = gmdate("Y-m-d H:i:s");
                         $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
                     }
                     break;

@@ -1,6 +1,7 @@
 <?php
 
-use kartik\grid\GridView;
+//use kartik\grid\GridView;
+use yii\grid\GridView;
 use common\models\Order;
 
 $dataProvider->sort = false;
@@ -11,8 +12,8 @@ echo GridView::widget([
     'summary' => '',
     'tableOptions' => ['class' => 'table table-bordered table-striped dataTable order-table'],
     'options' => ['class' => 'table-responsive'],
-    'panel' => false,
-    'bootstrap' => false,
+   // 'panel' => false,
+ //   'bootstrap' => false,
     'columns' => [
         [
             'format' => 'raw',

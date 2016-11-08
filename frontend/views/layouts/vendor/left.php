@@ -61,11 +61,3 @@ $cartCount = $user->organization->getCartCount();
         </form>
     </section>
 </aside>
-<?php
-/*$sidebar_js = <<< JS
-$(window).resize(function(){
-$('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');    
-}); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');         
-JS;
-$this->registerJs($sidebar_js, View::POS_READY);*/
-?>

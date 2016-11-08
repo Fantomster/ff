@@ -12,13 +12,14 @@ if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
     $homeUrl = parse_url(Url::base(true), PHP_URL_HOST);
+    $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
     //Yii::$app->urlManager->baseUrl;
     $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
     $js = <<<JS
 
-   socket = io.connect('http://notifications.$homeUrl:8890');
+   socket = io.connect('$notificationsUrl');
 
    socket.on('connect', function(){
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});

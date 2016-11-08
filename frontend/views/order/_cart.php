@@ -13,14 +13,17 @@ foreach ($orders as $order) {
             <div class="col-md-10 col-xs-10">
                 <h3 class="box-title"><?= $order->vendor->name ?></h3>
             </div><div class="col-md-2 col-xs-2">
-                 <span class='badge'><?= count($order->orderContent) ?></span>
+                <span class='badge'><?= count($order->orderContent) ?></span>
             </div>
             <!--<h3 class="box-title"><?= $order->vendor->name . "<span class='badge'>" . count($order->orderContent) . "</span>" ?></h3>-->
         </div>
         <!-- /.box-header -->
         <div class="box-body">
             <div class="list-group">
-    <?php foreach ($order->orderContent as $position) { ?>
+                <?php
+                foreach ($order->orderContent as $position) {
+                    $unit = empty($position->product->ed) ? "" : "/" . $position->product->ed;
+                    ?>
                     <a class="list-group-item" 
                        data-vendor_id = "<?= $order->vendor_id ?>" 
                        data-product_id = "<?= $position->product_id ?>"
@@ -29,7 +32,7 @@ foreach ($orders as $order) {
                        data-backdrop="static"
                        href="<?= Url::to(['order/ajax-change-quantity', 'vendor_id' => $order->vendor_id, 'product_id' => $position->product_id]) ?>">
                         <button class="btn btn-outline-danger delete-position pull-right"><i class="fa fa-trash" style="margin-top:-2px;"></i></button>
-                        <h5 class="list-group-item-heading text-info"><?= $position->product_name ?> (<?= $position->price ?> <i class="fa fa-fw fa-rub"></i>/<?= $position->units ?>)</h5>
+                        <h5 class="list-group-item-heading text-info"><?= $position->product_name ?> (<?= $position->price ?> <i class="fa fa-fw fa-rub"></i><?= $unit ?>)</h5>
                         <p class="list-group-item-text text-left">Кол-во: <?= $position->quantity ?></p>
                     </a>
     <?php } ?>

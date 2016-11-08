@@ -160,6 +160,7 @@ $this->registerJs(
                             'dataProvider' => $dataProvider,
                             'filterModel' => $searchModel,
                             'filterPosition' => false,
+                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             'summary' => '',
                             //'tableOptions' => ['class' => 'table no-margin table-hover'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
@@ -172,7 +173,8 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'attribute' => 'product',
                                     'value' => function($data) {
-                                        return "<div class='grid-prod'>" . $data['product'] . "</div><div>Поставщик: "
+                                        $note = empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
+                                        return "<div class='grid-prod'>" . $data['product'] . "</div>$note<div>Поставщик: "
                                                 . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
                                                 . $data['article'] . "</span></div>";
                                     },
@@ -182,11 +184,17 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'attribute' => 'price',
                                     'value' => function($data) {
-                                        return '<b>' . $data['price'] . '</b> <i class="fa fa-fw fa-rub"></i> / ' . $data['units'];
+                                        $unit = empty($data['ed']) ? '' : " / " . $data['ed'];
+                                        return '<b>' . $data['price'] . '</b> <i class="fa fa-fw fa-rub"></i>' . $unit;
                                     },
                                     'label' => 'Цена',
                                     'contentOptions' => ['class' => 'width150'],
                                     'headerOptions' => ['class' => 'width150']
+                                ],
+                                [
+                                    'attribute' => 'units',
+                                    'value' => 'units',
+                                    'label' => 'Кратность',
                                 ],
                                 [
                                     'format' => 'raw',

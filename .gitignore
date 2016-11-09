@@ -35,3 +35,6 @@ phpunit.phar
 /composer.lock
 /frontend/web/css/custom_style.css
 /frontend/web/css/custom_style.css.map
+/instant/db.js
+/instant/redisOptions.js
+/instant/npm-debug.log

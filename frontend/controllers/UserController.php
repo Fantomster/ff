@@ -157,8 +157,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $currentUser = Yii::$app->user->identity;
         if (Yii::$app->request->isAjax) {
             $email = Yii::$app->request->post('email');
-            if ($currentUser->sendInviteToFriend($email)) {
-                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            $validator = new \yii\validators\EmailValidator();
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            if ($validator->validate($email) && $currentUser->sendInviteToFriend($email)) {
                 return [
                     'success' => true,
                     'growl' => [
@@ -191,7 +192,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 ];
             }
         }
-        return false;
+        return ['success' => false];
     }
 
 }

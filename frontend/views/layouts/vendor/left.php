@@ -24,7 +24,7 @@ $cartCount = $user->organization->getCartCount();
                             'label' => 'Заказы',
                             'icon' => 'fa fa-history',
                             'url' => ['order/index'],
-                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
                         ],
                         ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
@@ -51,7 +51,7 @@ $cartCount = $user->organization->getCartCount();
         ?> 
         <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm">
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
-                <input type="text" class="form-control" placeholder="Email" name="email">
+                <input type="text" class="form-control" placeholder="Email" name="email" id="email">
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-success btn-flat" id="inviteFriend">
                         <i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i>
@@ -61,11 +61,3 @@ $cartCount = $user->organization->getCartCount();
         </form>
     </section>
 </aside>
-<?php
-/*$sidebar_js = <<< JS
-$(window).resize(function(){
-$('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');    
-}); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');         
-JS;
-$this->registerJs($sidebar_js, View::POS_READY);*/
-?>

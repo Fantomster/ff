@@ -2,18 +2,11 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var redis = require('redis');
-var mysql = require('mysql');
+var redisOptions = require('./redisOptions');
 
 server.listen(8890);
 
-var pool = mysql.createPool({
-    connectionLimit: 100,
-    host: 'localhost',
-    user: 'root',
-    password: 'f4simba',
-    database: 'f-keeper',
-    debug: false
-});
+var pool = require('./db');
 
 require('socketio-auth')(io, {
     authenticate: authenticate,
@@ -22,19 +15,19 @@ require('socketio-auth')(io, {
 });
 
 function authenticate(socket, data, callback) {
-    console.log("trying to authenticate, userid:" + data.userid + ", access_token:" + data.token);
+    //console.log("trying to authenticate, userid:" + data.userid + ", access_token:" + data.token);
     checkUser(data, function(result) {
         return callback(null, result);
     });
 }
 
 function postAuthenticate(socket, data) {
-    var redisClient = redis.createClient();
+    var redisClient = redis.createClient(redisOptions);
     redisClient.subscribe('chat');
 
     redisClient.on("message", function (channel, message) {
         messageObj = JSON.parse(message);
-        console.log("New message: " + message + ". In channel: " + messageObj.channel);
+        //console.log("New message: " + message + ". In channel: " + messageObj.channel);
         socket.emit(messageObj.channel, message);
     });
 
@@ -46,7 +39,7 @@ function postAuthenticate(socket, data) {
 function checkUser(data, callback) {
     pool.getConnection(function (err, connection) {
         if (err) {
-            console.log("Error in connection database");
+            //console.log("Error in connection database");
             return callback(false);
         }
 
@@ -55,16 +48,16 @@ function checkUser(data, callback) {
         connection.query("SELECT * FROM user WHERE (id = ?) AND (access_token = ?)", [data.userid, data.token], function(err, result) {
             connection.release();
             if (!err && (result.length > 0)) {
-                console.log("Authentication success for userid: " + data.userid);
+                //console.log("Authentication success for userid: " + data.userid);
                 return callback(true);
             } else if(!err) {
-                console.log("Authentication fail for userid: " + data.userid);
+                //console.log("Authentication fail for userid: " + data.userid);
                 return callback(false)
             }
         });
         
         connection.on('error', function (err) {
-            console.log("Error in connection database");
+            //console.log("Error in connection database");
             return callback(false);
         });
         

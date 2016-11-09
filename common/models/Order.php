@@ -213,5 +213,4 @@ class Order extends \yii\db\ActiveRecord {
         $this->save();
         return $this->total_price;
     }
-
 }

@@ -11,10 +11,15 @@ kartik\growl\GrowlAsset::register($this);
 if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
-    $homeUrl = Yii::$app->urlManager->baseUrl;
+    $homeUrl = parse_url(Url::base(true), PHP_URL_HOST);
+    $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
+    //Yii::$app->urlManager->baseUrl;
+    $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
+    $unreadMessages = $organization->unreadMessages;
+    $unreadNotifications = $organization->unreadNotifications;
     $js = <<<JS
 
-   socket = io.connect('http://$homeUrl:8890');
+   socket = io.connect('$notificationsUrl');
 
    socket.on('connect', function(){
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});
@@ -41,8 +46,8 @@ if (!Yii::$app->user->isGuest) {
         }
         if (message.isSystem) {
             if (message.isSystem == 1) {
-            form = $("#actionButtonsForm");
-            $.post(
+                form = $("#actionButtonsForm");
+                $.post(
                     form.attr("action"),
                     form.serialize()
                 ).done(function(result) {
@@ -57,6 +62,27 @@ if (!Yii::$app->user->isGuest) {
                 }
             }
         }
+            
+        $.get(
+            '$refreshStatsUrl'
+        ).done(function(result) {
+            if (result.unreadMessagesCount > 0) {
+                $(".unread-messages-count").show();
+            } else {
+                $(".unread-messages-count").hide();
+            }
+            if (result.unreadNotificationsCount > 0) {
+                $(".unread-notifications-count").show();
+            } else {
+                $(".unread-notifications-count").hide();
+            }
+            $(".unread-messages-count").html(result.unreadMessagesCount);
+            $(".unread-notifications-count").html(result.unreadNotificationsCount);
+            $(".new-orders-count").html(result.newOrdersCount);
+            $(".unread-messages").html(result.unreadMessages);
+            $(".unread-notifications").html(result.unreadNotifications);
+        });
+            
 
     });
         
@@ -76,14 +102,17 @@ $('#chat-form').submit(function() {
      return false;
 });
             
-            $(document).on("click", "#inviteFriend", function() {
+            $(document).on("submit", "#inviteForm", function(e) {
+                e.preventDefault();
                 form = $("#inviteForm");
                 $.post(
                     form.attr("action"),
                     form.serialize()
                 ).done(function(result) {
                     $("#email").val('');
-                    $.notify(result.growl.options, result.growl.settings);
+                    if (result.success) {
+                        $.notify(result.growl.options, result.growl.settings);
+                    }
                 });
             });
 JS;
@@ -130,131 +159,46 @@ JS;
                         </li>
                     <?php } ?>
                     <!-- Messages: style can be found in dropdown.less-->
-                    <?php if (false) { ?>
+                    <?php //if (false) { ?>
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
-                            <span class="label label-danger">4</span>
+                            <span class="label label-danger unread-messages-count" style="display: <?= count($unreadMessages) ? 'block' : 'none'?>"><?= count($unreadMessages) ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header">You have 4 messages</li>
+                            <li class="header">Непрочитанных сообщений: <span class="unread-messages-count"><?= count($unreadMessages) ?></span></li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
-                                <ul class="menu">
-                                    <li><!-- start message -->
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle"
-                                                     alt="User Image"/>
-                                            </div>
-                                            <h4>
-                                                Support Team
-                                                <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <!-- end message -->
-                                    <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <img src="<?= $directoryAsset ?>/img/user3-128x128.jpg" class="img-circle"
-                                                     alt="user image"/>
-                                            </div>
-                                            <h4>
-                                                AdminLTE Design Team
-                                                <small><i class="fa fa-clock-o"></i> 2 hours</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <img src="<?= $directoryAsset ?>/img/user4-128x128.jpg" class="img-circle"
-                                                     alt="user image"/>
-                                            </div>
-                                            <h4>
-                                                Developers
-                                                <small><i class="fa fa-clock-o"></i> Today</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <img src="<?= $directoryAsset ?>/img/user3-128x128.jpg" class="img-circle"
-                                                     alt="user image"/>
-                                            </div>
-                                            <h4>
-                                                Sales Department
-                                                <small><i class="fa fa-clock-o"></i> Yesterday</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <div class="pull-left">
-                                                <img src="<?= $directoryAsset ?>/img/user4-128x128.jpg" class="img-circle"
-                                                     alt="user image"/>
-                                            </div>
-                                            <h4>
-                                                Reviewers
-                                                <small><i class="fa fa-clock-o"></i> 2 days</small>
-                                            </h4>
-                                            <p>Why not buy a new awesome theme?</p>
-                                        </a>
-                                    </li>
+                                <ul class="menu unread-messages">
+                                    <?php
+                                        foreach ($unreadMessages as $message) {
+                                            echo $this->render('/order/_header-message', compact('message'));
+                                        }
+                                    ?>
                                 </ul>
                             </li>
-                            <li class="footer"><a href="#">See All Messages</a></li>
                         </ul>
                     </li>
-                    <li class="dropdown notifications-menu">
+                    <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-bell-o"></i>
-                            <span class="label label-warning">10</span>
+                            <span class="label label-warning unread-notifications-count" style="display: <?= count($unreadNotifications) ? 'block' : 'none'?>"><?= count($unreadNotifications) ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header">You have 10 notifications</li>
+                            <li class="header">Оповещений: <span class="unread-notifications-count"><?= count($unreadNotifications) ?></span></li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
-                                <ul class="menu">
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-users text-aqua"></i> 5 new members joined today
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-warning text-yellow"></i> Very long description here that may
-                                            not fit into the page and may cause design problems
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-users text-red"></i> 5 new members joined
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-shopping-cart text-green"></i> 25 sales made
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa fa-user text-red"></i> You changed your username
-                                        </a>
-                                    </li>
+                                <ul class="menu unread-notifications">
+                                    <?php
+                                        foreach ($unreadNotifications as $message) {
+                                            echo $this->render('/order/_header-message', compact('message'));
+                                        }
+                                    ?>
                                 </ul>
                             </li>
-                            <li class="footer"><a href="#">View all</a></li>
                         </ul>
                     </li>
-                    <?php } ?>
+                    <?php //} ?>
                     <!-- Tasks: style can be found in dropdown.less -->
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">

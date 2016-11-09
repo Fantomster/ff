@@ -40,6 +40,7 @@ $js = <<<JS
                     {"action": $(this).data("action"), "order_id": $order->id}
             ).done(function(result) {
                     $('#actionButtons').html(result);
+                    $.pjax.reload({container: "#cart"});
             });
             }
         });
@@ -120,6 +121,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
     <div class="row">
         <div class="col-md-8" id="toPrint">
             <div class="box box-info">
+                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
                 <div class="box-header with-border">
                     <div class="row m-b-xl">
                         <div class="col-xs-6">
@@ -151,7 +153,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                                 телефон: <?= $order->vendor->phone ?>
                             </address>
                             <p class="text-right">
-                                <span><strong>Дата создания заказа:</strong><br><?=  Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></span><br>
+                                <span><strong>Дата создания заказа:</strong><br><?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></span><br>
                                 <span><strong>Дата доставки:</strong><br><?= $order->actual_delivery ? Yii::$app->formatter->asDatetime($order->actual_delivery, "php:j M Y") : '' ?></span>
                             </p>
                         </div>
@@ -159,7 +161,6 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                    <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
                     <div id="orderGrid">
                         <?php
                         if ($quantityEditable || $priceEditable) {
@@ -169,10 +170,10 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                         }
                         ?>
                     </div>
-                    <?php Pjax::end(); ?>
                     <!-- /.table-responsive -->
                 </div>
                 <!-- /.box-body -->
+                <?php Pjax::end(); ?>
             </div>
 
         </div>

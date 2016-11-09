@@ -23,6 +23,8 @@ use yii\helpers\ArrayHelper;
  * @property OrganizationType $type
  * @property Delivery $delivery
  * @property User $users
+ * @property OrderChat $unreadMessages
+ * @property OrderChat $unreadSystem
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -285,6 +287,49 @@ class Organization extends \yii\db\ActiveRecord {
         return $this->hasMany(User::className(), ['organization_id' => 'id']);
     }
 
+    /*
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUnreadMessages() {
+        
+        $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
+                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . 'WHERE (`order_chat`.`recipient_id` = '.$this->id.') '
+                . 'AND ((`order_chat`.`is_system`=0) '
+                . 'AND (`order_chat`.`viewed`=0)) '
+                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'ORDER BY `order_chat`.`created_at`';
+
+        return OrderChat::findBySql($sql)->all();  
+
+        
+//        return OrderChat::find()
+//                ->leftJoin('order', 'order.id = order_chat.order_id')
+//                ->where('(order.client_id=' . $this->id . ') OR (order.vendor_id=' . $this->id . ')')
+//                ->andWhere(['order_chat.is_system' => 0, 'order_chat.viewed' => 0])
+//                ->all();
+    }
+    
+    /*
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUnreadNotifications() {
+        $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
+                . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
+                . 'WHERE (`order_chat`.`recipient_id` = '.$this->id.') '
+                . 'AND ((`order_chat`.`is_system`=1) '
+                . 'AND (`order_chat`.`viewed`=0)) '
+                . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
+                . 'ORDER BY `order_chat`.`created_at`';
+
+        return OrderChat::findBySql($sql)->all();  
+//        return OrderChat::find()
+//                ->leftJoin('order', 'order.id = order_chat.order_id')
+//                ->where('(order.client_id=' . $this->id . ') OR (order.vendor_id=' . $this->id . ')')
+//                ->andWhere(['order_chat.is_system' => 1, 'order_chat.viewed' => 0])
+//                ->all();
+    }
+    
     /**
      * @return array
      */
@@ -328,5 +373,9 @@ class Organization extends \yii\db\ActiveRecord {
             $delivery->save();
         }
         parent::afterSave($insert, $changedAttributes);
+    }
+
+    public function markViewed($orderId) {
+        return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id'=>$this->id]);
     }
 }

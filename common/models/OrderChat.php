@@ -13,6 +13,8 @@ use Yii;
  * @property integer $is_system
  * @property string $message
  * @property string $created_at
+ * @property integer $viewed
+ * @peoperty integer $recipient_id
  *
  * @property Order $order
  * @property User $sentBy
@@ -34,7 +36,7 @@ class OrderChat extends \yii\db\ActiveRecord
     {
         return [
             [['order_id', 'sent_by_id'], 'required'],
-            [['order_id', 'sent_by_id'], 'integer'],
+            [['order_id', 'sent_by_id', 'viewed', 'recipient_id'], 'integer'],
             [['message', 'created_at', 'is_system'], 'safe'],
             [['message'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],

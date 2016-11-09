@@ -302,7 +302,7 @@ class OrderController extends DefaultController {
     public function actionAjaxMakeOrder() {
         $client = $this->currentUser->organization;
         $cartCount = $client->getCartCount();
-        
+
         if (!$cartCount) {
             return false;
         }
@@ -314,14 +314,18 @@ class OrderController extends DefaultController {
                 if ($order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                     $order->created_by_id = $this->currentUser->id;
+                    $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
+                    $this->sendNewOrder($order->vendor);
                 }
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
                 foreach ($orders as $order) {
                     $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                     $order->created_by_id = $this->currentUser->id;
+                    $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
+                    $this->sendNewOrder($order->vendor);
                 }
             }
             $cartCount = $client->getCartCount();
@@ -393,7 +397,8 @@ class OrderController extends DefaultController {
         $searchModel = new OrderSearch();
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
-        $searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");;
+        $searchModel->date_from = Yii::$app->formatter->asTime($organization->getEarliestOrderDate(), "php:d.m.Y");
+        ;
         $params = Yii::$app->request->getQueryParams();
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
             $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
@@ -424,6 +429,8 @@ class OrderController extends DefaultController {
     public function actionView($id) {
         $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
+        $user->organization->markViewed($id);
+
         if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
@@ -476,9 +483,9 @@ class OrderController extends DefaultController {
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
-                $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? 'Клиент' : 'Поставщик';
+                $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                 $systemMessage = $initiator . ' отменил заказ!';
-                $this->sendSystemMessage($user->id, $order->id, $systemMessage);
+                $this->sendSystemMessage($user, $order->id, $systemMessage);
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
                 }
@@ -489,22 +496,22 @@ class OrderController extends DefaultController {
             }
             if ($orderChanged && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $this->sendSystemMessage($user->id, $order->id, 'Клиент изменил детали заказа №' . $order->id);
+                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id);
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
                 }
             } elseif ($orderChanged && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
-                $this->sendSystemMessage($user->id, $order->id, 'Поставщик изменил детали заказа №' . $order->id);
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id);
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
                 if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
-                    $systemMessage = 'Клиент получил заказ!';
+                    $systemMessage = $order->client->name . ' получил заказ!';
                     $order->status = Order::STATUS_DONE;
-                    $this->sendSystemMessage($user->id, $order->id, $systemMessage);
+                    $this->sendSystemMessage($user, $order->id, $systemMessage);
                     $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order->id);
                 }
             }
@@ -592,31 +599,32 @@ class OrderController extends DefaultController {
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
-                    $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? 'Клиент' : 'Поставщик';
+                    $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                     $systemMessage = $initiator . ' отменил заказ!';
                     if (isset($order->accepted_by_id)) {
                         $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
-                    } 
+                    }
                     break;
                 case 'confirm':
                     if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
-                        $systemMessage = 'Клиент подтвердил заказ!';
+                        $systemMessage = $order->client->name . ' подтвердил заказ!';
                         $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order->id);
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
-                        $systemMessage = 'Поставщик подтвердил заказ!';
+                        $systemMessage = $order->vendor->name . ' подтвердил заказ!';
                         $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
                         $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order->id);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
-                        $systemMessage = 'Клиент получил заказ!';
+                        $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
+                        $order->actual_delivery = gmdate("Y-m-d H:i:s");
                         $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
                     }
                     break;
             }
             if ($order->save()) {
-                $this->sendSystemMessage($user_id, $order->id, $systemMessage);
+                $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage);
                 return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
             }
         }
@@ -638,13 +646,44 @@ class OrderController extends DefaultController {
             return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
         }
     }
+    
+    public function actionAjaxRefreshStats() {
+        $organization = $this->currentUser->organization;
+        $newOrdersCount = $organization->getNewOrdersCount();
+        $unreadMessages = $organization->unreadMessages;
+        $unreadNotifications = $organization->unreadNotifications;
+        
+        $unreadMessagesHtml = '';
+        foreach ($unreadMessages as $message) {
+            $unreadMessagesHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+        }
+        $unreadNotificationsHtml = '';
+        foreach ($unreadNotifications as $message) {
+            $unreadNotificationsHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+        }
+        
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return [
+            'newOrdersCount' => $newOrdersCount,
+            'unreadMessagesCount' => count($unreadMessages),
+            'unreadNotificationsCount' => count($unreadNotifications),
+            'unreadMessages' => $unreadMessagesHtml,
+            'unreadNotifications' => $unreadNotificationsHtml,
+        ];
+    }
 
     private function sendChatMessage($user, $order_id, $message) {
-        //  $channel = 'order' . Yii::$app->request->post('order_id');
+        $order = Order::findOne(['id' => $order_id]);
+
         $newMessage = new OrderChat();
         $newMessage->order_id = $order_id;
         $newMessage->sent_by_id = $user->id;
         $newMessage->message = $message;
+        if ($order->client_id == $user->organization_id) {
+            $newMessage->recipient_id = $order->vendor_id;
+        } else {
+            $newMessage->recipient_id = $order->client_id;
+        }
         $newMessage->save();
         $name = $user->profile->full_name;
 
@@ -657,8 +696,6 @@ class OrderController extends DefaultController {
             'sender_id' => $user->id,
             'ajax' => 1,
         ]);
-
-        $order = Order::findOne(['id' => $order_id]);
 
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
@@ -695,29 +732,28 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function sendSystemMessage($user_id, $order_id, $message) {
-//        $channel = 'order' . $order_id;
+    private function sendSystemMessage($user, $order_id, $message) {
+        $order = Order::findOne(['id' => $order_id]);
+
         $newMessage = new OrderChat();
         $newMessage->order_id = $order_id;
         $newMessage->message = $message;
         $newMessage->is_system = 1;
-        $newMessage->sent_by_id = $user_id;
+        $newMessage->sent_by_id = $user->id;
+        if ($order->client_id == $user->organization_id) {
+            $newMessage->recipient_id = $order->vendor_id;
+        } else {
+            $newMessage->recipient_id = $order->client_id;
+        }
         $newMessage->save();
         $body = $this->renderPartial('_chat-message', [
             'name' => '',
             'message' => $newMessage->message,
             'time' => $newMessage->created_at,
             'isSystem' => 1,
-            'sender_id' => $user_id,
+            'sender_id' => $user->id,
             'ajax' => 1,
         ]);
-
-//        return Yii::$app->redis->executeCommand('PUBLISH', [
-//                    'channel' => 'chat',
-//                    'message' => Json::encode(['body' => $body, 'channel' => $channel, 'isSystem' => 1])
-//        ]);
-
-        $order = Order::findOne(['id' => $order_id]);
 
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
@@ -764,6 +800,20 @@ class OrderController extends DefaultController {
         return true;
     }
 
+    private function sendNewOrder($vendor) {
+        $vendorUsers = $vendor->users;
+
+        foreach ($vendorUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode(['channel' => $channel, 'isSystem' => 3])
+            ]);
+        }
+
+        return true;
+    }
+    
     private function successNotify($title) {
         return [
             'success' => true,

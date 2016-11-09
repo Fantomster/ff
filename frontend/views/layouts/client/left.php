@@ -30,7 +30,7 @@ $cartCount = $user->organization->getCartCount();
                             'label' => 'Заказы',
                             'icon' => 'fa fa-history',
                             'url' => ['order/index'],
-                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
                         ],
                         ['label' => 'Поставщики', 'icon' => 'fa fa-users', 'url' => ['client/suppliers'], 'options' => ['class' => 'hidden-xs']],
 //                        [
@@ -59,7 +59,7 @@ $cartCount = $user->organization->getCartCount();
         ?>
         <form action="<?= Url::to(['/user/ajax-invite-friend']) ?>" method="post" style="margin: 15px;" id="inviteForm">
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255);font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
-                <input type="text" class="form-control" placeholder="Email" name="email">
+                <input type="text" class="form-control" placeholder="Email" name="email" id="email">
                 <span class="input-group-btn">
                     <button type="button" class="btn btn-success btn-flat" id="inviteFriend">
                         <i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i>

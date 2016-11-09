@@ -591,7 +591,9 @@ class VendorController extends DefaultController {
             {
                 unlink($path);
                 $transaction->rollback();
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
+                Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
+                        . '<small>Если ошибка повтрояется, пожалуйста, сообщите нам'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
             }
         }
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));

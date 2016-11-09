@@ -493,6 +493,111 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportToXls($id) {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $importModel = new \common\models\upload\UploadForm();
+        
+        if (Yii::$app->request->isPost) {
+            $unique = 'article'; //уникальное поле
+            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id,'deleted'=>0])->asArray()->all();
+            $count_array = count($sql_array_products);
+            $arr = [];
+            //массив артикулов из базы
+            for ($i = 0; $i < $count_array; $i++) {
+                array_push($arr, $sql_array_products[$i][$unique]);
+            }
+            
+            $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
+            $path = $importModel->upload();
+            if (!is_readable($path)) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
+                        . '<small>Если ошибка повтрояется, пожалуйста, сообщите нам'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }
+            $localFile = \PHPExcel_IOFactory::identify($path);
+            $objReader = \PHPExcel_IOFactory::createReader($localFile);
+            $objPHPExcel = $objReader->load($path);
+            
+            
+            $transaction = Yii::$app->db->beginTransaction();
+            try
+            {
+            /*foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) // цикл обходит страницы файла
+                {*/
+                  $worksheet = $objPHPExcel->getSheet(0);
+                  $highestRow = $worksheet->getHighestRow(); // получаем количество строк
+                  $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
+
+                  for ($row = 1; $row <= $highestRow; ++ $row) // обходим все строки
+                  {
+                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+                    $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
+                    $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
+                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //валюта
+                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); //единица измерения
+                    if (!empty($row_article && $row_product && $row_price && $row_ed)) {
+                        if(empty($row_units) || $row_units<0){$row_units=0;}
+                        if (in_array($row_article, $arr)) {
+                                $sql = "update {{%catalog_base_goods}} set "
+                                        . "article=:article,"
+                                        . "product=:product,"
+                                        . "units=:units,"
+                                        . "price=:price,"
+                                        . "ed=:ed,"
+                                        . "note=:note"
+                                . " where article='{$row_article}' and cat_id=$id";
+                                $command = \Yii::$app->db->createCommand($sql);
+                                $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
+                                $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
+                                $command->bindParam(":units",$row_units);
+                                $command->bindParam(":price",$row_price);
+                                $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
+                                $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
+                                $command->execute();
+                        }else{
+                                $sql = "insert into {{%catalog_base_goods}}" .
+                                        "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                                        . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
+                                        . ":cat_id,"
+                                        . "0,"
+                                        . $currentUser->organization_id .","
+                                        . ":article,"
+                                        . ":product,"
+                                        . ":units,"
+                                        . ":price,"
+                                        . ":ed,"
+                                        . ":note," 
+                                        . CatalogBaseGoods::STATUS_ON .","
+                                        . "NOW())";
+                                $command = \Yii::$app->db->createCommand($sql);
+                                $command->bindParam(":cat_id",$id,\PDO::PARAM_INT);
+                                $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
+                                $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
+                                $command->bindParam(":units",$row_units);
+                                $command->bindParam(":price",$row_price);
+                                $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
+                                $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
+                                $command->execute();
+                        }
+                    }
+                  }
+              /*  } */
+                $transaction->commit();
+                unlink($path);
+                return $this->redirect(['vendor/basecatalog', 'id' => $id]);
+            }
+            catch(Exception $e)
+            {
+                unlink($path);
+                $transaction->rollback();
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
+            }
+        }
+        return $this->renderAjax('catalogs/_importForm', compact('importModel'));
+    }
+    /* ДУБЛЬ
+    public function actionImportToXls($id) {
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
             $unique = 'article';
@@ -504,7 +609,8 @@ class VendorController extends DefaultController {
                 $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
                 $objPHPExcel = $objReader->load($path);
             } catch (Exception $ex) {
-                die('Error');
+                //die('Error');
+                \Yii::$app->setSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
             }
 
             $sheet = $objPHPExcel->getSheet(0);
@@ -594,7 +700,7 @@ class VendorController extends DefaultController {
         }
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));
     }
-
+    */
     public function actionImportBaseCatalogFromXls() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();

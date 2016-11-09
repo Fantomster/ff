@@ -714,17 +714,21 @@ class ClientController extends DefaultController {
             $transaction = Yii::$app->db->beginTransaction();
             try
             {
-            $sql = "delete from goods_notes where catalog_base_goods_id in (select `base_goods_id` from `catalog_goods` where cat_id=$catalog_id)";
+            $sql = "delete gn " . 
+            "from goods_notes gn " .  
+            "inner join catalog_goods cg " .  
+            "on gn.catalog_base_goods_id = cg.base_goods_id " . 
+            "where cg.cat_id=$catalog_id";
             \Yii::$app->db->createCommand($sql)->execute();
-            $sql = "delete cb 
-            from catalog_base_goods cb
-            inner join catalog_goods c
-            on cb.id=c.base_goods_id 
-            where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
+            $sql = "delete cb " . 
+            "from catalog_base_goods cb " . 
+            "inner join catalog_goods c " . 
+            "on cb.id=c.base_goods_id  " . 
+            "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
             \Yii::$app->db->createCommand($sql)->execute();
             $sql = "delete from catalog_goods where cat_id=$catalog_id";
             \Yii::$app->db->createCommand($sql)->execute();
-            foreach ($arrCatalog as $arrCatalogs) {
+                foreach ($arrCatalog as $arrCatalogs) {
                 $product = trim($arrCatalogs['dataItem']['product']);
                 $article = trim($arrCatalogs['dataItem']['article']);
                 $units = trim($arrCatalogs['dataItem']['units']);

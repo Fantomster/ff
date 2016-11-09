@@ -1050,10 +1050,10 @@ class VendorController extends DefaultController {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         // выборка для handsontable
-        $arr = CatalogGoods::find()->select(['id', 'base_goods_id', 'price', 'discount', 'discount_percent'])->where(['cat_id' => $id])->
+        /*$arr = CatalogGoods::find()->select(['id', 'base_goods_id', 'price', 'discount', 'discount_percent'])->where(['cat_id' => $id])->
                         andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->
                             where(['supp_org_id' => $currentUser->organization_id, 'deleted' => 1])])->all();
-        $arr = \yii\helpers\ArrayHelper::toArray($arr);
+        $arr = \yii\helpers\ArrayHelper::toArray($arr);*/
         
         $sql = "SELECT " 
                 . "catalog.id as id,"
@@ -1081,7 +1081,7 @@ class VendorController extends DefaultController {
             $c_base_price = $arrs['base_price'];
             $c_ed = $arrs['ed'];
             $c_price = $arrs['price'];
-
+            
             array_push($array, [
                 'article' => $c_article,
                 'product' => $c_product,
@@ -1280,13 +1280,16 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $header_info_zakaz = \common\models\Order::find()->
                         where(['vendor_id' => $currentUser->organization_id])->count();
+        empty($header_info_zakaz)?$header_info_zakaz=0:$header_info_zakaz;
         $header_info_clients = \common\models\RelationSuppRest::find()->
                         where(['supp_org_id' => $currentUser->organization_id])->count();
+        empty($header_info_clients)?$header_info_clients=0:$header_info_clients;
         $header_info_prodaji = \common\models\Order::find()->
                         where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
+        empty($header_info_prodaji)?$header_info_prodaji=0:$header_info_prodaji;
         $header_info_poziciy = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
                         where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-
+        empty($header_info_poziciy)?$header_info_poziciy=0:$header_info_poziciy;
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('rest_org_id')->

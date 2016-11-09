@@ -25,6 +25,13 @@ Modal::widget([
     'clientOptions' => false,
 ])
 ?>
+<?=
+Modal::widget([
+    'id' => 'edit-catalog',
+    'size' => 'modal-lg',
+    'clientOptions' => false,
+])
+?>
 <?php
 $this->title = 'Поставщики';
 $this->params['breadcrumbs'][] = $this->title;
@@ -103,7 +110,7 @@ yii\bootstrap\Alert::widget([
             [
             'attribute'=>'status_invite',
             'label'=>'Статус сотрудничества',
-            'contentOptions' => ['style' => 'vertical-align:middle;width:45%;'],
+            'contentOptions' => ['style' => 'vertical-align:middle;min-width:180px;'],
             'format' => 'raw',
             'value'=> function ($data) {
                 if($data["status_invite"]==1){return '<span class="text-danger">Ожидается<br>подтверждение</span>';}
@@ -112,20 +119,12 @@ yii\bootstrap\Alert::widget([
                 }
             ],
             [
-            'label'=>'',
-            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;width:10%;min-width:217px;'],
+            'label'=>'Каталог',
+            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;min-width:119px;width:126px'],
+                'headerOptions' => ['style'=>'text-align:right'],
             'format' => 'raw',
             'value'=>function ($data) {
             $result = "";
-            
-            $data["status_invite"]==2?
-            $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
-                'id'=>$data["supp_org_id"],
-                ],[
-                    'class'=>'btn btn-outline-default btn-sm resend-invite',
-                    'data-pjax'=>0, 
-                    'style'=>'margin-right:10px;text-center'
-                  ]):'';
             $data["invite"]==0 ? $result = '' :
             $result .= $data["cat_id"]==0 ? '' :
             Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
@@ -140,11 +139,16 @@ yii\bootstrap\Alert::widget([
             $data["invite"]==0 ? $result .= '' :
             $result .= $data["cat_id"]==0 ? '' :
                 $data["status_invite"]==2 ?
-                Html::a('<i class="fa fa-pencil"></i> Каталог', ['client/view-catalog', 'id' => $data["cat_id"]], [
+                Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
                 'class'=>'btn btn-outline-default btn-sm',
                 'style'=>'text-center',
-                'data-pjax'=>0]):
-                Html::a('<i class="fa fa-eye"></i> Каталог', ['client/view-catalog', 'id' => $data["cat_id"]], [
+                'data-pjax'=>0,
+                'data' => [
+                'target' => '#edit-catalog',
+                'toggle' => 'modal',
+                'backdrop' => 'static',]
+                    ]):
+                Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
                 'class'=>'btn btn-outline-default btn-sm',
                 'style'=>'text-center',
                 'data-pjax'=>0,
@@ -157,7 +161,30 @@ yii\bootstrap\Alert::widget([
             
             return $result;
             }
-            ]
+            ],
+            [
+            'attribute'=>'',
+            'label'=>'',
+            'contentOptions' => ['style' => 'vertical-align:middle;max-width:35px'],
+            'format' => 'raw',
+            'value'=> function ($data) {
+                $result ='';
+                $data["status_invite"]==2?
+                $result = Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
+                'id'=>$data["supp_org_id"],
+                ],[
+                    'class'=>'btn btn-outline-success btn-sm resend-invite',
+                    'data-pjax'=>0, 
+                    'style'=>'margin-right:10px;text-center',
+                    'data' => [
+                        'target' => '#edit-supplier',
+                        'toggle' => 'modal',
+                        'backdrop' => 'static',
+                              ],
+                  ]):'';
+                return $result;
+                }
+            ],
         ];
         ?>
 <section class="content">
@@ -303,7 +330,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Единица измерения', 'Комментарий'],
+  colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
   columns: [
         {data: 'article'},
         {data: 'product', wordWrap:true},
@@ -586,6 +613,9 @@ $("body").on("hidden.bs.modal", "#view-catalog", function() {
     $(this).data("bs.modal", null);
 })
 $("body").on("hidden.bs.modal", "#resend", function() {
+    $(this).data("bs.modal", null);
+})
+$("body").on("hidden.bs.modal", "#edit-catalog", function() {
     $(this).data("bs.modal", null);
 })
 JS;

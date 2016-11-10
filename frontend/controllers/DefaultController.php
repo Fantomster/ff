@@ -39,7 +39,7 @@ class DefaultController extends Controller {
 //                        return $this->redirect(['client/suppliers']);
 //                    }
                     $isSettings = ($this->id === 'client') && ($this->action->id === 'settings');
-                    $isSuppliers = ($this->id === 'client') && ($this->action->id === 'suppliers');
+                    $isSuppliers = ($this->id === 'client') && (($this->action->id === 'suppliers') || ($this->action->id === 'invite') || ($this->action->id === 'chkmail'));
                     if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
                         return $this->redirect(['client/settings']);
                     }
@@ -57,7 +57,7 @@ class DefaultController extends Controller {
 //                        return $this->redirect(['vendor/catalogs']);
 //                    }
                     $isSettings = ($this->id === 'vendor') && ($this->action->id === 'settings');
-                    $isCatalogs = ($this->id === 'vendor') && ($this->action->id === 'catalogs');
+                    $isCatalogs = ($this->id === 'vendor') && (($this->action->id === 'catalogs') || (($this->action->id === 'supplier-start-catalog-create')));
                     if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
                         return $this->redirect(['vendor/settings']);
                     }

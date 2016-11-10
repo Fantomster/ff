@@ -86,7 +86,7 @@ class Organization extends \yii\db\ActiveRecord {
             'address' => 'Адрес',
             'zip_code' => 'Индекс',
             'phone' => 'Телефон',
-            'email' => 'Email',
+            'email' => 'Email организации',
             'website' => 'Веб-сайт',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

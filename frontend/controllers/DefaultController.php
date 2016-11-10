@@ -39,7 +39,7 @@ class DefaultController extends Controller {
 //                        return $this->redirect(['client/suppliers']);
 //                    }
                     $isSettings = ($this->id === 'client') && ($this->action->id === 'settings');
-                    $isSuppliers = ($this->id === 'client') && (($this->action->id === 'suppliers') || ($this->action->id === 'create') || ($this->action->id === 'chkmail'));
+                    $isSuppliers = ($this->id === 'client') && (($this->action->id === 'suppliers') || ($this->action->id === 'create') || ($this->action->id === 'invite') || ($this->action->id === 'chkmail'));
                     if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
                         return $this->redirect(['client/settings']);
                     }

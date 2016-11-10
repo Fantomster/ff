@@ -184,7 +184,12 @@ yii\bootstrap\Alert::widget([
             <div class="box-body">
                 <div class="row">
                     <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                              <i class="fa fa-search"></i>
+                            </span>
                     <?=Html::input('text', 'search', $searchString, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                        </div>
                     </div>
                 </div>
                 <div class="row">

@@ -850,6 +850,11 @@ class ClientController extends DefaultController {
         
         return $this->renderAjax('suppliers/_editCatalog', compact('id','array'));       
     }
+    public function actionRemoveSupplier($id) {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
+        \Yii::$app->db->createCommand($sql)->execute();
+    }
     public function actionMessages() {
         return $this->render('/site/underConstruction');
     }

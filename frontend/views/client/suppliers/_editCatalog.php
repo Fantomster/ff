@@ -2,13 +2,16 @@
 use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
+use yii\widgets\Pjax;
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Редактирование каталога</h4>
 </div>
 <div class="modal-body">
+    <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'pjax-edit-catalog'])?>
     <div class="handsontable" id="editCatalogSupplier"></div> 
+    <?php Pjax::end(); ?>
 </div>
 <div class="modal-footer">
     <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success','id'=>'save-catalog-supplier']) ?>
@@ -81,6 +84,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
           success: function (response) {
               if(response.success){ 
                 $('#loader-show').hideLoading();
+                //
                 bootbox.dialog({
                     message: response.alert.body,
                     title: response.alert.title,
@@ -88,9 +92,12 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                         success: {
                           label: "Закрыть!",
                           className: "btn-success btn-md",
+                          callback: function() {
+                            
+                          }
                         },
                     },
-                    className: response.alert.class
+                    className: response.alert.class,
                 });
               }else{
                 $('#loader-show').hideLoading();
@@ -101,9 +108,12 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                         success: {
                           label: "Окей!",
                           className: "btn-success btn-md",
+                          callback: function() {
+                            console.log("err");
+                            }
                         },
                     },
-                    className: response.alert.class
+                    className: response.alert.class,  
                 });
               }
           },

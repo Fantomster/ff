@@ -130,9 +130,9 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                 }
             ],
             [
-            'label'=>'Каталог',
-            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;min-width:119px;width:126px'],
-                'headerOptions' => ['style'=>'text-align:right'],
+            'label'=>'',
+            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;'],
+            'headerOptions' => ['style'=>'text-align:right'],
             'format' => 'raw',
             'value'=>function ($data) {
             $result = "";
@@ -143,15 +143,14 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                 'OrderCatalogSearch[selectedCategory]'=>"",
                 'OrderCatalogSearch[selectedVendor]'=>$data["supp_org_id"],
                 ],[
-                    'class'=>'btn btn-outline-success btn-sm',
-                    'data-pjax'=>0, 
-                    'style'=>'margin-right:10px;text-center'
+                    'class'=>'btn btn-success btn-sm',
+                    'data-pjax'=>0,
                   ]);
             $data["invite"]==0 ? $result .= '' :
             $result .= $data["cat_id"]==0 ? '' :
                 $data["status_invite"]==2 ?
                 Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
-                'class'=>'btn btn-outline-default btn-sm',
+                'class'=>'btn btn-default btn-sm',
                 'style'=>'text-center',
                 'data-pjax'=>0,
                 'data' => [
@@ -160,7 +159,7 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                 'backdrop' => 'static',]
                     ]):
                 Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
-                'class'=>'btn btn-outline-default btn-sm',
+                'class'=>'btn btn-default btn-sm',
                 'style'=>'text-center',
                 'data-pjax'=>0,
                 'data' => [
@@ -169,31 +168,19 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                 'backdrop' => 'static',
                    ],
                 ]);
-            
-            return $result;
-            }
-            ],
-            [
-            'attribute'=>'',
-            'label'=>'',
-            'contentOptions' => ['style' => 'vertical-align:middle;max-width:35px'],
-            'format' => 'raw',
-            'value'=> function ($data) {
-                $result ='';
                 $data["status_invite"]==2?
-                $result = Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
+                $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
                 'id'=>$data["supp_org_id"],
                 ],[
-                    'class'=>'btn btn-outline-success btn-sm resend-invite',
-                    'data-pjax'=>0, 
-                    'style'=>'margin-right:10px;text-center',
-                    'data' => [
-                        'target' => '#edit-supplier',
-                        'toggle' => 'modal',
-                        'backdrop' => 'static',
-                              ],
-                  ]):'';
-                return $result;
+                    'class'=>'btn btn-default btn-sm resend-invite',
+                    'data-pjax'=>0,]):'';
+                
+                $result .= Html::a('<i class="fa fa-trash m-r-xs"></i>', ['client/remove-supplier',
+                'id'=>$data["supp_org_id"],
+                ],[
+                    'class'=>'btn btn-danger btn-sm remove-supplier',
+                    'data-pjax'=>0,]);
+                return "<div class='btn-group'>" . $result . "</div>";
                 }
             ],
         ];
@@ -208,7 +195,12 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
             <div class="box-body">
                 <div class="row">
                     <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                              <i class="fa fa-search"></i>
+                            </span>
                     <?=Html::input('text', 'search', $searchString, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -617,6 +609,32 @@ $(document).on("click", ".resend-invite", function(e) {
         }
     });
 });
+$(document).on("click", ".remove-supplier", function(e) {     
+    e.preventDefault();
+    var url = $(this).attr('href');
+    console.log(url);
+    bootbox.confirm({
+        title:"Удаление поставщика",
+        message: "Удалить поставщика из вашего списка?",
+        buttons: {
+            cancel: {
+                label: 'Отмена',
+                className: 'btn-gray'
+            },
+            confirm: {
+                label: 'Удалить',
+                className: 'btn-success'
+            }
+            
+        },
+        callback: function (result) {
+         if(result){ 
+             $.post(url, function( data ) { $.pjax.reload({container: "#sp-list"}); });
+                
+            }
+        }
+    });
+});        
 $("body").on("hidden.bs.modal", "#view-supplier", function() {
     $(this).data("bs.modal", null);
 })

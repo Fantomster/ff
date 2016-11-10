@@ -58,12 +58,12 @@ $this->title = 'F-keeper';
         <div class="inside__number-block">
             <div class="container-fluid">
                 <div class="col-md-6 col-sm-6">
-                    <span class="number">420</span>
+                    <span class="number"><?=$counter['rest_count'] ?></span>
                     <span class="plays__title">Ресторанов</span>	
                 </div>
                 <div class="col-md-6 col-sm-6">
                     <div class="alig__right">
-                        <span class="number">200</span>
+                        <span class="number"><?=$counter['supp_count'] ?></span>
                         <span class="plays__title">Поставщиков</span>
                     </div>
                 </div>

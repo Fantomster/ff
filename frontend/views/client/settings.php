@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
@@ -17,14 +18,16 @@ $this->registerJs(
 );
 ?>
 <!--<div style="padding: 20px 30px; background: rgb(243, 156, 18); z-index: 999999; font-size: 16px; font-weight: 600;"><a class="pull-right" href="#" data-toggle="tooltip" data-placement="left" title="Never show me this again!" style="color: rgb(255, 255, 255); font-size: 20px;">×</a><a href="https://themequarry.com" style="color: rgba(255, 255, 255, 0.901961); display: inline-block; margin-right: 10px; text-decoration: none;">Ready to sell your theme? Submit your theme to our new marketplace now and let over 200k visitors see it!</a><a class="btn btn-default btn-sm" href="https://themequarry.com" style="margin-top: -5px; border: 0px; box-shadow: none; color: rgb(243, 156, 18); font-weight: 600; background: rgb(255, 255, 255);">Let's Do It!</a></div>-->
-<?=
-yii\bootstrap\Alert::widget([
-    'options' => [
-        'class' => 'alert-warning fade in',
-    ],
-    'body' => 'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '
-    . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-]);
+<?php
+if ($organization->step == common\models\Organization::STEP_SET_INFO) {
+    echo yii\bootstrap\Alert::widget([
+        'options' => [
+            'class' => 'alert-warning fade in',
+        ],
+        'body' => 'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '
+        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+    ]);
+}
 ?>
 <section class="content-header">
     <h1>
@@ -83,9 +86,9 @@ yii\bootstrap\Alert::widget([
             ?>
 
             <?php /*
-                    $form->field($organization, 'zip_code')
-                    ->label(false)
-                    ->textInput(['placeholder' => $organization->getAttributeLabel('zip_code')])
+              $form->field($organization, 'zip_code')
+              ->label(false)
+              ->textInput(['placeholder' => $organization->getAttributeLabel('zip_code')])
              */ ?>
 
             <?=
@@ -115,7 +118,7 @@ yii\bootstrap\Alert::widget([
         </div>
         <div class="box-footer clearfix">
             <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить изменения', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
-            <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
+        <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
         </div>
         <?php
         ActiveForm::end();

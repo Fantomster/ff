@@ -39,14 +39,16 @@ $this->registerJsFile('modules/handsontable/dist/handsontable.js');
 $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
-<?=
-yii\bootstrap\Alert::widget([
-    'options' => [
-        'class' => 'alert-warning',
-    ],
-    'body' => 'Для того, чтобы начать продавать, загрузите Ваш первый каталог. '
-    . '<a class="btn btn-default btn-sm" href="#">Видео инструкция</a>',
-]);
+<?php
+if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
+    echo yii\bootstrap\Alert::widget([
+        'options' => [
+            'class' => 'alert-warning fade in',
+        ],
+        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
+        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+    ]);
+}
 ?>
 <section class="content-header">
     <h1>

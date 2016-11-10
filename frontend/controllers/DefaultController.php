@@ -32,19 +32,36 @@ class DefaultController extends Controller {
             switch ($organization->type_id) {
                 case Organization::TYPE_RESTAURANT:
                     $this->layout = 'main-client';
-                    //проверка, имеет ли кабак поставщиков, если нет, то направляем на страницу добавления поставщиков
-                    $suppliers = RelationSuppRest::findOne(['rest_org_id' => $organization->id]);
-                    $isIndex = ($this->id === 'client') && ($this->action->id === 'index');
-                    if (!isset($suppliers) && $isIndex) {
+//                    //проверка, имеет ли кабак поставщиков, если нет, то направляем на страницу добавления поставщиков
+//                    $suppliers = RelationSuppRest::findOne(['rest_org_id' => $organization->id]);
+//                    $isIndex = ($this->id === 'client') && ($this->action->id === 'index');
+//                    if (!isset($suppliers) && $isIndex) {
+//                        return $this->redirect(['client/suppliers']);
+//                    }
+                    $isSettings = ($this->id === 'client') && ($this->action->id === 'settings');
+                    $isSuppliers = ($this->id === 'client') && (($this->action->id === 'suppliers') || ($this->action->id === 'create') || ($this->action->id === 'chkmail'));
+                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
+                        return $this->redirect(['client/settings']);
+                    }
+                    if (($organization->step == Organization::STEP_ADD_VENDOR) && !$isSuppliers) {
                         return $this->redirect(['client/suppliers']);
                     }
+                    
                     break;
                 case Organization::TYPE_SUPPLIER:
                     $this->layout = 'main-vendor';
-                    //проверка, имеет ли крестьянин базовый каталог, если нет, то направляем создавать
-                    $baseCatalogs = Catalog::findOne(['supp_org_id' => $organization->id]);
-                    $isIndex = ($this->id === 'vendor') && ($this->action->id === 'index');
-                    if (!isset($baseCatalogs) && $isIndex) {
+//                    //проверка, имеет ли крестьянин базовый каталог, если нет, то направляем создавать
+//                    $baseCatalogs = Catalog::findOne(['supp_org_id' => $organization->id]);
+//                    $isIndex = ($this->id === 'vendor') && ($this->action->id === 'index');
+//                    if (!isset($baseCatalogs) && $isIndex) {
+//                        return $this->redirect(['vendor/catalogs']);
+//                    }
+                    $isSettings = ($this->id === 'vendor') && ($this->action->id === 'settings');
+                    $isCatalogs = ($this->id === 'vendor') && (($this->action->id === 'catalogs') || (($this->action->id === 'supplier-start-catalog-create')));
+                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
+                        return $this->redirect(['vendor/settings']);
+                    }
+                    if (($organization->step == Organization::STEP_ADD_CATALOG) && !$isCatalogs) {
                         return $this->redirect(['vendor/catalogs']);
                     }
                     break;

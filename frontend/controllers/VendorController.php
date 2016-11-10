@@ -75,6 +75,11 @@ class VendorController extends DefaultController {
 
         if ($organization->load(Yii::$app->request->get())) {
             if ($organization->validate()) {
+                if ($organization->step == Organization::STEP_SET_INFO) {
+                    $organization->step = Organization::STEP_ADD_CATALOG;
+                    $organization->save();
+                    return $this->redirect(['vendor/catalogs']);
+                }
                 $organization->save();
             }
         }
@@ -207,8 +212,10 @@ class VendorController extends DefaultController {
 
     public function actionCatalogs() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        
         if (!Catalog::find()->where(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
-            return $this->render("catalogs/createBaseCatalog", compact("Catalog"));
+            $step = $currentUser->organization->step;
+            return $this->render("catalogs/createBaseCatalog", compact("Catalog", "step"));
         } else {
             $searchString = "";
             $restaurant = "";
@@ -370,6 +377,11 @@ class VendorController extends DefaultController {
                 $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
             }
             $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Поздравляем!', 'body' => 'Вы успешно создали свой первый каталог!']];
+            $currentOrganization = $currentUser->organization;
+                    if ($currentOrganization->step == Organization::STEP_ADD_CATALOG) {
+                        $currentOrganization->step = Organization::STEP_OK;
+                        $currentOrganization->save();
+                    }
             return $result;
             exit;
         }

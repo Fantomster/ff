@@ -80,6 +80,11 @@ class ClientController extends DefaultController {
 
         if ($organization->load(Yii::$app->request->get())) {
             if ($organization->validate()) {
+                if ($organization->step == Organization::STEP_SET_INFO) {
+                    $organization->step = Organization::STEP_ADD_VENDOR;
+                    $organization->save();
+                    return $this->redirect(['client/suppliers']);
+                }
                 $organization->save();
             }
         }
@@ -513,6 +518,11 @@ class ClientController extends DefaultController {
                         \Yii::$app->db->createCommand($sql)->execute();
                     }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
+                    $currentOrganization = $currentUser->organization;
+                    if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                        $currentOrganization->step = Organization::STEP_OK;
+                        $currentOrganization->save();
+                    }
                     return $result;
                     exit;
                 }
@@ -1135,6 +1145,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
     }
     public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $step = $currentUser->organization->step;
         $user = new User;
         $profile = new Profile;
         $relationCategory = new RelationCategory;
@@ -1192,7 +1203,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 ]
             ],
         ]);
-        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "searchString", "dataProvider"));
+        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "searchString", "dataProvider", "step"));
     
     }
     public function actionSidebar() {

@@ -72,6 +72,17 @@ yii\bootstrap\Alert::widget([
     . '<a class="btn btn-default btn-sm" href="#">Смотреть!</a>',
 ]); */
 ?>
+<?php
+if ($step == common\models\Organization::STEP_ADD_VENDOR) {
+    echo yii\bootstrap\Alert::widget([
+        'options' => [
+            'class' => 'alert-warning fade in',
+        ],
+        'body' => 'Для того, чтобы продолжить работу с нашей системой, добавьте в систему вашего поставщика. '
+        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+    ]);
+}
+?>
 <section class="content-header">
     <h1>
         <i class="fa fa-users"></i> Поставщики

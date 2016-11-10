@@ -8,6 +8,7 @@ use kartik\select2\Select2;
 $form = ActiveForm::begin([
     'id' => 'register-form',
     'enableAjaxValidation' => true,
+    'action' => yii\helpers\Url::to(['/user/register']),
     ]);
 ?>
 <div class="form-group">
@@ -63,6 +64,12 @@ $form = ActiveForm::begin([
             $form->field($profile, 'full_name')
             ->label(false)
             ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
+    ?>
+    <?=
+            $form->field($profile, 'phone')
+            ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+            ->label(false)
+            ->textInput(['class' => 'form-control', 'placeholder' => 'телефон'])
     ?>
     <?=
             $form->field($user, 'newPassword')

@@ -39,7 +39,7 @@ $this->registerJs(
         <div class="box-header">
         </div>
         <?php
-        Pjax::begin(['enablePushState' => false, 'id' => 'settingsDelivery', 'timeout' => 3000]);
+        Pjax::begin(['enablePushState' => false, 'id' => 'settingsDelivery', 'timeout' => 5000]);
         $form = ActiveForm::begin([
                     'id' => 'deliveryForm',
                     'enableAjaxValidation' => false,

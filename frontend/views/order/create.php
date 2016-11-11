@@ -40,7 +40,7 @@ $this->registerJs(
                 }
                 timer = setTimeout(function() {
                     $("#createForm").submit();
-                }, 300);
+                }, 700);
             });
             $("#createOrder").on("pjax:complete", function() {
                 var searchInput = $("#searchString");
@@ -111,7 +111,7 @@ $this->registerJs(
                 <!-- /.box-header -->
                 <div class="box-body">    
                     <?php
-                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 3000]);
+                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 5000]);
                     $form = ActiveForm::begin([
                                 'options' => [
                                     'data-pjax' => true,

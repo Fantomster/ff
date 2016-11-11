@@ -22,7 +22,7 @@ $this->registerJs(
                 }
                 timer = setTimeout(function() {
                     $("#search-form").submit();
-                }, 300);
+                }, 700);
             });
             $("#users-list").on("pjax:complete", function() {
                 var searchInput = $("#search-string");
@@ -66,7 +66,7 @@ $this->registerJs(
     ?>
 </section>
 <section class="content">
-        <?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list', 'timeout' => 3000]); ?>
+        <?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list', 'timeout' => 5000]); ?>
     <div class="box box-info settings">
         <div class="box-header">
         <?php

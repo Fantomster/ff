@@ -122,7 +122,7 @@ $this->registerJs(
 );
 ?>
 <?php
-Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 3000]);
+Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000]);
 ?>
 <section class="content-header">
     <h1>

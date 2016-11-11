@@ -121,7 +121,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
     <div class="row">
         <div class="col-md-8" id="toPrint">
             <div class="box box-info">
-                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 3000]); ?>
+                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 5000]); ?>
                 <div class="box-header with-border">
                     <div class="row m-b-xl">
                         <div class="col-xs-6">

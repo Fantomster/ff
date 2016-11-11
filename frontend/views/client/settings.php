@@ -49,7 +49,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
 <section class="content">
     <div class="box box-info settings">
         <?php
-        Pjax::begin(['enablePushState' => false, 'id' => 'settingsInfo', 'timeout' => 3000]);
+        Pjax::begin(['enablePushState' => false, 'id' => 'settingsInfo', 'timeout' => 5000]);
         $form = ActiveForm::begin([
                     'id' => 'generalSettings',
                     'enableAjaxValidation' => false,

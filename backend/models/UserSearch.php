@@ -18,7 +18,8 @@ class UserSearch extends User {
     public $role;
     public $full_name;
     public $phone;
-    public $organization;
+    public $org_name;
+    public $org_type_id;
 
     /**
      * @inheritdoc
@@ -33,7 +34,7 @@ class UserSearch extends User {
     public function rules() {
         return [
             [['id', 'status', 'organization_id'], 'integer'],
-            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'organization'], 'safe'],
+            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'org_name', 'org_type_id'], 'safe'],
         ];
     }
 
@@ -86,9 +87,13 @@ class UserSearch extends User {
             'asc' => ["$profileTable.phone" => SORT_ASC],
             'desc' => ["$profileTable.phone" => SORT_DESC],
         ];
-        $dataProvider->sort->attributes['organization'] = [
+        $dataProvider->sort->attributes['org_name'] = [
             'asc' => ["$organizationTable.name" => SORT_ASC],
             'desc' => ["$organizationTable.name" => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['org_type_id'] = [
+            'asc' => ["$organizationTable.type_id" => SORT_ASC],
+            'desc' => ["$organizationTable.type_id" => SORT_DESC],
         ];
 
         // grid filtering conditions
@@ -105,7 +110,8 @@ class UserSearch extends User {
                 ->andFilterWhere(['like', 'logged_in_ip', $this->logged_in_ip])
                 ->andFilterWhere(['like', 'created_ip', $this->created_ip])
                 ->andFilterWhere(['like', "$roleTable.name", $this->role])
-                ->andFilterWhere(['like', "$organizationTable.name", $this->organization])
+                ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
+                ->andFilterWhere(['like', "$organizationTable.type_id", $this->org_type_id])
                 ->andFilterWhere(['like', "$profileTable.full_name", $this->full_name])
                 ->andFilterWhere(['like', "$profileTable.phone", $this->phone]);
 

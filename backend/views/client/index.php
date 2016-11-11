@@ -17,22 +17,35 @@ $gridColumns = [
             'id',
             [
                 'attribute' => 'full_name',
-                'value' => 'profile.full_name'
+                'value' => 'profile.full_name',
+                'label' => 'Полное имя',
             ],
             [
                 'attribute' => 'phone',
                 'value' => 'profile.phone',
+                'label' => 'Телефон',
             ],
             'status',
             'email',
-            'organization_id',
             [
-                'attribute' => 'organization',
-                'value' => 'organization.name'
+                'attribute' => 'organization_id',
+                'value' => 'organization_id',
+                'label' => 'Орг ID'
+            ],
+            [
+                'attribute' => 'org_name',
+                'value' => 'organization.name',
+                'label' => 'Название организации',
+            ],
+            [
+                'attribute' => 'org_type_id',
+                'value' => 'organization.type_id',
+                'label' => 'Тип',
             ],
             [
                 'attribute' => 'role',
-                'value' => 'role.name'
+                'value' => 'role.name',
+                'label' => 'Роль',
             ],
             'created_at',
             'logged_in_at',

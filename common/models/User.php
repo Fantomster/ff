@@ -39,11 +39,7 @@ class User extends \amnah\yii2\user\models\User {
         
         return $rules;
     }
-    /*public function scenarios() {
-        $scenarios = parent::scenarios();
-        $scenarios['sendInviteFromVendor'] = ['email'];
-        return $scenarios;
-    }*/
+
     /**
      * Set organization id
      * @param int $orgId

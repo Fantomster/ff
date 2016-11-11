@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 ?>
 <?php
-Pjax::begin(['enablePushState' => false, 'id' => 'cart', 'timeout' => 3000]);
+Pjax::begin(['enablePushState' => false, 'id' => 'cart', 'timeout' => 5000]);
 foreach ($orders as $order) {
     ?>
     <div class="box box-info ">

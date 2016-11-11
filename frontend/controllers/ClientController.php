@@ -671,6 +671,14 @@ class ClientController extends DefaultController {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+            if ($arrCatalog === Array()) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Каталог пустой']];
+                    return $result;
+                    exit;
+                }
             foreach ($arrCatalog as $arrCatalogs) {
                 $product = trim($arrCatalogs['dataItem']['product']);
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -862,6 +870,8 @@ class ClientController extends DefaultController {
     public function actionRemoveSupplier($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
+        \Yii::$app->db->createCommand($sql)->execute();
+        $sql = "delete from relation_category where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
         \Yii::$app->db->createCommand($sql)->execute();
     }
 

@@ -1403,8 +1403,7 @@ class VendorController extends DefaultController {
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $header_info_zakaz = \common\models\Order::find()->
-                        where(['vendor_id' => $currentUser->organization_id])->count();
-        
+                        where(['vendor_id' => $currentUser->organization_id])->count();        
         empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
         $header_info_clients = \common\models\RelationSuppRest::find()->
                         where(['supp_org_id' => $currentUser->organization_id])->count();

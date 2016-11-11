@@ -374,6 +374,7 @@ class ClientController extends DefaultController {
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
                      *    
                      * */
+                    
                     foreach ($arrCatalog as $arrCatalogs) {
                         $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                         $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -516,13 +517,14 @@ class ClientController extends DefaultController {
                     $org = $organization->name;
                     $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
-
+                    
                     $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW())";
                     \Yii::$app->db->createCommand($sql)->execute();
-
-                    foreach ($categorys as $arrCategorys) {
-                        $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                        \Yii::$app->db->createCommand($sql)->execute();
+                    if(!empty($categorys)){
+                        foreach ($categorys as $arrCategorys) {
+                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+                            \Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
                     $currentOrganization = $currentUser->organization;

@@ -1,7 +1,9 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+//use yii\grid\GridView;
+use kartik\grid\GridView;
+use kartik\export\ExportMenu;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -10,16 +12,8 @@ use yii\widgets\Pjax;
 
 $this->title = 'Users';
 $this->params['breadcrumbs'][] = $this->title;
-?>
-<div class="user-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-<?php // echo $this->render('_search', ['model' => $searchModel]);  ?>
-    <?php Pjax::begin(['enablePushState' => false, 'id' => 'userList', 'timeout' => 3000]); ?>    <?=
-    GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
+$gridColumns = [
             'id',
             [
                 'attribute' => 'full_name',
@@ -42,18 +36,28 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'created_at',
             'logged_in_at',
-            // 'password',
-            // 'auth_key',
-            // 'access_token',
-            // 'logged_in_ip',
-            // 'logged_in_at',
-            // 'created_ip',
-            // 'created_at',
-            // 'updated_at',
-            // 'banned_at',
-            // 'banned_reason',
-            // 'organization_id',
-        ],
+        ];
+?>
+<div class="user-index">
+
+    <h1><?= Html::encode($this->title) ?></h1>
+<?php 
+echo ExportMenu::widget([
+    'dataProvider' => $dataProvider,
+    'columns' => $gridColumns,
+    'target' => ExportMenu::TARGET_SELF,
+    'exportConfig' => [
+        ExportMenu::FORMAT_PDF => false,
+        ExportMenu::FORMAT_EXCEL_X => false,
+    ],
+]);
+?>
+    <?php Pjax::begin(['enablePushState' => false, 'id' => 'userList', 'timeout' => 3000]); ?>    
+    <?=
+    GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
     ]);
     ?>
 <?php Pjax::end(); ?></div>

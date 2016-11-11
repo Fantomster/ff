@@ -337,12 +337,7 @@ class ClientController extends DefaultController {
                             $currentOrganization->step = Organization::STEP_OK;
                             $currentOrganization->save();
                         }
-                        /**
-                         *
-                         * Отправка почты
-                         * 
-                         * */
-                        $currentUser->sendInviteToVendor($user);
+                        
                     } else {
                         //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                         $get_supp_org_id = $check['org_id'];
@@ -456,6 +451,12 @@ class ClientController extends DefaultController {
                     $relationSuppRest->status = RelationSuppRest::CATALOG_STATUS_ON;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
                     $relationSuppRest->save();
+                    /**
+                         *
+                         * Отправка почты
+                         * 
+                         * */
+                    $currentUser->sendInviteToVendor($user);
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
                         return $result;
@@ -463,6 +464,7 @@ class ClientController extends DefaultController {
                         $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  <strong>' . $email . '</strong>'];
                         return $result;
                     }
+                    
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];
                     return $result;
@@ -1160,7 +1162,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $where = "";
         if (Yii::$app->request->isAjax) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            empty($searchString) ? "" : $where .= " and organization.name LIKE :name";
+            empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";
         }
         $query = Yii::$app->db->createCommand("SELECT 
             relation_supp_rest.id,

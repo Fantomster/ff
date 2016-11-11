@@ -525,7 +525,11 @@ class ClientController extends DefaultController {
                         \Yii::$app->db->createCommand($sql)->execute();
                     }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
-
+                    $currentOrganization = $currentUser->organization;
+                    if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                        $currentOrganization->step = Organization::STEP_OK;
+                        $currentOrganization->save();
+                    }
                     return $result;
                     exit;
                 }

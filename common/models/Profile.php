@@ -13,6 +13,7 @@ namespace common\models;
  *
  * @inheritdoc
  *
+ * @property sting $phone
  */
 class Profile extends \amnah\yii2\user\models\Profile {
     /**
@@ -23,6 +24,8 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['full_name'], 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите как к вам обращаться'];
         $rules[] = [['full_name'], 'required'];
         $rules[] = [['full_name'], 'filter', 'filter'=>'\yii\helpers\HtmlPurifier::process'];
+        $rules[] = [['phone'], 'string', 'max' => 255];
+        $rules[] = [['phone'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
         
 //        //переопределим сообщения валидации быдланским способом
 //        $pos = array_search(['email', 'required'], $rules);
@@ -34,6 +37,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
     {
         return [
             'full_name' => 'ФИО',
+            'phone' => 'Телефон',
         ];
     }
 }

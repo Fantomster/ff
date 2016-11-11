@@ -80,6 +80,11 @@ class ClientController extends DefaultController {
 
         if ($organization->load(Yii::$app->request->get())) {
             if ($organization->validate()) {
+                if ($organization->step == Organization::STEP_SET_INFO) {
+                    $organization->step = Organization::STEP_ADD_VENDOR;
+                    $organization->save();
+                    return $this->redirect(['client/suppliers']);
+                }
                 $organization->save();
             }
         }
@@ -198,6 +203,7 @@ class ClientController extends DefaultController {
     public function actionAjaxDeleteUser() {
         //
     }
+
     /**
      *
      * Типы callback-ов:
@@ -280,7 +286,7 @@ class ClientController extends DefaultController {
                         return $result;
                         exit;
                     }
-                    if (empty($units) || $units<0) {
+                    if (empty($units) || $units < 0) {
                         $units = 0;
                     }
                     $units = str_replace(',', '.', $units);
@@ -294,7 +300,6 @@ class ClientController extends DefaultController {
                         return $result;
                         exit;
                     }
-                    
                 }
                 $email = $user->email;
                 $fio = $profile->full_name;
@@ -327,12 +332,12 @@ class ClientController extends DefaultController {
                         $organization->save();
                         $user->setOrganization($organization->id)->save();
                         $get_supp_org_id = $organization->id;
-                        /**
-                         *
-                         * Отправка почты
-                         * 
-                         * */
-                        $currentUser->sendInviteToVendor($user);
+                        $currentOrganization = $currentUser->organization;
+                        if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                            $currentOrganization->step = Organization::STEP_OK;
+                            $currentOrganization->save();
+                        }
+                        
                     } else {
                         //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                         $get_supp_org_id = $check['org_id'];
@@ -342,7 +347,7 @@ class ClientController extends DefaultController {
                      * 1) Делаем связь категорий поставщика
                      * 
                      * */
-                    if(!empty($categorys)){
+                    if (!empty($categorys)) {
                         foreach ($categorys as $arrCategorys) {
                             $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
                             \Yii::$app->db->createCommand($sql)->execute();
@@ -369,6 +374,7 @@ class ClientController extends DefaultController {
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
                      *    
                      * */
+                    
                     foreach ($arrCatalog as $arrCatalogs) {
                         $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                         $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -381,7 +387,7 @@ class ClientController extends DefaultController {
                         } else {
                             $units = str_replace('.', '', $units);
                         }
-                        if (empty($units) || $units<0) {
+                        if (empty($units) || $units < 0) {
                             $units = 'NULL';
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
@@ -396,28 +402,28 @@ class ClientController extends DefaultController {
                             $price = str_replace('.', '', $price);
                         }
                         $sql = "insert into {{%catalog_base_goods}}" .
-                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                            . "`units`,`price`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
-                            . $lastInsert_base_cat_id . ","
-                            . "0,"
-                            . $get_supp_org_id . ","
-                            . ":article,"
-                            . ":product,"
-                            . ":units,"
-                            . ":price,"
-                            . ":note,"
-                            . ":ed,"
-                            . CatalogBaseGoods::STATUS_ON .","
-                            . "0,"
-                            . "0,"
-                            . "NOW())";
+                                "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                                . "`units`,`price`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
+                                . $lastInsert_base_cat_id . ","
+                                . "0,"
+                                . $get_supp_org_id . ","
+                                . ":article,"
+                                . ":product,"
+                                . ":units,"
+                                . ":price,"
+                                . ":note,"
+                                . ":ed,"
+                                . CatalogBaseGoods::STATUS_ON . ","
+                                . "0,"
+                                . "0,"
+                                . "NOW())";
                         $command = \Yii::$app->db->createCommand($sql);
-                        $command->bindParam(":article",$article,\PDO::PARAM_STR);
-                        $command->bindParam(":product",$product,\PDO::PARAM_STR);
-                        $command->bindParam(":units",$units);
-                        $command->bindParam(":price",$price);
-                        $command->bindParam(":note",$note,\PDO::PARAM_STR);
-                        $command->bindParam(":ed",$ed,\PDO::PARAM_STR);
+                        $command->bindParam(":article", $article, \PDO::PARAM_STR);
+                        $command->bindParam(":product", $product, \PDO::PARAM_STR);
+                        $command->bindParam(":units", $units);
+                        $command->bindParam(":price", $price);
+                        $command->bindParam(":note", $note, \PDO::PARAM_STR);
+                        $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
                         $command->execute();
                         $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
 
@@ -446,6 +452,12 @@ class ClientController extends DefaultController {
                     $relationSuppRest->status = RelationSuppRest::CATALOG_STATUS_ON;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
                     $relationSuppRest->save();
+                    /**
+                         *
+                         * Отправка почты
+                         * 
+                         * */
+                    $currentUser->sendInviteToVendor($user);
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
                         return $result;
@@ -453,6 +465,7 @@ class ClientController extends DefaultController {
                         $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  <strong>' . $email . '</strong>'];
                         return $result;
                     }
+                    
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];
                     return $result;
@@ -504,15 +517,21 @@ class ClientController extends DefaultController {
                     $org = $organization->name;
                     $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
-
+                    
                     $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW())";
                     \Yii::$app->db->createCommand($sql)->execute();
-
-                    foreach ($categorys as $arrCategorys) {
-                        $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                        \Yii::$app->db->createCommand($sql)->execute();
+                    if(!empty($categorys)){
+                        foreach ($categorys as $arrCategorys) {
+                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+                            \Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
+                    $currentOrganization = $currentUser->organization;
+                    if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                        $currentOrganization->step = Organization::STEP_OK;
+                        $currentOrganization->save();
+                    }
                     return $result;
                     exit;
                 }
@@ -529,7 +548,7 @@ class ClientController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $organization = Organization::find()->where(['id' => $supplier_org_id])->one();
         $user = User::find()->where(['email' => $organization->email])->one();
-        !empty($user) ? $user->status==0 ? $userStatus = 1:$userStatus = 0:$userStatus = '';
+        !empty($user) ? $user->status == 0 ? $userStatus = 1 : $userStatus = 0 : $userStatus = '';
         $load_data = ArrayHelper::getColumn(Category::find()->where(['in', 'id', \common\models\RelationCategory::find()->
                                     select('category_id')->
                                     where(['rest_org_id' => $currentUser->organization_id,
@@ -568,19 +587,20 @@ class ClientController extends DefaultController {
 
                 $message = 'Сохранено';
                 return $this->renderAjax('suppliers/_success', ['message' => $message]);
-            }else{
+            } else {
                 $post = Yii::$app->request->post();
                 if ($post) {
-                $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
-                \Yii::$app->db->createCommand($sql)->execute();
-                $message = 'Сохранено';
-                return $this->renderAjax('suppliers/_success', ['message' => $message]);    
+                    $sql = "DELETE FROM relation_category WHERE rest_org_id=$currentUser->organization_id AND supp_org_id=$supplier_org_id";
+                    \Yii::$app->db->createCommand($sql)->execute();
+                    $message = 'Сохранено';
+                    return $this->renderAjax('suppliers/_success', ['message' => $message]);
                 }
             }
         }
-        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data', 'user','userStatus'));
+        return $this->renderAjax('suppliers/_viewSupplier', compact('organization', 'supplier_org_id', 'currentUser', 'load_data', 'user', 'userStatus'));
     }
-    public function actionReSendEmailInvite($id){
+
+    public function actionReSendEmailInvite($id) {
         if (Yii::$app->request->isAjax) {
             $currentUser = User::findIdentity(Yii::$app->user->id);
             $organization = Organization::find()->where(['id' => $id])->one();
@@ -588,34 +608,35 @@ class ClientController extends DefaultController {
             $currentUser->sendInviteToVendor($user);
         }
     }
+
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::BASE_CATALOG) {
-        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status "
-                . " FROM `catalog` "
-                . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
-                . " WHERE "
-                . " catalog_base_goods.cat_id = $id and deleted != 1");
-        $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
-                . " FROM `catalog` "
-                . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
-                . " WHERE "
-                . " catalog_base_goods.cat_id = $id and deleted != 1")->queryScalar();
+            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status "
+                    . " FROM `catalog` "
+                    . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
+                    . " WHERE "
+                    . " catalog_base_goods.cat_id = $id and deleted != 1");
+            $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
+                            . " FROM `catalog` "
+                            . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
+                            . " WHERE "
+                            . " catalog_base_goods.cat_id = $id and deleted != 1")->queryScalar();
         }
         if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::CATALOG) {
-        $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status "
-                . " FROM `catalog` "
-                . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
-                . " WHERE "
-                . " catalog_goods.cat_id = $id and deleted != 1");
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
-                . " FROM `catalog` "
-                . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
-                . " WHERE "
-                . " catalog_goods.cat_id = $id and deleted != 1")->queryScalar();
+            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status "
+                    . " FROM `catalog` "
+                    . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                    . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
+                    . " WHERE "
+                    . " catalog_goods.cat_id = $id and deleted != 1");
+            $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
+                            . " FROM `catalog` "
+                            . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                            . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
+                            . " WHERE "
+                            . " catalog_goods.cat_id = $id and deleted != 1")->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
@@ -639,7 +660,209 @@ class ClientController extends DefaultController {
             ],
         ]);
         return $this->renderAjax('suppliers/_viewCatalog', compact('searchModel', 'dataProvider', 'cat_id'));
-        
+    }
+
+    public function actionEditCatalog($id) {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $supp_org_id = Catalog::find()->where(['id' => $id])->one()->supp_org_id;
+        $catalog_id = $id;
+        $base_catalog_id = Catalog::find()->where(['supp_org_id' => $supp_org_id, 'type' => 1])->one()->id;
+        if (Yii::$app->request->isAjax && Yii::$app->request->post('catalog')) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
+            $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+            foreach ($arrCatalog as $arrCatalogs) {
+                $product = trim($arrCatalogs['dataItem']['product']);
+                $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
+                $units = trim($arrCatalogs['dataItem']['units']);
+                $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
+                $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
+                if (empty($article)) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => '<strong>[Артикул]</strong> не указан']];
+                    return $result;
+                    exit;
+                }
+                if (empty($product)) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Пустое поле <strong>[Наименование]</strong>!']];
+                    return $result;
+                    exit;
+                }
+                if (empty($price)) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Пустое поле <strong>[Цена]</strong>!']];
+                    return $result;
+                    exit;
+                }
+                $price = str_replace(',', '.', $price);
+                if (!preg_match($numberPattern, $price)) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => '<strong>[Цена]</strong> в неверном формате!']];
+                    return $result;
+                    exit;
+                }
+                if (empty($units) || $units < 0) {
+                    $units = 0;
+                }
+                $units = str_replace(',', '.', $units);
+                if (!empty($units) && !preg_match($numberPattern, $units)) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => '<strong>[Кратность]</strong> товара в неверном формате']];
+                    return $result;
+                    exit;
+                }
+                if (empty($ed)) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Пустое поле <strong>[Единица измерения]</strong>!']];
+                    return $result;
+                    exit;
+                }
+            }
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $sql = "delete gn " .
+                        "from goods_notes gn " .
+                        "inner join catalog_goods cg " .
+                        "on gn.catalog_base_goods_id = cg.base_goods_id " .
+                        "where cg.cat_id=$catalog_id";
+                \Yii::$app->db->createCommand($sql)->execute();
+                $sql = "delete cb " .
+                        "from catalog_base_goods cb " .
+                        "inner join catalog_goods c " .
+                        "on cb.id=c.base_goods_id  " .
+                        "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
+                \Yii::$app->db->createCommand($sql)->execute();
+                $sql = "delete from catalog_goods where cat_id=$catalog_id";
+                \Yii::$app->db->createCommand($sql)->execute();
+                foreach ($arrCatalog as $arrCatalogs) {
+                    $product = trim($arrCatalogs['dataItem']['product']);
+                    $article = trim($arrCatalogs['dataItem']['article']);
+                    $units = trim($arrCatalogs['dataItem']['units']);
+                    $price = trim($arrCatalogs['dataItem']['price']);
+                    $ed = trim($arrCatalogs['dataItem']['ed']);
+                    $note = trim($arrCatalogs['dataItem']['note']);
+
+                    $sql = "insert into {{%catalog_base_goods}}" .
+                            "(`cat_id`,`supp_org_id`,`article`,`product`,"
+                            . "`units`,`price`,`ed`,`status`,`created_at`) VALUES ("
+                            . ":cat_id,"
+                            . $supp_org_id . ","
+                            . ":article,"
+                            . ":product,"
+                            . ":units,"
+                            . ":price,"
+                            . ":ed,"
+                            . CatalogBaseGoods::STATUS_ON . ","
+                            . "NOW())";
+                    $command = \Yii::$app->db->createCommand($sql);
+                    $command->bindParam(":cat_id", $base_catalog_id, \PDO::PARAM_INT);
+                    $command->bindParam(":article", $article, \PDO::PARAM_STR);
+                    $command->bindParam(":product", $product, \PDO::PARAM_STR);
+                    $command->bindParam(":units", $units);
+                    $command->bindParam(":price", $price);
+                    $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
+                    $command->execute();
+                    $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
+
+                    $sql = "insert into {{%catalog_goods}}" .
+                            "(`cat_id`,`base_goods_id`,`price`,`created_at`) VALUES ("
+                            . ":cat_id,"
+                            . $lastInsert_base_goods_id . ","
+                            . ":price,"
+                            . "NOW())";
+                    $command = \Yii::$app->db->createCommand($sql);
+                    $command->bindParam(":cat_id", $catalog_id, \PDO::PARAM_INT);
+                    $command->bindParam(":price", $price);
+                    $command->execute();
+
+                    if (!empty($note)) {
+                        $sql = "insert into " . GoodsNotes::tableName() .
+                                " (`rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES ("
+                                . $currentUser->organization_id . ","
+                                . $lastInsert_base_goods_id . ","
+                                . ":note,"
+                                . "NOW())";
+                        $command = \Yii::$app->db->createCommand($sql);
+                        $command->bindParam(":note", $note, \PDO::PARAM_STR);
+                        $command->execute();
+                    }
+                }
+                $transaction->commit();
+                $result = ['success' => false, 'alert' => [
+                        'class' => 'success-fk',
+                        'title' => 'Сохранено',
+                        'body' => 'Каталог был успешно обновлен']];
+                return $result;
+                exit;
+            } catch (Exception $e) {
+                $transaction->rollback();
+                $result = ['success' => false, 'alert' => [
+                        'class' => 'danger-fk',
+                        'title' => 'Ошибка сохранения',
+                        'body' => 'Пожалуйста, повторите попытку сохранения']];
+                return $result;
+                exit;
+            }
+            //$message =  'Успех';   
+            //return $this->renderAjax('suppliers/_success', ['message' => $message]);
+        }
+        $sql = "SELECT "
+                . "catalog.id as catalog_id,"
+                . "catalog_base_goods.id as goods_base_id,"
+                . "article,"
+                . "product,"
+                . "units,"
+                . "ed,"
+                . "catalog_base_goods.price,"
+                . "goods_notes.note"
+                . " FROM `catalog` "
+                . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
+                . "LEFT JOIN goods_notes on catalog_base_goods.id = goods_notes.catalog_base_goods_id "
+                . "WHERE catalog.id = $id";
+        $arr = \Yii::$app->db->createCommand($sql)->queryAll();
+        $array = [];
+        foreach ($arr as $arrs) {
+            $c_catalog_id = $arrs['catalog_id'];
+            $c_goods_base_id = $arrs['goods_base_id'];
+            $c_article = $arrs['article'];
+            $c_product = $arrs['product'];
+            $c_units = $arrs['units'];
+            $c_ed = $arrs['ed'];
+            $c_price = $arrs['price'];
+            $c_note = $arrs['note'];
+            array_push($array, [
+                'catalog_id' => $c_catalog_id,
+                'goods_base_id' => $c_goods_base_id,
+                'article' => $c_article,
+                'product' => $c_product,
+                'units' => $c_units,
+                'ed' => $c_ed,
+                'price' => $c_price,
+                'note' => $c_note]);
+        }
+
+        return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array'));
+    }
+
+    public function actionRemoveSupplier($id) {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
+        \Yii::$app->db->createCommand($sql)->execute();
     }
 
     public function actionMessages() {
@@ -651,17 +874,21 @@ class ClientController extends DefaultController {
 
         $header_info_zakaz = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id])->count();
+        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
         $header_info_suppliers = \common\models\RelationSuppRest::find()->
                         where(['rest_org_id' => $currentUser->organization_id, 'invite' => RelationSuppRest::INVITE_ON])->count();
+        empty($header_info_suppliers) ? $header_info_suppliers = 0 : $header_info_suppliers = (int)$header_info_suppliers;
         $header_info_purchases = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
+        empty($header_info_purchases) ? $header_info_purchases = 0 : $header_info_purchases = (int)$header_info_purchases;
         $header_info_items = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
                         where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-
+        empty($header_info_items) ? $header_info_items = 0 : $header_info_items = (int)$header_info_items;
         $filter_get_supplier = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('supp_org_id')->
                                     where(['rest_org_id' => $currentUser->organization_id, 'invite' => '1'])])->all(), 'id', 'name');
+
         $filter_get_employee = yii\helpers\ArrayHelper::map(\common\models\Profile::find()->
                                 where(['in', 'user_id', \common\models\User::find()->
                                     select('id')->
@@ -829,13 +1056,12 @@ class ClientController extends DefaultController {
          * Поставщики
          * 
          */
-        $searchString="";
+        $searchString = "";
         $where = "";
         if (Yii::$app->request->isAjax) {
-                $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-                
-                empty($searchString)?"":$where .= " and name LIKE :name";
-                        
+            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+
+            empty($searchString) ? "" : $where .= " and name LIKE :name";
         }
         $sql = "SELECT supp_org_id, name FROM `relation_supp_rest` join `organization`
 on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
@@ -843,9 +1069,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $query = \Yii::$app->db->createCommand($sql);
         $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM `relation_supp_rest` join `organization`
 on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
-                . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where", 
-                    [':name' => $searchString])->queryScalar();
-        
+                        . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where", [':name' => $searchString])->queryScalar();
+
         $suppliers_dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -854,7 +1079,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 'pageSize' => 4,
             ],
         ]);
-        
+
         /*
          * 
          * Поставщики END
@@ -931,17 +1156,19 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                                 'dataProvider', 'suppliers_dataProvider', 'chart_dates', 'chart_price'
         ));
     }
+
     public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $step = $currentUser->organization->step;
         $user = new User;
         $profile = new Profile;
         $relationCategory = new RelationCategory;
         $organization = new Organization;
-        $searchString="";
+        $searchString = "";
         $where = "";
         if (Yii::$app->request->isAjax) {
-                $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-                empty($searchString)?"":$where .= " and organization.name LIKE :name";
+            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+            empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";
         }
         $query = Yii::$app->db->createCommand("SELECT 
             relation_supp_rest.id,
@@ -961,11 +1188,10 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
                 . "WHERE rest_org_id = " . $currentUser->organization_id . " $where");
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM "
-                . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
-                . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
-                . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`", 
-                    [':name' => $searchString])->queryScalar();
+                        . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
+                        . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
+                        . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
+                        . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`", [':name' => $searchString])->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -990,12 +1216,13 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 ]
             ],
         ]);
-        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "searchString", "dataProvider"));
-    
+        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "searchString", "dataProvider", "step"));
     }
+
     public function actionSidebar() {
-        Yii::$app->session->get('sidebar-collapse')?
-        Yii::$app->session->set('sidebar-collapse', false):
-        Yii::$app->session->set('sidebar-collapse', true);    
+        Yii::$app->session->get('sidebar-collapse') ?
+                        Yii::$app->session->set('sidebar-collapse', false) :
+                        Yii::$app->session->set('sidebar-collapse', true);
     }
+
 }

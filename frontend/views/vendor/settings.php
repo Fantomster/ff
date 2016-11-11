@@ -16,14 +16,16 @@ $this->registerJs(
         });'
 );
 ?>
-<?=
-yii\bootstrap\Alert::widget([
-    'options' => [
-        'class' => 'alert-warning',
-    ],
-    'body' => 'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '
-    . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-]);
+<?php
+if ($organization->step == common\models\Organization::STEP_SET_INFO) {
+    echo yii\bootstrap\Alert::widget([
+        'options' => [
+            'class' => 'alert-warning fade in',
+        ],
+        'body' => 'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '
+        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+    ]);
+}
 ?>
 <section class="content-header">
     <h1>

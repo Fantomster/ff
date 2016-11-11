@@ -16,7 +16,8 @@ use common\models\Organization;
 class UserSearch extends User {
 
     public $role;
-    public $profile;
+    public $full_name;
+    public $phone;
     public $organization;
 
     /**
@@ -32,7 +33,7 @@ class UserSearch extends User {
     public function rules() {
         return [
             [['id', 'status', 'organization_id'], 'integer'],
-            [['email', 'profile', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'organization'], 'safe'],
+            [['email', 'full_name', 'phone', 'role', 'logged_in_ip', 'logged_in_at', 'created_ip', 'created_at', 'updated_at', 'organization'], 'safe'],
         ];
     }
 
@@ -77,9 +78,13 @@ class UserSearch extends User {
             'asc' => ["$roleTable.name" => SORT_ASC],
             'desc' => ["$roleTable.name" => SORT_DESC],
         ];
-        $dataProvider->sort->attributes['profile'] = [
+        $dataProvider->sort->attributes['full_name'] = [
             'asc' => ["$profileTable.full_name" => SORT_ASC],
             'desc' => ["$profileTable.full_name" => SORT_DESC],
+        ];
+        $dataProvider->sort->attributes['phone'] = [
+            'asc' => ["$profileTable.phone" => SORT_ASC],
+            'desc' => ["$profileTable.phone" => SORT_DESC],
         ];
         $dataProvider->sort->attributes['organization'] = [
             'asc' => ["$organizationTable.name" => SORT_ASC],
@@ -96,12 +101,13 @@ class UserSearch extends User {
             'organization_id' => $this->organization_id,
         ]);
 
-        $query->andFilterWhere(['like', 'email', $this->email])
+        $query->andFilterWhere(['like', 'user.email', $this->email])
                 ->andFilterWhere(['like', 'logged_in_ip', $this->logged_in_ip])
                 ->andFilterWhere(['like', 'created_ip', $this->created_ip])
                 ->andFilterWhere(['like', "$roleTable.name", $this->role])
                 ->andFilterWhere(['like', "$organizationTable.name", $this->organization])
-                ->andFilterWhere(['like', "$profileTable.full_name", $this->profile]);
+                ->andFilterWhere(['like', "$profileTable.full_name", $this->full_name])
+                ->andFilterWhere(['like', "$profileTable.phone", $this->phone]);
 
         return $dataProvider;
     }

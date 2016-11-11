@@ -30,6 +30,11 @@ class Organization extends \yii\db\ActiveRecord {
 
     const TYPE_RESTAURANT = 1;
     const TYPE_SUPPLIER = 2;
+    
+    const STEP_OK = 0;
+    const STEP_SET_INFO = 1;
+    const STEP_ADD_VENDOR = 2; //restaurants only
+    const STEP_ADD_CATALOG = 3; //vendors only
 
     /**
      * @inheritdoc
@@ -46,7 +51,7 @@ class Organization extends \yii\db\ActiveRecord {
             ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
             ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
             [['type_id', 'name'], 'required'],
-            [['type_id'], 'integer'],
+            [['type_id', 'step'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -81,7 +86,7 @@ class Organization extends \yii\db\ActiveRecord {
             'address' => 'Адрес',
             'zip_code' => 'Индекс',
             'phone' => 'Телефон',
-            'email' => 'Email',
+            'email' => 'Email организации',
             'website' => 'Веб-сайт',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',

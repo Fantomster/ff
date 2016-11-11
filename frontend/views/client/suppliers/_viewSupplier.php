@@ -26,42 +26,42 @@ $form = ActiveForm::begin([
     <div class="row">
         <div class="col-md-6">
             <?=$userStatus==0?
-                $form->field($organization, 'name')->textInput(['readonly' => true]):
-                $form->field($organization, 'name');//->textInput(['readonly' => true]);
+                $form->field($organization, 'name')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-name']):
+                $form->field($organization, 'name')->textInput(['id' => 'organization-view-supplirs-name']);
             ?>
         </div>
         <div class="col-md-6">
             <?=$userStatus==0?
-                $form->field($organization, 'city')->textInput(['readonly' => true]):
-                $form->field($organization, 'city');//
-            ?>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <?=$userStatus==0?
-                $form->field($organization, 'address')->textInput(['readonly' => true]):
-                $form->field($organization, 'address');
-            ?>
-        </div>
-        <div class="col-md-6">
-            <?=$userStatus==0?
-                $form->field($organization, 'zip_code')->textInput(['readonly' => true]):
-                $form->field($organization, 'zip_code');
+                $form->field($organization, 'city')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-city']):
+                $form->field($organization, 'city')->textInput(['id' => 'organization-view-supplirs-city']);
             ?>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
             <?=$userStatus==0?
-                $form->field($organization, 'phone')->textInput(['readonly' => true]):
-                $form->field($organization, 'phone');
+                $form->field($organization, 'address')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-address']):
+                $form->field($organization, 'address')->textInput(['id' => 'organization-view-supplirs-address']);
             ?>
         </div>
         <div class="col-md-6">
             <?=$userStatus==0?
-                $form->field($organization, 'email')->textInput(['readonly' => true]):
-                $form->field($organization, 'email'); 
+                $form->field($organization, 'zip_code')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-zip_code']):
+                $form->field($organization, 'zip_code')->textInput(['id' => 'organization-view-supplirs-zip_code']);
+            ?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <?=$userStatus==0?
+                $form->field($organization, 'phone')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-phone']):
+                $form->field($organization, 'phone')->textInput(['id' => 'organization-view-supplirs-phone']);
+            ?>
+        </div>
+        <div class="col-md-6">
+            <?=$userStatus==0?
+                $form->field($organization, 'email')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-email']):
+                $form->field($organization, 'email')->textInput(['id' => 'organization-view-supplirs-email']); 
             ?>
             
         </div>
@@ -69,8 +69,8 @@ $form = ActiveForm::begin([
     <div class="row">
         <div class="col-md-6">
             <?=$userStatus==0?
-                $form->field($organization, 'website')->textInput(['readonly' => true]):
-                $form->field($organization, 'website');
+                $form->field($organization, 'website')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-website']):
+                $form->field($organization, 'website')->textInput(['id' => 'organization-view-supplirs-website']);
             ?>
         </div>
         <div class="col-md-6">

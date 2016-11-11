@@ -96,7 +96,9 @@ class SiteController extends Controller {
         $profile->scenario = 'register';
         $organization = new Organization();
         $organization->scenario = 'register';
-        return $this->render('index', compact("user", "profile", "organization"));
+        $sql = "select rest_count,supp_count from main_counter";
+        $counter = \Yii::$app->db->createCommand($sql)->queryOne();
+        return $this->render('index', compact("user", "profile", "organization", "counter"));
     }
 
     /**

@@ -15,15 +15,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 <?php // echo $this->render('_search', ['model' => $searchModel]);  ?>
-    <?php Pjax::begin(); ?>    <?=
+    <?php Pjax::begin(['enablePushState' => false, 'id' => 'userList', 'timeout' => 3000]); ?>    <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             'id',
             [
-                'attribute' => 'profile',
+                'attribute' => 'full_name',
                 'value' => 'profile.full_name'
+            ],
+            [
+                'attribute' => 'phone',
+                'value' => 'profile.phone',
             ],
             'status',
             'email',

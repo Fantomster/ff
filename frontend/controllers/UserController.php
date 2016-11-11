@@ -79,9 +79,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 // perform registration
                 $role = $this->module->model("Role");
                 $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
-                $profile->setUser($user->id)->save();
-                $organization->save();
-                $user->setOrganization($organization->id)->save();
+//                $profile->setUser($user->id)->save();
+//                $organization->save();
+//                $user->setOrganization($organization->id)->save();
+                sleep(1);
                 $this->afterRegister($user);
 
                 // set flash

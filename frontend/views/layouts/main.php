@@ -60,22 +60,6 @@ JS;
 JS;
 }
 $this->registerJs($js, \yii\web\View::POS_READY);
-//$js2 = <<<JS2
-//        $('.content').on('submit', function(e) {
-//            e.preventDefault();
-//            alert(1);
-//            var form = $("#register-form");
-//            $.post(
-//                form.attr("action"),
-//                form.serialize()
-//            ).done(result) {
-//                if (result) {
-//                    alert(result);
-//                }
-//            }
-//        });
-//JS2;
-//$this->registerJs($j2, \yii\web\View::POS_READY);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -103,6 +87,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     </head>
     <body>	
 <?php $this->beginBody() ?>
+        <div id="loader-show"></div>
+
         <div class="wrapper">
             <header class="header-nav default <?= $isIndex ? '' : ' dark-bg' ?>" id="menu-fk">
                 <div class="inside__block">

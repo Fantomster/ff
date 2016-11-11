@@ -4,18 +4,29 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\OrganizationType;
 use kartik\select2\Select2;
+use nirvana\showloading\ShowLoadingAsset;
+
+ShowLoadingAsset::register($this);
+$this->registerJs(
+        '$("document").ready(function(){
+            $("#register-form").on("submit", function(e) {
+                $("#loader-show").showLoading();
+            });
+        });'
+);
+$this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
 
 $form = ActiveForm::begin([
-    'id' => 'register-form',
-    'enableAjaxValidation' => true,
-    'action' => yii\helpers\Url::to(['/user/register']),
-    ]);
+            'id' => 'register-form',
+            'enableAjaxValidation' => true,
+            'action' => yii\helpers\Url::to(['/user/register']),
+            'validateOnSubmit' => false,
+        ]);
 ?>
 <div class="form-group">
     <?=
     $form->field($organization, 'type_id')->widget(
-    Select2::className(),
-            [
+            Select2::className(), [
         'model' => $organization,
         'attribute' => 'type_id',
         'hideSearch' => true,
@@ -28,8 +39,8 @@ $form = ActiveForm::begin([
         'pluginOptions' => [
             'allowClear' => false,
         ],
-    ]
-            )->label(false);
+            ]
+    )->label(false);
 //    Select2::widget([
 //        'model' => $organization,
 //        'attribute' => 'type_id',
@@ -79,6 +90,7 @@ $form = ActiveForm::begin([
 </div>
 <?=
 Html::a('Зарегистрироваться', '#', [
+    'id' => 'btnRegister',
     'data' => [
         'method' => 'post',
     ],

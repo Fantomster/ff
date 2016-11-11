@@ -1404,16 +1404,16 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $header_info_zakaz = \common\models\Order::find()->
                         where(['vendor_id' => $currentUser->organization_id])->count();
-        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz;
+        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
         $header_info_clients = \common\models\RelationSuppRest::find()->
                         where(['supp_org_id' => $currentUser->organization_id])->count();
-        empty($header_info_clients) ? $header_info_clients = 0 : $header_info_clients;
+        empty($header_info_clients) ? $header_info_clients = 0 : $header_info_clients = (int)$header_info_clients;
         $header_info_prodaji = \common\models\Order::find()->
                         where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
-        empty($header_info_prodaji) ? $header_info_prodaji = 0 : $header_info_prodaji;
+        empty($header_info_prodaji) ? $header_info_prodaji = 0 : $header_info_prodaji = (int)$header_info_prodaji;
         $header_info_poziciy = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
                         where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-        empty($header_info_poziciy) ? $header_info_poziciy = 0 : $header_info_poziciy;
+        empty($header_info_poziciy) ? $header_info_poziciy = 0 : $header_info_poziciy = (int)$header_info_poziciy;
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('rest_org_id')->

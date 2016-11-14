@@ -11,7 +11,6 @@ use kartik\widgets\TouchSpin;
 
 $this->registerJs(
         '$("document").ready(function(){
-            var timer = null;
             $("#createP").on("change", "#selectedCategory", function(e) {
                 var form = $("#createForm");
                 form.submit();

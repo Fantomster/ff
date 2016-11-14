@@ -26,6 +26,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['full_name'], 'filter', 'filter'=>'\yii\helpers\HtmlPurifier::process'];
         $rules[] = [['phone'], 'string', 'max' => 255];
         $rules[] = [['phone'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
+        $rules[] = [['phone'], 'required', 'on' => 'register', 'message' => 'Пожалуйста, введите свой номер телефона'];
         
 //        //переопределим сообщения валидации быдланским способом
 //        $pos = array_search(['email', 'required'], $rules);

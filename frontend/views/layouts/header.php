@@ -122,6 +122,7 @@ JS;
         var socket;
         var dataEdited = 0;
         var link = '#';
+        var timer = null;
     </script>
 <?php } ?>
 <header class="main-header">

@@ -259,6 +259,12 @@ class ClientController extends DefaultController {
                     exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+               if(count($arrCatalog)>1000){
+               $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                   . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
+               return $result;
+               exit;     
+                }
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -678,6 +684,15 @@ class ClientController extends DefaultController {
                             'body' => 'Каталог пустой']];
                     return $result;
                     exit;
+                }
+                if(count($arrCatalog)>1000){
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'Уведомление',
+                            'body' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                   . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>']];
+                    return $result;
+                    exit;     
                 }
             foreach ($arrCatalog as $arrCatalogs) {
                 $product = trim($arrCatalogs['dataItem']['product']);

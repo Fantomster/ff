@@ -41,36 +41,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     </head>
     <body class="hold-transition skin-blue sidebar-mini">
         <?php $this->beginBody() ?>
-        <div class="wrapper">
-            <!--            <header class="header-nav default dark-bg" id="menu-fk">
-                            <div class="inside__block">
-                                <div class="container-fluid">
-                                    <div class="logo__block">
-                                        <a class="logo__block-icon" href="<?= Yii::$app->homeUrl; ?>"></a>
-                                    </div>
-                                    <div class="phone__block">
-                                        <span class="phone__block-number">
-                                            <span class="glyphicon glyphicon-phone"></span>8-499-404-10-18
-                                        </span>
-                                    </div>
-                                    <div class="nav__block">
-                                        <span id="menu__burger">Меню</span>
-            <?=
-            yii\widgets\Menu::widget([
-                'options' => ['class' => 'nav_menu'],
-                'items' => [
-                    ['label' => 'Главная', 'url' => ['/site/index']],
-                    ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
-                    ['label' => 'о компании', 'url' => ['/site/about']],
-                    ['label' => 'контакты', 'url' => ['/site/contacts']],
-                ]
-            ])
-            ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </header> .header-nav-->
+        <div id="loader-show"></div>
 
+        <div class="wrapper">
             <main class="content">
                 <?= $content ?>
             </main><!-- .content -->

@@ -534,14 +534,20 @@ class VendorController extends DefaultController {
             $objPHPExcel = $objReader->load($path);
 
 
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
+            
                 /* foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) // цикл обходит страницы файла
                   { */
                 $worksheet = $objPHPExcel->getSheet(0);
                 $highestRow = $worksheet->getHighestRow(); // получаем количество строк
                 $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
-
+            if ($highestRow>1000) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций, обратитесь к нам и мы вам поможем'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }    
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                     $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                     $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование

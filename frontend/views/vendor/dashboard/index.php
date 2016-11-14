@@ -62,7 +62,7 @@ $this->registerCss('
                     <div>
                             <small class="stat-label text-bold">Текущий месяц</small>
                             <h2 class="m-xs text-success font-bold  text-bold">
-                            <?=$stats['curMonth']?$stats['curMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                            <?=$stats['curMonth']?(float)$stats['curMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                             </h2>
                     </div>
                     <?php
@@ -74,13 +74,13 @@ $this->registerCss('
                             <div class="col-xs-6">
                                     <small class="stat-label text-bold">Сегодня</small>
                                     <h4 class="text-success">
-                            <?=$stats['curDay']?$stats['curDay'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                            <?=$stats['curDay']?(float)$stats['curDay'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                                     </h4> <!-- <i class="fa fa-level-up text-success"></i> -->
                             </div>
                             <div class="col-xs-6">
                                     <small class="stat-label text-bold">Текущая неделя</small>
                                     <h4 class="text-success">
-                                    <?=$stats['curWeek']?$stats['curWeek'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                                    <?=$stats['curWeek']?(float)$stats['curWeek'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                                     </h4>
                             </div>
                     </div>
@@ -88,13 +88,13 @@ $this->registerCss('
                             <div class="col-xs-6">
                                     <small class="stat-label text-bold"><?=$months[date('n', strtotime(" -1 months"))];?></small>
                                     <h4 class="text-success">
-                                    <?=$stats['lastMonth']?$stats['lastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                                    <?=$stats['lastMonth']?(float)$stats['lastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                                     </h4>
                             </div>
                             <div class="col-xs-6">
                                     <small class="stat-label text-bold"><?=$months[date('n', strtotime(" -2 months"))];?></small>
                                     <h4 class="text-success">
-                                    <?=$stats['TwoLastMonth']?$stats['TwoLastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
+                                    <?=$stats['TwoLastMonth']?(float)$stats['TwoLastMonth'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
                                     </h4>
                             </div>
                     </div>   
@@ -137,7 +137,7 @@ $this->registerCss('
         'format' => 'raw',
         'attribute' => 'total_price',
         'value' => function($data) {
-            return $data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
+            return (float)$data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
         },
         'label' => 'Сумма',
         'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],        

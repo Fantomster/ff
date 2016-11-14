@@ -317,6 +317,7 @@ class OrderController extends DefaultController {
                     $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
                     $this->sendNewOrder($order->vendor);
+                    $this->sendOrderCreated($this->currentUser, $order->vendor, $order->id);
                 }
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
@@ -326,6 +327,7 @@ class OrderController extends DefaultController {
                     $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
                     $this->sendNewOrder($order->vendor);
+                    $this->sendOrderCreated($this->currentUser, $order->vendor, $order->id);
                 }
             }
             $cartCount = $client->getCartCount();
@@ -646,13 +648,13 @@ class OrderController extends DefaultController {
             return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
         }
     }
-    
+
     public function actionAjaxRefreshStats() {
         $organization = $this->currentUser->organization;
         $newOrdersCount = $organization->getNewOrdersCount();
         $unreadMessages = $organization->unreadMessages;
         $unreadNotifications = $organization->unreadNotifications;
-        
+
         $unreadMessagesHtml = '';
         foreach ($unreadMessages as $message) {
             $unreadMessagesHtml .= $this->renderPartial('/order/_header-message', compact('message'));
@@ -661,7 +663,7 @@ class OrderController extends DefaultController {
         foreach ($unreadNotifications as $message) {
             $unreadNotificationsHtml .= $this->renderPartial('/order/_header-message', compact('message'));
         }
-        
+
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return [
             'newOrdersCount' => $newOrdersCount,
@@ -813,7 +815,7 @@ class OrderController extends DefaultController {
 
         return true;
     }
-    
+
     private function successNotify($title) {
         return [
             'success' => true,
@@ -875,19 +877,21 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-//    public function sendOrderCreated($sender, $recipient, $order_id) {
-//        /** @var Mailer $mailer */
-//        /** @var Message $message */
-//        $mailer = Yii::$app->mailer;
-//        // send email
-//        $senderOrg = $sender->organization;
-//        $email = $recipient->email;
-//        $subject = "f-keeper: Создан новый заказ №" . $order_id . "!";
-//        $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->send();
-//    }
+    public function sendOrderCreated($sender, $recipientOrg, $order_id) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $subject = "f-keeper: Создан новый заказ №" . $order_id . "!";
+        foreach ($recipientOrg->users as $recipient) {
+            $email = $recipient->email;
+            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+        }
+    }
 
     public function sendOrderProcessing($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */

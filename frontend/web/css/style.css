@@ -1426,3 +1426,6 @@ a:focus {
 .has-success .select2-container--bootstrap .select2-dropdown, .has-success .select2-container--bootstrap .select2-selection {
     border-color: #ccc !important;
 }
+.loading-indicator {
+    background: url( '../images/preloader.gif') !important;
+}

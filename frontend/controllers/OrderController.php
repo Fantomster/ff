@@ -875,19 +875,19 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    public function sendOrderCanceled($sender, $recipient, $order_id) {
-        /** @var Mailer $mailer */
-        /** @var Message $message */
-        $mailer = Yii::$app->mailer;
-        // send email
-        $senderOrg = $sender->organization;
-        $email = $recipient->email;
-        $subject = "f-keeper: заказ №" . $order_id . " отменен!";
-        $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
-    }
+//    public function sendOrderCreated($sender, $recipient, $order_id) {
+//        /** @var Mailer $mailer */
+//        /** @var Message $message */
+//        $mailer = Yii::$app->mailer;
+//        // send email
+//        $senderOrg = $sender->organization;
+//        $email = $recipient->email;
+//        $subject = "f-keeper: Создан новый заказ №" . $order_id . "!";
+//        $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->send();
+//    }
 
     public function sendOrderProcessing($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */

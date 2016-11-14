@@ -15,7 +15,6 @@ $role = new Role();
 
 $this->registerJs(
         '$("document").ready(function(){
-            var timer = null;
             $(".content").on("change keyup paste cut", "#searchString", function() {
                 if (timer) {
                     clearTimeout(timer);

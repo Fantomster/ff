@@ -6,6 +6,7 @@ use yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
 $newOrdersCount = $user->organization->getNewOrdersCount();
+$newClientCount = $user->organization->getNewClientCount();
 $cartCount = $user->organization->getCartCount();
 ?>
 
@@ -28,7 +29,12 @@ $cartCount = $user->organization->getCartCount();
                         ],
                         ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
-                        ['label' => 'Мои клиенты', 'icon' => 'fa fa-users', 'url' => ['vendor/clients']],
+                        [
+                            'label' => 'Мои клиенты', 
+                            'icon' => 'fa fa-users', 
+                            'url' => ['vendor/clients'],
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newClientCount ? $newClientCount : '').'</span></span></a>',
+                        ],
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
                         //['label' => 'Обучающее видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['vendor/tutorial']],
                         //['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['vendor/events']],

@@ -230,8 +230,8 @@ HTML;
                 'attribute' => 'price',
                 'format'=>'raw',
                 'label'=>'Итого',
-                'value'=>function ($data) { return $data['price']."<i class=\"fa fa-fw fa-rub\"></i>";},
-                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:21%'],
+                'value'=>function ($data) { return (float)$data['price']."<i class=\"fa fa-fw fa-rub\"></i>";},
+                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:25%'],
                 ]
             ];
             ?>

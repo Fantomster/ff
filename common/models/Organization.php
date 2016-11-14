@@ -258,7 +258,23 @@ class Organization extends \yii\db\ActiveRecord {
                 break;
         }
         return $result;
-    } 
+    }
+    
+    public function getNewClientCount() {
+        $result = 0;
+        switch ($this->type_id) {
+            case self::TYPE_RESTAURANT:
+                $result = 0;
+                break;
+            case self::TYPE_SUPPLIER:
+                $result = RelationSuppRest::find()->where([
+                    'supp_org_id' => $this->id, 
+                    'invite' => [RelationSuppRest::INVITE_OFF]]
+                        )->count();
+                break;
+        }
+        return $result;
+    }
     
     public function getEarliestOrderDate() {
         $today = new \DateTime();

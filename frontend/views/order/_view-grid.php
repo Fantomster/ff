@@ -53,13 +53,14 @@ echo GridView::widget([
 ]);
 ?>
 <table class="table dataTable tbl-discount">
-    <tr>
+<!--    <tr>
         <th>
             Стоимость заказа
         </th><td>
             <?= '<b>' . 'скоро будет' . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
         </td>
-    </tr><tr>
+    </tr>-->
+    <tr>
         <th>
             <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>
         </th><td>

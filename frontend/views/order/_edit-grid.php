@@ -114,13 +114,14 @@ echo GridView::widget([
                     //editable discount
                     ?>
                     <table class="table table-bordered table-striped dataTable tbl-discount">
-                        <tr>
+<!--                        <tr>
                             <th>
                                 Стоимость заказа
                             </th><td>
                                 <?= '<b>' . 'скоро будет' . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
                             </td>
-                        </tr><tr>
+                        </tr>-->
+                        <tr>
                             <th>
                                 <?= $form->field($order, 'discount_type')->dropDownList($discountTypes)->label(false) ?>
                             </th><td>
@@ -145,13 +146,14 @@ echo GridView::widget([
                     //show discount
                     ?>
                     <table class="table dataTable tbl-discount">
-                        <tr>
+<!--                        <tr>
                             <th>
                                 Стоимость заказа
                             </th><td>
                                 <?= '<b>' . 'скоро будет' . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
                             </td>
-                        </tr><tr>
+                        </tr>-->
+                        <tr>
                             <th>
                                 <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>
                             </th><td>

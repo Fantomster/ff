@@ -63,7 +63,16 @@ $exportColumns = [
     'value'=>function ($data) { return $data['note']?$data['note']:''; },
     ]
 ]
-?>  
+?>
+<?php 
+Modal::begin([
+   'header'=>'<h4 class="modal-title">Загрузка каталога</h4>',
+   'id'=>'instruction',
+   'size'=>'modal-lg',
+]);
+echo '<iframe style="min-width: 320px;width: 100%;" width="854" height="480" id="video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen></iframe>';
+Modal::end();
+?>
 <section class="content-header">
     <h1>
         <i class="fa fa-list-alt"></i> Главный каталог
@@ -207,22 +216,16 @@ $exportColumns = [
                    '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>',
                    Url::to('@web/upload/template.xlsx'),
                    ['class' => 'btn btn-outline-default btn-sm pull-right','style' => ['margin-right'=>'10px;']]
-               ) ?>   
-               <?php /*
-                   Modal::widget([
-                       'id' => 'info',
-                       'clientOptions' => false,
-                       'size'=>'modal-md',
-                       'toggleButton' => [
-                           'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> <span class="text-label">Инструкция</span>',
-                           'tag' => 'a',
-                           'data-target' => '#info',
-                           'class' => 'btn btn-outline-default btn-sm pull-right',
-                           'href' => Url::to(['#']),
-                           'style' => 'margin-right:10px;',
-                       ],
-                   ]) */
-               ?>
+               ) ?>
+                <?=Html::a('<i class="fa fa-question-circle" aria-hidden="true"></i>', ['#'], [
+                      'class' => 'btn btn-warning btn-sm pull-right',
+                      'style' => 'margin-right:10px;',
+                      'data' => [
+                      'target' => '#instruction',
+                      'toggle' => 'modal',
+                      'backdrop' => 'static',
+                         ],
+                      ]);?>
                 </div>
                 <div class="panel-body">
                     <?php
@@ -593,7 +596,14 @@ $(".del-product").live("click", function(e){
 		console.log('cancel');	
 		}
 	}});      
-})      
+}) 
+var url = $("#video").attr('src');        
+$("#instruction").on('hide.bs.modal', function(){
+$("#video").attr('src', '');
+});
+$("#instruction").on('show.bs.modal', function(){
+$("#video").attr('src', url);
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

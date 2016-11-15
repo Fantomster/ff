@@ -50,6 +50,15 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
     ]);
 }
 ?>
+<?php 
+Modal::begin([
+   'header'=>'<h4 class="modal-title">Загрузка каталога</h4>',
+   'id'=>'instruction',
+   'size'=>'modal-lg',
+]);
+echo '<iframe style="min-width: 320px;width: 100%;" width="854" height="480" id="video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen></iframe>';
+Modal::end();
+?>
 <section class="content-header">
     <h1>
         <i class="fa fa-list-alt"></i> Создание главного каталога
@@ -96,21 +105,15 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
         Url::to('@web/upload/template.xlsx'),
         ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px']]
     ) ?>
-    <?php /* 
-        Modal::widget([
-            'id' => 'info',
-            'clientOptions' => false,
-            'size'=>'modal-md',
-            'toggleButton' => [
-                'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
-                'tag' => 'a',
-                'data-target' => '#info',
-                'class' => 'btn btn-default pull-right',
-                'href' => Url::to(['#']),
-                'style' => 'margin-right:5px;',
-            ],
-        ]) */
-    ?>
+    <?=Html::a('<i class="fa fa-question-circle" aria-hidden="true"></i>', ['#'], [
+                      'class' => 'btn btn-warning btn-sm pull-right',
+                      'style' => 'margin-right:10px;',
+                      'data' => [
+                      'target' => '#instruction',
+                      'toggle' => 'modal',
+                      'backdrop' => 'static',
+                         ],
+                      ]);?>
         </div>
         <div class="panel-body">
             <div class="handsontable" id="CreateCatalog"></div> 
@@ -239,6 +242,13 @@ Handsontable.Dom.addEvent(save, 'click', function() {
 })
 $('#save').click(function(e){	
 e.preventDefault();
+});
+var url = $("#video").attr('src');        
+$("#instruction").on('hide.bs.modal', function(){
+$("#video").attr('src', '');
+});
+$("#instruction").on('show.bs.modal', function(){
+$("#video").attr('src', url);
 });
 JS;
 $this->registerJs($customJs, View::POS_READY);

@@ -103,7 +103,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="registr-block">
                             <div class="registr__block">
-<?= Html::a('вход / регистрация', ["/user/login"]) ?>
+<?= Html::a('вход', ["/user/login"]) ?>
                             </div>
                         </div>
                         <div class="nav__block">
@@ -113,6 +113,7 @@ yii\widgets\Menu::widget([
     'options' => ['class' => 'nav_menu'],
     'items' => [
         ['label' => 'Главная', 'url' => ['/site/index']],
+        ['label' => 'Новости', 'url' => 'http://blog.f-keeper.ru?news'],
         ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
         ['label' => 'о компании', 'url' => ['/site/about']],
         ['label' => 'контакты', 'url' => ['/site/contacts']],
@@ -133,6 +134,7 @@ yii\widgets\Menu::widget([
                             <div class="footer__menu_block">
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
+                                    <li><?= Html::a('Новости', "http://blog.f-keeper.ru?news") ?></li>
                                     <li><?= Html::a('Для ресторанов', ["/site/restaurant"]) ?></li>
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>

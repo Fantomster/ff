@@ -27,9 +27,6 @@ $this->title = 'F-keeper';
             <div class="watch_video">
                 <a href="#" data-toggle="modal" data-target="#myModal2" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
             </div>
-
-
-              
         </div>
     </div>
     <a href="#bottom" class="show__bottom"></a>
@@ -104,7 +101,7 @@ $this->title = 'F-keeper';
                                         <img src="images/rew3.jpg" alt=""/>
                                         <div class="rew__descript">
                                                 <h3>Христо Дечев</h3>
-                                                <span>Основатель: ресторанная сеть Black Smith; ресторан - Djagger; клубы - Гараж, Roxbury.</span>
+                                                <span>Совладелец: Black Smith, Гараж, Шайка Лейка, Азия клуб</span>
                                                 <p>“Я владею несколькими заведениями. Сначала мы внедрили f-keeper в гараж, а далее во все заведения. Это работает, мы пользуемся и желаем удачи в развитии компании f-keeper.”</p>
                                         </div>
                                 </div>

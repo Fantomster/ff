@@ -90,7 +90,8 @@ class OrderController extends DefaultController {
 
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
-        $params = Yii::$app->request->getQueryParams();
+        //$params = Yii::$app->request->getQueryParams();
+        $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
 
         $selectedCategory = null;
         $selectedVendor = null;

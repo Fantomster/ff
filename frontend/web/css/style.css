@@ -853,7 +853,7 @@ a:focus {
 .form-control {
     border-color: #b7beb5 !important;
     height: 46px !important;
-    color: #a5a8a4 !important;
+    color: #3f3e3e !important;
     opacity: 1 !important;
     appearance: none!important;
     /*for WebKit*/

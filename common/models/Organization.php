@@ -351,6 +351,16 @@ class Organization extends \yii\db\ActiveRecord {
 //                ->all();
     }
     
+    public function setMessagesRead() {
+        $sql = "UPDATE `order_chat` SET `viewed` = 1 WHERE (`recipient_id`=$this->id) AND (`is_system`=0)";
+        Yii::$app->db->createCommand($sql)->execute();
+    }
+    
+    public function setNotificationsRead() {
+        $sql = "UPDATE `order_chat` SET `viewed` = 1 WHERE (`recipient_id`=$this->id) AND (`is_system`=1)";
+        Yii::$app->db->createCommand($sql)->execute();
+    }
+    
     /**
      * @return array
      */

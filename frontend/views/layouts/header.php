@@ -19,8 +19,26 @@ if (!Yii::$app->user->isGuest) {
     $unreadNotifications = $organization->unreadNotifications;
     $js = <<<JS
 
-   socket = io.connect('$notificationsUrl');
+    socket = io.connect('$notificationsUrl');
 
+    function refreshMenu(result) {
+        if (result.unreadMessagesCount > 0) {
+            $(".unread-messages-count").show();
+        } else {
+            $(".unread-messages-count").hide();
+        }
+        if (result.unreadNotificationsCount > 0) {
+            $(".unread-notifications-count").show();
+        } else {
+            $(".unread-notifications-count").hide();
+        }
+        $(".unread-messages-count").html(result.unreadMessagesCount);
+        $(".unread-notifications-count").html(result.unreadNotificationsCount);
+        $(".new-orders-count").html(result.newOrdersCount);
+        $(".unread-messages").html(result.unreadMessages);
+        $(".unread-notifications").html(result.unreadNotifications);
+    }
+            
    socket.on('connect', function(){
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});
     });
@@ -66,55 +84,48 @@ if (!Yii::$app->user->isGuest) {
         $.get(
             '$refreshStatsUrl'
         ).done(function(result) {
-            if (result.unreadMessagesCount > 0) {
-                $(".unread-messages-count").show();
-            } else {
-                $(".unread-messages-count").hide();
-            }
-            if (result.unreadNotificationsCount > 0) {
-                $(".unread-notifications-count").show();
-            } else {
-                $(".unread-notifications-count").hide();
-            }
-            $(".unread-messages-count").html(result.unreadMessagesCount);
-            $(".unread-notifications-count").html(result.unreadNotificationsCount);
-            $(".new-orders-count").html(result.newOrdersCount);
-            $(".unread-messages").html(result.unreadMessages);
-            $(".unread-notifications").html(result.unreadNotifications);
+            refreshMenu(result);
         });
-            
-
     });
         
-$('#chat-form').submit(function() {
+    $('#chat-form').submit(function() {
 
-     var form = $(this);
+         var form = $(this);
 
-     $.ajax({
-          url: form.attr('action'),
-          type: 'post',
-          data: form.serialize(),
-          success: function (response) {
-               $("#message-field").val("");
-          }
-     });
+         $.ajax({
+              url: form.attr('action'),
+              type: 'post',
+              data: form.serialize(),
+              success: function (response) {
+                   $("#message-field").val("");
+              }
+         });
 
-     return false;
-});
+         return false;
+    });
+
+    $(document).on("submit", "#inviteForm", function(e) {
+        e.preventDefault();
+        form = $("#inviteForm");
+        $.post(
+            form.attr("action"),
+            form.serialize()
+        ).done(function(result) {
+            $("#email").val('');
+            if (result.success) {
+                $.notify(result.growl.options, result.growl.settings);
+            }
+        });
+    });
             
-            $(document).on("submit", "#inviteForm", function(e) {
-                e.preventDefault();
-                form = $("#inviteForm");
-                $.post(
-                    form.attr("action"),
-                    form.serialize()
-                ).done(function(result) {
-                    $("#email").val('');
-                    if (result.success) {
-                        $.notify(result.growl.options, result.growl.settings);
-                    }
-                });
-            });
+    $(document).on("click", ".setRead", function(e) {
+        e.preventDefault();
+        $.get(
+            '$refreshStatsUrl&setMessagesRead=' + $(this).data("msg") + '&setNotificationsRead=' + $(this).data("ntf")
+        ).done(function(result) {
+            refreshMenu(result);
+        });
+    });
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
@@ -178,6 +189,9 @@ JS;
                                     ?>
                                 </ul>
                             </li>
+                            <li class="footer">
+                                <a href="#" class="setRead" data-msg="1" data-ntf="0">Пометить как прочитанные</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="dropdown messages-menu">
@@ -196,6 +210,9 @@ JS;
                                         }
                                     ?>
                                 </ul>
+                            </li>
+                            <li class="footer">
+                                <a href="#" class="setRead" data-msg="0" data-ntf="1">Пометить как прочитанные</a>
                             </li>
                         </ul>
                     </li>

@@ -650,19 +650,30 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxRefreshStats() {
+    public function actionAjaxRefreshStats($setMessagesRead = 0, $setNotificationsRead = 0) {
         $organization = $this->currentUser->organization;
         $newOrdersCount = $organization->getNewOrdersCount();
-        $unreadMessages = $organization->unreadMessages;
-        $unreadNotifications = $organization->unreadNotifications;
 
         $unreadMessagesHtml = '';
-        foreach ($unreadMessages as $message) {
-            $unreadMessagesHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+        if ($setMessagesRead) {
+            $unreadMessages = [];
+            $organization->setMessagesRead();
+        } else {
+            $unreadMessages = $organization->unreadMessages;
+            foreach ($unreadMessages as $message) {
+                $unreadMessagesHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+            }
         }
+
         $unreadNotificationsHtml = '';
-        foreach ($unreadNotifications as $message) {
-            $unreadNotificationsHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+        if ($setNotificationsRead) {
+            $unreadNotifications = [];
+            $organization->setNotificationsRead();
+        } else {
+            $unreadNotifications = $organization->unreadNotifications;
+            foreach ($unreadNotifications as $message) {
+                $unreadNotificationsHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+            }
         }
 
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;

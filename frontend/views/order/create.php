@@ -42,12 +42,6 @@ $this->registerJs(
                     $("#searchForm").submit();
                 }, 700);
             });
-//            $("#createOrder").on("pjax:complete", function() {
-//                var searchInput = $("#searchString");
-//                var strLength = searchInput.val().length * 2;
-//                searchInput.focus();
-//                searchInput[0].setSelectionRange(strLength, strLength);
-//            });
             $("#orders").on("click", ".delete-position", function(e) {
                 $("#loader-show").showLoading();
                 $.post(
@@ -82,14 +76,6 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
-//            $(document).on("submit", "#searchForm", function(e) {
-//                e.preventDefault();
-//                $("#hiddenSearchString").val($("#searchString").val());
-//                $("#hiddenSelectedCategory").val($("#selectedCategory").val());
-//                $("#hiddenSelectedVendor").val($("#selectedVendor").val());
-//                return false;
-//                //$("#createForm").submit();
-//            });
         });'
 );
 ?>

@@ -32,7 +32,7 @@ class UserSearch extends \common\models\User {
     {
         return [
             [['id', 'role_id', 'status'], 'integer'],
-            [['email', 'profile.full_name', 'role.name', 'organization_id', 'searchString'], 'safe'],
+            [['email', 'profile.full_name', 'profile.phone', 'role.name', 'organization_id', 'searchString'], 'safe'],
         ];
     }
     
@@ -77,7 +77,7 @@ class UserSearch extends \common\models\User {
         ]);
 
         // enable sorting for the related columns
-        $addSortAttributes = ["profile.full_name", "role.name"];
+        $addSortAttributes = ["profile.full_name", "role.name", "profile.phone"];
         foreach ($addSortAttributes as $addSortAttribute) {
             $dataProvider->sort->attributes[$addSortAttribute] = [
                 'asc' => [$addSortAttribute => SORT_ASC],
@@ -91,6 +91,7 @@ class UserSearch extends \common\models\User {
 
         $query->orFilterWhere(['like', 'email', $this->searchString])
             ->orFilterWhere(['like', "profile.full_name", $this->searchString])
+            ->orFilterWhere(['like', "profile.phone", $this->searchString])
             ->orFilterWhere(['like', "role.name", $this->searchString]);
         $query->andFilterWhere([
             'status' => $this->status,

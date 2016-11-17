@@ -73,24 +73,6 @@ $form = ActiveForm::begin([
                 $form->field($organization, 'website')->textInput(['id' => 'organization-view-supplirs-website']);
             ?>
         </div>
-        <div class="col-md-6">
-            <?=$userStatus==0?'':
-                CheckboxX::widget([
-                    'name'=>'resend_email',
-                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>0,
-                    'autoLabel' => true,
-                    'options'=>['id'=>'resend_email'],
-                    'pluginOptions'=>[
-                        'threeState'=>false,
-                        'theme' => 'krajee-flatblue',
-                        'enclosedLabel' => true,
-                        'size'=>'md',
-                        ]
-                ]) . 
-                '<label class="control-label" for="resend_email">Отправить приглашение</label>';
-            ?>
-        </div>
     </div>
     <div class="row">
         <div class="col-md-12">

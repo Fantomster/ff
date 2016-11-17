@@ -523,8 +523,8 @@ class ClientController extends DefaultController {
                     $org = $organization->name;
                     $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
-                    
-                    $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW())";
+                    $supp_base_cat_id = Catalog::find()->where(['supp_org_id'=>$get_supp_org_id, 'type'=>1])->one()->id;
+                    $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`,`cat_id`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1,$supp_base_cat_id)";
                     \Yii::$app->db->createCommand($sql)->execute();
                     if(!empty($categorys)){
                         foreach ($categorys as $arrCategorys) {
@@ -570,11 +570,11 @@ class ClientController extends DefaultController {
                             $user->email = $organization->email;
                             $user->save();
                             $currentUser->sendInviteToVendor($user);
-                        } else {
+                        }/* else {
                             if (Yii::$app->request->post('resend_email') == 1) {
                                 $currentUser->sendInviteToVendor($user);
                             }
-                        }
+                        }*/
                     } else {
                         $message = 'Не верно заполнена форма!';
                         return $this->renderAjax('suppliers/_success', ['message' => $message]);

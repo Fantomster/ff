@@ -209,7 +209,7 @@ class Order extends \yii\db\ActiveRecord {
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
             $total_price += $this->vendor->delivery->delivery_charge;
         }
-        $this->total_price = $total_price;
+        $this->total_price = number_format($total_price, 2, '.', '');
         $this->save();
         return $this->total_price;
     }

@@ -162,6 +162,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
             return $this->redirect($returnUrl);
         }
+        
+        if ($model->hasErrors()) {
+            $model->clearErrors();
+            $model->addError('password', 'Вы указали неверную почту или пароль');
+        }
 
         return $this->render('login', compact("model"));
     }

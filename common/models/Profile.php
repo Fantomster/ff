@@ -15,6 +15,7 @@ use yii\helpers\ArrayHelper;
  * @property string $avatar
  * 
  * @property string $avatarUrl
+ * @property string $miniAvatarUrl
  */
 class Profile extends \amnah\yii2\user\models\Profile {
 
@@ -35,6 +36,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
                         'url' => '/upload/temp/',
                         'thumbs' => [
                             'avatar' => ['width' => 90, 'height' => 90, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
+                            'mini' => ['width' => 25, 'height' => 25, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
                         ],
                     ],
         ]);
@@ -72,6 +74,10 @@ class Profile extends \amnah\yii2\user\models\Profile {
      */
     public function getAvatarUrl()
     {
-        return $this->avatar ? $this->getBehavior('avatar')->getThumbUploadUrl('avatar', 'avatar') : self::DEFAULT_AVATAR;
+        return $this->avatar ? $this->getThumbUploadUrl('avatar', 'avatar') : self::DEFAULT_AVATAR;
+    }
+    
+    public function getMiniAvatarUrl() {
+        return $this->avatar ? $this->getThumbUploadUrl('avatar', 'mini') : self::DEFAULT_AVATAR;
     }
 }

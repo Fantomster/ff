@@ -8,6 +8,7 @@ use yii\base\InvalidConfigException;
 use yii\db\BaseActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\imagine\Image;
+use yii\web\UploadedFile;
 
 /**
  * Description of ImageUploadBehavior
@@ -79,9 +80,9 @@ class ImageUploadBehavior extends UploadBehavior {
     protected function beforeUpload()
     {
         parent::beforeUpload();
-        if ($this->createThumbsOnSave) {
-            $this->createThumbs();
-        }
+//        if ($this->createThumbsOnSave) {
+//            $this->createThumbs();
+//        }
     }
 
     /**
@@ -90,9 +91,9 @@ class ImageUploadBehavior extends UploadBehavior {
     protected function afterUpload()
     {
         parent::afterUpload();
-        /*if ($this->createThumbsOnSave) {
+        if ($this->createThumbsOnSave) {
             $this->createThumbs();
-        }*/
+        }
     }
 
     public function isExists($attribute, $profile = 'thumb')
@@ -198,7 +199,7 @@ class ImageUploadBehavior extends UploadBehavior {
     {
         $width = ArrayHelper::getValue($config, 'width');
         $height = ArrayHelper::getValue($config, 'height');
-        $quality = ArrayHelper::getValue($config, 'quality', 100);
+        $quality = ArrayHelper::getValue($config, 'quality', 95);
         $mode = ArrayHelper::getValue($config, 'mode', ManipulatorInterface::THUMBNAIL_INSET);
 
         if (!$width || !$height) {

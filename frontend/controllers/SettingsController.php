@@ -25,14 +25,17 @@ class SettingsController extends DefaultController {
 
         if ($loadedPost && $profile->validate() && isset($profile->dirtyAttributes['avatar']) && $profile->avatar) {
             $profile->save();
-//            Yii::$app->session->setFlash('success', Yii::t('app', 'Avatar successfully changed.'));
-            if (!Yii::$app->request->isPjax) {
-                return $this->refresh();
-            }
+            Yii::$app->session->setFlash('success', 'Аватар изменен!');
         }
 
-        //if (Yii::$app->request->isAjax) {
-            return $this->renderAjax('/settings/user/_change-avatar', compact('profile'));
-        //} 
+        return $this->renderAjax('/settings/user/_change-avatar', compact('profile'));
+    }
+    
+    public function actionAjaxDeleteAvatar() {
+        $profile = $this->currentUser->profile;
+        $profile->avatar = 'delete';
+        if ($profile->save()) {
+            return $profile->avatarUrl;
+        }
     }
 }

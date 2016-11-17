@@ -33,6 +33,10 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      */
     protected $_file;    
     
+    protected $_oldValue;
+    
+    protected $_deleting = false;
+    
     /**
      * @inheritdoc
      */
@@ -78,7 +82,11 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
         if (in_array($model->scenario, $this->scenarios)) {
-            if ($this->_file instanceof UploadedFile) {
+            if ($model->getAttribute($this->attribute) == 'delete') {
+                $this->delete($this->attribute, true);
+                $this->_deleting = true;
+                $model->setAttribute($this->attribute, null);
+            } elseif ($this->_file instanceof UploadedFile) {
                 if (!$model->getIsNewRecord() && $model->isAttributeChanged($this->attribute)) {
                     if ($this->unlinkOnSave === true) {
                         $this->delete($this->attribute, true);
@@ -104,14 +112,24 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      */
     public function afterSave()
     {
-        if ($this->_file instanceof UploadedFile) {
+        /** @var BaseActiveRecord $model */
+        $model = $this->owner;
+        $value = $model->getAttribute($this->attribute);
+
+        if (!$this->_deleting && ($this->_file instanceof UploadedFile)) {
             $path = $this->getUploadPath($this->attribute);
-            if (is_string($path) && FileHelper::createDirectory(dirname($path))) {
+            if (is_string($path)) {
+                $this->beforeUpload();
                 $this->save($this->_file, $path);
+                $this->owner->setAttribute($this->attribute, $this->_file->name);
                 $this->afterUpload();
             } else {
                 throw new InvalidParamException("Directory specified in 'path' attribute doesn't exist or cannot be created.");
             }
+        }
+
+        if (!$this->_deleting && empty($value)) {
+            $model->setAttribute($this->attribute, $this->_oldValue);
         }
     }
     

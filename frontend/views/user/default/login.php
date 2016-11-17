@@ -15,7 +15,11 @@ $this->title = Yii::t('user', 'Login');
         <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-inner.png" alt=""/></a>
         <div class="contact__form">
             <?php
-            $form = ActiveForm::begin(['id' => 'login-form']);
+            $form = ActiveForm::begin([
+                        'id' => 'login-form',
+                        'enableAjaxValidation' => false,
+                        'validateOnSubmit' => false,
+            ]);
             ?>
             <div class="form-group">
                 <?=
@@ -39,11 +43,11 @@ $this->title = Yii::t('user', 'Login');
             ?>
             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
             <div class="regist">
-            <?= Html::a(Yii::t("user", "Register"), ["/user/register"]) ?>
-            <?= Html::a(Yii::t("user", "Forgot password") . "?", ["/user/forgot"]) ?>
-            <?= Html::a(Yii::t("user", "Resend confirmation email"), ["/user/resend"], ["class" => "small-login"]) ?>
+                <?= Html::a(Yii::t("user", "Register"), ["/user/register"]) ?>
+                <?= Html::a(Yii::t("user", "Forgot password") . "?", ["/user/forgot"]) ?>
+                <?= Html::a(Yii::t("user", "Resend confirmation email"), ["/user/resend"], ["class" => "small-login"]) ?>
             </div>
-<?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
         </div>
     </div>
 

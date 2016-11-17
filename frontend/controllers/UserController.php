@@ -27,16 +27,29 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      */
     public function behaviors() {
         $behaviors = parent::behaviors();
-        $behaviors['access']['rules'][] = [
-            'actions' => ['accept-restaurants-invite'],
-            'allow' => true,
-            'roles' => ['?'],
+
+        $behaviors['access']['rules'] = [
+            [
+                'actions' => ['confirm', 'resend', 'logout'],
+                'allow' => true,
+                'roles' => ['?', '@'],
+            ],
+            [
+                'actions' => ['login', 'register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite'],
+                'allow' => true,
+                'roles' => ['?'],
+            ],
+            [
+                'actions' => ['index', 'profile', 'account', 'cancel', 'resend-change'],
+                'allow' => false,
+            ],
+            [
+                'actions' => ['ajax-invite-friend'],
+                'allow' => true,
+                'roles' => ['@'],
+            ]
         ];
-        $behaviors['access']['rules'][] = [
-            'actions' => ['ajax-invite-friend'],
-            'allow' => true,
-            'roles' => ['@'],
-        ];
+
         $behaviors['access']['denyCallback'] = function($rule, $action) {
             $this->redirect(['/site/index']);
         };
@@ -148,6 +161,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         if ($model->load($post) && $model->validate()) {
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
             return $this->redirect($returnUrl);
+        }
+        
+        if ($model->hasErrors()) {
+            $model->clearErrors();
+            $model->addError('password', 'Вы указали неверную почту или пароль');
         }
 
         return $this->render('login', compact("model"));

@@ -38,3 +38,4 @@ phpunit.phar
 /instant/db.js
 /instant/redisOptions.js
 /instant/npm-debug.log
+/frontend/web/upload/

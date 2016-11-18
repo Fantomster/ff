@@ -79,7 +79,7 @@ class ImageUploadBehavior extends UploadBehavior {
      */
     protected function beforeUpload()
     {
-        parent::beforeUpload();
+        //parent::beforeUpload();
 //        if ($this->createThumbsOnSave) {
 //            $this->createThumbs();
 //        }

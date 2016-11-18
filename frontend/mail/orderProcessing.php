@@ -26,3 +26,6 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
     border-radius: 4px;
     width: 80%;">Заказ №<?= $order_id ?></a>
 </div>
+<div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
+<?= $this->render("_mailGrid", compact("dataProvider")) ?>
+</div>

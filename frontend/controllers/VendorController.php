@@ -624,111 +624,6 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));
     }
 
-    /* ДУБЛЬ
-      public function actionImportToXls($id) {
-      $importModel = new \common\models\upload\UploadForm();
-      if (Yii::$app->request->isPost) {
-      $unique = 'article';
-      $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile');
-      $path = $importModel->upload();
-      $currentUser = User::findIdentity(Yii::$app->user->id);
-      try {
-      $inputFileType = \PHPExcel_IOFactory::identify($path);
-      $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
-      $objPHPExcel = $objReader->load($path);
-      } catch (Exception $ex) {
-      //die('Error');
-      \Yii::$app->setSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
-      }
-
-      $sheet = $objPHPExcel->getSheet(0);
-      $highestRow = $sheet->getHighestRow();
-      $highestColumn = $sheet->getHighestColumn();
-      //импорт таблицы начиная со второй строки
-      $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id,'deleted'=>0])->asArray()->all();
-      $count_array = count($sql_array_products);
-      $arr = [];
-      for ($i = 0; $i < $count_array; $i++) {
-      array_push($arr, $sql_array_products[$i][$unique]);
-      }
-      //var_dump($arr);
-      $transaction = Yii::$app->db->beginTransaction();
-      try
-      {
-      for ($row = 1; $row <= $highestRow; ++$row) {
-
-      $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-      $row_article = trim($rowData[0][0]);
-      $row_product = trim($rowData[0][1]);
-      $row_units = trim($rowData[0][2]);
-      $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $row_units));
-      $row_price = trim($rowData[0][3]);
-      $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
-      $row_ed = trim($rowData[0][4]);
-      $row_note = trim($rowData[0][5]);
-
-      if (!empty($row_article && $row_product && $row_price && $row_ed)) {
-      if(empty($row_units) || $row_units<0){$row_units=0;}
-
-      if (in_array($row_article, $arr)) {
-      $sql = "update {{%catalog_base_goods}} set "
-      . "article=:article,"
-      . "product=:product,"
-      . "units=:units,"
-      . "price=:price,"
-      . "ed=:ed,"
-      . "note=:note"
-      . " where article='{$row_article}' and cat_id=$id";
-      $command = \Yii::$app->db->createCommand($sql);
-      $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
-      $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-      $command->bindParam(":units",$row_units);
-      $command->bindParam(":price",$row_price);
-      $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
-      $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
-      $command->execute();
-      }else{
-      $sql = "insert into {{%catalog_base_goods}}" .
-      "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-      . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
-      . ":cat_id,"
-      . "0,"
-      . $currentUser->organization_id .","
-      . ":article,"
-      . ":product,"
-      . ":units,"
-      . ":price,"
-      . ":ed,"
-      . ":note,"
-      . CatalogBaseGoods::STATUS_ON .","
-      . "NOW())";
-      $command = \Yii::$app->db->createCommand($sql);
-      $command->bindParam(":cat_id",$id,\PDO::PARAM_INT);
-      $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
-      $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-      $command->bindParam(":units",$row_units);
-      $command->bindParam(":price",$row_price);
-      $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
-      $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
-      $command->execute();
-      }
-      }
-      }
-      $transaction->commit();
-      unlink($path);
-      return $this->redirect(['vendor/basecatalog', 'id' => $id]);
-      }
-      catch(Exception $e)
-      {
-      $transaction->rollback();
-      \Yii::$app->setSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
-      }
-
-
-      }
-      return $this->renderAjax('catalogs/_importForm', compact('importModel'));
-      }
-     */
 
     public function actionImportBaseCatalogFromXls() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -799,7 +694,7 @@ class VendorController extends DefaultController {
             //Есть идея через pjax обновлять модальное окно с редиректом при успехе _success.php
             return $this->redirect(['vendor/basecatalog', 'id' => $lastInsert_base_cat_id]);
         }
-        return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
+       return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
     }
 
     public function actionChangestatus() {

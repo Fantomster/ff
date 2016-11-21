@@ -24,8 +24,8 @@ use Yii;
  * 
  * @property User $acceptedBy
  * @property User $createdBy
- * @property string $createdByProfile
- * @property string $acceptedByProfile
+ * @property Profile $createdByProfile
+ * @property Profile $acceptedByProfile
  * @property Organization $client
  * @property Organization $vendor
  * @property OrderContent[] $orderContent

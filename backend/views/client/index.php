@@ -14,58 +14,66 @@ $this->title = 'Users';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
-            'id',
-            [
-                'attribute' => 'full_name',
-                'value' => 'profile.full_name',
-                'label' => 'Полное имя',
-            ],
-            [
-                'attribute' => 'phone',
-                'value' => 'profile.phone',
-                'label' => 'Телефон',
-            ],
-            'status',
-            'email',
-            [
-                'attribute' => 'organization_id',
-                'value' => 'organization_id',
-                'label' => 'Орг ID'
-            ],
-            [
-                'attribute' => 'org_name',
-                'value' => 'organization.name',
-                'label' => 'Название организации',
-            ],
-            [
-                'attribute' => 'org_type_id',
-                'value' => 'organization.type_id',
-                'label' => 'Тип',
-            ],
-            [
-                'attribute' => 'role',
-                'value' => 'role.name',
-                'label' => 'Роль',
-            ],
-            'created_at',
-            'logged_in_at',
-        ];
+    'id',
+    [
+        'format' => 'raw',
+        'attribute' => 'full_name',
+//                'value' => 'profile.full_name',
+        'value' => function ($data) {
+            return Html::a($data['profile']['full_name'], ['client/view', 'id' => $data['id']]);
+        },
+        'label' => 'Полное имя',
+    ],
+    [
+        'attribute' => 'phone',
+        'value' => 'profile.phone',
+        'label' => 'Телефон',
+    ],
+    'status',
+    'email',
+//            [
+//                'attribute' => 'organization_id',
+//                'value' => 'organization_id',
+//                'label' => 'Орг ID'
+//            ],
+    [
+        'format' => 'raw',
+        'attribute' => 'org_name',
+        'value' => function ($data) {
+            return Html::a($data['organization']['name'], ['organization/view', 'id' => $data['organization_id']]);
+        },
+        'label' => 'Название организации',
+    ],
+    [
+        'attribute' => 'org_type_id',
+        'value' => 'organization.type.name',
+        'label' => 'Тип',
+        'filter' => common\models\OrganizationType::getList(),
+    ],
+    [
+        'attribute' => 'role',
+        'value' => 'role.name',
+        'label' => 'Роль',
+    ],
+//            'created_at',
+//            'logged_in_at',
+];
 ?>
 <div class="user-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-<?php 
-echo ExportMenu::widget([
-    'dataProvider' => $dataProvider,
-    'columns' => $gridColumns,
-    'target' => ExportMenu::TARGET_SELF,
-    'exportConfig' => [
-        ExportMenu::FORMAT_PDF => false,
-        ExportMenu::FORMAT_EXCEL_X => false,
-    ],
-]);
-?>
-    <?php Pjax::begin(['enablePushState' => false, 'id' => 'userList', 'timeout' => 3000]); ?>    
+    <?php
+    echo ExportMenu::widget([
+        'dataProvider' => $dataProvider,
+        'columns' => $gridColumns,
+        'target' => ExportMenu::TARGET_SELF,
+        'exportConfig' => [
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_EXCEL_X => false,
+        ],
+    ]);
+    ?>
+    <?php Pjax::begin(['enablePushState' => false, 'id' => 'userList', 'timeout' => 5000]); ?>    
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
@@ -73,4 +81,4 @@ echo ExportMenu::widget([
         'columns' => $gridColumns,
     ]);
     ?>
-<?php Pjax::end(); ?></div>
+    <?php Pjax::end(); ?></div>

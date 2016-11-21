@@ -59,7 +59,11 @@ $gridColumns = [
     ],
 //            'created_by_id',
 //            'accepted_by_id',
-    'status',
+    [
+        'attribute' => 'status',
+        'value' => 'statusText',
+        'filter' => common\models\Order::getStatusList(),
+    ],
     'total_price',
     'created_at',
         // 'updated_at',

@@ -869,7 +869,12 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: измененения в заказе №" . $order_id;
-        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id"))
+        
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+        
+        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
@@ -883,7 +888,12 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " выполнен!";
-        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id"))
+        
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+        
+        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
@@ -896,9 +906,14 @@ class OrderController extends DefaultController {
         // send email
         $senderOrg = $sender->organization;
         $subject = "f-keeper: Создан новый заказ №" . $order_id . "!";
+        
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+        
         foreach ($recipientOrg->users as $recipient) {
             $email = $recipient->email;
-            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id"))
+            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
                     ->setTo($email)
                     ->setSubject($subject)
                     ->send();
@@ -913,7 +928,31 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " подтвержден!";
-        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id"))
+        
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+        
+        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
+    }
+
+    public function sendOrderCanceled($sender, $recipient, $order_id) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $email = $recipient->email;
+        $subject = "f-keeper: заказ №" . $order_id . " отменен!";
+        
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+        
+        $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

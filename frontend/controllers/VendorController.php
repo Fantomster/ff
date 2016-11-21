@@ -534,16 +534,21 @@ class VendorController extends DefaultController {
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
 
-
-            
                 /* foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) // цикл обходит страницы файла
                   { */
                 $worksheet = $objPHPExcel->getSheet(0);
                 $highestRow = $worksheet->getHighestRow(); // получаем количество строк
                 $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
-            if ($highestRow>1000) {
+            $newRows = 0;    
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                    if (!in_array($row_article, $arr)) {
+                    $newRows++;   
+                    }
+            }
+            if ($newRows>1000) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций, обратитесь к нам и мы вам поможем'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }    
@@ -902,7 +907,18 @@ class VendorController extends DefaultController {
 
         return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
     }
+    public function actionAjaxUpdateProductMarketPlace($id) {
+        $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
 
+            
+        }
+
+        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods'));
+    }
+    
     public function actionAjaxCreateProduct() {
         if (Yii::$app->request->isAjax) {
             $catalogBaseGoods = new CatalogBaseGoods();

@@ -131,13 +131,17 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
             ],
             [
             'label'=>'',
-            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;'],
+            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;min-width:174px'],
             'headerOptions' => ['style'=>'text-align:right'],
             'format' => 'raw',
             'value'=>function ($data) {
             $result = "";
-            $data["invite"]==0 ? $result = '' :
-            $result .= $data["cat_id"]==0 ? '' :
+            $data["invite"]==0 ? $result .=Html::tag('span','<i class="fa fa-shopping-cart m-r-xs"></i> Заказ',[
+                    'class'=>'btn btn-success btn-sm',
+                    'disabled' =>'disabled']) :
+            $result .= $data["cat_id"]==0 ? $result .=Html::tag('span','<i class="fa fa-shopping-cart m-r-xs"></i> Заказ',[
+                    'class'=>'btn btn-success btn-sm',
+                    'disabled' =>'disabled']) :
             Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
                 'OrderCatalogSearch[selectedCategory]'=>"",
@@ -146,8 +150,12 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                     'class'=>'btn btn-success btn-sm',
                     'data-pjax'=>0,
                   ]);
-            $data["invite"]==0 ? $result .= '' :
-            $result .= $data["cat_id"]==0 ? '' :
+            $data["invite"]==0 ? $result .=Html::tag('span','<i class="fa fa-eye m-r-xs"></i>',[
+                    'class'=>'btn btn-default btn-sm',
+                    'disabled' =>'disabled']) :
+            $result .= $data["cat_id"]==0 ? $result .=Html::tag('span','<i class="fa fa-eye m-r-xs"></i>',[
+                    'class'=>'btn btn-default btn-sm',
+                    'disabled' =>'disabled']) :
                 $data["status_invite"]==2 ?
                 Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
                 'class'=>'btn btn-default btn-sm',
@@ -172,8 +180,10 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                 $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
                 'id'=>$data["supp_org_id"],
                 ],[
-                    'class'=>'btn btn-default btn-sm resend-invite',
-                    'data-pjax'=>0,]):'';
+                    'class'=>'btn btn-default btn-sm',
+                    'data-pjax'=>0,]): $result .=Html::tag('span','<i class="fa fa-envelope m-r-xs"></i>',[
+                    'class'=>'btn btn-default btn-sm',
+                    'disabled' =>'disabled']);
                 
                 $result .= Html::a('<i class="fa fa-trash m-r-xs"></i>', ['client/remove-supplier',
                 'id'=>$data["supp_org_id"],
@@ -455,7 +465,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            $('#profile-full_name,#organization-name').removeAttr('readonly');
                             console.log('type = 5');    
 	                }
-                        // форма передана не ajax (лочим все кнопки)	
+                        // 
 	                if(response.eventType==6){
 		        var fio = response.fio;
                         var organization = response.organization;
@@ -464,7 +474,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                $('#addProduct').addClass('hide');
 	                $('#inviteSupplier').removeClass('hide');
 		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').removeAttr('disabled');
+                            $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
 		            console.log('type = 6');    
 	                }
                 }else{

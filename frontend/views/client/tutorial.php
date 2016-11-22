@@ -40,9 +40,10 @@ Breadcrumbs::widget([
                         <h3 class="timeline-header">Загрузка главного каталога</h3>
 
                         <div class="timeline-body">
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
+                            <div>
+                                <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
                             </div>
+                            Описание блеать
                         </div>
                     </div>
                 </li>
@@ -55,8 +56,8 @@ Breadcrumbs::widget([
                         <h3 class="timeline-header">Загрузка чего-то там еще</h3>
 
                         <div class="timeline-body">
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
+                            <div>
+                                <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
                             </div>
                         </div>
                     </div>
@@ -77,8 +78,8 @@ Breadcrumbs::widget([
                         <h3 class="timeline-header">Оформление заказа</h3>
 
                         <div class="timeline-body">
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
+                            <div>
+                                <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
                             </div>
                         </div>
                     </div>
@@ -92,8 +93,8 @@ Breadcrumbs::widget([
                         <h3 class="timeline-header">История заказов</h3>
 
                         <div class="timeline-body">
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
+                            <div>
+                                <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/tMWkeBIohBs" frameborder="0" allowfullscreen=""></iframe>
                             </div>
                         </div>
                     </div>

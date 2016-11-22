@@ -57,7 +57,7 @@ class DefaultController extends Controller {
 //                        return $this->redirect(['vendor/catalogs']);
 //                    }
                     $isSettings = ($this->id === 'vendor') && ($this->action->id === 'settings');
-                    $isCatalogs = ($this->id === 'vendor') && (($this->action->id === 'catalogs') || ($this->action->id === 'supplier-start-catalog-create') || ($this->action->id === ' import-base-catalog-from-xls'));
+                    $isCatalogs = ($this->id === 'vendor') && (($this->action->id === 'catalogs') || ($this->action->id === 'supplier-start-catalog-create') || ($this->action->id === 'import-base-catalog-from-xls'));
                     if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
                         return $this->redirect(['vendor/settings']);
                     }

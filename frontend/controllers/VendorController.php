@@ -511,7 +511,6 @@ class VendorController extends DefaultController {
     public function actionImportToXls($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
-
         if (Yii::$app->request->isPost) {
             $unique = 'article'; //уникальное поле
             $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
@@ -534,8 +533,6 @@ class VendorController extends DefaultController {
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
 
-                /* foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) // цикл обходит страницы файла
-                  { */
                 $worksheet = $objPHPExcel->getSheet(0);
                 $highestRow = $worksheet->getHighestRow(); // получаем количество строк
                 $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
@@ -609,7 +606,6 @@ class VendorController extends DefaultController {
                         }
                     }
                 }
-                /*  } */
                 $transaction->commit();
                 unlink($path);
                 return $this->redirect(['vendor/basecatalog', 'id' => $id]);
@@ -621,6 +617,7 @@ class VendorController extends DefaultController {
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
             }
         }
+        
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));
     }
 
@@ -695,6 +692,7 @@ class VendorController extends DefaultController {
             return $this->redirect(['vendor/basecatalog', 'id' => $lastInsert_base_cat_id]);
         }
        return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
+       
     }
 
     public function actionChangestatus() {

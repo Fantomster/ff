@@ -77,7 +77,7 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
         '<i class="icon fa fa-save"></i> Сохранить',
         ['#'],
         ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px'],'id'=>'save', 'name'=>'save']
-    ) ?> 
+    ) ?>
     <?php /*=
         Modal::widget([
             'id' => 'importFromXls',

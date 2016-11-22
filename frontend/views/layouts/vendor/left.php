@@ -36,7 +36,7 @@ $cartCount = $user->organization->getCartCount();
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newClientCount ? $newClientCount : '').'</span></span></a>',
                         ],
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
-                        //['label' => 'Обучающие видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['vendor/tutorial']],
+                        ['label' => 'Обучающие видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['vendor/tutorial', 'video' => 'video']],
                         //['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['vendor/events']],
                         ['label' => 'Новости', 'icon' => 'fa fa-newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
                         [

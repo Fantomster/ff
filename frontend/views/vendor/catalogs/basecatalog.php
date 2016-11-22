@@ -73,6 +73,7 @@ Modal::begin([
 echo '<iframe style="min-width: 320px;width: 100%;" width="854" height="480" id="video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen></iframe>';
 Modal::end();
 ?>
+
 <section class="content-header">
     <h1>
         <i class="fa fa-list-alt"></i> Главный каталог

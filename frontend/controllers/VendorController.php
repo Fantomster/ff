@@ -805,19 +805,23 @@ class VendorController extends DefaultController {
     public function actionAjaxUpdateProductMarketPlace($id) {
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $currentOrgName = Organization::getOrganization($currentUser->organization)->name;
+        //$sql = "select * from ";
+        //$currentProfile = \Yii::$app->db->createCommand($sql)->queryOne();
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
 
             
         }
 
-        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods'));
+        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','currentOrgName'));
     }
     
     public function actionAjaxCreateProduct() {
         if (Yii::$app->request->isAjax) {
             $catalogBaseGoods = new CatalogBaseGoods();
             $currentUser = User::findIdentity(Yii::$app->user->id);
+            
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->status = 1;

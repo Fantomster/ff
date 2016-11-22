@@ -624,72 +624,87 @@ class VendorController extends DefaultController {
 
     public function actionImportBaseCatalogFromXls() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $importModel = new \common\models\upload\UploadForm();
+$importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
-            //$unique = \Yii::$app->request->post('importUnique');
-            $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile');
-            $path = $importModel->upload();
-            $currentUser = User::findIdentity(Yii::$app->user->id);
-            try {
-                $inputFileType = \PHPExcel_IOFactory::identify($path);
-                $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
-                $objPHPExcel = $objReader->load($path);
-            } catch (Exception $ex) {
-                die('Error');
-            }
+            
 
-            $sheet = $objPHPExcel->getSheet(0);
-            $highestRow = $sheet->getHighestRow();
-            $highestColumn = $sheet->getHighestColumn();
-            //импорт таблицы начиная со второй строки
-            $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW())";
+            $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
+            $path = $importModel->upload();
+            if (!is_readable($path)) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
+                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }
+            $localFile = \PHPExcel_IOFactory::identify($path);
+            $objReader = \PHPExcel_IOFactory::createReader($localFile);
+            $objPHPExcel = $objReader->load($path);
+
+                $worksheet = $objPHPExcel->getSheet(0);
+                $highestRow = $worksheet->getHighestRow(); // получаем количество строк
+                $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
+            
+            if ($highestRow>1000) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }  
+              
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+	            
+	        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW())";
             \Yii::$app->db->createCommand($sql)->execute();
             $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
-
-
-            for ($row = 2; $row <= $highestRow; ++$row) {
-                $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-                $row_article = trim($rowData[0][0]);
-                $row_product = trim($rowData[0][1]);
-                $row_units = trim($rowData[0][2]);
-                $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $row_units));
-                $row_price = trim($rowData[0][3]);
-                $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
-                $row_ed = trim($rowData[0][4]);
-                $row_note = trim($rowData[0][5]);
-                if (!empty($row_article && $row_product && $row_price && $row_ed)) {
-                    if (empty($row_units) || $row_units < 0) {
-                        $row_units = 'NULL';
+            
+                for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+                    $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
+                    $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
+                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //валюта
+                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); //единица измерения
+                    if (!empty($row_article && $row_product && $row_price && $row_ed)) {
+                        if (empty($row_units) || $row_units < 0) {
+                            $row_units = 0;
+                        }
+                            $sql = "insert into {{%catalog_base_goods}}" .
+                                    "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                                    . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
+                                    . ":cat_id,"
+                                    . "0,"
+                                    . $currentUser->organization_id . ","
+                                    . ":article,"
+                                    . ":product,"
+                                    . ":units,"
+                                    . ":price,"
+                                    . ":ed,"
+                                    . ":note,"
+                                    . CatalogBaseGoods::STATUS_ON . ","
+                                    . "NOW())";
+                            $command = \Yii::$app->db->createCommand($sql);
+                            $command->bindParam(":cat_id", $lastInsert_base_cat_id, \PDO::PARAM_INT);
+                            $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
+                            $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
+                            $command->bindParam(":units", $row_units);
+                            $command->bindParam(":price", $row_price);
+                            $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
+                            $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
+                            $command->execute();
+                        
                     }
-
-                    $sql = "insert into {{%catalog_base_goods}}" .
-                            "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                            . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
-                            . $lastInsert_base_cat_id . ","
-                            . "0,"
-                            . $currentUser->organization_id . ","
-                            . ":article,"
-                            . ":product,"
-                            . ":units,"
-                            . ":price,"
-                            . ":ed,"
-                            . ":note,"
-                            . CatalogBaseGoods::STATUS_ON . ","
-                            . "NOW())";
-                    $command = \Yii::$app->db->createCommand($sql);
-                    $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
-                    $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
-                    $command->bindParam(":units", $row_units);
-                    $command->bindParam(":price", $row_price);
-                    $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
-                    $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
-                    $command->execute();
                 }
+                $transaction->commit();
+                unlink($path);
+                return $this->redirect(['vendor/basecatalog', 'id' => $lastInsert_base_cat_id]);
+            } catch (Exception $e) {
+                unlink($path);
+                $transaction->rollback();
+                Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
+                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
             }
-            unlink($path);
-            //не нашел другого способа как обновить без перезагрузки =(((
-            //Есть идея через pjax обновлять модальное окно с редиректом при успехе _success.php
-            return $this->redirect(['vendor/basecatalog', 'id' => $lastInsert_base_cat_id]);
         }
        return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
        

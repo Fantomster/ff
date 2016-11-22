@@ -1061,6 +1061,10 @@ class ClientController extends DefaultController {
     public function actionTutorial() {
         return $this->render('/site/underConstruction');
     }
+    
+    public function actionTest() {
+        return $this->render('tutorial');
+    }
 
     public function actionSupport() {
         return $this->render('/site/underConstruction');

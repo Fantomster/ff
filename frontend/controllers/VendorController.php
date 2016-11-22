@@ -39,8 +39,11 @@ class VendorController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                'only' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'tutorial'],
                 'rules' => [
+//                    [
+//                        
+//                    ],
                     [
                         'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
                         'allow' => true,
@@ -50,7 +53,7 @@ class VendorController extends DefaultController {
                         ],
                     ],
                     [
-                        'actions' => ['index', 'catalog'],
+                        'actions' => ['index', 'catalog', 'tutorial'],
                         'allow' => true,
                         // Allow suppliers managers
                         'roles' => [
@@ -59,9 +62,9 @@ class VendorController extends DefaultController {
                         ],
                     ],
                 ],
-                'denyCallback' => function($rule, $action) {
-            $this->redirect(Url::to(['/vendor/index']));
-        }
+//                'denyCallback' => function($rule, $action) {
+//            $this->redirect(Url::to(['/vendor/index']));
+//        }
             ],
         ];
     }

@@ -111,6 +111,42 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->render("register", compact("user", "profile", "organization"));
     }
 
+        /**
+     * Confirm email
+     */
+    public function actionConfirm($token)
+    {
+        /** @var \amnah\yii2\user\models\UserToken $userToken */
+        /** @var \amnah\yii2\user\models\User $user */
+
+        // search for userToken
+        $success = false;
+        $email = "";
+        $userToken = $this->module->model("UserToken");
+        $userToken = $userToken::findByToken($token, [$userToken::TYPE_EMAIL_ACTIVATE, $userToken::TYPE_EMAIL_CHANGE]);
+        if ($userToken) {
+
+            // find user and ensure that another user doesn't have that email
+            //   for example, user registered another account before confirming change of email
+            $user = $this->module->model("User");
+            $user = $user::findOne($userToken->user_id);
+            $newEmail = $userToken->data;
+            if ($user->confirm($newEmail)) {
+                $success = true;
+            }
+            if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
+                //send welcome
+                $user->sendWelcome();
+            }
+            // set email and delete token
+            $email = $newEmail ?: $user->email;
+            $userToken->delete();
+        }
+
+        return $this->render("confirm", compact("userToken", "success", "email"));
+    }
+
+    
     /**
      * Accept restaurant's invite
      */

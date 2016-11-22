@@ -44,7 +44,7 @@ class ClientController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers'],
+                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial'],
                 'rules' => [
                     [
                         'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
@@ -55,7 +55,7 @@ class ClientController extends DefaultController {
                         ],
                     ],
                     [
-                        'actions' => ['index', 'suppliers'],
+                        'actions' => ['index', 'suppliers', 'tutorial'],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [

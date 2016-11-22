@@ -147,6 +147,32 @@ class User extends \amnah\yii2\user\models\User {
     }
     
     /**
+     * Send welcome email after confirmation
+     * @param User $client
+     * @return int
+     */
+    public function sendWelcome() {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+		// send email
+        $type = $this->organization->type_id;
+        $name = $this->profile->full_name;
+        $subject = "Добро пожаловать на f-keeper";
+        $result = $mailer->compose('welcome', compact("subject", "type", "name"))
+                ->setTo($this->email)
+                ->setSubject($subject)
+                ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        return $result;
+    }
+    
+    /**
      *  Send confirmation email to your new employee
      *  @param User $user
      *  @return int 

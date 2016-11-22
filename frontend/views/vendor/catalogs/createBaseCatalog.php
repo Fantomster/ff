@@ -70,6 +70,13 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
 </section>
 
 <section class="content">
+<?php if (Yii::$app->session->hasFlash('success')): ?>
+    <div class="alert alert-danger alert-dismissable">
+    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+    <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+    <?= Yii::$app->session->getFlash('success') ?>
+    </div>
+  <?php endif; ?>
 <div class="box box-info">
     <div class="box-body">
         <div class="panel-body">
@@ -77,22 +84,7 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
         '<i class="icon fa fa-save"></i> Сохранить',
         ['#'],
         ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px'],'id'=>'save', 'name'=>'save']
-    ) ?> 
-    <?php /*=
-        Modal::widget([
-            'id' => 'importFromXls',
-            'clientOptions' => false,
-            'size'=>'modal-md',
-            'toggleButton' => [
-                'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
-                'tag' => 'a',
-                'data-target' => '#importFromXls',
-                'class' => 'btn btn-default pull-right importLink',
-                'href' => Url::to(['/vendor/import-base-catalog-from-xls','id' => '']),
-                'style' => 'margin: 0 5px;',
-            ],
-        ]) */
-    ?>
+    ) ?>
     <?= Html::a('<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>', 
             ['/vendor/import-base-catalog-from-xls'], [
                 'data' => [

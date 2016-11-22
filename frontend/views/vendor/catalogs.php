@@ -88,7 +88,7 @@ Modal::begin([
           </div>
                 <div class="box box-info">
             <div class="box-header with-border">
-              <div class="box-title pull-left"> 
+              <div class="box-title pull-left">
                  <?= Html::a('<i class="fa fa-plus-circle"></i> Новый каталог', ['vendor/step-1'],['class'=>'btn btn-md fk-button']) ?>
               </div>
             </div>

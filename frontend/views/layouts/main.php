@@ -60,22 +60,6 @@ JS;
 JS;
 }
 $this->registerJs($js, \yii\web\View::POS_READY);
-//$js2 = <<<JS2
-//        $('.content').on('submit', function(e) {
-//            e.preventDefault();
-//            alert(1);
-//            var form = $("#register-form");
-//            $.post(
-//                form.attr("action"),
-//                form.serialize()
-//            ).done(result) {
-//                if (result) {
-//                    alert(result);
-//                }
-//            }
-//        });
-//JS2;
-//$this->registerJs($j2, \yii\web\View::POS_READY);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -103,6 +87,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     </head>
     <body>	
 <?php $this->beginBody() ?>
+        <div id="loader-show"></div>
+
         <div class="wrapper">
             <header class="header-nav default <?= $isIndex ? '' : ' dark-bg' ?>" id="menu-fk">
                 <div class="inside__block">
@@ -127,6 +113,7 @@ yii\widgets\Menu::widget([
     'options' => ['class' => 'nav_menu'],
     'items' => [
         ['label' => 'Главная', 'url' => ['/site/index']],
+        ['label' => 'Новости', 'url' => 'http://blog.f-keeper.ru?news'],
         ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
         ['label' => 'о компании', 'url' => ['/site/about']],
         ['label' => 'контакты', 'url' => ['/site/contacts']],
@@ -147,6 +134,7 @@ yii\widgets\Menu::widget([
                             <div class="footer__menu_block">
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
+                                    <li><?= Html::a('Новости', "http://blog.f-keeper.ru?news") ?></li>
                                     <li><?= Html::a('Для ресторанов', ["/site/restaurant"]) ?></li>
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>

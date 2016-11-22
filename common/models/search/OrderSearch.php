@@ -6,7 +6,6 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Order;
-use common\models\User;
 use common\models\Organization;
 use common\models\Profile;
 

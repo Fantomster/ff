@@ -15,21 +15,20 @@ $role = new Role();
 
 $this->registerJs(
         '$("document").ready(function(){
-            var timer = null;
             $(".content").on("change keyup paste cut", "#searchString", function() {
                 if (timer) {
                     clearTimeout(timer);
                 }
                 timer = setTimeout(function() {
                     $("#search-form").submit();
-                }, 300);
+                }, 700);
             });
-            $("#users-list").on("pjax:complete", function() {
-                var searchInput = $("#search-string");
-                var strLength = searchInput.val().length * 2;
-                searchInput.focus();
-                searchInput[0].setSelectionRange(strLength, strLength);
-            });
+//            $("#users-list").on("pjax:complete", function() {
+//                var searchInput = $("#search-string");
+//                var strLength = searchInput.val().length * 2;
+//                searchInput.focus();
+//                searchInput[0].setSelectionRange(strLength, strLength);
+//            });
             $(".content").on("click", ".edit", function() {
                 var form = $("#user-form");
                 $.post(
@@ -66,17 +65,16 @@ $this->registerJs(
     ?>
 </section>
 <section class="content">
-        <?php Pjax::begin(['enablePushState' => false, 'id' => 'users-list', 'timeout' => 3000]); ?>
     <div class="box box-info settings">
         <div class="box-header">
         <?php
         $form = ActiveForm::begin([
                     'options' => [
-                        'data-pjax' => true,
+                      //  'data-pjax' => true,
                         'id' => 'search-form',
                         'role' => 'search',
                     ],
-                    'method' => 'get',
+                    //'method' => 'get',
         ]);
         ?>
             <div class="row">
@@ -107,6 +105,7 @@ $this->registerJs(
         </div>
        <div class="box-body no-padding">
         <!--?= Html::button('Добавить пользователя', ['id' => 'add-user', 'class' => 'btn btn-primary']) ?-->
+        <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'users-list', 'timeout' => 5000]); ?>
         <?=
         GridView::widget([
             'dataProvider' => $dataProvider,
@@ -131,6 +130,7 @@ $this->registerJs(
                     },
                         ],
                         'email',
+                        'profile.phone',
                         'role.name',
                         [
                             'attribute' => 'status',
@@ -144,9 +144,9 @@ $this->registerJs(
                     ],
                 ]);
                 ?>
-            </div>
-            </div>
                 <?php Pjax::end(); ?>
+            </div>
+            </div>
             <?php
             Modal::begin([
                 'id' => 'user-edit',

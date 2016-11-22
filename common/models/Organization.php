@@ -258,7 +258,23 @@ class Organization extends \yii\db\ActiveRecord {
                 break;
         }
         return $result;
-    } 
+    }
+    
+    public function getNewClientCount() {
+        $result = 0;
+        switch ($this->type_id) {
+            case self::TYPE_RESTAURANT:
+                $result = 0;
+                break;
+            case self::TYPE_SUPPLIER:
+                $result = RelationSuppRest::find()->where([
+                    'supp_org_id' => $this->id, 
+                    'invite' => [RelationSuppRest::INVITE_OFF]]
+                        )->count();
+                break;
+        }
+        return $result;
+    }
     
     public function getEarliestOrderDate() {
         $today = new \DateTime();
@@ -303,7 +319,7 @@ class Organization extends \yii\db\ActiveRecord {
                 . 'AND ((`order_chat`.`is_system`=0) '
                 . 'AND (`order_chat`.`viewed`=0)) '
                 . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
-                . 'ORDER BY `order_chat`.`created_at`';
+                . 'ORDER BY `order_chat`.`created_at` DESC';
 
         return OrderChat::findBySql($sql)->all();  
 
@@ -325,7 +341,7 @@ class Organization extends \yii\db\ActiveRecord {
                 . 'AND ((`order_chat`.`is_system`=1) '
                 . 'AND (`order_chat`.`viewed`=0)) '
                 . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
-                . 'ORDER BY `order_chat`.`created_at`';
+                . 'ORDER BY `order_chat`.`created_at` DESC';
 
         return OrderChat::findBySql($sql)->all();  
 //        return OrderChat::find()
@@ -333,6 +349,16 @@ class Organization extends \yii\db\ActiveRecord {
 //                ->where('(order.client_id=' . $this->id . ') OR (order.vendor_id=' . $this->id . ')')
 //                ->andWhere(['order_chat.is_system' => 1, 'order_chat.viewed' => 0])
 //                ->all();
+    }
+    
+    public function setMessagesRead() {
+        $sql = "UPDATE `order_chat` SET `viewed` = 1 WHERE (`recipient_id`=$this->id) AND (`is_system`=0)";
+        Yii::$app->db->createCommand($sql)->execute();
+    }
+    
+    public function setNotificationsRead() {
+        $sql = "UPDATE `order_chat` SET `viewed` = 1 WHERE (`recipient_id`=$this->id) AND (`is_system`=1)";
+        Yii::$app->db->createCommand($sql)->execute();
     }
     
     /**

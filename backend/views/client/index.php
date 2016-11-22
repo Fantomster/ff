@@ -1,7 +1,9 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+//use yii\grid\GridView;
+use kartik\grid\GridView;
+use kartik\export\ExportMenu;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -10,50 +12,73 @@ use yii\widgets\Pjax;
 
 $this->title = 'Users';
 $this->params['breadcrumbs'][] = $this->title;
+
+$gridColumns = [
+    'id',
+    [
+        'format' => 'raw',
+        'attribute' => 'full_name',
+//                'value' => 'profile.full_name',
+        'value' => function ($data) {
+            return Html::a($data['profile']['full_name'], ['client/view', 'id' => $data['id']]);
+        },
+        'label' => 'Полное имя',
+    ],
+    [
+        'attribute' => 'phone',
+        'value' => 'profile.phone',
+        'label' => 'Телефон',
+    ],
+    'status',
+    'email',
+//            [
+//                'attribute' => 'organization_id',
+//                'value' => 'organization_id',
+//                'label' => 'Орг ID'
+//            ],
+    [
+        'format' => 'raw',
+        'attribute' => 'org_name',
+        'value' => function ($data) {
+            return Html::a($data['organization']['name'], ['organization/view', 'id' => $data['organization_id']]);
+        },
+        'label' => 'Название организации',
+    ],
+    [
+        'attribute' => 'org_type_id',
+        'value' => 'organization.type.name',
+        'label' => 'Тип',
+        'filter' => common\models\OrganizationType::getList(),
+    ],
+    [
+        'attribute' => 'role',
+        'value' => 'role.name',
+        'label' => 'Роль',
+    ],
+//            'created_at',
+//            'logged_in_at',
+];
 ?>
 <div class="user-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-<?php // echo $this->render('_search', ['model' => $searchModel]);  ?>
-    <?php Pjax::begin(['enablePushState' => false, 'id' => 'userList', 'timeout' => 3000]); ?>    <?=
-    GridView::widget([
+    <?php
+    echo ExportMenu::widget([
         'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            'id',
-            [
-                'attribute' => 'full_name',
-                'value' => 'profile.full_name'
-            ],
-            [
-                'attribute' => 'phone',
-                'value' => 'profile.phone',
-            ],
-            'status',
-            'email',
-            'organization_id',
-            [
-                'attribute' => 'organization',
-                'value' => 'organization.name'
-            ],
-            [
-                'attribute' => 'role',
-                'value' => 'role.name'
-            ],
-            'created_at',
-            'logged_in_at',
-            // 'password',
-            // 'auth_key',
-            // 'access_token',
-            // 'logged_in_ip',
-            // 'logged_in_at',
-            // 'created_ip',
-            // 'created_at',
-            // 'updated_at',
-            // 'banned_at',
-            // 'banned_reason',
-            // 'organization_id',
+        'columns' => $gridColumns,
+        'target' => ExportMenu::TARGET_SELF,
+        'exportConfig' => [
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_EXCEL_X => false,
         ],
     ]);
     ?>
-<?php Pjax::end(); ?></div>
+    <?php Pjax::begin(['enablePushState' => false, 'id' => 'userList', 'timeout' => 5000]); ?>    
+    <?=
+    GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+    ]);
+    ?>
+    <?php Pjax::end(); ?></div>

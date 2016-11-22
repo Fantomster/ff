@@ -6,6 +6,7 @@ use yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
 $newOrdersCount = $user->organization->getNewOrdersCount();
+$newClientCount = $user->organization->getNewClientCount();
 $cartCount = $user->organization->getCartCount();
 ?>
 
@@ -28,10 +29,16 @@ $cartCount = $user->organization->getCartCount();
                         ],
                         ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
-                        ['label' => 'Мои клиенты', 'icon' => 'fa fa-users', 'url' => ['vendor/clients']],
+                        [
+                            'label' => 'Мои клиенты', 
+                            'icon' => 'fa fa-users', 
+                            'url' => ['vendor/clients'],
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">'.($newClientCount ? $newClientCount : '').'</span></span></a>',
+                        ],
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
                         //['label' => 'Обучающее видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['vendor/tutorial']],
                         //['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['vendor/events']],
+                        ['label' => 'Новости', 'icon' => 'fa fa-newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
                         [
                             'label' => 'Настройки',
                             'icon' => 'fa fa-gears',
@@ -53,7 +60,7 @@ $cartCount = $user->organization->getCartCount();
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255); font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
                 <input type="text" class="form-control" placeholder="Email" name="email" id="email">
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-success btn-flat" id="inviteFriend">
+                    <button type="submit" class="btn btn-success btn-flat" id="inviteFriend">
                         <i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i>
                     </button>
                 </span>

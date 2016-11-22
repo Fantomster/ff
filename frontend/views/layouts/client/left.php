@@ -41,6 +41,7 @@ $cartCount = $user->organization->getCartCount();
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['client/analytics'], 'options' => ['class' => 'hidden-xs']],
                         // ['label' => 'Обучающее видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['client/tutorial']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
+                        ['label' => 'Новости', 'icon' => 'fa fa-newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
                         [
                             'label' => 'Настройки',
                             'icon' => 'fa fa-gears',
@@ -61,7 +62,7 @@ $cartCount = $user->organization->getCartCount();
             <div class="input-group input-group-sm" data-toggle="tooltip" data-placement="bottom" title="" style="color: rgb(255, 255, 255);font-size: 20px;" data-original-title="Пригласите партнеров и друзей">
                 <input type="text" class="form-control" placeholder="Email" name="email" id="email">
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-success btn-flat" id="inviteFriend">
+                    <button type="submit" class="btn btn-success btn-flat" id="inviteFriend">
                         <i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i>
                     </button>
                 </span>

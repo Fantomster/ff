@@ -19,8 +19,8 @@
         "yiisoft/yii2-bootstrap": "*",
         "yiisoft/yii2-swiftmailer": "*",
         "amnah/yii2-user": "^5.0",
-        "2amigos/yii2-resource-manager-component": "^0.1.0",
         "kartik-v/yii2-widget-select2": "@dev",
+        "fedemotta/yii2-widget-datatables": "*",
         "bower-asset/bootbox": "~4.3.0",
         "rmrevin/yii2-fontawesome": "~2.15",
         "yiisoft/yii2-redis": "^2.0",
@@ -37,8 +37,10 @@
         "kartik-v/yii2-widgets": "*",
         "kop/yii2-scroll-pager": "dev-master",
         "kartik-v/yii2-field-range": "*",
+        "npm-asset/croppie": "*",
         "yii2assets/yii2-printthis": "^1.0",
-        "skeeks/yii2-assets-auto-compress": "*"
+        "mongosoft/yii2-upload-behavior": "*",
+        "2amigos/yii2-resource-manager-component": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

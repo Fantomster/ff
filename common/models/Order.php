@@ -24,13 +24,14 @@ use Yii;
  * 
  * @property User $acceptedBy
  * @property User $createdBy
- * @property string $createdByProfile
- * @property string $acceptedByProfile
+ * @property Profile $createdByProfile
+ * @property Profile $acceptedByProfile
  * @property Organization $client
  * @property Organization $vendor
  * @property OrderContent[] $orderContent
  * @property OrderChat[] $orderChat
  * @property integer positionCount
+ * @property string $statusText
  */
 class Order extends \yii\db\ActiveRecord {
 
@@ -183,6 +184,23 @@ class Order extends \yii\db\ActiveRecord {
             '2' => 'Скидка (%)',
         ];
     }
+    
+    public function getStatusText() {
+        $statusList = self::getStatusList();
+        return $statusList[$this->status];
+    }
+    
+    public static function getStatusList() {
+        return [
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => 'Ожидает подтверждения поставщика',
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => 'Ожидает подтверждения клиента',
+            Order::STATUS_PROCESSING => 'Выполняется',
+            Order::STATUS_DONE => 'Завершен',
+            Order::STATUS_REJECTED => 'Отклонен поставщиком',
+            Order::STATUS_CANCELLED => 'Отменен клиентом',
+            Order::STATUS_FORMING => 'Формируется',
+        ];
+    }
 
     public function getPositionCount() {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
@@ -209,7 +227,7 @@ class Order extends \yii\db\ActiveRecord {
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
             $total_price += $this->vendor->delivery->delivery_charge;
         }
-        $this->total_price = $total_price;
+        $this->total_price = number_format($total_price, 2, '.', '');
         $this->save();
         return $this->total_price;
     }

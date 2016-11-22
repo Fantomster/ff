@@ -11,13 +11,18 @@ use kartik\widgets\TouchSpin;
 
 $this->registerJs(
         '$("document").ready(function(){
-            var timer = null;
             $("#createP").on("change", "#selectedCategory", function(e) {
-                var form = $("#createForm");
+                var form = $("#searchForm");
                 form.submit();
+                $.post(
+                    "' . Url::to(['/order/ajax-refresh-vendors']) . '",
+                    {"selectedCategory": $(this).val()}
+                ).done(function(result) {
+                    $("#selectedVendor").replaceWith(result);
+                });
             });
             $("#createP").on("change", "#selectedVendor", function(e) {
-                var form = $("#createForm");
+                var form = $("#searchForm");
                 form.submit();
             });
             $("#createP").on("click", ".add-to-cart", function(e) {
@@ -35,18 +40,13 @@ $this->registerJs(
                 });
             });
             $("#createP").on("change keyup paste cut", "#searchString", function() {
+                $("#hiddenSearchString").val($("#searchString").val());
                 if (timer) {
                     clearTimeout(timer);
                 }
                 timer = setTimeout(function() {
-                    $("#createForm").submit();
-                }, 300);
-            });
-            $("#createOrder").on("pjax:complete", function() {
-                var searchInput = $("#searchString");
-                var strLength = searchInput.val().length * 2;
-                searchInput.focus();
-                searchInput[0].setSelectionRange(strLength, strLength);
+                    $("#searchForm").submit();
+                }, 700);
             });
             $("#orders").on("click", ".delete-position", function(e) {
                 $("#loader-show").showLoading();
@@ -111,19 +111,18 @@ $this->registerJs(
                 <!-- /.box-header -->
                 <div class="box-body">    
                     <?php
-                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 3000]);
+//                    echo Html::textInput('OrderCatalogSearch[searchString]', null, [
+//                                        'id' => 'searchString',
+//                                    'class' => 'form-control',
+//                                    'placeholder' => 'Поиск']);
                     $form = ActiveForm::begin([
                                 'options' => [
-                                    'data-pjax' => true,
-                                    'id' => 'createForm',
+                                    'id' => 'searchForm',
                                     'class' => "navbar-form no-padding no-margin",
                                     'role' => 'search',
                                 ],
-                                'method' => 'get',
-                    ]);
-                    ?>
-                    <div>
-                        <?=
+                    ]); ?>
+                        <?= 
                                 $form->field($searchModel, 'searchString', [
                                     'addon' => [
                                         'prepend' => [
@@ -153,6 +152,52 @@ $this->registerJs(
                                 ->label(false)
                         ?>
                         <?php ActiveForm::end(); ?>
+                    <?php
+                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 5000]);
+//                    $form = ActiveForm::begin([
+//                                'options' => [
+//                                    'data-pjax' => true,
+//                                    'id' => 'createForm',
+//                                    'class' => "navbar-form no-padding no-margin",
+//                                    'role' => 'search',
+//                                ],
+//                                'method' => 'get',
+//                    ]);
+                    ?>
+                    <div>
+                        <?= ''
+                            //$form->field($searchModel, 'searchString')->hiddenInput(['id' => 'hiddenSearchString'])->label(false)
+//                                $form->field($searchModel, 'searchString', [
+//                                    'addon' => [
+//                                        'prepend' => [
+//                                            'content' => '<i class="fa fa-search"></i>',
+//                                        ],
+//                                    ],
+//                                    'options' => [
+//                                        'class' => "margin-right-15 form-group",
+//                                    ],
+//                                ])
+//                                ->textInput([
+//                                    'id' => 'searchString',
+//                                    'class' => 'form-control',
+//                                    'placeholder' => 'Поиск'])
+//                                ->label(false)
+                        ?>
+                        <?= ''
+                            //$form->field($searchModel, 'selectedCategory')->hiddenInput(['id' => 'hiddenSelectedCategory'])->label(false)
+//                                $form->field($searchModel, 'selectedCategory')
+//                                ->dropDownList($client->getRestaurantCategories(), [
+//                                    'id' => 'selectedCategory',
+//                                    'class' => 'form-control margin-right-15'])
+//                                ->label(false)
+                        ?>
+                        <?= ''
+                            //$form->field($searchModel, 'selectedVendor')->hiddenInput(['id' => 'hiddenSelectedVendor'])->label(false)
+//                                $form->field($searchModel, 'selectedVendor')
+//                                ->dropDownList($vendors, ['id' => 'selectedVendor'])
+//                                ->label(false)
+                        ?>
+                        <?php //ActiveForm::end(); ?>
                     </div>
                     <div id="products">
                         <?=

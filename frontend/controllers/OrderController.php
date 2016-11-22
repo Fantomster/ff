@@ -90,13 +90,15 @@ class OrderController extends DefaultController {
 
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
-        $params = Yii::$app->request->getQueryParams();
+//        $params = Yii::$app->request->getQueryParams();
+        $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
 
         $selectedCategory = null;
         $selectedVendor = null;
 
         if (isset($params['OrderCatalogSearch'])) {
-            $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
+            $selectedVendor = $params['OrderCatalogSearch']['selectedVendor'];
+            //$selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
             $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }
 
@@ -317,6 +319,7 @@ class OrderController extends DefaultController {
                     $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
                     $this->sendNewOrder($order->vendor);
+                    $this->sendOrderCreated($this->currentUser, $order->vendor, $order->id);
                 }
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
@@ -326,6 +329,7 @@ class OrderController extends DefaultController {
                     $order->created_at = gmdate("Y-m-d H:i:s");
                     $order->save();
                     $this->sendNewOrder($order->vendor);
+                    $this->sendOrderCreated($this->currentUser, $order->vendor, $order->id);
                 }
             }
             $cartCount = $client->getCartCount();
@@ -646,22 +650,42 @@ class OrderController extends DefaultController {
             return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
         }
     }
-    
-    public function actionAjaxRefreshStats() {
+
+    public function actionAjaxRefreshVendors() {
+        if (Yii::$app->request->post()) {
+            $client = $this->currentUser->organization;
+            $selectedCategory = Yii::$app->request->post("selectedCategory");
+            $vendors = $client->getSuppliers($selectedCategory);
+            return \yii\helpers\Html::dropDownList('OrderCatalogSearch[selectedVendor]', null, $vendors, ['id' => 'selectedVendor', "class" => "form-control"]);
+        }
+    }
+
+    public function actionAjaxRefreshStats($setMessagesRead = 0, $setNotificationsRead = 0) {
         $organization = $this->currentUser->organization;
         $newOrdersCount = $organization->getNewOrdersCount();
-        $unreadMessages = $organization->unreadMessages;
-        $unreadNotifications = $organization->unreadNotifications;
-        
+
         $unreadMessagesHtml = '';
-        foreach ($unreadMessages as $message) {
-            $unreadMessagesHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+        if ($setMessagesRead) {
+            $unreadMessages = [];
+            $organization->setMessagesRead();
+        } else {
+            $unreadMessages = $organization->unreadMessages;
+            foreach ($unreadMessages as $message) {
+                $unreadMessagesHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+            }
         }
+
         $unreadNotificationsHtml = '';
-        foreach ($unreadNotifications as $message) {
-            $unreadNotificationsHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+        if ($setNotificationsRead) {
+            $unreadNotifications = [];
+            $organization->setNotificationsRead();
+        } else {
+            $unreadNotifications = $organization->unreadNotifications;
+            foreach ($unreadNotifications as $message) {
+                $unreadNotificationsHtml .= $this->renderPartial('/order/_header-message', compact('message'));
+            }
         }
-        
+
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return [
             'newOrdersCount' => $newOrdersCount,
@@ -813,7 +837,7 @@ class OrderController extends DefaultController {
 
         return true;
     }
-    
+
     private function successNotify($title) {
         return [
             'success' => true,
@@ -855,7 +879,12 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: измененения в заказе №" . $order_id;
-        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id"))
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+
+        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
@@ -869,7 +898,52 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " выполнен!";
-        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id"))
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+
+        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
+    }
+
+    public function sendOrderCreated($sender, $recipientOrg, $order_id) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $subject = "f-keeper: Создан новый заказ №" . $order_id . "!";
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+
+        foreach ($recipientOrg->users as $recipient) {
+            $email = $recipient->email;
+            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+        }
+    }
+
+    public function sendOrderProcessing($sender, $recipient, $order_id) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $email = $recipient->email;
+        $subject = "f-keeper: заказ №" . $order_id . " подтвержден!";
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+
+        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
@@ -883,21 +957,12 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " отменен!";
-        $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
-    }
 
-    public function sendOrderProcessing($sender, $recipient, $order_id) {
-        /** @var Mailer $mailer */
-        /** @var Message $message */
-        $mailer = Yii::$app->mailer;
-        // send email
-        $senderOrg = $sender->organization;
-        $email = $recipient->email;
-        $subject = "f-keeper: заказ №" . $order_id . " подтвержден!";
-        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id"))
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order_id;
+        $dataProvider = $searchModel->search($params);
+
+        $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

@@ -9,19 +9,9 @@ use yii\bootstrap\Modal;
 use kartik\select2\Select2;
 use common\models\Category;
 /* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- * 
- * 3 кнопки [Импорт каталога формата xls / Скачать шаблон][Создать каталог]
- * 1) Импорт - по аналогии скачать функционал с basecatalog
- * 2) Создать каталог - по аналогии с рестораном (графический Эксель)
- * 
- * 2 ations  
- * 1) importBaseCatalog
- * 2) createBaseCatalogStep1
  * 
  */
+$this->title = 'Главный каталог';
 $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;overflow: hidden;}
 .hide{dosplay:none}
@@ -40,6 +30,15 @@ $this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js')
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <?php
+Modal::begin([
+    'id' => 'importFromXls',
+    'clientOptions' => false,
+    'size'=>'modal-lg',
+    ]);
+Modal::end();
+?>
+<?php
+/*
 if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
     echo yii\bootstrap\Alert::widget([
         'options' => [
@@ -48,8 +47,11 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
         'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
         . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
     ]);
-}
+} 
+ */
 ?>
+
+
 <section class="content-header">
     <h1>
         <i class="fa fa-list-alt"></i> Создание главного каталога
@@ -75,42 +77,48 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
         '<i class="icon fa fa-save"></i> Сохранить',
         ['#'],
         ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px'],'id'=>'save', 'name'=>'save']
-    ) ?>
-    <?=
+    ) ?> 
+    <?php /*=
         Modal::widget([
-            'id' => 'importToXls',
+            'id' => 'importFromXls',
             'clientOptions' => false,
             'size'=>'modal-md',
             'toggleButton' => [
-                'label' => '<i class="glyphicon glyphicon-import"></i> Загрузить каталог',
+                'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
                 'tag' => 'a',
-                'data-target' => '#importToXls',
-                'class' => 'btn btn-default pull-right',
-                'href' => Url::to(['/vendor/import-base-catalog-from-xls']),
+                'data-target' => '#importFromXls',
+                'class' => 'btn btn-default pull-right importLink',
+                'href' => Url::to(['/vendor/import-base-catalog-from-xls','id' => '']),
                 'style' => 'margin: 0 5px;',
             ],
-        ])
+        ]) */
+    ?>
+    <?= Html::a('<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>', 
+            ['/vendor/import-base-catalog-from-xls'], [
+                'data' => [
+                'target' => '#importFromXls',
+                'toggle' => 'modal',
+                'backdrop' => 'static',
+                          ],
+                'class'=>'btn btn-default pull-right',
+                'style' => 'margin: 0 5px;',
+
+            ]);
     ?>
     <?= Html::a(
         '<i class="fa fa-list-alt"></i> Скачать шаблон',
         Url::to('@web/upload/template.xlsx'),
         ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px']]
     ) ?>
-    <?php /* 
-        Modal::widget([
-            'id' => 'info',
-            'clientOptions' => false,
-            'size'=>'modal-md',
-            'toggleButton' => [
-                'label' => '<i class="fa fa-question-circle" aria-hidden="true"></i> Инструкция',
-                'tag' => 'a',
-                'data-target' => '#info',
-                'class' => 'btn btn-default pull-right',
-                'href' => Url::to(['#']),
-                'style' => 'margin-right:5px;',
-            ],
-        ]) */
-    ?>
+    <?=Html::a('<i class="fa fa-question-circle" aria-hidden="true"></i>', ['#'], [
+                      'class' => 'btn btn-warning btn-sm pull-right',
+                      'style' => 'margin-right:10px;',
+                      'data' => [
+                      'target' => '#instruction',
+                      'toggle' => 'modal',
+                      'backdrop' => 'static',
+                         ],
+                      ]);?>
         </div>
         <div class="panel-body">
             <div class="handsontable" id="CreateCatalog"></div> 
@@ -118,6 +126,15 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
     </div>
 </div>
 </section>
+<?php 
+Modal::begin([
+   'header'=>'<h4 class="modal-title">Загрузка каталога</h4>',
+   'id'=>'instruction',
+   'size'=>'modal-lg',
+]);
+echo '<iframe style="min-width: 320px;width: 100%;" width="854" height="480" id="video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen></iframe>';
+Modal::end();
+?>
 <?php
 //$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
 $catgrs = \yii\helpers\ArrayHelper::getColumn(common\models\Category::find()->all(), 'name');
@@ -239,6 +256,13 @@ Handsontable.Dom.addEvent(save, 'click', function() {
 })
 $('#save').click(function(e){	
 e.preventDefault();
+});
+var url = $("#video").attr('src');        
+$("#instruction").on('hide.bs.modal', function(){
+$("#video").attr('src', '');
+});
+$("#instruction").on('show.bs.modal', function(){
+$("#video").attr('src', url);
 });
 JS;
 $this->registerJs($customJs, View::POS_READY);

@@ -151,7 +151,7 @@ $this->title = 'Вопросы / ответы';
                         <span class="str"></span>
                     </div>
                     <div class="ser__block collapse" id="collapseExample17">
-                        До 1 ноября для поставщиков, система f-keeper бесплатна.
+                        До 1 января для поставщиков, система f-keeper бесплатна.
                     </div>
                     <div class="quest__block" data-toggle="collapse" data-target="#collapseExample18">
                         Как мне найти новых клиентов в f-keeper?

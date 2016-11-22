@@ -28,6 +28,8 @@ $form = ActiveForm::begin([
 
     <?= $form->field($profile, 'full_name') ?>
 
+    <?= $form->field($profile, 'phone')->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',]) ?>
+
     <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType)) ?>
 
 </div>

@@ -19,6 +19,12 @@ return [
                 ],
             ],
         ],
+        'resourceManager' => [
+            'class' => 'dosamigos\resourcemanager\AmazonS3ResourceManager',
+            'key' => 'AKIAIQWR4FTPYC2CM6QQ',
+            'secret' => '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',
+            'bucket' => 'fkeeper',
+        ],
         'i18n' => [
                         'translations' => [
                                 '*' => [

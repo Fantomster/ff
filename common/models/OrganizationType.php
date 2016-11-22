@@ -68,8 +68,10 @@ class OrganizationType extends \yii\db\ActiveRecord
                 ->asArray()
                 ->all();
 
-        return ArrayHelper::merge(
-                        [null => null], ArrayHelper::map($models, 'id', 'name')
-        );
+        return 
+//        ArrayHelper::merge(
+//                        [null => null], 
+                ArrayHelper::map($models, 'id', 'name');
+       // );
     }
 }

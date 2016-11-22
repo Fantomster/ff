@@ -9,7 +9,7 @@ use yii\web\View;
     'id' => 'import-form',
     'enableAjaxValidation' => false,
     'options' => ['enctype' => 'multipart/form-data'],
-    'action' => Url::toRoute(['vendor/import-base-catalog-from-xls','id'=>Yii::$app->request->get('id')])])
+    'action' => Url::toRoute(['vendor/import-base-catalog-from-xls'])])
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

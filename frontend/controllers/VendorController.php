@@ -94,7 +94,8 @@ class VendorController extends DefaultController {
     public function actionEmployees() {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        $params = Yii::$app->request->getQueryParams();
+        //$params = Yii::$app->request->getQueryParams();
+        $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
@@ -533,15 +534,26 @@ class VendorController extends DefaultController {
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
 
-
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
                 /* foreach ($objPHPExcel->getWorksheetIterator() as $worksheet) // цикл обходит страницы файла
                   { */
                 $worksheet = $objPHPExcel->getSheet(0);
                 $highestRow = $worksheet->getHighestRow(); // получаем количество строк
                 $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
-
+            $newRows = 0;    
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                    if (!in_array($row_article, $arr)) {
+                    $newRows++;   
+                    }
+            }
+            if ($newRows>1000) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }    
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                     $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                     $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
@@ -612,111 +624,6 @@ class VendorController extends DefaultController {
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));
     }
 
-    /* ДУБЛЬ
-      public function actionImportToXls($id) {
-      $importModel = new \common\models\upload\UploadForm();
-      if (Yii::$app->request->isPost) {
-      $unique = 'article';
-      $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile');
-      $path = $importModel->upload();
-      $currentUser = User::findIdentity(Yii::$app->user->id);
-      try {
-      $inputFileType = \PHPExcel_IOFactory::identify($path);
-      $objReader = \PHPExcel_IOFactory::createReader($inputFileType);
-      $objPHPExcel = $objReader->load($path);
-      } catch (Exception $ex) {
-      //die('Error');
-      \Yii::$app->setSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
-      }
-
-      $sheet = $objPHPExcel->getSheet(0);
-      $highestRow = $sheet->getHighestRow();
-      $highestColumn = $sheet->getHighestColumn();
-      //импорт таблицы начиная со второй строки
-      $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id,'deleted'=>0])->asArray()->all();
-      $count_array = count($sql_array_products);
-      $arr = [];
-      for ($i = 0; $i < $count_array; $i++) {
-      array_push($arr, $sql_array_products[$i][$unique]);
-      }
-      //var_dump($arr);
-      $transaction = Yii::$app->db->beginTransaction();
-      try
-      {
-      for ($row = 1; $row <= $highestRow; ++$row) {
-
-      $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
-      $row_article = trim($rowData[0][0]);
-      $row_product = trim($rowData[0][1]);
-      $row_units = trim($rowData[0][2]);
-      $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $row_units));
-      $row_price = trim($rowData[0][3]);
-      $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $row_price));
-      $row_ed = trim($rowData[0][4]);
-      $row_note = trim($rowData[0][5]);
-
-      if (!empty($row_article && $row_product && $row_price && $row_ed)) {
-      if(empty($row_units) || $row_units<0){$row_units=0;}
-
-      if (in_array($row_article, $arr)) {
-      $sql = "update {{%catalog_base_goods}} set "
-      . "article=:article,"
-      . "product=:product,"
-      . "units=:units,"
-      . "price=:price,"
-      . "ed=:ed,"
-      . "note=:note"
-      . " where article='{$row_article}' and cat_id=$id";
-      $command = \Yii::$app->db->createCommand($sql);
-      $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
-      $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-      $command->bindParam(":units",$row_units);
-      $command->bindParam(":price",$row_price);
-      $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
-      $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
-      $command->execute();
-      }else{
-      $sql = "insert into {{%catalog_base_goods}}" .
-      "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-      . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
-      . ":cat_id,"
-      . "0,"
-      . $currentUser->organization_id .","
-      . ":article,"
-      . ":product,"
-      . ":units,"
-      . ":price,"
-      . ":ed,"
-      . ":note,"
-      . CatalogBaseGoods::STATUS_ON .","
-      . "NOW())";
-      $command = \Yii::$app->db->createCommand($sql);
-      $command->bindParam(":cat_id",$id,\PDO::PARAM_INT);
-      $command->bindParam(":article",$row_article,\PDO::PARAM_STR);
-      $command->bindParam(":product",$row_product,\PDO::PARAM_STR);
-      $command->bindParam(":units",$row_units);
-      $command->bindParam(":price",$row_price);
-      $command->bindParam(":ed",$row_ed,\PDO::PARAM_STR);
-      $command->bindParam(":note",$row_note,\PDO::PARAM_STR);
-      $command->execute();
-      }
-      }
-      }
-      $transaction->commit();
-      unlink($path);
-      return $this->redirect(['vendor/basecatalog', 'id' => $id]);
-      }
-      catch(Exception $e)
-      {
-      $transaction->rollback();
-      \Yii::$app->setSession()->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога');
-      }
-
-
-      }
-      return $this->renderAjax('catalogs/_importForm', compact('importModel'));
-      }
-     */
 
     public function actionImportBaseCatalogFromXls() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -787,7 +694,7 @@ class VendorController extends DefaultController {
             //Есть идея через pjax обновлять модальное окно с редиректом при успехе _success.php
             return $this->redirect(['vendor/basecatalog', 'id' => $lastInsert_base_cat_id]);
         }
-        return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
+       return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
     }
 
     public function actionChangestatus() {
@@ -895,11 +802,26 @@ class VendorController extends DefaultController {
 
         return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
     }
+    public function actionAjaxUpdateProductMarketPlace($id) {
+        $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $currentOrgName = Organization::getOrganization($currentUser->organization)->name;
+        //$sql = "select * from ";
+        //$currentProfile = \Yii::$app->db->createCommand($sql)->queryOne();
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
 
+            
+        }
+
+        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','currentOrgName'));
+    }
+    
     public function actionAjaxCreateProduct() {
         if (Yii::$app->request->isAjax) {
             $catalogBaseGoods = new CatalogBaseGoods();
             $currentUser = User::findIdentity(Yii::$app->user->id);
+            
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->status = 1;
@@ -1403,17 +1325,17 @@ class VendorController extends DefaultController {
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $header_info_zakaz = \common\models\Order::find()->
-                        where(['vendor_id' => $currentUser->organization_id])->count();
-        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz;
+                        where(['vendor_id' => $currentUser->organization_id])->count();        
+        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
         $header_info_clients = \common\models\RelationSuppRest::find()->
                         where(['supp_org_id' => $currentUser->organization_id])->count();
-        empty($header_info_clients) ? $header_info_clients = 0 : $header_info_clients;
+        empty($header_info_clients) ? $header_info_clients = 0 : $header_info_clients = (int)$header_info_clients;
         $header_info_prodaji = \common\models\Order::find()->
                         where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
-        empty($header_info_prodaji) ? $header_info_prodaji = 0 : $header_info_prodaji;
+        empty($header_info_prodaji) ? $header_info_prodaji = 0 : $header_info_prodaji = (int)$header_info_prodaji;
         $header_info_poziciy = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
                         where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-        empty($header_info_poziciy) ? $header_info_poziciy = 0 : $header_info_poziciy;
+        empty($header_info_poziciy) ? $header_info_poziciy = 0 : $header_info_poziciy = (int)$header_info_poziciy;
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('rest_org_id')->

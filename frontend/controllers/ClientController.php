@@ -103,7 +103,8 @@ class ClientController extends DefaultController {
     public function actionEmployees() {
         /** @var \common\models\search\UserSearch $searchModel */
         $searchModel = new UserSearch();
-        $params = Yii::$app->request->getQueryParams();
+        //$params = Yii::$app->request->getQueryParams();
+        $params['UserSearch'] = Yii::$app->request->post("UserSearch");
         $this->loadCurrentUser();
         $params['UserSearch']['organization_id'] = $this->currentUser->organization_id;
         $dataProvider = $searchModel->search($params);
@@ -259,6 +260,12 @@ class ClientController extends DefaultController {
                     exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+               if(count($arrCatalog)>1000){
+               $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                   . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
+               return $result;
+               exit;     
+                }
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -337,12 +344,7 @@ class ClientController extends DefaultController {
                             $currentOrganization->step = Organization::STEP_OK;
                             $currentOrganization->save();
                         }
-                        /**
-                         *
-                         * Отправка почты
-                         * 
-                         * */
-                        $currentUser->sendInviteToVendor($user);
+                        
                     } else {
                         //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                         $get_supp_org_id = $check['org_id'];
@@ -379,6 +381,7 @@ class ClientController extends DefaultController {
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
                      *    
                      * */
+                    
                     foreach ($arrCatalog as $arrCatalogs) {
                         $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                         $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -456,6 +459,12 @@ class ClientController extends DefaultController {
                     $relationSuppRest->status = RelationSuppRest::CATALOG_STATUS_ON;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
                     $relationSuppRest->save();
+                    /**
+                         *
+                         * Отправка почты
+                         * 
+                         * */
+                    $currentUser->sendInviteToVendor($user);
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
                         return $result;
@@ -463,6 +472,7 @@ class ClientController extends DefaultController {
                         $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  <strong>' . $email . '</strong>'];
                         return $result;
                     }
+                    
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];
                     return $result;
@@ -514,13 +524,14 @@ class ClientController extends DefaultController {
                     $org = $organization->name;
                     $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
-
-                    $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW())";
+                    $supp_base_cat_id = Catalog::find()->where(['supp_org_id'=>$get_supp_org_id, 'type'=>1])->one()->id;
+                    $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`,`cat_id`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1,$supp_base_cat_id)";
                     \Yii::$app->db->createCommand($sql)->execute();
-
-                    foreach ($categorys as $arrCategorys) {
-                        $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                        \Yii::$app->db->createCommand($sql)->execute();
+                    if(!empty($categorys)){
+                        foreach ($categorys as $arrCategorys) {
+                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+                            \Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
                     $currentOrganization = $currentUser->organization;
@@ -560,11 +571,11 @@ class ClientController extends DefaultController {
                             $user->email = $organization->email;
                             $user->save();
                             $currentUser->sendInviteToVendor($user);
-                        } else {
+                        }/* else {
                             if (Yii::$app->request->post('resend_email') == 1) {
                                 $currentUser->sendInviteToVendor($user);
                             }
-                        }
+                        }*/
                     } else {
                         $message = 'Не верно заполнена форма!';
                         return $this->renderAjax('suppliers/_success', ['message' => $message]);
@@ -667,6 +678,23 @@ class ClientController extends DefaultController {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+            if ($arrCatalog === Array()) {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Каталог пустой']];
+                    return $result;
+                    exit;
+                }
+                if(count($arrCatalog)>1000){
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'Уведомление',
+                            'body' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                   . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>']];
+                    return $result;
+                    exit;     
+                }
             foreach ($arrCatalog as $arrCatalogs) {
                 $product = trim($arrCatalogs['dataItem']['product']);
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -859,6 +887,8 @@ class ClientController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
         \Yii::$app->db->createCommand($sql)->execute();
+        $sql = "delete from relation_category where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
+        \Yii::$app->db->createCommand($sql)->execute();
     }
 
     public function actionMessages() {
@@ -870,16 +900,16 @@ class ClientController extends DefaultController {
 
         $header_info_zakaz = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id])->count();
-        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz;
+        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
         $header_info_suppliers = \common\models\RelationSuppRest::find()->
                         where(['rest_org_id' => $currentUser->organization_id, 'invite' => RelationSuppRest::INVITE_ON])->count();
-        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz;
+        empty($header_info_suppliers) ? $header_info_suppliers = 0 : $header_info_suppliers = (int)$header_info_suppliers;
         $header_info_purchases = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
-        empty($header_info_purchases) ? $header_info_purchases = 0 : $header_info_purchases;
+        empty($header_info_purchases) ? $header_info_purchases = 0 : $header_info_purchases = (int)$header_info_purchases;
         $header_info_items = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
                         where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-        empty($header_info_items) ? $header_info_items = 0 : $header_info_items;
+        empty($header_info_items) ? $header_info_items = 0 : $header_info_items = (int)$header_info_items;
         $filter_get_supplier = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('supp_org_id')->
@@ -1168,7 +1198,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $where = "";
         if (Yii::$app->request->isAjax) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            empty($searchString) ? "" : $where .= " and organization.name LIKE :name";
+            empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";
         }
         $query = Yii::$app->db->createCommand("SELECT 
             relation_supp_rest.id,

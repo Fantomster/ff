@@ -131,13 +131,17 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
             ],
             [
             'label'=>'',
-            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;'],
+            'contentOptions' => ['class'=>'text-right','style' => 'vertical-align:middle;min-width:174px'],
             'headerOptions' => ['style'=>'text-align:right'],
             'format' => 'raw',
             'value'=>function ($data) {
             $result = "";
-            $data["invite"]==0 ? $result = '' :
-            $result .= $data["cat_id"]==0 ? '' :
+            $data["invite"]==0 ? $result .=Html::tag('span','<i class="fa fa-shopping-cart m-r-xs"></i> Заказ',[
+                    'class'=>'btn btn-success btn-sm',
+                    'disabled' =>'disabled']) :
+            $result .= $data["cat_id"]==0 ? $result .=Html::tag('span','<i class="fa fa-shopping-cart m-r-xs"></i> Заказ',[
+                    'class'=>'btn btn-success btn-sm',
+                    'disabled' =>'disabled']) :
             Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
                 'OrderCatalogSearch[selectedCategory]'=>"",
@@ -146,8 +150,12 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                     'class'=>'btn btn-success btn-sm',
                     'data-pjax'=>0,
                   ]);
-            $data["invite"]==0 ? $result .= '' :
-            $result .= $data["cat_id"]==0 ? '' :
+            $data["invite"]==0 ? $result .=Html::tag('span','<i class="fa fa-eye m-r-xs"></i>',[
+                    'class'=>'btn btn-default btn-sm',
+                    'disabled' =>'disabled']) :
+            $result .= $data["cat_id"]==0 ? $result .=Html::tag('span','<i class="fa fa-eye m-r-xs"></i>',[
+                    'class'=>'btn btn-default btn-sm',
+                    'disabled' =>'disabled']) :
                 $data["status_invite"]==2 ?
                 Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
                 'class'=>'btn btn-default btn-sm',
@@ -172,8 +180,10 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
                 $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
                 'id'=>$data["supp_org_id"],
                 ],[
-                    'class'=>'btn btn-default btn-sm resend-invite',
-                    'data-pjax'=>0,]):'';
+                    'class'=>'btn btn-default btn-sm',
+                    'data-pjax'=>0,]): $result .=Html::tag('span','<i class="fa fa-envelope m-r-xs"></i>',[
+                    'class'=>'btn btn-default btn-sm',
+                    'disabled' =>'disabled']);
                 
                 $result .= Html::a('<i class="fa fa-trash m-r-xs"></i>', ['client/remove-supplier',
                 'id'=>$data["supp_org_id"],
@@ -320,11 +330,7 @@ bootbox.dialog({
     },
 });
 }
-$('#profile-full_name').attr('readonly','readonly');
-$('#organization-name').attr('readonly','readonly');
-$('#relationcategory-category_id').attr('disabled','disabled');
-$('.select2-search__field').css('width','100%');
-$('#addProduct').attr('disabled','disabled');
+
 $('#modal_addProduct').on('shown.bs.modal', function() {
 var data = [];
 for ( var i = 0; i < 60; i++ ) {
@@ -376,11 +382,16 @@ $('#modal_addProduct').on('hidden.bs.modal', function (e) {
 /*
 * 1 Поставщик уже есть в списке контактов (лочим все кнопки)
 * 2 Вы уже отправили приглашение этому поставщику, ожидается отклик поставщика (лочим кнопки)
-* 3 Связи не найдено - просто invite (#inviteSupplier)
+* 3 Поставщик еще не авторизован / добавляем каталог
 * 4 Данный email не может быть использован (лочим все кнопки)
 * 5 Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
-* 6 форма передана не ajax (лочим все кнопки)	
+* 6 поставщик авторизован, связи не найдено, invite	
 */
+$('#profile-full_name').attr('readonly','readonly');
+$('#organization-name').attr('readonly','readonly');
+$('#relationcategory-category_id').attr('disabled','disabled');
+$('.select2-search__field').css('width','100%');
+$('#addProduct').attr('disabled','disabled');
 $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute, messages) {	
 	var hasError = messages.length !==0;
     var field = $(attribute.container);
@@ -396,19 +407,21 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
             success: function(response) {
             console.log(response)
                 if(response.success){
-	                if(response.eventType==1){
+                        // Поставщик уже есть в списке контактов (лочим все кнопки)
+	                if(response.eventType==1){ 
 		        var fio = response.fio;
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
 	                $('#organization-name').val(organization); 
 	                $('#addProduct').removeClass('hide');
 	                $('#inviteSupplier').addClass('hide');
+                        $('#addProduct').attr('disabled','disabled');
 		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(organization);    
 	                }
-	                
+	                // Вы уже отправили приглашение этому поставщику, ожидается отклик поставщика (лочим кнопки)
 	                if(response.eventType==2){
 		        var fio = response.fio;
 	                var organization = response.organization;
@@ -416,12 +429,13 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                $('#organization-name').val(organization); 
 	                $('#addProduct').removeClass('hide');
 	                $('#inviteSupplier').addClass('hide');
+                        $('#addProduct').attr('disabled','disabled');
 		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log('type = 2');    
 	                }
-	                
+	                // Связи не найдено - просто invite (#inviteSupplier)
 	                if(response.eventType==3){
 		        var fio = response.fio;
 	                var organization = response.organization;
@@ -429,26 +443,29 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                $('#organization-name').val(organization);  
 		            $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide');
-		            $('#profile-full_name,#organization-name').removeAttr('readonly');
-		            $('#relationcategory-category_id').removeAttr('disabled');
+		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
+		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
                             console.log('type = 3');     
 	                }
-	                
+	                // Данный email не может быть использован (лочим все кнопки)
 	                if(response.eventType==4){
 		            $('#addProduct').removeClass('hide');
-                            $('#inviteSupplier').addClass('hide'); 
+                            $('#inviteSupplier').addClass('hide');
+                            $('#addProduct').attr('disabled','disabled'); 
 		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log('type = 4');  
 	                }
+                        // Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
 	                if(response.eventType==5){
-		            $('#relationcategory-category_id').removeAttr('disabled');
+		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
                             $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
 		            $('#profile-full_name,#organization-name').removeAttr('readonly');
                             console.log('type = 5');    
 	                }
+                        // 
 	                if(response.eventType==6){
 		        var fio = response.fio;
                         var organization = response.organization;
@@ -457,7 +474,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                $('#addProduct').addClass('hide');
 	                $('#inviteSupplier').removeClass('hide');
 		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
-		            $('#relationcategory-category_id').removeAttr('disabled');
+                            $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
 		            console.log('type = 6');    
 	                }
                 }else{

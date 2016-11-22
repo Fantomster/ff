@@ -90,14 +90,15 @@ class OrderController extends DefaultController {
 
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
-        //$params = Yii::$app->request->getQueryParams();
+//        $params = Yii::$app->request->getQueryParams();
         $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
 
         $selectedCategory = null;
         $selectedVendor = null;
 
         if (isset($params['OrderCatalogSearch'])) {
-            $selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
+            $selectedVendor = $params['OrderCatalogSearch']['selectedVendor'];
+            //$selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
             $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }
 
@@ -650,6 +651,15 @@ class OrderController extends DefaultController {
         }
     }
 
+    public function actionAjaxRefreshVendors() {
+        if (Yii::$app->request->post()) {
+            $client = $this->currentUser->organization;
+            $selectedCategory = Yii::$app->request->post("selectedCategory");
+            $vendors = $client->getSuppliers($selectedCategory);
+            return \yii\helpers\Html::dropDownList('OrderCatalogSearch[selectedVendor]', null, $vendors, ['id' => 'selectedVendor', "class" => "form-control"]);
+        }
+    }
+
     public function actionAjaxRefreshStats($setMessagesRead = 0, $setNotificationsRead = 0) {
         $organization = $this->currentUser->organization;
         $newOrdersCount = $organization->getNewOrdersCount();
@@ -869,11 +879,11 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: измененения в заказе №" . $order_id;
-        
+
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
-        
+
         $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -888,11 +898,11 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " выполнен!";
-        
+
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
-        
+
         $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -906,11 +916,11 @@ class OrderController extends DefaultController {
         // send email
         $senderOrg = $sender->organization;
         $subject = "f-keeper: Создан новый заказ №" . $order_id . "!";
-        
+
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
-        
+
         foreach ($recipientOrg->users as $recipient) {
             $email = $recipient->email;
             $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
@@ -928,11 +938,11 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " подтвержден!";
-        
+
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
-        
+
         $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -947,11 +957,11 @@ class OrderController extends DefaultController {
         $senderOrg = $sender->organization;
         $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " отменен!";
-        
+
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
-        
+
         $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)

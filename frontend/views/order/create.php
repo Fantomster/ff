@@ -14,6 +14,12 @@ $this->registerJs(
             $("#createP").on("change", "#selectedCategory", function(e) {
                 var form = $("#searchForm");
                 form.submit();
+                $.post(
+                    "' . Url::to(['/order/ajax-refresh-vendors']) . '",
+                    {"selectedCategory": $(this).val()}
+                ).done(function(result) {
+                    $("#selectedVendor").replaceWith(result);
+                });
             });
             $("#createP").on("change", "#selectedVendor", function(e) {
                 var form = $("#searchForm");

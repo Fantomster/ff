@@ -24,13 +24,14 @@ use Yii;
  * 
  * @property User $acceptedBy
  * @property User $createdBy
- * @property string $createdByProfile
- * @property string $acceptedByProfile
+ * @property Profile $createdByProfile
+ * @property Profile $acceptedByProfile
  * @property Organization $client
  * @property Organization $vendor
  * @property OrderContent[] $orderContent
  * @property OrderChat[] $orderChat
  * @property integer positionCount
+ * @property string $statusText
  */
 class Order extends \yii\db\ActiveRecord {
 
@@ -181,6 +182,23 @@ class Order extends \yii\db\ActiveRecord {
             '' => 'Без скидки',
             '1' => 'Скидка (р)',
             '2' => 'Скидка (%)',
+        ];
+    }
+    
+    public function getStatusText() {
+        $statusList = self::getStatusList();
+        return $statusList[$this->status];
+    }
+    
+    public static function getStatusList() {
+        return [
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => 'Ожидает подтверждения поставщика',
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => 'Ожидает подтверждения клиента',
+            Order::STATUS_PROCESSING => 'Выполняется',
+            Order::STATUS_DONE => 'Завершен',
+            Order::STATUS_REJECTED => 'Отклонен поставщиком',
+            Order::STATUS_CANCELLED => 'Отменен клиентом',
+            Order::STATUS_FORMING => 'Формируется',
         ];
     }
 

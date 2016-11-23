@@ -447,6 +447,8 @@ class OrderController extends DefaultController {
             $this->redirect(['/order/checkout']);
         }
         $organizationType = $user->organization->type_id;
+        $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
+        $message = "";
 
         if (Yii::$app->request->post()) {
             $orderChanged = 0;
@@ -465,9 +467,12 @@ class OrderController extends DefaultController {
                 if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
+                        $ed = isset($product->product->ed) ? ' '.$product->product->ed : '';
+                        $message .= "<br/>изменил количество $product->product_name с $product->quantity".$ed." на $position[quantity]".$ed; 
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
+                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб"; 
                         $product->price = $position['price'];
                     }
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
@@ -489,9 +494,8 @@ class OrderController extends DefaultController {
                 $orderChanged = -1;
             }
             if ($orderChanged < 0) {
-                $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                 $systemMessage = $initiator . ' отменил заказ!';
-                $this->sendSystemMessage($user, $order->id, $systemMessage);
+                $this->sendSystemMessage($user, $order->id, $systemMessage, true);
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
                 }
@@ -502,14 +506,14 @@ class OrderController extends DefaultController {
             }
             if ($orderChanged && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id);
+                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
                 }
             } elseif ($orderChanged && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
-                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id);
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
 
@@ -602,11 +606,13 @@ class OrderController extends DefaultController {
             $user_id = $this->currentUser->id;
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
             $organizationType = $this->currentUser->organization->type_id;
+            $danger = false;
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
                     $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                     $systemMessage = $initiator . ' отменил заказ!';
+                    $danger = true;
                     if (isset($order->accepted_by_id)) {
                         $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
                     }
@@ -630,7 +636,7 @@ class OrderController extends DefaultController {
                     break;
             }
             if ($order->save()) {
-                $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage);
+                $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
             }
         }
@@ -701,7 +707,7 @@ class OrderController extends DefaultController {
     private function sendChatMessage($user, $order_id, $message) {
         $order = Order::findOne(['id' => $order_id]);
 
-        $newMessage = new OrderChat();
+        $newMessage = new OrderChat(['scenario' => 'userSent']);
         $newMessage->order_id = $order_id;
         $newMessage->sent_by_id = $user->id;
         $newMessage->message = $message;
@@ -758,7 +764,7 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function sendSystemMessage($user, $order_id, $message) {
+    private function sendSystemMessage($user, $order_id, $message, $danger = false) {
         $order = Order::findOne(['id' => $order_id]);
 
         $newMessage = new OrderChat();
@@ -766,6 +772,7 @@ class OrderController extends DefaultController {
         $newMessage->message = $message;
         $newMessage->is_system = 1;
         $newMessage->sent_by_id = $user->id;
+        $newMessage->danger = $danger;
         if ($order->client_id == $user->organization_id) {
             $newMessage->recipient_id = $order->vendor_id;
         } else {
@@ -779,6 +786,7 @@ class OrderController extends DefaultController {
             'isSystem' => 1,
             'sender_id' => $user->id,
             'ajax' => 1,
+            'danger' => $danger,
         ]);
 
         $clientUsers = $order->client->users;

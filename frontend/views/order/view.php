@@ -214,6 +214,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                                 'time' => $chat->created_at,
                                 'isSystem' => $chat->is_system,
                                 'ajax' => 0,
+                                'danger' => $chat->danger,
                                 'organizationType' => $chat->sentBy->organization->type_id]);
                         }
                         ?>

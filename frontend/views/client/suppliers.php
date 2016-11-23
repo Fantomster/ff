@@ -85,17 +85,17 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
         });
             ');
 
-    echo yii\bootstrap\Alert::widget([
-        'options' => [
-            'class' => 'alert-warning fade in',
-        ],
-        'body' => 'Для того, чтобы продолжить работу с нашей системой, добавьте ваших поставщиков.'
-        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-    ]);
+//    echo yii\bootstrap\Alert::widget([
+//        'options' => [
+//            'class' => 'alert-warning fade in',
+//        ],
+//        'body' => 'Для того, чтобы продолжить работу с нашей системой, добавьте ваших поставщиков.'
+//        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+//    ]);
 
     Modal::begin([
         'id' => 'showVideo',
-        'header' => '<h4>Обучающее видео</h4>',
+        'header' => '<h4>Загрузка каталогов поставщиков</h4>',
         'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>',
     ]);
     ?>
@@ -104,7 +104,7 @@ if ($step == common\models\Organization::STEP_ADD_VENDOR) {
             <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/Cj85FCJOZbQ" frameborder="0" allowfullscreen=""></iframe>
         </div>
         <div style="padding-top: 15px;">
-            Как начать работать в системе f-keeper, или Загрузка каталогов поставщиков
+            Для того, чтобы продолжить работу с нашей системой, добавьте ваших поставщиков
         </div>
     </div>
     <?php

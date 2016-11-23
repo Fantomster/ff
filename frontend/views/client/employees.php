@@ -23,12 +23,6 @@ $this->registerJs(
                     $("#search-form").submit();
                 }, 700);
             });
-//            $("#users-list").on("pjax:complete", function() {
-//                var searchInput = $("#search-string");
-//                var strLength = searchInput.val().length * 2;
-//                searchInput.focus();
-//                searchInput[0].setSelectionRange(strLength, strLength);
-//            });
             $(".content").on("click", ".edit", function() {
                 var form = $("#user-form");
                 $.post(

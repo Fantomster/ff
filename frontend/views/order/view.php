@@ -202,7 +202,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 <!-- /.box-header -->
                 <div class="box-body">
                     <!-- Conversations are loaded here -->
-                    <div class="direct-chat-messages">
+                    <div class="direct-chat-messages" id="chatBody">
                         <?php
                         foreach ($order->orderChat as $chat) {
                             echo $this->render('_chat-message', [

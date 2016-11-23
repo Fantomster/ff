@@ -468,7 +468,11 @@ class OrderController extends DefaultController {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' '.$product->product->ed : '';
-                        $message .= "<br/>изменил количество $product->product_name с $product->quantity".$ed." на $position[quantity]".$ed; 
+                        if ($position['quantity'] == 0) {
+                            $message .= "<br/>удалил $product->product_name из заказа";
+                        } else {
+                            $message .= "<br/>изменил количество $product->product_name с $product->quantity".$ed." на $position[quantity]".$ed; 
+                        }
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {

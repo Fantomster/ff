@@ -506,7 +506,7 @@ class OrderController extends DefaultController {
             }
             if (isset($discount['discount_type']) && isset($discount['discount'])) {
                 $order->discount_type = $discount['discount_type'];
-                $order->discount = $discount['discount'];
+                $order->discount = $order->discount_type ? $discount['discount'] : null;
             }
             if ($orderChanged && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;

@@ -29,20 +29,24 @@ $js = <<<JS
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");
                 extData = "&orderAction=confirm"; 
+                $("#loader-show").showLoading();
                 $.post(
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
                     dataEdited = 0;
+                    $("#loader-show").hideLoading();
                 });
             } else {
-            $.post(
-                "$urlOrderAction",
-                    {"action": $(this).data("action"), "order_id": $order->id}
-            ).done(function(result) {
-                    $('#actionButtons').html(result);
-                    $.pjax.reload({container: "#cart"});
-            });
+                $("#loader-show").showLoading();
+                $.post(
+                    "$urlOrderAction",
+                        {"action": $(this).data("action"), "order_id": $order->id}
+                ).done(function(result) {
+                        $('#actionButtons').html(result);
+                        $.pjax.reload({container: "#cart"});
+                        $("#loader-show").hideLoading();
+                });
             }
         });
         $('.content').on('change keyup paste cut', '.viewData', function() {
@@ -72,11 +76,13 @@ $js = <<<JS
         $('.content').on('submit', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
+            $("#loader-show").showLoading();
             $.post(
                 form.attr("action"),
                 form.serialize()
             ).done(function(result) {
                 dataEdited = 0;
+                $("#loader-show").hideLoading();
             });
         });
         $('.content').on('click', '.deletePosition', function(e) {
@@ -84,11 +90,13 @@ $js = <<<JS
             target = $(this).data("target");
             $(target).val(0);
             var form = $("#editOrder");
+            $("#loader-show").showLoading();
             $.post(
                 form.attr("action"),
                 form.serialize()
             ).done(function(result) {
                 dataEdited = 0;
+                $("#loader-show").hideLoading();
             });
         });
         $(document).on('pjax:complete', function() {

@@ -47,11 +47,12 @@ class Profile extends \amnah\yii2\user\models\Profile {
      */
     public function rules() {
         $rules = parent::rules();
-        $rules[] = [['full_name'], 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите как к вам обращаться'];
+        $rules[] = [['full_name'], 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите, как к вам обращаться'];
         $rules[] = [['full_name'], 'required'];
         $rules[] = [['full_name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
         $rules[] = [['phone'], 'string', 'max' => 255];
-        $rules[] = [['phone'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
+//        $rules[] = [['phone'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
+        $rules[] = [['phone'], 'match', 'pattern' => '/^\+7 \([0-9]{3}\) [0-9]{3} [0-9]{2} [0-9]{2}$/', 'message' => 'Некорректный номер'];
         $rules[] = [['phone'], 'required', 'on' => 'register', 'message' => 'Пожалуйста, введите свой номер телефона'];
         $rules[] = [['avatar'], 'image', 'extensions' => 'jpg, jpeg, gif, png'];
         

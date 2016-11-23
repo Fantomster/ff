@@ -45,8 +45,11 @@ class User extends \amnah\yii2\user\models\User {
      * @param int $orgId
      * @return static
      */
-    public function setOrganization($orgId) {
-        $this->organization_id = $orgId;
+    public function setOrganization($organization) {
+        $this->organization_id = $organization->id;
+        $organization->email = $this->email;
+        $organization->phone = $this->profile->phone;
+        $organization->save();
         return $this;
     }
 

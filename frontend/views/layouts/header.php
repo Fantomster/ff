@@ -19,8 +19,6 @@ if (!Yii::$app->user->isGuest) {
     $unreadNotifications = $organization->unreadNotifications;
     $js = <<<JS
 
-    $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
-
     socket = io.connect('$notificationsUrl');
 
     function refreshMenu(result) {

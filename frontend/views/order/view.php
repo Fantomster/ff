@@ -24,6 +24,7 @@ $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 
 $js = <<<JS
+        $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");

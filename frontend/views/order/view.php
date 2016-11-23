@@ -44,7 +44,7 @@ $js = <<<JS
                         {"action": $(this).data("action"), "order_id": $order->id}
                 ).done(function(result) {
                         $('#actionButtons').html(result);
-                        $.pjax.reload({container: "#cart"});
+                        $.pjax.reload({container: "#orderContent"});
                         $("#loader-show").hideLoading();
                 });
             }

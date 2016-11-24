@@ -467,16 +467,16 @@ class OrderController extends DefaultController {
                 if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
                     $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
                     if ($quantityChanged) {
-                        $ed = isset($product->product->ed) ? ' '.$product->product->ed : '';
+                        $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                         if ($position['quantity'] == 0) {
                             $message .= "<br/>удалил $product->product_name из заказа";
                         } else {
-                            $message .= "<br/>изменил количество $product->product_name с $product->quantity".$ed." на $position[quantity]".$ed; 
+                            $message .= "<br/>изменил количество $product->product_name с $product->quantity" . $ed . " на $position[quantity]" . $ed;
                         }
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб"; 
+                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб";
                         $product->price = $position['price'];
                     }
                     if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
@@ -888,7 +888,7 @@ class OrderController extends DefaultController {
     public function sendOrderChange($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $mailer = Yii::$app->mailer;
+//        $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
@@ -898,16 +898,20 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
 
-        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
-                ->send();
+                ->queue();
+//        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->send();
     }
 
     public function sendOrderDone($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $mailer = Yii::$app->mailer;
+//        $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
@@ -917,16 +921,20 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
 
-        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        Yii::$app->mailqueue->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
-                ->send();
+                ->queue();
+//        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->send();
     }
 
     public function sendOrderCreated($sender, $recipientOrg, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $mailer = Yii::$app->mailer;
+//        $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
         $subject = "f-keeper: Создан новый заказ №" . $order_id . "!";
@@ -937,17 +945,21 @@ class OrderController extends DefaultController {
 
         foreach ($recipientOrg->users as $recipient) {
             $email = $recipient->email;
-            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
+            Yii::$app->mailqueue->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->queue();
+//            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
+//                    ->setTo($email)
+//                    ->setSubject($subject)
+//                    ->send();
         }
     }
 
     public function sendOrderProcessing($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $mailer = Yii::$app->mailer;
+//        $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
@@ -957,16 +969,20 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
 
-        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        Yii::$app->mailqueue->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
-                ->send();
+                ->queue();
+//        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->send();
     }
 
     public function sendOrderCanceled($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        $mailer = Yii::$app->mailer;
+//        $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
@@ -976,10 +992,14 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
 
-        $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        Yii::$app->mailqueue->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
-                ->send();
+                ->queue();
+//        $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->send();
     }
 
 }

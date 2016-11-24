@@ -61,7 +61,11 @@ if (!Yii::$app->user->isGuest) {
                 messageWrapper.find(".direct-chat-name").removeClass("pull-right").addClass("pull-left");
                 messageWrapper.find(".direct-chat-timestamp").removeClass("pull-left").addClass("pull-right");
             }
-            $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
+            try {
+                $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
+            } catch(e) {
+            }
+            
         }
         if (message.isSystem) {
             if (message.isSystem == 1) {
@@ -71,7 +75,10 @@ if (!Yii::$app->user->isGuest) {
                     form.serialize()
                 ).done(function(result) {
                     $('#actionButtons').html(result);
-                    $.pjax.reload({container: "#orderContent"});
+                    try {
+                        $.pjax.reload({container: "#orderContent"});
+                    } catch(e) {
+                    }
                 });
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);

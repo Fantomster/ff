@@ -40,7 +40,8 @@
         "npm-asset/croppie": "*",
         "yii2assets/yii2-printthis": "^1.0",
         "mongosoft/yii2-upload-behavior": "*",
-        "2amigos/yii2-resource-manager-component": "*"
+        "2amigos/yii2-resource-manager-component": "*",
+        "nterms/yii2-mailqueue": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

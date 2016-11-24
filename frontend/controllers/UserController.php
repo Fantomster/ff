@@ -94,7 +94,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
                 $profile->setUser($user->id)->save();
                 $organization->save();
-                $user->setOrganization($organization->id)->save();
+                $user->setOrganization($organization)->save();
                 $this->afterRegister($user);
 
                 // set flash
@@ -105,6 +105,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     $guestText = Yii::t("user", " - Please check your email to confirm your account");
                 }
                 Yii::$app->session->setFlash("Register-success", $successText . $guestText);
+            } else {
+                $profile->validate();
+                $organization->validate();
             }
         }
 

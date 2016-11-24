@@ -62,17 +62,17 @@ if ($step == common\models\Organization::STEP_ADD_CATALOG) {
         });
             ');
 
-    echo yii\bootstrap\Alert::widget([
-        'options' => [
-            'class' => 'alert-warning fade in',
-        ],
-        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
-        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-    ]);
+//    echo yii\bootstrap\Alert::widget([
+//        'options' => [
+//            'class' => 'alert-warning fade in',
+//        ],
+//        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
+//        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+//    ]);
 
     Modal::begin([
         'id' => 'showVideo',
-        'header' => '<h4>Обучающее видео</h4>',
+        'header' => '<h4>Загрузка Главного каталога поставщика</h4>',
         'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>',
     ]);
     ?>
@@ -81,7 +81,7 @@ if ($step == common\models\Organization::STEP_ADD_CATALOG) {
             <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen=""></iframe>
         </div>
         <div style="padding-top: 15px;">
-            Загрузка Главного каталога поставщика при входе в систему
+            Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог.
         </div>
     </div>
     <?php

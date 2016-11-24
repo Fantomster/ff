@@ -47,10 +47,10 @@ if (!Yii::$app->user->isGuest) {
         var message = JSON.parse(data);
 
         messageBody = $.parseHTML( message.body );
-        
+            
         orderId = $("#order_id").val();
         if (orderId == message.order_id) {
-            $( ".direct-chat-messages" ).prepend( message.body );
+            $( ".direct-chat-messages" ).append( message.body );
             senderId = $("#sender_id").val();
             messageWrapper = $("#msg" + message.id);
             if (senderId == message.sender_id) {
@@ -61,6 +61,11 @@ if (!Yii::$app->user->isGuest) {
                 messageWrapper.find(".direct-chat-name").removeClass("pull-right").addClass("pull-left");
                 messageWrapper.find(".direct-chat-timestamp").removeClass("pull-left").addClass("pull-right");
             }
+            try {
+                $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
+            } catch(e) {
+            }
+            
         }
         if (message.isSystem) {
             if (message.isSystem == 1) {
@@ -70,7 +75,10 @@ if (!Yii::$app->user->isGuest) {
                     form.serialize()
                 ).done(function(result) {
                     $('#actionButtons').html(result);
-                    $.pjax.reload({container: "#orderContent"});
+                    try {
+                        $.pjax.reload({container: "#orderContent"});
+                    } catch(e) {
+                    }
                 });
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);

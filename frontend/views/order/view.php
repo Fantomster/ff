@@ -24,24 +24,29 @@ $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
 
 $js = <<<JS
+        $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");
                 extData = "&orderAction=confirm"; 
+                $("#loader-show").showLoading();
                 $.post(
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
                     dataEdited = 0;
+                    $("#loader-show").hideLoading();
                 });
             } else {
-            $.post(
-                "$urlOrderAction",
-                    {"action": $(this).data("action"), "order_id": $order->id}
-            ).done(function(result) {
-                    $('#actionButtons').html(result);
-                    $.pjax.reload({container: "#cart"});
-            });
+                $("#loader-show").showLoading();
+                $.post(
+                    "$urlOrderAction",
+                        {"action": $(this).data("action"), "order_id": $order->id}
+                ).done(function(result) {
+                        $('#actionButtons').html(result);
+                        //$.pjax.reload({container: "#orderContent"});
+                        $("#loader-show").hideLoading();
+                });
             }
         });
         $('.content').on('change keyup paste cut', '.viewData', function() {
@@ -71,11 +76,13 @@ $js = <<<JS
         $('.content').on('submit', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
+            $("#loader-show").showLoading();
             $.post(
                 form.attr("action"),
                 form.serialize()
             ).done(function(result) {
                 dataEdited = 0;
+                $("#loader-show").hideLoading();
             });
         });
         $('.content').on('click', '.deletePosition', function(e) {
@@ -83,11 +90,13 @@ $js = <<<JS
             target = $(this).data("target");
             $(target).val(0);
             var form = $("#editOrder");
+            $("#loader-show").showLoading();
             $.post(
                 form.attr("action"),
                 form.serialize()
             ).done(function(result) {
                 dataEdited = 0;
+                $("#loader-show").hideLoading();
             });
         });
         $(document).on('pjax:complete', function() {
@@ -202,7 +211,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 <!-- /.box-header -->
                 <div class="box-body">
                     <!-- Conversations are loaded here -->
-                    <div class="direct-chat-messages">
+                    <div class="direct-chat-messages" id="chatBody">
                         <?php
                         foreach ($order->orderChat as $chat) {
                             echo $this->render('_chat-message', [
@@ -213,6 +222,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                                 'time' => $chat->created_at,
                                 'isSystem' => $chat->is_system,
                                 'ajax' => 0,
+                                'danger' => $chat->danger,
                                 'organizationType' => $chat->sentBy->organization->type_id]);
                         }
                         ?>

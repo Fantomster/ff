@@ -13,7 +13,59 @@ use yii\web\View;
 use common\models\Category;
 use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
+use common\assets\CroppieAsset;
+CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
+?>
+<?php
+$this->registerJs("           
+                   // var uploadCrop;
+
+		function readFile(input) {
+ 			if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+					$('.upload-avatar').addClass('ready');
+                                        $('.upload-demo-wrap').css('opacity','1').css('z-index','98')
+	            	uploadCrop.croppie('bind', {
+	            		url: e.target.result
+	            	}).then(function(){
+	            		console.log('jQuery bind complete');
+	            	});
+	            	
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	        else {
+		        swal('Sorry - your browser does not support the FileReader API');
+		    }
+		}
+
+		$(document).on('change', '#upload', function () { readFile(this); });
+		$(document).on('click', '.upload-result', function (ev) {
+			uploadCrop.croppie('result', {
+				type: 'canvas',
+				size: 'viewport'
+			}).then(function (resp) {
+				popupResult({
+					src: resp
+				});
+			});
+		});
+                $(document).on('click', '#deleteAvatar', function() {
+                    $('#loader-show').showLoading();
+                    $.post(
+                        '".Url::to(['settings/ajax-delete-avatar'])."'
+                    )
+                    .done(function(result) {
+                        $('.avatar').attr('src', result); 
+                        $('#loader-show').hideLoading();
+                    });
+                });
+        "
+);
 ?>
 <?php 
 $this->title = 'Главный каталог';
@@ -73,6 +125,15 @@ Modal::begin([
 echo '<iframe style="min-width: 320px;width: 100%;" width="854" height="480" id="video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen></iframe>';
 Modal::end();
 ?>
+<?php
+Modal::begin([
+    'id' => 'add-product-market-place',
+    'clientOptions' => false,
+    'size'=>'modal-lg',
+    ]);
+Modal::end();
+?>
+
 <section class="content-header">
     <h1>
         <i class="fa fa-list-alt"></i> Главный каталог
@@ -317,7 +378,27 @@ Modal::end();
                                 ]);
                                 return $link;               
                             },
-                            ],                           
+                            ], 
+                            [
+                                'attribute' => '',
+                                'label' => '',
+                                'format' => 'raw',
+                                'contentOptions' => ['style' => 'width:70px'],
+                                'headerOptions' => ['class' => 'text-success'],
+                                'value' => function ($data) {
+                                    $link = Html::a('<font style="font-weight:700;color:#555;">f</font>-market', ['/vendor/ajax-update-product-market-place', 'id' => $data['id']], [
+                                        'data' => [
+                                        'target' => '#add-product-market-place',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                                  ],
+                                        'class'=>'btn btn-sm btn-outline-success'
+
+                                    ]);
+                                    return $link;
+                                },
+
+                            ],    /*                      
                             [
                                 'attribute' => '',
                                 'label' => '',
@@ -336,7 +417,7 @@ Modal::end();
                                     return $link;
                                 },
 
-                            ],
+                            ],*/
                             [
                                 'attribute' => '',
                                 'label' => '',
@@ -604,6 +685,23 @@ $("#video").attr('src', '');
 $("#instruction").on('show.bs.modal', function(){
 $("#video").attr('src', url);
 });
+$("body").on("hidden.bs.modal", "#add-product-market-place", function() {
+    $(this).data("bs.modal", null);
+})
+$("#add-product-market-place").on("click", ".edit", function() {
+    var form = $("#marketplace-product-form");
+    $('#loader-show').showLoading();
+    $.post(
+        form.attr("action"),
+            form.serialize()
+            )
+            .done(function(result) {
+            $('#loader-show').hideLoading();
+            form.replaceWith(result);
+        
+        });
+        return false;
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

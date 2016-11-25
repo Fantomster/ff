@@ -37,13 +37,13 @@ $this->registerCss('
       <div class="box box-info">
         <div class="box-header with-border">
             <h3 class="box-title">Объем продаж</h3><br><small>За месяц</small>
-
           <div class="box-tools pull-right">
             <?= Html::a('Аналитика', ['vendor/analytics'],['class'=>'btn btn-success btn-sm']) ?>
           </div>
         </div>
         <div class="box-body" style="display: block;">
           <div class="chart">
+              <!--img style="width: 100%;" src="http://www.imageup.ru/img171/2601896/snimok-ehkrana-2016-11-16-v-144110.png"-->
             <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
           </div>
         </div>
@@ -58,6 +58,8 @@ $this->registerCss('
             <h3 class="box-title">Статистика</h3>
         </div>
         <div class="box-body" style="display: block;">
+            <!--img style="width: 100%;" src="http://www.imageup.ru/img171/2601902/snimok-ehkrana-2016-11-16-v-154356-2.png"-->
+            
                 <div class="panel-body" style="min-height: 307px;height:100%;">
                     <div>
                             <small class="stat-label text-bold">Текущий месяц</small>
@@ -75,7 +77,7 @@ $this->registerCss('
                                     <small class="stat-label text-bold">Сегодня</small>
                                     <h4 class="text-success">
                             <?=$stats['curDay']?(float)$stats['curDay'].'<i class="fa fa-fw fa-rub"></i>':0 .'<i class="fa fa-fw fa-rub"></i>';?>
-                                    </h4> <!-- <i class="fa fa-level-up text-success"></i> -->
+                                    </h4> 
                             </div>
                             <div class="col-xs-6">
                                     <small class="stat-label text-bold">Текущая неделя</small>
@@ -98,7 +100,7 @@ $this->registerCss('
                                     </h4>
                             </div>
                     </div>   
-            </div> 
+                </div> 
         </div>
         <!-- /.box-body -->
       </div>
@@ -266,6 +268,8 @@ var areaChartOptions = {
     };
   //Create the line chart
     areaChart.Line(areaChartData, areaChartOptions);       
+ 
+$('#areaChart').blur();
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

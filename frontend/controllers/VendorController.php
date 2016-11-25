@@ -7,6 +7,7 @@ use yii\helpers\Json;
 use common\models\User;
 use common\models\Order;
 use common\models\Organization;
+use common\models\Delivery;
 use common\models\Role;
 use common\models\Profile;
 use common\models\search\UserSearch;
@@ -807,7 +808,7 @@ $importModel = new \common\models\upload\UploadForm();
 
                     $catalogBaseGoods->save();
 
-                    $message = 'Продукт обновлен!';
+                    $message = 'Товар обновлен!';
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
                 }
             }
@@ -816,18 +817,28 @@ $importModel = new \common\models\upload\UploadForm();
         return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
     }
     public function actionAjaxUpdateProductMarketPlace($id) {
-        $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentOrgName = Organization::getOrganization($currentUser->organization)->name;
-        //$sql = "select * from ";
-        //$currentProfile = \Yii::$app->db->createCommand($sql)->queryOne();
+        $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        $delivery = Delivery::find()->where(['vendor_id' => $currentUser->organization_id])->one();
+        
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
+            //var_dump($post);
+            if ($catalogBaseGoods->load($post)) {
+                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+                $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
+                if ($post && $catalogBaseGoods->validate()) {
+//($loadedPost && $profile->validate() && isset($profile->dirtyAttributes['avatar']) && $profile->avatar)
+                    $catalogBaseGoods->save();
 
-            
+                    $message = 'Продукт обновлен!';
+                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                }
+            }
         }
-
-        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','currentOrgName'));
+        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', 
+                compact('catalogBaseGoods','currentOrgName','delivery'));
     }
     
     public function actionAjaxCreateProduct() {

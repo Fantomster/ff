@@ -398,7 +398,7 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
     public function afterSave($insert, $changedAttributes) {
-        if ($insert && ($this->type_id = self::TYPE_SUPPLIER)) {
+        if ($insert && ($this->type_id == self::TYPE_SUPPLIER)) {
             $delivery = new Delivery();
             $delivery->vendor_id = $this->id;
             $delivery->save();

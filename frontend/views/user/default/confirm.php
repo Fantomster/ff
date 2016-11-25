@@ -38,8 +38,11 @@ $this->title = Yii::t('user', $success ? 'Confirmed' : 'Error');
 
             <?php else: ?>
 
-                <div class="alert alert-danger"><?= Yii::t("user", "Invalid token") ?></div>
-
+                <div class="alert alert-danger">Вход по данной разовой ссылке заблокирован. Вы можете зайти под своим логином и паролем, либо запросить свой пароль на почту</div>
+                <div class="regist">
+                <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
+                <?= Html::a(Yii::t("user", "Forgot password") . "?", ["/user/forgot"]) ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>

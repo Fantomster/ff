@@ -16,6 +16,7 @@ $this->registerJs(
             });
         });'
 );
+$this->title = "Общие настройки";
 ?>
 <!--<div style="padding: 20px 30px; background: rgb(243, 156, 18); z-index: 999999; font-size: 16px; font-weight: 600;"><a class="pull-right" href="#" data-toggle="tooltip" data-placement="left" title="Never show me this again!" style="color: rgb(255, 255, 255); font-size: 20px;">×</a><a href="https://themequarry.com" style="color: rgba(255, 255, 255, 0.901961); display: inline-block; margin-right: 10px; text-decoration: none;">Ready to sell your theme? Submit your theme to our new marketplace now and let over 200k visitors see it!</a><a class="btn btn-default btn-sm" href="https://themequarry.com" style="margin-top: -5px; border: 0px; box-shadow: none; color: rgb(243, 156, 18); font-weight: 600; background: rgb(255, 255, 255);">Let's Do It!</a></div>-->
 <?php
@@ -31,7 +32,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Общие
+        <i class="fa fa-gears"></i> Общие настройки
         <small>Информация об организации</small>
     </h1>
     <?=

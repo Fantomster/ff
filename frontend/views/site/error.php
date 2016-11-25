@@ -29,7 +29,6 @@ $this->title = $name;
                     </p><p>
                         А пока можно <a href='<?= Yii::$app->homeUrl ?>'>перейти на главную страницу</a>.
                     </p>
-
                 </div>
             </div>
         </div>

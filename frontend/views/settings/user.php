@@ -73,6 +73,7 @@ $this->registerJs("
                 });
         "
 );
+$this->title = "Личные настройки";
 ?>
 <style>
     .upload-demo .upload-demo-wrap,
@@ -104,7 +105,7 @@ $this->registerJs("
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Личные
+        <i class="fa fa-gears"></i> Личные настройки
         <small>Информация обо мне</small>
     </h1>
     <?=

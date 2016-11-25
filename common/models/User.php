@@ -45,8 +45,11 @@ class User extends \amnah\yii2\user\models\User {
      * @param int $orgId
      * @return static
      */
-    public function setOrganization($orgId) {
-        $this->organization_id = $orgId;
+    public function setOrganization($organization) {
+        $this->organization_id = $organization->id;
+        $organization->email = $this->email;
+        $organization->phone = $this->profile->phone;
+        $organization->save();
         return $this;
     }
 
@@ -147,6 +150,32 @@ class User extends \amnah\yii2\user\models\User {
     }
     
     /**
+     * Send welcome email after confirmation
+     * @param User $client
+     * @return int
+     */
+    public function sendWelcome() {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+		// send email
+        $type = $this->organization->type_id;
+        $name = $this->profile->full_name;
+        $subject = "Добро пожаловать на f-keeper";
+        $result = $mailer->compose('welcome', compact("subject", "type", "name"))
+                ->setTo($this->email)
+                ->setSubject($subject)
+                ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        return $result;
+    }
+    
+    /**
      *  Send confirmation email to your new employee
      *  @param User $user
      *  @return int 
@@ -191,24 +220,28 @@ class User extends \amnah\yii2\user\models\User {
         /** @var Message $message */
 
         // modify view path to module views
-        $mailer = Yii::$app->mailer;
-        $oldViewPath = $mailer->viewPath;
-        $mailer->viewPath = $this->module->emailViewPath;
+//        $mailer = Yii::$app->mailer;
+//        $oldViewPath = $mailer->viewPath;
+//        $mailer->viewPath = $this->module->emailViewPath;
 
         // send email
         $user = $this;
         $profile = $user->profile;
         $email = $userToken->data ?: $user->email;
         $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
-        $emailCss = "../css/email.css";
-        $imgLogo = "../img/logo.png";
-        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken", "emailCss", "imgLogo"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+        
+        $result = Yii::$app->mailqueue->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->queue();
+        
+//        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
+//            ->setTo($email)
+//            ->setSubject($subject)
+//            ->send();
 
         // restore view path and return result
-        $mailer->viewPath = $oldViewPath;
+        //$mailer->viewPath = $oldViewPath;
         return $result;
     }
     

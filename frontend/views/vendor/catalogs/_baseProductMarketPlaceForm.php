@@ -15,6 +15,9 @@ use yii\widgets\ActiveForm;
     ],
 ]); 
 ?>
+<style>
+small{font-size:13px}    
+</style>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Форма товара в MarketPlace</h4>
@@ -331,7 +334,7 @@ use yii\widgets\ActiveForm;
     <div class="input-group  pull-left" style="width:150px">
         <button class="form-control btn btn-outline-success market-place"><i class="icon fa fa-check"></i></button>                    
         <span class="input-group-addon" style="background:#6ea262;border-color:#6ea262;color:#fff;border-radius:0px 3px 3px 0px;">
-            Добавить товар в F-MARKET?
+            Разместить в F-MARKET?
         </span>
     </div>
                             <?php //= Html::button('<i class="icon fa fa-check"></i>', ['class' => 'btn btn-outline-success market-place pull-left']) ?>

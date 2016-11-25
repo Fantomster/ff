@@ -67,11 +67,6 @@ $form = ActiveForm::begin([
             ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
     ?>
     <?=
-            $form->field($user, 'email')
-            ->label(false)
-            ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
-    ?>
-    <?=
             $form->field($profile, 'full_name')
             ->label(false)
             ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
@@ -81,6 +76,11 @@ $form = ActiveForm::begin([
             ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
             ->label(false)
             ->textInput(['class' => 'form-control', 'placeholder' => 'телефон'])
+    ?>
+    <?=
+            $form->field($user, 'email')
+            ->label(false)
+            ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
     ?>
     <?=
             $form->field($user, 'newPassword')

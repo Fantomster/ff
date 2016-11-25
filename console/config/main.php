@@ -20,6 +20,10 @@ return [
                 ],
             ],
         ],
+        'mailqueue' => [
+            'class' => 'nterms\mailqueue\MailQueue',
+            'table' => '{{%mail_queue}}',
+        ],
     ],
     'params' => $params,
 ];

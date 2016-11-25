@@ -39,11 +39,12 @@ class DefaultController extends Controller {
 //                        return $this->redirect(['client/suppliers']);
 //                    }
                     $isSettings = ($this->id === 'client') && ($this->action->id === 'settings');
+                    $isTutorial = ($this->id === 'client') && ($this->action->id === 'tutorial');
                     $isSuppliers = ($this->id === 'client') && (($this->action->id === 'suppliers') || ($this->action->id === 'create') || ($this->action->id === 'invite') || ($this->action->id === 'chkmail'));
-                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
+                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings && !$isTutorial) {
                         return $this->redirect(['client/settings']);
                     }
-                    if (($organization->step == Organization::STEP_ADD_VENDOR) && !$isSuppliers) {
+                    if (($organization->step == Organization::STEP_ADD_VENDOR) && !$isSuppliers && !$isTutorial) {
                         return $this->redirect(['client/suppliers']);
                     }
                     
@@ -57,11 +58,12 @@ class DefaultController extends Controller {
 //                        return $this->redirect(['vendor/catalogs']);
 //                    }
                     $isSettings = ($this->id === 'vendor') && ($this->action->id === 'settings');
+                    $isTutorial = ($this->id === 'vendor') && ($this->action->id === 'tutorial');
                     $isCatalogs = ($this->id === 'vendor') && (($this->action->id === 'catalogs') || ($this->action->id === 'supplier-start-catalog-create') || ($this->action->id === 'import-base-catalog-from-xls'));
-                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings) {
+                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings && !$isTutorial) {
                         return $this->redirect(['vendor/settings']);
                     }
-                    if (($organization->step == Organization::STEP_ADD_CATALOG) && !$isCatalogs) {
+                    if (($organization->step == Organization::STEP_ADD_CATALOG) && !$isCatalogs && !$isTutorial) {
                         return $this->redirect(['vendor/catalogs']);
                     }
                     break;

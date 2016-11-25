@@ -133,7 +133,6 @@ Modal::begin([
     ]);
 Modal::end();
 ?>
-
 <section class="content-header">
     <h1>
         <i class="fa fa-list-alt"></i> Главный каталог
@@ -303,32 +302,6 @@ Modal::end();
                             'value'=>'product',
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                             ],
-                            /*[
-                            'class'=>'kartik\grid\EditableColumn',
-                            'attribute'=>'Товар',
-                            'pageSummary'=>false,
-                            'value' => function ($data, $row) {
-                                return $data['product'];
-                            },
-                            'refreshGrid' => true,
-                            'editableOptions'=>[
-                                //'data' =>'ooooo',
-                                'buttonsTemplate'=>
-                                '<button type="button" class="btn btn-sm btn-success kv-editable-submit" title="Применить">'
-                                    . '<i class="glyphicon glyphicon-save"></i>'
-                                . '</button>'
-                                . '<button type="button" class="btn btn-sm btn-default kv-editable-close" title="Отмена">'
-                                    . '<i class="glyphicon glyphicon-remove"></i>'
-                                . '</button>',
-                                'resetButton'=>false,
-                                'inlineSettings' => [
-                                'closeButton' =>false         
-                            ],
-                                'asPopover' => false,
-                                    'name' => 'product',
-                                    'header'=>'Наименование',
-                                    'inputType'=>\kartik\editable\Editable::INPUT_TEXT,
-                                ],*/
                             
                             [
                             'attribute' => 'units',
@@ -386,7 +359,7 @@ Modal::end();
                                 'contentOptions' => ['style' => 'width:70px'],
                                 'headerOptions' => ['class' => 'text-success'],
                                 'value' => function ($data) {
-                                    $link = Html::a('<font style="font-weight:700;color:#555;">f</font>-market', ['/vendor/ajax-update-product-market-place', 'id' => $data['id']], [
+                                    $link = Html::a('<font style="font-weight:700;color:#555;">ƒ</font>-market', ['/vendor/ajax-update-product-market-place', 'id' => $data['id']], [
                                         'data' => [
                                         'target' => '#add-product-market-place',
                                         'toggle' => 'modal',

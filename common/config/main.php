@@ -1,9 +1,10 @@
 <?php
+
 return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
-    'sourceLanguage'=>'ru_ru',
-    'language'=>'ru',
-    'charset'=>'utf-8',
+    'sourceLanguage' => 'ru_ru',
+    'language' => 'ru',
+    'charset' => 'utf-8',
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -26,15 +27,24 @@ return [
             'bucket' => 'fkeeper',
         ],
         'i18n' => [
-                        'translations' => [
-                                '*' => [
-                                        'class' => 'yii\i18n\PhpMessageSource'
-                                ],
-
-                        ],
+            'translations' => [
+                '*' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
                 ],
+            ],
+        ],
         'formatter' => [
             'locale' => 'ru_RU',
+        ],
+        'mailer' => [
+            'viewPath' => '@common/mail',
+        ],
+        'mailqueue' => [
+            'class' => 'nterms\mailqueue\MailQueue',
+            'table' => '{{%mail_queue}}',
+            'mailsPerRound' => 10,
+            'maxAttempts' => 3,
+            'viewPath' => '@common/mail',
         ],
     ],
     'modules' => [
@@ -43,7 +53,7 @@ return [
             'loginEmail' => true,
             'requireEmail' => true,
             'requireUsername' => false,
-            'loginUsername' => false, 
+            'loginUsername' => false,
             'controllerMap' => [
                 'default' => 'frontend\controllers\UserController',
             ],
@@ -53,12 +63,10 @@ return [
                 'Role' => 'common\models\Role',
                 'Organization' => 'common\models\Organization',
             ],
-            'emailViewPath' => '@app/mail',
+            'emailViewPath' => '@common/mail',
         ],
-		'gridview' => [
-			'class' => 'kartik\grid\Module',
-		]
-
+        'gridview' => [
+            'class' => 'kartik\grid\Module',
+        ],
     ],
-            
 ];

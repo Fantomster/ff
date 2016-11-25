@@ -24,4 +24,8 @@ class CronController extends Controller {
         $interval = $now->diff($latest, true)->i;
         echo "latest:".Yii::$app->formatter->asTime($latest, "php:j M Y, H:i:s").";now:".Yii::$app->formatter->asTime($now, "php:j M Y, H:i:s").";diff:".$interval."\n";
     }
+    
+    public function actionSendMail() {
+        Yii::$app->mailqueue->process();
+    }
 }

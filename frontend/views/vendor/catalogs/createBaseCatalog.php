@@ -50,7 +50,44 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
 } 
  */
 ?>
+<?php
+if ($step == common\models\Organization::STEP_ADD_CATALOG) {
+    $this->registerJs('
+        $("document").ready(function(){
+            $("#showVideo").modal("show");
+            
+            $("body").on("hidden.bs.modal", "#showVideo", function() {
+                $("#showVideo").remove()
+            });
+        });
+            ');
 
+//    echo yii\bootstrap\Alert::widget([
+//        'options' => [
+//            'class' => 'alert-warning fade in',
+//        ],
+//        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
+//        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+//    ]);
+
+    Modal::begin([
+        'id' => 'showVideo',
+        'header' => '<h4>Загрузка Главного каталога поставщика</h4>',
+        'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>',
+    ]);
+    ?>
+    <div class="modal-body form-inline"> 
+        <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen=""></iframe>
+        </div>
+        <div style="padding-top: 15px;">
+            Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог.
+        </div>
+    </div>
+    <?php
+    Modal::end();
+}
+?>
 
 <section class="content-header">
     <h1>

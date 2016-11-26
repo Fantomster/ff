@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\widgets\Breadcrumbs;
 
 /* @var $this yii\web\View */
 /* @var $name string */
@@ -9,36 +10,27 @@ use yii\helpers\Html;
 
 $this->title = $name;
 ?>
-<section class="content">
+<main class="content content-inner" style="margin-bottom: 100px;">
+    <div class="faq__inner">
+        <div class="container-fluid">
+            <div class="error-page">
+                <h2 class="headline text-info"><i class="fa fa-warning text-yellow"></i></h2>
 
-    <div class="error-page">
-        <h2 class="headline text-info"><i class="fa fa-warning text-yellow"></i></h2>
+                <div class="error-content">
+                    <h3><?= $name ?></h3>
 
-        <div class="error-content">
-            <h3><?= $name ?></h3>
+                    <p>
+                        <?= nl2br(Html::encode($message)) ?>
+                    </p>
 
-            <p>
-                <?= nl2br(Html::encode($message)) ?>
-            </p>
-
-            <p>
-                The above error occurred while the Web server was processing your request.
-                Please contact us if you think this is a server error. Thank you.
-                Meanwhile, you may <a href='<?= Yii::$app->homeUrl ?>'>return to dashboard</a> or try using the search
-                form.
-            </p>
-
-            <form class='search-form'>
-                <div class='input-group'>
-                    <input type="text" name="search" class='form-control' placeholder="Search"/>
-
-                    <div class="input-group-btn">
-                        <button type="submit" name="submit" class="btn btn-primary"><i class="fa fa-search"></i>
-                        </button>
-                    </div>
+                    <p>
+                        Во время обработки вашего запроса произошла ошибка. 
+                        Если вы считаете, что это ошибка приложения, пожалуйста, свяжитесь с нами. 
+                    </p><p>
+                        А пока можно <a href='<?= Yii::$app->homeUrl ?>'>перейти на главную страницу</a>.
+                    </p>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-
-</section>
+</main><!-- .content -->

@@ -16,6 +16,7 @@ $this->registerJs(
             });
         });'
 );
+$this->title = "Доставка";
 ?>
 <section class='content-header'>
     <h1>

@@ -46,6 +46,7 @@ $this->registerJs(
             });
         });'
 );
+$this->title = "Сотрудники";
 ?>
 <section class="content-header">
     <h1>

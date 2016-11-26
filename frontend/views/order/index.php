@@ -36,6 +36,7 @@ $this->registerJs('
 $this->registerCss("
     tr:hover{cursor: pointer;}
         ");
+$this->title = "Заказы";
 ?>
 
 <section class="content-header">

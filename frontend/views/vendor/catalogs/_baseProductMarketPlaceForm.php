@@ -2,6 +2,10 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use kartik\depdrop\DepDrop;
+use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
+
 ?>
 <?php $form = ActiveForm::begin([
     'id' => 'marketplace-product-form',
@@ -16,7 +20,8 @@ use yii\widgets\ActiveForm;
 ]); 
 ?>
 <style>
-small{font-size:13px}    
+    
+small{font-size:14px}    
 </style>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -35,7 +40,7 @@ small{font-size:13px}
                             'placeholder'=>'Наименование', 
                             'style'=>'width:100%;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                         echo Html::error($catalogBaseGoods,'product', ['class' => 'help-block h6']);
                         echo $field->end();
                         ?>
@@ -57,19 +62,81 @@ small{font-size:13px}
                             echo Html::activeTextInput($catalogBaseGoods, 'article', ['placeholder'=>'Артикул', 
                                 'style'=>'width:40%;
                                           background: #fff;
-                                          border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                          border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                             echo Html::error($catalogBaseGoods,'article', ['class' => 'help-block h6']);
                             echo $field->end();
                             ?>
                             </b>
                         </small>
+                        <style>
+                        .select2-container--krajee .select2-selection--single .select2-selection__arrow {
+                            border-left: none;
+                        }
+                        .has-success .select2-container--krajee.select2-container--focus .select2-selection {
+                        -webkit-box-shadow: none;
+                        box-shadow: none;
+                        border-color: #d6d6d6;
+                        }
+                        .select2-container--krajee .select2-selection {
+                        -webkit-box-shadow: none;
+                        box-shadow: none;
+                        }
+                        .has-success .select2-container--krajee .select2-dropdown, .has-success .select2-container--krajee .select2-selection {
+                        border-color: #d6d6d6;
+                        }
+                        .select2-container--krajee .select2-selection--single {
+                            height: 28px;
+                            line-height: 1.70;
+                        }
+                        .select2-container--krajee .select2-selection--single .select2-selection__arrow b {
+                        margin-top: -4px;
+                        }
+                        </style>
+                        <div class="row">
+                            <div class="col-md-6">
+                            <?php
+                            // Top most parent
+                            echo $form->field($categorys,'sub1')->widget(Select2::classname(), [
+                                'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name'),
+                                'options' => ['placeholder' => 'Выберите...', 'id' => 'cat-id'],
+                                'hideSearch' => true,
+                                'pluginOptions' => [
+                                    'allowClear' => false
+                                ],
+                            ])->label(false);
+                            
+                            echo Html::hiddenInput('catalogBaseGoods_id1', $catalogBaseGoods['category_id'], ['id'=>'catalogBaseGoods_id1']);
+                           
+                            ?>
+                            </div>
+                            <div class="col-md-6">
+                            <?php
+                            echo $form->field($categorys, 'sub2')->widget(DepDrop::classname(), [
+                               'options' => ['id' => 'subcat-id'],
+                               'type' => DepDrop::TYPE_SELECT2,
+                               'select2Options'=>[
+                                    'hideSearch' => true,
+                                    'pluginOptions' => [
+                                        'allowClear' => false
+                                        ],
+                                    ],
+                                'pluginOptions'=>[
+                                    'depends'=>['cat-id'],
+                                    'placeholder'=>'',
+                                    'url' => Url::to(['vendor/get-sub-cat']),
+                                    'loadingText' => 'Загрузка...'
+                                ]
+                            ])->label(false);
+                            ?>
+                            </div>
+                        </div>
                         <h3  style="margin-top: 20px;margin-bottom:0px;">
                             <?php 
                             $field = $form->field($catalogBaseGoods, 'price');
                             echo $field->begin();
                             echo Html::activeTextInput($catalogBaseGoods, 'price', ['placeholder'=>'Цена', 'style'=>'width:120px;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                             echo '<i class="fa fa-fw fa-rub" style="font-size:20px"></i> за ';
                             echo $catalogBaseGoods['units']. ' ' .$catalogBaseGoods['ed'];
                             echo Html::error($catalogBaseGoods,'price', ['class' => 'help-block h6']);
@@ -193,7 +260,7 @@ small{font-size:13px}
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" style="margin-top:15px">
                 <div class="col-md-12 no-padding">
                     <div class="col-md-6">
                         <h5>КОРОТКО О ТОВАРЕ</h5>
@@ -204,7 +271,7 @@ small{font-size:13px}
                             echo $field->begin();
                             echo Html::activeTextInput($catalogBaseGoods, 'brand', ['placeholder'=>'Производитель', 'style'=>'width:40%;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                             //echo Html::error($catalogBaseGoods,'price', ['class' => 'help-block h6']);
                             echo $field->end();
                             ?>
@@ -217,7 +284,7 @@ small{font-size:13px}
                             echo $field->begin();
                             echo Html::activeTextInput($catalogBaseGoods, 'region', ['placeholder'=>'Страна', 'style'=>'width:40%;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                             //echo Html::error($catalogBaseGoods,'price', ['class' => 'help-block h6']);
                             echo $field->end();
                             ?>
@@ -230,7 +297,7 @@ small{font-size:13px}
                             echo $field->begin();
                             echo Html::activeTextInput($catalogBaseGoods, 'ed', ['placeholder'=>'Единица измерения', 'style'=>'width:40%;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                             //echo Html::error($catalogBaseGoods,'ed', ['class' => 'help-block h6']);
                             echo $field->end();
                             ?>
@@ -243,7 +310,7 @@ small{font-size:13px}
                             echo $field->begin();
                             echo Html::activeTextInput($catalogBaseGoods, 'weight', ['placeholder'=>'Вес', 'style'=>'width:40%;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                             //echo Html::error($catalogBaseGoods,'ed', ['class' => 'help-block h6']);
                             echo $field->end();
                             ?>
@@ -256,7 +323,7 @@ small{font-size:13px}
                             echo $field->begin();
                             echo Html::activeTextInput($catalogBaseGoods, 'units', ['placeholder'=>'Кратность', 'style'=>'width:40%;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px']);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
                             //echo Html::error($catalogBaseGoods,'units', ['class' => 'help-block h6']);
                             echo $field->end();
                             ?>
@@ -270,7 +337,7 @@ small{font-size:13px}
                                 <?= empty($delivery['delivery_charge'])?'(Не указано)':$delivery['delivery_charge'] ?>
                             </b>
                         </small><br>
-                        <small>Стоимость заказа для бесплатной доставки у поставщика: 
+                        <small>Стоимость заказа для бесплатной доставки: 
                             <b>
                                 <?= empty($delivery['min_free_delivery_charge'])?'(Не указано)':$delivery['min_free_delivery_charge'] ?>
                             </b>
@@ -320,7 +387,7 @@ small{font-size:13px}
                             echo $field->begin();
                             echo Html::activeTextArea($catalogBaseGoods, 'note', ['placeholder'=>'Комментарий', 'style'=>'width:100%;
                                       background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:0 3px','rows'=>4]);
+                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px','rows'=>4]);
                             //echo Html::error($catalogBaseGoods,'note', ['class' => 'help-block h6']);
                             echo $field->end();
                             ?>  

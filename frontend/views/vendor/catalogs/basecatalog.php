@@ -313,7 +313,7 @@ Modal::end();
                             'attribute' => 'category_id',
                             'label'=>'Категория',
                             'value'=>function ($data) {
-                            $data['category_id']==0 ? $category_name='':$category_name=Category::get_value($data['category_id'])->name;
+                            $data['category_id']==0 ? $category_name='':$category_name=\common\models\MpCategory::find()->where(['id'=>$data['category_id']])->one()->name;
                             return $category_name;
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],

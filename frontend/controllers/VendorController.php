@@ -823,27 +823,53 @@ $importModel = new \common\models\upload\UploadForm();
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentOrgName = Organization::getOrganization($currentUser->organization)->name;
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        //var_dump($catalogBaseGoods);
         $delivery = Delivery::find()->where(['vendor_id' => $currentUser->organization_id])->one();
+        $categorys = new \yii\base\DynamicModel([
+            'sub1','sub2'
+        ]);
+        /*$listSub2Categorys = \common\models\MpCategory::find()->where(['parent'=>
+            \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category_id])->one()->parent
+            ])->asArray()->all();*/
+        $categorys->addRule(['sub1','sub2'], 'integer');
         
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            //var_dump($post);
-            if ($catalogBaseGoods->load($post)) {
+            if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
                 if ($post && $catalogBaseGoods->validate()) {
-//($loadedPost && $profile->validate() && isset($profile->dirtyAttributes['avatar']) && $profile->avatar)
+                    $catalogBaseGoods->category_id = $categorys->sub2;
                     $catalogBaseGoods->save();
-
                     $message = 'Продукт обновлен!';
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
                 }
             }
         }
         return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', 
-                compact('catalogBaseGoods','currentOrgName','delivery'));
+                compact('catalogBaseGoods','currentOrgName','delivery','categorys'));
     }
-    
+    public function actionGetSubCat() {   
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $id = end($_POST['depdrop_parents']);
+            $list = \common\models\MpCategory::find()->andWhere(['parent'=>$id])->asArray()->all();
+            $selected  = null;
+            if ($id != null && count($list) > 0) {
+                $selected = '';
+                foreach ($list as $i => $cat) {
+                    $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
+                    if ($i == 0) {
+                        $selected = $cat['id'];
+                    }
+                }
+                // Shows how you can preselect a value
+                echo Json::encode(['output' => $out, 'selected'=>$selected]);
+                return;
+            }
+        }
+        echo Json::encode(['output' => '', 'selected'=>2]);
+    }
     public function actionAjaxCreateProduct() {
         if (Yii::$app->request->isAjax) {
             $catalogBaseGoods = new CatalogBaseGoods();
@@ -863,6 +889,7 @@ $importModel = new \common\models\upload\UploadForm();
             }
         }
         return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
+        
     }
 
     public function actionChangecatalogprop() {

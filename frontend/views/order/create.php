@@ -84,7 +84,6 @@ $this->registerJs(
             });
         });'
 );
-$this->title = "Разместить заказ";
 ?>
 <section class="content-header">
     <h1>
@@ -241,9 +240,6 @@ $this->title = "Разместить заказ";
                                     'attribute' => 'units',
                                     'value' => 'units',
                                     'label' => 'Кратность',
-                                    'value' => function($data) {
-                                        return $data['units'] ? $data['units'] : '';
-                                    },
                                 ],
                                 [
                                     'format' => 'raw',

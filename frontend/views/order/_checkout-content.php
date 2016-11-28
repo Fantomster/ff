@@ -1,8 +1,6 @@
 <?php
-
 use yii\data\ArrayDataProvider;
 use kartik\grid\GridView;
-//use yii\grid\GridView;
 use kartik\editable\Editable;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -29,7 +27,7 @@ echo GridView::widget([
             'attribute' => 'product_name',
             'value' => function($data) {
                 return "<div class='grid-prod'>" . $data['product_name'] . "</div><div class='grid-article'>Артикул: "
-                        . $data['article'] . "</div><div class='grid-article'>Цена: "
+                        . $data['article'] . "</div><div>"
                         . $data['price'] . ' <i class="fa fa-fw fa-rub"></i></div>';
             },
             'label' => 'Название продукта',
@@ -80,18 +78,10 @@ echo GridView::widget([
                 ],
                 [
                     'format' => 'raw',
-                    'header' => 'Сумма',
-                    'value' => function ($data) {
-                        $total = $data['price'] * $data['quantity'];
-                        return "<span id=total$data[id]><b>$total</b></span> " . '<i class="fa fa-fw fa-rub"></i>';
-                    },
-//                            'contentOptions' => ['style' => 'vertical-align: middle;'],
-//                            'headerOptions' => ['style' => 'width:200px']
-                ],
-                [
-                    'format' => 'raw',
-                    'value' => function($data) use ($vendor_id) {
-                        $btnNote = Html::a('<i class="fa fa-thumb-tack m-r-xs"></i> Заметка', Url::to(['order/ajax-set-note', 'product_id' => $data['product_id']]), [
+                    'header' => 'Цена',
+                    'value' => function ($data) use ($vendor_id) {
+                                $total = $data['price'] * $data['quantity'];
+                        $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i> Заметка', Url::to(['order/ajax-set-note', 'product_id' => $data['product_id']]), [
                                     'class' => 'add-note btn btn-default margin-right-5',
                                     'data' => [
                                         'id' => $data['product_id'],
@@ -100,14 +90,15 @@ echo GridView::widget([
                                         'backdrop' => "static",
                                     ],
                         ]);
-                        $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> Удалить товар', '#', [
+                        $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> Удалить', '#', [
                                     'class' => 'btn btn-outline-danger remove',
                                     'data-product_id' => $data['product_id'],
                                     'data-vendor_id' => $vendor_id,
                         ]);
-                        return $btnNote . $btnDelete;
+                        return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i> <div class="pull-right">' . $btnNote . $btnDelete . '</div>';
                     },
-                            'contentOptions' => ['style' => 'width:240px;'],
+//                            'contentOptions' => ['class' => 'text-center'],
+//                            'headerOptions' => ['style' => 'width:200px']
                         ],
                     ]
                 ]);

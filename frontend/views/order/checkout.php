@@ -120,7 +120,6 @@ $this->registerJs(
             
         });'
 );
-$this->title = "Корзина";
 ?>
 <?php
 Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000]);
@@ -151,12 +150,12 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
             <div class="row">
                 <div class="col-md-6 col-sm-6 col-xs-9">
                     <div class="btn-group" role="group" id="createAll">
-                        <button class="btn btn-success" type="button"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span></button>
-                        <button type="button" class="btn btn-success  btn-outline total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
+                        <button class="btn btn-success m-t-xs" type="button"><i class="fa fa-paper-plane m-r-xxs" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span></button>
+                        <button type="button" class="btn btn-success  btn-outline m-t-xs total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-6 col-xs-3">
-                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-xs"> Очистить корзину</span></button>    
+                    <button class="btn btn-danger m-t-xs m-r pull-right" type="button" id="deleteAll" style="margin-right: 10px;"><i class="fa fa-trash" style="margin-top:-3px;"></i><span class="hidden-xs"> Очистить корзину</span></button>    
 
                 </div>
             </div>
@@ -172,7 +171,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                 </div>
                                 <div class="col-md-4 col-sm-4 col-xs-4">
                                     <div class="pull-right">
-                                        <a class="btn btn-outline btn-xs btn-outline-danger delete" style="margin-right:10px;" data-id="<?= $order->id ?>"><i class="fa fa-close m-r-xxs" style="margin-top:-2px;"></i></a>
+                                        <a class="btn btn-outline btn-xs btn-outline-danger delete" style="margin-right:10px;" data-id="<?= $order->id ?>"><i class="fa fa-trash m-r-xxs" style="margin-top:-2px;"></i> Удалить заказ</a>
                                     </div>
                                 </div>
                             </div>
@@ -184,42 +183,47 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                     <div class="panel-heading">
                                         <div class="form-inline">
                                             <div class="row">
-                                                <div class="col-md-6 col-sm-6 col-xs-6">
-                                                    <?=
-                                                    DatePicker::widget([
-                                                        'name' => '',
-                                                        'value' => isset($order->requested_delivery) ? date('d.m.Y', strtotime($order->requested_delivery)) : null,
-                                                        'options' => [
-                                                            'placeholder' => 'Дата доставки',
-                                                            'class' => 'delivery-date',
-                                                            'data-order_id' => $order->id,
-                                                        ],
-                                                        'type' => DatePicker::TYPE_COMPONENT_APPEND,
-                                                        'layout' => '{picker}{input}{remove}',
-                                                        'pluginOptions' => [
-                                                            'daysOfWeekDisabled' => $order->vendor->getDisabledDeliveryDays(),
-                                                            'format' => 'dd.mm.yyyy',
-                                                            'autoclose' => true,
-                                                            'startDate' => "0d",
-                                                        ]
-                                                    ])
-                                                    ?>
+                                                <div class="col-md-4 col-sm-4 col-xs-12">
+                                                        <button class="btn btn-default" data-toggle="collapse" data-target="#order<?= $order->id ?>">Содержимое заказа</button>
                                                 </div>
-                                                <div class="col-md-6 col-sm-6 col-xs-6">
-                                                    <button class="btn btn-success create pull-right" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
-                                                    <a class="btn btn-gray comment pull-right"
-                                                       data-target="#changeComment"
-                                                       data-toggle="modal"
-                                                       data-backdrop="static"
-                                                       href="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>">
-                                                        <i class="fa fa-comment" style="margin-top:-3px;"></i><span class="hidden-fk"> Комментарий к заказу</span>
-                                                    </a>
+                                                <div class="col-md-3 col-sm-4 col-xs-6">
+                                                        <?=
+                                                        DatePicker::widget([
+                                                            'name' => '',
+                                                            'value' => isset($order->requested_delivery) ? date('d.m.Y', strtotime($order->requested_delivery)) : null,
+                                                            'options' => [
+                                                                'placeholder' => 'Дата доставки',
+                                                                'class' => 'delivery-date',
+                                                                'data-order_id' => $order->id,
+                                                            ],
+                                                            'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                                                            'layout' => '{picker}{input}{remove}',
+                                                            'pluginOptions' => [
+                                                                'daysOfWeekDisabled' => $order->vendor->getDisabledDeliveryDays(),
+                                                                'format' => 'dd.mm.yyyy',
+                                                                'autoclose' => true,
+                                                                'startDate' => "0d",
+                                                            ]
+                                                        ])
+                                                        ?>
+                                                </div>
+                                                <div class="col-md-5 col-sm-4 col-xs-6">
+                                                        <button class="btn btn-success create pull-right" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
+                                                        <a class="btn btn-default comment pull-right"
+                                                           data-target="#changeComment"
+                                                           data-toggle="modal"
+                                                           data-backdrop="static"
+                                                           href="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>">
+                                                            <i class="fa fa-comment" style="margin-top:-3px;"></i><span class="hidden-fk"> Комментарий к заказу</span>
+                                                        </a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="panel-body cart-order" id="order<?= $order->id ?>">
-                                        <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
+                                    <div id="order<?= $order->id ?>" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

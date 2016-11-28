@@ -105,7 +105,6 @@ $js = <<<JS
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \yii2assets\printthis\PrintThisAsset::register($this);
-$this->title = "Заказ №$order->id";
 ?>
 
 <section class="content-header">

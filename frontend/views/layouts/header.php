@@ -39,31 +39,8 @@ if (!Yii::$app->user->isGuest) {
         $(".unread-notifications").html(result.unreadNotifications);
     }
             
-    socket.on('connect', function(){
+   socket.on('connect', function(){
         socket.emit('authentication', {userid: "$user->id", token: "$user->access_token"});
-    });
-    socket.on('global', function(data) {
-        var message = JSON.parse(data);
-        $.notify({
-            // options
-            //message: message.body 
-        },{
-            // settings
-            type: 'success',
-            placement: {
-                from: 'bottom',
-                align: 'left'
-            },
-            delay: 2000,
-            animate: {
-                enter: 'animated fadeInUp',
-                exit: 'animated fadeOutDown'
-            },
-            template: '<div data-notify="container" style="background-color: rgba(132, 191, 118, 0.9); color: #ffffff; padding: 20px;" role="alert">'+
-                        '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' + 
-                        '<div style="padding-right: 20px;">' + 
-                            message.body + '</div></div>'
-        });  
     });
     socket.on('user$user->id', function (data) {
 

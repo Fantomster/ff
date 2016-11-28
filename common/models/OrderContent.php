@@ -18,7 +18,6 @@ use Yii;
  * @property Order $order
  * @property CatalogBaseGoods $product
  * @property string $total
- * @property string $note
  */
 class OrderContent extends \yii\db\ActiveRecord
 {
@@ -76,9 +75,5 @@ class OrderContent extends \yii\db\ActiveRecord
     
     public function getTotal() {
         return $this->quantity * $this->price;
-    }
-    
-    public function getNote() {
-        return $this->hasOne(GoodsNotes::className(), ['id' => 'catalog_base_goods_id', 'rest_org_id' => $this->order->client_id]);
     }
 }

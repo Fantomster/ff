@@ -26,11 +26,10 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
         . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
     ]);
 }
-$this->title = "Общие настройки";
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Общие настройки
+        <i class="fa fa-gears"></i> Общие
         <small>Информация об организации</small>
     </h1>
     <?=

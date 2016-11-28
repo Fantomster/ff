@@ -20,7 +20,7 @@ use yii\web\HttpException;
  */
 class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
-    public $layout = "@frontend/views/layouts/main-user";
+    public $layout = "@common/views/layouts/main-user";
 
     /**
      * @inheritdoc

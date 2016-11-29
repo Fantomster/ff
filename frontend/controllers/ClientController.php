@@ -156,7 +156,7 @@ class ClientController extends DefaultController {
 
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
-                    $user->setOrganization($this->currentUser->organization_id)->save();
+                    $user->setOrganization($this->currentUser->organization)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
                     $message = 'Пользователь добавлен!';

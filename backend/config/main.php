@@ -54,17 +54,17 @@ return [
 //            ],
 //        ],
 //    ],
-//    'on beforeAction' => function ($event) {
-//        if (Yii::$app->user->isGuest) {
-//            if ($event->action->id !== 'login') {
-//                $event->isValid = false;
-//                Yii::$app->response->redirect(['/user/default/login']);
-//            }
-//            return;
-//        }
-//        if (!Yii::$app->user->can('admin')) {
-//            $event->isValid = false;
-//            Yii::$app->response->statusCode = 403;
-//        }
-//    },
+    'on beforeAction' => function ($event) {
+        if (Yii::$app->user->isGuest) {
+            if ($event->action->id !== 'login') {
+                $event->isValid = false;
+                Yii::$app->response->redirect(['/user/default/login']);
+            }
+            return;
+        }
+        if (!Yii::$app->user->can('admin')) {
+            $event->isValid = false;
+            Yii::$app->response->statusCode = 403;
+        }
+    },
 ];

@@ -32,7 +32,7 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = '';//$data->note ? "<div class='grid-article'>Заметка: " . $data->product->note->note . "</div>" : ""; 
+                $note = ""; //$data->product->note ? "<div class='grid-article'>Заметка: " . $data->product->note . "</div>" : ""; 
                 return "<div class='grid-prod'>" . $data->product_name . "</div>"
                         . "<div class='grid-article'>Артикул: <span>"
                         . $data->article . "</span></div>" . $note;

@@ -47,8 +47,13 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function setOrganization($organization) {
         $this->organization_id = $organization->id;
-        $organization->email = $this->email;
-        $organization->phone = $this->profile->phone;
+        
+        if (isset($this->email)) {
+            $organization->email = $this->email;
+        }
+        if (isset($this->profile->phone)) {
+            $organization->phone = $this->profile->phone;
+        }
         $organization->save();
         return $this;
     }
@@ -220,9 +225,9 @@ class User extends \amnah\yii2\user\models\User {
         /** @var Message $message */
 
         // modify view path to module views
-//        $mailer = Yii::$app->mailer;
-//        $oldViewPath = $mailer->viewPath;
-//        $mailer->viewPath = $this->module->emailViewPath;
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
 
         // send email
         $user = $this;
@@ -230,18 +235,18 @@ class User extends \amnah\yii2\user\models\User {
         $email = $userToken->data ?: $user->email;
         $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
         
-        $result = Yii::$app->mailqueue->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->queue();
+//        $result = Yii::$app->mailqueue->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->queue();
         
-//        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-//            ->setTo($email)
-//            ->setSubject($subject)
-//            ->send();
+        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
 
         // restore view path and return result
-        //$mailer->viewPath = $oldViewPath;
+        $mailer->viewPath = $oldViewPath;
         return $result;
     }
     

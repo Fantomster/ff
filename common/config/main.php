@@ -4,7 +4,6 @@ return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'sourceLanguage' => 'ru_ru',
     'language' => 'ru',
-    'timeZone' => 'Europe/Moscow',
     'charset' => 'utf-8',
     'components' => [
         'cache' => [
@@ -17,7 +16,7 @@ return [
         'view' => [
             'theme' => [
                 'pathMap' => [
-                    '@vendor/amnah/yii2-user/views' => '@app/views/user',
+                    '@vendor/amnah/yii2-user/views' => '@frontend/views/user',
                 ],
             ],
         ],
@@ -43,8 +42,8 @@ return [
         'mailqueue' => [
             'class' => 'nterms\mailqueue\MailQueue',
             'table' => '{{%mail_queue}}',
-            'mailsPerRound' => 10,
-            'maxAttempts' => 3,
+            'mailsPerRound' => 15,
+            'maxAttempts' => 1,
             'viewPath' => '@common/mail',
         ],
     ],

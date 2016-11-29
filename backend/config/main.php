@@ -18,7 +18,7 @@ return [
         ],
         'session' => [
             // this is the name of the session cookie used for login on the backend
-            'name' => 'advanced-backend',
+            'name' => 'FKEEPSESSID',
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -42,18 +42,18 @@ return [
         */
     ],
     'params' => $params,
-    'modules' => [
-        'user' => [
-            'class' => 'amnah\yii2\user\Module',
-            'loginEmail' => true,
-            'requireEmail' => true,
-            'requireUsername' => false,
-            'loginUsername' => false, 
-            'controllerMap' => [
-                'default' => 'amnah\yii2\user\controllers\DefaultController',
-            ],
-        ],
-    ],
+//    'modules' => [
+//        'user' => [
+//            'class' => 'amnah\yii2\user\Module',
+//            'loginEmail' => true,
+//            'requireEmail' => true,
+//            'requireUsername' => false,
+//            'loginUsername' => false, 
+//            'controllerMap' => [
+//                'default' => 'amnah\yii2\user\controllers\DefaultController',
+//            ],
+//        ],
+//    ],
     'on beforeAction' => function ($event) {
         if (Yii::$app->user->isGuest) {
             if ($event->action->id !== 'login') {

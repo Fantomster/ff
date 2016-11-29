@@ -546,7 +546,7 @@ class VendorController extends DefaultController {
                     $newRows++;   
                     }
             }
-            if ($newRows>1000) {
+            if ($newRows>2000) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');

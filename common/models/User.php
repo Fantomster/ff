@@ -47,7 +47,10 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function setOrganization($organization) {
         $this->organization_id = $organization->id;
-        $organization->email = $this->email;
+        
+        if (isset($this->email)) {
+            $organization->email = $this->email;
+        }
         if (isset($this->profile->phone)) {
             $organization->phone = $this->profile->phone;
         }

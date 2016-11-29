@@ -647,7 +647,7 @@ $importModel = new \common\models\upload\UploadForm();
                 $highestRow = $worksheet->getHighestRow(); // получаем количество строк
                 $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             
-            if ($highestRow>1000) {
+            if ($highestRow>2000) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');

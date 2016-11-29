@@ -52,6 +52,7 @@ class ClientController extends DefaultController {
                         // Allow restaurant managers
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_FKEEPER_MANAGER,
                         ],
                     ],
                     [
@@ -61,6 +62,7 @@ class ClientController extends DefaultController {
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
                         ],
                     ],
                 ],

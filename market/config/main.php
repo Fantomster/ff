@@ -14,16 +14,11 @@ return [
     'modules' => [],
     'components' => [
         'request' => [
-            'csrfParam' => '_csrf-market',
-        ],
-        'user' => [
-            'identityClass' => 'common\models\User',
-            'enableAutoLogin' => true,
-            'identityCookie' => ['name' => '_identity-market', 'httpOnly' => true],
+            'csrfParam' => '_csrf-fk',
         ],
         'session' => [
-            // this is the name of the session cookie used for login on the market
-            'name' => 'advanced-market',
+            // this is the name of the session cookie used for login on the backend
+            'name' => 'FKEEPSESSID',
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,

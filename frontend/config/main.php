@@ -12,7 +12,7 @@ return [
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
-            'csrfParam' => '_csrf-frontend',
+            'csrfParam' => '_csrf-fk',
         ],
         'session' => [
             // this is the name of the session cookie used for login on the frontend

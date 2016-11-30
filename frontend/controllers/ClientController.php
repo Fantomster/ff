@@ -260,7 +260,7 @@ class ClientController extends DefaultController {
                     exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
-               if(count($arrCatalog)>2000){
+               if(count($arrCatalog)>5000){
                $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
                return $result;
@@ -685,7 +685,7 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;
                 }
-                if(count($arrCatalog)>2000){
+                if(count($arrCatalog)>5000){
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
                             'title' => 'Уведомление',

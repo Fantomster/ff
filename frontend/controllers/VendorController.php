@@ -40,7 +40,7 @@ class VendorController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'tutorial'],
+                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'tutorial'],
                 'rules' => [
 //                    [
 //                        

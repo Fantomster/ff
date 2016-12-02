@@ -28,7 +28,7 @@ $this->title = Yii::t('user', 'Reset');
     <?php elseif (!empty($invalidToken)): ?>
 
         <div class="alert alert-danger">
-            <p><?= Yii::t("user", "Invalid token") ?></p>
+            <p>Вход по данной разовой ссылке заблокирован. Вы можете зайти под своим логином и паролем, либо запросить свой пароль на почту</p>
         </div>
 
     <?php else: ?>

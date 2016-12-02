@@ -1,8 +1,13 @@
 var app = require('express')();
-var server = require('http').Server(app);
+//var server = require('http').Server(app);
+
+var sslOptions = require('./sslOptions');
+
+var server = require('https').Server(sslOptions, app);
 var io = require('socket.io')(server);
 var redis = require('redis');
 var redisOptions = require('./redisOptions');
+
 
 server.listen(8890);
 

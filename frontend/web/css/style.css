@@ -1053,9 +1053,10 @@ a:focus {
 }
 .login__block {
     min-height: 620px;
-    background: url(../images/login-bg.jpg) no-repeat;
-    background-size: cover;
-    overflow: hidden
+/*    background: url(../images/login-bg.jpg) no-repeat;
+    background-size: cover;*/
+    overflow: hidden;
+    padding-bottom: 7%;
 }
 .login__inside {
     max-width: 460px;

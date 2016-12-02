@@ -39,3 +39,6 @@ phpunit.phar
 /instant/redisOptions.js
 /instant/npm-debug.log
 /frontend/web/upload/
+/instant/sslOptions.js
+/instant/cert/ssl-cert-snakeoil.pem
+/instant/cert/ssl-cert-snakeoil.key

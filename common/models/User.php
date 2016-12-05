@@ -45,13 +45,13 @@ class User extends \amnah\yii2\user\models\User {
      * @param int $orgId
      * @return static
      */
-    public function setOrganization($organization) {
+    public function setOrganization($organization, $first = false) {
         $this->organization_id = $organization->id;
         
         if (isset($this->email)) {
             $organization->email = $this->email;
         }
-        if (isset($this->profile->phone)) {
+        if ($first && isset($this->profile->phone)) {
             $organization->phone = $this->profile->phone;
         }
         $organization->save();
@@ -235,15 +235,15 @@ class User extends \amnah\yii2\user\models\User {
         $email = $userToken->data ?: $user->email;
         $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
         
-//        $result = Yii::$app->mailqueue->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
+        $result = Yii::$app->mailqueue->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
+                ->setTo($email)
+                ->setSubject($subject)
+                ->queue();
         
-        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+//        $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
+//            ->setTo($email)
+//            ->setSubject($subject)
+//            ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;

@@ -33,7 +33,7 @@ use yii\helpers\Html;
                                     <td style="margin: 0; padding: 0;text-align:center;"><img src="http://f-keeper.ru/img/logo.png" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" /></td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small>Революция в работе с поставщиками
+                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small>Революция в работе с поставщиками.
                                             Закупка в 2 клика.</small></td>
                                 </tr>
                             </table>

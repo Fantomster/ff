@@ -248,7 +248,7 @@ $this->registerJs(
                                                     'name' => '',
                                                     'pluginOptions' => [
                                                         'initval' => 1,
-                                                        'min' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.1,
+                                                        'min' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.001,
                                                         'max' => PHP_INT_MAX,
                                                         'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
                                                         'decimals' => 1,

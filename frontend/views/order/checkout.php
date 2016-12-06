@@ -117,6 +117,22 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
+            $(".content").on("change keyup paste cut", ".quantity", function() {
+                dataEdited = 1;
+                $("#saveChanges").show();
+            });
+            $(document).on("click", ".changed", function() {
+                document.location = link;
+            });
+            $(document).on("click", "a", function(e) {
+                if (dataEdited) {
+                    e.preventDefault();
+                    link = $(this).attr("href");
+                    if (link != "#") {
+                        $("#dataChanged").modal("show")       
+                    }
+                }
+            });
             
         });'
 );
@@ -149,16 +165,16 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
     <div class="box box-info">
         <div class="box-header checkout-header">
             <div class="row">
-                <div class="col-md-6 col-sm-6 col-xs-9">
+                <div class="col-md-5 col-sm-6 col-xs-9">
                     <div class="btn-group" role="group" id="createAll">
                         <button class="btn btn-success" type="button"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span></button>
                         <button type="button" class="btn btn-success  btn-outline total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-6 col-xs-3">
-                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-xs"> Очистить корзину</span></button>    
-
-                </div>
+                <div class="col-md-7 col-sm-6 col-xs-3">
+                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px; margin-left: 3px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm"> Очистить корзину</span></button>    
+                    <button class="btn btn-success create pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm"> Сохранить изменения</span></button>
+               </div>
             </div>
         </div>
         <div class="box-body">
@@ -184,7 +200,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                     <div class="panel-heading">
                                         <div class="form-inline">
                                             <div class="row">
-                                                <div class="col-md-6 col-sm-6 col-xs-6">
+                                                <div class="col-md-4 col-sm-6 col-xs-6">
                                                     <?=
                                                     DatePicker::widget([
                                                         'name' => '',
@@ -205,7 +221,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                                     ])
                                                     ?>
                                                 </div>
-                                                <div class="col-md-6 col-sm-6 col-xs-6">
+                                                <div class="col-md-8 col-sm-6 col-xs-6">
                                                     <button class="btn btn-success create pull-right" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
                                                     <a class="btn btn-gray comment pull-right"
                                                        data-target="#changeComment"
@@ -243,3 +259,21 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
     ])
     ?>
 </section>
+<!-- Modal -->
+<div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
+            </div>
+            <div class="modal-body">
+                Вы изменили заказ, но не сохранили изменения!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
+                <button type="button" class="btn btn-danger changed">Уйти</button>
+            </div>
+        </div>
+    </div>
+</div>

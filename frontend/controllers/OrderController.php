@@ -111,6 +111,9 @@ class OrderController extends DefaultController {
         $searchModel->catalogs = $catalogs;
 
         $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString'])? $params['OrderCatalogSearch']['searchString'] : null;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
+        $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
         $orders = $client->getCart();
 

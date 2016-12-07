@@ -134,6 +134,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 'id',
                 'cat_id',
                 'category_id',
+                'market_place',
                 'article',
                 'product',
                 'units',

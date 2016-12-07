@@ -365,7 +365,7 @@ Modal::end();
                                 'contentOptions' => ['style' => 'width:70px'],
                                 'headerOptions' => ['class' => 'text-success'],
                                 'value' => function ($data) {
-                                    empty($data['market_place'])?
+                                    $data['market_place']==0?
                                     $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', 
                                             ['/vendor/ajax-update-product-market-place', 
                                                 'id' => $data['id']], [

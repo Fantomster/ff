@@ -308,23 +308,25 @@ label {
 	</div>
 	<div class="row">
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
-                    <label><div class="pull-left">
-                            <?=CheckboxX::widget([
-                            'name'=>'settomp',
-                            'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                            'value'=>0,
+                    <div class="pull-left">
+                            <?=$form->field($catalogBaseGoods, 'market_place')->widget(CheckboxX::classname(), [
+                            //'initInputType' => CheckboxX::INPUT_CHECKBOX,
                             'autoLabel' => true,
-                            'options'=>['id'=>'settomp', 
-                                'data-id'=>$catalogBaseGoods->id, 
-                                'event-type' => 'set-to-mp','class'=>''],
+                            'model' => $catalogBaseGoods,
+                            'attribute' => 'market_place',
                             'pluginOptions'=>[
                                 'threeState'=>false,
                                 'theme' => 'krajee-flatblue',
                                 'enclosedLabel' => true,
                                 'size'=>'lg',
+                                ],
+                            'labelSettings' => [
+                                'label' => 'РАЗМЕСТИТЬ В F-MARKET',
+                                'position' => CheckboxX::LABEL_RIGHT
                                 ]
-                        ]);?>
-                        </div><h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5></label>	
+                            ])->label(false);?>
+                            
+                        </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
 			<div class="pull-right" style="margin-bottom: 20px">
 			<?= Html::button($catalogBaseGoods->isNewRecord ? 
                             '<i class="icon fa fa-plus-circle"></i> Создать' : 

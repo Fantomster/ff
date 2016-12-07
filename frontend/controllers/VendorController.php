@@ -473,7 +473,7 @@ class VendorController extends DefaultController {
         $currentCatalog = $baseCatalog;
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status FROM catalog_base_goods "
+            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
                     . "WHERE cat_id = $baseCatalog AND "
                     . "deleted=0 AND (product LIKE :product or article LIKE :article)";
             $query = \Yii::$app->db->createCommand($sql);
@@ -481,7 +481,7 @@ class VendorController extends DefaultController {
                             . "WHERE cat_id = $baseCatalog AND "
                             . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
         } else {
-            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status FROM catalog_base_goods "
+            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
                     . "WHERE cat_id = $baseCatalog AND "
                     . "deleted=0";
             $query = \Yii::$app->db->createCommand($sql);

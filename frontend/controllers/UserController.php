@@ -94,7 +94,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
                 $profile->setUser($user->id)->save();
                 $organization->save();
-                $user->setOrganization($organization)->save();
+                $user->setOrganization($organization, true)->save();
                 $this->afterRegister($user);
 
                 // set flash
@@ -114,14 +114,12 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $this->render("register", compact("user", "profile", "organization"));
     }
 
-        /**
+    /**
      * Confirm email
      */
-    public function actionConfirm($token)
-    {
+    public function actionConfirm($token) {
         /** @var \amnah\yii2\user\models\UserToken $userToken */
         /** @var \amnah\yii2\user\models\User $user */
-
         // search for userToken
         $success = false;
         $email = "";
@@ -142,14 +140,13 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $user->sendWelcome();
             }
             // set email and delete token
-            $email = $newEmail ?: $user->email;
+            $email = $newEmail ? : $user->email;
             $userToken->delete();
         }
 
         return $this->render("confirm", compact("userToken", "success", "email"));
     }
 
-    
     /**
      * Accept restaurant's invite
      */
@@ -201,10 +198,17 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
             return $this->redirect($returnUrl);
         }
-        
+
         if ($model->hasErrors()) {
-            $model->clearErrors();
-            $model->addError('password', 'Вы указали неверную почту или пароль');
+            $test = $model->errors;
+            $confirmError = "Ссылка подтверждения была отправлена на email";
+            if (isset($test['email'][0]) && ($test['email'][0] === $confirmError)) {
+                $model->clearErrors();
+                $model->addError('password', "Аккаунт не подтвержден. $confirmError");
+            } else {
+                $model->clearErrors();
+                $model->addError('password', 'Вы указали неверную почту или пароль');
+            }
         }
 
         return $this->render('login', compact("model"));

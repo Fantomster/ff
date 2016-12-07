@@ -40,7 +40,7 @@ class VendorController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'tutorial'],
+                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'tutorial'],
                 'rules' => [
 //                    [
 //                        
@@ -51,6 +51,7 @@ class VendorController extends DefaultController {
                         // Allow suppliers managers
                         'roles' => [
                             Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_FKEEPER_MANAGER,
                         ],
                     ],
                     [
@@ -60,6 +61,7 @@ class VendorController extends DefaultController {
                         'roles' => [
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
                         ],
                     ],
                 ],
@@ -547,7 +549,7 @@ class VendorController extends DefaultController {
                     $newRows++;   
                     }
             }
-            if ($newRows>1000) {
+            if ($newRows>5000) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
@@ -648,7 +650,7 @@ $importModel = new \common\models\upload\UploadForm();
                 $highestRow = $worksheet->getHighestRow(); // получаем количество строк
                 $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             
-            if ($highestRow>1000) {
+            if ($highestRow>5000) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');

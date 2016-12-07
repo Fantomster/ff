@@ -58,6 +58,7 @@ class OrderController extends DefaultController {
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
                         ],
                     ],
                     [
@@ -76,6 +77,7 @@ class OrderController extends DefaultController {
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
                         ],
                     ],
                 ],

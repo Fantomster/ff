@@ -12,9 +12,9 @@ $js = <<<JS
 function heightDetect() {
 		$(".login__block").css("height", $(window).height());
 	};
-	heightDetect();
+	//heightDetect();
 	$(window).resize(function() {
-		heightDetect();
+		//heightDetect();
 	});
             $("#menu__burger").click(function () {
                 $(".nav_menu").slideToggle();
@@ -39,7 +39,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
     </head>
-    <body class="hold-transition skin-blue sidebar-mini">
+    <body class="hold-transition skin-blue sidebar-mini" style="background: url(../images/login-bg.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;">
         <?php $this->beginBody() ?>
         <div id="loader-show"></div>
 

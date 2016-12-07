@@ -431,8 +431,11 @@ Modal::end();
                             <div class="box-body table-responsive no-padding">
                               
                             <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list','timeout' => 10000,]); ?>
+                            <?php ActiveForm::begin(['options' => ['data-pjax' => true ]]); ?>
                             <?=GridView::widget([
                                 'dataProvider' => $dataProvider,
+                                'pjax' => true, // pjax is set to always true for this demo
+                                'pjaxSettings' =>['options'=>['id'=>'kv-unique-id-1']], 
                                 'filterPosition' => false,
                                 'columns' => $gridColumnsBaseCatalog, 
                                 'options' => ['class' => 'table-responsive'],
@@ -443,12 +446,13 @@ Modal::end();
                                 'condensed' => false,
                                 'responsive' => false,
                                 'hover' => false,
-           'resizableColumns'=>false,
+                                'resizableColumns'=>false,
                                 'export' => [
                                     'fontAwesome' => true,
                                 ],
                             ]);
                             ?> 
+                            <?php ActiveForm::end(); ?>
                             <?php Pjax::end(); ?>
                             </div>
                         </div>      
@@ -660,7 +664,7 @@ $(".del-product").live("click", function(e){
 	        success: function(response) {
 		        if(response.success){
                         //$.pjax.reload({container: "#clients-list"});
-			        $.pjax.reload({container: "#products-list"}); 
+			        $.pjax.reload({container: "#kv-unique-id-1"}); 
 			        }else{
 				    console.log('Что-то пошло не так');    
 			        }
@@ -691,7 +695,7 @@ $("#add-product-market-place").on("click", ".edit", function() {
             .done(function(result) {
             $('#loader-show').hideLoading();
             form.replaceWith(result);
-        $.pjax.reload({container: "#products-list"});
+        $.pjax.reload({container: "#kv-unique-id-1"});
         });
         return false;
     });

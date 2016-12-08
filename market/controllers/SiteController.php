@@ -5,7 +5,12 @@ use Yii;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
+use common\models\User;
+use common\models\Profile;
+use common\models\Organization;
+use common\models\Role;
+use common\components\AccessRule;
+use yii\helpers\Url;
 
 /**
  * Site controller
@@ -60,7 +65,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        return $this->render('/site/index');
     }
 
     /**

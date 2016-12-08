@@ -189,7 +189,7 @@ Modal::end();
                 <?=
                 Modal::widget([
                     'id' => 'add-product',
-                    'clientOptions' => false,
+                    'clientOptions' => ['style'=>'margin-top:13.2px;'],
                     'toggleButton' => [
                         'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
                         'tag' => 'a',
@@ -360,10 +360,10 @@ Modal::end();
                             ], 
                             [
                                 'attribute' => '',
-                                'label' => '',
+                                'label' => 'F-MARKET',
                                 'format' => 'raw',
                                 'contentOptions' => ['style' => 'width:70px'],
-                                'headerOptions' => ['class' => 'text-success'],
+                                'headerOptions' => ['class' => 'text-center'],
                                 'value' => function ($data) {
                                     $data['market_place']==0?
                                     $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', 
@@ -429,13 +429,10 @@ Modal::end();
                         ?> 
                         <div class="panel-body">
                             <div class="box-body table-responsive no-padding">
-                              
-                            <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list','timeout' => 10000,]); ?>
-                            <?php ActiveForm::begin(['options' => ['data-pjax' => true ]]); ?>
                             <?=GridView::widget([
                                 'dataProvider' => $dataProvider,
                                 'pjax' => true, // pjax is set to always true for this demo
-                                'pjaxSettings' =>['options'=>['id'=>'kv-unique-id-1']], 
+                                'pjaxSettings' =>['options'=>['id'=>'kv-unique-id-1'],'loadingCssClass'=>false], 
                                 'filterPosition' => false,
                                 'columns' => $gridColumnsBaseCatalog, 
                                 'options' => ['class' => 'table-responsive'],
@@ -452,8 +449,6 @@ Modal::end();
                                 ],
                             ]);
                             ?> 
-                            <?php ActiveForm::end(); ?>
-                            <?php Pjax::end(); ?>
                             </div>
                         </div>      
                         
@@ -538,10 +533,10 @@ window.clearTimeout(timer);
    timer = setTimeout(function () {
        $.pjax({
         type: 'GET',
-        push: false,
+        push: true,
         timeout: 10000,
         url: 'index.php?r=vendor/basecatalog&id=$currentCatalog',
-        container: '#products-list',
+        container: '#kv-unique-id-1',
         data: {searchString: $('#search').val()}
       })
    }, 700);
@@ -685,6 +680,9 @@ $("#video").attr('src', url);
 $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
     $(this).data("bs.modal", null);
 })
+$("body").on("show.bs.modal", "#add-product-market-place", function() {
+    $('#add-product-market-place>.modal-dialog').css('margin-top','13px');
+})        
 $("#add-product-market-place").on("click", ".edit", function() {
     var form = $("#marketplace-product-form");
     $('#loader-show').showLoading();
@@ -700,6 +698,7 @@ $("#add-product-market-place").on("click", ".edit", function() {
         return false;
     });
   $('#add-product-market-place').removeAttr('tabindex');
+  
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -42,7 +42,8 @@
         "mongosoft/yii2-upload-behavior": "*",
         "2amigos/yii2-resource-manager-component": "*",
         "nterms/yii2-mailqueue": "*",
-        "kartik-v/yii2-widget-depdrop": "@dev"
+        "kartik-v/yii2-widget-depdrop": "@dev",
+        "yiisoft/yii2-elasticsearch": "^2.0"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

@@ -301,7 +301,7 @@ label {
                                     <?= $form->field($catalogBaseGoods, 'weight', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
     textInput(['placeholder' => 'ВЕС УПАКОВКИ','style'=>'border-radius:3px']) ?>
-                                    <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 113px;']) ?>
+                                    <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
 				</div>
 			</div>
 		</div>
@@ -327,7 +327,7 @@ label {
                             ])->label(false);?>
                             
                         </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
-			<div class="pull-right" style="margin-bottom: 20px">
+			<div class="pull-right" style="">
 			<?= Html::button($catalogBaseGoods->isNewRecord ? 
                             '<i class="icon fa fa-plus-circle"></i> Создать' : 
                             '<i class="icon fa fa-save"></i> Сохранить', 

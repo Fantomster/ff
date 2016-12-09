@@ -113,7 +113,7 @@ class OrderController extends DefaultController {
         $searchModel->catalogs = $catalogs;
 
         $dataProvider = $searchModel->search($params);
-        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString'])? $params['OrderCatalogSearch']['searchString'] : null;
+        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
@@ -890,7 +890,7 @@ class OrderController extends DefaultController {
         ];
     }
 
-    public function sendOrderChange($sender, $recipient, $order_id) {
+    private function sendOrderChange($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -913,7 +913,7 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    public function sendOrderDone($sender, $recipient, $order_id) {
+    private function sendOrderDone($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -936,7 +936,7 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    public function sendOrderCreated($sender, $recipientOrg, $order_id) {
+    private function sendOrderCreated($sender, $recipientOrg, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -961,7 +961,7 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function sendOrderProcessing($sender, $recipient, $order_id) {
+    private function sendOrderProcessing($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -984,7 +984,7 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    public function sendOrderCanceled($sender, $recipient, $order_id) {
+    private function sendOrderCanceled($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -1005,6 +1005,17 @@ class OrderController extends DefaultController {
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
+    }
+
+    private function saveCartChanges($content) {
+        foreach ($content as $position) {
+            $product = OrderContent::findOne(['id' => $position['id']]);
+            if ($product->quantity == 0) {
+                $product->delete();
+            } else {
+                $product->save();
+            }
+        }
     }
 
 }

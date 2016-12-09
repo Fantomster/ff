@@ -173,7 +173,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                 </div>
                 <div class="col-md-7 col-sm-6 col-xs-3">
                     <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px; margin-left: 3px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm"> Очистить корзину</span></button>    
-                    <button class="btn btn-success create pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm"> Сохранить изменения</span></button>
+                    <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm"> Сохранить изменения</span></button>
                </div>
             </div>
         </div>

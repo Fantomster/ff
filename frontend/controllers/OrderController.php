@@ -552,33 +552,9 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $totalCart = 0;
 
-        if (isset($_POST['hasEditable'])) {
-            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            $posted = current($_POST['OrderContent']);
-            $post = ['OrderContent' => $posted];
-            if ($model->load($post)) {
-                $model->quantity = $model->quantity - $model->quantity % $model->units;
-                $model->save();
-                $order = $model->order;
-                $order->calculateTotalPrice();
-                $order->save();
-                $orders = $client->getCart();
-                foreach ($orders as $order) {
-                    $totalCart += $order->total_price;
-                }
-                return [
-                    'output' => $model->quantity,
-                    'message' => '',
-                    'positionTotal' => $model->price * $model->quantity,
-                    'positionId' => $model->id,
-                    'orderId' => $order->id,
-                    'orderTotal' => $order->total_price,
-                    'totalCart' => $totalCart,
-                ];
-            } else {
-                return ['output' => '', 'message' => ''];
-            }
+        if (Yii::$app->request->post('action')) {
+            $content = Yii::$app->request->post('OrderContent');
+            $this->saveCartChanges($content);
         }
 
         $orders = $client->getCart();

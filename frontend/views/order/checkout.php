@@ -5,6 +5,7 @@ use yii\widgets\Pjax;
 use kartik\date\DatePicker;
 use yii\bootstrap\Modal;
 use yii\widgets\Breadcrumbs;
+use kartik\form\ActiveForm;
 
 //kartik\growl\GrowlAsset::register($this);
 
@@ -60,17 +61,38 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
-            $("#checkout").on("click", ".remove", function(e) {
-            e.preventDefault();
+            $("#checkout").on("click", "#createAll", function(e) {
+                e.preventDefault();
                 $("#loader-show").showLoading();
+                var form = $("#cartForm");
+                extData = "&action=make"; 
                 $.post(
-                    "' . Url::to(['/order/ajax-remove-position']) . '",
-                    {"product_id": $(this).data("product_id"), "vendor_id": $(this).data("vendor_id")}
+                    form.attr("action"),
+                    form.serialize() + extData
                 ).done(function(result) {
-                    if (result) {
-                        //$.pjax.reload({container: "#checkout"});
-                    }
+                    dataEdited = 0;
+                    $("#saveChanges").hide();
                     $("#loader-show").hideLoading();
+                    if (result) {
+                        $.notify(result.growl.options, result.growl.settings);
+                    }
+                });
+            });
+            $("#checkout").on("click", "#saveChanges", function(e) {
+                e.preventDefault();
+                $("#loader-show").showLoading();
+                var form = $("#cartForm");
+                extData = "&action=save"; 
+                $.post(
+                    form.attr("action"),
+                    form.serialize() + extData
+                ).done(function(result) {
+                    dataEdited = 0;
+                    $("#saveChanges").hide();
+                    $("#loader-show").hideLoading();
+                    if (result) {
+                        $.notify(result.growl.options, result.growl.settings);
+                    }
                 });
             });
             $("#checkout").on("change", ".delivery-date", function(e) {
@@ -174,11 +196,22 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                 <div class="col-md-7 col-sm-6 col-xs-3">
                     <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px; margin-left: 3px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm"> Очистить корзину</span></button>    
                     <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm"> Сохранить изменения</span></button>
-               </div>
+                </div>
             </div>
         </div>
         <div class="box-body">
             <div class="checkout">
+                <?php
+                $form = ActiveForm::begin([
+                            'id' => 'cartForm',
+                            'enableAjaxValidation' => false,
+                            'options' => [
+                                'data-pjax' => true,
+                            ],
+                            'method' => 'post',
+                            'action' => Url::to(['order/checkout']),
+                ]);
+                ?>
                 <?php foreach ($orders as $order) { ?>
                     <div class="box box-info box-order-content">
                         <div class="box-header with-border">
@@ -242,6 +275,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                         </div>
                     </div>
                 <?php } ?>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>

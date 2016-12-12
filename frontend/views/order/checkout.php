@@ -187,15 +187,15 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
     <div class="box box-info">
         <div class="box-header checkout-header">
             <div class="row">
-                <div class="col-md-5 col-sm-6 col-xs-9">
+                <div class="col-md-6 col-sm-8 col-xs-6">
                     <div class="btn-group" role="group" id="createAll">
                         <button class="btn btn-success" type="button"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span></button>
                         <button type="button" class="btn btn-success  btn-outline total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
                     </div>
                 </div>
-                <div class="col-md-7 col-sm-6 col-xs-3">
-                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px; margin-left: 3px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm"> Очистить корзину</span></button>    
-                    <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm"> Сохранить изменения</span></button>
+                <div class="col-md-6 col-sm-4 col-xs-6">
+                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px; margin-left: 3px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Очистить корзину</span></button>    
+                    <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Сохранить</span></button>
                 </div>
             </div>
         </div>
@@ -250,6 +250,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                                             'format' => 'dd.mm.yyyy',
                                                             'autoclose' => true,
                                                             'startDate' => "0d",
+                                                            'todayHighlight' => true,
                                                         ]
                                                     ])
                                                     ?>

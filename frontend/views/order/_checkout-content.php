@@ -62,10 +62,15 @@ echo GridView::widget([
                         $total = $data['price'] * $data['quantity'];
                         return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i>';
                     },
-                    'contentOptions' => ['class' => 'width150'],
-                    'headerOptions' => ['class' => 'width150']
-//                            'contentOptions' => ['class' => 'text-center'],
-//                            'headerOptions' => ['style' => 'width:200px']
+                    'headerOptions' => ['class' => 'width100']
+                ],
+                [
+                    'format' => 'raw',
+                    'header' => 'Кратность',
+                    'value' => function ($data) {
+                        return $data["units"];
+                    },
+                    'headerOptions' => ['class' => 'width70']
                 ],
                 [
                     'format' => 'raw',
@@ -86,7 +91,7 @@ echo GridView::widget([
                         ]);
                         return '<div class="pull-right">' . $btnNote . $btnDelete . '</div>';
                     },
-                            'headerOptions' => ['style' => 'min-width:82px;']
+                            'headerOptions' => ['class' => 'checkout-action'],
                         ],
                     ]
                 ]);

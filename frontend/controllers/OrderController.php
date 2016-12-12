@@ -71,6 +71,7 @@ class OrderController extends DefaultController {
                             'ajax-make-order',
                             'ajax-change-quantity',
                             'ajax-remove-position',
+                            'ajax-show-details',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -196,6 +197,24 @@ class OrderController extends DefaultController {
         $this->sendCartChange($client, $cartCount);
 
         return true; //$this->renderPartial('_orders', compact('orders'));
+    }
+
+    public function actionAjaxShowDetails() {
+        $get = Yii::$app->request->get();
+        $productId = $get['id'];
+        $catId = $get['cat_id'];
+        $product = CatalogGoods::findOne(['base_goods_id' => $productId, 'cat_id' => $catId]);
+
+        if ($product) {
+            $baseProduct = $product->baseProduct;
+            $price = $product->price;
+        } else {
+            $baseProduct = CatalogBaseGoods::findOne(['id' => $get['id'], 'cat_id' => $get['cat_id']]);
+            $price = $baseProduct->price;
+        }
+        $vendorName = $baseProduct->vendor->name;
+        
+        return $this->renderPartial("_order-details", compact('baseProduct', 'price', 'vendorName', 'productId', 'catId'));
     }
 
     public function actionAjaxRemovePosition() {

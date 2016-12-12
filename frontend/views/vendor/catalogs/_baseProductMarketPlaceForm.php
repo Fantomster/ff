@@ -5,226 +5,170 @@ use yii\widgets\ActiveForm;
 use kartik\depdrop\DepDrop;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
+use yii\web\View;
+use yii\widgets\Pjax;
+use kartik\checkbox\CheckboxX;
+kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
 ?>
+<style>
+.form-control:focus {
+    border-color: #84bf76;
+    outline: 0;
+    box-shadow: inset 0px 3px 5px 0px rgba(91, 137, 81, 0.3);
+}
+.bl-img{
+    width: 152px;
+    height:102px;
+    border:1px dashed #65a157;
+    display: inline-block;
+}
+.input-group{width: 100%;}
+input,textarea{
+    font-size: 12px !important;	
+}
+
+
+.input-group .input-group-addon {
+    border-top-left-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-top-right-radius: 3px !important;
+    border-bottom-right-radius: 3px !important;
+}
+.input-group-addon{background: #fff}
+.h3-text{
+    font-weight: 300;
+    font-size: 24px;	
+    letter-spacing: 0.02;
+    line-height: 1;
+}
+.sub-h3-text{
+    font-weight: 400;
+    font-size: 1em;
+    color: rgba(63,62,62,0.6) !important;
+    line-height: 0.9;
+    margin-bottom: 24px
+}
+.dp-text{
+    font-weight: 400;
+    font-size: 1em;
+    color: rgba(63,62,62,0.6) !important;
+    line-height: 0.9;	
+}
+a{
+    color: #84bf76;	
+}
+a:focus{
+    color: #006c1e	
+}
+a:hover{
+    color: #006c1e		
+} 
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+     line-height: 28px; 
+}
+.select2-container--default .select2-selection--single {
+    background-color: #fff;
+    border-color: #d2d6de;
+    border-radius: 3px;
+}
+.select2-container .select2-selection--single {
+    height: 34px;}
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    margin-top: 2px;
+}
+.select2-container .select2-selection--single .select2-selection__rendered {
+    padding-left: 0px;
+    padding-right: 10px;
+}
+label {
+    margin-top:0px
+}
+.uploadButton {
+    position: absolute;
+    display: block;
+    width: 176px;
+    height: 119px;
+    border-radius: 0%;
+    top: 0;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    opacity:0;
+    cursor:pointer;
+    padding-top: 88px;
+    font-style: italic;
+    font-weight: bold;
+}
+.uploadButton:hover {
+    background:#000;
+    color:#fff;
+    opacity:0.5;
+}
+.upload-demo .upload-demo-wrap,
+.upload-demo .upload-result,
+.upload-demo.ready .upload-msg {
+    display: none;
+}
+.upload-demo.ready .upload-demo-wrap {
+    display: block;
+}
+.upload-demo.ready .upload-result {
+    display: inline-block;    
+}
+.upload-demo-wrap {
+    position:absolute;
+    width: 176px;
+    height: 119px;
+    border-radius: 0%;
+    top: 0;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    opacity:0;
+}
+.cr-boundary{border-radius:0%}
+.upload-msg {
+    text-align: center;
+    padding: 50px;
+    font-size: 22px;
+    color: #aaa;
+    width: 260px;
+    margin: 50px auto;
+    border: 1px solid #aaa;
+}
+.croppie-container .cr-slider-wrap {
+    margin: 20px auto;
+}
+#upload-avatar{border-radius:0%}
+.cr-viewport{border-radius:0%}
+</style>
 <?php $form = ActiveForm::begin([
     'id' => 'marketplace-product-form',
-    'action' => $catalogBaseGoods->isNewRecord? 
-        Url::toRoute('vendor/ajax-create-product') : 
-        Url::toRoute(['vendor/ajax-update-product-market-place', 'id' => $catalogBaseGoods->id]),           
-    'fieldConfig' => [
-         'options' => [
-             'tag' => 'span'
-             ],
-    ],
+    'action' => $catalogBaseGoods->isNewRecord ? 
+        Url::toRoute('vendor/ajax-create-product-market-place') : 
+        Url::toRoute(['vendor/ajax-update-product-market-place', 'id' => $catalogBaseGoods->id]),  
 ]); 
 ?>
-<style>
-    
-small{font-size:14px}    
-</style>
+
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Форма товара в MarketPlace</h4>
+    <h4 class="modal-title"><?=$catalogBaseGoods->isNewRecord ? 'ДОБАВЛЕНИЕ ТОВАРА':'РЕДАКТИРОВАНИЕ ТОВАРА'?></h4>
 </div>
-<div class="modal-body" style="background:#f7f8f9 !important">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="row">
-                <div class="col-md-8">
-                    <h4 class="text-bolt" style="margin-top: 0px;margin-bottom:20px;">
-                        <?php 
-                        $field = $form->field($catalogBaseGoods, 'product');
-                        echo $field->begin();
-                        echo Html::activeTextInput($catalogBaseGoods, 'product', [
-                            'placeholder'=>'Наименование', 
-                            'style'=>'width:100%;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                        echo Html::error($catalogBaseGoods,'product', ['class' => 'help-block h6']);
-                        echo $field->end();
-                        ?>
-                    </h4>
-                </div>
-                <div class="col-md-4 text-center">
-                    <h5 style="color:#ababac;font-style:italic;margin-top: 0px;margin-bottom:0;"><?= $currentOrgName ?></h5>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8 no-padding">
-                    <div class="col-md-12">
-                        <!--hr-->
-                        <small>Артикул: 
-                            <b>
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'article');
-                            echo $field->begin();
-                            echo Html::activeTextInput($catalogBaseGoods, 'article', ['placeholder'=>'Артикул', 
-                                'style'=>'width:40%;
-                                          background: #fff;
-                                          border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                            echo Html::error($catalogBaseGoods,'article', ['class' => 'help-block h6']);
-                            echo $field->end();
-                            ?>
-                            </b>
-                        </small>
-                        <style>
-                        .select2-container--krajee .select2-selection--single .select2-selection__arrow {
-                            border-left: none;
-                        }
-                        .has-success .select2-container--krajee.select2-container--focus .select2-selection {
-                        -webkit-box-shadow: none;
-                        box-shadow: none;
-                        border-color: #d6d6d6;
-                        }
-                        .select2-container--krajee .select2-selection {
-                        -webkit-box-shadow: none;
-                        box-shadow: none;
-                        }
-                        .has-success .select2-container--krajee .select2-dropdown, .has-success .select2-container--krajee .select2-selection {
-                        border-color: #d6d6d6;
-                        }
-                        .select2-container--krajee .select2-selection--single {
-                            height: 28px;
-                            line-height: 1.70;
-                        }
-                        .select2-container--krajee .select2-selection--single .select2-selection__arrow b {
-                        margin-top: -4px;
-                        }
-                        </style>
-                        <div class="row">
-                            <div class="col-md-6">
-                            <?php
-                            // Top most parent
-                            echo $form->field($categorys,'sub1')->widget(Select2::classname(), [
-                                'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name'),
-                                'options' => ['placeholder' => 'Выберите...', 'id' => 'cat-id'],
-                                'hideSearch' => true,
-                                'pluginOptions' => [
-                                    'allowClear' => false
-                                ],
-                            ])->label(false);
-                            
-                            echo Html::hiddenInput('catalogBaseGoods_id1', $catalogBaseGoods['category_id'], ['id'=>'catalogBaseGoods_id1']);
-                           
-                            ?>
-                            </div>
-                            <div class="col-md-6">
-                            <?php
-                            echo $form->field($categorys, 'sub2')->widget(DepDrop::classname(), [
-                               'options' => ['id' => 'subcat-id'],
-                               'type' => DepDrop::TYPE_SELECT2,
-                               'select2Options'=>[
-                                    'hideSearch' => true,
-                                    'pluginOptions' => [
-                                        'allowClear' => false
-                                        ],
-                                    ],
-                                'pluginOptions'=>[
-                                    'depends'=>['cat-id'],
-                                    'placeholder'=>'',
-                                    'url' => Url::to(['vendor/get-sub-cat']),
-                                    'loadingText' => 'Загрузка...'
-                                ]
-                            ])->label(false);
-                            ?>
-                            </div>
-                        </div>
-                        <h3  style="margin-top: 20px;margin-bottom:0px;">
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'price');
-                            echo $field->begin();
-                            echo Html::activeTextInput($catalogBaseGoods, 'price', ['placeholder'=>'Цена', 'style'=>'width:120px;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                            echo '<i class="fa fa-fw fa-rub" style="font-size:20px"></i> за ';
-                            echo $catalogBaseGoods['units']. ' ' .$catalogBaseGoods['ed'];
-                            echo Html::error($catalogBaseGoods,'price', ['class' => 'help-block h6']);
-                            echo $field->end();
-                            ?>
-                        </h3>
-                    </div>
-                    <div class="col-md-12" style="margin-top: 10px;margin-bottom:20px;">
-                        <small class="pull-left text-success" style="margin-right:15px">ПОКАЗАТЬ ТЕЛЕФОН</small>
-                        <small class="pull-left text-success" style="margin-right:15px">ПОКАЗАТЬ EMAIL</small>
-                        <small class="pull-left" style="color:#ababac;">САМОВЫВОЗ/КУРЬЕРОМ</small>
-                    </div>
-                    <div class="col-md-12 no-padding">
-                        <div class="col-md-4">
-                            <a href="#" class="btn btn-success btn-lg disabled" disabled="" style="width:100%">В карзину</a>
-                        </div>
-                        <div class="col-md-8">
-                            <a href="#" class="btn btn-outline-success btn-lg disabled" disabled="" style="width:100%">Добавить поставщика</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <style>
-                    .uploadButton {
-                        position: absolute;
-                        display: block;
-                        width: 200px;
-                        height: 200px;
-                        border-radius: 50%;
-                        top: 0;
-                        margin: 0 auto;
-                        left: 0;
-                        right: 0;
-                        opacity:0;
-                        cursor:pointer;
-                        padding-top: 88px;
-                        font-style: italic;
-                        font-weight: bold;
-                    }
-                    .uploadButton:hover {
-                        background:#000;
-                        color:#fff;
-                        opacity:0.5;
-                    }
-                    .upload-demo .upload-demo-wrap,
-                    .upload-demo .upload-result,
-                    .upload-demo.ready .upload-msg {
-                        display: none;
-                    }
-                    .upload-demo.ready .upload-demo-wrap {
-                        display: block;
-                    }
-                    .upload-demo.ready .upload-result {
-                        display: inline-block;    
-                    }
-                    .upload-demo-wrap {
-                        position:absolute;
-                        width: 200px;
-                        height: 200px;
-                        border-radius: 50%;
-                        top: 0;
-                        margin: 0 auto;
-                        left: 0;
-                        right: 0;
-                        opacity:0;
-                    }
-                    .cr-boundary{border-radius:50%}
-                    .upload-msg {
-                        text-align: center;
-                        padding: 50px;
-                        font-size: 22px;
-                        color: #aaa;
-                        width: 260px;
-                        margin: 50px auto;
-                        border: 1px solid #aaa;
-                    }
-                    .croppie-container .cr-slider-wrap {
-                        margin: 20px auto;
-                    }
-                    #upload-avatar{border-radius:50%}
-                    .cr-viewport{border-radius:50%}
-                    </style>
+<div class="modal-body" style="background:#fff !important">
+	<div class="row">
+		<div class="col-md-12 text-center">
+			<h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете</h5>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 text-center">
                     <?php
                     $this->registerJs("
                         var uploadCrop = $('#upload-avatar').croppie({
                                 viewport: {
-                                        width: 210,
-                                        height: 210,
+                                        width: 178,
+                                        height: 121,
                                         //type: 'circle'
                                         type: 'square'
                                 },
@@ -240,7 +184,8 @@ small{font-size:14px}
                     <div class="upload-demo-wrap">
                         <div id="upload-avatar"></div>
                     </div>
-                    <img id="newAvatar" class="img-circle" width="200" height="200" style="background-color:#ccc" src="<?= !empty($catalogBaseGoods['image'])?
+                    <img id="newAvatar" width="176" height="119" style="background-color:#ccc"
+                         src="<?= !empty($catalogBaseGoods['image'])?
                             $catalogBaseGoods->imageUrl:
                             common\models\CatalogBaseGoods::DEFAULT_IMAGE ?>" class="avatar"/>
                     <?=
@@ -253,159 +198,151 @@ small{font-size:14px}
                     <label for="upload" class="uploadButton">Загрузить файл</label>
                     <input style="opacity: 0; z-index: -1;" type="file" accept="image/*" id="upload">
                     <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
-                    <div style="position:absolute;bottom:15px;width:100%;left: 0;right:0;z-index:99">
-                        <div style="color:#fff;background:#f39c12;width:50%;margin: 0 auto;border-radius:5px;">
-                            <small><b>Кратность: за <?=$catalogBaseGoods['units']. ' ' .$catalogBaseGoods['ed']?></b></small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row" style="margin-top:15px">
-                <div class="col-md-12 no-padding">
-                    <div class="col-md-6">
-                        <h5>КОРОТКО О ТОВАРЕ</h5>
-                        <small>Производитель: 
-                            <b>
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'brand');
-                            echo $field->begin();
-                            echo Html::activeTextInput($catalogBaseGoods, 'brand', ['placeholder'=>'Производитель', 'style'=>'width:40%;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                            //echo Html::error($catalogBaseGoods,'price', ['class' => 'help-block h6']);
-                            echo $field->end();
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
+                                <label class="control-label" for="dynamicmodel-sub1">Категория товара</label>
+                            <?php
+                            echo $form->field($categorys, 'sub1')->widget(Select2::classname(), [
+                                //'model'=>$categorys->sub1,
+                                'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(),'id', 'name'),
+                                'options' => ['placeholder' => 'Выберите...'],
+                                'theme' => "default",
+                                //'hideSearch' => true,
+                                'pluginOptions' => [
+                                    'allowClear' => true
+                                ],
+                            ])->label(false);
+                            echo Html::hiddenInput('catalogBaseGoods_id1', $catalogBaseGoods->category_id, ['id'=>'catalogBaseGoods_id1']);
                             ?>
-                            </b>
-                        </small><br>
-                        <small>Страна: 
-                            <b>
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'region');
-                            echo $field->begin();
-                            echo Html::activeTextInput($catalogBaseGoods, 'region', ['placeholder'=>'Страна', 'style'=>'width:40%;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                            //echo Html::error($catalogBaseGoods,'price', ['class' => 'help-block h6']);
-                            echo $field->end();
+                            <?php
+                            echo $form->field($categorys, 'sub2')->widget(DepDrop::classname(), [
+                               'options' => [],
+                               'type' => DepDrop::TYPE_SELECT2,
+                               'select2Options'=>[
+                                    'model'=>$categorys->sub2,
+                                    'theme' => "default",
+                                    //'hideSearch' => true,
+                                    'pluginOptions' => [
+                                        'allowClear' => true
+                                        ],
+                                    ],
+                                'pluginOptions'=>[
+                                    'depends'=>['dynamicmodel-sub1'],
+                                    'placeholder'=>'',
+                                    'url' => Url::to(['vendor/get-sub-cat']),
+                                    'loadingText' => 'Загрузка...',
+                                    'initialize' => true,
+                                    //'initDepends'=>['dynamicmodel-sub1'],
+                                    'params'=>['catalogBaseGoods_id1'],
+                                ]
+                            ])->label(false);
                             ?>
-                            </b>
-                        </small><br>
-                        <small>Единица измерения: 
-                            <b>
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'ed');
-                            echo $field->begin();
-                            echo Html::activeTextInput($catalogBaseGoods, 'ed', ['placeholder'=>'Единица измерения', 'style'=>'width:40%;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                            //echo Html::error($catalogBaseGoods,'ed', ['class' => 'help-block h6']);
-                            echo $field->end();
-                            ?>
-                            </b>
-                        </small><br>
-                        <small>Вес: 
-                            <b>
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'weight');
-                            echo $field->begin();
-                            echo Html::activeTextInput($catalogBaseGoods, 'weight', ['placeholder'=>'Вес', 'style'=>'width:40%;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                            //echo Html::error($catalogBaseGoods,'ed', ['class' => 'help-block h6']);
-                            echo $field->end();
-                            ?>
-                            </b>
-                        </small><br>
-                        <small>Кратность: 
-                            <b>
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'units');
-                            echo $field->begin();
-                            echo Html::activeTextInput($catalogBaseGoods, 'units', ['placeholder'=>'Кратность', 'style'=>'width:40%;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px']);
-                            //echo Html::error($catalogBaseGoods,'units', ['class' => 'help-block h6']);
-                            echo $field->end();
-                            ?>
-                            </b>
-                        </small>
-                    </div>   
-                    <div class="col-md-6">
-                        <h5>УСЛОВИЯ ДОСТАВКИ</h5>
-                        <small>Стоимость доставки: 
-                            <b>
-                                <?= empty($delivery['delivery_charge'])?'(Не указано)':$delivery['delivery_charge'] ?>
-                            </b>
-                        </small><br>
-                        <small>Стоимость заказа для бесплатной доставки: 
-                            <b>
-                                <?= empty($delivery['min_free_delivery_charge'])?'(Не указано)':$delivery['min_free_delivery_charge'] ?>
-                            </b>
-                        </small><br>
-                        <small>Минимальная стоимость заказа:
-                            <b>
-                                <?= empty($delivery['min_order_price'])?'(Не указано)':$delivery['min_order_price'] ?>
-                            </b>
-                        </small><br>
-                        <small>Дни доставки: 
-                            <b>
-                                <?php 
-                                $days = [];
-                                empty($delivery['mon'])?'':array_push($days, 'Пн'); 
-                                empty($delivery['tue'])?'':array_push($days, 'Вт'); 
-                                empty($delivery['wed'])?'':array_push($days, 'Ср'); 
-                                empty($delivery['thu'])?'':array_push($days, 'Чт'); 
-                                empty($delivery['fri'])?'':array_push($days, 'Пт'); 
-                                empty($delivery['sat'])?'':array_push($days, 'Сб'); 
-                                empty($delivery['sun'])?'':array_push($days, 'Вс'); 
-                                $i = 0;
-                                $i_max = count($days);
-                                if(!empty($i_max)){
-                                    foreach ($days as $day) {
-                                        $i++;
-                                        if($i >= $i_max){
-                                          echo $day;  
-                                        }else{
-                                          echo $day . ', ';  
-                                        }   
-                                    }
-                                }else{
-                                    echo '(Не указано)';
-                                }
-                                ?>
-                            </b>
-                        </small>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12" >
-                    <h5 style="margin-top: 20px;">КОММЕНТАРИЙ</h5>
-                    <small>
-                            <?php 
-                            $field = $form->field($catalogBaseGoods, 'note');
-                            echo $field->begin();
-                            echo Html::activeTextArea($catalogBaseGoods, 'note', ['placeholder'=>'Комментарий', 'style'=>'width:100%;
-                                      background: #fff;
-                                      border: 1px solid #d6d6d6;border-radius:ds3px;border: 1px solid #d6d6d6;border-radius:3px;padding:3px 3px','rows'=>4]);
-                            //echo Html::error($catalogBaseGoods,'note', ['class' => 'help-block h6']);
-                            echo $field->end();
-                            ?>  
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div> 
-</div>
-<div class="modal-footer" style="background:#f7f8f9 !important">
-    <div class="input-group  pull-left" style="width:150px">
-        <button class="form-control btn btn-outline-success market-place"><i class="icon fa fa-check"></i></button>                    
-        <span class="input-group-addon" style="background:#6ea262;border-color:#6ea262;color:#fff;border-radius:0px 3px 3px 0px;">
-            Разместить в F-MARKET?
-        </span>
-    </div>
-                            <?php //= Html::button('<i class="icon fa fa-check"></i>', ['class' => 'btn btn-outline-success market-place pull-left']) ?>
-    <?= Html::button($catalogBaseGoods->isNewRecord ? '<i class="icon fa fa-plus-circle"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', ['class' => $catalogBaseGoods->isNewRecord ? 'btn btn-success edit' : 'btn btn-success edit']) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+                            <?= $catalogBaseGoods->isNewRecord? $form->field($catalogBaseGoods, 'cat_id')->hiddenInput(['value'=> Yii::$app->request->get('id')])->label(false):'' ?>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="col-md-12" style="padding: 0px;">
+				<div class="col-md-6">
+                                        <?= $form->field($catalogBaseGoods, 'product', 
+    ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
+    textInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','style'=>'border-radius:3px']) ?>
+					<?= $form->field($catalogBaseGoods, 'article', 
+    ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
+    <span class="glyphicon glyphicon-question-sign" 
+    data-toggle="tooltip" 
+    title="Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара">
+    </span></span></div>{error}'])->
+    textInput(['placeholder' => 'АРТИКУЛ']) ?>
+                                    <?= $form->field($catalogBaseGoods, 'price', 
+    ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
+    <span class="glyphicon glyphicon-question-sign" 
+    data-toggle="tooltip" 
+    title="Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)">
+    </span></span></div>{error}'])->
+    textInput(['placeholder' => 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ']) ?>
+                                    <label class="control-label" for="">Ед измерения</label>
+                                    <?php
+                                    echo $form->field($catalogBaseGoods, 'ed')->widget(Select2::classname(), [
+                                        'model'=>$catalogBaseGoods->ed,
+                                        'data' => ArrayHelper::map(\common\models\MpEd::find()->asArray()->all(),'name', 'name'),
+                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'theme' => Select2::THEME_DEFAULT,
+                                        'pluginOptions' => [
+                                            'allowClear' => true,
+                                        ],
+                                     ])->label(false);?>
+                                    <?= $form->field($catalogBaseGoods, 'units', 
+    ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
+    <span class="glyphicon glyphicon-question-sign"
+    data-toggle="tooltip" 
+    title="Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)"></span></span></div>{error}'])->
+    textInput(['placeholder' => 'КРАТНОСТЬ ПОСТАВКИ']) ?>
+				</div>
+				<div class="col-md-6">
+                                    <label class="control-label" for="">Страна производитель</label>
+                                    <?php
+                                    echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
+                                        'model'=>$catalogBaseGoods->region,
+                                        'data' => ArrayHelper::map(\common\models\MpCountry::find()->asArray()->all(),'id', 'name'),
+                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'theme' => "default",
+                                        'pluginOptions' => [
+                                            'allowClear' => true
+                                        ],
+                                    ])->label(false);?>
+                                    <?= $form->field($catalogBaseGoods, 'brand', 
+    ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
+    textInput(['placeholder' => 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ','style'=>'border-radius:3px']) ?>
+                                    <?= $form->field($catalogBaseGoods, 'weight', 
+    ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
+    textInput(['placeholder' => 'ВЕС УПАКОВКИ','style'=>'border-radius:3px']) ?>
+                                    <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
+                    <div class="pull-left">
+                            <?=$form->field($catalogBaseGoods, 'market_place')->widget(CheckboxX::classname(), [
+                            //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                            'autoLabel' => true,
+                            'model' => $catalogBaseGoods,
+                            'attribute' => 'market_place',
+                            'pluginOptions'=>[
+                                'threeState'=>false,
+                                'theme' => 'krajee-flatblue',
+                                'enclosedLabel' => true,
+                                'size'=>'lg',
+                                ],
+                            'labelSettings' => [
+                                'label' => 'РАЗМЕСТИТЬ В F-MARKET',
+                                'position' => CheckboxX::LABEL_RIGHT
+                                ]
+                            ])->label(false);?>
+                            
+                        </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
+			<div class="pull-right" style="">
+			<?= Html::button($catalogBaseGoods->isNewRecord ? 
+                            '<i class="icon fa fa-plus-circle"></i> Создать' : 
+                            '<i class="icon fa fa-save"></i> Сохранить', 
+                            ['class' => $catalogBaseGoods->isNewRecord ? 
+                            'btn btn-success edit' : 'btn btn-success edit']) ?>
+                            <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+			</div>	
+		</div>
+	</div>
 </div>
 <?php ActiveForm::end(); ?>
+<?php
+$customJs = <<< JS
+//$('#dynamicmodel-sub1').val()==''?$('#dynamicmodel-sub1').addClass('hide'):
+//        $('#dynamicmodel-sub1').removeClass('hide')
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

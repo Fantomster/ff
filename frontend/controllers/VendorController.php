@@ -473,7 +473,7 @@ class VendorController extends DefaultController {
         $currentCatalog = $baseCatalog;
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status FROM catalog_base_goods "
+            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
                     . "WHERE cat_id = $baseCatalog AND "
                     . "deleted=0 AND (product LIKE :product or article LIKE :article)";
             $query = \Yii::$app->db->createCommand($sql);
@@ -481,7 +481,7 @@ class VendorController extends DefaultController {
                             . "WHERE cat_id = $baseCatalog AND "
                             . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
         } else {
-            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status FROM catalog_base_goods "
+            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
                     . "WHERE cat_id = $baseCatalog AND "
                     . "deleted=0";
             $query = \Yii::$app->db->createCommand($sql);
@@ -799,7 +799,7 @@ $importModel = new \common\models\upload\UploadForm();
     /*
      *  User product
      */
-
+/*
     public function actionAjaxUpdateProduct($id) {
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -820,28 +820,54 @@ $importModel = new \common\models\upload\UploadForm();
         }
 
         return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
+    }*/
+    public function actionAjaxCreateProductMarketPlace() {  
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $catalogBaseGoods = new CatalogBaseGoods();
+            $categorys = new \yii\base\DynamicModel([
+                'sub1','sub2'
+            ]);
+            $categorys->addRule(['sub1','sub2'], 'required',['message' => Yii::t('app', 'Укажите категорию товара')])
+                      ->addRule(['sub1','sub2'], 'integer');
+            if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
+                $catalogBaseGoods->status = 1;
+                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+                $catalogBaseGoods->supp_org_id = $currentUser->organization_id;   
+                $catalogBaseGoods->category_id = $categorys->sub2; 
+                if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
+                    $catalogBaseGoods->save();
+                    $message = 'Продукт добавлен!';
+                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                }
+            }
+        }
+        //return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', ['catalogBaseGoods'=>$catalogBaseGoods, 'categorys'=>$categorys]);
+       return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','categorys'));       
     }
     public function actionAjaxUpdateProductMarketPlace($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $currentOrgName = Organization::getOrganization($currentUser->organization)->name;
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
-        //var_dump($catalogBaseGoods);
-        $delivery = Delivery::find()->where(['vendor_id' => $currentUser->organization_id])->one();
         $categorys = new \yii\base\DynamicModel([
-            'sub1','sub2'
-        ]);
-        /*$listSub2Categorys = \common\models\MpCategory::find()->where(['parent'=>
-            \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category_id])->one()->parent
-            ])->asArray()->all();*/
-        $categorys->addRule(['sub1','sub2'], 'integer');
+                'sub1','sub2'
+            ]);
+        $categorys->addRule(['sub1','sub2'], 'required',['message' => Yii::t('app', 'Укажите категорию товара')])
+                  ->addRule(['sub1','sub2'], 'integer');
+        
+        if(!empty($catalogBaseGoods->category_id)){
+        $categorys->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id'=>$catalogBaseGoods->category_id])->one()->parent;
+        $categorys->sub2 = $catalogBaseGoods->category_id; 
+        }
         
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
-                if ($post && $catalogBaseGoods->validate()) {
-                    $catalogBaseGoods->category_id = $categorys->sub2;
+                $catalogBaseGoods->category_id = $categorys->sub2;
+                //var_dump($catalogBaseGoods);
+                if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
                     $catalogBaseGoods->save();
                     $message = 'Продукт обновлен!';
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
@@ -849,20 +875,30 @@ $importModel = new \common\models\upload\UploadForm();
             }
         }
         return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', 
-                compact('catalogBaseGoods','currentOrgName','delivery','categorys'));
+                compact('catalogBaseGoods','categorys'));
     }
     public function actionGetSubCat() {   
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
             $id = end($_POST['depdrop_parents']);
-            $list = \common\models\MpCategory::find()->andWhere(['parent'=>$id])->asArray()->all();
+            $list = \common\models\MpCategory::find()->select(['id','name'])->
+                    andWhere(['parent'=>$id])->
+                    asArray()->
+                    all();
             $selected  = null;
             if ($id != null && count($list) > 0) {
                 $selected = '';
-                foreach ($list as $i => $cat) {
-                    $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
-                    if ($i == 0) {
-                        $selected = $cat['id'];
+                if (!empty($_POST['depdrop_params'])) {
+                    $params = $_POST['depdrop_params'];
+                    $id1 = $params[0]; // get the value of model_id1
+                    foreach ($list as $i => $cat) {
+                        $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
+                        /*if ($i == 0){
+                            $aux = $cat['id'];
+                        }
+
+                        ($cat['id'] == $id1) ? $selected = $id1 : $selected = $aux;*/
+                       $selected = $id1; 
                     }
                 }
                 // Shows how you can preselect a value
@@ -870,29 +906,9 @@ $importModel = new \common\models\upload\UploadForm();
                 return;
             }
         }
-        echo Json::encode(['output' => '', 'selected'=>2]);
+        echo Json::encode(['output' => '', 'selected'=>'']);
     }
-    public function actionAjaxCreateProduct() {
-        if (Yii::$app->request->isAjax) {
-            $catalogBaseGoods = new CatalogBaseGoods();
-            $currentUser = User::findIdentity(Yii::$app->user->id);
-            
-            $post = Yii::$app->request->post();
-            if ($catalogBaseGoods->load($post)) {
-                $catalogBaseGoods->status = 1;
-
-                if ($catalogBaseGoods->validate()) {
-                    $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
-                    $catalogBaseGoods->save();
-
-                    $message = 'Продукт добавлен!';
-                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
-                }
-            }
-        }
-        return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
-        
-    }
+    
 
     public function actionChangecatalogprop() {
         if (Yii::$app->request->isAjax) {

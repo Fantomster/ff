@@ -384,8 +384,8 @@ class ClientController extends DefaultController {
                      * */
                     
                     foreach ($arrCatalog as $arrCatalogs) {
-                        $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
-                        $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
+                        $article = trim($arrCatalogs['dataItem']['article']);
+                        $product = trim($arrCatalogs['dataItem']['product']);
                         $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
                         if (substr($units, -3, 1) == '.') {

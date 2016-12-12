@@ -16,6 +16,7 @@ use kartik\checkbox\CheckboxX;
 use common\assets\CroppieAsset;
 CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
+kartik\select2\Select2Asset::register($this);
 ?>
 <?php
 $this->registerJs("           
@@ -27,7 +28,8 @@ $this->registerJs("
 	            
 	            reader.onload = function (e) {
 					$('.upload-avatar').addClass('ready');
-                                        $('.upload-demo-wrap').css('opacity','1').css('z-index','98')
+                                        $('.upload-demo-wrap').css('opacity','1').css('z-index','198');
+                                        console.log('ok');
 	            	uploadCrop.croppie('bind', {
 	            		url: e.target.result
 	            	}).then(function(){
@@ -54,7 +56,7 @@ $this->registerJs("
 				});
 			});
 		});
-                $(document).on('click', '#deleteAvatar', function() {
+                /*$(document).on('click', '#deleteAvatar', function() {
                     $('#loader-show').showLoading();
                     $.post(
                         '".Url::to(['settings/ajax-delete-avatar'])."'
@@ -63,7 +65,7 @@ $this->registerJs("
                         $('.avatar').attr('src', result); 
                         $('#loader-show').hideLoading();
                     });
-                });
+                });*/
         "
 );
 ?>
@@ -136,7 +138,9 @@ Modal::end();
 <section class="content-header">
     <h1>
         <i class="fa fa-list-alt"></i> Главный каталог
-        <small>Это ваш главный каталог</small>
+        <small>Это ваш главный каталог</small><label>
+                  <div class="icheckbox_minimal-blue" aria-checked="false" aria-disabled="false" style="position: relative;"><input type="checkbox" class="minimal" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div>
+                </label>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -185,13 +189,13 @@ Modal::end();
                 <?=
                 Modal::widget([
                     'id' => 'add-product',
-                    'clientOptions' => false,
+                    'clientOptions' => ['style'=>'margin-top:13.2px;'],
                     'toggleButton' => [
                         'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
                         'tag' => 'a',
-                        'data-target' => '#add-product',
+                        'data-target' => '#add-product-market-place',
                         'class' => 'btn btn-fk-success btn-sm pull-right',
-                        'href' => Url::to(['/vendor/ajax-create-product','id' => Yii::$app->request->get('id')]),
+                        'href' => Url::to(['/vendor/ajax-create-product-market-place','id' => Yii::$app->request->get('id')]),
                     ],
                 ])
                 ?><div class="btn-group pull-right" placement="left" style="margin-right: 10px">
@@ -327,7 +331,9 @@ Modal::end();
                             [
                             'attribute' => 'ed',
                             'label'=>'Ед. измерения',
-                            'value'=>'ed',
+                            'value'=>function ($data) {
+                            return $data['ed'];
+                            },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                             ],
                             [
@@ -354,12 +360,15 @@ Modal::end();
                             ], 
                             [
                                 'attribute' => '',
-                                'label' => '',
+                                'label' => 'F-MARKET',
                                 'format' => 'raw',
                                 'contentOptions' => ['style' => 'width:70px'],
-                                'headerOptions' => ['class' => 'text-success'],
+                                'headerOptions' => ['class' => 'text-center'],
                                 'value' => function ($data) {
-                                    $link = Html::a('<font style="font-weight:700;color:#555;">ƒ</font>-market', ['/vendor/ajax-update-product-market-place', 'id' => $data['id']], [
+                                    $data['market_place']==0?
+                                    $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', 
+                                            ['/vendor/ajax-update-product-market-place', 
+                                                'id' => $data['id']], [
                                         'data' => [
                                         'target' => '#add-product-market-place',
                                         'toggle' => 'modal',
@@ -367,7 +376,18 @@ Modal::end();
                                                   ],
                                         'class'=>'btn btn-sm btn-outline-success'
 
-                                    ]);
+                                    ]):
+                                    $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', 
+                                            ['/vendor/ajax-update-product-market-place', 
+                                                'id' => $data['id']], [
+                                        'data' => [
+                                        'target' => '#add-product-market-place',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                                  ],
+                                        'class'=>'btn btn-sm btn-success'
+
+                                    ]);    
                                     return $link;
                                 },
 
@@ -409,10 +429,10 @@ Modal::end();
                         ?> 
                         <div class="panel-body">
                             <div class="box-body table-responsive no-padding">
-                              
-                            <?php Pjax::begin(['enablePushState' => false, 'id' => 'products-list','timeout' => 10000,]); ?>
                             <?=GridView::widget([
                                 'dataProvider' => $dataProvider,
+                                'pjax' => true, // pjax is set to always true for this demo
+                                'pjaxSettings' =>['options'=>['id'=>'kv-unique-id-1'],'loadingCssClass'=>false], 
                                 'filterPosition' => false,
                                 'columns' => $gridColumnsBaseCatalog, 
                                 'options' => ['class' => 'table-responsive'],
@@ -423,13 +443,12 @@ Modal::end();
                                 'condensed' => false,
                                 'responsive' => false,
                                 'hover' => false,
-           'resizableColumns'=>false,
+                                'resizableColumns'=>false,
                                 'export' => [
                                     'fontAwesome' => true,
                                 ],
                             ]);
                             ?> 
-                            <?php Pjax::end(); ?>
                             </div>
                         </div>      
                         
@@ -514,10 +533,10 @@ window.clearTimeout(timer);
    timer = setTimeout(function () {
        $.pjax({
         type: 'GET',
-        push: false,
+        push: true,
         timeout: 10000,
         url: 'index.php?r=vendor/basecatalog&id=$currentCatalog',
-        container: '#products-list',
+        container: '#kv-unique-id-1',
         data: {searchString: $('#search').val()}
       })
    }, 700);
@@ -640,7 +659,7 @@ $(".del-product").live("click", function(e){
 	        success: function(response) {
 		        if(response.success){
                         //$.pjax.reload({container: "#clients-list"});
-			        $.pjax.reload({container: "#products-list"}); 
+			        $.pjax.reload({container: "#kv-unique-id-1"}); 
 			        }else{
 				    console.log('Что-то пошло не так');    
 			        }
@@ -661,6 +680,9 @@ $("#video").attr('src', url);
 $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
     $(this).data("bs.modal", null);
 })
+$("body").on("show.bs.modal", "#add-product-market-place", function() {
+    $('#add-product-market-place>.modal-dialog').css('margin-top','13px');
+})        
 $("#add-product-market-place").on("click", ".edit", function() {
     var form = $("#marketplace-product-form");
     $('#loader-show').showLoading();
@@ -671,10 +693,12 @@ $("#add-product-market-place").on("click", ".edit", function() {
             .done(function(result) {
             $('#loader-show').hideLoading();
             form.replaceWith(result);
-        
+        $.pjax.reload({container: "#kv-unique-id-1"});
         });
         return false;
     });
+  $('#add-product-market-place').removeAttr('tabindex');
+  
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

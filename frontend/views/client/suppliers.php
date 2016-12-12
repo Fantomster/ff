@@ -214,7 +214,7 @@ $gridColumnsCatalog = [
                     $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
                         'id' => $data["supp_org_id"],
                             ], [
-                        'class' => 'btn btn-default btn-sm',
+                        'class' => 'btn btn-default btn-sm resend-invite',
                         'data-pjax' => 0,]) : $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
                         'class' => 'btn btn-default btn-sm',
                         'disabled' => 'disabled']);

@@ -25,7 +25,7 @@ $this->registerJs(
                 var form = $("#searchForm");
                 form.submit();
             });
-            $("#createP").on("click", ".add-to-cart", function(e) {
+            $("#createP, #showDetails").on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
                 $("#loader-show").showLoading();
                 quantity = $(this).parent().parent().find(".quantity").val();
@@ -62,7 +62,7 @@ $this->registerJs(
                 });
                 return false;
             });
-            $("body").on("hidden.bs.modal", "#changeQuantity", function() {
+            $("body").on("hidden.bs.modal", "#changeQuantity, #showDetails", function() {
                 $(this).data("bs.modal", null);
             });
             $("body").on("submit", "#quantityForm", function() {
@@ -222,7 +222,7 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'attribute' => 'product',
                                     'value' => function($data) {
-                                        $note = empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
+                                        $note = "";//empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
                                         $productUrl = Html::a($data['product'], Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
                                                     'data' => [
                                                         'target' => '#showDetails',
@@ -343,5 +343,6 @@ $this->registerJs(
                         Modal::widget([
                             'id' => 'showDetails',
                             'clientOptions' => false,
+                            'size' => 'modal-lg',
                         ])
                         ?>

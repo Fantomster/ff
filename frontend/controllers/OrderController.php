@@ -212,9 +212,9 @@ class OrderController extends DefaultController {
             $baseProduct = CatalogBaseGoods::findOne(['id' => $get['id'], 'cat_id' => $get['cat_id']]);
             $price = $baseProduct->price;
         }
-        $vendorName = $baseProduct->vendor->name;
+        $vendor = $baseProduct->vendor;
         
-        return $this->renderPartial("_order-details", compact('baseProduct', 'price', 'vendorName', 'productId', 'catId'));
+        return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId'));
     }
 
     public function actionAjaxRemovePosition() {

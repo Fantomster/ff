@@ -435,6 +435,9 @@ Modal::end();
                                 'pjaxSettings' =>['options'=>['id'=>'kv-unique-id-1'],'loadingCssClass'=>false], 
                                 'filterPosition' => false,
                                 'columns' => $gridColumnsBaseCatalog, 
+                                /*'rowOptions' => function ($data, $key, $index, $grid) {
+                                        return ['id' => $data['id'], 'onclick' => 'alert(this.id);'];
+                                },*/
                                 'options' => ['class' => 'table-responsive'],
                                 'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                                 'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],

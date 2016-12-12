@@ -829,17 +829,30 @@ $importModel = new \common\models\upload\UploadForm();
             ]);
             $categorys->addRule(['sub1','sub2'], 'required',['message' => Yii::t('app', 'Укажите категорию товара')])
                       ->addRule(['sub1','sub2'], 'integer');
+            
             if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
                 $catalogBaseGoods->status = 1;
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;   
-                $catalogBaseGoods->category_id = $categorys->sub2; 
-                if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
-                    $catalogBaseGoods->save();
-                    $message = 'Продукт добавлен!';
-                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                
+                var_dump($catalogBaseGoods);
+                if($catalogBaseGoods->market_place==1){
+                    if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
+                        $catalogBaseGoods->category_id = $categorys->sub2; 
+                        $catalogBaseGoods->save();
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                    }
+                }else{
+                    if ($post && $catalogBaseGoods->validate()) { 
+                        $catalogBaseGoods->category_id = $categorys->sub2;
+                        $catalogBaseGoods->market_place = 0;
+                        $catalogBaseGoods->save();
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                    }   
                 }
             }
         }
@@ -865,12 +878,22 @@ $importModel = new \common\models\upload\UploadForm();
             if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
-                $catalogBaseGoods->category_id = $categorys->sub2;
+                
                 //var_dump($catalogBaseGoods);
-                if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
-                    $catalogBaseGoods->save();
-                    $message = 'Продукт обновлен!';
-                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                if($catalogBaseGoods->market_place==1){
+                    if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
+                        $catalogBaseGoods->category_id = $categorys->sub2;
+                        $catalogBaseGoods->save();
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                    }
+                }else{
+                    if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $categorys->sub2;
+                        $catalogBaseGoods->save();
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('catalogs/_success', ['message' => $message]);
+                    }   
                 }
             }
         }

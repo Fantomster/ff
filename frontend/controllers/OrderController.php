@@ -213,7 +213,7 @@ class OrderController extends DefaultController {
             $price = $baseProduct->price;
         }
         $vendor = $baseProduct->vendor;
-        
+
         return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId'));
     }
 
@@ -296,6 +296,48 @@ class OrderController extends DefaultController {
         if (Yii::$app->request->get()) {
             $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             return $this->renderAjax('_add-comment', compact('order'));
+        }
+    }
+
+    public function actionAjaxCancelOrder($order_id = null) {
+
+        $initiator = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            $order_id = Yii::$app->request->post('order_id');
+            switch ($initiator->type_id) {
+                case Organization::TYPE_RESTAURANT:
+                    $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
+                    break;
+                case Organization::TYPE_SUPPLIER:
+                    $order = Order::find()->where(['id' => $order_id, 'vendor_id' => $initiator->id])->one();
+                    break;
+            }
+            if ($order && $order->load(Yii::$app->request->post())) {
+                $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
+                $systemMessage = $initiator->name . ' отменил заказ!';
+                $danger = true;
+                $order->save();
+                if (isset($order->accepted_by_id)) {
+                    $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
+                }
+                $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return $this->successNotify("Заказ отменен!");
+            }
+            return false;
+        }
+
+        if (Yii::$app->request->get()) {
+            switch ($initiator->type_id) {
+                case Organization::TYPE_RESTAURANT:
+                    $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
+                    break;
+                case Organization::TYPE_SUPPLIER:
+                    $order = Order::find()->where(['id' => $order_id, 'vendor_id' => $initiator->id])->one();
+                    break;
+            }
+            return $this->renderAjax('_cancel-order', compact('order'));
         }
     }
 

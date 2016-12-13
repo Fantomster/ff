@@ -6,6 +6,7 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+use yii\bootstrap\Modal;
 
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
@@ -37,7 +38,7 @@ $js = <<<JS
                     dataEdited = 0;
                     $("#loader-show").hideLoading();
                 });
-            } else {
+            } else if ($(this).data("action") != "cancel") {
                 $("#loader-show").showLoading();
                 $.post(
                     "$urlOrderAction",
@@ -73,7 +74,7 @@ $js = <<<JS
                 $('#toPrint').printThis();
             });
         });
-        $('.content').on('submit', function(e) {
+        $('.content').on('submit', '#editOrder', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
             $("#loader-show").showLoading();
@@ -99,6 +100,28 @@ $js = <<<JS
                 $("#loader-show").hideLoading();
             });
         });
+
+        $("#cancelOrder").on("click", ".saveComment", function() {
+            $("#loader-show").showLoading();
+            var form = $("#commentForm");
+            $.post(
+                form.attr("action"),
+                form.serialize()
+            )
+            .done(function (result) {
+                if (result) {
+                    $.notify(result.growl.options, result.growl.settings);
+                }
+                $("#loader-show").hideLoading();
+            });
+        });
+        
+        $("body").on("hidden.bs.modal", "#changeComment", function() {
+            $(this).data("bs.modal", null);
+        });
+        $("body").on("submit", "#commentForm", function() {
+            return false;
+        });        
         $(document).on('pjax:complete', function() {
             dataEdited = 0;
         })
@@ -280,3 +303,9 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
         </div>
     </div>
 </div>
+    <?=
+    Modal::widget([
+        'id' => 'cancelOrder',
+        'clientOptions' => false,
+    ])
+    ?>

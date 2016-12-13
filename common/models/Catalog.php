@@ -55,6 +55,7 @@ class Catalog extends \yii\db\ActiveRecord
             [['supp_org_id', 'type', 'status'], 'integer'],
             [['created_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
+            ['type', 'uniqueBaseCatalog'],
         ];
     }
     /**
@@ -71,6 +72,16 @@ class Catalog extends \yii\db\ActiveRecord
             'created_at' => 'Create Datetime',
         ];
     }
+    
+    public function uniqueBaseCatalog() {
+        if ($this->type == 1) {
+            $baseCheck = self::find()->where(['supp_org_id' => $this->supp_org_id, 'type' => 1])->all();
+            if ($baseCheck) {
+                $this->addError('type', 'Может быть только один базовый каталог');
+            }
+        }
+    }
+    
     public static function getNameCatalog($id){
 	$catalogName = Catalog::find()
 	->where(['id' => $id])->one();  

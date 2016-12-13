@@ -837,7 +837,7 @@ $importModel = new \common\models\upload\UploadForm();
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;   
                 
-                var_dump($catalogBaseGoods);
+                //var_dump($catalogBaseGoods);
                 if($catalogBaseGoods->market_place==1){
                     if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
                         $catalogBaseGoods->category_id = $categorys->sub2; 

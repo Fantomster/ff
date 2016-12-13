@@ -317,7 +317,7 @@ label {
                             'pluginOptions'=>[
                                 'threeState'=>false,
                                 'theme' => 'krajee-flatblue',
-                                'enclosedLabel' => true,
+                                'enclosedLabel' => false,
                                 'size'=>'lg',
                                 ],
                             'labelSettings' => [

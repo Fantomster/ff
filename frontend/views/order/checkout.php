@@ -48,26 +48,26 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
-            $("#checkout").on("click", "#createAll", function(e) {
-                $("#loader-show").showLoading();
-                $.post(
-                    "' . Url::to(['/order/ajax-make-order']) . '",
-                    {"all":1 }
-                ).done(function(result) {
-                    if (result) {
-                        //$.pjax.reload({container: "#checkout"});
-                        $.notify(result.growl.options, result.growl.settings);
-                    }
-                    $("#loader-show").hideLoading();
-                });
-            });
+//            $("#checkout").on("click", "#createAll", function(e) {
+//                $("#loader-show").showLoading();
+//                $.post(
+//                    "' . Url::to(['/order/ajax-make-order']) . '",
+//                    {"all":1 }
+//                ).done(function(result) {
+//                    if (result) {
+//                        //$.pjax.reload({container: "#checkout"});
+//                        $.notify(result.growl.options, result.growl.settings);
+//                    }
+//                    $("#loader-show").hideLoading();
+//                });
+//            });
             $("#checkout").on("click", "#createAll", function(e) {
                 e.preventDefault();
                 $("#loader-show").showLoading();
                 var form = $("#cartForm");
-                extData = "&action=make"; 
+                extData = "&all=1"; 
                 $.post(
-                    form.attr("action"),
+                    "' . Url::to(['/order/ajax-make-order']) . '",
                     form.serialize() + extData
                 ).done(function(result) {
                     dataEdited = 0;

@@ -378,6 +378,8 @@ class OrderController extends DefaultController {
         }
 
         if (Yii::$app->request->post()) {
+            $content = Yii::$app->request->post('OrderContent');
+            $this->saveCartChanges($content);
             if (!Yii::$app->request->post('all')) {
                 $order_id = Yii::$app->request->post('id');
                 $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
@@ -1050,6 +1052,7 @@ class OrderController extends DefaultController {
             if ($product->quantity == 0) {
                 $product->delete();
             } else {
+                $product->quantity = $position['quantity'];
                 $product->save();
             }
         }

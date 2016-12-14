@@ -36,7 +36,7 @@ echo GridView::widget([
                 return TouchSpin::widget([
                             'name' => "OrderContent[" . $data["id"] . "][quantity]",
                             'pluginOptions' => [
-                                'initval' => 1,
+                                'initval' => $data["quantity"],
                                 'min' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.001,
                                 'max' => PHP_INT_MAX,
                                 'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
@@ -48,7 +48,7 @@ echo GridView::widget([
                                 'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                             ],
                             'options' => ['class' => 'quantity form-control '],
-                ]);
+                ]) . Html::hiddenInput("OrderContent[$data[id]][id]", $data["id"]);
                 // return Html::textInput('', 1, ['class' => 'quantity form-control']);
             },
                     'label' => 'Количество',

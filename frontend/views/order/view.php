@@ -54,7 +54,7 @@ $js = <<<JS
             dataEdited = 1;
         });
         $(document).on('click', 'a', function(e) {
-            if (dataEdited) {
+            if (dataEdited && ($(this).data("action") !== undefined)) {
                 e.preventDefault();
                 link = $(this).attr('href');
                 if (link != '#') {

@@ -17,7 +17,9 @@ echo Html::hiddenInput('order_id', $order->id);
 </div>
 <div class="modal-body form-inline" style="text-align: center;"> 
     <?=
-        $form->field($order, 'comment', ['options' => ['style' => 'width: 100%;']])->label(false)->textarea(['style' => 'width: 100%; min-width: 300px; height: 100px;']);
+        $form->field($order, 'comment', ['options' => ['style' => 'width: 100%;']])
+            ->label(false)
+            ->textarea(['style' => 'width: 100%; min-width: 300px; height: 100px;', 'placeholder' => 'Комментарий']);
     ?>
 </div>
 <div class="modal-footer">

@@ -54,4 +54,24 @@ class MpCountry extends \yii\db\ActiveRecord
             'location' => 'Location',
         ];
     }
+    
+    public function ajaxsearch($q){
+        $query = self::find();
+        $query->select(['name','id']);
+        if($q!='*'){
+            $query->andFilterWhere(['like', 'name', $q]);
+        }
+
+        $query->orderBy('name');
+        $res=$query->all();
+        $result=[];
+        if(!empty($res)){
+            foreach($res as $row){
+                /**@var countrys $row **/
+                $result[]=['id'=>$row->id,'name'=>$row->name];
+            }
+        }
+        $out=['more'=>false,'results'=>$result];
+        return $out;
+    }
 }

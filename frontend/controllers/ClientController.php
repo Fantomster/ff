@@ -374,7 +374,7 @@ class ClientController extends DefaultController {
                         $lastInsert_base_cat_id = RestaurantChecker::getBaseCatalog($get_supp_org_id);
                         $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
                     }
-                    $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'" . Organization::getOrganization($currentUser->organization_id)->name . "'," . Catalog::CATALOG . ",NOW())";
+                    $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($get_supp_org_id,'" . Organization::getOrganization($currentUser->organization_id)->name . "'," . Catalog::CATALOG . ",NOW(),1)";
                     \Yii::$app->db->createCommand($sql)->execute();
                     $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
                     /**

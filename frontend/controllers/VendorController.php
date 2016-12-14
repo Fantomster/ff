@@ -864,6 +864,7 @@ $importModel = new \common\models\upload\UploadForm();
         //return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', ['catalogBaseGoods'=>$catalogBaseGoods, 'categorys'=>$categorys]);
        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','categorys','countrys'));       
     }
+    
     public function actionAjaxUpdateProductMarketPlace($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
@@ -907,6 +908,15 @@ $importModel = new \common\models\upload\UploadForm();
         }
         return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', 
                 compact('catalogBaseGoods','categorys','countrys'));
+    }
+     public function actionMpCountryList($q){
+        if(Yii::$app->request->isAjax){
+            $model=new \common\models\MpCountry();
+            Yii::$app->response->format=Response::FORMAT_JSON;
+                    //return 'aaa';
+            return $model->ajaxsearch($q);
+        }
+        return false;
     }
     public function actionGetSubCat() {   
         $out = [];

@@ -8,6 +8,8 @@ use kartik\select2\Select2;
 use yii\web\View;
 use yii\widgets\Pjax;
 use kartik\checkbox\CheckboxX;
+use yii\web\JsExpression;
+use \yii\helpers\Json;
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
 ?>
@@ -198,7 +200,7 @@ label {
                     <label for="upload" class="uploadButton">Загрузить файл</label>
                     <!--input style="opacity: 0; z-index: -1;" type="file" accept="image/*" id="upload"-->
                     <?= $form->field($catalogBaseGoods, 'image',
-                            ['template'=>' {label}<div class="input-group">{input}</div>{error}'])
+                            ['template'=>'<div class="input-group">{input}</div>{error}'])
                             ->fileInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','id'=>'upload','accept'=>'image/*','style'=>'opacity: 0; z-index: -1;position: absolute;left: -9999px;']) ?>
                     <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
 		</div>
@@ -288,7 +290,7 @@ label {
 				</div>
 				<div class="col-md-6">
                                     <label class="control-label" for="">Страна производитель</label>
-                                    <?php
+                                    <?php 
                                     echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
                                         'model'=>$catalogBaseGoods->region,
                                         'data' => ArrayHelper::map($countrys,'id', 'name'),
@@ -296,8 +298,35 @@ label {
                                         'theme' => "default",
                                         'pluginOptions' => [
                                             'allowClear' => true,
+                                            //'tags' => true,
                                         ],
-                                    ])->label(false);?>
+                                    ])->label(false);
+                                    /*       
+                                    echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
+                                        'language'=>'ru',
+                                        'options' => ['placeholder' => 'Страна ...'], 
+                                        'pluginOptions' => [
+                                            'minimumInputLength' => 1,
+                                            'allowClear' => false,
+                                            'ajax' => [
+                                                'url' => \yii\helpers\Url::toRoute(['vendor/mp-country-list']),
+                                                'dataType' => 'json',
+                                                //'type' => 'GET',
+                                                'data' => new \yii\web\JsExpression('function(term,page) { return {wq:term}; }'),
+                                                'results' => new \yii\web\JsExpression('function(data,page) { return {results:data.results}; }'),
+                                                'initSelection' => new \yii\web\JsExpression('function(element,callback){
+                                                return callback('.
+                                                   ($model->isNewRecord
+                                                      ? '{"id":null,"text":""}'
+                                                     :Json::encode(["id"=>$model->streetid,"text"=>$model->name."[".$model->city->name."]"])
+                                                                       ).')
+                                                  }')
+                                            ],
+                                           
+                                        ], 
+                                    ])->label(false);*/
+                                    ?>
+                                    
                                     <?= $form->field($catalogBaseGoods, 'brand', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
     textInput(['placeholder' => 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ','style'=>'border-radius:3px']) ?>
@@ -311,9 +340,7 @@ label {
 	</div>
 	<div class="row">
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
-                    <div class="pull-left" style="border: 2px dotted #84bf76;
-    padding: 10px 10px 0px 10px;
-    margin-top: 0;">
+                    <div class="pull-left" style="border: 2px dotted #84bf76;padding: 10px 10px 0px 10px;margin-top: 0;border-radius:8px;">
                             <?=$form->field($catalogBaseGoods, 'market_place')->widget(CheckboxX::classname(), [
                             //'initInputType' => CheckboxX::INPUT_CHECKBOX,
                             'autoLabel' => true,
@@ -327,7 +354,8 @@ label {
                                 ],
                             'labelSettings' => [
                                 'label' => 'РАЗМЕСТИТЬ В F-MARKET',
-                                'position' => CheckboxX::LABEL_RIGHT
+                                'position' => CheckboxX::LABEL_RIGHT,
+                                'options' =>['style'=>'font-weight: 700;']
                                 ]
                             ])->label(false);?>
                             

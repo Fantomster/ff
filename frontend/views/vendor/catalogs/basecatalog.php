@@ -436,7 +436,7 @@ Modal::end();
                                 'filterPosition' => false,
                                 'columns' => $gridColumnsBaseCatalog, 
                                 /*'rowOptions' => function ($data, $key, $index, $grid) {
-                                        return ['id' => $data['id'], 'onclick' => 'alert(this.id);'];
+                                        return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
                                 },*/
                                 'options' => ['class' => 'table-responsive'],
                                 'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
@@ -445,7 +445,7 @@ Modal::end();
                                 'striped' => true,
                                 'condensed' => false,
                                 'responsive' => false,
-                                'hover' => false,
+                                'hover' => true,
                                 'resizableColumns'=>false,
                                 'export' => [
                                     'fontAwesome' => true,

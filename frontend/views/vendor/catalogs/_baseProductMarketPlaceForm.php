@@ -196,7 +196,10 @@ label {
                         ]);
                     ?>
                     <label for="upload" class="uploadButton">Загрузить файл</label>
-                    <input style="opacity: 0; z-index: -1;" type="file" accept="image/*" id="upload">
+                    <!--input style="opacity: 0; z-index: -1;" type="file" accept="image/*" id="upload"-->
+                    <?= $form->field($catalogBaseGoods, 'image',
+                            ['template'=>' {label}<div class="input-group">{input}</div>{error}'])
+                            ->fileInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','id'=>'upload','accept'=>'image/*','style'=>'opacity: 0; z-index: -1;position: absolute;left: -9999px;']) ?>
                     <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
 		</div>
 	</div>
@@ -288,11 +291,11 @@ label {
                                     <?php
                                     echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
                                         'model'=>$catalogBaseGoods->region,
-                                        'data' => ArrayHelper::map(\common\models\MpCountry::find()->asArray()->all(),'id', 'name'),
+                                        'data' => ArrayHelper::map($countrys,'id', 'name'),
                                         'options' => ['placeholder' => 'Выберите...'],
                                         'theme' => "default",
                                         'pluginOptions' => [
-                                            'allowClear' => true
+                                            'allowClear' => true,
                                         ],
                                     ])->label(false);?>
                                     <?= $form->field($catalogBaseGoods, 'brand', 
@@ -308,7 +311,9 @@ label {
 	</div>
 	<div class="row">
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
-                    <div class="pull-left">
+                    <div class="pull-left" style="border: 2px dotted #84bf76;
+    padding: 10px 10px 0px 10px;
+    margin-top: 0;">
                             <?=$form->field($catalogBaseGoods, 'market_place')->widget(CheckboxX::classname(), [
                             //'initInputType' => CheckboxX::INPUT_CHECKBOX,
                             'autoLabel' => true,
@@ -327,7 +332,7 @@ label {
                             ])->label(false);?>
                             
                         </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
-			<div class="pull-right" style="">
+			<div class="pull-right" style="margin-top: 10px;">
 			<?= Html::button($catalogBaseGoods->isNewRecord ? 
                             '<i class="icon fa fa-plus-circle"></i> Создать' : 
                             '<i class="icon fa fa-save"></i> Сохранить', 

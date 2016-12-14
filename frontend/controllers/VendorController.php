@@ -824,9 +824,14 @@ $importModel = new \common\models\upload\UploadForm();
     public function actionAjaxCreateProductMarketPlace() {  
             $currentUser = User::findIdentity(Yii::$app->user->id);
             $catalogBaseGoods = new CatalogBaseGoods();
+            $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
+	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
+            $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+            
             $categorys = new \yii\base\DynamicModel([
                 'sub1','sub2'
             ]);
+            
             $categorys->addRule(['sub1','sub2'], 'required',['message' => Yii::t('app', 'Укажите категорию товара')])
                       ->addRule(['sub1','sub2'], 'integer');
             
@@ -857,11 +862,14 @@ $importModel = new \common\models\upload\UploadForm();
             }
         }
         //return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', ['catalogBaseGoods'=>$catalogBaseGoods, 'categorys'=>$categorys]);
-       return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','categorys'));       
+       return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','categorys','countrys'));       
     }
     public function actionAjaxUpdateProductMarketPlace($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
+	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
+            $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
         $categorys = new \yii\base\DynamicModel([
                 'sub1','sub2'
             ]);
@@ -898,7 +906,7 @@ $importModel = new \common\models\upload\UploadForm();
             }
         }
         return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', 
-                compact('catalogBaseGoods','categorys'));
+                compact('catalogBaseGoods','categorys','countrys'));
     }
     public function actionGetSubCat() {   
         $out = [];

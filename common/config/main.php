@@ -4,6 +4,7 @@ return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'sourceLanguage' => 'ru_ru',
     'language' => 'ru',
+    'timeZone' => 'Europe/Moscow',
     'charset' => 'utf-8',
     'components' => [
         'cache' => [

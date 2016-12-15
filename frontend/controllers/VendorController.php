@@ -864,6 +864,7 @@ $importModel = new \common\models\upload\UploadForm();
         //return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', ['catalogBaseGoods'=>$catalogBaseGoods, 'categorys'=>$categorys]);
        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','categorys','countrys'));       
     }
+    
     public function actionAjaxUpdateProductMarketPlace($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
@@ -908,6 +909,15 @@ $importModel = new \common\models\upload\UploadForm();
         return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', 
                 compact('catalogBaseGoods','categorys','countrys'));
     }
+     public function actionMpCountryList($q){
+        if(Yii::$app->request->isAjax){
+            $model=new \common\models\MpCountry();
+            Yii::$app->response->format=Response::FORMAT_JSON;
+                    //return 'aaa';
+            return $model->ajaxsearch($q);
+        }
+        return false;
+    }
     public function actionGetSubCat() {   
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
@@ -921,18 +931,22 @@ $importModel = new \common\models\upload\UploadForm();
                 $selected = '';
                 if (!empty($_POST['depdrop_params'])) {
                     $params = $_POST['depdrop_params'];
-                    $id1 = $params[0]; // get the value of model_id1
+                    $id1 = $params[0]; // get the value of 1
+                    $id2 = $params[1]; // get the value of 2
                     foreach ($list as $i => $cat) {
                         $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
-                        /*if ($i == 0){
-                            $aux = $cat['id'];
+                        //if ($i == 0){$aux = $cat['id'];}
+                        //($cat['id'] == $id1) ? $selected = $id1 : $selected = $aux;
+                       //$selected = $id1; 
+                        if($cat['id']==$id1){
+                            $selected = $cat['id'];
                         }
-
-                        ($cat['id'] == $id1) ? $selected = $id1 : $selected = $aux;*/
-                       $selected = $id1; 
+                        if($cat['id']==$id2){
+                            $selected = $id2;
+                        }
                     }
+                    
                 }
-                // Shows how you can preselect a value
                 echo Json::encode(['output' => $out, 'selected'=>$selected]);
                 return;
             }

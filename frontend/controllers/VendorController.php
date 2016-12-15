@@ -334,7 +334,7 @@ class VendorController extends DefaultController {
                     exit;
                 }
             }
-            $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW())";
+            $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
             \Yii::$app->db->createCommand($sql)->execute();
             $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 
@@ -660,7 +660,7 @@ $importModel = new \common\models\upload\UploadForm();
             $transaction = Yii::$app->db->beginTransaction();
             try {
 	            
-	        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW())";
+	        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
             \Yii::$app->db->createCommand($sql)->execute();
             $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
             

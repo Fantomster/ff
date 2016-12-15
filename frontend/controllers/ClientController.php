@@ -367,8 +367,8 @@ class ClientController extends DefaultController {
                      *    
                      * */
                     if ($check['eventType'] == 5) {
-                        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) "
-                                . "VALUES ($get_supp_org_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW())";
+                        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) "
+                                . "VALUES ($get_supp_org_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
                         \Yii::$app->db->createCommand($sql)->execute();
                         $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
                     } else {
@@ -445,8 +445,10 @@ class ClientController extends DefaultController {
                         if (!empty($note)) {
                             $sql = "insert into " . GoodsNotes::tableName() . "(
 				      `rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES (
-				      $currentUser->organization_id, $lastInsert_base_goods_id, '$note',NOW())";
-                            \Yii::$app->db->createCommand($sql)->execute();
+				      $currentUser->organization_id, $lastInsert_base_goods_id, ':note',NOW())";
+                            $command =\Yii::$app->db->createCommand($sql);
+                            $command->bindParam(":note", $note, \PDO::PARAM_STR);
+                            $command->execute();
                         }
                     }
 
@@ -458,7 +460,7 @@ class ClientController extends DefaultController {
                     $relationSuppRest->rest_org_id = $currentUser->organization_id;
                     $relationSuppRest->supp_org_id = $get_supp_org_id;
                     $relationSuppRest->cat_id = $lastInsert_cat_id;
-                    $relationSuppRest->status = RelationSuppRest::CATALOG_STATUS_ON;
+                    $relationSuppRest->status = 1;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
                     $relationSuppRest->save();
                     /**
@@ -621,7 +623,7 @@ class ClientController extends DefaultController {
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::BASE_CATALOG) {
+        if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::BASE_CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status "
                     . " FROM `catalog` "
                     . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
@@ -633,7 +635,7 @@ class ClientController extends DefaultController {
                             . " WHERE "
                             . " catalog_base_goods.cat_id = $id and deleted != 1")->queryScalar();
         }
-        if (Catalog::find()->where(['id' => $cat_id])->one()->type == Catalog::CATALOG) {
+        if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status "
                     . " FROM `catalog` "
                     . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "

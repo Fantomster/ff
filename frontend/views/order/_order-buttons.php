@@ -2,12 +2,23 @@
 
 use common\models\Order;
 use common\models\Organization;
+use yii\helpers\Html;
 
 $statusInfo = '';
 $actionButtons = '';
+$btnCancel = Html::a('<i class="icon fa fa-ban"></i> Отменить', ['order/ajax-cancel-order', 'order_id' => $order->id], [
+            'class' => "btn btn-outline-danger btnOrderAction",
+            'data' => [
+                'target' => '#cancelOrder',
+                'toggle' => 'modal',
+                'backdrop' => 'static',
+                'action' => 'cancel',
+            ],
+            'title' => 'Отменить заказ',
+        ]);
 switch ($order->status) {
     case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-        $actionButtons .= '<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+        $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
         if ($organizationType == Organization::TYPE_RESTAURANT) {
             $statusInfo .= '<a href="#" class="btn btn-warning disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
         } else {
@@ -15,7 +26,7 @@ switch ($order->status) {
         }
         break;
     case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-        $actionButtons .= '<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+        $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
         if ($organizationType == Organization::TYPE_SUPPLIER) {
             $statusInfo .= '<a href="#" class="btn btn-warning disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
         } else {
@@ -23,7 +34,7 @@ switch ($order->status) {
         }
         break;
     case Order::STATUS_PROCESSING:
-        $actionButtons .= '<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+        $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
         if ($organizationType == Organization::TYPE_SUPPLIER) {
             $statusInfo .= '<a href="#" class="btn btn-processing disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Исполняется</a>';
         } else {
@@ -47,7 +58,7 @@ switch ($order->status) {
 <p class="text-left m-b-sm"><b>Стоимость доставки:</b><br>
     <?= $order->vendor->delivery->delivery_charge ?></p>
 <p class="text-left m-b-sm"><b>Стоимость заказа:</b><br>
-<?= $order->total_price ?></p>
+    <?= $order->total_price ?></p>
 <div class="row">
     <div class="col-md-12"><?= $statusInfo ?></div>
 </div>

@@ -29,7 +29,9 @@ $this->registerJs('
         });
         $(".box-body").on("click", "td", function (e) {
             var id = $(this).parent("tr").data("id");
-            location.href = "' . Url::to(['order/view']) . '&id=" + id;
+            if (id !== undefined) {
+                location.href = "' . Url::to(['order/view']) . '&id=" + id;
+            }
         });
     });
         ');

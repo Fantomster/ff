@@ -71,6 +71,7 @@ class OrderController extends DefaultController {
                             'ajax-make-order',
                             'ajax-change-quantity',
                             'ajax-remove-position',
+                            'ajax-show-details',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -113,7 +114,7 @@ class OrderController extends DefaultController {
         $searchModel->catalogs = $catalogs;
 
         $dataProvider = $searchModel->search($params);
-        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString'])? $params['OrderCatalogSearch']['searchString'] : null;
+        $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
@@ -198,6 +199,24 @@ class OrderController extends DefaultController {
         return true; //$this->renderPartial('_orders', compact('orders'));
     }
 
+    public function actionAjaxShowDetails() {
+        $get = Yii::$app->request->get();
+        $productId = $get['id'];
+        $catId = $get['cat_id'];
+        $product = CatalogGoods::findOne(['base_goods_id' => $productId, 'cat_id' => $catId]);
+
+        if ($product) {
+            $baseProduct = $product->baseProduct;
+            $price = $product->price;
+        } else {
+            $baseProduct = CatalogBaseGoods::findOne(['id' => $get['id'], 'cat_id' => $get['cat_id']]);
+            $price = $baseProduct->price;
+        }
+        $vendor = $baseProduct->vendor;
+
+        return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId'));
+    }
+
     public function actionAjaxRemovePosition() {
 
         $client = $this->currentUser->organization;
@@ -280,6 +299,48 @@ class OrderController extends DefaultController {
         }
     }
 
+    public function actionAjaxCancelOrder($order_id = null) {
+
+        $initiator = $this->currentUser->organization;
+
+        if (Yii::$app->request->post()) {
+            $order_id = Yii::$app->request->post('order_id');
+            switch ($initiator->type_id) {
+                case Organization::TYPE_RESTAURANT:
+                    $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
+                    break;
+                case Organization::TYPE_SUPPLIER:
+                    $order = Order::find()->where(['id' => $order_id, 'vendor_id' => $initiator->id])->one();
+                    break;
+            }
+            if ($order && $order->load(Yii::$app->request->post())) {
+                $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
+                $systemMessage = $initiator->name . ' отменил заказ!';
+                $danger = true;
+                $order->save();
+                if (isset($order->accepted_by_id)) {
+                    $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
+                }
+                $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return $this->successNotify("Заказ отменен!");
+            }
+            return false;
+        }
+
+        if (Yii::$app->request->get()) {
+            switch ($initiator->type_id) {
+                case Organization::TYPE_RESTAURANT:
+                    $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
+                    break;
+                case Organization::TYPE_SUPPLIER:
+                    $order = Order::find()->where(['id' => $order_id, 'vendor_id' => $initiator->id])->one();
+                    break;
+            }
+            return $this->renderAjax('_cancel-order', compact('order'));
+        }
+    }
+
     public function actionAjaxSetNote($product_id = null) {
 
         $client = $this->currentUser->organization;
@@ -317,6 +378,8 @@ class OrderController extends DefaultController {
         }
 
         if (Yii::$app->request->post()) {
+            $content = Yii::$app->request->post('OrderContent');
+            $this->saveCartChanges($content);
             if (!Yii::$app->request->post('all')) {
                 $order_id = Yii::$app->request->post('id');
                 $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
@@ -552,33 +615,9 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $totalCart = 0;
 
-        if (isset($_POST['hasEditable'])) {
-            $model = OrderContent::findOne(['id' => Yii::$app->request->post('editableKey')]);
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            $posted = current($_POST['OrderContent']);
-            $post = ['OrderContent' => $posted];
-            if ($model->load($post)) {
-                $model->quantity = $model->quantity - $model->quantity % $model->units;
-                $model->save();
-                $order = $model->order;
-                $order->calculateTotalPrice();
-                $order->save();
-                $orders = $client->getCart();
-                foreach ($orders as $order) {
-                    $totalCart += $order->total_price;
-                }
-                return [
-                    'output' => $model->quantity,
-                    'message' => '',
-                    'positionTotal' => $model->price * $model->quantity,
-                    'positionId' => $model->id,
-                    'orderId' => $order->id,
-                    'orderTotal' => $order->total_price,
-                    'totalCart' => $totalCart,
-                ];
-            } else {
-                return ['output' => '', 'message' => ''];
-            }
+        if (Yii::$app->request->post('action')) {
+            $content = Yii::$app->request->post('OrderContent');
+            $this->saveCartChanges($content);
         }
 
         $orders = $client->getCart();
@@ -890,7 +929,7 @@ class OrderController extends DefaultController {
         ];
     }
 
-    public function sendOrderChange($sender, $recipient, $order_id) {
+    private function sendOrderChange($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -913,7 +952,7 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    public function sendOrderDone($sender, $recipient, $order_id) {
+    private function sendOrderDone($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -936,7 +975,7 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    public function sendOrderCreated($sender, $recipientOrg, $order_id) {
+    private function sendOrderCreated($sender, $recipientOrg, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -961,7 +1000,7 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function sendOrderProcessing($sender, $recipient, $order_id) {
+    private function sendOrderProcessing($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -984,7 +1023,7 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    public function sendOrderCanceled($sender, $recipient, $order_id) {
+    private function sendOrderCanceled($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -1005,6 +1044,18 @@ class OrderController extends DefaultController {
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
+    }
+
+    private function saveCartChanges($content) {
+        foreach ($content as $position) {
+            $product = OrderContent::findOne(['id' => $position['id']]);
+            if ($product->quantity == 0) {
+                $product->delete();
+            } else {
+                $product->quantity = $position['quantity'];
+                $product->save();
+            }
+        }
     }
 
 }

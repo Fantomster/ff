@@ -1,13 +1,24 @@
 <?php
-
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
-
 /**
  * @var yii\web\View $this
  * @var yii\widgets\ActiveForm $form
  * @var amnah\yii2\user\models\forms\ResendForm $model
  */
+
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+use nirvana\showloading\ShowLoadingAsset;
+
+ShowLoadingAsset::register($this);
+$this->registerJs(
+        '$("document").ready(function(){
+            $("#resend-form").on("submit", function(e) {
+                $("#loader-show").showLoading();
+            });
+        });'
+);
+$this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
+
 $this->title = Yii::t('user', 'Resend');
 ?>
 <div class="login__block">
@@ -22,7 +33,7 @@ $this->title = Yii::t('user', 'Resend');
 
             <?php else: ?>
 
-                <?php $form = ActiveForm::begin(['id' => 'resend-form']); ?>
+                <?php $form = ActiveForm::begin(['id' => 'resend-form', 'validateOnSubmit' => false,]); ?>
                 <div class="form-group">
                     <?=
                             $form->field($model, 'email')

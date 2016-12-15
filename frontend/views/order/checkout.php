@@ -5,6 +5,7 @@ use yii\widgets\Pjax;
 use kartik\date\DatePicker;
 use yii\bootstrap\Modal;
 use yii\widgets\Breadcrumbs;
+use kartik\form\ActiveForm;
 
 //kartik\growl\GrowlAsset::register($this);
 
@@ -47,30 +48,51 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
+//            $("#checkout").on("click", "#createAll", function(e) {
+//                $("#loader-show").showLoading();
+//                $.post(
+//                    "' . Url::to(['/order/ajax-make-order']) . '",
+//                    {"all":1 }
+//                ).done(function(result) {
+//                    if (result) {
+//                        //$.pjax.reload({container: "#checkout"});
+//                        $.notify(result.growl.options, result.growl.settings);
+//                    }
+//                    $("#loader-show").hideLoading();
+//                });
+//            });
             $("#checkout").on("click", "#createAll", function(e) {
+                e.preventDefault();
                 $("#loader-show").showLoading();
+                var form = $("#cartForm");
+                extData = "&all=1"; 
                 $.post(
                     "' . Url::to(['/order/ajax-make-order']) . '",
-                    {"all":1 }
+                    form.serialize() + extData
                 ).done(function(result) {
+                    dataEdited = 0;
+                    $("#saveChanges").hide();
+                    $("#loader-show").hideLoading();
                     if (result) {
-                        //$.pjax.reload({container: "#checkout"});
                         $.notify(result.growl.options, result.growl.settings);
                     }
-                    $("#loader-show").hideLoading();
                 });
             });
-            $("#checkout").on("click", ".remove", function(e) {
-            e.preventDefault();
+            $("#checkout").on("click", "#saveChanges", function(e) {
+                e.preventDefault();
                 $("#loader-show").showLoading();
+                var form = $("#cartForm");
+                extData = "&action=save"; 
                 $.post(
-                    "' . Url::to(['/order/ajax-remove-position']) . '",
-                    {"product_id": $(this).data("product_id"), "vendor_id": $(this).data("vendor_id")}
+                    form.attr("action"),
+                    form.serialize() + extData
                 ).done(function(result) {
-                    if (result) {
-                        //$.pjax.reload({container: "#checkout"});
-                    }
+                    dataEdited = 0;
+                    $("#saveChanges").hide();
                     $("#loader-show").hideLoading();
+                    if (result) {
+                        $.notify(result.growl.options, result.growl.settings);
+                    }
                 });
             });
             $("#checkout").on("change", ".delivery-date", function(e) {
@@ -117,6 +139,22 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
+            $(".content").on("change keyup paste cut", ".quantity", function() {
+                dataEdited = 1;
+                $("#saveChanges").show();
+            });
+            $(document).on("click", ".changed", function() {
+                document.location = link;
+            });
+            $(document).on("click", "a", function(e) {
+                if (dataEdited) {
+                    e.preventDefault();
+                    link = $(this).attr("href");
+                    if (link != "#") {
+                        $("#dataChanged").modal("show")       
+                    }
+                }
+            });
             
         });'
 );
@@ -149,20 +187,31 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
     <div class="box box-info">
         <div class="box-header checkout-header">
             <div class="row">
-                <div class="col-md-6 col-sm-6 col-xs-9">
+                <div class="col-md-6 col-sm-8 col-xs-6">
                     <div class="btn-group" role="group" id="createAll">
                         <button class="btn btn-success" type="button"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span></button>
                         <button type="button" class="btn btn-success  btn-outline total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-6 col-xs-3">
-                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-xs"> Очистить корзину</span></button>    
-
+                <div class="col-md-6 col-sm-4 col-xs-6">
+                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px; margin-left: 3px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Очистить корзину</span></button>    
+                    <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Сохранить</span></button>
                 </div>
             </div>
         </div>
         <div class="box-body">
             <div class="checkout">
+                <?php
+                $form = ActiveForm::begin([
+                            'id' => 'cartForm',
+                            'enableAjaxValidation' => false,
+                            'options' => [
+                                'data-pjax' => true,
+                            ],
+                            'method' => 'post',
+                            'action' => Url::to(['order/checkout']),
+                ]);
+                ?>
                 <?php foreach ($orders as $order) { ?>
                     <div class="box box-info box-order-content">
                         <div class="box-header with-border">
@@ -184,7 +233,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                     <div class="panel-heading">
                                         <div class="form-inline">
                                             <div class="row">
-                                                <div class="col-md-6 col-sm-6 col-xs-6">
+                                                <div class="col-md-4 col-sm-6 col-xs-6">
                                                     <?=
                                                     DatePicker::widget([
                                                         'name' => '',
@@ -201,11 +250,12 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                                             'format' => 'dd.mm.yyyy',
                                                             'autoclose' => true,
                                                             'startDate' => "0d",
+                                                            'todayHighlight' => true,
                                                         ]
                                                     ])
                                                     ?>
                                                 </div>
-                                                <div class="col-md-6 col-sm-6 col-xs-6">
+                                                <div class="col-md-8 col-sm-6 col-xs-6">
                                                     <button class="btn btn-success create pull-right" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
                                                     <a class="btn btn-gray comment pull-right"
                                                        data-target="#changeComment"
@@ -226,6 +276,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                         </div>
                     </div>
                 <?php } ?>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>
@@ -243,3 +294,21 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
     ])
     ?>
 </section>
+<!-- Modal -->
+<div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
+            </div>
+            <div class="modal-body">
+                Вы изменили заказ, но не сохранили изменения!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
+                <button type="button" class="btn btn-danger changed">Уйти</button>
+            </div>
+        </div>
+    </div>
+</div>

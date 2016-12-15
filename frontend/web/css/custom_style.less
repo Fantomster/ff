@@ -598,6 +598,12 @@ label {
 table.dataTable thead th, table.dataTable thead td {
     border-bottom: 0;
 }
+.width70 {
+    width: 70px;
+}
+.width100 {
+    width: 100px;
+}
 .width150 {
     width: 150px;
 }
@@ -615,7 +621,7 @@ table.dataTable thead th, table.dataTable thead td {
 .label-success {
     background-color: @light-green-fk !important;
 }
-.btn-gray {
+.btn-gray, .btn-gray:focus {
     background-color: @gray-fk;
     color: #fff;
 }
@@ -873,14 +879,15 @@ a:hover, a:active, a:focus {
         margin-right: 0;
     }
 }
+.checkout-action {
+    width: 200px;
+}
 @media (max-width: 1225px) {
     .hidden-fk {
         display: none;
     }
-}
-@media (max-width: 1150px) {
-    .hidden-fk {
-        display: none;
+    .checkout-action {
+        width: 82px;
     }
 }
 #actionButtons {

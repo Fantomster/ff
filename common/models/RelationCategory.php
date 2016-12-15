@@ -16,7 +16,6 @@ use yii\helpers\ArrayHelper;
  * @property Category $category
  * @property Organization $vendor
  * @property Organization $client
- * @property Catalog $catalog
  */
 class RelationCategory extends \yii\db\ActiveRecord
 {
@@ -73,12 +72,5 @@ class RelationCategory extends \yii\db\ActiveRecord
      */
     public function getClient() {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
-    }
-    
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCatalog() {
-        return $this->hasOne(Catalog::className(), ['id' => 'supp_org_id']);
     }
 }

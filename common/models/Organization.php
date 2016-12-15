@@ -30,7 +30,6 @@ class Organization extends \yii\db\ActiveRecord {
 
     const TYPE_RESTAURANT = 1;
     const TYPE_SUPPLIER = 2;
-    
     const STEP_OK = 0;
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only
@@ -39,6 +38,7 @@ class Organization extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
+
     public static function tableName() {
         return 'organization';
     }
@@ -193,9 +193,12 @@ class Organization extends \yii\db\ActiveRecord {
         }
         $query = RelationSuppRest::find()
                 ->select(['relation_supp_rest.cat_id'])
-                ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+                ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
+                ->where(['relation_supp_rest.rest_org_id' => $this->id])
+                ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
         if ($category_id) {
-            $query = $query->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id AND relation_category.rest_org_id = relation_supp_rest.rest_org_id')
+            $query = $query
+                    ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id AND relation_category.rest_org_id = relation_supp_rest.rest_org_id')
                     ->andWhere(['relation_category.category_id' => $category_id]);
         }
         if ($vendor_id) {
@@ -241,25 +244,26 @@ class Organization extends \yii\db\ActiveRecord {
     /*
      * @return integer
      */
+
     public function getNewOrdersCount() {
         $result = 0;
         switch ($this->type_id) {
             case self::TYPE_RESTAURANT:
                 $result = Order::find()->where([
-                    'client_id' => $this->id, 
-                    'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                            'client_id' => $this->id,
+                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
                         )->count();
                 break;
             case self::TYPE_SUPPLIER:
                 $result = Order::find()->where([
-                    'vendor_id' => $this->id, 
-                    'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                            'vendor_id' => $this->id,
+                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
                         )->count();
                 break;
         }
         return $result;
     }
-    
+
     public function getNewClientCount() {
         $result = 0;
         switch ($this->type_id) {
@@ -268,31 +272,31 @@ class Organization extends \yii\db\ActiveRecord {
                 break;
             case self::TYPE_SUPPLIER:
                 $result = RelationSuppRest::find()->where([
-                    'supp_org_id' => $this->id, 
-                    'invite' => [RelationSuppRest::INVITE_OFF]]
+                            'supp_org_id' => $this->id,
+                            'invite' => [RelationSuppRest::INVITE_OFF]]
                         )->count();
                 break;
         }
         return $result;
     }
-    
+
     public function getEarliestOrderDate() {
         $today = new \DateTime();
         $result = $today->format('d.m.Y');
         switch ($this->type_id) {
             case self::TYPE_RESTAURANT:
                 $firstOrder = Order::find()
-                    ->where(['client_id' => $this->id])
-                    ->orderBy(['created_at' => SORT_ASC])
-                    ->limit(1)
-                    ->one();
+                        ->where(['client_id' => $this->id])
+                        ->orderBy(['created_at' => SORT_ASC])
+                        ->limit(1)
+                        ->one();
                 break;
             case self::TYPE_SUPPLIER:
                 $firstOrder = Order::find()
-                    ->where(['vendor_id' => $this->id])
-                    ->orderBy(['created_at' => SORT_ASC])
-                    ->limit(1)
-                    ->one();
+                        ->where(['vendor_id' => $this->id])
+                        ->orderBy(['created_at' => SORT_ASC])
+                        ->limit(1)
+                        ->one();
                 break;
         }
         if ($firstOrder) {
@@ -300,7 +304,7 @@ class Organization extends \yii\db\ActiveRecord {
         }
         return $result;
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -311,56 +315,58 @@ class Organization extends \yii\db\ActiveRecord {
     /*
      * @return \yii\db\ActiveQuery
      */
+
     public function getUnreadMessages() {
-        
+
         $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
                 . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'WHERE (`order_chat`.`recipient_id` = '.$this->id.') '
+                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=0) '
                 . 'AND (`order_chat`.`viewed`=0)) '
                 . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
                 . 'ORDER BY `order_chat`.`created_at` DESC';
 
-        return OrderChat::findBySql($sql)->all();  
+        return OrderChat::findBySql($sql)->all();
 
-        
+
 //        return OrderChat::find()
 //                ->leftJoin('order', 'order.id = order_chat.order_id')
 //                ->where('(order.client_id=' . $this->id . ') OR (order.vendor_id=' . $this->id . ')')
 //                ->andWhere(['order_chat.is_system' => 0, 'order_chat.viewed' => 0])
 //                ->all();
     }
-    
+
     /*
      * @return \yii\db\ActiveQuery
      */
+
     public function getUnreadNotifications() {
         $sql = 'SELECT `order_chat`.* FROM `order_chat` INNER JOIN '
                 . '(SELECT MIN(`order_chat`.`id`) as id, `order_chat`.`order_id` FROM `order_chat` '
-                . 'WHERE (`order_chat`.`recipient_id` = '.$this->id.') '
+                . 'WHERE (`order_chat`.`recipient_id` = ' . $this->id . ') '
                 . 'AND ((`order_chat`.`is_system`=1) '
                 . 'AND (`order_chat`.`viewed`=0)) '
                 . 'GROUP BY `order_chat`.`order_id` ) as oc2 ON `order_chat`.`id` = oc2.`id`'
                 . 'ORDER BY `order_chat`.`created_at` DESC';
 
-        return OrderChat::findBySql($sql)->all();  
+        return OrderChat::findBySql($sql)->all();
 //        return OrderChat::find()
 //                ->leftJoin('order', 'order.id = order_chat.order_id')
 //                ->where('(order.client_id=' . $this->id . ') OR (order.vendor_id=' . $this->id . ')')
 //                ->andWhere(['order_chat.is_system' => 1, 'order_chat.viewed' => 0])
 //                ->all();
     }
-    
+
     public function setMessagesRead() {
         $sql = "UPDATE `order_chat` SET `viewed` = 1 WHERE (`recipient_id`=$this->id) AND (`is_system`=0)";
         Yii::$app->db->createCommand($sql)->execute();
     }
-    
+
     public function setNotificationsRead() {
         $sql = "UPDATE `order_chat` SET `viewed` = 1 WHERE (`recipient_id`=$this->id) AND (`is_system`=1)";
         Yii::$app->db->createCommand($sql)->execute();
     }
-    
+
     /**
      * @return array
      */
@@ -407,6 +413,7 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
     public function markViewed($orderId) {
-        return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id'=>$this->id]);
+        return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id' => $this->id]);
     }
+
 }

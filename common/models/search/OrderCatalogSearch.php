@@ -62,7 +62,7 @@ class OrderCatalogSearch extends \yii\base\Model {
             'params' => [':searchString' => $searchString],
             'totalCount' => $count1 + $count2,
             'pagination' => [
-                'pageSize' => 15,
+                'pageSize' => 20,
                 'page' => isset($params['page']) ? ($params['page']-1) : 0,
             ],
             'sort' => [

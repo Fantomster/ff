@@ -83,4 +83,29 @@ class Delivery extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
+    
+    public function getDaysString() {
+        if ($this->mon) {
+            $days[] = 'Пн';
+        }
+        if ($this->tue) {
+            $days[] = 'Вт'; 
+        }
+        if ($this->wed) {
+            $days[] = 'Ср';
+        }
+        if ($this->thu) {
+            $days[] = 'Чт';
+        }
+        if ($this->fri) {
+            $days[] = 'Пт';
+        }
+        if ($this->sat) {
+            $daysp[] = 'Сб';
+        }
+        if ($this->sun) {
+            $days[] = 'Вс';
+        }
+        return implode(", ", $days);
+    }
 }

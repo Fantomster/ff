@@ -221,6 +221,7 @@ label {
                                 ],
                             ])->label(false);
                             echo Html::hiddenInput('catalogBaseGoods_id1', $catalogBaseGoods->category_id, ['id'=>'catalogBaseGoods_id1']);
+                            echo Html::hiddenInput('input-type-2', $categorys->sub2, ['id'=>'input-type-2']);
                             ?>
                             <?php
                             echo $form->field($categorys, 'sub2')->widget(DepDrop::classname(), [
@@ -236,12 +237,12 @@ label {
                                     ],
                                 'pluginOptions'=>[
                                     'depends'=>['dynamicmodel-sub1'],
-                                    'placeholder'=>'',
+                                    'placeholder' => false,
                                     'url' => Url::to(['vendor/get-sub-cat']),
                                     'loadingText' => 'Загрузка...',
                                     'initialize' => true,
-                                    //'initDepends'=>['dynamicmodel-sub1'],
-                                    'params'=>['catalogBaseGoods_id1'],
+                                    //'initDepends'=>['dynamicmodel-sub2'],
+                                    'params'=>['catalogBaseGoods_id1','input-type-2'],
                                 ]
                             ])->label(false);
                             ?>

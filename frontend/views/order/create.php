@@ -111,10 +111,6 @@ $this->registerJs(
                 <!-- /.box-header -->
                 <div class="box-body">    
                     <?php
-//                    echo Html::textInput('OrderCatalogSearch[searchString]', null, [
-//                                        'id' => 'searchString',
-//                                    'class' => 'form-control',
-//                                    'placeholder' => 'Поиск']);
                     $form = ActiveForm::begin([
                                 'options' => [
                                     'id' => 'searchForm',
@@ -155,54 +151,7 @@ $this->registerJs(
                     <?php ActiveForm::end(); ?>
                     <?php
                     Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 5000]);
-//                    $form = ActiveForm::begin([
-//                                'options' => [
-//                                    'data-pjax' => true,
-//                                    'id' => 'createForm',
-//                                    'class' => "navbar-form no-padding no-margin",
-//                                    'role' => 'search',
-//                                ],
-//                                'method' => 'get',
-//                    ]);
                     ?>
-                    <div>
-                        <?=
-                        ''
-                        //$form->field($searchModel, 'searchString')->hiddenInput(['id' => 'hiddenSearchString'])->label(false)
-//                                $form->field($searchModel, 'searchString', [
-//                                    'addon' => [
-//                                        'prepend' => [
-//                                            'content' => '<i class="fa fa-search"></i>',
-//                                        ],
-//                                    ],
-//                                    'options' => [
-//                                        'class' => "margin-right-15 form-group",
-//                                    ],
-//                                ])
-//                                ->textInput([
-//                                    'id' => 'searchString',
-//                                    'class' => 'form-control',
-//                                    'placeholder' => 'Поиск'])
-//                                ->label(false)
-                        ?>
-                        <?=
-                        ''
-                        //$form->field($searchModel, 'selectedCategory')->hiddenInput(['id' => 'hiddenSelectedCategory'])->label(false)
-//                                $form->field($searchModel, 'selectedCategory')
-//                                ->dropDownList($client->getRestaurantCategories(), [
-//                                    'id' => 'selectedCategory',
-//                                    'class' => 'form-control margin-right-15'])
-//                                ->label(false)
-                        ?>
-                        <?=
-                        ''
-                        //$form->field($searchModel, 'selectedVendor')->hiddenInput(['id' => 'hiddenSelectedVendor'])->label(false)
-//                                $form->field($searchModel, 'selectedVendor')
-//                                ->dropDownList($vendors, ['id' => 'selectedVendor'])
-//                                ->label(false)
-                        ?>
-                        <?php //ActiveForm::end(); ?>
-                    </div>
                     <div id="products">
                         <?=
                         GridView::widget([
@@ -211,7 +160,6 @@ $this->registerJs(
                             'filterPosition' => false,
                             'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                             'summary' => '',
-                            //'tableOptions' => ['class' => 'table no-margin table-hover'],
                             'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
                             'options' => ['class' => 'table-responsive'],
                             'pager' => [
@@ -272,7 +220,6 @@ $this->registerJs(
                                                             ],
                                                             'options' => ['class' => 'quantity form-control '],
                                                 ]);
-                                                // return Html::textInput('', 1, ['class' => 'quantity form-control']);
                                             },
                                                     'label' => 'Количество',
                                                     'contentOptions' => ['class' => 'width150'],

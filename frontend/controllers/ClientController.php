@@ -367,7 +367,8 @@ class ClientController extends DefaultController {
                      *    
                      * */
                     if ($check['eventType'] == 5) {
-                        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) VALUES ($get_supp_org_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW())";
+                        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`) "
+                                . "VALUES ($get_supp_org_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW())";
                         \Yii::$app->db->createCommand($sql)->execute();
                         $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
                     } else {
@@ -1211,9 +1212,16 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             invite,
             case 
                 when invite=0 then 1 else
-                    case when (select count(*) from user where email=`organization`.`email` and status =0) = 1 then 2 else 3 end
+                    case 
+                        when
+                        (SELECT count(*) from user where organization_id = relation_supp_rest.supp_org_id and status = 1)=0
+                        then
+                        2
+                        else
+                        3 
+                        end
                     end as status_invite,
-            `relation_supp_rest`.`status` 
+           `relation_supp_rest`.`status` 
             FROM {{%relation_supp_rest}}"
                 . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
                 . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "

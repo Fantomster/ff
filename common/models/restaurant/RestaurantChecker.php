@@ -33,7 +33,8 @@ class RestaurantChecker
                 $vendor_info->queryOne();
                 $vendor_info = $vendor_info->queryOne();
                 $userProfileFullName = $vendor_info['user_full_name'];
-                $userProfileStatus = $vendor_info['user_status'];
+                $userProfileStatus = $vendor_info['user_status']; //есть менеджеры или нет (user.status > 0)
+                
                 $userProfileOrgId = $vendor_info['organization_id'];
                 $userOrgTypeId = $vendor_info['organization_type_id'];
                 $userOrgName = $vendor_info['organization_name'];
@@ -63,7 +64,8 @@ class RestaurantChecker
 	
 					} 
 				}else{
-					if($userProfileStatus==0){
+                                        $managersIsActive = User::find()->where(['organization_id' => $userProfileOrgId, 'status' =>1])->count();
+					if($managersIsActive==0){
 					//поставщик не авторизован
 					//добавляем к базовому каталогу поставщика каталог ресторана и создаем связь    
 					$result = ['success'=>true,'eventType'=>3,'message'=>'Поставщик еще не авторизован / добавляем каталог',

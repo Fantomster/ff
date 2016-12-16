@@ -623,6 +623,7 @@ class ClientController extends DefaultController {
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::BASE_CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status "
                     . " FROM `catalog` "
@@ -1209,11 +1210,12 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             organization.name as 'organization_name',
             relation_supp_rest.cat_id,
             catalog.name as 'catalog_name',
+            catalog.status as 'catalog_status',
             relation_supp_rest.created_at,
             relation_supp_rest.supp_org_id,
             invite,
             case 
-                when invite=0 then 1 else
+                when invite=0 then 1 else 
                     case 
                         when
                         (SELECT count(*) from user where organization_id = relation_supp_rest.supp_org_id and status = 1)=0

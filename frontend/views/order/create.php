@@ -170,7 +170,7 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'attribute' => 'product',
                                     'value' => function($data) {
-                                        $note = "";//empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
+                                        $note = ""; //empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
                                         $productUrl = Html::a($data['product'], Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
                                                     'data' => [
                                                         'target' => '#showDetails',
@@ -257,7 +257,7 @@ $this->registerJs(
                                                 ?>
                                             </div>
                                             </form>
-                        <?php Pjax::end(); ?>
+                                            <?php Pjax::end(); ?>
                                         </div>
                                     </div>
                                 </div>
@@ -268,7 +268,7 @@ $this->registerJs(
                                         </div>
                                         <!-- /.box-header -->
                                         <div class="box-body" id="orders">
-                        <?= $this->render('_cart', compact('orders')) ?>
+                                            <?= $this->render('_cart', compact('orders')) ?>
                                         </div>
                                     </div>
                                 </div>

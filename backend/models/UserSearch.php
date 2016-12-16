@@ -98,7 +98,7 @@ class UserSearch extends User {
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            $userTable.'.id' => $this->id,
             'status' => $this->status,
             'logged_in_at' => $this->logged_in_at,
             'created_at' => $this->created_at,

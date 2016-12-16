@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => Html::a($model->organization->name, ['organization/view', 'id' => $model->organization_id]),
-                'label' => 'Название организации',
+                'label' => 'Организация',
             ],
         ],
     ]) ?>

@@ -7,23 +7,8 @@ use yii\bootstrap\Modal;
 use yii\widgets\Breadcrumbs;
 use kartik\form\ActiveForm;
 
-//kartik\growl\GrowlAsset::register($this);
-
 $this->registerJs(
         '$("document").ready(function(){
-            $("#checkout").on("click", ".create", function(e) {
-                $("#loader-show").showLoading();
-                $.post(
-                    "' . Url::to(['/order/ajax-make-order']) . '",
-                    {"id": $(this).data("id"), "all": 0 }
-                ).done(function(result) {
-                    if (result) {
-                        //$.pjax.reload({container: "#checkout"});
-                        $.notify(result.growl.options, result.growl.settings);
-                    }
-                    $("#loader-show").hideLoading();
-                });
-            });
             $("#checkout").on("click", ".delete", function(e) {
                 $("#loader-show").showLoading();
                 $.post(
@@ -48,19 +33,25 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
-//            $("#checkout").on("click", "#createAll", function(e) {
-//                $("#loader-show").showLoading();
-//                $.post(
-//                    "' . Url::to(['/order/ajax-make-order']) . '",
-//                    {"all":1 }
-//                ).done(function(result) {
-//                    if (result) {
-//                        //$.pjax.reload({container: "#checkout"});
-//                        $.notify(result.growl.options, result.growl.settings);
-//                    }
-//                    $("#loader-show").hideLoading();
-//                });
-//            });
+
+            $("#checkout").on("click", ".create", function(e) {
+                e.preventDefault();
+                $("#loader-show").showLoading();
+                var form = $("#cartForm");
+                extData = "&all=0&id=" + $(this).data("id"); 
+                $.post(
+                    "' . Url::to(['/order/ajax-make-order']) . '",
+                    form.serialize() + extData
+                ).done(function(result) {
+                    if (result) {
+                        dataEdited = 0;
+                        $("#saveChanges").hide();
+                        $.notify(result.growl.options, result.growl.settings);
+                    }
+                    $("#loader-show").hideLoading();
+                });
+            });
+
             $("#checkout").on("click", "#createAll", function(e) {
                 e.preventDefault();
                 $("#loader-show").showLoading();

@@ -104,7 +104,7 @@ class RestaurantChecker
 		}	
 	}
 	public static function getBaseCatalog($id_org){
-		$idorg = Catalog::find()->select('id')->where(['supp_org_id' => $id_org,'type'=>Catalog::BASE_CATALOG])->one();
-		return $idorg;
+		return Catalog::find()->select('id')->where(['supp_org_id' => $id_org,'type'=>Catalog::BASE_CATALOG])->one();
+		 
 	}
 }		

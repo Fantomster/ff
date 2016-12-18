@@ -372,9 +372,19 @@ class ClientController extends DefaultController {
                         \Yii::$app->db->createCommand($sql)->execute();
                         $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
                     } else {
-                        $lastInsert_base_cat_id = RestaurantChecker::getBaseCatalog($get_supp_org_id);
-                        $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+                       //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+                       if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
+                           $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->one();
+                           $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+                       }else{
+                        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) "
+                                . "VALUES ($get_supp_org_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
+                        \Yii::$app->db->createCommand($sql)->execute();
+                        $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID(); 
+                       }
+                       
                     }
+                    
                     $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($get_supp_org_id,'" . Organization::getOrganization($currentUser->organization_id)->name . "'," . Catalog::CATALOG . ",NOW(),1)";
                     \Yii::$app->db->createCommand($sql)->execute();
                     $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
@@ -412,7 +422,7 @@ class ClientController extends DefaultController {
                         }
                         $sql = "insert into {{%catalog_base_goods}}" .
                                 "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                                . "`units`,`price`,`note`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
+                                . "`units`,`price`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
                                 . $lastInsert_base_cat_id . ","
                                 . "0,"
                                 . $get_supp_org_id . ","
@@ -420,7 +430,6 @@ class ClientController extends DefaultController {
                                 . ":product,"
                                 . ":units,"
                                 . ":price,"
-                                . ":note,"
                                 . ":ed,"
                                 . CatalogBaseGoods::STATUS_ON . ","
                                 . "0,"
@@ -431,7 +440,7 @@ class ClientController extends DefaultController {
                         $command->bindParam(":product", $product, \PDO::PARAM_STR);
                         $command->bindParam(":units", $units);
                         $command->bindParam(":price", $price);
-                        $command->bindParam(":note", $note, \PDO::PARAM_STR);
+                        //$command->bindParam(":note", $note, \PDO::PARAM_STR);
                         $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
                         $command->execute();
                         $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
@@ -445,7 +454,7 @@ class ClientController extends DefaultController {
                         if (!empty($note)) {
                             $sql = "insert into " . GoodsNotes::tableName() . "(
 				      `rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES (
-				      $currentUser->organization_id, $lastInsert_base_goods_id, ':note',NOW())";
+				      $currentUser->organization_id, $lastInsert_base_goods_id, :note,NOW())";
                             $command =\Yii::$app->db->createCommand($sql);
                             $command->bindParam(":note", $note, \PDO::PARAM_STR);
                             $command->execute();

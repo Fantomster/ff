@@ -15,7 +15,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
     'id',
-    'type_id',
+    [
+        'attribute' => 'type_id',
+        'value' => 'type.name',
+        'label' => 'Тип',
+        'filter' => common\models\OrganizationType::getList(),
+    ],
     [
         'format' => 'raw',
         'attribute' => 'name',
@@ -49,7 +54,7 @@ $gridColumns = [
                 ],
             ]);
             ?>
-            <?php Pjax::begin(['enablePushState' => false, 'id' => 'organizationList', 'timeout' => 5000]); ?>    <?=
+            <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>    <?=
             GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,

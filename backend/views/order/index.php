@@ -89,7 +89,7 @@ $gridColumns = [
         ],
     ]);
     ?>
-    <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderList', 'timeout' => 5000]); ?>    <?=
+    <?php Pjax::begin(['enablePushState' => true, 'id' => 'orderList', 'timeout' => 5000]); ?>    <?=
     GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,

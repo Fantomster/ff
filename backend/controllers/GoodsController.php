@@ -162,7 +162,7 @@ class GoodsController extends Controller {
         if ($post) {
             $product = CatalogBaseGoods::findOne(['id' => $post['id']]);
             $product->category_id = null;
-            return $product->save();
+            return $product->save(false);
         }
         return false;
     }
@@ -172,7 +172,7 @@ class GoodsController extends Controller {
         if ($post) {
             $product = CatalogBaseGoods::findOne(['id' => $post['id']]);
             $product->category_id = $post['category_id'];
-            return $product->save();
+            return $product->save(false);
         }
         return false;
     }

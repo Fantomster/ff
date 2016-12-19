@@ -108,7 +108,7 @@ $this->registerJs($customJs, View::POS_READY);
         'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
         'columns' => [
 
-            'id',
+          //  'id',
             'article',
 //            'product',
             [
@@ -138,20 +138,26 @@ $this->registerJs($customJs, View::POS_READY);
                 },
                         'label' => 'Название организации',
                     ],
-                    'market_place',
+                  //  'market_place',
+                        [
+                            'attribute' => 'market_place',
+                            'value' => 'market_place',
+                            'label' => 'MP',
+                            
+                        ],
                     // 'deleted',
                     // 'created_at',
                     // 'updated_at',
                     // 'supp_org_id',
-                    // 'price',
-                    // 'units',
+                     'price',
+                     'units',
                     'category_id',
                 // 'note',
-                // 'ed',
+                 'ed',
                 // 'image',
-                // 'brand',
-                // 'region',
-                // 'weight',
+                 'brand',
+                 'region',
+                 'weight',
                 // ['class' => 'yii\grid\ActionColumn'],
                 ],
             ]);

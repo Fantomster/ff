@@ -47,6 +47,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public $searchString; 
     
     public $resourceCategory = 'image';
+    
+    public $sub1;
+    public $sub2;
 
     /**
      * @inheritdoc
@@ -86,7 +89,16 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['image'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'maxSize' => 1024 * 1024 * 4, 'tooBig' => 'Размер файла не должен превышать 4 Мб'],
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            [['price'], 'number', 'min'=>0.1]
+            [['price'], 'number', 'min'=>0.1],
+            [['sub1', 'sub2'], 'required', 
+                'when' => function($model) { 
+                    return $model->market_place == self::MARKETPLACE_ON;
+                },
+                'whenClient' => 'function(attribute, value) {
+                    return ($("#catalogbasegoods-market_place").val() == ' . self::MARKETPLACE_ON .');
+                }',
+                'message' => 'Укажите категорию товара',
+            ]
         ];
     }
 

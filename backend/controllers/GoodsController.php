@@ -49,7 +49,7 @@ class GoodsController extends Controller {
         $searchModel = new CatalogBaseGoodsSearch();
         $params = Yii::$app->request->queryParams;
         $dataProvider = $searchModel->search($params);
-        $dataProvider->query->where(['supp_org_id' => $id]);
+        $dataProvider->query->andWhere(['supp_org_id' => $id]);
 
         return $this->render('vendor', compact('id', 'searchModel', 'dataProvider'));
     }
@@ -147,10 +147,10 @@ class GoodsController extends Controller {
         $searchModel = new CatalogBaseGoodsSearch();
         
         $dataProviderCategory = $searchModel->search();
-        $dataProviderCategory->query->where(['category_id' => $id, 'supp_org_id' => $vendor_id]);
+        $dataProviderCategory->query->andWhere(['category_id' => $id, 'supp_org_id' => $vendor_id]);
         
         $dataProviderEmpty = $searchModel->search();
-        $dataProviderEmpty->query->where(['category_id' => null, 'supp_org_id' => $vendor_id]);
+        $dataProviderEmpty->query->andWhere(['category_id' => null, 'supp_org_id' => $vendor_id]);
         $subCategory = \common\models\MpCategory::findOne(['id' => $id]);
         $category = \common\models\MpCategory::findOne(['id' => $subCategory->parent]);
         

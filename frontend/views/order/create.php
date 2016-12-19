@@ -207,7 +207,7 @@ $this->registerJs(
                                                 return TouchSpin::widget([
                                                             'name' => '',
                                                             'pluginOptions' => [
-                                                                'initval' => 1,
+                                                                'initval' => 0.100,
                                                                 'min' => (isset($data['units']) && ($data['units'] > 0)) ? $data['units'] : 0.001,
                                                                 'max' => PHP_INT_MAX,
                                                                 'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,

@@ -32,7 +32,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
                         'class' => ImageUploadBehavior::className(),
                         'attribute' => 'avatar',
                         'scenarios' => ['default'],
-                        'path' => '@frontend/web/upload/temp/',
+                        'path' => '@app/web/upload/temp/',
                         'url' => '/upload/temp/',
                         'thumbs' => [
                             'avatar' => ['width' => 90, 'height' => 90, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],

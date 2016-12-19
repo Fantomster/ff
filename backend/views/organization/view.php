@@ -14,9 +14,11 @@ $this->params['breadcrumbs'][] = $this->title;
 switch ($model->type_id) {
     case Organization::TYPE_RESTAURANT:
         $orderListUrl = ['order/index', 'OrderSearch[client_id]' => $model->id];
+        $goodsListUrl = null;
         break;
     case Organization::TYPE_SUPPLIER:
         $orderListUrl = ['order/index', 'OrderSearch[vendor_id]' => $model->id];
+        $goodsListUrl = ['goods/vendor', 'id' => $model->id];
         break;
 }
 ?>
@@ -51,6 +53,11 @@ switch ($model->type_id) {
                 'format' => 'raw',
                 'label' => 'Заказы',
                 'value' => Html::a('Список', $orderListUrl),
+            ],
+            [
+                'format' => 'raw',
+                'label' => 'Товары',
+                'value' => $goodsListUrl ? Html::a('Список', $goodsListUrl) : '',
             ],
         ],
     ]) ?>

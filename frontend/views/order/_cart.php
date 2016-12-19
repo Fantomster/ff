@@ -33,7 +33,7 @@ foreach ($orders as $order) {
                        href="<?= Url::to(['order/ajax-change-quantity', 'vendor_id' => $order->vendor_id, 'product_id' => $position->product_id]) ?>">
                         <button class="btn btn-outline-danger delete-position pull-right"><i class="fa fa-trash" style="margin-top:-2px;"></i></button>
                         <h5 class="list-group-item-heading text-info"><?= $position->product_name ?> (<?= $position->price ?> <i class="fa fa-fw fa-rub"></i><?= $unit ?>)</h5>
-                        <p class="list-group-item-text text-left">Кол-во: <?= $position->quantity ?></p>
+                        <p class="list-group-item-text text-left">Кол-во: <?= $position->quantity + 0 ?></p>
                     </a>
     <?php } ?>
             </div>            

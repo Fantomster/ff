@@ -40,7 +40,7 @@ echo GridView::widget([
                                 'min' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.001,
                                 'max' => PHP_INT_MAX,
                                 'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
-                                'decimals' => 1,
+                                'decimals' => (!isset($data["units"]) || ($data["units"] < 1)) ? 3 : 0,
                                 'forcestepdivisibility' => (isset($data['units']) && ($data['units'])) ? 'floor' : 'none',
                                 'buttonup_class' => 'btn btn-default',
                                 'buttondown_class' => 'btn btn-default',
@@ -82,12 +82,14 @@ echo GridView::widget([
                                         'target' => "#changeNote",
                                         'toggle' => "modal",
                                         'backdrop' => "static",
+                                        'internal' => "1",
                                     ],
                         ]);
                         $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> <span class="hidden-fk">Удалить</span>', '#', [
                                     'class' => 'btn btn-outline-danger remove',
                                     'data-product_id' => $data['product_id'],
                                     'data-vendor_id' => $vendor_id,
+                                    'data-internal' => '1',
                         ]);
                         return '<div class="pull-right">' . $btnNote . $btnDelete . '</div>';
                     },

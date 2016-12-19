@@ -9,6 +9,18 @@ use kartik\form\ActiveForm;
 
 $this->registerJs(
         '$("document").ready(function(){
+            $("#checkout").on("click", ".remove", function(e) {
+                $("#loader-show").showLoading();
+                $.post(
+                    "' . Url::to(['/order/ajax-remove-position']) . '",
+                    {vendor_id: $(this).data("vendor_id"), product_id: $(this).data("product_id")}
+                ).done(function(result) {
+                    if (result) {
+                        //$.pjax.reload({container: "#checkout"});
+                    }
+                    $("#loader-show").hideLoading();
+                });
+            });
             $("#checkout").on("click", ".delete", function(e) {
                 $("#loader-show").showLoading();
                 $.post(
@@ -141,8 +153,10 @@ $this->registerJs(
                 if (dataEdited) {
                     e.preventDefault();
                     link = $(this).attr("href");
-                    if (link != "#") {
-                        $("#dataChanged").modal("show")       
+                    if ($(this).data("internal") != 1) {
+                        if (link != "#") {
+                            $("#dataChanged").modal("show")       
+                        }
                     }
                 }
             });
@@ -212,7 +226,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                 </div>
                                 <div class="col-md-4 col-sm-4 col-xs-4">
                                     <div class="pull-right">
-                                        <a class="btn btn-outline btn-xs btn-outline-danger delete" style="margin-right:10px;" data-id="<?= $order->id ?>"><i class="fa fa-close m-r-xxs" style="margin-top:-2px;"></i></a>
+                                        <a class="btn btn-outline btn-xs btn-outline-danger delete" style="margin-right:10px;" data-id="<?= $order->id ?>" data-internal="1"><i class="fa fa-close m-r-xxs" style="margin-top:-2px;"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -252,6 +266,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                                        data-target="#changeComment"
                                                        data-toggle="modal"
                                                        data-backdrop="static"
+                                                       data-internal="1"
                                                        href="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>">
                                                         <i class="fa fa-comment" style="margin-top:-3px;"></i><span class="hidden-fk"> Комментарий к заказу</span>
                                                     </a>

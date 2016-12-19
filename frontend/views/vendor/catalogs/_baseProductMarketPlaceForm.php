@@ -187,7 +187,7 @@ label {
                         <div id="upload-avatar"></div>
                     </div>
                     <img id="newAvatar" width="176" height="119" style="background-color:#ccc"
-                         src="<?= !empty($catalogBaseGoods['image'])?
+                         src="<?= (!empty($catalogBaseGoods['image']) && !$catalogBaseGoods->isNewRecord) ?
                             $catalogBaseGoods->imageUrl:
                             common\models\CatalogBaseGoods::DEFAULT_IMAGE ?>" class="avatar"/>
                     <?=
@@ -362,7 +362,7 @@ label {
                             
                         </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
 			<div class="pull-right" style="margin-top: 10px;">
-			<?= Html::button($catalogBaseGoods->isNewRecord ? 
+			<?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
                             '<i class="icon fa fa-plus-circle"></i> Создать' : 
                             '<i class="icon fa fa-save"></i> Сохранить', 
                             ['class' => $catalogBaseGoods->isNewRecord ? 

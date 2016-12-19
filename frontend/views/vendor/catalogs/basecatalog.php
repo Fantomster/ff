@@ -681,7 +681,8 @@ $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
 $("body").on("show.bs.modal", "#add-product-market-place", function() {
     $('#add-product-market-place>.modal-dialog').css('margin-top','13px');
 })        
-$("#add-product-market-place").on("click", ".edit", function() {
+$(document).on("submit", "#marketplace-product-form", function(e) {
+        e.preventDefault();
     var form = $("#marketplace-product-form");
     $('#loader-show').showLoading();
     $.post(

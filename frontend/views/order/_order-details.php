@@ -63,8 +63,6 @@ use kartik\widgets\TouchSpin;
                             <?= $baseProduct->units ?>
                             </b>
                         </small><br>
-                        <!--small>Бренд: <b>НАТС</b></small><br-->
-                        <!--<small>Условия доставки: <b>За 12 дней</b></small>-->
                     </div>   
                     <div class="col-md-6">
                         <h5>УСЛОВИЯ ДОСТАВКИ</h5>

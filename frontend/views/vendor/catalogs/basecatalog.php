@@ -47,7 +47,7 @@ $this->registerJs("
 
 		$(document).on('change', '#upload', function () { 
                     size = $('#upload').get(0).files[0].size;
-                    if (size <= 1024 * 1024 * 4) {
+                    if (size <= 4194304) {
                         readFile(this); 
                     }
                 });

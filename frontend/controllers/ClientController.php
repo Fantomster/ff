@@ -372,6 +372,7 @@ class ClientController extends DefaultController {
                         \Yii::$app->db->createCommand($sql)->execute();
                         $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
                     } else {
+                       //Поставщик зарегистрирован, но не авторизован
                        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
                        if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
                            $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->one();

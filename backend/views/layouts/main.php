@@ -9,8 +9,21 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use common\widgets\Alert;
+use nirvana\showloading\ShowLoadingAsset;
+
+ShowLoadingAsset::register($this);
+$this->registerCss('#loader-show {position:absolute;width:100%;display:none;}');
 
 AppAsset::register($this);
+
+$customJs = <<< JS
+$('#loader-show').css('height',$(window).height());
+$(window).on('resize',function() {
+    $('#loader-show').css('height',$(window).height());
+});
+JS;
+$this->registerJs($customJs, yii\web\View::POS_READY);
+
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -24,11 +37,11 @@ AppAsset::register($this);
 </head>
 <body>
 <?php $this->beginBody() ?>
-
+<div id="loader-show"></div>
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'My Company',
+        'brandLabel' => 'f-keeper',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
@@ -36,9 +49,10 @@ AppAsset::register($this);
     ]);
     $menuItems = [
         //['label' => 'Home', 'url' => ['/site/index']],
-        ['label' => 'Users', 'url' =>['/client/index']],
-        ['label' => 'Organizations', 'url' =>['/organization/index']],
-        ['label' => 'Orders', 'url' =>['/order/index']],
+        ['label' => 'Пользователи', 'url' =>['/client/index']],
+        ['label' => 'Организации', 'url' =>['/organization/index']],
+        ['label' => 'Заказы', 'url' =>['/order/index']],
+        ['label' => 'Товары', 'url' =>['/goods/index']],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => ['/user/login']];

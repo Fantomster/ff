@@ -154,7 +154,7 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
     {
         if (!isset($this->_resourceNames[$path])) {
             $path_parts = pathinfo($path);
-            $basename = (isset($path_parts['dirname']) ? $path_parts['dirname'] . DIRECTORY_SEPARATOR : '') . $path_parts['filename'];
+            $basename = $path_parts['filename'];//(isset($path_parts['dirname']) ? $path_parts['dirname'] . DIRECTORY_SEPARATOR : '') . $path_parts['filename'];
             $category = $this->getResourceCategory();
             $this->_resourceNames[$path] = ($category !== null ? $category . '/' : '')
                 . md5($basename) . (isset($path_parts['extension']) ? '.' . $path_parts['extension'] : '');

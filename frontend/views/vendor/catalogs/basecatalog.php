@@ -45,7 +45,12 @@ $this->registerJs("
 		    }
 		}
 
-		$(document).on('change', '#upload', function () { readFile(this); });
+		$(document).on('change', '#upload', function () { 
+                    size = $('#upload').get(0).files[0].size;
+                    if (size <= 1024 * 1024 * 4) {
+                        readFile(this); 
+                    }
+                });
 		$(document).on('click', '.upload-result', function (ev) {
 			uploadCrop.croppie('result', {
 				type: 'canvas',
@@ -56,16 +61,6 @@ $this->registerJs("
 				});
 			});
 		});
-                /*$(document).on('click', '#deleteAvatar', function() {
-                    $('#loader-show').showLoading();
-                    $.post(
-                        '".Url::to(['settings/ajax-delete-avatar'])."'
-                    )
-                    .done(function(result) {
-                        $('.avatar').attr('src', result); 
-                        $('#loader-show').hideLoading();
-                    });
-                });*/
         "
 );
 ?>
@@ -686,7 +681,8 @@ $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
 $("body").on("show.bs.modal", "#add-product-market-place", function() {
     $('#add-product-market-place>.modal-dialog').css('margin-top','13px');
 })        
-$("#add-product-market-place").on("click", ".edit", function() {
+$(document).on("submit", "#marketplace-product-form", function(e) {
+        e.preventDefault();
     var form = $("#marketplace-product-form");
     $('#loader-show').showLoading();
     $.post(

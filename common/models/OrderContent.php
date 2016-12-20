@@ -76,4 +76,12 @@ class OrderContent extends \yii\db\ActiveRecord
     public function getTotal() {
         return $this->quantity * $this->price;
     }
+    
+//    public function getPrice() {
+//        return ($this->price + 0);
+//    }
+//    
+//    public function getQuantity() {
+//        return ($this->quantity + 0);
+//    }
 }

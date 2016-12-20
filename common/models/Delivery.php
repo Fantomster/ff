@@ -85,6 +85,7 @@ class Delivery extends \yii\db\ActiveRecord
     }
     
     public function getDaysString() {
+        $days = [];
         if ($this->mon) {
             $days[] = 'Пн';
         }

@@ -207,11 +207,11 @@ $this->registerJs(
                                                 return TouchSpin::widget([
                                                             'name' => '',
                                                             'pluginOptions' => [
-                                                                'initval' => 1,
-                                                                'min' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.001,
+                                                                'initval' => 0.100,
+                                                                'min' => (isset($data['units']) && ($data['units'] > 0)) ? $data['units'] : 0.001,
                                                                 'max' => PHP_INT_MAX,
                                                                 'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
-                                                                'decimals' => 1,
+                                                                'decimals' => (!isset($data["units"]) || ($data["units"] < 1)) ? 3 : 0,
                                                                 'forcestepdivisibility' => (isset($data['units']) && ($data['units'])) ? 'floor' : 'none',
                                                                 'buttonup_class' => 'btn btn-default',
                                                                 'buttondown_class' => 'btn btn-default',

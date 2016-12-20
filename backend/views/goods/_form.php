@@ -6,12 +6,8 @@ use kartik\depdrop\DepDrop;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
 use yii\web\View;
-use yii\widgets\Pjax;
 use kartik\checkbox\CheckboxX;
-use yii\web\JsExpression;
-use \yii\helpers\Json;
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
-
 ?>
 <style>
 .form-control:focus {
@@ -66,7 +62,7 @@ a:focus{
 a:hover{
     color: #006c1e		
 } 
-.select2-container--default .select2-selection--single .select2-selection__rendered {
+/*.select2-container--default .select2-selection--single .select2-selection__rendered {
      line-height: 28px; 
 }
 .select2-container--default .select2-selection--single {
@@ -82,7 +78,7 @@ a:hover{
 .select2-container .select2-selection--single .select2-selection__rendered {
     padding-left: 0px;
     padding-right: 10px;
-}
+}*/
 label {
     margin-top:0px
 }
@@ -147,10 +143,7 @@ label {
 </style>
 <?php $form = ActiveForm::begin([
     'id' => 'marketplace-product-form',
-    'enableClientValidation' => true,
-    'action' => $catalogBaseGoods->isNewRecord ? 
-        Url::toRoute('vendor/ajax-create-product-market-place') : 
-        Url::toRoute(['vendor/ajax-update-product-market-place', 'id' => $catalogBaseGoods->id]),  
+    'action' => Url::toRoute(['ajax-update-product-market-place', 'id' => $catalogBaseGoods->id]),  
 ]); 
 ?>
 
@@ -188,7 +181,7 @@ label {
                         <div id="upload-avatar"></div>
                     </div>
                     <img id="newAvatar" width="176" height="119" style="background-color:#ccc"
-                         src="<?= (!empty($catalogBaseGoods['image']) && !$catalogBaseGoods->isNewRecord) ?
+                         src="<?= !empty($catalogBaseGoods['image'])?
                             $catalogBaseGoods->imageUrl:
                             common\models\CatalogBaseGoods::DEFAULT_IMAGE ?>" class="avatar"/>
                     <?=
@@ -211,7 +204,7 @@ label {
 			<div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
                                 <label class="control-label" for="dynamicmodel-sub1">Категория товара</label>
                             <?php
-                            echo $form->field($catalogBaseGoods, 'sub1')->widget(Select2::classname(), [
+                            echo $form->field($categorys, 'sub1')->widget(Select2::classname(), [
                                 //'model'=>$categorys->sub1,
                                 'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(),'id', 'name'),
                                 'options' => ['placeholder' => 'Выберите...'],
@@ -222,14 +215,14 @@ label {
                                 ],
                             ])->label(false);
                             echo Html::hiddenInput('catalogBaseGoods_id1', $catalogBaseGoods->category_id, ['id'=>'catalogBaseGoods_id1']);
-                            echo Html::hiddenInput('input-type-2', $catalogBaseGoods->sub2, ['id'=>'input-type-2']);
+                            echo Html::hiddenInput('input-type-2', $categorys->sub2, ['id'=>'input-type-2']);
                             ?>
                             <?php
-                            echo $form->field($catalogBaseGoods, 'sub2')->widget(DepDrop::classname(), [
+                            echo $form->field($categorys, 'sub2')->widget(DepDrop::classname(), [
                                'options' => [],
                                'type' => DepDrop::TYPE_SELECT2,
                                'select2Options'=>[
-                                   // 'model'=>$catalogBaseGoods->sub2,
+                                    'model'=>$categorys->sub2,
                                     'theme' => "default",
                                     //'hideSearch' => true,
                                     'pluginOptions' => [
@@ -237,9 +230,9 @@ label {
                                         ],
                                     ],
                                 'pluginOptions'=>[
-                                    'depends'=>['catalogbasegoods-sub1'],
+                                    'depends'=>['dynamicmodel-sub1'],
                                     'placeholder' => false,
-                                    'url' => Url::to(['vendor/get-sub-cat']),
+                                    'url' => Url::to(['get-sub-cat']),
                                     'loadingText' => 'Загрузка...',
                                     'initialize' => true,
                                     //'initDepends'=>['dynamicmodel-sub2'],
@@ -303,30 +296,7 @@ label {
                                             //'tags' => true,
                                         ],
                                     ])->label(false);
-                                    /*       
-                                    echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
-                                        'language'=>'ru',
-                                        'options' => ['placeholder' => 'Страна ...'], 
-                                        'pluginOptions' => [
-                                            'minimumInputLength' => 1,
-                                            'allowClear' => false,
-                                            'ajax' => [
-                                                'url' => \yii\helpers\Url::toRoute(['vendor/mp-country-list']),
-                                                'dataType' => 'json',
-                                                //'type' => 'GET',
-                                                'data' => new \yii\web\JsExpression('function(term,page) { return {wq:term}; }'),
-                                                'results' => new \yii\web\JsExpression('function(data,page) { return {results:data.results}; }'),
-                                                'initSelection' => new \yii\web\JsExpression('function(element,callback){
-                                                return callback('.
-                                                   ($model->isNewRecord
-                                                      ? '{"id":null,"text":""}'
-                                                     :Json::encode(["id"=>$model->streetid,"text"=>$model->name."[".$model->city->name."]"])
-                                                                       ).')
-                                                  }')
-                                            ],
-                                           
-                                        ], 
-                                    ])->label(false);*/
+                                   
                                     ?>
                                     
                                     <?= $form->field($catalogBaseGoods, 'brand', 
@@ -363,7 +333,7 @@ label {
                             
                         </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
 			<div class="pull-right" style="margin-top: 10px;">
-			<?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
+			<?= Html::button($catalogBaseGoods->isNewRecord ? 
                             '<i class="icon fa fa-plus-circle"></i> Создать' : 
                             '<i class="icon fa fa-save"></i> Сохранить', 
                             ['class' => $catalogBaseGoods->isNewRecord ? 

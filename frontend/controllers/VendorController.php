@@ -539,22 +539,22 @@ class VendorController extends DefaultController {
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
 
-                $worksheet = $objPHPExcel->getSheet(0);
-                $highestRow = $worksheet->getHighestRow(); // получаем количество строк
-                $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
-            $newRows = 0;    
+            $worksheet = $objPHPExcel->getSheet(0);
+            $highestRow = $worksheet->getHighestRow(); // получаем количество строк
+            $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
+            $newRows = 0;
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
-                    if (!in_array($row_article, $arr)) {
-                    $newRows++;   
-                    }
+                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                if (!in_array($row_article, $arr)) {
+                    $newRows++;
+                }
             }
-            if ($newRows>5000) {
+            if ($newRows > 5000) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
-            }    
+            }
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
@@ -623,16 +623,15 @@ class VendorController extends DefaultController {
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
             }
         }
-        
+
         return $this->renderAjax('catalogs/_importForm', compact('importModel'));
     }
 
-
     public function actionImportBaseCatalogFromXls() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-$importModel = new \common\models\upload\UploadForm();
+        $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
-            
+
 
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
@@ -646,24 +645,24 @@ $importModel = new \common\models\upload\UploadForm();
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
 
-                $worksheet = $objPHPExcel->getSheet(0);
-                $highestRow = $worksheet->getHighestRow(); // получаем количество строк
-                $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
-            
-            if ($highestRow>5000) {
+            $worksheet = $objPHPExcel->getSheet(0);
+            $highestRow = $worksheet->getHighestRow(); // получаем количество строк
+            $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
+
+            if ($highestRow > 5000) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
-            }  
-              
+            }
+
             $transaction = Yii::$app->db->beginTransaction();
             try {
-	            
-	        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
-            \Yii::$app->db->createCommand($sql)->execute();
-            $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
-            
+
+                $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
+                \Yii::$app->db->createCommand($sql)->execute();
+                $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
+
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                     $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                     $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
@@ -675,30 +674,29 @@ $importModel = new \common\models\upload\UploadForm();
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
                         }
-                            $sql = "insert into {{%catalog_base_goods}}" .
-                                    "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                                    . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
-                                    . ":cat_id,"
-                                    . "0,"
-                                    . $currentUser->organization_id . ","
-                                    . ":article,"
-                                    . ":product,"
-                                    . ":units,"
-                                    . ":price,"
-                                    . ":ed,"
-                                    . ":note,"
-                                    . CatalogBaseGoods::STATUS_ON . ","
-                                    . "NOW())";
-                            $command = \Yii::$app->db->createCommand($sql);
-                            $command->bindParam(":cat_id", $lastInsert_base_cat_id, \PDO::PARAM_INT);
-                            $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
-                            $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
-                            $command->bindParam(":units", $row_units);
-                            $command->bindParam(":price", $row_price);
-                            $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
-                            $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
-                            $command->execute();
-                        
+                        $sql = "insert into {{%catalog_base_goods}}" .
+                                "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                                . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
+                                . ":cat_id,"
+                                . "0,"
+                                . $currentUser->organization_id . ","
+                                . ":article,"
+                                . ":product,"
+                                . ":units,"
+                                . ":price,"
+                                . ":ed,"
+                                . ":note,"
+                                . CatalogBaseGoods::STATUS_ON . ","
+                                . "NOW())";
+                        $command = \Yii::$app->db->createCommand($sql);
+                        $command->bindParam(":cat_id", $lastInsert_base_cat_id, \PDO::PARAM_INT);
+                        $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
+                        $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
+                        $command->bindParam(":units", $row_units);
+                        $command->bindParam(":price", $row_price);
+                        $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
+                        $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
+                        $command->execute();
                     }
                 }
                 $transaction->commit();
@@ -712,8 +710,7 @@ $importModel = new \common\models\upload\UploadForm();
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
             }
         }
-       return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
-       
+        return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
     }
 
     public function actionChangestatus() {
@@ -799,134 +796,154 @@ $importModel = new \common\models\upload\UploadForm();
     /*
      *  User product
      */
-/*
-    public function actionAjaxUpdateProduct($id) {
-        $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+    /*
+      public function actionAjaxUpdateProduct($id) {
+      $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+      $currentUser = User::findIdentity(Yii::$app->user->id);
+      if (Yii::$app->request->isAjax) {
+      $post = Yii::$app->request->post();
+
+      if ($catalogBaseGoods->load($post)) {
+      $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+      $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
+      if ($catalogBaseGoods->validate()) {
+
+      $catalogBaseGoods->save();
+
+      $message = 'Товар обновлен!';
+      return $this->renderAjax('catalogs/_success', ['message' => $message]);
+      }
+      }
+      }
+
+      return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
+      } */
+
+//    public function actionAjaxValidateProduct() {
+//        $catalogBaseGoods = new CatalogBaseGoods();
+//        $categorys = new \yii\base\DynamicModel([
+//            'sub1', 'sub2'
+//        ]);
+//        $categorys->addRule(['sub1', 'sub2'], 'required', ['message' => Yii::t('app', 'Укажите категорию товара')])
+//                ->addRule(['sub1', 'sub2'], 'integer');
+//
+//
+//        if (Yii::$app->request->isAjax) {
+//            $post = Yii::$app->request->post();
+//            if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
+//                $catalogBaseGoods->status = 1;
+//                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+//                $catalogBaseGoods->supp_org_id = $this->currentUser->organization_id;
+//
+//                //var_dump($catalogBaseGoods);
+//                if ($catalogBaseGoods->market_place == 1) {
+//                    //if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
+//                        Yii::$app->response->format = Response::FORMAT_JSON;
+//                        $test = json_encode(\yii\widgets\ActiveForm::validateMultiple([$catalogBaseGoods, $categorys]));
+//                        return $test;
+//                    //}
+//                } else {
+//                    //if ($post && $catalogBaseGoods->validate()) {
+//                        Yii::$app->response->format = Response::FORMAT_JSON;
+//                        return json_encode(\yii\widgets\ActiveForm::validate($catalogBaseGoods));
+//                    //}
+//                }
+//            }
+//        }
+//    }
+
+    public function actionAjaxCreateProductMarketPlace() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $catalogBaseGoods = new CatalogBaseGoods();
+        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
+	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
+        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-
             if ($catalogBaseGoods->load($post)) {
-                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-                $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
-                if ($catalogBaseGoods->validate()) {
-
-                    $catalogBaseGoods->save();
-
-                    $message = 'Товар обновлен!';
-                    return $this->renderAjax('catalogs/_success', ['message' => $message]);
-                }
-            }
-        }
-
-        return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
-    }*/
-    public function actionAjaxCreateProductMarketPlace() {  
-            $currentUser = User::findIdentity(Yii::$app->user->id);
-            $catalogBaseGoods = new CatalogBaseGoods();
-            $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
-	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
-            $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
-            
-            $categorys = new \yii\base\DynamicModel([
-                'sub1','sub2'
-            ]);
-            
-            $categorys->addRule(['sub1','sub2'], 'required',['message' => Yii::t('app', 'Укажите категорию товара')])
-                      ->addRule(['sub1','sub2'], 'integer');
-            
-            if (Yii::$app->request->isAjax) {
-            $post = Yii::$app->request->post();
-            if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
                 $catalogBaseGoods->status = 1;
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-                $catalogBaseGoods->supp_org_id = $currentUser->organization_id;   
-                
-                //var_dump($catalogBaseGoods);
-                if($catalogBaseGoods->market_place==1){
-                    if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
-                        $catalogBaseGoods->category_id = $categorys->sub2; 
+                $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
+
+                if ($catalogBaseGoods->market_place == 1) {
+                    if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
-                }else{
-                    if ($post && $catalogBaseGoods->validate()) { 
-                        $catalogBaseGoods->category_id = $categorys->sub2;
+                } else {
+                    if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->market_place = 0;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
-                    }   
+                    }
                 }
             }
         }
-        //return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', ['catalogBaseGoods'=>$catalogBaseGoods, 'categorys'=>$categorys]);
-       return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods','categorys','countrys'));       
+        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods', 'countrys'));
     }
-    
+
     public function actionAjaxUpdateProductMarketPlace($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
-            $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
-        $categorys = new \yii\base\DynamicModel([
-                'sub1','sub2'
-            ]);
-        $categorys->addRule(['sub1','sub2'], 'required',['message' => Yii::t('app', 'Укажите категорию товара')])
-                  ->addRule(['sub1','sub2'], 'integer');
-        
-        if(!empty($catalogBaseGoods->category_id)){
-        $categorys->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id'=>$catalogBaseGoods->category_id])->one()->parent;
-        $categorys->sub2 = $catalogBaseGoods->category_id; 
+        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+
+        if (!empty($catalogBaseGoods->category_id)) {
+            $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
+            $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
         }
-        
+
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
+            if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
-                
-                //var_dump($catalogBaseGoods);
-                if($catalogBaseGoods->market_place==1){
-                    if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
-                        $catalogBaseGoods->category_id = $categorys->sub2;
+
+                if ($catalogBaseGoods->market_place == 1) {
+                    if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
-                }else{
+                } else {
                     if ($post && $catalogBaseGoods->validate()) {
-                        $catalogBaseGoods->category_id = $categorys->sub2;
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
-                    }   
+                    }
                 }
             }
         }
-        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', 
-                compact('catalogBaseGoods','categorys','countrys'));
+        return $this->renderAjax('catalogs/_baseProductMarketPlaceForm', compact('catalogBaseGoods', 'countrys'));
     }
-     public function actionMpCountryList($q){
-        if(Yii::$app->request->isAjax){
-            $model=new \common\models\MpCountry();
-            Yii::$app->response->format=Response::FORMAT_JSON;
-                    //return 'aaa';
+
+    public function actionMpCountryList($q) {
+        if (Yii::$app->request->isAjax) {
+            $model = new \common\models\MpCountry();
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            //return 'aaa';
             return $model->ajaxsearch($q);
         }
         return false;
     }
-    public function actionGetSubCat() {   
+
+    public function actionGetSubCat() {
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
             $id = end($_POST['depdrop_parents']);
-            $list = \common\models\MpCategory::find()->select(['id','name'])->
-                    andWhere(['parent'=>$id])->
+            $list = \common\models\MpCategory::find()->select(['id', 'name'])->
+                    andWhere(['parent' => $id])->
                     asArray()->
                     all();
-            $selected  = null;
+            $selected = null;
             if ($id != null && count($list) > 0) {
                 $selected = '';
                 if (!empty($_POST['depdrop_params'])) {
@@ -937,23 +954,21 @@ $importModel = new \common\models\upload\UploadForm();
                         $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
                         //if ($i == 0){$aux = $cat['id'];}
                         //($cat['id'] == $id1) ? $selected = $id1 : $selected = $aux;
-                       //$selected = $id1; 
-                        if($cat['id']==$id1){
+                        //$selected = $id1; 
+                        if ($cat['id'] == $id1) {
                             $selected = $cat['id'];
                         }
-                        if($cat['id']==$id2){
+                        if ($cat['id'] == $id2) {
                             $selected = $id2;
                         }
                     }
-                    
                 }
-                echo Json::encode(['output' => $out, 'selected'=>$selected]);
+                echo Json::encode(['output' => $out, 'selected' => $selected]);
                 return;
             }
         }
-        echo Json::encode(['output' => '', 'selected'=>'']);
+        echo Json::encode(['output' => '', 'selected' => '']);
     }
-    
 
     public function actionChangecatalogprop() {
         if (Yii::$app->request->isAjax) {
@@ -1442,17 +1457,17 @@ $importModel = new \common\models\upload\UploadForm();
     public function actionAnalytics() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $header_info_zakaz = \common\models\Order::find()->
-                        where(['vendor_id' => $currentUser->organization_id])->count();        
-        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
+                        where(['vendor_id' => $currentUser->organization_id])->count();
+        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int) $header_info_zakaz;
         $header_info_clients = \common\models\RelationSuppRest::find()->
                         where(['supp_org_id' => $currentUser->organization_id])->count();
-        empty($header_info_clients) ? $header_info_clients = 0 : $header_info_clients = (int)$header_info_clients;
+        empty($header_info_clients) ? $header_info_clients = 0 : $header_info_clients = (int) $header_info_clients;
         $header_info_prodaji = \common\models\Order::find()->
                         where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
-        empty($header_info_prodaji) ? $header_info_prodaji = 0 : $header_info_prodaji = (int)$header_info_prodaji;
+        empty($header_info_prodaji) ? $header_info_prodaji = 0 : $header_info_prodaji = (int) $header_info_prodaji;
         $header_info_poziciy = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
                         where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-        empty($header_info_poziciy) ? $header_info_poziciy = 0 : $header_info_poziciy = (int)$header_info_poziciy;
+        empty($header_info_poziciy) ? $header_info_poziciy = 0 : $header_info_poziciy = (int) $header_info_poziciy;
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('rest_org_id')->

@@ -176,7 +176,7 @@ label {
                                         type: 'square'
                                 },
                                 update: function(){
-                                    uploadCrop.croppie('result', 'canvas').then(function (resp) {
+                                    uploadCrop.croppie('result', {type:'canvas'}).then(function (resp) {
                                         $('#image-crop-result').val(resp);
                                     });
                                 },

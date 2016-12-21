@@ -587,10 +587,9 @@ class VendorController extends DefaultController {
                             $command->execute();
                         } else {
                             $sql = "insert into {{%catalog_base_goods}}" .
-                                    "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                                    "(`cat_id`,`supp_org_id`,`article`,`product`,"
                                     . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
                                     . ":cat_id,"
-                                    . "0,"
                                     . $currentUser->organization_id . ","
                                     . ":article,"
                                     . ":product,"

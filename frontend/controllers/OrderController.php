@@ -446,7 +446,7 @@ class OrderController extends DefaultController {
             $oldDateSet = isset($order->requested_delivery);
             if ($order) {
                 //$timestamp = \DateTime::createFromFormat('d.m.Y H:i:s', $delivery_date. ' 23:59:59');
-                $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 23:59:59'));
+                $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 19:00:00'));
 
                 $order->requested_delivery = $timestamp;
                 $order->save();

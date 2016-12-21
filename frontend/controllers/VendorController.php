@@ -141,7 +141,7 @@ class VendorController extends DefaultController {
      */
 
     public function actionAjaxValidateUser() {
-        $user = new User();
+        $user = new User(['scenario' => 'manageNew']);
         $profile = new Profile();
 
         if (Yii::$app->request->isAjax) {
@@ -149,10 +149,10 @@ class VendorController extends DefaultController {
             if ($user->load($post)) {
                 $profile->load($post);
 
-                if ($user->validate() && $profile->validate()) {
+                //if ($user->validate() && $profile->validate()) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
-                    return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
-                }
+                    return json_encode(ActiveForm::validateMultiple([$user, $profile]));
+                //} 
             }
         }
     }
@@ -210,6 +210,8 @@ class VendorController extends DefaultController {
 
                     $message = 'Пользователь обновлен!';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
+                } else {
+                    $profile->validate();
                 }
             }
         }

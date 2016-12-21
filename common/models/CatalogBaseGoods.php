@@ -86,7 +86,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['product','brand','region','weight'], 'string', 'max' => 255],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
-            [['image'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'maxSize' => 1024 * 1024 * 4, 'tooBig' => 'Размер файла не должен превышать 4 Мб'],
+            [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => 'Размер файла не должен превышать 2 Мб'],//, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min'=>0.1],

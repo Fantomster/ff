@@ -47,20 +47,10 @@ $this->registerJs("
 
 		$(document).on('change', '#upload', function () { 
                     size = $('#upload').get(0).files[0].size;
-                    if (size <= 1024 * 1024 * 4) {
+                    if (size <= 2097152) {
                         readFile(this); 
                     }
                 });
-		$(document).on('click', '.upload-result', function (ev) {
-			uploadCrop.croppie('result', {
-				type: 'canvas',
-				size: 'viewport'
-			}).then(function (resp) {
-				popupResult({
-					src: resp
-				});
-			});
-		});
         "
 );
 ?>

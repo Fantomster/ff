@@ -8,6 +8,8 @@ use yii\web\UploadedFile;
 use yii\base\InvalidParamException;
 use yii\db\BaseActiveRecord;
 use yii\helpers\FileHelper;
+use Imagine\Image\ManipulatorInterface;
+use yii\imagine\Image;
 
 /**
  * Description of UploadBehavior
@@ -15,43 +17,38 @@ use yii\helpers\FileHelper;
  * @author sharaf
  */
 class UploadBehavior extends \mongosoft\file\UploadBehavior {
-    
+
     /**
      * @var ResourceManagerInterface handles resource to upload/uploaded.
      */
     public $resourceManager;
-    
+
     /**
      * @var array options to resourceManager->save() function
      */
     public $saveOptions = [];
-    
     private $_resourceNames = [];
-    
+
     /**
      * @var UploadedFile the uploaded file instance.
      */
-    protected $_file;    
-    
+    protected $_file;
     protected $_oldValue;
-    
     protected $_deleting = false;
-    
+
     /**
      * @inheritdoc
      */
-    public function init()
-    {
+    public function init() {
         parent::init();
 
-        $this->resourceManager = $this->resourceManager ?: Yii::$app->get('resourceManager');
+        $this->resourceManager = $this->resourceManager ? : Yii::$app->get('resourceManager');
     }
 
     /**
      * This method is invoked before validation starts.
      */
-    public function beforeValidate()
-    {
+    public function beforeValidate() {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
         if (in_array($model->scenario, $this->scenarios)) {
@@ -73,12 +70,11 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
             }
         }
     }
-    
+
     /**
      * This method is called at the beginning of inserting or updating a record.
      */
-    public function beforeSave()
-    {
+    public function beforeSave() {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
         if (in_array($model->scenario, $this->scenarios)) {
@@ -110,8 +106,7 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * This method is called at the end of inserting or updating a record.
      * @throws \yii\base\InvalidParamException
      */
-    public function afterSave()
-    {
+    public function afterSave() {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
         $value = $model->getAttribute($this->attribute);
@@ -132,14 +127,13 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
             $model->setAttribute($this->attribute, $this->_oldValue);
         }
     }
-    
+
     /**
      * Returns file url for the attribute.
      * @param string $attribute
      * @return string|null
      */
-    public function getUploadUrl($attribute)
-    {
+    public function getUploadUrl($attribute) {
         $url = $this->getUploadPath($attribute);
         $resourceName = $this->getResourceName($url);
         return $url ? $this->resourceManager->getUrl($resourceName) : null;
@@ -150,14 +144,13 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * @param $path
      * @return string
      */
-    public function getResourceName($path)
-    {
+    public function getResourceName($path) {
         if (!isset($this->_resourceNames[$path])) {
             $path_parts = pathinfo($path);
-            $basename = $path_parts['filename'];//(isset($path_parts['dirname']) ? $path_parts['dirname'] . DIRECTORY_SEPARATOR : '') . $path_parts['filename'];
+            $basename = $path_parts['filename']; //(isset($path_parts['dirname']) ? $path_parts['dirname'] . DIRECTORY_SEPARATOR : '') . $path_parts['filename'];
             $category = $this->getResourceCategory();
             $this->_resourceNames[$path] = ($category !== null ? $category . '/' : '')
-                . md5($basename) . (isset($path_parts['extension']) ? '.' . $path_parts['extension'] : '');
+                    . md5($basename) . (isset($path_parts['extension']) ? '.' . $path_parts['extension'] : '');
         }
 
         return $this->_resourceNames[$path];
@@ -167,13 +160,11 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
      * Return resource category
      * @return string|null
      */
-    public function getResourceCategory()
-    {
+    public function getResourceCategory() {
         return property_exists($this->owner, 'resourceCategory') ? $this->owner->resourceCategory : null;
     }
 
-    public function getFromBase64()
-    {
+    public function getFromBase64() {
         /** @var BaseActiveRecord $model */
         $model = $this->owner;
 
@@ -181,7 +172,7 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         $temp_data = $model->getAttribute($this->attribute);
 
         $data = substr($temp_data, strlen('data:image/png;base64,'));
-        $mime_type = 'image/png';
+        $mime_type = 'image/jpeg';
         $data = base64_decode($data);
 
         if ($temp_file1) {
@@ -194,38 +185,41 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
 
         $temp_filename = $uploadArr['name'];
         $temp_filename = substr($temp_filename, 0, strrpos($temp_filename, '.')) . '.png';
+        $temp_filename_jpg = substr($temp_filename, 0, strrpos($temp_filename, '.')) . '.jpg';
         $temp_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $temp_filename;
+        $temp_path_jpg = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $temp_filename_jpg;
         @file_put_contents($temp_path, $data);
 
+        Image::getImagine()->open($temp_path)->save($temp_path_jpg, ['jpeg_quality' => 85]);
+
         $upload = new UploadedFile();
-        $upload->name = $temp_filename;
-        $upload->tempName = $temp_path;
+        $upload->name = $temp_filename_jpg;
+        $upload->tempName = $temp_path_jpg;
         $upload->type = $mime_type;
-        $upload->size = $uploadArr['size'];
+        $upload->size = filesize($temp_path_jpg);//$uploadArr['size'];
         $upload->error = UPLOAD_ERR_OK;
 
         return $upload;
     }
-    
+
     /**
      * Saves the uploaded file.
      * @param UploadedFile $file the uploaded file instance
      * @param string $path the file path used to save the uploaded file
      * @return boolean true whether the file is saved successfully
      */
-    protected function save($file, $path)
-    {
+    protected function save($file, $path) {
         return $this->resourceManager->save($file, $this->getResourceName($path), $this->saveOptions);
     }
-    
+
     /**
      * Deletes old file.
      * @param string $attribute
      * @param boolean $old
      */
-    protected function delete($attribute, $old = false)
-    {
+    protected function delete($attribute, $old = false) {
         $path = $this->getUploadPath($attribute, $old);
         $this->resourceManager->delete($this->getResourceName($path));
     }
+
 }

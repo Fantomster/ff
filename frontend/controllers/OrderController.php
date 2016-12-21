@@ -752,6 +752,55 @@ class OrderController extends DefaultController {
         ];
     }
 
+    public function actionRepeat($id) {
+        $order = Order::findOne(['id' => $id]);
+
+        if ($order->client_id !== $this->currentUser->organization_id) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+
+        $newOrder = new Order([
+            'client_id' => $order->client_id,
+            'vendor_id' => $order->vendor_id,
+            'created_by_id' => $order->created_by_id,
+            'status' => Order::STATUS_FORMING,
+        ]);
+        $newContent = [];
+        foreach ($order->orderContent as $position) {
+            $attributes = $position->copyIfPossible();
+            if ($attributes) {
+                $newContent[] = new OrderContent($attributes);
+            }
+        }
+        if ($newContent) {
+            $currentOrder = Order::findOne([
+                        'client_id' => $order->client_id,
+                        'vendor_id' => $order->vendor_id,
+                        'created_by_id' => $order->created_by_id,
+                        'status' => Order::STATUS_FORMING,
+            ]);
+            if (!$currentOrder) {
+                $currentOrder = $newOrder;
+                $currentOrder->save();
+            }
+            foreach ($newContent as $position) {
+                $samePosition = OrderContent::findOne([
+                            'order_id' => $currentOrder->id,
+                            'product_id' => $position->product_id,
+                ]);
+                if ($samePosition) {
+                    $samePosition->quantity += $position->quantity;
+                    $samePosition->save();
+                } else {
+                    $position->order_id = $currentOrder->id;
+                    $position->save();
+                }
+            }
+        }
+        var_dump($order);
+        var_dump($newContent);
+    }
+
     private function sendChatMessage($user, $order_id, $message) {
         $order = Order::findOne(['id' => $order_id]);
 

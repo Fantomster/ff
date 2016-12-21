@@ -77,6 +77,69 @@ class OrderContent extends \yii\db\ActiveRecord
         return $this->quantity * $this->price;
     }
     
+    public function copyIfPossible() {
+        $cgTable = CatalogGoods::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+        $orgTable = Organization::tableName();
+        $rsrTable = RelationSuppRest::tableName();
+        $catTable = Catalog::tableName();
+        
+        $product = CatalogGoods::find()
+                ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.status" => RelationSuppRest::CATALOG_STATUS_ON,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.supp_org_id" => $this->order->vendor_id,
+                    "$rsrTable.rest_org_id" => $this->order->client_id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $this->product_id,
+                ])
+                ->one();
+        if ($product) {
+            return [
+                'product_id' => $product->baseProduct->id,
+                'quantity' => $this->quantity,
+                'price' => $product->price,
+                'product_name' => $product->baseProduct->product,
+                'units' => $product->baseProduct->units,
+                'article' => $product->baseProduct->article,
+            ];
+        }
+        $product = CatalogBaseGoods::find()
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cbgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.status" => RelationSuppRest::CATALOG_STATUS_ON,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.supp_org_id" => $this->order->vendor_id,
+                    "$rsrTable.rest_org_id" => $this->order->client_id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $this->product_id,
+                ])
+                ->one();
+        if ($product) {
+            return [
+                'product_id' => $product->id,
+                'quantity' => $this->quantity,
+                'price' => $product->price,
+                'product_name' => $product->product,
+                'units' => $product->units,
+                'article' => $product->article,
+            ];
+        }
+        return [];
+    }
+    
+    public function copy() {
+        
+    }
+    
 //    public function getPrice() {
 //        return ($this->price + 0);
 //    }

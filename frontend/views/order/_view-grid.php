@@ -57,7 +57,7 @@ echo GridView::widget([
         <th>
             Стоимость заказа
         </th><td>
-            <?= '<b>' . 'скоро будет' . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
+    <?= '<b>' . 'скоро будет' . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
         </td>
     </tr>-->
     <tr>
@@ -80,3 +80,8 @@ echo GridView::widget([
         </td>
     </tr>
 </table>
+<?=
+$canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
+            'class' => 'btn btn-default pull-right',
+            'style' => 'margin-right: 7px;'
+        ]) : "" ?>

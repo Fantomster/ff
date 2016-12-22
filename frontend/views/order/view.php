@@ -128,6 +128,17 @@ $js = <<<JS
 JS;
 $this->registerJs($js, \yii\web\View::POS_LOAD);
 \yii2assets\printthis\PrintThisAsset::register($this);
+
+$canRepeatOrder = false;
+if ($priceEditable) {
+    switch ($order->status) {
+        case Order::STATUS_DONE:
+        case Order::STATUS_REJECTED:
+        case Order::STATUS_CANCELLED:
+            $canRepeatOrder = true;
+            break;
+    }
+}
 ?>
 
 <section class="content-header">
@@ -155,12 +166,12 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
             <div class="box box-info">
                 <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 5000]); ?>
                 <div class="box-header with-border">
-                    <div class="row m-b-xl">
+                    <h4 class="font-bold">Заказ №<?= $order->id ?></h4><hr>
+                    <div class="row m-b-xl" style="line-height: 1.8;">
                         <div class="col-xs-6">
-                            <h4 class="font-bold">Заказ №<?= $order->id ?></h4>
-                            <span>Заказчик:</span>
+                            <span class="org-type">Заказчик:</span><br>
+                            <strong><?= $order->client->name ?></strong><br>
                             <address>
-                                <strong><?= $order->client->name ?></strong><br>
                                 <?= $order->client->city ?><br>
                                 адрес: <?= $order->client->address ?><br>
                                 телефон: <?= $order->client->phone ?>
@@ -176,10 +187,9 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                             </p>
                         </div>
                         <div class="col-xs-6 text-right">
-                            <h4 class="font-bold">&nbsp;</h4>
-                            <span>Поставщик:</span>
+                            <span class="org-type">Поставщик:</span><br>
+                            <strong><?= $order->vendor->name ?></strong><br>
                             <address>
-                                <strong><?= $order->vendor->name ?></strong><br>
                                 <?= $order->vendor->city ?><br>
                                 адрес: <?= $order->vendor->address ?><br>
                                 телефон: <?= $order->vendor->phone ?>
@@ -196,9 +206,9 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                     <div id="orderGrid">
                         <?php
                         if ($quantityEditable || $priceEditable) {
-                            echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'quantityEditable', 'priceEditable', 'order'));
+                            echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'quantityEditable', 'priceEditable', 'order', 'canRepeatOrder'));
                         } else {
-                            echo $this->render('_view-grid', compact('dataProvider', 'order'));
+                            echo $this->render('_view-grid', compact('dataProvider', 'order', 'canRepeatOrder'));
                         }
                         ?>
                     </div>
@@ -281,7 +291,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                     <?= Html::endForm() ?>
                 </div>
                 <!-- /.box-footer-->
-            </div>    
+            </div>
         </div>
     </div>
 </section>
@@ -303,9 +313,9 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
         </div>
     </div>
 </div>
-    <?=
-    Modal::widget([
-        'id' => 'cancelOrder',
-        'clientOptions' => false,
-    ])
-    ?>
+<?=
+Modal::widget([
+    'id' => 'cancelOrder',
+    'clientOptions' => false,
+])
+?>

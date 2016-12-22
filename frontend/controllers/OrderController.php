@@ -797,8 +797,7 @@ class OrderController extends DefaultController {
                 }
             }
         }
-        var_dump($order);
-        var_dump($newContent);
+        $this->redirect(['order/checkout']);
     }
 
     private function sendChatMessage($user, $order_id, $message) {

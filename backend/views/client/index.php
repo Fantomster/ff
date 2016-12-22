@@ -31,11 +31,6 @@ $gridColumns = [
     ],
     'status',
     'email',
-//            [
-//                'attribute' => 'organization_id',
-//                'value' => 'organization_id',
-//                'label' => 'Орг ID'
-//            ],
     [
         'format' => 'raw',
         'attribute' => 'org_name',

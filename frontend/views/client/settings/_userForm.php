@@ -8,7 +8,8 @@ use common\models\Role;
 <?php
 $form = ActiveForm::begin([
             'id' => 'user-form',
-            'enableAjaxValidation' => false,
+            'enableAjaxValidation' => true,
+            'enableClientValidation' => true,
             'action' => $user->isNewRecord? Url::toRoute('client/ajax-create-user') : Url::toRoute(['client/ajax-update-user', 'id' => $user->id]),
             'options' => [
                 'class' => 'user-form',

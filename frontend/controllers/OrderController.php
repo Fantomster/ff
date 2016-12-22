@@ -446,7 +446,7 @@ class OrderController extends DefaultController {
             $oldDateSet = isset($order->requested_delivery);
             if ($order) {
                 //$timestamp = \DateTime::createFromFormat('d.m.Y H:i:s', $delivery_date. ' 23:59:59');
-                $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 23:59:59'));
+                $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 19:00:00'));
 
                 $order->requested_delivery = $timestamp;
                 $order->save();
@@ -750,6 +750,55 @@ class OrderController extends DefaultController {
             'unreadMessages' => $unreadMessagesHtml,
             'unreadNotifications' => $unreadNotificationsHtml,
         ];
+    }
+
+    public function actionRepeat($id) {
+        $order = Order::findOne(['id' => $id]);
+
+        if ($order->client_id !== $this->currentUser->organization_id) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+
+        $newOrder = new Order([
+            'client_id' => $order->client_id,
+            'vendor_id' => $order->vendor_id,
+            'created_by_id' => $order->created_by_id,
+            'status' => Order::STATUS_FORMING,
+        ]);
+        $newContent = [];
+        foreach ($order->orderContent as $position) {
+            $attributes = $position->copyIfPossible();
+            if ($attributes) {
+                $newContent[] = new OrderContent($attributes);
+            }
+        }
+        if ($newContent) {
+            $currentOrder = Order::findOne([
+                        'client_id' => $order->client_id,
+                        'vendor_id' => $order->vendor_id,
+                        'created_by_id' => $order->created_by_id,
+                        'status' => Order::STATUS_FORMING,
+            ]);
+            if (!$currentOrder) {
+                $currentOrder = $newOrder;
+                $currentOrder->save();
+            }
+            foreach ($newContent as $position) {
+                $samePosition = OrderContent::findOne([
+                            'order_id' => $currentOrder->id,
+                            'product_id' => $position->product_id,
+                ]);
+                if ($samePosition) {
+                    $samePosition->quantity += $position->quantity;
+                    $samePosition->save();
+                } else {
+                    $position->order_id = $currentOrder->id;
+                    $position->save();
+                }
+            }
+        }
+        var_dump($order);
+        var_dump($newContent);
     }
 
     private function sendChatMessage($user, $order_id, $message) {

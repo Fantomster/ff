@@ -288,6 +288,7 @@ class VendorController extends DefaultController {
             }
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+            $arrEd = \yii\helpers\ArrayHelper::getColumn(\common\models\MpEd::find()->all(), 'name');
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -295,7 +296,6 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
-                $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
                     return $result;
@@ -316,12 +316,10 @@ class VendorController extends DefaultController {
                     return $result;
                     exit;
                 }
-                if (!empty($category_name)) {
-                    if (!Category::find()->where(['name' => $category_name])->exists()) {
-                        $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Ошибка в поле <strong>Категория</strong>']];
-                        return $result;
-                        exit;
-                    }
+                if(!in_array($ed, $arrEd)){
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверная <strong>Единица измерения</strong> товара']];
+                    return $result;
+                    exit;
                 }
                 $price = str_replace(',', '.', $price);
 
@@ -345,14 +343,8 @@ class VendorController extends DefaultController {
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                 $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
-                $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
-                if (empty($category_name)) {
-                    $category_name = 0;
-                } else {
-                    //$category_name = 0;
-                    $category_name = empty(Category::find()->where(["name" => $category_name])->one()->id) ? 0 : Category::find()->where(["name" => $category_name])->one()->id;
-                }
+
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $price = str_replace(',', '.', $price);
                 if (substr($price, -3, 1) == '.') {
@@ -372,7 +364,7 @@ class VendorController extends DefaultController {
                         . ":product,"
                         . ":units,"
                         . ":price,"
-                        . ":category_id,"
+                        . "NULL,"
                         . ":note,"
                         . ":ed,"
                         . CatalogBaseGoods::STATUS_ON . ","
@@ -384,7 +376,6 @@ class VendorController extends DefaultController {
                 $command->bindParam(":product", $product, \PDO::PARAM_STR);
                 $command->bindParam(":units", $units);
                 $command->bindParam(":price", $price);
-                $command->bindParam(":category_id", $category_name);
                 $command->bindParam(":note", $note, \PDO::PARAM_STR);
                 $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
                 $command->execute();

@@ -62,7 +62,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
         <div class="box-body">
             <div class="row">
 
-                <div class="col-md-12">
+                <div class="col-md-10">
                     <fieldset>
                         <legend>Данные организации:</legend>
                         <div class="row">
@@ -130,22 +130,14 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                         </div>
                     </div>
                 </div>
-            </div>           
-            <div style="width:100%;">
-                <div>
-                    <div class="form-group" style="float: right;">
-                        <label>Информация об организации</label>
-                        <textarea class="form-control" rows="3" placeholder="Несколько слов об организации ..."></textarea>
-                    </div>
+                <div class="col-md-2">
 
-                </div>
-                <div style="width: 248px; float: right;">
-                    <img id="newAvatar" style="background-color:#ccc; display: block; width: 248px; height:248px; z-index: 1; margin-top: 15px;
+                    <img id="newAvatar" style="background-color:#ccc; display: block; width: 100%; /*max-height:210px; max-width: 210px;*/ z-index: 1; margin-top: 15px;
                          " src="images/rest-noavatar.gif">
 
                     <a href="#" class="btn btn-gray" style="width:100%; display: inline-block; z-index: 999; margin-top:-15px; margin-bottom:20px;"> Загрузить аватар</a>
                 </div>
-            </div>
+            </div>            
             <fieldset>
                 <legend>Контактное лицо:</legend>
                 <div class="row">
@@ -174,13 +166,21 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <?=
-                                    $form->field($organization, 'phone', [
-                                        'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
-                                    ])
-                                    ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
-                                    ->label('Телефон')
-                                    ->textInput()
-                            ?>
+                    $form->field($organization, 'phone', [
+                        'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
+                    ])
+                    ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+                    ->label('Телефон')
+                    ->textInput()
+            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Информация об организации</label>
+                            <textarea class="form-control" rows="3" placeholder="Несколько слов об организации ..."></textarea>
                         </div>
                     </div>
                 </div>

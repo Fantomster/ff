@@ -130,7 +130,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
 \yii2assets\printthis\PrintThisAsset::register($this);
 
 $canRepeatOrder = false;
-if ($priceEditable) {
+if ($organizationType == Organization::TYPE_RESTAURANT) {
     switch ($order->status) {
         case Order::STATUS_DONE:
         case Order::STATUS_REJECTED:

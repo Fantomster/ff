@@ -4,6 +4,8 @@ namespace common\models;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+use common\behaviors\ImageUploadBehavior;
+use Imagine\Image\ManipulatorInterface;
 
 /**
  * This is the model class for table "organization".
@@ -19,6 +21,10 @@ use yii\helpers\ArrayHelper;
  * @property string $website
  * @property string $created_at
  * @property string $updated_at
+ * @property string $legal_entity
+ * @property string $contact_name
+ * @property string $about
+ * @property string $picture
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
@@ -34,11 +40,13 @@ class Organization extends \yii\db\ActiveRecord {
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only
     const STEP_ADD_CATALOG = 3; //vendors only
+    const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
+
+    public $resourceCategory = 'org-picture';
 
     /**
      * @inheritdoc
      */
-
     public static function tableName() {
         return 'organization';
     }
@@ -53,10 +61,11 @@ class Organization extends \yii\db\ActiveRecord {
             [['type_id', 'name'], 'required'],
             [['type_id', 'step'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['email'], 'email'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
+            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
         ];
     }
 
@@ -70,6 +79,16 @@ class Organization extends \yii\db\ActiveRecord {
                 'value' => function ($event) {
                     return gmdate("Y-m-d H:i:s");
                 },
+            ],
+            [
+                'class' => ImageUploadBehavior::className(),
+                'attribute' => 'picture',
+                'scenarios' => ['default'],
+                'path' => '@app/web/upload/temp/',
+                'url' => '/upload/temp/',
+                'thumbs' => [
+                    'picture' => ['width' => 420, 'height' => 236, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
+                ],
             ],
         ];
     }
@@ -90,6 +109,10 @@ class Organization extends \yii\db\ActiveRecord {
             'website' => 'Веб-сайт',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'legal_entity' => 'Название юридического лица',
+            'contact_name' => 'ФИО контактного лица',
+            'about' => 'Информация об организации',
+            'picture' => 'Аватар',
         ];
     }
 

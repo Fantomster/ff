@@ -4,6 +4,9 @@ use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
+use common\assets\CroppieAsset;
+
+CroppieAsset::register($this);
 
 $this->registerJs(
         '$("document").ready(function(){
@@ -16,6 +19,83 @@ $this->registerJs(
             });
         });'
 );
+$this->registerJs("           
+		function readFile(input) {
+ 			if (input.files && input.files[0]) {
+	            var reader = new FileReader();
+	            
+	            reader.onload = function (e) {
+					$('.upload-avatar').addClass('ready');
+                                        $('.upload-demo-wrap').css('opacity','1').css('z-index','198');
+                                        console.log('ok');
+	            	uploadCrop.croppie('bind', {
+	            		url: e.target.result
+	            	}).then(function(){
+	            		console.log('jQuery bind complete');
+	            	});
+	            	
+	            }
+	            
+	            reader.readAsDataURL(input.files[0]);
+	        }
+	        else {
+		        swal('Sorry - your browser does not support the FileReader API');
+		    }
+		}
+
+		$(document).on('change', '#upload', function () { 
+                    size = $('#upload').get(0).files[0].size;
+                    if (size <= 2097152) {
+                        readFile(this); 
+                    }
+                });
+                
+                        var uploadCrop = $('#upload-avatar').croppie({
+                                viewport: {
+                                        width: 420,
+                                        height: 236,
+                                        type: 'square'
+                                },
+                                update: function(){
+                                    uploadCrop.croppie('result', {type:'canvas'}).then(function (resp) {
+                                        $('#image-crop-result').val(resp);
+                                    });
+                                },
+                                enableExif: true
+                        });
+        "
+);
+$this->registerCss("
+    .upload-demo .upload-demo-wrap,
+.upload-demo .upload-result,
+.upload-demo.ready .upload-msg {
+    display: none;
+}
+.upload-demo.ready .upload-demo-wrap {
+    display: block;
+}
+.upload-demo.ready .upload-result {
+    display: inline-block;    
+}
+.upload-demo-wrap {
+    position:absolute;
+    width: 420px;
+    height: 236px;
+    border-radius: 0%;
+    top: 0;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    opacity:0;
+}
+.cr-boundary{border-radius:0%}
+.croppie-container .cr-slider-wrap {
+    margin: 20px auto;
+}
+#upload-avatar{border-radius:0%}
+.cr-viewport{border-radius:0%}
+
+        ");
 ?>
 <!--<div style="padding: 20px 30px; background: rgb(243, 156, 18); z-index: 999999; font-size: 16px; font-weight: 600;"><a class="pull-right" href="#" data-toggle="tooltip" data-placement="left" title="Never show me this again!" style="color: rgb(255, 255, 255); font-size: 20px;">×</a><a href="https://themequarry.com" style="color: rgba(255, 255, 255, 0.901961); display: inline-block; margin-right: 10px; text-decoration: none;">Ready to sell your theme? Submit your theme to our new marketplace now and let over 200k visitors see it!</a><a class="btn btn-default btn-sm" href="https://themequarry.com" style="margin-top: -5px; border: 0px; box-shadow: none; color: rgb(243, 156, 18); font-weight: 600; background: rgb(255, 255, 255);">Let's Do It!</a></div>-->
 <?php
@@ -56,15 +136,32 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                     'options' => [
                         'data-pjax' => true,
                     ],
-                    'method' => 'get',
+                    'method' => 'post',
         ]);
         ?>
         <div class="box-body">
             <div class="row">
 
-                <div class="col-md-10">
+                <div class="col-md-12">
                     <fieldset>
                         <legend>Данные организации:</legend>
+                        <div class="avatar-option" style="">
+
+                            <div class="upload-demo-wrap">
+                                <div id="upload-avatar"></div>
+                            </div>
+                            <img id="newAvatar" style="background-color:#ccc; display: block; width: 420px; margin-top: 15px; z-index: 1; max-height:236px;" class="center-block" src="<?= $organization->pictureUrl ?>">
+                            <label class="btn btn-gray" style="width:420px; display: block; margin: 0 auto; z-index: 999; /*margin-top:-15px;*/ margin-bottom:20px;"> Загрузить аватар
+                                <?=
+                                        $form->field($organization, 'picture', ['template' => '<div class="input-group">{input}</div>{error}'])
+                                        ->fileInput(['id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
+                                ?>
+                            </label>
+
+                            <?= Html::hiddenInput('Organization[picture]', null, ['id' => 'image-crop-result']) ?>
+
+
+                        </div>
                         <div class="row">
 
                             <div class="col-md-6">
@@ -82,7 +179,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <?=
-                                            $form->field($organization, 'name', [
+                                            $form->field($organization, 'legal_entity', [
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
                                             ->label('Название юридического лица <span style="font-size:12px; color: #dd4b39;"></span>')
@@ -130,14 +227,18 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-
-                    <img id="newAvatar" style="background-color:#ccc; display: block; width: 100%; /*max-height:210px; max-width: 210px;*/ z-index: 1; margin-top: 15px;
-                         " src="images/rest-noavatar.gif">
-
-                    <a href="#" class="btn btn-gray" style="width:100%; display: inline-block; z-index: 999; margin-top:-15px; margin-bottom:20px;"> Загрузить аватар</a>
-                </div>
             </div>            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <?=
+                                $form->field($organization, 'about')
+                                ->label('Информация об организации')
+                                ->textarea(['placeholder' => "Несколько слов об организации ...", 'rows' => 3])
+                        ?>
+                    </div>
+                </div>
+            </div>
             <fieldset>
                 <legend>Контактное лицо:</legend>
                 <div class="row">
@@ -145,7 +246,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <?=
-                                    $form->field($organization, 'name', [
+                                    $form->field($organization, 'contact_name', [
                                         'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                     ])
                                     ->label('ФИО контактного лица')
@@ -166,21 +267,13 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <?=
-                    $form->field($organization, 'phone', [
-                        'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
-                    ])
-                    ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
-                    ->label('Телефон')
-                    ->textInput()
-            ?>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Информация об организации</label>
-                            <textarea class="form-control" rows="3" placeholder="Несколько слов об организации ..."></textarea>
+                                    $form->field($organization, 'phone', [
+                                        'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
+                                    ])
+                                    ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+                                    ->label('Телефон')
+                                    ->textInput()
+                            ?>
                         </div>
                     </div>
                 </div>

@@ -73,7 +73,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                             $form->field($organization, 'name', [
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
-                                            ->label('Название ресторана <span style="font-size:12px; color: #dd4b39;"><i class="fa fa-fw fa-asterisk"></i></span>')
+                                            ->label('Название ресторана <span style="font-size:12px; color: #dd4b39;"></span>')
                                             ->textInput(['placeholder' => 'Введите название ресторана'])
                                     ?>
                                 </div>
@@ -85,7 +85,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                             $form->field($organization, 'name', [
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
-                                            ->label('Название юридического лица <span style="font-size:12px; color: #dd4b39;"><i class="fa fa-fw fa-asterisk"></i></span>')
+                                            ->label('Название юридического лица <span style="font-size:12px; color: #dd4b39;"></span>')
                                             ->textInput(['placeholder' => 'Введите название юридического лица'])
                                     ?>
                                 </div>

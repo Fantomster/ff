@@ -3,6 +3,7 @@
 //use kartik\grid\GridView;
 use yii\grid\GridView;
 use common\models\Order;
+use yii\helpers\Html;
 
 $dataProvider->sort = false;
 $discountTypes = Order::discountDropDown();

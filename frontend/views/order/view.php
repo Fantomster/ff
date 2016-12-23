@@ -50,7 +50,7 @@ $js = <<<JS
                 });
             }
         });
-        $('.content').on('change keyup paste cut', '.viewData', function() {
+        $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
         });
         $(document).on('click', 'a', function(e) {
@@ -170,16 +170,16 @@ if ($priceEditable) {
                     <div class="row m-b-xl" style="line-height: 1.8;">
                         <div class="col-xs-6">
                             <span class="org-type">Заказчик:</span><br>
-                            <strong><?= $order->client->name ?></strong><br>
+                            <?= $order->client->name ?><br><br>
                             <address>
-                                <?= $order->client->city ?><br>
-                                адрес: <?= $order->client->address ?><br>
-                                телефон: <?= $order->client->phone ?>
+                                <b>Город:</b> <?= $order->client->city ?><br>
+                                <b>Адрес:</b> <?= $order->client->address ?><br>
+                                <b>Телефон:</b> <?= $order->client->phone ?>
                             </address>
                             <p class="text-left">
-                                <span>Размещен:</span>
-                                <strong><?= $order->createdBy->profile->full_name ?></strong><br>
-                                email: <?= $order->createdBy->email ?>
+                                <b>Размещен:</b>
+                                <?= $order->createdBy->profile->full_name ?><br>
+                                <b>Email:</b> <?= $order->createdBy->email ?>
                             </p>
                             <p class="text-left">
                                 <strong>Запрошенная дата доставки:</strong><br>
@@ -188,11 +188,11 @@ if ($priceEditable) {
                         </div>
                         <div class="col-xs-6 text-right">
                             <span class="org-type">Поставщик:</span><br>
-                            <strong><?= $order->vendor->name ?></strong><br>
+                            <?= $order->vendor->name ?><br><br>
                             <address>
-                                <?= $order->vendor->city ?><br>
-                                адрес: <?= $order->vendor->address ?><br>
-                                телефон: <?= $order->vendor->phone ?>
+                                <b>Город:</b> <?= $order->vendor->city ?><br>
+                                <b>Адрес:</b> <?= $order->vendor->address ?><br>
+                                <b>Телефон:</b> <?= $order->vendor->phone ?>
                             </address>
                             <p class="text-right">
                                 <span><strong>Дата создания заказа:</strong><br><?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></span><br>

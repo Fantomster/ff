@@ -52,34 +52,37 @@ echo GridView::widget([
     ],
 ]);
 ?>
-<table class="table dataTable tbl-discount">
-<!--    <tr>
-        <th>
-            Стоимость заказа
-        </th><td>
-    <?= '<b>' . 'скоро будет' . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
-        </td>
-    </tr>-->
-    <tr>
-        <th>
-            <?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?>
-        </th><td>
-            <?= ($order->discount) ? $order->discount : '-' ?>
-        </td>
-    </tr><tr>
-        <th>
-            Стоимость доставки
-        </th><td>
-            <?= '<b>' . $order->calculateDelivery() . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
-        </td>
-    </tr><tr>
-        <th>
-            Стоимость заказа
-        </th><td>
-            <?= '<b>' . $order->total_price . '</b> <i class="fa fa-fw fa-rub"></i>' ?>
-        </td>
-    </tr>
-</table>
+                    <div class="order-total">
+                        <div class="row">
+                            <div class="col-xs-4"><hr></div>
+                            <div class="col-xs-8"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <span><?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?></span>
+                            </div>
+                            <div class="col-xs-8">
+                                <span><?= ($order->discount) ? $order->discount : '-' ?></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4 ">
+                                <span>Стоимость доставки:</span>
+                            </div>
+                            <div class="col-xs-8">
+                                <span><?= $order->calculateDelivery() . ' руб' ?></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <span>Итого:</span>
+                            </div>
+                            <div class="col-xs-8">
+                                <span><?= $order->total_price . ' руб' ?></span>
+                            </div>
+                        </div>
+                    </div>
+
 <?=
 $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
             'class' => 'btn btn-default pull-right',

@@ -165,18 +165,18 @@ echo '<iframe style="min-width: 320px;width: 100%;" width="854" height="480" id=
 Modal::end();
 ?>
 <?php
-//$categorys = json_encode(common\models\Category::allCategory(), JSON_UNESCAPED_UNICODE);
-$catgrs = \yii\helpers\ArrayHelper::getColumn(common\models\Category::find()->all(), 'name');
-array_unshift($catgrs,"");
-$catgrs = json_encode($catgrs, JSON_UNESCAPED_UNICODE);
+
+$mped = \yii\helpers\ArrayHelper::getColumn(common\models\MpEd::find()->all(), 'name');
+array_unshift($mped,"");
+$mped = json_encode($mped, JSON_UNESCAPED_UNICODE);
 
 $customJs = <<< JS
-var category = $catgrs;
+var ed = $mped;
 var arr = [];
 var data = [];
         
 for ( var i = 0; i < 60; i++ ) {
-    data.push({article: '', product: '', units: '', price: '', ed: '', category: '', note: ''});
+    data.push({article: '', product: '', units: '', price: '', ed: '', note: ''});
 }
 var container = document.getElementById('CreateCatalog');
 
@@ -191,8 +191,8 @@ hot = new Handsontable(container, {
   beforeChange: function () {
       //console.log('beforeChange');
   },
-  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Категория', 'Комментарий'],
-  colWidths: [40, 120, 45, 45, 65,  55,  80],
+  colHeaders : ['Артикул', 'Продукт', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
+  colWidths: [40, 120, 45, 45, 65, 80],
   renderAllRows: true,
   columns: [
     {data: 'article'},
@@ -209,11 +209,10 @@ hot = new Handsontable(container, {
         format: '0.00',
         language: 'ru-RU'
     },
-    {data: 'ed'},
     {
-        data: 'category', 
+        data: 'ed', 
         type: 'dropdown',
-        source: category
+        source: ed
     },
     {data: 'note'},   
     ],
@@ -228,7 +227,7 @@ hot = new Handsontable(container, {
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, data=[]; 
   var cleanedData = {};
-  var cols = ['article', 'product', 'units', 'price', 'ed', 'category', 'note'];
+  var cols = ['article', 'product', 'units', 'price', 'ed', 'note'];
     $.each(dataTable, function( rowKey, object) {
         if (!hot.isEmptyRow(rowKey)){
             cleanedData[rowKey] = object;

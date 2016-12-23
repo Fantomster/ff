@@ -425,7 +425,7 @@ class ClientController extends DefaultController {
                                 "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
                                 . "`units`,`price`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
                                 . $lastInsert_base_cat_id . ","
-                                . "0,"
+                                . "NULL,"
                                 . $get_supp_org_id . ","
                                 . ":article,"
                                 . ":product,"

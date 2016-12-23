@@ -204,8 +204,29 @@ $this->registerCss('
                                 $statusClass = 'cancelled';
                                 break;
                         }
-                        return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data['status']) . '</span>';//fa fa-circle-thin
-                    },]
+                        return '<span class="status ' . $statusClass . '">' . Order::statusText($data['status']) . '</span>';//<i class="fa fa-circle-thin"></i> 
+                    },],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    switch ($data['status']) {
+                                        case Order::STATUS_DONE:
+                                        case Order::STATUS_REJECTED:
+                                        case Order::STATUS_CANCELLED:
+                                            return Html::a('<i class="fa fa-refresh"></i>', ['order/repeat', 'id' => $data['id']], [
+                                                        'class' => 'reorder',
+                                                        'data' => [
+                                                            'toggle' => 'tooltip',
+                                                            'original-title' => 'Повторить заказ',
+                                                        ],
+                                            ]);
+                                            break;
+                                    }
+                                    return '';
+                                },
+                                        'contentOptions' => ['class' => 'text-center'],
+                                        'headerOptions' => ['style' => 'width: 20px;']
+                                    ],
 	];
         ?>
         <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'order-analytic-list',]); ?>

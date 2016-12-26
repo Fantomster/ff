@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
@@ -15,165 +16,165 @@ use kartik\checkbox\CheckboxX;
 Modal::widget([
     'id' => 'view-catalog',
     'size' => 'modal-lg',
-    'clientOptions' => false,   
+    'clientOptions' => false,
 ])
 ?>
 <?=
 Modal::widget([
     'id' => 'view-client',
     'size' => 'modal-md',
-    'clientOptions' => false,   
+    'clientOptions' => false,
 ])
 ?>
-<?php 
-$gridColumnsClients = [
-		[
-		'label'=>'Ресторан',
-                'format' => 'raw',
-		'value'=>function ($data) {
-                $res = common\models\Organization::find()->where(['id'=>$data['rest_org_id']])->one()->name;
-                return Html::a(Html::encode($res), ['vendor/view-client', 'id' => $data['rest_org_id']], [
-                    'data' => [
-                    'target' => '#view-client',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',
-                              ],
-                    ]);
-                }
-		],
-                [
-		'label'=>'Последний заказ',
-                'format' => 'raw',
-		'value'=>
-                    function($data) {
-                            $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id'=>$data['rest_org_id'],'vendor_id'=>common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
-                            $date = Yii::$app->formatter->asDatetime($res, "php:j M Y");
-                            return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
-                        },
-                    
-		],
-		[
-		'label'=>'Текущий каталог',
-                'format' => 'raw',
-		'value'=>function ($data) {
-                $cat = common\models\Catalog::find()->where(['id'=>$data['cat_id']])->one();
-                return $data['cat_id']==0? '':
-                        Html::a(Html::encode($cat->name), ['vendor/view-catalog', 'id' => $data['cat_id']], [
-                    'data' => [
-                    'target' => '#view-catalog',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',
-                              ],
-                    ]);
-		}
-		],
-                [
-                'attribute' => 'Статус сотрудничества',
-                'format' => 'raw',
-                'contentOptions' => ['style' => 'width:190px;text-align:center'],
-                'value' => function ($data) {
-                    $link = CheckboxX::widget([
-                    'name'=>'restOrgId_'.$data['rest_org_id'],
-                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data['invite']==0 ? 0 : 1,
-                    'autoLabel' => true,
-                    'options'=>['id'=>'restOrgId_'.$data['rest_org_id'], 'data-id'=>$data['rest_org_id']],
-                    'pluginOptions'=>[
-                        'threeState'=>false,
-                        'theme' => 'krajee-flatblue',
-                        'enclosedLabel' => true,
-                        'size'=>'lg',
-                        ]
-                ]);
-                return $link;
-                    },
-                ],
-    
-];
-?>
-<section class="content-header">
-    <h1>
-        <i class="fa fa-list-alt"></i> Мои клиенты
-        <small></small>
-    </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'links' => [
-            'Мои клиенты'
-        ],
-    ])
-    ?>
-</section>
-<section class="content">
-<div class="box box-info">
-    <div class="box-header with-border">
-        <?=
-        Modal::widget([
-            'id' => 'add-client',
-            'clientOptions' => false,
-            'toggleButton' => [
-                'label' => 'Пригласить клиента',
-                'tag' => 'a',
-                'data-target' => '#add-client',
-                'class' => 'btn btn-sm btn-fk-success pull-right',
-                'href' => Url::to(['/vendor/ajax-add-client']),
-                'style' => 'float:right',
-            ],
-        ])
-        ?>
-    </div>
-    <!-- /.box-header -->
-    <div class="box-body">
-            <div class="panel-body">
-                <div class="col-sm-3">
-                    <?= Html::label('Ресторан', 'filter_restaurant', ['class' => 'label filter_catalog','style'=>'color:#555']) ?>
-                    <?= Html::dropDownList('filter_restaurant', null,
-                            $arr_restaurant,['prompt' => 'Все','class' => 'form-control','id'=>'filter_restaurant']) ?> 
-                </div>
-                <div class="col-sm-3">
-                    <?= Html::label('Каталог', 'filter_catalog', ['class' => 'label filter_catalog','style'=>'color:#555']) ?>
-                    <?= Html::dropDownList('filter_catalog', null,
-                            $arr_catalog,['prompt' => 'Все','class' => 'form-control','id'=>'filter_catalog']) ?>  
-                </div>
-                <div class="col-sm-3">
-                    <?= Html::label('Статус', 'filter_invite', ['class' => 'label filter_invite','style'=>'color:#555']) ?>
-                    <?= Html::dropDownList('filter_invite', null,
-                            [
-                                '0' => 'Не подтвержден',
-                                '1' => 'Подтвержден',
-                            ],['prompt' => 'Все','class' => 'form-control','id'=>'filter_invite']) ?> 
-                </div>
-                <div class="col-sm-3 col-md-2 col-lg-1">
-                    <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-                    <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
-                </div>
-            </div>
-        <div class="panel-body">
-            <?php Pjax::begin(['enablePushState' => false, 'id' => 'cl-list',]); ?>
-            <?=GridView::widget([
-                    'dataProvider' => $dataProvider,
-                    'filterPosition' => false,
-                    'formatter' => ['class' => 'yii\i18n\Formatter','nullDisplay' => ''],
-                    'columns' => $gridColumnsClients, 
-                    'options' => ['class' => 'table-responsive'],
-                    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                    'bordered' => false,
-                    'striped' => true,
-                    'condensed' => false,
-                    'responsive' => false,
-                    'hover' => false,
-            ]);
-            ?> 
-            <?php Pjax::end(); ?> 
-        </div>
-    </div>
-</div>
-</section>
 <?php
-$customJs = <<< JS
+$gridColumnsClients = [
+    [
+        'label' => 'Ресторан',
+        'format' => 'raw',
+        'value' => function ($data) {
+            $res = common\models\Organization::find()->where(['id' => $data['rest_org_id']])->one()->name;
+            return Html::a("<b>" . Html::encode($res) . "</b>", ['vendor/view-client', 'id' => $data['rest_org_id']], [
+                        'data' => [
+                            'target' => '#view-client',
+                            'toggle' => 'modal',
+                            'backdrop' => 'static',
+                        ],
+            ]);
+        }
+            ],
+            [
+                'label' => 'Последний заказ',
+                'format' => 'raw',
+                'value' =>
+                function($data) {
+                    $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id' => $data['rest_org_id'], 'vendor_id' => common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
+                    $date = Yii::$app->formatter->asDatetime($res, "php:j M Y");
+                    return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                },
+                    ],
+                    [
+                        'label' => 'Текущий каталог',
+                        'format' => 'raw',
+                        'value' => function ($data) {
+                            $cat = common\models\Catalog::find()->where(['id' => $data['cat_id']])->one();
+                            return $data['cat_id'] == 0 ? '' :
+                                    Html::a(Html::encode($cat->name), ['vendor/view-catalog', 'id' => $data['cat_id']], [
+                                        'data' => [
+                                            'target' => '#view-catalog',
+                                            'toggle' => 'modal',
+                                            'backdrop' => 'static',
+                                        ],
+                                        'class' => 'current-catalog',
+                            ]);
+                        }
+                            ],
+                            [
+                                'attribute' => 'Статус сотрудничества',
+                                'format' => 'raw',
+                                'contentOptions' => ['style' => 'width:190px;text-align:center'],
+                                'value' => function ($data) {
+                            $link = CheckboxX::widget([
+                                        'name' => 'restOrgId_' . $data['rest_org_id'],
+                                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                        'value' => $data['invite'] == 0 ? 0 : 1,
+                                        'autoLabel' => true,
+                                        'options' => ['id' => 'restOrgId_' . $data['rest_org_id'], 'data-id' => $data['rest_org_id']],
+                                        'pluginOptions' => [
+                                            'threeState' => false,
+                                            'theme' => 'krajee-flatblue',
+                                            'enclosedLabel' => true,
+                                            'size' => 'lg',
+                                        ]
+                            ]);
+                            return $link;
+                        },
+                            ],
+                        ];
+                        ?>
+                        <section class="content-header">
+                            <h1>
+                                <i class="fa fa-list-alt"></i> Мои клиенты
+                                <small></small>
+                            </h1>
+                            <?=
+                            Breadcrumbs::widget([
+                                'options' => [
+                                    'class' => 'breadcrumb',
+                                ],
+                                'links' => [
+                                    'Мои клиенты'
+                                ],
+                            ])
+                            ?>
+                        </section>
+                        <section class="content">
+                            <div class="box box-info">
+                                <div class="box-header with-border">
+                                    <?=
+                                    Modal::widget([
+                                        'id' => 'add-client',
+                                        'clientOptions' => false,
+                                        'toggleButton' => [
+                                            'label' => 'Пригласить клиента',
+                                            'tag' => 'a',
+                                            'data-target' => '#add-client',
+                                            'class' => 'btn btn-md btn-fk-success',
+                                            'href' => Url::to(['/vendor/ajax-add-client']),
+                                        ],
+                                    ])
+                                    ?>
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body">
+                                    <div class="panel-body" style="padding-left: 0;">
+                                        <div class="col-sm-3">
+                                            <?= Html::label('Ресторан', 'filter_restaurant', ['class' => 'label filter_catalog', 'style' => 'color:#555']) ?>
+                                            <?= Html::dropDownList('filter_restaurant', null, $arr_restaurant, ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_restaurant'])
+                                            ?> 
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <?= Html::label('Каталог', 'filter_catalog', ['class' => 'label filter_catalog', 'style' => 'color:#555']) ?>
+                                            <?= Html::dropDownList('filter_catalog', null, $arr_catalog, ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_catalog'])
+                                            ?>  
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <?= Html::label('Статус', 'filter_invite', ['class' => 'label filter_invite', 'style' => 'color:#555']) ?>
+                                            <?=
+                                            Html::dropDownList('filter_invite', null, [
+                                                '0' => 'Не подтвержден',
+                                                '1' => 'Подтвержден',
+                                                    ], ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_invite'])
+                                            ?> 
+                                        </div>
+                                        <div class="col-sm-3 col-md-2 col-lg-1">
+                                            <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                                            <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'cl-list',]); ?>
+                                        <?=
+                                        GridView::widget([
+                                            'dataProvider' => $dataProvider,
+                                            'filterPosition' => false,
+                                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                                            'columns' => $gridColumnsClients,
+                                            'options' => ['class' => 'table-responsive'],
+                                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                            'bordered' => false,
+                                            'striped' => true,
+                                            'condensed' => false,
+                                            'responsive' => false,
+                                            'hover' => false,
+                                        ]);
+                                        ?> 
+                        <?php Pjax::end(); ?> 
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <?php
+                        $customJs = <<< JS
 $('#filter_restaurant').on("change", function () {
        $('#filter_catalog').val(''), 
        $('#filter_invite').val('')
@@ -308,5 +309,5 @@ $("#view-client").on("click", ".save-form", function() {
         return false;
     });
 JS;
-$this->registerJs($customJs, View::POS_READY);
-?>
+                        $this->registerJs($customJs, View::POS_READY);
+                        ?>

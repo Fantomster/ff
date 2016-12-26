@@ -11,11 +11,15 @@ CroppieAsset::register($this);
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
-                $.pjax.reload({container: "#settingsInfo"});            
+                $.pjax.reload({container: "#settingsInfo"});      
             });
-            $(".settings").on("change paste keyup", ".form-control", function() {
+            $(".settings").on("change paste keyup", ".form-control, input", function() {
                 $("#cancelOrg").prop( "disabled", false );
                 $("#saveOrg").prop( "disabled", false );
+            });
+            $(document).on("submit", "#generalSettings", function(e) {
+                $("#cancelOrg").prop( "disabled", true );
+                $("#saveOrg").prop( "disabled", true );
             });
         });'
 );
@@ -25,13 +29,26 @@ $this->registerJs("
 	            var reader = new FileReader();
 	            
 	            reader.onload = function (e) {
-					$('.upload-avatar').addClass('ready');
-                                        $('.upload-demo-wrap').css('opacity','1').css('z-index','198');
-                                        console.log('ok');
-	            	uploadCrop.croppie('bind', {
-	            		url: e.target.result
-	            	}).then(function(){
-	            		console.log('jQuery bind complete');
+                                $('.upload-avatar').addClass('ready');
+                                $('.upload-demo-wrap').css('opacity','1').css('z-index','198');
+                                console.log('ok');
+                                uploadCrop = $('#upload-avatar').croppie({
+                                    viewport: {
+                                            width: 420,
+                                            height: 236,
+                                            type: 'square'
+                                    },
+                                    update: function(){
+                                        uploadCrop.croppie('result', {type:'canvas'}).then(function (resp) {
+                                            $('#image-crop-result').val(resp);
+                                        });
+                                    },
+                                    enableExif: true
+                                });
+                                uploadCrop.croppie('bind', {
+                                        url: e.target.result
+                                }).then(function(){
+                                        console.log('jQuery bind complete');
 	            	});
 	            	
 	            }
@@ -47,22 +64,11 @@ $this->registerJs("
                     size = $('#upload').get(0).files[0].size;
                     if (size <= 2097152) {
                         readFile(this); 
+                        $('#uploadAvatar').toggle();
+                        $('#stub').toggle();
                     }
                 });
                 
-                        var uploadCrop = $('#upload-avatar').croppie({
-                                viewport: {
-                                        width: 420,
-                                        height: 236,
-                                        type: 'square'
-                                },
-                                update: function(){
-                                    uploadCrop.croppie('result', {type:'canvas'}).then(function (resp) {
-                                        $('#image-crop-result').val(resp);
-                                    });
-                                },
-                                enableExif: true
-                        });
         "
 );
 $this->registerCss("
@@ -82,7 +88,7 @@ $this->registerCss("
     width: 420px;
     height: 236px;
     border-radius: 0%;
-    top: 0;
+    top: 66px;
     margin: 0 auto;
     left: 0;
     right: 0;
@@ -94,8 +100,22 @@ $this->registerCss("
 }
 #upload-avatar{border-radius:0%}
 .cr-viewport{border-radius:0%}
-
+.croppie-container .cr-viewport {
+    border: 0;
+}
         ");
+?>
+<!--<div style="padding: 20px 30px; background: rgb(243, 156, 18); z-index: 999999; font-size: 16px; font-weight: 600;"><a class="pull-right" href="#" data-toggle="tooltip" data-placement="left" title="Never show me this again!" style="color: rgb(255, 255, 255); font-size: 20px;">×</a><a href="https://themequarry.com" style="color: rgba(255, 255, 255, 0.901961); display: inline-block; margin-right: 10px; text-decoration: none;">Ready to sell your theme? Submit your theme to our new marketplace now and let over 200k visitors see it!</a><a class="btn btn-default btn-sm" href="https://themequarry.com" style="margin-top: -5px; border: 0px; box-shadow: none; color: rgb(243, 156, 18); font-weight: 600; background: rgb(255, 255, 255);">Let's Do It!</a></div>-->
+<?php
+if ($organization->step == common\models\Organization::STEP_SET_INFO) {
+    echo yii\bootstrap\Alert::widget([
+        'options' => [
+            'class' => 'alert-warning fade in',
+        ],
+        'body' => 'Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. '
+        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
+    ]);
+}
 ?>
 <!--<div style="padding: 20px 30px; background: rgb(243, 156, 18); z-index: 999999; font-size: 16px; font-weight: 600;"><a class="pull-right" href="#" data-toggle="tooltip" data-placement="left" title="Never show me this again!" style="color: rgb(255, 255, 255); font-size: 20px;">×</a><a href="https://themequarry.com" style="color: rgba(255, 255, 255, 0.901961); display: inline-block; margin-right: 10px; text-decoration: none;">Ready to sell your theme? Submit your theme to our new marketplace now and let over 200k visitors see it!</a><a class="btn btn-default btn-sm" href="https://themequarry.com" style="margin-top: -5px; border: 0px; box-shadow: none; color: rgb(243, 156, 18); font-weight: 600; background: rgb(255, 255, 255);">Let's Do It!</a></div>-->
 <?php
@@ -151,12 +171,13 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                 <div id="upload-avatar"></div>
                             </div>
                             <img id="newAvatar" style="background-color:#ccc; display: block; width: 420px; margin-top: 15px; z-index: 1; max-height:236px;" class="center-block" src="<?= $organization->pictureUrl ?>">
-                            <label class="btn btn-gray" style="width:420px; display: block; margin: 0 auto; z-index: 999; /*margin-top:-15px;*/ margin-bottom:20px;"> Загрузить аватар
+                            <label class="btn btn-gray" id="uploadAvatar" style="width:420px; display: block; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px;"> Загрузить аватар
                                 <?=
                                         $form->field($organization, 'picture', ['template' => '<div class="input-group">{input}</div>{error}'])
                                         ->fileInput(['id' => 'upload', 'accept' => 'image/*', 'style' => 'opacity: 0; z-index: -1;position: absolute;left: -9999px;'])
                                 ?>
                             </label>
+                            <div id="stub" style="width:420px; display: none; margin: 0 auto; z-index: 999; border-radius: 0; margin-bottom:20px; height: 44px; background-color: #3f3e3e;"></div>
 
                             <?= Html::hiddenInput('Organization[picture]', null, ['id' => 'image-crop-result']) ?>
 

@@ -79,7 +79,7 @@ class VendorController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
 
-        if ($organization->load(Yii::$app->request->get())) {
+        if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_CATALOG;

@@ -622,10 +622,15 @@ class OrderController extends DefaultController {
 
         $orders = $client->getCart();
         foreach ($orders as $order) {
+            $order->calculateTotalPrice();
             $totalCart += $order->total_price;
         }
 
-        return $this->render('checkout', compact('orders', 'totalCart'));
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('checkout', compact('orders', 'totalCart'));
+        } else {
+            return $this->render('checkout', compact('orders', 'totalCart'));
+        }
     }
 
     public function actionAjaxOrderGrid($id) {

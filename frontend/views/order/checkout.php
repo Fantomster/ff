@@ -90,6 +90,7 @@ $this->registerJs(
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
+                    form.replace(result);
                     dataEdited = 0;
                     $("#saveChanges").hide();
                     $("#loader-show").hideLoading();

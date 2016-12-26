@@ -796,6 +796,7 @@ class OrderController extends DefaultController {
                     $position->save();
                 }
             }
+            $currentOrder->calculateTotalPrice();
         }
         $this->redirect(['order/checkout']);
     }

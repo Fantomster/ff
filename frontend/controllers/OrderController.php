@@ -627,7 +627,7 @@ class OrderController extends DefaultController {
         }
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('checkout', compact('orders', 'totalCart'));
+            return treu;//$this->renderPartial('checkout', compact('orders', 'totalCart'));
         } else {
             return $this->render('checkout', compact('orders', 'totalCart'));
         }

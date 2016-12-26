@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Url;
+use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\date\DatePicker;
 use yii\bootstrap\Modal;
@@ -90,7 +91,7 @@ $this->registerJs(
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
-                    form.replace(result);
+                    $.pjax.reload({container: "#checkout"});
                     dataEdited = 0;
                     $("#saveChanges").hide();
                     $("#loader-show").hideLoading();

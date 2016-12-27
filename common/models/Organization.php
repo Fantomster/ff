@@ -31,6 +31,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property User $users
  * @property OrderChat $unreadMessages
  * @property OrderChat $unreadSystem
+ * @property string $pictureUrl
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -62,7 +63,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['type_id', 'step'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'website'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['email'], 'email'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
@@ -438,5 +439,12 @@ class Organization extends \yii\db\ActiveRecord {
     public function markViewed($orderId) {
         return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id' => $this->id]);
     }
-
+    
+    /**
+     * @return string url to avatar image
+     */
+    public function getPictureUrl()
+    {
+        return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
+    }
 }

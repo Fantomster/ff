@@ -1,11 +1,31 @@
 <?php
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\View;
-?>
 
-<?php
+$addAction = Url::to(["site/ajax-add-to-cart"]);
+
 $this->title = 'F-MARKET главная';
+
+$js = <<<JS
+        $(document).on("click", ".add-to-cart", function(e) {
+            e.preventDefault();
+            //alert($(this).data("product-id"));
+            $.post(
+                "$addAction",
+                {product_id: $(this).data("product-id")}
+            ).done(function (result) {
+                if (result) {
+                    alert("Yes, we can!");
+                } else {
+                    alert("Fail!");
+                }
+            });
+        });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+
 ?>
 
 <div class="row">
@@ -36,7 +56,7 @@ $this->title = 'F-MARKET главная';
                 <h4>142968 руб.</h4>
               </div>
               <div class="product-button pull-right">
-                <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
+                <a href="#" class="btn btn-sm btn-cart add-to-cart" data-product-id="1"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
               </div>
             </div>
           </div>

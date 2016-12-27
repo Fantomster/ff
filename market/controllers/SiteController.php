@@ -320,7 +320,7 @@ class SiteController extends Controller {
 
         $isNewPosition = true;
         foreach ($alteringOrder->orderContent as $position) {
-            if ($position->product_id == $product_id) {
+            if ($position->product_id == $product->id) {
                 $isNewPosition = false;
             }
         }
@@ -338,6 +338,7 @@ class SiteController extends Controller {
 
         $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
+        $client->inviteVendor($product->vendor);
         $this->sendCartChange($client, $cartCount);
 
         return true;

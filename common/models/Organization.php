@@ -447,4 +447,21 @@ class Organization extends \yii\db\ActiveRecord {
     {
         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
     }
+    
+    public function inviteVendor($vendor, $includeBaseCatalog = false) {
+        if ($this->type_id !== self::TYPE_RESTAURANT) {
+            return false;
+        }
+
+        $relation = new RelationSuppRest();
+        $relation->supp_org_id = $vendor->id;
+        $relation->rest_org_id = $this->id;
+        $relation->invite = $includeBaseCatalog ? RelationSuppRest::INVITE_OFF : RelationSuppRest::INVITE_ON;
+        $relation->status = $includeBaseCatalog ? RelationSuppRest::CATALOG_STATUS_ON : RelationSuppRest::CATALOG_STATUS_OFF;
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $vendor->id, 'type' => Catalog::BASE_CATALOG]);
+        if ($includeBaseCatalog && $baseCatalog) {
+            $relation->cat_id = $baseCatalog;
+        }
+        return $relation->save();
+    }
 }

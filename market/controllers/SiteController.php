@@ -20,48 +20,49 @@ use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
+use common\models\OrderContent;
 use common\components\AccessRule;
 use yii\helpers\Url;
+use yii\helpers\Json;
+
 //ini_set('xdebug.max_nesting_level', 200);
 /**
  * Site controller
  */
-class SiteController extends Controller
-{
+class SiteController extends Controller {
     /**
      * @inheritdoc
      */
-    /*public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'rules' => [
-                    [
-                        'actions' => ['login', 'error'],
-                        'allow' => true,
-                    ],
-                    [
-                        'actions' => ['logout', 'index'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
-        ];
-    }*/
+    /* public function behaviors()
+      {
+      return [
+      'access' => [
+      'class' => AccessControl::className(),
+      'rules' => [
+      [
+      'actions' => ['login', 'error'],
+      'allow' => true,
+      ],
+      [
+      'actions' => ['logout', 'index'],
+      'allow' => true,
+      'roles' => ['@'],
+      ],
+      ],
+      ],
+      'verbs' => [
+      'class' => VerbFilter::className(),
+      'actions' => [
+      'logout' => ['post'],
+      ],
+      ],
+      ];
+      } */
 
     /**
      * @inheritdoc
      */
-    public function actions()
-    {
+    public function actions() {
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
@@ -133,13 +134,13 @@ class SiteController extends Controller
           }          
           throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');                
     }
+
     //в перспективе запрос поменяю, будет мапиться только то, что добавлено в МП
-     public function actionCurlAddProduct()
-    {
+    public function actionCurlAddProduct() {
         ini_set("max_execution_time", "180");
         ini_set('memory_limit', '256M');
-        
-    $url = 'curl -XPUT \'http://localhost:9200/product\' -d \'{
+
+        $url = 'curl -XPUT \'http://localhost:9200/product\' -d \'{
     "settings": {
 		"analysis": {
 			"analyzer": {
@@ -184,7 +185,7 @@ class SiteController extends Controller
             $product_category_sub_name = $name->category->name;
             $product_created_at = $name->created_at;
             $product = new \common\models\ES\Product();
-            $product->attributes = [  
+            $product->attributes = [
                 "product_id" => $product_id,
                 "product_image" => $product_image,
                 "product_name"  => $product_name,
@@ -204,12 +205,11 @@ class SiteController extends Controller
     var_dump($model);
     return $res;
     }
-    
-     public function actionCurlAddSupplier()
-    {
+
+    public function actionCurlAddSupplier() {
         ini_set("max_execution_time", "180");
         ini_set('memory_limit', '256M');
-        
+
         $url = 'curl -XPUT \'http://localhost:9200/supplier\' -d \'{
         "settings": {
                     "analysis": {
@@ -237,7 +237,7 @@ class SiteController extends Controller
                 }
                 }
         }\'
-        '; 
+        ';
         $res = shell_exec($url);
         $sql = "SELECT organization.id as id, organization.name as name 
             FROM user JOIN organization ON user.organization_id = organization.id
@@ -245,13 +245,13 @@ class SiteController extends Controller
         $model = \Yii::$app->db->createCommand($sql)->queryAll();
         foreach ($model as $name) {
             $supplier_id = $name['id'];
-            $supplier_image = ''; 
-            $supplier_name = $name['name']; 
+            $supplier_image = '';
+            $supplier_name = $name['name'];
             $suppliers = new \common\models\ES\Supplier();
-            $suppliers->attributes = [  
+            $suppliers->attributes = [
                 "supplier_id" => $supplier_id,
                 "supplier_image" => $supplier_image,
-                "supplier_name"  => $supplier_name
+                "supplier_name" => $supplier_name
             ];
             $suppliers->save();
         }
@@ -259,84 +259,132 @@ class SiteController extends Controller
         $res = shell_exec($url);
         return $res;
     }
-    public function actionView()
-    {
-    $search="";
-    $search_products_count="";
-    $search_suppliers_count="";
-    $search_products="";
-    $search_suppliers="";
-    if (isset($_POST['searchText'])) {
-        $search = $_POST['searchText'];
-        $params_products = [
-                'query'  => [
+
+    public function actionView() {
+        $search = "";
+        $search_products_count = "";
+        $search_suppliers_count = "";
+        $search_products = "";
+        $search_suppliers = "";
+        if (isset($_POST['searchText'])) {
+            $search = $_POST['searchText'];
+            $params_products = [
+                'query' => [
                     'match' => [
                         'product_name' => $search
                     ]
-                 ]
+                ]
             ];
-        $params_suppliers = [
-                'query'  => [
+            $params_suppliers = [
+                'query' => [
                     'match' => [
                         'supplier_name' => $search
                     ]
-                 ]
+                ]
             ];
-        $search_products_count = \common\models\ES\Product::find()->query($params_products)
-                ->limit(10000000)->count();
-        $search_suppliers_count = \common\models\ES\Product::find()->query($params_suppliers)
-                ->limit(10000000)->count();
-        
-        $search_products = \common\models\ES\Product::find()->query($params_products)
-               /* ->highlight([
-                    "pre_tags"  => "<em>",
-                    "post_tags" => "</em>",
-                    'fields'    => [
-                        'product_name' => new \stdClass()
-                    ]
-                ])*/
-                ->limit(4)->asArray()->all();  
-        $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
-                ->limit(6)->asArray()->all(); 
-        }
-        
-        return $this->renderAjax('main/_search_form', compact(
-                'search_products_count',
-                'search_suppliers_count',
-                'search_products',
-                'search_suppliers',
-                'search'));
-    }
-    /**
-     * Login action.
-     *
-     * @return string
-     */
-    public function actionLogin()
-    {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+            $search_products_count = \common\models\ES\Product::find()->query($params_products)
+                            ->limit(10000000)->count();
+            $search_suppliers_count = \common\models\ES\Product::find()->query($params_suppliers)
+                            ->limit(10000000)->count();
+
+            $search_products = \common\models\ES\Product::find()->query($params_products)
+                            /* ->highlight([
+                              "pre_tags"  => "<em>",
+                              "post_tags" => "</em>",
+                              'fields'    => [
+                              'product_name' => new \stdClass()
+                              ]
+                              ]) */
+                            ->limit(4)->asArray()->all();
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
+                            ->limit(6)->asArray()->all();
         }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+        return $this->renderAjax('main/_search_form', compact(
+                                'search_products_count', 'search_suppliers_count', 'search_products', 'search_suppliers', 'search'));
+    }
+
+    public function actionAjaxAddToCart() {
+
+        $currentUser = Yii::$app->user->identity;
+        $client = $currentUser->organization;
+
+        if ($client->type_id !== Organization::TYPE_RESTAURANT) {
+            return false;
+        }
+
+        $orders = $client->getCart();
+
+        $post = Yii::$app->request->post();
+
+        if ($post && $post['product_id']) {
+            $product = CatalogBaseGoods::findOne(['id' => $post['product_id']]);
+            if (empty($product)) {
+                return false;
+            }
+            $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id]);
+            if ($relation) {
+                return false;
+            }
         } else {
-            return $this->render('login', [
-                'model' => $model,
+            return false;
+        }
+
+        $isNewOrder = true;
+
+        foreach ($orders as $order) {
+            if ($order->vendor_id == $product->vendor->id) {
+                $isNewOrder = false;
+                $alteringOrder = $order;
+            }
+        }
+        if ($isNewOrder) {
+            $newOrder = new Order();
+            $newOrder->client_id = $client->id;
+            $newOrder->vendor_id = $product->vendor->id;
+            $newOrder->status = Order::STATUS_FORMING;
+            $newOrder->save();
+            $alteringOrder = $newOrder;
+        }
+
+        $isNewPosition = true;
+        foreach ($alteringOrder->orderContent as $position) {
+            if ($position->product_id == $product->id) {
+                $isNewPosition = false;
+            }
+        }
+        if ($isNewPosition) {
+            $position = new OrderContent();
+            $position->order_id = $alteringOrder->id;
+            $position->product_id = $product->id;
+            $position->quantity = 1;
+            $position->price = $product->price;
+            $position->product_name = $product->product;
+            $position->units = $product->units;
+            $position->article = $product->article;
+            $position->save();
+        }
+
+        $alteringOrder->calculateTotalPrice();
+        $cartCount = $client->getCartCount();
+        $client->inviteVendor($product->vendor);
+        $this->sendCartChange($client, $cartCount);
+
+        return true;
+    }
+
+    private function sendCartChange($client, $cartCount) {
+        $clientUsers = $client->users;
+
+        foreach ($clientUsers as $user) {
+            $channel = 'user' . $user->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode(['body' => $cartCount, 'channel' => $channel, 'isSystem' => 2])
             ]);
         }
+
+        return true;
     }
 
-    /**
-     * Logout action.
-     *
-     * @return string
-     */
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-
-        return $this->goHome();
-    }
 }

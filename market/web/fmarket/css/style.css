@@ -720,6 +720,7 @@ margin: 0;padding: 0
 	border: 1px solid #5eac6b; 
 	border-radius: 3px;
 	color: #5eac6b;
+        width:100%;
 }
 .btn-cart:hover {
 	background: #5eac6b; 

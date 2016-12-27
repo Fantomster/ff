@@ -1,7 +1,7 @@
 <?php
 
 namespace market\controllers;
-
+use yii\web\HttpException;
 use Yii;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -75,12 +75,35 @@ class SiteController extends Controller {
      *
      * @return string
      */
-    public function actionIndex() {
-        return $this->render('/site/index');
-    }
+    public function actionIndex()
+    {
+        
+        $topProducts = CatalogBaseGoods::find()->where(['market_place'=>1])->limit(6)->all();
+        $topSuppliers = CatalogBaseGoods::find()->select('supp_org_id')->where(['market_place'=>1])->limit(6)->distinct();
 
-    public function actionFilter() {
-        return $this->render('filter');
+        return $this->render('/site/index', compact('topProducts'));
+    }
+    public function actionFilter()
+    {
+        $request = Yii::$app->request;
+        $category = $request->get('category');
+        $product = $request->get('product');
+        $supplier = $request->get('supplier');
+          if(isset($category)){
+            $products = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$category])->limit(12)->all();
+            return $this->render('filter', compact('products','category'));
+          }
+          if(isset($product)){
+            $products = \common\models\ES\Product::find()->where(['product_category_sub_id'=>$category])->limit(12)->all(); 
+            return $this->render('filter', compact('products','category'));
+          }
+          if(isset($supplier)){
+            $products = \common\models\ES\Product::find()->where(['product_category_sub_id'=>$category])->limit(12)->all(); 
+            return $this->render('filter', compact('products','category'));
+          }
+           
+          throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+              
     }
 
     //в перспективе запрос поменяю, будет мапиться только то, что добавлено в МП
@@ -115,28 +138,43 @@ class SiteController extends Controller {
             }
             }
     }\'
-    ';
-        $res = shell_exec($url);
-        $model = \common\models\CatalogBaseGoods::find()->select(['id', 'image', 'product', 'price', 'created_at'])->all();
+    '; 
+    $res = shell_exec($url);
+    $model = \common\models\CatalogBaseGoods::find()
+    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])
+    ->all();
         foreach ($model as $name) {
             $product_id = $name->id;
-            $product_image = !empty($name->image) ? $name->imageUrl : '';
-            $product_name = $name->product;
-            $product_price = $name->price;
+            $product_image = !empty($name->image) ? $name->imageUrl : ''; 
+            $product_name = $name->product; 
+            $product_supp_id = $name->supp_org_id;
+            $product_supp_name = $name->vendor->name; 
+            $product_price = $name->price; 
+            $product_category_id = $name->category->parent; 
+            $product_category_name = \common\models\MpCategory::find()->where(['id'=>$name->category->parent])->one()->name; 
+            $product_category_sub_id = $name->category->id; 
+            $product_category_sub_name = $name->category->name;
             $product_created_at = $name->created_at;
             $product = new \common\models\ES\Product();
             $product->attributes = [
                 "product_id" => $product_id,
                 "product_image" => $product_image,
-                "product_name" => $product_name,
-                "product_price" => $product_price,
-                "product_created_at" => $product_created_at
+                "product_name"  => $product_name,
+                "product_supp_id"  => $product_supp_id,
+                "product_supp_name"  => $product_supp_name,
+                "product_price"  => $product_price,
+                "product_category_id" => $product_category_id,
+                "product_category_name" => $product_category_name,
+                "product_category_sub_id" => $product_category_sub_id,
+                "product_category_sub_name" => $product_category_sub_name,
+                "product_created_at"  => $product_created_at
             ];
             $product->save();
         }
-        $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
-        $res = shell_exec($url);
-        return $res;
+    $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
+    $res = shell_exec($url);
+    var_dump($model);
+    return $res;
     }
 
     public function actionCurlAddSupplier() {

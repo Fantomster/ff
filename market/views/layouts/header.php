@@ -15,13 +15,11 @@ use yii\web\View;
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand text-hide" href="#">f-keeper
-            </a>
+            <a class="navbar-brand text-hide" href="<?=Url::home();?>">f-keeper</a>
           </div>
           <div id="navbar6" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-              <li class="active"><a href="#">ПРОДУКТЫ</a></li>
-              <li><a href="#">ПОСТАВЩИКИ</a></li>
+              <li class="active"><a href="<?=Url::home();?>">ГЛАВНАЯ</a></li>
               <li><a href="#">О&nbsp;НАС</a></li>
               <li><a href="#">КОНТАКТЫ</a></li>
               <li><a class="btn-navbar" href="#">войти / регистрация</a></li>

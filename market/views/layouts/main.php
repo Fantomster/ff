@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-
+use yii\web\View;
 use yii\widgets\Breadcrumbs;
 use common\widgets\Alert;
 
@@ -25,7 +25,7 @@ market\assets\AppAsset::register($this);
 <?= $this->render('header.php') ?>
 <?= $this->render('search.php') ?>
     
-<section  id="features1-u">
+<section  id="features1-u" style="background:url(fmarket/images/linen.jpg) repeat">
   <div class="container">
     <div class="row">
       <div class="col-md-12">

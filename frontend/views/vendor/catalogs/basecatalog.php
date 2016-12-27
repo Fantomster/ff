@@ -31,6 +31,7 @@ $this->registerJs("
 	            reader.onload = function (e) {
 					$('.upload-avatar').addClass('ready');
                                         $('.upload-demo-wrap').css('opacity','1').css('z-index','198');
+                                        $('.upload-block').css('padding-bottom','44px');
                                         console.log('ok');
 	            	uploadCrop.croppie('bind', {
 	            		url: e.target.result

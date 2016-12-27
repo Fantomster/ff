@@ -78,9 +78,40 @@ class SiteController extends Controller
     {
         
         $topProducts = CatalogBaseGoods::find()->where(['market_place'=>1])->limit(6)->all();
-        $topSuppliers = CatalogBaseGoods::find()->select('supp_org_id')->where(['market_place'=>1])->limit(6)->distinct();
-
-        return $this->render('/site/index', compact('topProducts'));
+        $topSuppliers = CatalogBaseGoods::find()
+        ->select('DISTINCT(`supp_org_id`) as supp_org_id')
+        ->where(['market_place'=>1])
+        ->limit(6)
+        ->all();
+        $topProductsCount = CatalogBaseGoods::find()->where(['market_place'=>1])->count();
+        $command = Yii::$app->db->createCommand('select count(*) from (select DISTINCT(`supp_org_id`) from catalog_base_goods where market_place=1)tb');
+        $topSuppliersCount = $command->queryScalar();
+        return $this->render('/site/index', compact('topProducts','topSuppliers','topProductsCount','topSuppliersCount'));
+    }
+    public function actionAjaxProductMore($num)
+    {              
+        $count = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->count();
+        if($count > 0){
+        $pr = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->all();    
+        return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
+        }
+        
+    }
+    public function actionAjaxSupplierMore($num)
+    {            
+        $count = CatalogBaseGoods::find()
+            ->select('DISTINCT(`supp_org_id`) as supp_org_id')
+            ->where(['market_place'=>1])
+            ->limit(6)->offset($num)        
+            ->count();
+        if($count > 0){
+        $sp = CatalogBaseGoods::find()
+            ->select('DISTINCT(`supp_org_id`) as supp_org_id')
+            ->where(['market_place'=>1])
+            ->limit(6)->offset($num)
+            ->all();
+        return $this->renderPartial('/site/main/_ajaxSupplierMore', compact('sp'));
+        }
     }
     public function actionFilter()
     {
@@ -99,10 +130,8 @@ class SiteController extends Controller
           if(isset($supplier)){
             $products = \common\models\ES\Product::find()->where(['product_category_sub_id'=>$category])->limit(12)->all(); 
             return $this->render('filter', compact('products','category'));
-          }
-           
-          throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
-              
+          }          
+          throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');                
     }
     //в перспективе запрос поменяю, будет мапиться только то, что добавлено в МП
      public function actionCurlAddProduct()

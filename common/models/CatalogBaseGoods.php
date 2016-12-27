@@ -63,8 +63,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                         'path' => '@app/web/upload/temp/',
                         'url' => '/upload/temp/',
                         'thumbs' => [
-                            'image' => ['width' => 176, 'height' => 119, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
-                            'mini' => ['width' => 58.6, 'height' => 39.66, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
+                            'image' => ['width' => 432, 'height' => 243, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
+                            'mini' => ['width' => 96, 'height' => 54, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
                         ],
                     ],
         ]);

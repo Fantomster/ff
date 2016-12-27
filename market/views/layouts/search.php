@@ -115,7 +115,7 @@ var scrollTop = $(window).scrollTop();
         });
       }
     });
-});        
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

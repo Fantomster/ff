@@ -15,163 +15,42 @@ $this->title = 'F-MARKET главная';
 </div>
 <div class="row">
   <div class="col-md-12">
-    <div class="row">
-      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-        <div class="mp-product-block">
-          <img class="product-image" src="http://vsovetah.ru/wp-content/uploads/2014/10/%D0%9A%D0%B0%D0%BA-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE-%D0%B6%D0%B0%D1%80%D0%B8%D1%82%D1%8C-%D0%BC%D1%8F%D1%81%D0%BE.jpg">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="product-title">
-                <h3>Рагу из свинины</h3>
+    <div class="row" id="product-block">
+      <?php
+        foreach($topProducts as $row){
+        ?>
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
+            <div class="mp-product-block">
+                <img class="product-image" src="<?= $row->imageUrl ?>">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="product-title">
+                     <h3><?=$row->product; ?></h3>
+                  </div>
+                  <div class="product-category">
+                      <h5><?= \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name; ?>/<?=$row->subCategory->name; ?></h5>
+                  </div>
+                  <div class="product-company">
+                     <h5><?=$row->vendor->name; ?></h5>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="product-price">
+                      <h4><?=floatval($row->price); ?> <small>руб.</small></h4>
+                  </div>
+                  
+                </div>
+                <div class="col-md-12">
+                  <div class="product-button">
+                    <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ</a>
+                  </div>  
+                </div>
               </div>
-              <div class="product-category">
-                <h5>Мясо/Говядина</h5>
-              </div>
-              <div class="product-company">
-                <h5>ООО РикиТикиТави</h5>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="product-price pull-left">
-                <h4>142968 руб.</h4>
-              </div>
-              <div class="product-button pull-right">
-                <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
-              </div>
-            </div>
-          </div>
-        </div>  
-      </div>
-      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-        <div class="mp-product-block">
-          <img class="product-image" src="http://vsovetah.ru/wp-content/uploads/2014/10/%D0%9A%D0%B0%D0%BA-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE-%D0%B6%D0%B0%D1%80%D0%B8%D1%82%D1%8C-%D0%BC%D1%8F%D1%81%D0%BE.jpg">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="product-title">
-                <h3>Рагу из свинины</h3>
-              </div>
-              <div class="product-category">
-                <h5>Мясо/Говядина</h5>
-              </div>
-              <div class="product-company">
-                <h5>ООО РикиТикиТави</h5>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="product-price pull-left">
-                <h4>142968 руб.</h4>
-              </div>
-              <div class="product-button pull-right">
-                <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
-              </div>
-            </div>
-          </div>
-        </div>  
-      </div>
-      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-        <div class="mp-product-block">
-          <img class="product-image" src="http://vsovetah.ru/wp-content/uploads/2014/10/%D0%9A%D0%B0%D0%BA-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE-%D0%B6%D0%B0%D1%80%D0%B8%D1%82%D1%8C-%D0%BC%D1%8F%D1%81%D0%BE.jpg">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="product-title">
-                <h3>Рагу из свинины</h3>
-              </div>
-              <div class="product-category">
-                <h5>Мясо/Говядина</h5>
-              </div>
-              <div class="product-company">
-                <h5>ООО РикиТикиТави</h5>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="product-price pull-left">
-                <h4>142968 руб.</h4>
-              </div>
-              <div class="product-button pull-right">
-                <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
-              </div>
-            </div>
-          </div>
-        </div>  
-      </div>
-      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-        <div class="mp-product-block">
-          <img class="product-image" src="http://vsovetah.ru/wp-content/uploads/2014/10/%D0%9A%D0%B0%D0%BA-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE-%D0%B6%D0%B0%D1%80%D0%B8%D1%82%D1%8C-%D0%BC%D1%8F%D1%81%D0%BE.jpg">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="product-title">
-                <h3>Рагу из свинины</h3>
-              </div>
-              <div class="product-category">
-                <h5>Мясо/Говядина</h5>
-              </div>
-              <div class="product-company">
-                <h5>ООО РикиТикиТави</h5>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="product-price pull-left">
-                <h4>142968 руб.</h4>
-              </div>
-              <div class="product-button pull-right">
-                <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
-              </div>
-            </div>
-          </div>
-        </div>  
-      </div>
-      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-        <div class="mp-product-block">
-          <img class="product-image" src="http://vsovetah.ru/wp-content/uploads/2014/10/%D0%9A%D0%B0%D0%BA-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE-%D0%B6%D0%B0%D1%80%D0%B8%D1%82%D1%8C-%D0%BC%D1%8F%D1%81%D0%BE.jpg">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="product-title">
-                <h3>Рагу из свинины</h3>
-              </div>
-              <div class="product-category">
-                <h5>Мясо/Говядина</h5>
-              </div>
-              <div class="product-company">
-                <h5>ООО РикиТикиТави</h5>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="product-price pull-left">
-                <h4>142968 руб.</h4>
-              </div>
-              <div class="product-button pull-right">
-                <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
-              </div>
-            </div>
-          </div>
-        </div>  
-      </div>
-      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-        <div class="mp-product-block">
-          <img class="product-image" src="http://vsovetah.ru/wp-content/uploads/2014/10/%D0%9A%D0%B0%D0%BA-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D1%8C%D0%BD%D0%BE-%D0%B6%D0%B0%D1%80%D0%B8%D1%82%D1%8C-%D0%BC%D1%8F%D1%81%D0%BE.jpg">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="product-title">
-                <h3>Рагу из свинины</h3>
-              </div>
-              <div class="product-category">
-                <h5>Мясо/Говядина</h5>
-              </div>
-              <div class="product-company">
-                <h5>ООО РикиТикиТави</h5>
-              </div>
-            </div>
-            <div class="col-md-12">
-              <div class="product-price pull-left">
-                <h4>142968 руб.</h4>
-              </div>
-              <div class="product-button pull-right">
-                <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc></a>
-              </div>
-            </div>
-          </div>
-        </div>  
-      </div>
+            </div>  
+        </div>    
+        <?php    
+        }
+        ?> 
     </div>
     <div class="row">
       <div class="col-md-12 min-padding" style="margin-bottom: 10px">
@@ -330,10 +209,3 @@ $this->title = 'F-MARKET главная';
     </div>
   </div> 
 </div> 
-
-<?php
-$customJs = <<< JS
-
-JS;
-$this->registerJs($customJs, View::POS_READY);
-?>

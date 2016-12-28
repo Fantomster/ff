@@ -89,9 +89,10 @@ class SiteController extends Controller {
         $topSuppliersCount = $command->queryScalar();
         return $this->render('/site/index', compact('topProducts','topSuppliers','topProductsCount','topSuppliersCount'));
     }
+    
     public function actionProduct($id)
     {
-        $product = CatalogBaseGoods::findOne(['id' => $id]);
+        $product = CatalogBaseGoods::findOne(['id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON]);
         
         if ($product) {
             return $this->render('/site/product', compact('product'));
@@ -100,10 +101,18 @@ class SiteController extends Controller {
         }
 
     }
+    
     public function actionSupplier($id)
-    {  
-        return $this->render('/site/supplier');
+    {
+        $vendor = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_SUPPLIER]);
+        
+        if ($vendor) {
+            return $this->render('/site/supplier', compact('vendor'));
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }
     }
+    
     public function actionAjaxProductMore($num)
     {              
         $count = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->count();
@@ -113,6 +122,7 @@ class SiteController extends Controller {
         }
         
     }
+    
     public function actionAjaxSupplierMore($num)
     {            
         $count = CatalogBaseGoods::find()
@@ -129,6 +139,7 @@ class SiteController extends Controller {
         return $this->renderPartial('/site/main/_ajaxSupplierMore', compact('sp'));
         }
     }
+    
     public function actionFilter()
     {
         $request = Yii::$app->request;
@@ -337,7 +348,7 @@ class SiteController extends Controller {
             if (empty($product)) {
                 return false;
             }
-            $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id]);
+            $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON]);
             if ($relation) {
                 return false;
             }

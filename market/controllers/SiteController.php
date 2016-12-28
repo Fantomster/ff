@@ -101,8 +101,13 @@ class SiteController extends Controller {
     }
     public function actionSupplier($id)
     {
+        $vendor = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_SUPPLIER]);
         
-        return $this->render('/site/supplier');
+        if ($vendor) {
+            return $this->render('/site/supplier', compact('vendor'));
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }
     }
     public function actionAjaxProductMore($num)
     {              

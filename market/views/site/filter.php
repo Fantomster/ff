@@ -14,7 +14,7 @@ $this->title = 'F-MARKET фильтр поиска';
     /* фильтер по категориям */
     if(!empty($category)){
     ?>
-      <h3>Продукты категории <small>sdasd</small></h3>
+      <h3>Продукты категории <small><?=\common\models\MpCategory::getCategory($category)?></small></h3>
      <div class="row">
       <?php
         foreach($products as $row){

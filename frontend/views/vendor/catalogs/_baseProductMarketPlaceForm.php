@@ -20,8 +20,8 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
     box-shadow: inset 0px 3px 5px 0px rgba(91, 137, 81, 0.3);
 }
 .bl-img{
-    width: 152px;
-    height:102px;
+    width: 240px;
+    height:135px;
     border:1px dashed #65a157;
     display: inline-block;
 }
@@ -89,8 +89,8 @@ label {
 .uploadButton {
     position: absolute;
     display: block;
-    width: 176px;
-    height: 119px;
+    width: 240px;
+    height: 135px;
     border-radius: 0%;
     top: 0;
     margin: 0 auto;
@@ -101,6 +101,7 @@ label {
     padding-top: 88px;
     font-style: italic;
     font-weight: bold;
+    transition: all .6s;
 }
 .uploadButton:hover {
     background:#000;
@@ -120,8 +121,8 @@ label {
 }
 .upload-demo-wrap {
     position:absolute;
-    width: 176px;
-    height: 119px;
+    width: 100%;
+    height: 150px;
     border-radius: 0%;
     top: 0;
     margin: 0 auto;
@@ -165,13 +166,13 @@ label {
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-12 text-center">
+		<div class="col-md-12 text-center upload-block">
                     <?php
                     $this->registerJs("
                         var uploadCrop = $('#upload-avatar').croppie({
                                 viewport: {
-                                        width: 178,
-                                        height: 121,
+                                        width: 240,
+                                        height: 135,
                                         //type: 'circle'
                                         type: 'square'
                                 },
@@ -187,7 +188,7 @@ label {
                     <div class="upload-demo-wrap">
                         <div id="upload-avatar"></div>
                     </div>
-                    <img id="newAvatar" width="176" height="119" style="background-color:#ccc"
+                    <img id="newAvatar" width="240" height="135" style="background-color:#ccc"
                          src="<?= (!empty($catalogBaseGoods['image']) && !$catalogBaseGoods->isNewRecord) ?
                             $catalogBaseGoods->imageUrl:
                             common\models\CatalogBaseGoods::DEFAULT_IMAGE ?>" class="avatar"/>

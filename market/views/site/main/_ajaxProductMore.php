@@ -32,7 +32,7 @@ foreach($pr as $row){
         </div>
         <div class="col-md-12">
           <div class="product-button">
-            <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ</a>
+            <a href="#" class="btn btn-sm btn-cart add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ</a>
           </div>  
         </div>
       </div>

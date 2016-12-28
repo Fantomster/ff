@@ -91,7 +91,14 @@ class SiteController extends Controller {
     }
     public function actionProduct($id)
     {
-        return $this->render('/site/product');
+        $product = CatalogBaseGoods::findOne(['id' => $id]);
+        
+        if ($product) {
+            return $this->render('/site/product', compact('product'));
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }
+
     }
     public function actionSupplier($id)
     {  
@@ -375,8 +382,37 @@ class SiteController extends Controller {
 
         $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
-        $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF);
+        $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
         $this->sendCartChange($client, $cartCount);
+
+        return true;
+    }
+    
+    public function actionAjaxInviteVendor() {
+        
+        $currentUser = Yii::$app->user->identity;
+        $client = $currentUser->organization;
+
+        if ($client->type_id !== Organization::TYPE_RESTAURANT) {
+            return false;
+        }
+
+        $post = Yii::$app->request->post();
+
+        if ($post && $post['vendor_id']) {
+            $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
+            if (empty($vendor)) {
+                return false;
+            }
+            $relation = RelationSuppRest::findOne(['supp_org_id' => $vendor->id, 'rest_org_id' => $client->id]);
+            if ($relation) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        $client->inviteVendor($vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
 
         return true;
     }

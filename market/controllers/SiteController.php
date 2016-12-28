@@ -98,6 +98,7 @@ class SiteController extends Controller {
         } else {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
         }
+
     }
     public function actionSupplier($id)
     {

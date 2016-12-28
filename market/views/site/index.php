@@ -53,11 +53,13 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         ?>
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
             <div class="mp-product-block">
+                <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
                 <img class="product-image" src="<?= $row->imageUrl ?>">
+                </a>
               <div class="row">
                 <div class="col-md-12">
                   <div class="product-title">
-                     <h3><?=$row->product; ?></h3>
+                     <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>"><h3><?=$row->product; ?></h3></a>
                   </div>
                   <div class="product-category">
                       <h5><?= \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name; ?>/<?=$row->subCategory->name; ?></h5>

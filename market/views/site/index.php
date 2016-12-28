@@ -99,7 +99,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             </div>
             <div class="col-md-12">
               <div class="supplier-button">
-                <a href="#" class="btn btn-success" style="width: 100%">Заказать</a>
+                <a href="#" class="btn btn-success" style="width: 100%">Добавить</a>
               </div>
             </div>
           </div>

@@ -49,7 +49,7 @@ echo GridView::widget([
                                 'min' => (isset($data->units) && ($data->units)) ? $data->units : 0.001,
                                 'max' => PHP_INT_MAX,
                                 'step' => (isset($data->units) && ($data->units)) ? $data->units : 1,
-                                'decimals' => (!isset($data->units) || (fmod($data->units, 1) > 0)) ? 3 : 0,
+                                'decimals' => (empty($data->units) || (fmod($data->units, 1) > 0)) ? 3 : 0,
                                 'forcestepdivisibility' => (isset($data->units) && ($data->units)) ? 'floor' : 'none',
                                 'buttonup_class' => 'btn btn-default',
                                 'buttondown_class' => 'btn btn-default',

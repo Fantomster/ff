@@ -377,7 +377,7 @@ class SiteController extends Controller {
 
         $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
-        $client->inviteVendor($product->vendor);
+        $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF);
         $this->sendCartChange($client, $cartCount);
 
         return true;

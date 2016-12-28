@@ -92,7 +92,7 @@ class SiteController extends Controller {
     
     public function actionProduct($id)
     {
-        $product = CatalogBaseGoods::findOne(['id' => $id]);
+        $product = CatalogBaseGoods::findOne(['id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON]);
         
         if ($product) {
             return $this->render('/site/product', compact('product'));
@@ -348,7 +348,7 @@ class SiteController extends Controller {
             if (empty($product)) {
                 return false;
             }
-            $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id]);
+            $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON]);
             if ($relation) {
                 return false;
             }

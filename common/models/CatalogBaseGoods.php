@@ -33,6 +33,8 @@ use yii\helpers\ArrayHelper;
  * @property string $ed
  * 
  * @property Organization $vendor
+ * @property MpCategory $category
+ * @property MpCategory $mainCategory
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
@@ -207,9 +209,15 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function getMiniImageUrl() {
         return $this->image ? $this->getThumbUploadUrl('image', 'mini') : self::DEFAULT_IMAGE;
     }
+    
     public function getSubCategory() {
         return $this->hasOne(MpCategory::className(), ['id' => 'category_id']);
     }
+    
+    public function getMainCategory() {
+        return MpCategory::find()->where(['id' => $this->category->parent]);
+    }
+    
     public static function getCurCategory($id) {
     $parent = MpCategory::find()->where(['id' => $id])->one()->parent;
     return MpCategory::find()->where(['id' => $parent])->one();

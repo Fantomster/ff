@@ -722,18 +722,26 @@ margin: 0;padding: 0
 	color: #5eac6b;
         width:100%;
 }
-.btn-cart:hover {
+.btn-cart:hover, .btn-cart-active:hover {
 	background: #5eac6b; 
 	border: 1px solid #5eac6b; 
 	border-radius: 3px;
 	color: #fff;
 }
-.btn-cart:focus {
+.btn-cart:focus, .btn-cart-active:focus {
 	background: #5eac6b; 
 	border: 1px solid #5eac6b; 
 	border-radius: 3px;
 	color: #fff;
 }
+.btn-cart-active{
+        background: #63b370; 
+	border: 1px solid #5eac6b; 
+	border-radius: 3px;
+	color: #fff;
+        width:100%;
+}
+
 .media-block{
 padding: 10px 8px;
 border: 1px solid #fff;	
@@ -743,4 +751,10 @@ margin:0;
 border: 1px solid #b0b0b0;
 border-radius:3px;
 cursor: pointer !important;
+}
+
+.mp-block{
+background:#fff;
+box-shadow: 0px 1px 3px rgba(9, 12, 17, 0.2); 
+border-radius:3px;
 }

@@ -89,6 +89,16 @@ class SiteController extends Controller {
         $topSuppliersCount = $command->queryScalar();
         return $this->render('/site/index', compact('topProducts','topSuppliers','topProductsCount','topSuppliersCount'));
     }
+    public function actionProduct($id)
+    {
+        
+        return $this->render('/site/product');
+    }
+    public function actionSupplier($id)
+    {
+        
+        return $this->render('/site/supplier');
+    }
     public function actionAjaxProductMore($num)
     {              
         $count = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->count();

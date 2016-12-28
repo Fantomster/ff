@@ -41,6 +41,9 @@ $this->title = 'F-MARKET информация о товаре';
 }
 .mp-block-show-phone{padding-top:20px}
 .mp-block-show-email{padding-top:20px}
+.title-param{
+font-family: "HelveticaBold",Arial,sans-serif;    
+}
 </style>
 <div class="row">
   <div class="col-md-12">
@@ -54,7 +57,7 @@ $this->title = 'F-MARKET информация о товаре';
             <div class="row">
                 <div class="col-md-12">
                     <h3>Рагу из молодого барашка</h3>
-                    <h2>240098 <small>руб.</small></h2>
+                    <h2 style="padding-bottom:15px">240098 <small>руб.</small></h2>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать телефон</a></div>
                 <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать E-mail</a></div>
@@ -85,6 +88,40 @@ $this->title = 'F-MARKET информация о товаре';
         <div class="col-md-4 col-lg-4">
                 <img class="mp-product-image" src="http://yenisafak.feo.doracdn.com/resize/47uQufiZbmsgHk3H/400/0/resim/upload/2016/02/03/04/23/ea936dd22bff6c1108e1607cf5d5e04bf5811f75_k.jpg">
                 <div class="mp-product-article">Артикул № 2293322444123232</div>
+        </div>
+        <div class="col-md-12" style="padding-top:25px">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>КОРОТКО О ТОВАРЕ</h4>  
+                </div>
+                <div class="col-md-6">
+                    <h4>УСЛОВИЯ ДОСТАВКИ</h4>  
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6"> 
+                    <h5><span class="title-param">Страна:</span> asdasdasd</h5>   
+                    <h5><span class="title-param">Ед. измерения:</span> asdasdasd</h5>  
+                    <h5><span class="title-param">Вес:</span> asdasdasd</h5>   
+                    <h5><span class="title-param">Производитель:</span> asdasdasd</h5>   
+                    <h5><span class="title-param">Кратность поставки:</span> asdasdasd</h5>   
+                </div>
+                <div class="col-md-6">
+                    <h5><span class="title-param">Стоимость доставки:</span> asdasdasd</h5>    
+                    <h5><span class="title-param">Бесплатная доставка от:</span> asdasdasd</h5> 
+                    <h5><span class="title-param">Минимальный заказ:</span> asdasdasd</h5>   
+                    <h5><span class="title-param">Адрес самовывоза:</span> asdasdasd</h5>   
+                    <h5><span class="title-param">Дни доставки:</span> asdasdasd</h5>  
+                </div>
+                <div class="col-md-12">
+                    <h4>КОММЕНТАРИЙ</h4>  
+                </div>
+                <div class="col-md-12" style="padding-bottom:10px;">
+                   фывфывфывфыв  
+                </div>
+            </div>
         </div>
       </div>
   </div>

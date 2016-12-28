@@ -91,12 +91,10 @@ class SiteController extends Controller {
     }
     public function actionProduct($id)
     {
-        
         return $this->render('/site/product');
     }
     public function actionSupplier($id)
-    {
-        
+    {  
         return $this->render('/site/supplier');
     }
     public function actionAjaxProductMore($num)

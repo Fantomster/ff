@@ -91,8 +91,13 @@ class SiteController extends Controller {
     }
     public function actionProduct($id)
     {
+        $product = CatalogBaseGoods::findOne(['id' => $id]);
         
-        return $this->render('/site/product');
+        if ($product) {
+            return $this->render('/site/product', compact('product'));
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }
     }
     public function actionSupplier($id)
     {

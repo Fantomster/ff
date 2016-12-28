@@ -28,7 +28,7 @@ echo Html::hiddenInput('product_id', $product_id);
                                 'min' => (isset($units) && ($units > 0)) ? $units : 0.001,
                                 'max' => PHP_INT_MAX,
                                 'step' => (isset($units) && ($units)) ? $units : 1,
-                                'decimals' => (!isset($units) || ($units < 1)) ? 3 : 0,
+                                'decimals' => (!isset($units) || (fmod($units, 1) > 0)) ? 3 : 0,
                                 'forcestepdivisibility' => (isset($units) && ($units)) ? 'floor' : 'none',
                                 'buttonup_class' => 'btn btn-default',
                                 'buttondown_class' => 'btn btn-default',

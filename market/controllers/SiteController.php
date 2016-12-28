@@ -89,6 +89,7 @@ class SiteController extends Controller {
         $topSuppliersCount = $command->queryScalar();
         return $this->render('/site/index', compact('topProducts','topSuppliers','topProductsCount','topSuppliersCount'));
     }
+    
     public function actionProduct($id)
     {
         $product = CatalogBaseGoods::findOne(['id' => $id]);
@@ -100,6 +101,7 @@ class SiteController extends Controller {
         }
 
     }
+    
     public function actionSupplier($id)
     {
         $vendor = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_SUPPLIER]);
@@ -110,6 +112,7 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
         }
     }
+    
     public function actionAjaxProductMore($num)
     {              
         $count = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->count();
@@ -119,6 +122,7 @@ class SiteController extends Controller {
         }
         
     }
+    
     public function actionAjaxSupplierMore($num)
     {            
         $count = CatalogBaseGoods::find()
@@ -135,6 +139,7 @@ class SiteController extends Controller {
         return $this->renderPartial('/site/main/_ajaxSupplierMore', compact('sp'));
         }
     }
+    
     public function actionFilter()
     {
         $request = Yii::$app->request;

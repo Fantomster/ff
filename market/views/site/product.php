@@ -1,7 +1,43 @@
 <?php
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\View;
+
+$addAction = Url::to(["site/ajax-add-to-cart"]);
+$inviteAction = Url::to(["site/ajax-invite-vendor"]);
+
+$this->title = 'F-MARKET главная';
+
+$js = <<<JS
+        $(document).on("click", ".add-to-cart", function(e) {
+            e.preventDefault();
+            $.post(
+                "$addAction",
+                {product_id: $(this).data("product-id")}
+            ).done(function (result) {
+                if (result) {
+                    alert("Yes, we can!");
+                } else {
+                    alert("Fail!");
+                }
+            });
+        });
+        $(document).on("click", ".invite-vendor", function(e) {
+            e.preventDefault();
+            $.post(
+                "$inviteAction",
+                {vendor_id: $(this).data("vendor-id")}
+            ).done(function (result) {
+                if (result) {
+                    alert("Invited!");
+                } else {
+                    alert("Fail!");
+                }
+            });
+        });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 
 <?php
@@ -56,8 +92,8 @@ font-family: "HelveticaBold",Arial,sans-serif;
         <div class="col-md-8 col-lg-8">
             <div class="row">
                 <div class="col-md-12">
-                    <h3>Рагу из молодого барашка</h3>
-                    <h2 style="padding-bottom:15px">240098 <small>руб.</small></h2>
+                    <h3><?= $product->product ?></h3>
+                    <h2 style="padding-bottom:15px"><?= $product->price ?> <small>руб.</small></h2>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать телефон</a></div>
                 <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать E-mail</a></div>
@@ -65,7 +101,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                              <a href="#" class="btn btn-sm btn-cart-active add-to-cart" data-product-id="">
+                              <a href="#" class="btn btn-sm btn-cart-active add-to-cart" data-product-id="<?= $product->id ?>">
                                   <isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ
                               </a>
                             </div>
@@ -76,7 +112,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                              <a href="#" class="btn btn-sm btn-cart" data-product-id="">
+                              <a href="#" class="btn btn-sm btn-cart invite-vendor" data-vendor-id="<?= $product->supp_org_id ?>">
                                   <i class="fa fa-plus"></i>&nbsp;&nbsp;ДОБАВИТЬ ПОСТАВЩИКА
                               </a>
                             </div>

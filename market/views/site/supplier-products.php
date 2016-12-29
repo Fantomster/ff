@@ -54,7 +54,7 @@ $this->title = 'F-MARKET Продукты поставщика';
     </div>
     <div class="row">
       <div class="col-md-12 min-padding">
-        <a href="#" class="btn btn-outline-ajax <?=$productsCount>6?'':'disabled'?>" id="product-more">Показать еще</a>  
+        <a href="#" class="btn btn-outline-ajax <?=$productsCount>12?'':'disabled'?>" id="product-more">Показать еще</a>  
       </div>   
     </div>
   </div>
@@ -62,7 +62,7 @@ $this->title = 'F-MARKET Продукты поставщика';
 
 <?php $customJs = <<< JS
 var inProgress = false;
-var num = 6;
+var num = 12;
 $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#product-more').addClass('disabled');

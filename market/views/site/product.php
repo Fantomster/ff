@@ -111,7 +111,11 @@ font-family: "HelveticaBold",Arial,sans-serif;
         <div class="col-md-8 col-lg-8">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><?= $product->product ?> <small><?= $vendor->name ?></small></h3>
+                    <h3><?= $product->product ?> 
+                        <a href="<?=Url::to(['/site/supplier', 'id' => $vendor->id]);?>">
+                            <small><?= $vendor->name ?></small>
+                        </a>
+                    </h3>
                     <h2 style="padding-bottom:15px"><?= $product->price ?> <small>руб.</small></h2>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать телефон</a></div>

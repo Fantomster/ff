@@ -106,7 +106,7 @@ class SiteController extends Controller {
     {
         $productsCount = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->count();
         $products = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
-                ->limit(6)->all();
+                ->limit(12)->all();
         if ($products) {
             return $this->render('/site/supplier-products', compact('products','id','productsCount'));
             
@@ -145,7 +145,6 @@ class SiteController extends Controller {
         }
         
     }
-    
     public function actionAjaxSupplierMore($num)
     {            
         $count = CatalogBaseGoods::find()
@@ -162,11 +161,10 @@ class SiteController extends Controller {
         return $this->renderPartial('/site/main/_ajaxSupplierMore', compact('sp'));
         }
     }
-    
     public function actionCategory($id)
     {
-          $count = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(6)->count();
-          $products = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(6)->all();         
+          $count = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(12)->count();
+          $products = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(12)->all();         
           if ($products) {
                 return $this->render('category', compact('products','id','count'));
             } else {
@@ -180,7 +178,7 @@ class SiteController extends Controller {
         $suppliers = CatalogBaseGoods::find()
         ->select('DISTINCT(`supp_org_id`) as supp_org_id')
         ->where(['market_place'=>1])
-        ->limit(6)
+        ->limit(12)
         ->all();
         $command = Yii::$app->db->createCommand('select count(*) from (select DISTINCT(`supp_org_id`) from catalog_base_goods where market_place=1)tb');
         $suppliersCount = $command->queryScalar();

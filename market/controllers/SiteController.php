@@ -366,14 +366,15 @@ class SiteController extends Controller {
         $orders = $client->getCart();
 
         $post = Yii::$app->request->post();
+        $relation = null;
 
         if ($post && $post['product_id']) {
             $product = CatalogBaseGoods::findOne(['id' => $post['product_id']]);
             if (empty($product)) {
                 return false;
             }
-            $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON]);
-            if ($relation) {
+            $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id]);
+            if ($relation && ($relation->invite === RelationSuppRest::INVITE_ON)) {
                 return false;
             }
         } else {
@@ -417,7 +418,9 @@ class SiteController extends Controller {
 
         $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
-        $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
+        if (!$relation) {
+            $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
+        }
         $this->sendCartChange($client, $cartCount);
 
         return true;

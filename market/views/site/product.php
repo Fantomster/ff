@@ -97,7 +97,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             $product->mainCategory->name,
             [
                 'label' => $product->category->name,
-                'url' => ['site/filter', 'category' => $product->category_id],
+                'url' => ['site/category', 'id' => $product->category_id],
             ],
             $product->product,
         ],

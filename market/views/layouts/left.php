@@ -26,7 +26,7 @@ foreach($left_menu_categorys as $row){
                     <ul class="list-unstyled">';
     foreach($left_menu_categorys_sub as $row2){
         if($row['id'] == $row2['parent']){
-            echo     '<li><a href="?r=site/filter&category=' . $row2['id'] . '" title="">'.$row2['name'].' <span class="badge">'. \common\models\MpCategory::getCountProduct($row2['id']).'</span></a></li>';
+            echo     '<li><a href="?r=site/category&id=' . $row2['id'] . '" title="">'.$row2['name'].' <span class="badge">'. \common\models\MpCategory::getCountProduct($row2['id']).'</span></a></li>';
         }
     }
             echo   '</ul>

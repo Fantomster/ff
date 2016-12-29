@@ -6,11 +6,11 @@ use yii\helpers\Url;
 ?>
 
 <?php
-$this->title = 'F-MARKET Продукты поставщика';
+$this->title = 'F-MARKET фильтр поиска';
 ?>
 <div class="row">
   <div class="col-md-12">
-      <h3>Продукты <small></small></h3>
+      <h3>Продукты категории <small><?=\common\models\MpCategory::getCategory($id)?></small></h3>
      <div class="row" id="mp-product-block">
       <?php
         foreach($products as $row){
@@ -35,8 +35,7 @@ $this->title = 'F-MARKET Продукты поставщика';
                 <div class="col-md-12">
                   <div class="product-price">
                       <h4><?=floatval($row->price); ?> <small>руб.</small></h4>
-                  </div>
-                  
+                  </div>                  
                 </div>
                 <div class="col-md-12">
                   <div class="product-button">
@@ -49,15 +48,14 @@ $this->title = 'F-MARKET Продукты поставщика';
         <?php    
         }
         ?> 
-    </div>
+    </div> 
     <div class="row">
       <div class="col-md-12 min-padding">
-        <a href="#" class="btn btn-outline-ajax <?=$productsCount>6?'':'disabled'?>" id="product-more">Показать еще</a>  
+        <a href="#" class="btn btn-outline-ajax <?=$count>6?'':'disabled'?>" id="product-more">Показать еще</a>  
       </div>   
     </div>
   </div>
 </div>
-
 <?php $customJs = <<< JS
 var inProgress = false;
 var num = 6;
@@ -65,9 +63,9 @@ $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#product-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-product-loader",
+        url: "index.php?r=site/ajax-product-cat-loader",
         type: "GET",
-        data: {"num": num, "supp_org_id":$id},
+        data: {"num": num, "category":$id},
         beforeSend: function() {
         inProgress = true;},
         cache: false,
@@ -91,9 +89,9 @@ $('#product-more').on("click", function (e) {
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-product-loader",
+      url: "index.php?r=site/ajax-product-cat-loader",
       type: "GET",
-      data: {"num": num, "supp_org_id":$id},
+      data: {"num": num, "category":$id},
       cache: false,
       success: function(response){
           if(response == 0){

@@ -102,6 +102,29 @@ class SiteController extends Controller {
 
     }
     
+    public function actionSupplierProducts($id)
+    {
+        $productsCount = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->count();
+        $products = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->limit(6)->all();
+        if ($products) {
+            return $this->render('/site/supplier-products', compact('products','id','productsCount'));
+            
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }
+    }
+    public function actionAjaxProductLoader($num,$supp_org_id)
+    {          
+        if (Yii::$app->request->isAjax) {
+            $count = CatalogBaseGoods::find()->where(['supp_org_id' => $supp_org_id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->count();
+
+            if($count > 0){
+            $pr = CatalogBaseGoods::find()->where(['supp_org_id' => $supp_org_id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->all();    
+            return $this->renderPartial('/site/supplier-product/_ajaxProductLoader', compact('pr'));
+            }
+        }
+    }
     public function actionSupplier($id)
     {
         $vendor = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_SUPPLIER]);
@@ -112,7 +135,6 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
         }
     }
-    
     public function actionAjaxProductMore($num)
     {              
         $count = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->count();

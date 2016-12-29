@@ -7,6 +7,7 @@ use yii\helpers\Url;
 
 <?php
 $this->title = 'F-MARKET фильтр поиска';
+
 ?>
 <div class="row">
   <div class="col-md-12">
@@ -29,7 +30,9 @@ $this->title = 'F-MARKET фильтр поиска';
                       <h5><?= \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name; ?>/<?=$row->subCategory->name; ?></h5>
                   </div>
                   <div class="product-company">
+                      <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
                       <h5><?=$row->vendor->name; ?></h5>
+                      </a>
                   </div>
                 </div>
                 <div class="col-md-12">

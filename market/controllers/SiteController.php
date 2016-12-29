@@ -174,6 +174,18 @@ class SiteController extends Controller {
             }
           throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');                
     }
+    
+    public function actionSuppliers()
+    {
+        $suppliers = CatalogBaseGoods::find()
+        ->select('DISTINCT(`supp_org_id`) as supp_org_id')
+        ->where(['market_place'=>1])
+        ->limit(6)
+        ->all();
+        $command = Yii::$app->db->createCommand('select count(*) from (select DISTINCT(`supp_org_id`) from catalog_base_goods where market_place=1)tb');
+        $suppliersCount = $command->queryScalar();
+        return $this->render('suppliers', compact('suppliers','suppliersCount'));
+    }
     public function actionAjaxProductCatLoader($num,$category)
     {          
         if (Yii::$app->request->isAjax) {

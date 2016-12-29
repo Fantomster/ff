@@ -9,7 +9,7 @@ use yii\helpers\Url;
 $this->title = 'F-MARKET Продукты поставщика';
 ?>
 <div class="row">
-  <div class="col-md-12">
+    <div class="col-md-12">
       <h3>Продукты <small></small></h3>
      <div class="row" id="mp-product-block">
       <?php

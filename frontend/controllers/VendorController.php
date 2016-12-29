@@ -949,10 +949,10 @@ class VendorController extends DefaultController {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->save();
-                        
+                        if(\common\models\ES\Product::find()->where(['product_id'=>$id])->exists()){
                         $es_product = \common\models\ES\Product::find()->where(['product_id'=>$id])->one();
                         $es_product->delete();
-                        
+                        }
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }

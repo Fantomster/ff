@@ -439,15 +439,14 @@ class Organization extends \yii\db\ActiveRecord {
     public function markViewed($orderId) {
         return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id' => $this->id]);
     }
-    
+
     /**
      * @return string url to avatar image
      */
-    public function getPictureUrl()
-    {
+    public function getPictureUrl() {
         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
     }
-    
+
     public function inviteVendor($vendor, $invite, $status, $includeBaseCatalog = false) {
         if ($this->type_id !== self::TYPE_RESTAURANT) {
             return false;
@@ -464,4 +463,32 @@ class Organization extends \yii\db\ActiveRecord {
         }
         return $relation->save();
     }
+
+    public function getClientsCount() {
+        if ($this->type_id === self::TYPE_RESTAURANT) {
+            return 0;
+        }
+        return RelationSuppRest::find()->where(['supp_org_id' => $this->id, 'invite' => RelationSuppRest::INVITE_ON])->count();
+    }
+
+    public function getOrdersCount() {
+        if ($this->type_id === self::TYPE_RESTAURANT) {
+            return 0;
+        }
+        return Order::find()->where(['vendor_id' => $this->id, 'status' => Order::STATUS_DONE])->count();
+    }
+
+    public function getMarketGoodsCount() {
+        if ($this->type_id === self::TYPE_RESTAURANT) {
+            return 0;
+        }
+        return CatalogBaseGoods::find()
+                        ->where([
+                            'supp_org_id' => $this->id,
+                            'deleted' => CatalogBaseGoods::DELETED_OFF,
+                            'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                        ->groupBy(['category_id'])
+                        ->count();
+    }
+
 }

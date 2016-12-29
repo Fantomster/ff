@@ -2,7 +2,7 @@
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;
-
+use yii\helpers\Url;
 $delivery = $vendor->delivery;
 ?>
 
@@ -64,7 +64,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                              <a href="#" class="btn btn-sm btn-cart-active" data-product-id="">
+                              <a href="<?=Url::to(['/site/supplier-products', 'id' => $vendor->id]);?>" class="btn btn-sm btn-cart-active" data-product-id="">
                                   <i class="fa fa-eye"></i>&nbsp;&nbsp;ПОСМОТРЕТЬ КАТАЛОГ
                               </a>
                             </div>

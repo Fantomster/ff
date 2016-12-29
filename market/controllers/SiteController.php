@@ -102,6 +102,30 @@ class SiteController extends Controller {
 
     }
     
+    public function actionSupplierProducts($id)
+    {
+        $productsCount = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->count();
+        $products = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->limit(6)->all();
+        if ($products) {
+            return $this->render('/site/supplier-products', compact('products','id','productsCount'));
+            
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }
+    }
+    public function actionAjaxProductLoader($num,$supp_org_id)
+    {          
+        if (Yii::$app->request->isAjax) {
+            $count = CatalogBaseGoods::find()->where(['supp_org_id' => $supp_org_id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->count();
+
+            if($count > 0){
+            $pr = CatalogBaseGoods::find()->where(['supp_org_id' => $supp_org_id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->all();    
+            return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
+            }
+        }
+    }
+    
     public function actionSupplier($id)
     {
         $vendor = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_SUPPLIER]);
@@ -112,7 +136,6 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
         }
     }
-    
     public function actionAjaxProductMore($num)
     {              
         $count = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->count();
@@ -140,27 +163,28 @@ class SiteController extends Controller {
         }
     }
     
-    public function actionFilter()
+    public function actionCategory($id)
     {
-        $request = Yii::$app->request;
-        $category = $request->get('category');
-        $product = $request->get('product');
-        $supplier = $request->get('supplier');
-          if(isset($category)){
-            $products = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$category])->limit(12)->all();
-            return $this->render('filter', compact('products','category'));
-          }
-          if(isset($product)){
-            $products = \common\models\ES\Product::find()->where(['product_category_sub_id'=>$category])->limit(12)->all(); 
-            return $this->render('filter', compact('products','category'));
-          }
-          if(isset($supplier)){
-            $products = \common\models\ES\Product::find()->where(['product_category_sub_id'=>$category])->limit(12)->all(); 
-            return $this->render('filter', compact('products','category'));
-          }          
+          $count = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(6)->count();
+          $products = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(6)->all();         
+          if ($products) {
+                return $this->render('category', compact('products','id','count'));
+            } else {
+                throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+            }
           throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');                
     }
+    public function actionAjaxProductCatLoader($num,$category)
+    {          
+        if (Yii::$app->request->isAjax) {
+            $count = CatalogBaseGoods::find()->where(['category_id' => $category, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->count();
 
+            if($count > 0){
+            $pr = CatalogBaseGoods::find()->where(['category_id' => $category, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->all();    
+            return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
+            }
+        }
+    }
     //в перспективе запрос поменяю, будет мапиться только то, что добавлено в МП
     public function actionCurlAddProduct() {
         ini_set("max_execution_time", "180");

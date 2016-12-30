@@ -78,7 +78,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 </div>
                 <div class="col-md-12">
                   <div class="product-button">
-                    <a href="#" class="btn btn-sm btn-cart add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ</a>
+                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>">
+                        <isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ
+                    </a>
                   </div>  
                 </div>
               </div>
@@ -90,13 +92,13 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     </div>
     <div class="row">
       <div class="col-md-12 min-padding" style="margin-bottom: 10px">
-        <a href="#" class="btn btn-outline-ajax <?=$topProductsCount>6?'':'disabled'?>" id="product-more">Показать еще</a>  
+        <a href="#" class="btn btn-100 btn-outline-default <?=$topProductsCount>6?'':'disabled'?>" id="product-more">ПОКАЗАТЬ ЕЩЕ</a>  
       </div>   
     </div>
     <div class="row">
       <div class="col-md-12 min-padding">
         <h3 class="pull-left">Поставщики</h3>  
-        <a href="<?=Url::to(['/site/suppliers']);?>" class="btn btn-success pull-right" style="margin-top: 10px;">Все поставщики</a>
+        <a href="<?=Url::to(['/site/suppliers']);?>" class="btn btn-success pull-right" style="margin:10px 0;">ВСЕ ПОСТАВЩИКИ</a>
       </div>
     </div>
     <div class="row" id="supplier-block">
@@ -121,7 +123,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             </div>
             <div class="col-md-12">
               <div class="supplier-button">
-                <a href="#" class="btn btn-success invite-vendor" data-vendor-id="<?= $row->vendor->id ?>" style="width: 100%">Добавить</a>
+                <a href="#" class="btn btn-100 btn-success invite-vendor" data-vendor-id="<?= $row->vendor->id ?>" style="width: 100%">ДОБАВИТЬ</a>
               </div>
             </div>
           </div>
@@ -133,7 +135,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     </div>
     <div class="row">
       <div class="col-md-12 min-padding">
-        <a href="#" class="btn btn-outline-ajax <?=$topSuppliersCount>6?'':'disabled'?>" id="supplier-more">Показать еще</a>  
+        <a href="#" class="btn btn-100 btn-outline-default <?=$topSuppliersCount>6?'':'disabled'?>" id="supplier-more">Показать еще</a>  
       </div>   
     </div>
   </div> 

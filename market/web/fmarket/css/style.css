@@ -101,12 +101,11 @@ isc {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
   speak: none;
+  font-size: smaller;
   font-style: normal;
   font-weight: bold;
   font-variant: normal;
   text-transform: none;
-  line-height: 2;
-  font-size: 12px;
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -715,32 +714,6 @@ margin: 0;padding: 0
 	    
 	}
 }
-.btn-cart {
-	background: #fff; 
-	border: 1px solid #5eac6b; 
-	border-radius: 3px;
-	color: #5eac6b;
-        width:100%;
-}
-.btn-cart:hover, .btn-cart-active:hover {
-	background: #5eac6b; 
-	border: 1px solid #5eac6b; 
-	border-radius: 3px;
-	color: #fff;
-}
-.btn-cart:focus, .btn-cart-active:focus {
-	background: #5eac6b; 
-	border: 1px solid #5eac6b; 
-	border-radius: 3px;
-	color: #fff;
-}
-.btn-cart-active{
-        background: #63b370; 
-	border: 1px solid #5eac6b; 
-	border-radius: 3px;
-	color: #fff;
-        width:100%;
-}
 
 .media-block{
 padding: 10px 8px;
@@ -757,4 +730,57 @@ cursor: pointer !important;
 background:#fff;
 box-shadow: 0px 1px 3px rgba(9, 12, 17, 0.2); 
 border-radius:3px;
+}
+.btn{
+padding: 8px 10px 5px 10px;
+text-transform: uppercase;  
+}
+.btn-100{
+ width:100%;   
+}
+.btn-success{
+background:#84bf76;  
+border-radius:3px;
+
+}
+.btn-success:hover{
+background:#6ea262    
+}
+.btn-success:active{
+background:#6ea262    
+}
+
+.btn-outline-success{
+background:#fff;  
+border-color:#84bf76;
+color:#84bf76;
+border-radius:3px;
+
+}
+.btn-outline-success:hover{
+background:#6ea262;
+border-color:#6ea262;
+color:#fff;
+}
+.btn-outline-success:active{
+background:#6ea262; 
+border-color:#6ea262;
+color:#fff;
+}
+
+.btn-outline-default{
+border-color: #b0b0b0;
+color: #b0b0b0;
+background: #fff;
+text-transform: uppercase;
+}
+.btn-outline-default:hover{
+color: #b0b0b0;
+background: #efefef;
+border-color: #b0b0b0;
+}
+.btn-outline-default:active{
+color: #b0b0b0;
+background: #efefef;
+border-color: #b0b0b0;
 }

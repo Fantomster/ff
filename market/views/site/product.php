@@ -124,7 +124,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                              <a href="#" class="btn btn-sm btn-cart-active add-to-cart" data-product-id="<?= $product->id ?>">
+                              <a href="#" class="btn btn-100 btn-success add-to-cart" data-product-id="<?= $product->id ?>">
                                   <isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ
                               </a>
                             </div>
@@ -135,8 +135,8 @@ font-family: "HelveticaBold",Arial,sans-serif;
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                              <a href="#" class="btn btn-sm btn-cart invite-vendor" data-vendor-id="<?= $product->supp_org_id ?>">
-                                  <i class="fa fa-plus"></i>&nbsp;&nbsp;ДОБАВИТЬ ПОСТАВЩИКА
+                              <a href="#" class="btn btn-100 btn-outline-success invite-vendor" data-vendor-id="<?= $product->supp_org_id ?>">
+                                  ДОБАВИТЬ ПОСТАВЩИКА
                               </a>
                             </div>
                         </div>

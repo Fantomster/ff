@@ -42,7 +42,7 @@ $this->title = 'F-MARKET Продукты поставщика';
                 </div>
                 <div class="col-md-12">
                   <div class="product-button">
-                    <a href="#" class="btn btn-sm btn-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
+                    <a href="#" class="btn btn-100 btn-outline-success"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
                   </div>  
                 </div>
               </div>
@@ -54,7 +54,7 @@ $this->title = 'F-MARKET Продукты поставщика';
     </div>
     <div class="row">
       <div class="col-md-12 min-padding">
-        <a href="#" class="btn btn-outline-ajax <?=$productsCount>12?'':'disabled'?>" id="product-more">Показать еще</a>  
+        <a href="#" class="btn btn-100 btn-outline-default <?=$productsCount>12?'':'disabled'?>" id="product-more">Показать еще</a>  
       </div>   
     </div>
   </div>

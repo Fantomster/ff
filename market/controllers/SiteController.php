@@ -198,7 +198,7 @@ class SiteController extends Controller {
     //в перспективе запрос поменяю, будет мапиться только то, что добавлено в МП
     public function actionCurlAddProduct() {
         ini_set("max_execution_time", "180");
-        ini_set('memory_limit', '256M');
+        ini_set('memory_limit', '128M');
 
         $url = 'curl -XPUT \'http://localhost:9200/product\' -d \'{
     "settings": {
@@ -230,7 +230,7 @@ class SiteController extends Controller {
     '; 
     $res = shell_exec($url);
     $model = \common\models\CatalogBaseGoods::find()
-    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])
+    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])->limit(1000)
     ->all();
         foreach ($model as $name) {
             $product_id = $name->id;

@@ -142,11 +142,10 @@ class CronController extends Controller {
                     "product_created_at"  => $product_created_at
                 ];
                 $es_product->save();
-                
+                CatalogBaseGoods::updateAll(['es_status' => NULL], ['id' => $catalogBaseGoods->id]);
                 } 
                }
                
-               CatalogBaseGoods::updateAll(['es_status' => NULL], ['es_status' => 3]);
                $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
                $res = shell_exec($url);
             }
@@ -156,9 +155,10 @@ class CronController extends Controller {
                 if(\common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->exists()){
                   $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
                   $es_product->delete();  
+                  CatalogBaseGoods::updateAll(['es_status' => NULL], ['id' => $catalogBaseGoods->id]);
                 }
                } 
-               CatalogBaseGoods::updateAll(['es_status' => NULL], ['es_status' => 4]);
+               
                $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
                $res = shell_exec($url);
             }

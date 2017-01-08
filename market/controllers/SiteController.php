@@ -328,15 +328,75 @@ class SiteController extends Controller {
         $res = shell_exec($url);
         return $res;
     }
+    public function actionCurlAddCategory() {
+        ini_set("max_execution_time", "180");
+        ini_set('memory_limit', '256M');
 
+        $url = 'curl -XPUT \'http://localhost:9200/category\' -d \'{
+        "settings": {
+                    "analysis": {
+                            "analyzer": {
+                                    "my_analyzer": {
+                                            "type": "custom",
+                                            "tokenizer": "standard",
+                                            "filter": ["lowercase", "russian_morphology", "my_stopwords"]
+                                    }
+                            },
+                            "filter": {
+                                    "my_stopwords": {
+                                            "type": "stop",
+                                            "stopwords": "а,без,более,бы,был,была,были,было,быть,в,вам,вас,весь,во,вот,все,всего,всех,вы,где,да,даже,для,до,его,ее,если,есть,еще,же,за,здесь,и,из,или,им,их,к,как,ко,когда,кто,ли,либо,мне,может,мы,на,надо,наш,не,него,нее,нет,ни,них,но,ну,о,об,однако,он,она,они,оно,от,очень,по,под,при,с,со,так,также,такой,там,те,тем,то,того,тоже,той,только,том,ты,у,уже,хотя,чего,чей,чем,что,чтобы,чье,чья,эта,эти,это,я,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+                                    }
+                            }
+                    }
+            }
+        }\' && echo
+        curl -XPUT \'http://localhost:9200/category/category/_mapping\' -d \'{
+                "category": {
+                    "_all" : {"analyzer" : "russian_morphology"},
+                "properties" : {
+                        "category_name" : { "type" : "string", "analyzer" : "russian_morphology" }
+                }
+                }
+        }\'
+        ';
+        $res = shell_exec($url);
+        $sql = "select id,name from mp_category where parent is not null";
+        $model = \Yii::$app->db->createCommand($sql)->queryAll();
+        foreach ($model as $name) {
+            $category_id = $name['id'];
+            $category_image = '';
+            $category_name = $name['name'];
+            $category = new \common\models\ES\Category();
+            $category->attributes = [
+                "category_id" => $category_id,
+                "category_image" => $category_image,
+                "category_name" => $category_name
+            ];
+            $category->save();
+        }
+        $url = 'curl -XPOST \'http://localhost:9200/category/_refresh\'';
+        $res = shell_exec($url);
+        var_dump($model);
+        return $res;
+    }
     public function actionView() {
         $search = "";
+        $search_categorys_count = "";
         $search_products_count = "";
         $search_suppliers_count = "";
+        $search_categorys = "";
         $search_products = "";
         $search_suppliers = "";
         if (isset($_POST['searchText'])) {
             $search = $_POST['searchText'];
+            $params_categorys = [
+                'query' => [
+                    'match' => [
+                        'category_name' => $search
+                    ]
+                ]
+            ];
             $params_products = [
                 'query' => [
                     'match' => [
@@ -351,11 +411,15 @@ class SiteController extends Controller {
                     ]
                 ]
             ];
+            $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
+                            ->limit(10000)->count();
             $search_products_count = \common\models\ES\Product::find()->query($params_products)
                             ->limit(10000000)->count();
-            $search_suppliers_count = \common\models\ES\Product::find()->query($params_suppliers)
+            $search_suppliers_count = \common\models\ES\Supplier::find()->query($params_suppliers)
                             ->limit(10000000)->count();
-
+            
+            $search_categorys = \common\models\ES\Category::find()->query($params_categorys)
+                            ->limit(1000)->asArray()->all();
             $search_products = \common\models\ES\Product::find()->query($params_products)
                             /* ->highlight([
                               "pre_tags"  => "<em>",
@@ -366,11 +430,12 @@ class SiteController extends Controller {
                               ]) */
                             ->limit(4)->asArray()->all();
             $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
-                            ->limit(6)->asArray()->all();
+                            ->limit(4)->asArray()->all();
         }
 
         return $this->renderAjax('main/_search_form', compact(
-                                'search_products_count', 'search_suppliers_count', 'search_products', 'search_suppliers', 'search'));
+                                'search_categorys_count','search_products_count', 'search_suppliers_count', 
+                                'search_categorys', 'search_products', 'search_suppliers', 'search'));
     }
 
     public function actionAjaxAddToCart() {

@@ -30,7 +30,8 @@ if(!isset($search_suppliers)){$search_suppliers="";}
                   <div class="media media-block" >
                     <div class="media-left media-middle">
                       <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_id']]);?>">
-                        <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" src="<?=$arr['_source']['category_name']?>">
+                        <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
+                             src="<?=empty($arr['_source']['category_image'])?\common\models\ES\Product::putNoImage():$arr['_source']['category_image'] ?>">
                       </a>
                     </div>
                     <div class="media-body">
@@ -55,7 +56,8 @@ if(!isset($search_suppliers)){$search_suppliers="";}
                   <div class="media media-block" >
                     <div class="media-left media-middle">
                       <a href="<?=Url::to(['/site/product', 'id' => $arr['_source']['product_id']]);?>">
-                        <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" src="<?=$arr['_source']['product_image']?>">
+                        <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
+                             src="<?=empty($arr['_source']['product_image'])?\common\models\ES\Product::putNoImage():$arr['_source']['product_image'] ?>">
                       </a>
                     </div>
                     <div class="media-body">
@@ -90,7 +92,8 @@ if(!isset($search_suppliers)){$search_suppliers="";}
                   <div class="media media-block" >
                     <div class="media-left media-middle">
                       <a href="<?=Url::to(['/site/supplier', 'id' => $arr['_source']['supplier_id']]);?>">
-                        <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" src="<?=$arr['_source']['supplier_image']?>">
+                        <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
+                             src="<?=empty($arr['_source']['supplier_image'])?\common\models\ES\Product::putNoImage():$arr['_source']['supplier_image'] ?>">
                       </a>
                     </div>
                     <div class="media-body">

@@ -197,6 +197,7 @@ class SiteController extends Controller {
     }
     //в перспективе запрос поменяю, будет мапиться только то, что добавлено в МП
     public function actionCurlAddProduct() {
+        
         ini_set("max_execution_time", "180");
         ini_set('memory_limit', '128M');
 
@@ -230,7 +231,7 @@ class SiteController extends Controller {
     '; 
     $res = shell_exec($url);
     $model = \common\models\CatalogBaseGoods::find()
-    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])->limit(1000)
+    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])->limit(2000)
     ->all();
         foreach ($model as $name) {
             $product_id = $name->id;
@@ -262,10 +263,18 @@ class SiteController extends Controller {
         }
     $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
     $res = shell_exec($url);
+    echo memory_get_usage().'\n';
     var_dump($model);
     return $res;
     }
-
+    
+    
+    
+    
+    
+    
+    
+    
     public function actionCurlAddSupplier() {
         ini_set("max_execution_time", "180");
         ini_set('memory_limit', '256M');
@@ -478,5 +487,14 @@ class SiteController extends Controller {
 
         return true;
     }
-
+    
+    
+    
+    
+    
+    public function deleteCollection() {
+        
+        $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
+        $es_product->delete();
+    }
 }

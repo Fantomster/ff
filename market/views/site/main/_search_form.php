@@ -27,7 +27,7 @@ if(!isset($search_suppliers)){$search_suppliers="";}
                 if(!empty($search_categorys)){
                 foreach ($search_categorys as $arr) {
                 ?>
-                  <div class="media media-block" >
+                  <div class="media media-block animated fadeInUp" >
                     <div class="media-left media-middle">
                       <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_id']]);?>">
                         <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
@@ -53,7 +53,7 @@ if(!isset($search_suppliers)){$search_suppliers="";}
                 if(!empty($search_products)){
                 foreach ($search_products as $arr) {
                 ?>
-                  <div class="media media-block" >
+                  <div class="media media-block animated fadeInUp" >
                     <div class="media-left media-middle">
                       <a href="<?=Url::to(['/site/product', 'id' => $arr['_source']['product_id']]);?>">
                         <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
@@ -89,7 +89,7 @@ if(!isset($search_suppliers)){$search_suppliers="";}
                 if(!empty($search_suppliers)){
                 foreach ($search_suppliers as $arr) {
                 ?>
-                  <div class="media media-block" >
+                  <div class="media media-block animated fadeInUp" >
                     <div class="media-left media-middle">
                       <a href="<?=Url::to(['/site/supplier', 'id' => $arr['_source']['supplier_id']]);?>">
                         <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
@@ -120,59 +120,3 @@ if(!isset($search_suppliers)){$search_suppliers="";}
         </div>
     </div>
 </div>
-<!--div class="row">
-    <div class="search-block">
-        <div class="col-md-4">
-            <div class="search-block-1">
-            <h5 class=\"text-center\">Категории <span class='label label-success search-val'><?=$search_products_count?></span></h5>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="search-block-1">
-            <h5>Товары <span class='label label-success search-val'><?=$search_products_count?></span></h5>
-            <?php
-            if(!empty($search_products)){
-            foreach ($search_products as $arr) {
-                ?>
-                <div class="media" style="border-bottom:1px solid #eee;padding-bottom: 10px;">
-                    <div class="media-left media-middle">
-                      <a href="#">
-                        <img alt="64x64" data-holder-rendered="true" style="width: 64px; height: 64px;" class="media-object" src="<?=$arr['_source']['product_image']?>" alt="...">
-                      </a>
-                    </div>
-                    <div class="media-body">
-                      <h5 class="media-heading"><?=$arr['_source']['product_name']?></h5>
-                      <?=$arr['_source']['product_price']?>
-                    </div>
-                  </div>
-                <?php
-                }
-            }
-            ?>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="search-block-1">
-            <h5 class=\"text-center\">Поставщики <span class='label label-success search-val'><?=$search_suppliers_count?></span></h5>
-            <?php
-            if(!empty($search_suppliers)){
-            foreach ($search_suppliers as $arr) {
-                ?>
-                <div class="media" style="border-bottom:1px solid #eee;padding-bottom: 10px;">
-                    <div class="media-left media-middle">
-                      <a href="#">
-                        <img alt="64x64" data-holder-rendered="true" style="width: 64px; height: 64px;" class="media-object" src="<?=$arr['_source']['supplier_image']?>" alt="...">
-                      </a>
-                    </div>
-                    <div class="media-body">
-                      <h5 class="media-heading"><?=$arr['_source']['supplier_name']?></h5>
-                    </div>
-                  </div>
-                <?php
-                }
-            }
-            ?>
-            </div>
-        </div>
-    </div>
-</div-->

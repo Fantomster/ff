@@ -143,6 +143,8 @@ class CronController extends Controller {
                 ];
                 $es_product->save();
                 CatalogBaseGoods::updateAll(['es_status' => NULL], ['id' => $catalogBaseGoods->id]);
+                }else{
+                CatalogBaseGoods::updateAll(['es_status' => NULL], ['id' => $catalogBaseGoods->id]);    
                 } 
                }
                

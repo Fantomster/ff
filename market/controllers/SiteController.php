@@ -203,18 +203,20 @@ class SiteController extends Controller {
 
         $url = 'curl -XPUT \'http://localhost:9200/product\' -d \'{
     "settings": {
+                "number_of_shards": 1,
+                "number_of_replicas": 0,
 		"analysis": {
 			"analyzer": {
-				"my_analyzer": {
+				"ru": {
 					"type": "custom",
-					"tokenizer": "standard",
-					"filter": ["lowercase", "russian_morphology", "my_stopwords"]
+					"tokenizer": "whitespace",
+					"filter": ["lowercase", "russian_morphology", "ru_stopwords"]
 				}
 			},
 			"filter": {
-				"my_stopwords": {
+				"ru_stopwords": {
 					"type": "stop",
-					"stopwords": "а,без,более,бы,был,была,были,было,быть,в,вам,вас,весь,во,вот,все,всего,всех,вы,где,да,даже,для,до,его,ее,если,есть,еще,же,за,здесь,и,из,или,им,их,к,как,ко,когда,кто,ли,либо,мне,может,мы,на,надо,наш,не,него,нее,нет,ни,них,но,ну,о,об,однако,он,она,они,оно,от,очень,по,под,при,с,со,так,также,такой,там,те,тем,то,того,тоже,той,только,том,ты,у,уже,хотя,чего,чей,чем,что,чтобы,чье,чья,эта,эти,это,я,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам, во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
 				}
 			}
 		}
@@ -222,16 +224,19 @@ class SiteController extends Controller {
     }\' && echo
     curl -XPUT \'http://localhost:9200/product/product/_mapping\' -d \'{
             "product": {
-                "_all" : {"analyzer" : "russian_morphology"},
-            "properties" : {
-                    "product_name" : { "type" : "string", "analyzer" : "russian_morphology" }
-            }
+                "properties" : {
+                        "product_name" : { 
+                            "type" : "string", 
+                            "analyzer" : "ru",
+                            "term_vector" : "with_positions_offsets"
+                        }
+                }
             }
     }\'
     '; 
     $res = shell_exec($url);
     $model = \common\models\CatalogBaseGoods::find()
-    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])->limit(2000)
+    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])->limit(1000)
     ->all();
         foreach ($model as $name) {
             $product_id = $name->id;
@@ -400,7 +405,12 @@ class SiteController extends Controller {
             $params_products = [
                 'query' => [
                     'match' => [
-                        'product_name' => $search
+                        'product_name' => [
+                            'query' =>$search,
+                            'analyzer' =>"my_analyzer",
+                            'type' =>'phrase_prefix',
+                            'max_expansions' =>10
+                        ]
                     ]
                 ]
             ];

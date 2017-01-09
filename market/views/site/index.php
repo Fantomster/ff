@@ -51,10 +51,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <?php
         foreach($topProducts as $row){
         ?>
+        <!--class="wow slideInLeft" data-wow-duration="2s" data-wow-delay="5s"-->
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-            <div class="mp-product-block">
+            <div class="mp-product-block animated fadeIn">
                 <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
-                <img class="product-image" src="<?= $row->imageUrl ?>">
+                <img class="product-image wow animated fadeInUp" src="<?= $row->imageUrl ?>">
                 </a>
               <div class="row">
                 <div class="col-md-12">
@@ -106,9 +107,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         foreach($topSuppliers as $row){
         ?>
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-        <div class="mp-suppiler-block">
+        <div class="mp-suppiler-block animated fadeIn">
           <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
-            <img class="supplier-image" src="<?= $row->imageUrl ?>">
+            <img class="supplier-image  animated fadeInUp" src="<?= $row->imageUrl ?>">
           </a>
           <div class="row">
             <div class="col-md-12">

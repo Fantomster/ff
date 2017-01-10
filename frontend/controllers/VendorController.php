@@ -569,6 +569,7 @@ class VendorController extends DefaultController {
                                     . "price=:price,"
                                     . "ed=:ed,"
                                     . "note=:note"
+                                    . "es_status=3"
                                     . " where article='{$row_article}' and cat_id=$id";
                             $command = \Yii::$app->db->createCommand($sql);
                             $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
@@ -777,12 +778,8 @@ class VendorController extends DefaultController {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             $product_id = \Yii::$app->request->post('id');
-            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1], ['id' => $product_id]);
+            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1,'es_status' => 2], ['id' => $product_id]);
             
-            if(\common\models\ES\Product::find()->where(['product_id'=>$product_id])->exists()){
-              $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-              $es_product->delete();
-            }
             $result = ['success' => true];
             return $result;
             exit;
@@ -865,6 +862,7 @@ class VendorController extends DefaultController {
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
@@ -905,55 +903,18 @@ class VendorController extends DefaultController {
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
-                        
-                        //обновляем ES коллекцию
-                        
-                        
-            $product_id = $catalogBaseGoods->id;
-            $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
-            $product_name = $catalogBaseGoods->product; 
-            $product_supp_id = $catalogBaseGoods->supp_org_id;
-            $product_supp_name = $catalogBaseGoods->vendor->name; 
-            $product_price = $catalogBaseGoods->price; 
-            $product_category_id = $catalogBaseGoods->category->parent; 
-            $product_category_name = \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category->parent])->one()->name; 
-            $product_category_sub_id = $catalogBaseGoods->category->id; 
-            $product_category_sub_name = $catalogBaseGoods->category->name;
-            $product_created_at = $catalogBaseGoods->created_at;
-            if(\common\models\ES\Product::find()->where(['product_id'=>$id])->exists()){
-              $es_product = \common\models\ES\Product::find()->where(['product_id'=>$id])->one();
-            }else{
-              $es_product = new \common\models\ES\Product();
-            }
-            $es_product->attributes = [
-                "product_id" => $product_id,
-                "product_image" => $product_image,
-                "product_name"  => $product_name,
-                "product_supp_id"  => $product_supp_id,
-                "product_supp_name"  => $product_supp_name,
-                "product_price"  => $product_price,
-                "product_category_id" => $product_category_id,
-                "product_category_name" => $product_category_name,
-                "product_category_sub_id" => $product_category_sub_id,
-                "product_category_sub_name" => $product_category_sub_name,
-                "product_created_at"  => $product_created_at
-            ];
-            $es_product->save();
-            $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
-            $res = shell_exec($url);
                         
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
-                        if(\common\models\ES\Product::find()->where(['product_id'=>$id])->exists()){
-                        $es_product = \common\models\ES\Product::find()->where(['product_id'=>$id])->one();
-                        $es_product->delete();
-                        }
+                        
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }

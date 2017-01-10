@@ -1,6 +1,9 @@
 <?php
 
+namespace common\models\ES;
+
 use yii\elasticsearch\ActiveRecord;
+use Yii;
 
 class Category extends ActiveRecord
 {  
@@ -16,11 +19,9 @@ class Category extends ActiveRecord
     public function attributes()
     {
         return [            
-            "first_name",
-            "last_name",
-            "age" ,
-            "about" ,
-            "interests" 
+            "category_id",
+            "category_image",
+            "category_name"
           ];
       }
     public function rules() 

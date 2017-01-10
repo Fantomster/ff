@@ -45,3 +45,17 @@ market\assets\AppAsset::register($this);
 </body>
 </html>
 <?php $this->endPage() ?>
+<?php $customJs = <<< JS
+var wow = new WOW(
+  {
+    boxClass:     'wow',      // animated element css class (default is wow)
+    animateClass: 'animated', // animation css class (default is animated)
+    offset:       11,          // distance to the element when triggering the animation (default is 0)
+    mobile:       false,       // trigger animations on mobile devices (default is true)
+    live:         true,       // act on asynchronously loaded content (default is true)
+  }
+);
+wow.init();       
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>        

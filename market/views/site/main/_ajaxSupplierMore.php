@@ -8,9 +8,9 @@ use yii\web\View;
 foreach($sp as $row){
 ?>
 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-<div class="mp-suppiler-block">
+<div class="mp-suppiler-block  animated fadeIn">
     <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
-  <img class="supplier-image" src="<?= $row->imageUrl ?>">
+  <img class="supplier-image animated fadeInUp" src="<?= $row->imageUrl ?>">
     </a>
   <div class="row">
     <div class="col-md-12">

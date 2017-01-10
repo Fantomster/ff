@@ -8,9 +8,9 @@ use yii\helpers\Url;
 foreach($pr as $row){
 ?>
 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
-    <div class="mp-product-block">
+    <div class="mp-product-block animated fadeIn">
         <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
-        <img class="product-image" src="<?= $row->imageUrl ?>">
+        <img class="product-image animated fadeInUp" src="<?= $row->imageUrl ?>">
         </a>
       <div class="row">
         <div class="col-md-12">

@@ -18,17 +18,20 @@ use yii\web\View;
 </section>
 <section id="search-result">
     <div class="container">
-        <div class="row">
-            <div class="col-xs-12 search-result-block">
-               <div id="result"><?=$this->render('../site/main/_search_form');?></div>
-            </div>
+        <div class="row">         
+<?=$this->render('../site/main/_search_form');?>
         </div>
     </div>
 </section>
 <?php $customJs = <<< JS
 $('#search').on("keyup", function () {
     var searchText = $(this).val();
-    console.log(searchText)    
+    console.log(searchText)  
+    var timer;
+     if (timer) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
     $.ajax({
         url: "index.php?r=site/view",
         type: "POST",
@@ -38,6 +41,7 @@ $('#search').on("keyup", function () {
             $('#result').html(response);        
         }
     });
+        },1000);
 });
 $(document).ready(function(){
         $(document).on('focusin','#search', function(e){

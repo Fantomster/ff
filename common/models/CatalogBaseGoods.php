@@ -31,6 +31,7 @@ use yii\helpers\ArrayHelper;
  * @property file $importCatalog
  * @property string $note
  * @property string $ed
+ * @property integer $mp_show_price
  * 
  * @property Organization $vendor
  * @property MpCategory $category
@@ -83,7 +84,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['cat_id','article','price','product','ed'], 'required'],
-            [['cat_id', 'category_id', 'status', 'market_place', 'deleted'], 'integer'],
+            [['cat_id', 'category_id', 'status', 'market_place', 'deleted', 'mp_show_price'], 'integer'],
             [['article'], 'string', 'max' => 50],
             [['product','brand','region','weight'], 'string', 'max' => 255],
             [['note'], 'string', 'max' => 255],
@@ -125,6 +126,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'brand' => 'Производитель',
             'region' => 'Страна производитель',
             'weight' => 'Вес',
+            'mp_show_price' => 'Показывать цену в F-MARKET',
                 //'importCatalog'=>'Files'
         ];
     }

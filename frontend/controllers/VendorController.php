@@ -972,7 +972,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $CatalogBaseGoods = new CatalogBaseGoods;
+           // $CatalogBaseGoods = new CatalogBaseGoods;
             $id = \Yii::$app->request->post('id');
             $elem = \Yii::$app->request->post('elem');
 
@@ -991,15 +991,16 @@ class VendorController extends DefaultController {
             }
             if ($elem == 'status') {
                 $CatalogBaseGoods = CatalogBaseGoods::findOne(['id' => $id]);
-                if ($CatalogBaseGoods->status == 0) {
-                    $set = 1;
+                if (empty($CatalogBaseGoods->status)) {
+                    $set = CatalogBaseGoods::STATUS_ON;
                 } else {
-                    $set = 0;
+                    $set = CatalogBaseGoods::STATUS_OFF;
                 }
-                $CatalogBaseGoods->status = $set;
-                $CatalogBaseGoods->update();
+                //CatalogBaseGoods::updateAll(['status' =>$set], ['id' => $id]);
+               $CatalogBaseGoods->status = $set;
+               $CatalogBaseGoods->update();
 
-                $result = ['success' => true, 'status' => 'update status'];
+                $result = ['success' => true, 'status' => $set];
                 return $result;
             }
         }
@@ -1141,7 +1142,26 @@ class VendorController extends DefaultController {
 
         return $this->redirect(['vendor/step-1-update', 'id' => $cat_id]);
     }
-
+    public function actionStep2AddProduct(){
+        if (Yii::$app->request->isAjax) {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+            if (Yii::$app->request->post('state') == 'true') {
+                $product_id = Yii::$app->request->post('baseProductId');
+                $catalogGoods = new CatalogGoods;
+                $catalogGoods->base_goods_id = $product_id;
+                $catalogGoods->cat_id = Yii::$app->request->post('cat_id');;
+                $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
+                $catalogGoods->save();
+                return (['success' => true, 'Добавлен']);
+                exit;
+            } else {
+                $product_id = Yii::$app->request->post('baseProductId');
+                $CatalogGoods = CatalogGoods::deleteAll(['base_goods_id' => $product_id]);
+                return (['success' => true, 'Удален']);
+                exit;
+            }
+        }
+    }
     public function actionStep2($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1152,24 +1172,6 @@ class VendorController extends DefaultController {
                     return (['success' => true, 'cat_id' => $cat_id]);
                 } else {
                     return (['success' => false, 'type' => 1, 'message' => 'Пустой каталог']);
-                    exit;
-                }
-            }
-            if (Yii::$app->request->post('add-product')) {
-                if (Yii::$app->request->post('state') == 'true') {
-
-                    $product_id = Yii::$app->request->post('baseProductId');
-                    $catalogGoods = new CatalogGoods;
-                    $catalogGoods->base_goods_id = $product_id;
-                    $catalogGoods->cat_id = $cat_id;
-                    $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
-                    $catalogGoods->save();
-                    return (['success' => true, 'Добавлен']);
-                    exit;
-                } else {
-                    $product_id = Yii::$app->request->post('baseProductId');
-                    $CatalogGoods = CatalogGoods::deleteAll(['base_goods_id' => $product_id]);
-                    return (['success' => false, 'Удален']);
                     exit;
                 }
             }
@@ -1218,7 +1220,6 @@ class VendorController extends DefaultController {
                 ]
             ],
         ]);
-
         return $this->render('newcatalog/step-2', compact('searchModel', 'dataProvider', 'cat_id'));
     }
 

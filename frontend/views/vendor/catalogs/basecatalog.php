@@ -376,26 +376,7 @@ Modal::end();
                                 ]);
                                 return $link;
                             },
-                                ], /*
-                                  [
-                                  'attribute' => '',
-                                  'label' => '',
-                                  'format' => 'raw',
-                                  'contentOptions' => ['style' => 'width:50px;'],
-                                  'value' => function ($data) {
-                                  $link = Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['/vendor/ajax-update-product', 'id' => $data['id']], [
-                                  'data' => [
-                                  'target' => '#add-product',
-                                  'toggle' => 'modal',
-                                  'backdrop' => 'static',
-                                  ],
-                                  'class'=>'btn btn-sm btn-warning'
-
-                                  ]);
-                                  return $link;
-                                  },
-
-                                  ], */
+                                ],
                                 [
                                     'attribute' => '',
                                     'label' => '',

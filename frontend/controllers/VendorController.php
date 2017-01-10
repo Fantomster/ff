@@ -847,7 +847,7 @@ class VendorController extends DefaultController {
 
     public function actionAjaxCreateProductMarketPlace() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $catalogBaseGoods = new CatalogBaseGoods();
+        $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
@@ -884,6 +884,7 @@ class VendorController extends DefaultController {
     public function actionAjaxUpdateProductMarketPlace($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        $catalogBaseGoods->scenario = 'marketPlace';
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();

@@ -101,7 +101,14 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                     return ($("#catalogbasegoods-market_place").val() == ' . self::MARKETPLACE_ON .');
                 }',
                 'message' => 'Укажите категорию товара',
-            ]
+                'on' => 'marketPlace',
+            ],
+            [['category_id'], 'required',
+                'when' => function($model) {
+                    return $model->market_place == self::MARKETPLACE_ON;
+                },
+                'except' => 'marketPlace',
+            ],
         ];
     }
 

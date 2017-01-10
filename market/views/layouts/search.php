@@ -27,11 +27,7 @@ use yii\web\View;
 $('#search').on("keyup", function () {
     var searchText = $(this).val();
     console.log(searchText)  
-    var timer;
-     if (timer) {
-        clearTimeout(timer);
-    }
-    timer = setTimeout(function() {
+
     $.ajax({
         url: "index.php?r=site/view",
         type: "POST",
@@ -41,7 +37,6 @@ $('#search').on("keyup", function () {
             $('#result').html(response);        
         }
     });
-        },1000);
 });
 $(document).ready(function(){
         $(document).on('focusin','#search', function(e){

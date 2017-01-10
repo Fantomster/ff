@@ -290,6 +290,7 @@ label {
     data-toggle="tooltip" 
     title="Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)"></span></span></div>{error}'])->
     textInput(['placeholder' => 'КРАТНОСТЬ ПОСТАВКИ']) ?>
+                                    
 				</div>
 				<div class="col-md-6">
                                     <label class="control-label" for="">Страна производитель</label>
@@ -337,10 +338,12 @@ label {
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
     textInput(['placeholder' => 'ВЕС УПАКОВКИ','style'=>'border-radius:3px']) ?>
                                     <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
-				</div>
+				
+                                </div>
 			</div>
 		</div>
 	</div>
+        
 	<div class="row">
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
                     <div class="pull-left" style="border: 2px dotted #84bf76;padding: 10px 10px 0px 10px;margin-top: 0;border-radius:8px;">
@@ -361,16 +364,35 @@ label {
                                 'options' =>['style'=>'font-weight: 700;']
                                 ]
                             ])->label(false);?>
-                            
-                        </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
-			<div class="pull-right" style="margin-top: 10px;">
-			<?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
-                            '<i class="icon fa fa-plus-circle"></i> Создать' : 
-                            '<i class="icon fa fa-save"></i> Сохранить', 
-                            ['class' => $catalogBaseGoods->isNewRecord ? 
-                            'btn btn-success edit' : 'btn btn-success edit']) ?>
-                            <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
-			</div>	
+                    
+                    </div>
+                    <div class="pull-left" style="padding: 10px 10px 0px 10px;margin-top: 0;">    
+                        <?=$form->field($catalogBaseGoods, 'mp_show_price')->widget(CheckboxX::classname(), [
+                            //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                            'autoLabel' => true,
+                            'model' => $catalogBaseGoods,
+                            'attribute' => 'mp_show_price',
+                            'pluginOptions'=>[
+                                'threeState'=>false,
+                                'theme' => 'krajee-flatblue',
+                                'enclosedLabel' => false,
+                                'size'=>'lg',
+                                ],
+                            'labelSettings' => [
+                                'label' => 'Показывать цену в F-MARKET',
+                                'position' => CheckboxX::LABEL_RIGHT,
+                                'options' =>['style'=>'']
+                                ]
+                            ])->label(false);?>
+                    </div>    
+                    <div class="pull-right" style="margin-top: 10px;">
+                    <?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
+                        '<i class="icon fa fa-plus-circle"></i> Создать' : 
+                        '<i class="icon fa fa-save"></i> Сохранить', 
+                        ['class' => $catalogBaseGoods->isNewRecord ? 
+                        'btn btn-success edit' : 'btn btn-success edit']) ?>
+                        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+                    </div>	
 		</div>
 	</div>
 </div>

@@ -100,6 +100,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                     return ($("#catalogbasegoods-market_place").val() == ' . self::MARKETPLACE_ON .');
                 }',
                 'message' => 'Укажите категорию товара',
+                'on' => 'marketPlace',
             ]
         ];
     }

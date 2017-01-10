@@ -77,22 +77,66 @@ class SiteController extends Controller {
      */
     public function actionIndex()
     {
-        
-        $topProducts = CatalogBaseGoods::find()->where(['market_place'=>1])->limit(6)->all();
+        if (\Yii::$app->user->isGuest) {
+        $addwhere = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            $relationSupplier = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id])
+                    ->asArray()
+                    ->all();
+            $addwhere = ['not in','supp_org_id',$relationSupplier];
+            }
+        }
+        $topProducts = CatalogBaseGoods::find()->
+                where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                ->andWhere($addwhere)
+                ->limit(6)
+                ->all();
         $topSuppliers = CatalogBaseGoods::find()
-        ->select('DISTINCT(`supp_org_id`) as supp_org_id')
-        ->where(['market_place'=>1])
-        ->limit(6)
-        ->all();
-        $topProductsCount = CatalogBaseGoods::find()->where(['market_place'=>1])->count();
-        $command = Yii::$app->db->createCommand('select count(*) from (select DISTINCT(`supp_org_id`) from catalog_base_goods where market_place=1)tb');
-        $topSuppliersCount = $command->queryScalar();
+                ->select('DISTINCT(`supp_org_id`) as supp_org_id')
+                ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                ->andWhere($addwhere)
+                ->limit(6)
+                ->all();
+        $topProductsCount = CatalogBaseGoods::find()
+                ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                ->andWhere($addwhere)
+                ->count();
+        $topSuppliersCount = CatalogBaseGoods::find()
+                ->select('supp_org_id')
+                ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                ->andWhere($addwhere)
+                ->distinct()
+                ->count();
         return $this->render('/site/index', compact('topProducts','topSuppliers','topProductsCount','topSuppliersCount'));
     }
     
     public function actionProduct($id)
     {
-        $product = CatalogBaseGoods::findOne(['id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON]);
+        if (\Yii::$app->user->isGuest) {
+        $addwhere = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            $relationSupplier = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id])
+                    ->asArray()
+                    ->all();
+            $addwhere = ['not in','supp_org_id',$relationSupplier];
+            }
+        }
+        $product = CatalogBaseGoods::find()
+                ->where(['id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->andWhere($addwhere)
+                ->one();
         
         if ($product) {
             return $this->render('/site/product', compact('product'));
@@ -104,8 +148,27 @@ class SiteController extends Controller {
     
     public function actionSupplierProducts($id)
     {
-        $productsCount = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->count();
-        $products = CatalogBaseGoods::find()->where(['supp_org_id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+        if (\Yii::$app->user->isGuest) {
+        $addwhere = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            $relationSupplier = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id])
+                    ->asArray()
+                    ->all();
+            $addwhere = ['not in','supp_org_id',$relationSupplier];
+            }
+        }
+        $productsCount = CatalogBaseGoods::find()
+                ->where(['supp_org_id' => $id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                ->count();
+        $products = CatalogBaseGoods::find()
+                ->where(['supp_org_id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->andWhere($addwhere)
                 ->limit(12)->all();
         if ($products) {
             return $this->render('/site/supplier-products', compact('products','id','productsCount'));
@@ -115,9 +178,14 @@ class SiteController extends Controller {
         }
     }
     public function actionAjaxProductLoader($num,$supp_org_id)
-    {          
+    {     
+        
         if (Yii::$app->request->isAjax) {
-            $count = CatalogBaseGoods::find()->where(['supp_org_id' => $supp_org_id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->count();
+            $count = CatalogBaseGoods::find()
+                    ->where(['supp_org_id' => $supp_org_id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                    ->offset($num)
+                    ->limit(6)
+                    ->count();
 
             if($count > 0){
             $pr = CatalogBaseGoods::find()->where(['supp_org_id' => $supp_org_id, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->all();    
@@ -129,33 +197,87 @@ class SiteController extends Controller {
     public function actionSupplier($id)
     {
         $vendor = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_SUPPLIER]);
+        if (\Yii::$app->user->isGuest) {
+        $relationSupplier = false;  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            $relationSupplier = RelationSuppRest::find()
+                    ->where(['rest_org_id'=>$client->id,'supp_org_id'=>$vendor->id])
+                    ->exists();
+            }
+        }
         
-        if ($vendor) {
+        if ($vendor && !$relationSupplier) {
             return $this->render('/site/supplier', compact('vendor'));
         } else {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
         }
     }
     public function actionAjaxProductMore($num)
-    {              
-        $count = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->count();
+    {     
+        if (\Yii::$app->user->isGuest) {
+        $addwhere = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            $relationSupplier = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id])
+                    ->asArray()
+                    ->all();
+            $addwhere = ['not in','supp_org_id',$relationSupplier];
+            }
+        }
+        $count = CatalogBaseGoods::find()
+                ->where(['market_place'=>1])
+                ->andWhere($addwhere)
+                ->offset($num)
+                ->limit(6)
+                ->count();
         if($count > 0){
-        $pr = CatalogBaseGoods::find()->where(['market_place'=>1])->offset($num)->limit(6)->all();    
+        $pr = CatalogBaseGoods::find()
+                ->where(['market_place'=>1])
+                ->andWhere($addwhere)
+                ->offset($num)
+                ->limit(6)
+                ->all();    
         return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
         }
         
     }
     public function actionAjaxSupplierMore($num)
-    {            
+    {      
+        if (\Yii::$app->user->isGuest) {
+        $addwhere = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            $relationSupplier = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id])
+                    ->asArray()
+                    ->all();
+            $addwhere = ['not in','supp_org_id',$relationSupplier];
+            }
+        }
         $count = CatalogBaseGoods::find()
             ->select('DISTINCT(`supp_org_id`) as supp_org_id')
             ->where(['market_place'=>1])
+            ->andWhere($addwhere)
             ->limit(6)->offset($num)        
             ->count();
         if($count > 0){
         $sp = CatalogBaseGoods::find()
             ->select('DISTINCT(`supp_org_id`) as supp_org_id')
             ->where(['market_place'=>1])
+            ->andWhere($addwhere)
             ->limit(6)->offset($num)
             ->all();
         return $this->renderPartial('/site/main/_ajaxSupplierMore', compact('sp'));
@@ -163,8 +285,31 @@ class SiteController extends Controller {
     }
     public function actionCategory($id)
     {
-          $count = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(12)->count();
-          $products = CatalogBaseGoods::find()->where(['market_place'=>1,'category_id'=>$id])->limit(12)->all();         
+          if (\Yii::$app->user->isGuest) {
+            $addwhere = [];  
+            }else{
+                $currentUser = Yii::$app->user->identity;
+                $client = $currentUser->organization;
+
+                if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $relationSupplier = RelationSuppRest::find()
+                        ->select('supp_org_id')
+                        ->where(['rest_org_id'=>$client->id])
+                        ->asArray()
+                        ->all();
+                $addwhere = ['not in','supp_org_id',$relationSupplier];
+                }
+            }
+          $count = CatalogBaseGoods::find()
+                  ->where(['market_place'=>1,'category_id'=>$id])
+                  ->andWhere($addwhere)
+                  ->limit(12)
+                  ->count();
+          $products = CatalogBaseGoods::find()
+                  ->where(['market_place'=>1,'category_id'=>$id])
+                  ->andWhere($addwhere)
+                  ->limit(12)
+                  ->all();         
           if ($products) {
                 return $this->render('category', compact('products','id','count'));
             } else {
@@ -175,22 +320,69 @@ class SiteController extends Controller {
     
     public function actionSuppliers()
     {
+        if (\Yii::$app->user->isGuest) {
+            $addwhere = [];  
+            }else{
+                $currentUser = Yii::$app->user->identity;
+                $client = $currentUser->organization;
+
+                if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $relationSupplier = RelationSuppRest::find()
+                        ->select('supp_org_id')
+                        ->where(['rest_org_id'=>$client->id])
+                        ->asArray()
+                        ->all();
+                $addwhere = ['not in','supp_org_id',$relationSupplier];
+                }
+            }
         $suppliers = CatalogBaseGoods::find()
         ->select('DISTINCT(`supp_org_id`) as supp_org_id')
         ->where(['market_place'=>1])
+        ->andWhere($addwhere)
         ->limit(12)
         ->all();
-        $command = Yii::$app->db->createCommand('select count(*) from (select DISTINCT(`supp_org_id`) from catalog_base_goods where market_place=1)tb');
-        $suppliersCount = $command->queryScalar();
+        
+        $suppliersCount = CatalogBaseGoods::find()
+                ->select('supp_org_id')
+                ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                ->andWhere($addwhere)
+                ->distinct()
+                ->count();
+        
         return $this->render('suppliers', compact('suppliers','suppliersCount'));
     }
     public function actionAjaxProductCatLoader($num,$category)
-    {          
+    {    
+        if (\Yii::$app->user->isGuest) {
+            $addwhere = [];  
+            }else{
+                $currentUser = Yii::$app->user->identity;
+                $client = $currentUser->organization;
+
+                if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $relationSupplier = RelationSuppRest::find()
+                        ->select('supp_org_id')
+                        ->where(['rest_org_id'=>$client->id])
+                        ->asArray()
+                        ->all();
+                $addwhere = ['not in','supp_org_id',$relationSupplier];
+                }
+            }
         if (Yii::$app->request->isAjax) {
-            $count = CatalogBaseGoods::find()->where(['category_id' => $category, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->count();
+            $count = CatalogBaseGoods::find()
+                    ->where(['category_id' => $category, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                    ->andWhere($addwhere)
+                    ->offset($num)
+                    ->limit(6)
+                    ->count();
 
             if($count > 0){
-            $pr = CatalogBaseGoods::find()->where(['category_id' => $category, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])->offset($num)->limit(6)->all();    
+            $pr = CatalogBaseGoods::find()
+                    ->where(['category_id' => $category, 'market_place'=>CatalogBaseGoods::MARKETPLACE_ON])
+                    ->andWhere($addwhere)
+                    ->offset($num)
+                    ->limit(6)
+                    ->all();    
             return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
             }
         }

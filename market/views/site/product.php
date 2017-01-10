@@ -116,7 +116,11 @@ font-family: "HelveticaBold",Arial,sans-serif;
                             <small><?= $vendor->name ?></small>
                         </a>
                     </h3>
-                    <h2 style="padding-bottom:15px"><?= $product->price ?> <small>руб.</small></h2>
+              <?php if(empty($product->mp_show_price)){ ?>
+              <h2 style="color:#dfdfdf;padding-bottom:15px">договорная цена</h2>
+              <?php } else {?>
+              <h2 style="color:#dfdfdf;padding-bottom:15px"><?=floatval($product->price); ?> <small>руб.</small></h2>
+              <?php } ?>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать телефон</a></div>
                 <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать E-mail</a></div>

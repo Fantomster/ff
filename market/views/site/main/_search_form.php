@@ -101,7 +101,8 @@ if(empty($i)){
                     ?>
                       <div class="row">
                         <div class="col-md-12" style="margin-top: 10px">
-                          <a href="#" class="btn btn-outline-ajax">Показать еще</a>  
+                            
+                          <a href="<?=Url::to(['/site/search-products', 'search' => $search]);?>" class="btn btn-outline-ajax">Показать еще</a>  
                         </div>   
                       </div>
                     <?php
@@ -143,7 +144,7 @@ if(empty($i)){
                     ?>
                       <div class="row">
                         <div class="col-md-12" style="margin-top: 10px">
-                          <a href="#" class="btn btn-outline-ajax">Показать еще</a>  
+                          <a href="<?=Url::to(['/site/search-suppliers', 'search' => $search]);?>" class="btn btn-outline-ajax">Показать еще</a>  
                         </div>   
                       </div>
                     <?php

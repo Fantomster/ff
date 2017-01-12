@@ -86,7 +86,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
-                    ->where(['rest_org_id'=>$client->id])
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
                     ->asArray()
                     ->all();
             $addwhere = ['not in','supp_org_id',$relationSupplier];
@@ -127,7 +127,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
-                    ->where(['rest_org_id'=>$client->id])
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
                     ->asArray()
                     ->all();
             $addwhere = ['not in','supp_org_id',$relationSupplier];
@@ -145,7 +145,223 @@ class SiteController extends Controller {
         }
 
     }
-    
+    public function actionSearchProducts($search){
+        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $suppliers = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                    ->all();
+                $filterNotIn = [];
+                foreach ($suppliers AS $supplier){
+                    $filterNotIn[] = $supplier->supp_org_id;
+                }
+            }
+        }
+        $params = [
+            'filtered' => [
+                'query' => [
+                    'match' => [
+                        'product_name' => [
+                            'query' =>$search,
+                            'analyzer' =>"my_analyzer",
+                            'type' =>'phrase_prefix',
+                            'max_expansions' =>6
+                        ]
+                    ]
+                ],
+                'filter' => [
+                    'bool' => [
+                        'must_not' => [
+                            'terms' => [
+                                'product_supp_id' => $filterNotIn
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        $count = \common\models\ES\Product::find()->query($params)
+                            ->limit(1000000)->count();
+        if (!empty($count)) {
+            $products = \common\models\ES\Product::find()->query($params)
+                            ->limit(12)->all();
+            return $this->render('/site/search-products', compact('count','products','search')); 
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }        
+    }
+    public function actionAjaxEsProductMore($num,$search)
+    {     
+        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $suppliers = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                    ->all();
+                $filterNotIn = [];
+                foreach ($suppliers AS $supplier){
+                    $filterNotIn[] = $supplier->supp_org_id;
+                }
+            }
+        }
+        $params = [
+            'filtered' => [
+                'query' => [
+                    'match' => [
+                        'product_name' => [
+                            'query' =>$search,
+                            'analyzer' =>"my_analyzer",
+                            'type' =>'phrase_prefix',
+                            'max_expansions' =>6
+                        ]
+                    ]
+                ],
+                'filter' => [
+                    'bool' => [
+                        'must_not' => [
+                            'terms' => [
+                                'product_supp_id' => $filterNotIn//$filterNotIn
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        $count = \common\models\ES\Product::find()->query($params)
+                //->where('not in','product_supp_id',$addwhere)
+                //->mustNot('product_supp_id','1')
+                ->offset($num)
+                ->limit(12)
+                ->count();
+        
+        if($count > 0){
+        $pr = \common\models\ES\Product::find()->query($params)
+                //->where('not in','product_supp_id',$addwhere)
+                ->offset($num)
+                ->limit(12)
+                ->all();   
+        return $this->renderPartial('/site/main/_ajaxEsProductMore', compact('pr'));
+        }
+        
+    }
+    public function actionSearchSuppliers($search){
+        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $suppliers = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                    ->all();
+                $filterNotIn = [];
+                foreach ($suppliers AS $supplier){
+                    $filterNotIn[] = $supplier->supp_org_id;
+                }
+            }
+        }
+        $params = [
+            'filtered' => [
+                'query' => [
+                    'match' => [
+                        'supplier_name' => [
+                            'query' =>$search,
+                            'analyzer' =>"my_analyzer",
+                            'type' =>'phrase_prefix',
+                            'max_expansions' =>6
+                        ]
+                    ]
+                ],
+                'filter' => [
+                    'bool' => [
+                        'must_not' => [
+                            'terms' => [
+                                'supplier_id' => $filterNotIn
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        $count = \common\models\ES\Supplier::find()->query($params)
+                            ->limit(1000000)->count();
+        if (!empty($count)) {
+            $sp = \common\models\ES\Supplier::find()->query($params)
+                            ->limit(12)->all();
+            return $this->render('/site/search-suppliers', compact('count','sp','search')); 
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
+        }        
+    }
+    public function actionAjaxEsSupplierMore($num,$search)
+    {     
+        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $suppliers = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                    ->all();
+                $filterNotIn = [];
+                foreach ($suppliers AS $supplier){
+                    $filterNotIn[] = $supplier->supp_org_id;
+                }
+            }
+        }
+        $params = [
+            'filtered' => [
+                'query' => [
+                    'match' => [
+                        'supplier_name' => [
+                            'query' =>$search,
+                            'analyzer' =>"my_analyzer",
+                            'type' =>'phrase_prefix',
+                            'max_expansions' =>6
+                        ]
+                    ]
+                ],
+                'filter' => [
+                    'bool' => [
+                        'must_not' => [
+                            'terms' => [
+                                'supplier_id' => $filterNotIn
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+        $count = \common\models\ES\Supplier::find()->query($params)
+                ->offset($num)
+                ->limit(12)
+                ->count();
+        
+        if($count > 0){
+        $sp = \common\models\ES\Supplier::find()->query($params)
+                ->offset($num)
+                ->limit(12)
+                ->all();   
+        return $this->renderPartial('/site/main/_ajaxEsSupplierMore', compact('sp'));
+        }
+        
+    }
     public function actionSupplierProducts($id)
     {
         if (\Yii::$app->user->isGuest) {
@@ -157,7 +373,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
-                    ->where(['rest_org_id'=>$client->id])
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
                     ->asArray()
                     ->all();
             $addwhere = ['not in','supp_org_id',$relationSupplier];
@@ -197,15 +413,16 @@ class SiteController extends Controller {
     public function actionSupplier($id)
     {
         $vendor = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_SUPPLIER]);
+        
         if (\Yii::$app->user->isGuest) {
         $relationSupplier = false;  
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
 
-            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            if ($client->type_id == Organization::TYPE_RESTAURANT && $vendor) {
             $relationSupplier = RelationSuppRest::find()
-                    ->where(['rest_org_id'=>$client->id,'supp_org_id'=>$vendor->id])
+                    ->where(['rest_org_id'=>$client->id, 'supp_org_id'=>$vendor->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
                     ->exists();
             }
         }
@@ -227,7 +444,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
-                    ->where(['rest_org_id'=>$client->id])
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
                     ->asArray()
                     ->all();
             $addwhere = ['not in','supp_org_id',$relationSupplier];
@@ -329,7 +546,7 @@ class SiteController extends Controller {
                 if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id'=>$client->id])
+                        ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
                 $addwhere = ['not in','supp_org_id',$relationSupplier];
@@ -362,7 +579,7 @@ class SiteController extends Controller {
                 if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id'=>$client->id])
+                        ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
                 $addwhere = ['not in','supp_org_id',$relationSupplier];
@@ -578,6 +795,23 @@ class SiteController extends Controller {
         return $res;
     }
     public function actionView() {
+        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];  
+        }else{
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $suppliers = RelationSuppRest::find()
+                    ->select('supp_org_id')
+                    ->where(['rest_org_id'=>$client->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                    ->all();
+                $filterNotIn = [];
+                foreach ($suppliers AS $supplier){
+                    $filterNotIn[] = $supplier->supp_org_id;
+                }
+            }
+        }
         $search = "";
         $search_categorys_count = "";
         $search_products_count = "";
@@ -595,21 +829,45 @@ class SiteController extends Controller {
                 ]
             ];
             $params_products = [
-                'query' => [
-                    'match' => [
-                        'product_name' => [
-                            'query' =>$search,
-                            'analyzer' =>"my_analyzer",
-                            'type' =>'phrase_prefix',
-                            'max_expansions' =>10
+                'filtered' => [
+                    'query' => [
+                        'match' => [
+                            'product_name' => [
+                                'query' =>$search,
+                                'analyzer' =>"my_analyzer",
+                                'type' =>'phrase_prefix',
+                                'max_expansions' =>6
+                            ]
+                        ]
+                    ],
+                    'filter' => [
+                        'bool' => [
+                            'must_not' => [
+                                'terms' => [
+                                    'product_supp_id' => $filterNotIn
+                                ]
+                            ]
                         ]
                     ]
                 ]
             ];
             $params_suppliers = [
-                'query' => [
-                    'match' => [
-                        'supplier_name' => $search
+                'filtered' => [
+                    'query' => [
+                        'match' => [
+                            'supplier_name' => [
+                                'query' =>$search
+                            ]
+                        ]
+                    ],
+                    'filter' => [
+                        'bool' => [
+                            'must_not' => [
+                                'terms' => [
+                                    'supplier_id' => $filterNotIn
+                                ]
+                            ]
+                        ]
                     ]
                 ]
             ];

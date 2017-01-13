@@ -41,6 +41,7 @@ market\assets\AppAsset::register($this);
     </div>
   </div>
 </section>
+<a id='backTop'>Back To Top</a>
 <?php $this->endBody() ?>
 </body>
 </html>

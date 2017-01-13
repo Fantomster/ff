@@ -24,6 +24,11 @@ use yii\web\View;
     </div>
 </section>
 <?php $customJs = <<< JS
+$('#backTop').backTop({
+    'position' : 400,
+    'speed' : 500,
+    'color' : 'white',
+});
 $('#search').on("keyup", function () {
     var searchText = $(this).val();
     console.log(searchText)  

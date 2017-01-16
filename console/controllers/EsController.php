@@ -132,4 +132,90 @@ class EsController extends Controller
     '; 
     $res = shell_exec($url);
     }
+    
+    public function actionUpdateCategory() {
+    ini_set("max_execution_time", "180");
+    ini_set('memory_limit', '128M');
+    
+    $sql = "select id,name from mp_category where parent is not null";
+    $model = \Yii::$app->db->createCommand($sql)->queryAll();
+    foreach ($model as $name) {
+        $category_id = $name['id'];
+        $category_image = '';
+        $category_name = $name['name'];
+        $category = new \common\models\ES\Category();
+        $category->attributes = [
+            "category_id" => $category_id,
+            "category_image" => $category_image,
+            "category_name" => $category_name
+        ];
+        $category->save();
+    }
+    $url = 'curl -XPOST \'http://localhost:9200/category/_refresh\'';
+    $res = shell_exec($url);
+    }
+    public function actionUpdateProduct() {
+    ini_set("max_execution_time", "180");
+    ini_set('memory_limit', '128M');
+    
+    $model = \common\models\CatalogBaseGoods::find()
+    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON, 'es_status' => 3])->limit(1300)
+    ->all();
+    foreach ($model as $name) {
+        $product_id = $name->id;
+        $product_image = !empty($name->image) ? $name->imageUrl : ''; 
+        $product_name = $name->product; 
+        $product_supp_id = $name->supp_org_id;
+        $product_supp_name = $name->vendor->name; 
+        $product_price = $name->price; 
+        $product_category_id = $name->category->parent; 
+        $product_category_name = \common\models\MpCategory::find()->where(['id'=>$name->category->parent])->one()->name; 
+        $product_category_sub_id = $name->category->id; 
+        $product_category_sub_name = $name->category->name;
+        $product_created_at = $name->created_at;
+        $product = new \common\models\ES\Product();
+        $product->attributes = [
+            "product_id" => $product_id,
+            "product_image" => $product_image,
+            "product_name"  => $product_name,
+            "product_supp_id"  => $product_supp_id,
+            "product_supp_name"  => $product_supp_name,
+            "product_price"  => $product_price,
+            "product_category_id" => $product_category_id,
+            "product_category_name" => $product_category_name,
+            "product_category_sub_id" => $product_category_sub_id,
+            "product_category_sub_name" => $product_category_sub_name,
+            "product_created_at"  => $product_created_at
+        ];
+        $product->save();
+        \common\models\CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $name->id]);
+    }
+    $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
+    $res = shell_exec($url);
+    }
+    public function actionUpdateSupplier() {
+    ini_set("max_execution_time", "180");
+    ini_set('memory_limit', '128M');
+    
+    $sql = "SELECT organization.id as id, organization.name as name 
+            FROM user JOIN organization ON user.organization_id = organization.id
+            WHERE type_id = 2";
+        $model = \Yii::$app->db->createCommand($sql)->queryAll();
+        foreach ($model as $name) {
+            $supplier_id = $name['id'];
+            $supplier_image = '';
+            $supplier_name = $name['name'];
+            $suppliers = new \common\models\ES\Supplier();
+            $suppliers->attributes = [
+                "supplier_id" => $supplier_id,
+                "supplier_image" => $supplier_image,
+                "supplier_name" => $supplier_name
+            ];
+            $suppliers->save();
+        }
+        
+        $url = 'curl -XPOST \'http://localhost:9200/supplier/_refresh\'';
+        $res = shell_exec($url);
+    }
+    
 }

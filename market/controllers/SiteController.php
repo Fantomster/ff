@@ -169,7 +169,7 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' =>$search,
-                            'analyzer' =>"my_analyzer",
+                            'analyzer' =>"ru",
                             'type' =>'phrase_prefix',
                             'max_expansions' =>6
                         ]
@@ -221,7 +221,7 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' =>$search,
-                            'analyzer' =>"my_analyzer",
+                            'analyzer' =>"ru",
                             'type' =>'phrase_prefix',
                             'max_expansions' =>6
                         ]
@@ -279,7 +279,7 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' =>$search,
-                            'analyzer' =>"my_analyzer",
+                            'analyzer' =>"ru",
                             'type' =>'phrase_prefix',
                             'max_expansions' =>6
                         ]
@@ -331,7 +331,7 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' =>$search,
-                            'analyzer' =>"my_analyzer",
+                            'analyzer' =>"ru",
                             'type' =>'phrase_prefix',
                             'max_expansions' =>6
                         ]
@@ -697,7 +697,7 @@ class SiteController extends Controller {
         "settings": {
                     "analysis": {
                             "analyzer": {
-                                    "my_analyzer": {
+                                    "ru": {
                                             "type": "custom",
                                             "tokenizer": "standard",
                                             "filter": ["lowercase", "russian_morphology", "my_stopwords"]
@@ -750,7 +750,7 @@ class SiteController extends Controller {
         "settings": {
                     "analysis": {
                             "analyzer": {
-                                    "my_analyzer": {
+                                    "ru": {
                                             "type": "custom",
                                             "tokenizer": "standard",
                                             "filter": ["lowercase", "russian_morphology", "my_stopwords"]
@@ -834,7 +834,7 @@ class SiteController extends Controller {
                         'match' => [
                             'product_name' => [
                                 'query' =>$search,
-                                'analyzer' =>"my_analyzer",
+                                'analyzer' =>"ru",
                                 'type' =>'phrase_prefix',
                                 'max_expansions' =>6
                             ]

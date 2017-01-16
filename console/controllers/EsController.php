@@ -83,7 +83,7 @@ class EsController extends Controller
     $res = shell_exec($url); 
     
     
-    $url = 'curl -XPUT \'http://localhost:9200/category\' -d \'{
+    $url = 'curl -XPUT \'http://localhost:9200/supplier\' -d \'{
     "settings": {
                 "number_of_shards": 1,
                 "number_of_replicas": 0,
@@ -104,10 +104,10 @@ class EsController extends Controller
 		}
 	}
     }\' && echo
-    curl -XPUT \'http://localhost:9200/category/category/_mapping\' -d \'{
-            "category": {
+    curl -XPUT \'http://localhost:9200/supplier/supplier/_mapping\' -d \'{
+            "supplier": {
                 "properties" : {
-                        "category_name" : { 
+                        "supplier_name" : { 
                             "type" : "string", 
                             "analyzer" : "ru",
                             "term_vector" : "with_positions_offsets"

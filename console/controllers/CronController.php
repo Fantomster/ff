@@ -83,7 +83,7 @@ class CronController extends Controller {
                 
                 }
             }
-            CatalogBaseGoods::updateAll(['es_status' => NULL], ['es_status' => 1]);
+            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => 1]);
             $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
             $res = shell_exec($url);
          }
@@ -96,7 +96,7 @@ class CronController extends Controller {
              $es_product->delete();    
              }    
             }
-            CatalogBaseGoods::updateAll(['es_status' => NULL], ['es_status' => 2]);
+            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => 2]);
             $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
             $res = shell_exec($url);
          
@@ -112,7 +112,7 @@ class CronController extends Controller {
     public function actionMassUpdateCollection() {
         if(CatalogBaseGoods::find()->where('es_status is not null')->exists()){
             if(CatalogBaseGoods::find()->where(['es_status' => '3'])->exists()){
-               $products = CatalogBaseGoods::find()->where(['es_status' => '3'])->limit(500)->all();
+               $products = CatalogBaseGoods::find()->where(['es_status' => '3'])->limit(1000)->all();
                foreach($products as $catalogBaseGoods){
                 $product_id = $catalogBaseGoods->id;
                 $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
@@ -142,9 +142,9 @@ class CronController extends Controller {
                     "product_created_at"  => $product_created_at
                 ];
                 $es_product->save();
-                CatalogBaseGoods::updateAll(['es_status' => NULL], ['id' => $catalogBaseGoods->id]);
+                CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);
                 }else{
-                CatalogBaseGoods::updateAll(['es_status' => NULL], ['id' => $catalogBaseGoods->id]);    
+                CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);    
                 } 
                }
                
@@ -152,12 +152,12 @@ class CronController extends Controller {
                $res = shell_exec($url);
             }
             if(CatalogBaseGoods::find()->where(['es_status' => '4'])->exists()){
-               $products = CatalogBaseGoods::find()->where(['es_status' => '4'])->limit(500)->all();
+               $products = CatalogBaseGoods::find()->where(['es_status' => '4'])->limit(1000)->all();
                foreach($products as $catalogBaseGoods){
                 if(\common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->exists()){
                   $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
                   $es_product->delete();  
-                  CatalogBaseGoods::updateAll(['es_status' => NULL], ['id' => $catalogBaseGoods->id]);
+                  CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);
                 }
                } 
                

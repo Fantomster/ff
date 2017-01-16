@@ -36,11 +36,13 @@ class EsController extends Controller
     curl -XPUT \'http://localhost:9200/category/category/_mapping\' -d \'{
             "category": {
                 "properties" : {
+                        "category_id" : {"type" => "long"},
                         "category_name" : { 
                             "type" : "string", 
                             "analyzer" : "ru",
                             "term_vector" : "with_positions_offsets"
-                        }
+                        },
+                        "category_image" : {"type" => "string"}
                 }
             }
     }\'
@@ -71,11 +73,21 @@ class EsController extends Controller
     curl -XPUT \'http://localhost:9200/product/product/_mapping\' -d \'{
             "product": {
                 "properties" : {
+                        "product_id"  :{"type" => "long"},
                         "product_name" : { 
                             "type" : "string", 
                             "analyzer" : "ru",
                             "term_vector" : "with_positions_offsets"
-                        }
+                        },
+                        "product_supp_id" : {"type" => "long"},
+                        "product_supp_name" : {"type" => "string"},
+                        "product_image" : {"type" => "string"},
+                        "product_price" : {"type" => "string"},
+                        "product_category_id" : {"type" => "long"},
+                        "product_category_sub_id" : {"type" => "long"},
+                        "product_category_name" : {"type" => "string"},
+                        "product_category_sub_name" : {"type" => "string"},
+                        "product_created_at" : {"type" => "string"}
                 }
             }
     }\'
@@ -107,11 +119,13 @@ class EsController extends Controller
     curl -XPUT \'http://localhost:9200/supplier/supplier/_mapping\' -d \'{
             "supplier": {
                 "properties" : {
+                        "supplier_id" : {"type" => "long"},
                         "supplier_name" : { 
                             "type" : "string", 
                             "analyzer" : "ru",
                             "term_vector" : "with_positions_offsets"
-                        }
+                        },
+                        "supplier_image" : {"type" => "string"}
                 }
             }
     }\'

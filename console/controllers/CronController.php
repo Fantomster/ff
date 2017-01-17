@@ -144,6 +144,21 @@ class CronController extends Controller {
                 $es_product->save();
                 CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);
                 }else{
+                $es_product = new \common\models\ES\Product();
+                $es_product->attributes = [
+                    "product_id" => $product_id,
+                    "product_image" => $product_image,
+                    "product_name"  => $product_name,
+                    "product_supp_id"  => $product_supp_id,
+                    "product_supp_name"  => $product_supp_name,
+                    "product_price"  => $product_price,
+                    "product_category_id" => $product_category_id,
+                    "product_category_name" => $product_category_name,
+                    "product_category_sub_id" => $product_category_sub_id,
+                    "product_category_sub_name" => $product_category_sub_name,
+                    "product_created_at"  => $product_created_at
+                ];
+                $es_product->save();
                 CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);    
                 } 
                }

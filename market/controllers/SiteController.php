@@ -187,7 +187,7 @@ class SiteController extends Controller {
             ]
         ];
         $count = \common\models\ES\Product::find()->query($params)
-                            ->limit(1000000)->count();
+                            ->limit(10000)->count();
         if (!empty($count)) {
             $products = \common\models\ES\Product::find()->query($params)
                             ->limit(12)->all();

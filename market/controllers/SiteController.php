@@ -428,6 +428,7 @@ class SiteController extends Controller {
             }
             if ($client->type_id == Organization::TYPE_SUPPLIER) {
             $addwhere = [];    
+            $relationSupplier = false;
             }
         }
         

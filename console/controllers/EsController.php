@@ -218,9 +218,9 @@ class EsController extends Controller
         $res = shell_exec($url);
     }
     public function actionDeleleProductCollection(){
-     
+    // 
     $es = \common\models\ES\Product::find()->query($params);
-    
+    //
     }
     
 }

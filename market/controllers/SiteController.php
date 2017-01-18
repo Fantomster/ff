@@ -281,8 +281,8 @@ class SiteController extends Controller {
                         'supplier_name' => [
                             'query' =>$search,
                             'analyzer' =>"ru",
-                            'type' =>'phrase_prefix',
-                            'max_expansions' =>6
+                            //'type' =>'phrase_prefix',
+                           // 'max_expansions' =>6
                         ]
                     ]
                 ],
@@ -298,7 +298,7 @@ class SiteController extends Controller {
             ]
         ];
         $count = \common\models\ES\Supplier::find()->query($params)
-                            ->limit(1000000)->count();
+                            ->limit(10000)->count();
         if (!empty($count)) {
             $sp = \common\models\ES\Supplier::find()->query($params)
                             ->limit(12)->all();
@@ -605,196 +605,7 @@ class SiteController extends Controller {
             }
         }
     }
-    //в перспективе запрос поменяю, будет мапиться только то, что добавлено в МП
-    public function actionCurlAddProduct() {
-        
-        ini_set("max_execution_time", "180");
-        ini_set('memory_limit', '128M');
-
-        $url = 'curl -XPUT \'http://localhost:9200/product\' -d \'{
-    "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
-		"analysis": {
-			"analyzer": {
-				"ru": {
-					"type": "custom",
-					"tokenizer": "whitespace",
-					"filter": ["lowercase", "russian_morphology", "ru_stopwords"]
-				}
-			},
-			"filter": {
-				"ru_stopwords": {
-					"type": "stop",
-					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам, во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
-				}
-			}
-		}
-	}
-    }\' && echo
-    curl -XPUT \'http://localhost:9200/product/product/_mapping\' -d \'{
-            "product": {
-                "properties" : {
-                        "product_name" : { 
-                            "type" : "string", 
-                            "analyzer" : "ru",
-                            "term_vector" : "with_positions_offsets"
-                        }
-                }
-            }
-    }\'
-    '; 
-    $res = shell_exec($url);
-    $model = \common\models\CatalogBaseGoods::find()
-    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON])->limit(1000)
-    ->all();
-        foreach ($model as $name) {
-            $product_id = $name->id;
-            $product_image = !empty($name->image) ? $name->imageUrl : ''; 
-            $product_name = $name->product; 
-            $product_supp_id = $name->supp_org_id;
-            $product_supp_name = $name->vendor->name; 
-            $product_price = $name->price; 
-            $product_category_id = $name->category->parent; 
-            $product_category_name = \common\models\MpCategory::find()->where(['id'=>$name->category->parent])->one()->name; 
-            $product_category_sub_id = $name->category->id; 
-            $product_category_sub_name = $name->category->name;
-            $product_created_at = $name->created_at;
-            $product = new \common\models\ES\Product();
-            $product->attributes = [
-                "product_id" => $product_id,
-                "product_image" => $product_image,
-                "product_name"  => $product_name,
-                "product_supp_id"  => $product_supp_id,
-                "product_supp_name"  => $product_supp_name,
-                "product_price"  => $product_price,
-                "product_category_id" => $product_category_id,
-                "product_category_name" => $product_category_name,
-                "product_category_sub_id" => $product_category_sub_id,
-                "product_category_sub_name" => $product_category_sub_name,
-                "product_created_at"  => $product_created_at
-            ];
-            $product->save();
-        }
-    $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
-    $res = shell_exec($url);
-    echo memory_get_usage().'\n';
-    var_dump($model);
-    return $res;
-    }
     
-    
-    
-    
-    
-    
-    
-    
-    public function actionCurlAddSupplier() {
-        ini_set("max_execution_time", "180");
-        ini_set('memory_limit', '256M');
-
-        $url = 'curl -XPUT \'http://localhost:9200/supplier\' -d \'{
-        "settings": {
-                    "analysis": {
-                            "analyzer": {
-                                    "ru": {
-                                            "type": "custom",
-                                            "tokenizer": "standard",
-                                            "filter": ["lowercase", "russian_morphology", "my_stopwords"]
-                                    }
-                            },
-                            "filter": {
-                                    "my_stopwords": {
-                                            "type": "stop",
-                                            "stopwords": "а,без,более,бы,был,была,были,было,быть,в,вам,вас,весь,во,вот,все,всего,всех,вы,где,да,даже,для,до,его,ее,если,есть,еще,же,за,здесь,и,из,или,им,их,к,как,ко,когда,кто,ли,либо,мне,может,мы,на,надо,наш,не,него,нее,нет,ни,них,но,ну,о,об,однако,он,она,они,оно,от,очень,по,под,при,с,со,так,также,такой,там,те,тем,то,того,тоже,той,только,том,ты,у,уже,хотя,чего,чей,чем,что,чтобы,чье,чья,эта,эти,это,я,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
-                                    }
-                            }
-                    }
-            }
-        }\' && echo
-        curl -XPUT \'http://localhost:9200/supplier/supplier/_mapping\' -d \'{
-                "supplier": {
-                    "_all" : {"analyzer" : "russian_morphology"},
-                "properties" : {
-                        "supplier_name" : { "type" : "string", "analyzer" : "russian_morphology" }
-                }
-                }
-        }\'
-        ';
-        $res = shell_exec($url);
-        $sql = "SELECT organization.id as id, organization.name as name 
-            FROM user JOIN organization ON user.organization_id = organization.id
-            WHERE type_id = 2";
-        $model = \Yii::$app->db->createCommand($sql)->queryAll();
-        foreach ($model as $name) {
-            $supplier_id = $name['id'];
-            $supplier_image = '';
-            $supplier_name = $name['name'];
-            $suppliers = new \common\models\ES\Supplier();
-            $suppliers->attributes = [
-                "supplier_id" => $supplier_id,
-                "supplier_image" => $supplier_image,
-                "supplier_name" => $supplier_name
-            ];
-            $suppliers->save();
-        }
-        $url = 'curl -XPOST \'http://localhost:9200/supplier/_refresh\'';
-        $res = shell_exec($url);
-        return $res;
-    }
-    public function actionCurlAddCategory() {
-        ini_set("max_execution_time", "180");
-        ini_set('memory_limit', '256M');
-
-        $url = 'curl -XPUT \'http://localhost:9200/category\' -d \'{
-        "settings": {
-                    "analysis": {
-                            "analyzer": {
-                                    "ru": {
-                                            "type": "custom",
-                                            "tokenizer": "standard",
-                                            "filter": ["lowercase", "russian_morphology", "my_stopwords"]
-                                    }
-                            },
-                            "filter": {
-                                    "my_stopwords": {
-                                            "type": "stop",
-                                            "stopwords": "а,без,более,бы,был,была,были,было,быть,в,вам,вас,весь,во,вот,все,всего,всех,вы,где,да,даже,для,до,его,ее,если,есть,еще,же,за,здесь,и,из,или,им,их,к,как,ко,когда,кто,ли,либо,мне,может,мы,на,надо,наш,не,него,нее,нет,ни,них,но,ну,о,об,однако,он,она,они,оно,от,очень,по,под,при,с,со,так,также,такой,там,те,тем,то,того,тоже,той,только,том,ты,у,уже,хотя,чего,чей,чем,что,чтобы,чье,чья,эта,эти,это,я,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
-                                    }
-                            }
-                    }
-            }
-        }\' && echo
-        curl -XPUT \'http://localhost:9200/category/category/_mapping\' -d \'{
-                "category": {
-                    "_all" : {"analyzer" : "russian_morphology"},
-                "properties" : {
-                        "category_name" : { "type" : "string", "analyzer" : "russian_morphology" }
-                }
-                }
-        }\'
-        ';
-        $res = shell_exec($url);
-        $sql = "select id,name from mp_category where parent is not null";
-        $model = \Yii::$app->db->createCommand($sql)->queryAll();
-        foreach ($model as $name) {
-            $category_id = $name['id'];
-            $category_image = '';
-            $category_name = $name['name'];
-            $category = new \common\models\ES\Category();
-            $category->attributes = [
-                "category_id" => $category_id,
-                "category_image" => $category_image,
-                "category_name" => $category_name
-            ];
-            $category->save();
-        }
-        $url = 'curl -XPOST \'http://localhost:9200/category/_refresh\'';
-        $res = shell_exec($url);
-        var_dump($model);
-        return $res;
-    }
     public function actionView() {
         if (\Yii::$app->user->isGuest) {
         $filterNotIn = [];  
@@ -1012,15 +823,5 @@ class SiteController extends Controller {
         }
 
         return true;
-    }
-    
-    
-    
-    
-    
-    public function deleteCollection() {
-        
-        $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-        $es_product->delete();
     }
 }

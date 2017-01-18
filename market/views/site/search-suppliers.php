@@ -6,7 +6,7 @@ use yii\helpers\Url;
 ?>
 
 <?php
-$this->title = 'F-MARKET Продукты поставщика';
+$this->title = 'F-MARKET Поставщики';
 ?>
 <div class="row">
     <div class="col-md-12">

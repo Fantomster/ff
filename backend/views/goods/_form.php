@@ -232,7 +232,7 @@ label {
                                 'pluginOptions'=>[
                                     'depends'=>['catalogbasegoods-sub1'],
                                     'placeholder' => false,
-                                    'url' => Url::to(['vendor/get-sub-cat']),
+                                    'url' => Url::to(['goods/get-sub-cat']),
                                     'loadingText' => 'Загрузка...',
                                     'initialize' => true,
                                     //'initDepends'=>['dynamicmodel-sub2'],

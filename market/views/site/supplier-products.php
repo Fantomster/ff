@@ -37,7 +37,7 @@ $this->title = 'F-MARKET Продукты поставщика';
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
             <div class="mp-product-block">
                 <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
-                <img class="product-image" src="<?=!empty($row->image) ? $row->imageUrl: \common\models\ES\Product::putNoImage(); ?>">
+                <img class="product-image" src="<?= $row->imageUrl ?>">
                 </a>
               <div class="row">
                 <div class="col-md-12">

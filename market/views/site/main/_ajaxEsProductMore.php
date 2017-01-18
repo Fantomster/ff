@@ -10,7 +10,8 @@ foreach($pr as $row){
 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
     <div class="mp-product-block">
         <a href="<?=Url::to(['/site/product', 'id' => $row->product_id]);?>">
-        <img class="product-image" src="<?=!empty($row->product_image) ? $row->product_image: \common\models\ES\Product::putNoImage(); ?>">
+        <img class="product-image" src="<?=!empty($row->product_image) ? $row->product_image: 
+                Url::to('@web/fmarket/images/image-category/'.$row->product_category_id.".jpg", true); ?>">
         </a>
       <div class="row">
         <div class="col-md-12">

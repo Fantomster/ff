@@ -19,7 +19,8 @@ $this->title = 'F-MARKET результаты поиска';
             <div class="mp-product-block">
                 <a href="<?=Url::to(['/site/product', 'id' => $row->product_id]);?>">
                 <img class="product-image" src="<?=!empty($row->product_image) ? 
-        $row->product_image: \common\models\ES\Product::putNoImage(); ?>">
+        $row->product_image : 
+        Url::to('@web/fmarket/images/image-category/'.$row->product_category_id.".jpg", true); ?>">
                 </a>
               <div class="row">
                 <div class="col-md-12">

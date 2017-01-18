@@ -82,7 +82,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $addwhere = [];     
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -123,6 +123,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
+            $addwhere = []; 
 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
@@ -151,7 +152,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $filterNotIn = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -203,7 +204,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -261,7 +262,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $filterNotIn = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -313,7 +314,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $filterNotIn = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -369,7 +370,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $addwhere = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -419,7 +420,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $addwhere = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT && $vendor) {
             $relationSupplier = RelationSuppRest::find()
                     ->where(['rest_org_id'=>$client->id, 'supp_org_id'=>$vendor->id,'status' => RelationSuppRest::CATALOG_STATUS_ON])
@@ -440,7 +441,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $addwhere = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -474,7 +475,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $addwhere = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
             $relationSupplier = RelationSuppRest::find()
                     ->select('supp_org_id')
@@ -507,7 +508,7 @@ class SiteController extends Controller {
             }else{
                 $currentUser = Yii::$app->user->identity;
                 $client = $currentUser->organization;
-
+                $addwhere = []; 
                 if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -542,7 +543,7 @@ class SiteController extends Controller {
             }else{
                 $currentUser = Yii::$app->user->identity;
                 $client = $currentUser->organization;
-
+                $addwhere = []; 
                 if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -575,7 +576,7 @@ class SiteController extends Controller {
             }else{
                 $currentUser = Yii::$app->user->identity;
                 $client = $currentUser->organization;
-
+                $addwhere = []; 
                 if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -800,7 +801,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-
+            $addwhere = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                     ->select('supp_org_id')

@@ -217,31 +217,10 @@ class EsController extends Controller
         $url = 'curl -XPOST \'http://localhost:9200/supplier/_refresh\'';
         $res = shell_exec($url);
     }
-    public function actionCheckAndUpdateCollection(){
-    $params = [
-        'function_score' =>[
-                'query' => [
-                    'match_all' => ['product_id' => []]
-                    ]
-                ],
-                'random_score' => []
-            ];    
+    public function actionDeleleProductCollection(){
+     
     $es = \common\models\ES\Product::find()->query($params);
-    /*$data = [];
-    foreach($es as $row){
-        array_push($data,$row['_source']['product_id']);
-    }
-    $model = \common\models\CatalogBaseGoods::find()
-    ->where([
-        'market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON,
-        'deleted'=>0,
-        ])
-    ->andWhere(['not in', 'id', $data])
-    ->limit(1000)
-    ->asArray()
-    ->all();  
-    */
-    var_dump($es);
+    
     }
     
 }

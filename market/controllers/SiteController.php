@@ -171,8 +171,8 @@ class SiteController extends Controller {
                         'product_name' => [
                             'query' =>$search,
                             'analyzer' =>"ru",
-                            'type' =>'phrase_prefix',
-                            'max_expansions' =>6
+                            //'type' =>'phrase_prefix',
+                            //'max_expansions' =>6
                         ]
                     ]
                 ],
@@ -223,8 +223,8 @@ class SiteController extends Controller {
                         'product_name' => [
                             'query' =>$search,
                             'analyzer' =>"ru",
-                            'type' =>'phrase_prefix',
-                            'max_expansions' =>6
+                            //'type' =>'phrase_prefix',
+                            //'max_expansions' =>6
                         ]
                     ]
                 ],
@@ -280,7 +280,7 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' =>$search,
-                            'analyzer' =>"ru",
+                            //'analyzer' =>"ru",
                             //'type' =>'phrase_prefix',
                            // 'max_expansions' =>6
                         ]
@@ -332,7 +332,7 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' =>$search,
-                            'analyzer' =>"ru",
+                            //'analyzer' =>"ru",
                             //'type' =>'phrase_prefix',
                             //'max_expansions' =>6
                         ]
@@ -651,8 +651,8 @@ class SiteController extends Controller {
                             'product_name' => [
                                 'query' =>$search,
                                 'analyzer' =>"ru",
-                                'type' =>'phrase_prefix',
-                                'max_expansions' =>6
+                                //'type' =>'phrase_prefix',
+                                //'max_expansions' =>6
                             ]
                         ]
                     ],

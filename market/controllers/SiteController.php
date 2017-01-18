@@ -333,8 +333,8 @@ class SiteController extends Controller {
                         'supplier_name' => [
                             'query' =>$search,
                             'analyzer' =>"ru",
-                            'type' =>'phrase_prefix',
-                            'max_expansions' =>6
+                            //'type' =>'phrase_prefix',
+                            //'max_expansions' =>6
                         ]
                     ]
                 ],

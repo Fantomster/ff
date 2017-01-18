@@ -220,10 +220,15 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }*/
     public function getImageUrl()
     {
-        return $this->image ? $this->getThumbUploadUrl('image', 'image') : 
-            $this->category_id ?
-                Url::to('@web/fmarket/images/image-category/'.$this->mainCategory->id.".jpg", true) : 
-                self::DEFAULT_IMAGE;  
+        if($this->image){
+           return $this->getThumbUploadUrl('image', 'image'); 
+        }else{
+            if($this->category_id){
+                return Url::to('@web/fmarket/images/image-category/'.$this->mainCategory->id.".jpg", true);
+            }else{
+                return self::DEFAULT_IMAGE;
+            }
+        }
             
     }
     public function getMiniImageUrl() {

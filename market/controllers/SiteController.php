@@ -134,11 +134,11 @@ class SiteController extends Controller {
             $addwhere = ['not in','supp_org_id',$relationSupplier];
             }
         }
+        
         $product = CatalogBaseGoods::find()
                 ->where(['id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
                 ->andWhere($addwhere)
                 ->one();
-        
         if ($product) {
             return $this->render('/site/product', compact('product'));
         } else {

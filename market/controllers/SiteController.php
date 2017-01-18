@@ -801,7 +801,7 @@ class SiteController extends Controller {
         }else{
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = []; 
+            $filterNotIn = []; 
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                     ->select('supp_org_id')

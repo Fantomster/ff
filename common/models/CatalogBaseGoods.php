@@ -62,7 +62,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                     [
                         'class' => ImageUploadBehavior::className(),
                         'attribute' => 'image',
-                        'scenarios' => ['default'],
+                        'scenarios' => ['default', 'marketPlace'],
                         'path' => '@app/web/upload/temp/',
                         'url' => '/upload/temp/',
                         'thumbs' => [

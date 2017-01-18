@@ -83,14 +83,16 @@ class GoodsController extends Controller {
                 //var_dump($catalogBaseGoods);
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {
-                        $catalogBaseGoods->category_id = $categorys->sub2;
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('_success', ['message' => $message]);
                     }
                 } else {
                     if ($post && $catalogBaseGoods->validate()) {
-                        $catalogBaseGoods->category_id = $categorys->sub1 ? $categorys->sub2 : null;
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub1 ? $catalogBaseGoods->sub2 : null;
+                        $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('_success', ['message' => $message]);

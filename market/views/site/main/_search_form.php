@@ -52,7 +52,7 @@ if(empty($i)){
                         <div class="media-left media-middle">
                           <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_id']]);?>">
                             <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
-                                 src="<?=empty($arr['_source']['category_image'])?\common\models\ES\Product::putNoImage():$arr['_source']['category_image'] ?>">
+                                 src="<?=Url::to('@web/fmarket/images/image-category/'.$arr['_source']['category_id'].".jpg", true)?>">
                           </a>
                         </div>
                         <div class="media-body">
@@ -85,7 +85,9 @@ if(empty($i)){
                         <div class="media-left media-middle">
                           <a href="<?=Url::to(['/site/product', 'id' => $arr['_source']['product_id']]);?>">
                             <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
-                                 src="<?=empty($arr['_source']['product_image'])?\common\models\ES\Product::putNoImage():$arr['_source']['product_image'] ?>">
+                                 src="<?=empty($arr['_source']['product_image'])?
+                    Url::to('@web/fmarket/images/image-category/'.$arr['_source']['product_category_id'].".jpg", true)
+                    :$arr['_source']['product_image'] ?>">
                           </a>
                         </div>
                         <div class="media-body">

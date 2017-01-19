@@ -137,16 +137,15 @@ class EsController extends Controller
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
     
-    $sql = "select id,name from mp_category where parent is not null";
-    $model = \Yii::$app->db->createCommand($sql)->queryAll();
+    $model = \common\models\MpCategory::find()->where(['is not','parent','null'])->all();
     foreach ($model as $name) {
-        $category_id = $name['id'];
-        $category_image = '';
-        $category_name = $name['name'];
+        $category_id = $name->category->parent;
+        $category_sub_id = $name->category->id;
+        $category_name = $name->name;
         $category = new \common\models\ES\Category();
         $category->attributes = [
             "category_id" => $category_id,
-            "category_image" => $category_image,
+            "category_sub_id" => $category_sub_id,
             "category_name" => $category_name
         ];
         $category->save();

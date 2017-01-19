@@ -1,8 +1,27 @@
 <?php
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
-use yii\web\View;
 use yii\helpers\Url;
+use yii\web\View;
+
+$addAction = Url::to(["site/ajax-add-to-cart"]);
+
+$js = <<<JS
+        $(document).on("click", ".add-to-cart", function(e) {
+            e.preventDefault();
+            $.post(
+                "$addAction",
+                {product_id: $(this).data("product-id")}
+            ).done(function (result) {
+                if (result) {
+                    alert("Yes, we can!");
+                } else {
+                    alert("Fail!");
+                }
+            });
+        });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 
 <?php
@@ -46,7 +65,7 @@ $this->title = 'F-MARKET фильтр поиска';
                 </div>
                 <div class="col-md-12">
                   <div class="product-button">
-                    <a href="#" class="btn btn-100 btn-outline-success"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
+                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
                   </div>  
                 </div>
               </div>

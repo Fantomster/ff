@@ -157,7 +157,8 @@ class GoodsController extends Controller {
         $dataProviderCategory->query->andWhere(['category_id' => $id, 'supp_org_id' => $vendor_id]);
         
         $dataProviderEmpty = $searchModel->search();
-        $dataProviderEmpty->query->andWhere(['category_id' => null, 'supp_org_id' => $vendor_id]);
+        $dataProviderEmpty->query->andWhere(['supp_org_id' => $vendor_id]);
+        $dataProviderEmpty->query->andWhere('(category_id is null) OR (category_id = 0)');
         $subCategory = \common\models\MpCategory::findOne(['id' => $id]);
         $category = \common\models\MpCategory::findOne(['id' => $subCategory->parent]);
         

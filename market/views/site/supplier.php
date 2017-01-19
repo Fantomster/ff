@@ -3,6 +3,7 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
+use yii\widgets\Breadcrumbs;
 $delivery = $vendor->delivery;
 
 $inviteAction = Url::to(["site/ajax-invite-vendor"]);
@@ -67,7 +68,21 @@ font-family: "HelveticaBold",Arial,sans-serif;
 }
 </style>
 <div class="row">
-      <h3>Поставщики / <?= $vendor->name ?></h3>
+      <?=
+        Breadcrumbs::widget([
+            'options' => [
+                'class' => 'breadcrumb',
+            ],
+            'homeLink' => false,
+            'links' => [
+                [
+                    'label' => 'Все поставщики',
+                    'url' => ['/site/suppliers'],
+                ],
+                $vendor->name,
+            ],
+        ])
+      ?>
 </div>
 <div class="row">
   <div class="col-md-12 mp-block">

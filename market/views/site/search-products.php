@@ -3,14 +3,29 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
+use yii\widgets\Breadcrumbs;
 ?>
 
 <?php
 $this->title = 'F-MARKET результаты поиска';
 ?>
 <div class="row">
+    <div class="col-md-12 no-padding">
+      <?=
+        Breadcrumbs::widget([
+            'options' => [
+                'class' => 'breadcrumb',
+            ],
+            'homeLink' => false,
+            'links' => [
+                'Товаров найдено: ' . $count
+            ],
+        ])
+      ?>
+    </div>
+</div>
+<div class="row">
     <div class="col-md-12">
-      <h3>Продукты <small><?=$count?></small></h3>
      <div class="row" id="mp-product-block">
       <?php 
         foreach($products as $row){

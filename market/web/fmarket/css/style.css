@@ -835,3 +835,27 @@ border-color: #b0b0b0;
 .show-supp-info{
     margin-bottom:5px;
 }
+.noinfo {
+color: rgba(43,42,42,.3);
+}
+.breadcrumb{
+ background:none;
+ padding:0;
+ margin:24px 0 12px 0;
+ text-align:left
+}
+.breadcrumb a{
+    text-decoration: none;
+    color:#84bf76 !important;             
+}
+.breadcrumb a:hover{
+    text-decoration: underline;            
+}
+.icon-16{font-size: 16px;}
+.grey-link{
+text-decoration: none;
+    color:#3f3e3e;   
+}
+.grey-link:hover{
+    color:#84bf76; 
+}

@@ -51,12 +51,14 @@ $this->title = 'F-MARKET информация о товаре';
     .mp-product-image{
     object-fit: cover;
     width: 100%;
-    height: 160px;
-    padding: 15px 0px;    
+    height: 145px;
+    padding: 15px 0 0 0;    
     }   
     .mp-product-article{
     width:100%;
     display:inline-block;
+    border-radius:0 0 3px 3px;
+    font-size: 12px;
     background:#343435;
     color:#fff;
     padding:5px;
@@ -86,8 +88,8 @@ font-family: "HelveticaBold",Arial,sans-serif;
 }
 </style>
 <div class="row">
-  <div class="col-md-12">
-      <?=
+  <div class="col-md-12 no-padding">
+    <?=
     Breadcrumbs::widget([
         'options' => [
             'class' => 'breadcrumb',
@@ -112,7 +114,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             <div class="row">
                 <div class="col-md-12">
                     <h3><?= $product->product ?> 
-                        <a href="<?=Url::to(['/site/supplier', 'id' => $vendor->id]);?>">
+                        <a class="grey-link" href="<?=Url::to(['/site/supplier', 'id' => $vendor->id]);?>">
                             <small><?= $vendor->name ?></small>
                         </a>
                     </h3>
@@ -168,6 +170,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
                               <a href="#" class="btn btn-100 btn-outline-success invite-vendor" data-vendor-id="<?= $product->supp_org_id ?>">
+                                  <span class="fa fa-user-plus icon-16"></span>
                                   ДОБАВИТЬ ПОСТАВЩИКА
                               </a>
                             </div>
@@ -193,24 +196,24 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6"> 
-                    <h5><span class="title-param">Страна:</span> <?= $product->region ?></h5>   
-                    <h5><span class="title-param">Ед. измерения:</span> <?= $product->ed ?></h5>  
-                    <h5><span class="title-param">Вес:</span> <?= $product->weight ?></h5>   
-                    <h5><span class="title-param">Производитель:</span> <?= $product->brand ?></h5>   
-                    <h5><span class="title-param">Кратность поставки:</span> <?= $product->units ?></h5>   
+                    <h5><span class="title-param">Страна:</span> <?= empty($product->region) ? '<span class="noinfo">нет информации</span>':$product->region ?></h5>   
+                    <h5><span class="title-param">Ед. измерения:</span> <?= empty($product->ed) ? '<span class="noinfo">нет информации</span>':$product->ed ?></h5>  
+                    <h5><span class="title-param">Вес:</span> <?= empty($product->weight) ? '<span class="noinfo">нет информации</span>':$product->weight ?></h5>   
+                    <h5><span class="title-param">Производитель:</span> <?= empty($product->brend) ? '<span class="noinfo">нет информации</span>':$product->brend ?></h5>   
+                    <h5><span class="title-param">Кратность поставки:</span> <?= empty($product->units) ? '<span class="noinfo">нет информации</span>':$product->units ?></h5>   
                 </div>
                 <div class="col-md-6">
                     <h5><span class="title-param">Стоимость доставки:</span> <?= $delivery->delivery_charge ?> руб.</h5>    
                     <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> руб.</h5> 
                     <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> руб.</h5>   
-                    <h5><span class="title-param">Адрес самовывоза:</span> <?= '' ?></h5>   
+                    <h5><span class="title-param">Адрес самовывоза:</span> <?= '<span class="noinfo">нет информации</span>' ?></h5>   
                     <h5><span class="title-param">Дни доставки:</span> <?= $delivery->getDaysString() ?></h5>  
                 </div>
                 <div class="col-md-12">
                     <h4>КОММЕНТАРИЙ</h4>  
                 </div>
                 <div class="col-md-12" style="padding-bottom:10px;">
-                   <?= $product->note ?>  
+                   <?= empty($product->note) ? '<span class="noinfo">нет информации</span>':$product->note ?>  
                 </div>
             </div>
         </div>

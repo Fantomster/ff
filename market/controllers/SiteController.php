@@ -387,8 +387,9 @@ class SiteController extends Controller {
                 ->where(['supp_org_id' => $id, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
                 ->andWhere($addwhere)
                 ->limit(12)->all();
+        $vendor = \common\models\Organization::find()->where(['id'=>$id])->one();;
         if ($products) {
-            return $this->render('/site/supplier-products', compact('products','id','productsCount'));
+            return $this->render('/site/supplier-products', compact('products','id','vendor','productsCount'));
             
         } else {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
@@ -531,9 +532,10 @@ class SiteController extends Controller {
                   ->where(['market_place'=>1,'category_id'=>$id])
                   ->andWhere($addwhere)
                   ->limit(12)
-                  ->all();         
+                  ->all();   
+          $category = \common\models\MpCategory::find()->where(['id'=>$id])->one();
           if ($products) {
-                return $this->render('category', compact('products','id','count'));
+                return $this->render('category', compact('products','id','count','category'));
             } else {
                 throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');    
             }

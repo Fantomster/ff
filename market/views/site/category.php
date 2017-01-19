@@ -3,6 +3,7 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use yii\widgets\Breadcrumbs;
 
 $addAction = Url::to(["site/ajax-add-to-cart"]);
 
@@ -29,8 +30,23 @@ $this->title = 'F-MARKET фильтр поиска';
 
 ?>
 <div class="row">
+    <div class="col-md-12 no-padding">
+      <?=
+        Breadcrumbs::widget([
+            'options' => [
+                'class' => 'breadcrumb',
+            ],
+            'homeLink' => false,
+            'links' => [
+                \common\models\MpCategory::getCategory($category->parent),
+                \common\models\MpCategory::getCategory($category->id),
+            ],
+        ])
+      ?>
+    </div>
+</div>
+<div class="row">
   <div class="col-md-12">
-      <h3>Продукты категории <small><?=\common\models\MpCategory::getCategory($id)?></small></h3>
      <div class="row" id="mp-product-block">
       <?php
         foreach($products as $row){

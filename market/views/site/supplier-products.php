@@ -3,6 +3,7 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
+use yii\widgets\Breadcrumbs;
 
 $addAction = Url::to(["site/ajax-add-to-cart"]);
 
@@ -28,8 +29,30 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 $this->title = 'F-MARKET Продукты поставщика';
 ?>
 <div class="row">
+    <div class="col-md-12 no-padding">
+        <?=
+        Breadcrumbs::widget([
+            'options' => [
+                'class' => 'breadcrumb',
+            ],
+            'homeLink' => false,
+            'links' => [
+                [
+                    'label' => 'Все поставщики',
+                    'url' => ['/site/suppliers'],
+                ],
+                [
+                    'label' => $vendor->name,
+                    'url' => ['/site/supplier', 'id' => $vendor->id],
+                ],
+                'Каталог',
+            ],
+        ])
+      ?>
+    </div>
+</div>
+<div class="row">
     <div class="col-md-12">
-      <h3>Продукты <small></small></h3>
      <div class="row" id="mp-product-block">
       <?php
         foreach($products as $row){

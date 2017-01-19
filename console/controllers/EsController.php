@@ -137,7 +137,7 @@ class EsController extends Controller
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
     
-    $model = \common\models\mpCategory::find()->where(['is not','parent','null'])->all();
+    $model = \common\models\MpCategory::find()->where(['is not','parent','null'])->all();
     foreach ($model as $name) {
         $category_id = $name->category->parent;
         $category_sub_id = $name->category->id;

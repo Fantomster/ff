@@ -122,8 +122,36 @@ font-family: "HelveticaBold",Arial,sans-serif;
               <h2 style="color:#dfdfdf;padding-bottom:15px"><?=floatval($product->price); ?> <small>руб.</small></h2>
               <?php } ?>
                 </div>
-                <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать телефон</a></div>
-                <div class="col-xs-6 col-sm-6 col-md-6"><a>Показать E-mail</a></div>
+                <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
+                    <a id="supp-phone">Показать телефон</a>
+                </div>
+                
+                <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
+                    <a id="supp-email">Показать E-mail</a>
+                </div>
+                <?php
+if(!\Yii::$app->user->isGuest){
+$js = <<<JS
+ 
+$('#supp-phone').click(function(e){
+    $(this).html('$vendor->phone &nbsp;').css('text-decoration','none'); 
+   })   
+$('#supp-email').click(function(e){
+    $(this).html('$vendor->email &nbsp;').css('text-decoration','none'); 
+   })
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+
+}else{
+                    
+$js2 = <<<JS
+$('#supp-phone,#supp-email').click(function(e){
+alert('Необходимо зарегистрироваться в системе f-keeper');  
+})
+JS;
+$this->registerJs($js2, \yii\web\View::POS_READY);
+}
+                ?>
                 <div class="col-md-6 mp-block-left">
                     <div class="row">
                         <div class="col-md-12 no-padding">

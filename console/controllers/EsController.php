@@ -42,7 +42,7 @@ class EsController extends Controller
                             "analyzer" : "ru",
                             "term_vector" : "with_positions_offsets"
                         },
-                        "category_image" : {"type" : "string"}
+                        "category_sub_id" : {"type" : "long"}
                 }
             }
     }\'
@@ -87,7 +87,8 @@ class EsController extends Controller
                         "product_category_sub_id" : {"type" : "long"},
                         "product_category_name" : {"type" : "string"},
                         "product_category_sub_name" : {"type" : "string"},
-                        "product_created_at" : {"type" : "string"}
+                        "product_created_at" : {"type" : "string"},
+                        "product_show_price" : {"type" : "long"}
                 }
             }
     }\'
@@ -137,10 +138,10 @@ class EsController extends Controller
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
     
-    $model = \common\models\MpCategory::find()->where(['is not','parent','null'])->all();
+    $model = \common\models\MpCategory::find()->where('parent is not null')->all();
     foreach ($model as $name) {
-        $category_id = $name->category->parent;
-        $category_sub_id = $name->category->id;
+        $category_id = $name->parent;
+        $category_sub_id = $name->id;
         $category_name = $name->name;
         $category = new \common\models\ES\Category();
         $category->attributes = [
@@ -150,6 +151,7 @@ class EsController extends Controller
         ];
         $category->save();
     }
+    //var_dump($model);
     $url = 'curl -XPOST \'http://localhost:9200/category/_refresh\'';
     $res = shell_exec($url);
     }
@@ -172,6 +174,7 @@ class EsController extends Controller
         $product_category_sub_id = $name->category->id; 
         $product_category_sub_name = $name->category->name;
         $product_created_at = $name->created_at;
+        $product_show_price = $name->mp_show_price;
         $product = new \common\models\ES\Product();
         $product->attributes = [
             "product_id" => $product_id,
@@ -184,7 +187,8 @@ class EsController extends Controller
             "product_category_name" => $product_category_name,
             "product_category_sub_id" => $product_category_sub_id,
             "product_category_sub_name" => $product_category_sub_name,
-            "product_created_at"  => $product_created_at
+            "product_created_at"  => $product_created_at,
+            "product_show_price" => $product_show_price,
         ];
         $product->save();
         \common\models\CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $name->id]);

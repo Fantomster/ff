@@ -102,7 +102,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     <div class="row">
       <div class="col-md-12 min-padding">
         <h3 class="pull-left">Поставщики</h3>  
-        <a href="<?=Url::to(['/site/suppliers']);?>" class="btn btn-success pull-right" style="margin:10px 0;">ВСЕ ПОСТАВЩИКИ</a>
+        <a href="<?=Url::to(['/site/suppliers']);?>" class="pull-right text-success all-supplier-view">Все поставщики</a>
       </div>
     </div>
     <div class="row" id="supplier-block">

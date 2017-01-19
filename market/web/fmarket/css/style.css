@@ -16,7 +16,7 @@
     url("../fonts/HelveticaThin/HelveticaThin.woff") format("woff"),
     url("../fonts/HelveticaThin/HelveticaThin.ttf") format("truetype");
     font-style: normal;
-    font-weight: 300;
+    font-weight: 200;
 }
 /* font-family: "HelveticaBold"; */
 @font-face {
@@ -597,13 +597,13 @@ padding: 0px 15px
 }
 .product-category h5{
 font-size: 14px;
-color:#898989;
+color:rgba(63,62,62,.7);
 white-space: nowrap; /* Запрещаем перенос строк */
     overflow: hidden; /* Обрезаем все, что не помещается в область */
     text-overflow: ellipsis; /* Добавляем многоточие */
 }
 .product-company{
-padding: 0px 15px 15px 15px;
+padding: 0px 15px 5px 15px;
 }
 .product-company h5{
 font-size: 14px;
@@ -783,4 +783,55 @@ border-color: #b0b0b0;
 color: #b0b0b0;
 background: #efefef;
 border-color: #b0b0b0;
+}
+.product-title a{
+    text-decoration: none;
+    color:#3f3e3e !important;
+}
+.product-title a h3:hover{
+    text-decoration: none;
+    color:#84bf76;
+}
+.supplier-title a{
+    text-decoration: none;
+    color:#3f3e3e !important;
+}
+.supplier-title a h3:hover{
+    text-decoration: none;
+    color:#84bf76;
+}
+.product-company a{
+    text-decoration: none;
+    color:#3f3e3e !important;
+}
+.product-company a h5:hover{
+    text-decoration: none;
+    color:#84bf76;
+}
+.product-button a .icon-shopping-cart{
+    font-size: 16px;
+}
+#product-more, #supplier-more {
+    border: none;
+    padding: 13px 0 8px 0;
+    box-shadow: 0px 1px 3px rgba(9, 12, 17, 0.2);
+}
+.all-supplier-view{
+    margin:22px 0;
+    font-size: 16px;
+    text-decoration: underline;
+}
+.all-supplier-view:hover{
+    text-decoration: none;
+}
+.invite-vendor{
+  padding: 12px 0 6px 0;  
+}
+.show-supp-info a{
+   text-decoration: underline;
+    color:#84bf76; 
+    cursor:pointer
+}
+.show-supp-info{
+    margin-bottom:5px;
 }

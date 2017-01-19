@@ -50,13 +50,13 @@ if(empty($i)){
                     ?>
                       <div class="media media-block animated fadeInUp" >
                         <div class="media-left media-middle">
-                          <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_id']]);?>">
+                          <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_sub_id']]);?>">
                             <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
                                  src="<?=Url::to('@web/fmarket/images/image-category/'.$arr['_source']['category_id'].".jpg", true)?>">
                           </a>
                         </div>
                         <div class="media-body">
-                          <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_id']]);?>">
+                          <a href="<?=Url::to(['/site/category', 'id' => $arr['_source']['category_sub_id']]);?>">
                           <h5 class="media-heading"><?=$arr['_source']['category_name']?></h5>    
                           </a>
                         </div>

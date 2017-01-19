@@ -33,7 +33,7 @@ if (!Yii::$app->user->isGuest) {
                         <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                             <li>
                                 <a href="http://f-keeper.ru/index.php?r=order/checkout">
-                                    КОРЗИНА<span class="badge cartCount"><?= $organization->getCartCount() ?></span>
+                                    КОРЗИНА <sup><span class="badge cartCount"><?= $organization->getCartCount() ?></span></sup>
                                 </a>
                             </li>
                         <?php } ?>

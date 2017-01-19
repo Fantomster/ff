@@ -824,3 +824,14 @@ border-color: #b0b0b0;
 .all-supplier-view:hover{
     text-decoration: none;
 }
+.invite-vendor{
+  padding: 12px 0 6px 0;  
+}
+.show-supp-info a{
+   text-decoration: underline;
+    color:#84bf76; 
+    cursor:pointer
+}
+.show-supp-info{
+    margin-bottom:5px;
+}

@@ -45,6 +45,7 @@ class CronController extends Controller {
                 $product_category_name = \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category->parent])->one()->name; 
                 $product_category_sub_id = $catalogBaseGoods->category->id; 
                 $product_category_sub_name = $catalogBaseGoods->category->name;
+                $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
                 
                 if(\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()){
@@ -60,6 +61,7 @@ class CronController extends Controller {
                     "product_category_name" => $product_category_name,
                     "product_category_sub_id" => $product_category_sub_id,
                     "product_category_sub_name" => $product_category_sub_name,
+                    "product_show_price" => $product_show_price,
                     "product_created_at"  => $product_created_at
                 ];
                 $es_product->save();
@@ -77,6 +79,7 @@ class CronController extends Controller {
                     "product_category_name" => $product_category_name,
                     "product_category_sub_id" => $product_category_sub_id,
                     "product_category_sub_name" => $product_category_sub_name,
+                    "product_show_price" => $product_show_price,
                     "product_created_at"  => $product_created_at
                 ];
                 $es_product->save();
@@ -124,6 +127,7 @@ class CronController extends Controller {
                 $product_category_name = \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category->parent])->one()->name; 
                 $product_category_sub_id = $catalogBaseGoods->category->id; 
                 $product_category_sub_name = $catalogBaseGoods->category->name;
+                $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
                 
                 if(\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()){
@@ -139,6 +143,7 @@ class CronController extends Controller {
                     "product_category_name" => $product_category_name,
                     "product_category_sub_id" => $product_category_sub_id,
                     "product_category_sub_name" => $product_category_sub_name,
+                    "product_show_price" => $product_show_price,
                     "product_created_at"  => $product_created_at
                 ];
                 $es_product->save();
@@ -156,6 +161,7 @@ class CronController extends Controller {
                     "product_category_name" => $product_category_name,
                     "product_category_sub_id" => $product_category_sub_id,
                     "product_category_sub_name" => $product_category_sub_name,
+                    "product_show_price" => $product_show_price,
                     "product_created_at"  => $product_created_at
                 ];
                 $es_product->save();

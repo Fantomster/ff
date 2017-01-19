@@ -29,10 +29,12 @@ $('#backTop').backTop({
     'speed' : 500,
     'color' : 'white',
 });
-$('#search').on("keyup", function () {
-    var searchText = $(this).val();
-    console.log(searchText)  
-
+        
+var timeOutVar;
+$('#search').on('keyup', function() {
+var searchText = $(this).val();        
+clearTimeout(timeOutVar);
+    timeOutVar= setTimeout(function(){ 
     $.ajax({
         url: "index.php?r=site/view",
         type: "POST",
@@ -41,8 +43,10 @@ $('#search').on("keyup", function () {
         success: function(response) {
             $('#result').html(response);        
         }
-    });
+    });               
+   }, 500);
 });
+
 $(document).ready(function(){
         $(document).on('focusin','#search', function(e){
                 var obj = $('#search-result');

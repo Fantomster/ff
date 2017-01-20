@@ -717,7 +717,8 @@ class SiteController extends Controller {
     }
 
     public function actionAjaxAddToCart() {
-
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;
 
@@ -733,14 +734,14 @@ class SiteController extends Controller {
         if ($post && $post['product_id']) {
             $product = CatalogBaseGoods::findOne(['id' => $post['product_id']]);
             if (empty($product)) {
-                return false;
+                return $this->successNotify("Продукт не найден!");
             }
             $relation = RelationSuppRest::findOne(['supp_org_id' => $product->vendor->id, 'rest_org_id' => $client->id]);
             if ($relation && ($relation->invite === RelationSuppRest::INVITE_ON)) {
-                return false;
+                return $this->successNotify("Вы уже имеете каталог этого поставщика!");
             }
         } else {
-            return false;
+            return $this->successNotify("Неизвестная ошибка!");
         }
 
         $isNewOrder = true;
@@ -785,16 +786,17 @@ class SiteController extends Controller {
         }
         $this->sendCartChange($client, $cartCount);
 
-        return true;
+        return $this->successNotify("Продукт добавлен в корзину!");
     }
     
     public function actionAjaxInviteVendor() {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;
 
         if ($client->type_id !== Organization::TYPE_RESTAURANT) {
-            return false;
+            return $this->successNotify("Опомнитесь, вы и есть поставщик!");
         }
 
         $post = Yii::$app->request->post();
@@ -802,19 +804,19 @@ class SiteController extends Controller {
         if ($post && $post['vendor_id']) {
             $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
             if (empty($vendor)) {
-                return false;
+                return $this->successNotify("Поставщик не найден!");
             }
             $relation = RelationSuppRest::findOne(['supp_org_id' => $vendor->id, 'rest_org_id' => $client->id]);
             if ($relation) {
-                return false;
+                return $this->successNotify("Запрос поставщику уже направлен!");
             }
         } else {
-            return false;
+            return $this->successNotify("Неизвестная ошибка!");
         }
 
         $client->inviteVendor($vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
 
-        return true;
+        return $this->successNotify("Запрос поставщику отправлен!");
     }
 
     private function sendCartChange($client, $cartCount) {
@@ -829,5 +831,37 @@ class SiteController extends Controller {
         }
 
         return true;
+    }
+
+    private function successNotify($title) {
+        return [
+            'success' => true,
+            'growl' => [
+                'options' => [
+                ],
+                'settings' => [
+                    'element' => 'body',
+                    'type' => $title,
+                    'allow_dismiss' => true,
+                    'placement' => [
+                        'from' => 'top',
+                        'align' => 'center',
+                    ],
+                    'delay' => 1500,
+                    'animate' => [
+                        'enter' => 'animated fadeInDown',
+                        'exit' => 'animated fadeOutUp',
+                    ],
+                    'offset' => 75,
+                    'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
+                    . '<div class="modal-content">'
+                    . '<div class="modal-header">'
+                    . '<h4 class="modal-title">{0}</h4></div>'
+                    . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
+                    . '<span class="glyphicon glyphicon-thumbs-up"></span>'
+                    . '</div></div></div>',
+                ]
+            ]
+        ];
     }
 }

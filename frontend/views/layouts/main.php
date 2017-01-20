@@ -115,8 +115,8 @@ yii\widgets\Menu::widget([
         ['label' => 'Главная', 'url' => ['/site/index']],
         ['label' => 'Новости', 'url' => 'http://blog.f-keeper.ru?news'],
         ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
-        ['label' => 'о компании', 'url' => ['/site/about']],
-        ['label' => 'контакты', 'url' => ['/site/contacts']],
+        ['label' => 'О компании', 'url' => ['/site/about']],
+        ['label' => 'Контакты', 'url' => ['/site/contacts']],
     ]
 ])
 ?>

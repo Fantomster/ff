@@ -9,6 +9,41 @@ if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
 }
+
+$addAction = Url::to(["site/ajax-add-to-cart"]);
+$inviteAction = Url::to(["site/ajax-invite-vendor"]);
+
+$js = <<<JS
+        $(document).on("click", ".add-to-cart", function(e) {
+            e.preventDefault();
+            $.post(
+                "$addAction",
+                {product_id: $(this).data("product-id")}
+            ).done(function (result) {
+//                if (result) {
+//                    alert("Yes, we can!");
+                    $.notify(result.growl.options, result.growl.settings);
+//                } else {
+//                    alert("Fail!");
+//                }
+            });
+        });
+        $(document).on("click", ".invite-vendor", function(e) {
+            e.preventDefault();
+            $.post(
+                "$inviteAction",
+                {vendor_id: $(this).data("vendor-id")}
+            ).done(function (result) {
+//                if (result) {
+//                    alert("Invited!");
+                    $.notify(result.growl.options, result.growl.settings);
+//                } else {
+//                    alert("Fail!");
+//                }
+            });
+        });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 <section>
     <nav class="navbar navbar-inverse navbar-static-top example6 shadow-bottom">

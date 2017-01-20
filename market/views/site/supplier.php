@@ -4,28 +4,8 @@ use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+
 $delivery = $vendor->delivery;
-
-$inviteAction = Url::to(["site/ajax-invite-vendor"]);
-
-$this->title = 'F-MARKET главная';
-
-$js = <<<JS
-        $(document).on("click", ".invite-vendor", function(e) {
-            e.preventDefault();
-            $.post(
-                "$inviteAction",
-                {vendor_id: $(this).data("vendor-id")}
-            ).done(function (result) {
-                if (result) {
-                    alert("Invited!");
-                } else {
-                    alert("Fail!");
-                }
-            });
-        });
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 
 <?php

@@ -5,8 +5,6 @@ use yii\helpers\Url;
 use yii\web\View;
 use common\models\Organization;
 
-kartik\growl\GrowlAsset::register($this);
-
 if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;

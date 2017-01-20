@@ -40,8 +40,13 @@ $customJs = <<< JS
 JS;
 $this->registerJs($customJs, View::POS_READY);
 
+$dataProviderCategory->pagination->pageParam = 'category-page';
+$dataProviderCategory->sort->sortParam = 'category-sort';
+
+$dataProviderEmpty->pagination->pageParam = 'empty-page';
+$dataProviderEmpty->sort->sortParam = 'empty-sort';
 ?>
-<?php Pjax::begin(['enablePushState' => false, 'id' => 'categories', 'timeout' => 5000]); ?>
+<?php Pjax::begin(['id' => 'categories', 'timeout' => 5000]); ?>
 <h2><?= $vendor->name ?></h2>
 <div class="row">
     <div class="col-md-6">

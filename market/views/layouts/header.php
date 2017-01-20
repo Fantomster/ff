@@ -15,9 +15,6 @@ if (!Yii::$app->user->isGuest) {
 $addAction = Url::to(["site/ajax-add-to-cart"]);
 $inviteAction = Url::to(["site/ajax-invite-vendor"]);
 
-$vendor = $product->vendor;
-$delivery = $vendor->delivery;
-
 $js = <<<JS
         $(document).on("click", ".add-to-cart", function(e) {
             e.preventDefault();

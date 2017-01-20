@@ -717,7 +717,8 @@ class SiteController extends Controller {
     }
 
     public function actionAjaxAddToCart() {
-
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;
 
@@ -789,6 +790,7 @@ class SiteController extends Controller {
     }
     
     public function actionAjaxInviteVendor() {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         
         $currentUser = Yii::$app->user->identity;
         $client = $currentUser->organization;

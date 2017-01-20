@@ -1,10 +1,35 @@
 <?php
 use yii\helpers\Html;
 use yii\web\View;
-use yii\widgets\Breadcrumbs;
-use common\widgets\Alert;
+use yii\helpers\Url;
 
+kartik\growl\GrowlAsset::register($this);
 market\assets\AppAsset::register($this);
+
+$addAction = Url::to(["site/ajax-add-to-cart"]);
+$inviteAction = Url::to(["site/ajax-invite-vendor"]);
+
+$js = <<<JS
+        $(document).on("click", ".add-to-cart", function(e) {
+            e.preventDefault();
+            $.post(
+                "$addAction",
+                {product_id: $(this).data("product-id")}
+            ).done(function (result) {
+                    $.notify(result.growl.options, result.growl.settings);
+            });
+        });
+        $(document).on("click", ".invite-vendor", function(e) {
+            e.preventDefault();
+            $.post(
+                "$inviteAction",
+                {vendor_id: $(this).data("vendor-id")}
+            ).done(function (result) {
+                    $.notify(result.growl.options, result.growl.settings);
+            });
+        });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>

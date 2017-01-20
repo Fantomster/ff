@@ -4,25 +4,6 @@ use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
-
-$addAction = Url::to(["site/ajax-add-to-cart"]);
-
-$js = <<<JS
-        $(document).on("click", ".add-to-cart", function(e) {
-            e.preventDefault();
-            $.post(
-                "$addAction",
-                {product_id: $(this).data("product-id")}
-            ).done(function (result) {
-                if (result) {
-                    alert("Yes, we can!");
-                } else {
-                    alert("Fail!");
-                }
-            });
-        });
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 
 <?php

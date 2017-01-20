@@ -5,43 +5,8 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Breadcrumbs;
 
-$addAction = Url::to(["site/ajax-add-to-cart"]);
-$inviteAction = Url::to(["site/ajax-invite-vendor"]);
-
 $vendor = $product->vendor;
 $delivery = $vendor->delivery;
-
-$this->title = 'F-MARKET главная';
-
-$js = <<<JS
-        $(document).on("click", ".add-to-cart", function(e) {
-            e.preventDefault();
-            $.post(
-                "$addAction",
-                {product_id: $(this).data("product-id")}
-            ).done(function (result) {
-                if (result) {
-                    alert("Yes, we can!");
-                } else {
-                    alert("Fail!");
-                }
-            });
-        });
-        $(document).on("click", ".invite-vendor", function(e) {
-            e.preventDefault();
-            $.post(
-                "$inviteAction",
-                {vendor_id: $(this).data("vendor-id")}
-            ).done(function (result) {
-                if (result) {
-                    alert("Invited!");
-                } else {
-                    alert("Fail!");
-                }
-            });
-        });
-JS;
-$this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 
 <?php

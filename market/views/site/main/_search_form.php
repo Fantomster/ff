@@ -94,7 +94,11 @@ if(empty($i)){
                           <a href="<?=Url::to(['/site/product', 'id' => $arr['_source']['product_id']]);?>">
                           <h5 class="media-heading"><?=$arr['_source']['product_name']?></h5>
                           </a>
-                          <h5 class="media-price"><?=$arr['_source']['product_price']?></h5>                    
+                            <?php if (empty($arr['_source']['product_show_price'])){ ?>
+                            <h5 class="media-price" style="color: #dfdfdf">договорная цена</h5>
+                            <?php } else {?>
+                            <h5 class="media-price"><?=floatval($arr['_source']['product_price']); ?> <small>руб.</small></h5>
+                            <?php } ?>                 
                         </div>
                       </div>
                     <?php

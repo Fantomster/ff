@@ -29,6 +29,7 @@ class Product extends ActiveRecord
             "product_category_sub_id",
             "product_category_name",
             "product_category_sub_name",
+            "product_show_price",
             "product_created_at"    
           ];
       }

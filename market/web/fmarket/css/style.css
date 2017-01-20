@@ -859,3 +859,10 @@ text-decoration: none;
 .grey-link:hover{
     color:#84bf76; 
 }
+.modal-header{
+    background:#84bf76;
+    color:#fff;
+    text-transform: uppercase;
+    border-bottom: 0;
+    text-align:center;
+}

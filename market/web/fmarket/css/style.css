@@ -395,7 +395,6 @@ display: block; }
 .sub-cat h3 {
     font-size: 14px;
     padding: 17px 13px 17px 13px;
-    //border-bottom: 1px solid #c3c3c3;
     font-weight: 600;
 }
 .sub-cat h3 i {

@@ -1,13 +1,20 @@
 var app = require('express')();
-//var server = require('http').Server(app);
+var server;// = require('http').Server(app);
 
-var sslOptions = require('./sslOptions');
+var sslOptions;// = require('./sslOptions');
 
-var server = require('https').Server(sslOptions, app);
+var server;// = require('https').Server(sslOptions, app);
+
+try {
+    sslOptions = require('./sslOptions');
+    server = require('https').Server(sslOptions, app);
+} catch (ex) {
+    server = require('http').Server(app);
+}
+
 var io = require('socket.io')(server);
 var redis = require('redis');
 var redisOptions = require('./redisOptions');
-
 
 server.listen(8890);
 
@@ -21,7 +28,7 @@ require('socketio-auth')(io, {
 
 function authenticate(socket, data, callback) {
     //console.log("trying to authenticate, userid:" + data.userid + ", access_token:" + data.token);
-    checkUser(data, function(result) {
+    checkUser(data, function (result) {
         return callback(null, result);
     });
 }
@@ -50,21 +57,21 @@ function checkUser(data, callback) {
 
         console.log('connected as id ' + connection.threadId);
 
-        connection.query("SELECT * FROM user WHERE (id = ?) AND (access_token = ?)", [data.userid, data.token], function(err, result) {
+        connection.query("SELECT * FROM user WHERE (id = ?) AND (access_token = ?)", [data.userid, data.token], function (err, result) {
             connection.release();
             if (!err && (result.length > 0)) {
                 //console.log("Authentication success for userid: " + data.userid);
                 return callback(true);
-            } else if(!err) {
+            } else if (!err) {
                 //console.log("Authentication fail for userid: " + data.userid);
                 return callback(false)
             }
         });
-        
+
         connection.on('error', function (err) {
             //console.log("Error in connection database");
             return callback(false);
         });
-        
+
     });
 }

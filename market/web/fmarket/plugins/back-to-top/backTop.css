@@ -1,0 +1,18 @@
+/*Main stylesheet for Backtop jQuery Plugin */
+#backTop{
+    width:35px;
+    height:35px;
+    padding:10px;
+    text-indent:-9999px;
+    cursor:pointer;
+    z-index:999999999;
+	display:none;
+	box-sizing:content-box;
+	-webkit-box-sizing:content-box;
+}
+
+#backTop.white{
+     background:url(uparr-48-b.png) no-repeat center center rgba(255,255,255,0.9); 
+     border:1px solid #fff;
+}
+

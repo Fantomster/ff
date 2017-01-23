@@ -56,9 +56,9 @@ switch ($order->status) {
 <p class="text-left m-b-sm"><b>Дата создания заказа:</b><br>
     <?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>
 <p class="text-left m-b-sm"><b>Стоимость доставки:</b><br>
-    <?= $order->vendor->delivery->delivery_charge ?></p>
+    <?= $order->vendor->delivery->delivery_charge ?> руб</p>
 <p class="text-left m-b-sm"><b>Стоимость заказа:</b><br>
-    <?= $order->total_price ?></p>
+    <?= $order->total_price ?> руб</p>
 <div class="row">
     <div class="col-md-12"><?= $statusInfo ?></div>
 </div>

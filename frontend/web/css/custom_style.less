@@ -530,7 +530,12 @@ label {
 .datepicker table tr td.active.active:hover {
     background-color: @dark-green-fk;
 }
-
+.datepicker table tr td.today {
+    background-color: @light-green-fk;
+}
+.datepicker table tr td.today:hover {
+    background-color: @dark-green-fk;
+}
 a {
     color: @dark-green-fk;
 }
@@ -880,7 +885,7 @@ a:hover, a:active, a:focus {
     }
 }
 .checkout-action {
-    width: 290px;
+    width: 295px;
 }
 @media (max-width: 1225px) {
     .hidden-fk {
@@ -945,5 +950,30 @@ a:hover, a:active, a:focus {
     .table {
         margin-bottom: 0 !important;
         margin-top: 0 !important;
+    }
+}
+.reorder i {
+    font-size: 18px;
+}
+.org-type {
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 0.09em;
+}
+.view-data {
+    height: 31px;
+}
+.order-total {
+    margin-top: 10px;
+    span {
+        font-weight: bold;
+        font-size: 18px;
+    }
+}
+.current-catalog {
+    color: @gray-fk;
+    text-decoration: underline;
+    &:hover {
+        text-decoration: none;
     }
 }

@@ -80,7 +80,7 @@ class ClientController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
 
-        if ($organization->load(Yii::$app->request->get())) {
+        if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_VENDOR;
@@ -372,6 +372,7 @@ class ClientController extends DefaultController {
                         \Yii::$app->db->createCommand($sql)->execute();
                         $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
                     } else {
+                       //Поставщик зарегистрирован, но не авторизован
                        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
                        if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
                            $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->one();
@@ -424,7 +425,7 @@ class ClientController extends DefaultController {
                                 "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
                                 . "`units`,`price`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
                                 . $lastInsert_base_cat_id . ","
-                                . "0,"
+                                . "NULL,"
                                 . $get_supp_org_id . ","
                                 . ":article,"
                                 . ":product,"
@@ -529,17 +530,20 @@ class ClientController extends DefaultController {
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
-
                 if ($check['eventType'] == 6) {
-
                     $email = $user->email;
                     $fio = $profile->full_name;
                     $org = $organization->name;
                     $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
+                    if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
                     $supp_base_cat_id = Catalog::find()->where(['supp_org_id'=>$get_supp_org_id, 'type'=>1])->one()->id;
                     $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`,`cat_id`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1,$supp_base_cat_id)";
                     \Yii::$app->db->createCommand($sql)->execute();
+                    }else{
+                    $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1)";
+                    \Yii::$app->db->createCommand($sql)->execute();    
+                    }
                     if(!empty($categorys)){
                         foreach ($categorys as $arrCategorys) {
                             $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";

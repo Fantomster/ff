@@ -204,7 +204,7 @@ label {
 			<div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
                                 <label class="control-label" for="dynamicmodel-sub1">Категория товара</label>
                             <?php
-                            echo $form->field($categorys, 'sub1')->widget(Select2::classname(), [
+                            echo $form->field($catalogBaseGoods, 'sub1')->widget(Select2::classname(), [
                                 //'model'=>$categorys->sub1,
                                 'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(),'id', 'name'),
                                 'options' => ['placeholder' => 'Выберите...'],
@@ -215,14 +215,14 @@ label {
                                 ],
                             ])->label(false);
                             echo Html::hiddenInput('catalogBaseGoods_id1', $catalogBaseGoods->category_id, ['id'=>'catalogBaseGoods_id1']);
-                            echo Html::hiddenInput('input-type-2', $categorys->sub2, ['id'=>'input-type-2']);
+                            echo Html::hiddenInput('input-type-2', $catalogBaseGoods->sub2, ['id'=>'input-type-2']);
                             ?>
                             <?php
-                            echo $form->field($categorys, 'sub2')->widget(DepDrop::classname(), [
+                            echo $form->field($catalogBaseGoods, 'sub2')->widget(DepDrop::classname(), [
                                'options' => [],
                                'type' => DepDrop::TYPE_SELECT2,
                                'select2Options'=>[
-                                    'model'=>$categorys->sub2,
+                                   // 'model'=>$catalogBaseGoods->sub2,
                                     'theme' => "default",
                                     //'hideSearch' => true,
                                     'pluginOptions' => [
@@ -230,9 +230,9 @@ label {
                                         ],
                                     ],
                                 'pluginOptions'=>[
-                                    'depends'=>['dynamicmodel-sub1'],
+                                    'depends'=>['catalogbasegoods-sub1'],
                                     'placeholder' => false,
-                                    'url' => Url::to(['get-sub-cat']),
+                                    'url' => Url::to(['goods/get-sub-cat']),
                                     'loadingText' => 'Загрузка...',
                                     'initialize' => true,
                                     //'initDepends'=>['dynamicmodel-sub2'],

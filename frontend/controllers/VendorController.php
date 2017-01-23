@@ -79,7 +79,7 @@ class VendorController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
 
-        if ($organization->load(Yii::$app->request->get())) {
+        if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_CATALOG;
@@ -288,6 +288,7 @@ class VendorController extends DefaultController {
             }
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+            $arrEd = \yii\helpers\ArrayHelper::getColumn(\common\models\MpEd::find()->all(), 'name');
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -295,7 +296,6 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
-                $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
                     return $result;
@@ -316,12 +316,10 @@ class VendorController extends DefaultController {
                     return $result;
                     exit;
                 }
-                if (!empty($category_name)) {
-                    if (!Category::find()->where(['name' => $category_name])->exists()) {
-                        $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Ошибка в поле <strong>Категория</strong>']];
-                        return $result;
-                        exit;
-                    }
+                if(!in_array($ed, $arrEd)){
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверная <strong>Единица измерения</strong> товара']];
+                    return $result;
+                    exit;
                 }
                 $price = str_replace(',', '.', $price);
 
@@ -345,14 +343,8 @@ class VendorController extends DefaultController {
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
                 $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
-                $category_name = htmlspecialchars(trim($arrCatalogs['dataItem']['category']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
-                if (empty($category_name)) {
-                    $category_name = 0;
-                } else {
-                    //$category_name = 0;
-                    $category_name = empty(Category::find()->where(["name" => $category_name])->one()->id) ? 0 : Category::find()->where(["name" => $category_name])->one()->id;
-                }
+
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $price = str_replace(',', '.', $price);
                 if (substr($price, -3, 1) == '.') {
@@ -372,7 +364,7 @@ class VendorController extends DefaultController {
                         . ":product,"
                         . ":units,"
                         . ":price,"
-                        . ":category_id,"
+                        . "NULL,"
                         . ":note,"
                         . ":ed,"
                         . CatalogBaseGoods::STATUS_ON . ","
@@ -384,7 +376,6 @@ class VendorController extends DefaultController {
                 $command->bindParam(":product", $product, \PDO::PARAM_STR);
                 $command->bindParam(":units", $units);
                 $command->bindParam(":price", $price);
-                $command->bindParam(":category_id", $category_name);
                 $command->bindParam(":note", $note, \PDO::PARAM_STR);
                 $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
                 $command->execute();
@@ -564,8 +555,8 @@ class VendorController extends DefaultController {
                     $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
                     $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
-                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //валюта
-                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); //единица измерения
+                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
+                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); 
                     if (!empty($row_article && $row_product && $row_price && $row_ed)) {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
@@ -578,6 +569,7 @@ class VendorController extends DefaultController {
                                     . "price=:price,"
                                     . "ed=:ed,"
                                     . "note=:note"
+                                    . "es_status=3"
                                     . " where article='{$row_article}' and cat_id=$id";
                             $command = \Yii::$app->db->createCommand($sql);
                             $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
@@ -589,10 +581,9 @@ class VendorController extends DefaultController {
                             $command->execute();
                         } else {
                             $sql = "insert into {{%catalog_base_goods}}" .
-                                    "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
+                                    "(`cat_id`,`supp_org_id`,`article`,`product`,"
                                     . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
                                     . ":cat_id,"
-                                    . "0,"
                                     . $currentUser->organization_id . ","
                                     . ":article,"
                                     . ":product,"
@@ -787,8 +778,8 @@ class VendorController extends DefaultController {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             $product_id = \Yii::$app->request->post('id');
-            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1], ['id' => $product_id]);
-
+            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1,'es_status' => 2], ['id' => $product_id]);
+            
             $result = ['success' => true];
             return $result;
             exit;
@@ -856,7 +847,7 @@ class VendorController extends DefaultController {
 
     public function actionAjaxCreateProductMarketPlace() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $catalogBaseGoods = new CatalogBaseGoods();
+        $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
@@ -871,6 +862,7 @@ class VendorController extends DefaultController {
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
@@ -892,6 +884,7 @@ class VendorController extends DefaultController {
     public function actionAjaxUpdateProductMarketPlace($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        $catalogBaseGoods->scenario = 'marketPlace';
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
@@ -910,14 +903,18 @@ class VendorController extends DefaultController {
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
+                        
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
+                        
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
@@ -976,7 +973,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $CatalogBaseGoods = new CatalogBaseGoods;
+           // $CatalogBaseGoods = new CatalogBaseGoods;
             $id = \Yii::$app->request->post('id');
             $elem = \Yii::$app->request->post('elem');
 
@@ -995,15 +992,16 @@ class VendorController extends DefaultController {
             }
             if ($elem == 'status') {
                 $CatalogBaseGoods = CatalogBaseGoods::findOne(['id' => $id]);
-                if ($CatalogBaseGoods->status == 0) {
-                    $set = 1;
+                if (empty($CatalogBaseGoods->status)) {
+                    $set = CatalogBaseGoods::STATUS_ON;
                 } else {
-                    $set = 0;
+                    $set = CatalogBaseGoods::STATUS_OFF;
                 }
-                $CatalogBaseGoods->status = $set;
-                $CatalogBaseGoods->update();
+                //CatalogBaseGoods::updateAll(['status' =>$set], ['id' => $id]);
+               $CatalogBaseGoods->status = $set;
+               $CatalogBaseGoods->update();
 
-                $result = ['success' => true, 'status' => 'update status'];
+                $result = ['success' => true, 'status' => $set];
                 return $result;
             }
         }
@@ -1145,7 +1143,26 @@ class VendorController extends DefaultController {
 
         return $this->redirect(['vendor/step-1-update', 'id' => $cat_id]);
     }
-
+    public function actionStep2AddProduct(){
+        if (Yii::$app->request->isAjax) {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+            if (Yii::$app->request->post('state') == 'true') {
+                $product_id = Yii::$app->request->post('baseProductId');
+                $catalogGoods = new CatalogGoods;
+                $catalogGoods->base_goods_id = $product_id;
+                $catalogGoods->cat_id = Yii::$app->request->post('cat_id');;
+                $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
+                $catalogGoods->save();
+                return (['success' => true, 'Добавлен']);
+                exit;
+            } else {
+                $product_id = Yii::$app->request->post('baseProductId');
+                $CatalogGoods = CatalogGoods::deleteAll(['base_goods_id' => $product_id]);
+                return (['success' => true, 'Удален']);
+                exit;
+            }
+        }
+    }
     public function actionStep2($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1156,24 +1173,6 @@ class VendorController extends DefaultController {
                     return (['success' => true, 'cat_id' => $cat_id]);
                 } else {
                     return (['success' => false, 'type' => 1, 'message' => 'Пустой каталог']);
-                    exit;
-                }
-            }
-            if (Yii::$app->request->post('add-product')) {
-                if (Yii::$app->request->post('state') == 'true') {
-
-                    $product_id = Yii::$app->request->post('baseProductId');
-                    $catalogGoods = new CatalogGoods;
-                    $catalogGoods->base_goods_id = $product_id;
-                    $catalogGoods->cat_id = $cat_id;
-                    $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
-                    $catalogGoods->save();
-                    return (['success' => true, 'Добавлен']);
-                    exit;
-                } else {
-                    $product_id = Yii::$app->request->post('baseProductId');
-                    $CatalogGoods = CatalogGoods::deleteAll(['base_goods_id' => $product_id]);
-                    return (['success' => false, 'Удален']);
                     exit;
                 }
             }
@@ -1222,7 +1221,6 @@ class VendorController extends DefaultController {
                 ]
             ],
         ]);
-
         return $this->render('newcatalog/step-2', compact('searchModel', 'dataProvider', 'cat_id'));
     }
 

@@ -21,6 +21,13 @@ return [
                 ],
             ],
         ],
+        'elasticsearch' => [
+            'class' => 'yii\elasticsearch\Connection',
+            'nodes' => [
+                ['http_address' => 'localhost:9200'],
+                // configure more hosts if you have a cluster
+            ],
+        ],
         'resourceManager' => [
             'class' => 'dosamigos\resourcemanager\AmazonS3ResourceManager',
             'key' => 'AKIAIQWR4FTPYC2CM6QQ',

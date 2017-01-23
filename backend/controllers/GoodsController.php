@@ -56,36 +56,43 @@ class GoodsController extends Controller {
     
     public function actionAjaxUpdateProductMarketPlace($id) {
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        $catalogBaseGoods->scenario = 'marketPlace';
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
-        $categorys = new \yii\base\DynamicModel([
-            'sub1', 'sub2'
-        ]);
-        $categorys->addRule(['sub1', 'sub2'], 'required', ['message' => Yii::t('app', 'Укажите категорию товара')])
-                ->addRule(['sub1', 'sub2'], 'integer');
+//        $categorys = new \yii\base\DynamicModel([
+//            'sub1', 'sub2'
+//        ]);
+//        $categorys->addRule(['sub1', 'sub2'], 'required', ['message' => Yii::t('app', 'Укажите категорию товара')])
+//                ->addRule(['sub1', 'sub2'], 'integer');
 
+//        if (!empty($catalogBaseGoods->category_id)) {
+//            $categorys->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
+//            $categorys->sub2 = $catalogBaseGoods->category_id;
+//        }
         if (!empty($catalogBaseGoods->category_id)) {
-            $categorys->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
-            $categorys->sub2 = $catalogBaseGoods->category_id;
+            $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
+            $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
         }
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
+            if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
 
                 //var_dump($catalogBaseGoods);
                 if ($catalogBaseGoods->market_place == 1) {
-                    if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
-                        $catalogBaseGoods->category_id = $categorys->sub2;
+                    if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('_success', ['message' => $message]);
                     }
                 } else {
                     if ($post && $catalogBaseGoods->validate()) {
-                        $catalogBaseGoods->category_id = $categorys->sub1 ? $categorys->sub2 : null;
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub1 ? $catalogBaseGoods->sub2 : null;
+                        $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('_success', ['message' => $message]);
@@ -93,7 +100,7 @@ class GoodsController extends Controller {
                 }
             }
         }
-        return $this->renderAjax('_form', compact('catalogBaseGoods', 'categorys', 'countrys'));
+        return $this->renderAjax('_form', compact('catalogBaseGoods', 'countrys'));
     }
 
     public function actionMpCountryList($q) {
@@ -150,7 +157,8 @@ class GoodsController extends Controller {
         $dataProviderCategory->query->andWhere(['category_id' => $id, 'supp_org_id' => $vendor_id]);
         
         $dataProviderEmpty = $searchModel->search();
-        $dataProviderEmpty->query->andWhere(['category_id' => null, 'supp_org_id' => $vendor_id]);
+        $dataProviderEmpty->query->andWhere(['supp_org_id' => $vendor_id]);
+        $dataProviderEmpty->query->andWhere('(category_id is null) OR (category_id = 0)');
         $subCategory = \common\models\MpCategory::findOne(['id' => $id]);
         $category = \common\models\MpCategory::findOne(['id' => $subCategory->parent]);
         

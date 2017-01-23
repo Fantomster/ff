@@ -111,19 +111,41 @@ $this->registerCss('
             'attribute' => 'Добавить',
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
-            'value' => function ($data) {
+            'value' => function ($data) use($cat_id){
                 $link = CheckboxX::widget([
                             'name'=>'product_'.$data['id'],
                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
                             'value'=>common\models\CatalogGoods::searchProductFromCatalogGoods($data['id'],Yii::$app->request->get('id'))? 1 : 0,
                             'autoLabel' => true,
-                            'options'=>['id'=>'product_'.$data['id'], 'data-id'=>$data['id']],
+                            'options'=>['id'=>'product_'.$data['id'], 'data-id'=>$data['id'], 'cat-id'=>$cat_id],
                             'pluginOptions'=>[
                                 'threeState'=>false,
                                 'theme' => 'krajee-flatblue',
                                 'enclosedLabel' => true,
                                 'size'=>'lg',
-                                ]
+                                ],
+                            'pluginEvents' => [
+                                'change'=>'function() {
+                                 var state = $(this).prop("checked");
+                                 var id = $(this).attr("data-id");
+                                 var cat_id = $(this).attr("cat-id");
+                                 console.log(state);
+                                 $.ajax({
+                                    url: "index.php?r=vendor/step-2-add-product",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: {"add-product":true,"baseProductId":id,"state":state, "cat_id":cat_id},
+                                    cache: false,
+                                    success: function(response) {
+                                                console.log(response);             
+                                        },
+                                        failure: function(errMsg) {
+                                        console.log(errMsg);
+                                        }
+                                });
+                                }',
+                                'reset'=>'function() { console.log("reset"); }',
+                            ]
                         ]);
                         return $link;
                 },
@@ -188,39 +210,6 @@ window.clearTimeout(timer);
         data: {searchString: $("#search").val()}
       })
    }, 700);
-});
-/** 
- * Forward port jQuery.live()
- * Wrapper for newer jQuery.on()
- * Uses optimized selector context 
- * Only add if live() not already existing.
-*/
-if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))) {
-  jQuery.fn.extend({
-      live: function (event, callback) {
-         if (this.selector) {
-              jQuery(document).on(event, this.selector, callback);
-          }
-      }
-  });
-}
-$(".cbx-container").live("click", function(e) {
-    var id = $(this).children("input[type=checkbox]").attr("data-id");
-    var state = $(this).children("input[type=checkbox]").prop("checked");
-$.ajax({
-    url: "index.php?r=vendor/step-2&id='. $cat_id .'",
-    type: "POST",
-    dataType: "json",
-    data: {"add-product":true,"baseProductId":id,"state":state},
-    cache: false,
-    success: function(response) {
-                console.log(response);
-                
-        },
-        failure: function(errMsg) {
-        console.log(errMsg);
-        }
-    });
 });
 ');
 ?>

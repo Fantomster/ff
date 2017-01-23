@@ -44,4 +44,11 @@ class MpCategory extends \yii\db\ActiveRecord
             'parent' => 'Parent',
         ];
     }
+    
+    public static function getCountProduct($id) {
+        return CatalogBaseGoods::find()->where(["category_id" => $id])->count();
+    }
+    public static function getCategory($id) {
+        return MpCategory::find()->where(["id" => $id])->one()->name;
+    }
 }

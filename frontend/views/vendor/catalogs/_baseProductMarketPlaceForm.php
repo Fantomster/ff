@@ -20,8 +20,8 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
     box-shadow: inset 0px 3px 5px 0px rgba(91, 137, 81, 0.3);
 }
 .bl-img{
-    width: 152px;
-    height:102px;
+    width: 240px;
+    height:135px;
     border:1px dashed #65a157;
     display: inline-block;
 }
@@ -89,8 +89,8 @@ label {
 .uploadButton {
     position: absolute;
     display: block;
-    width: 176px;
-    height: 119px;
+    width: 240px;
+    height: 135px;
     border-radius: 0%;
     top: 0;
     margin: 0 auto;
@@ -101,6 +101,7 @@ label {
     padding-top: 88px;
     font-style: italic;
     font-weight: bold;
+    transition: all .6s;
 }
 .uploadButton:hover {
     background:#000;
@@ -120,8 +121,8 @@ label {
 }
 .upload-demo-wrap {
     position:absolute;
-    width: 176px;
-    height: 119px;
+    width: 100%;
+    height: 150px;
     border-radius: 0%;
     top: 0;
     margin: 0 auto;
@@ -161,17 +162,18 @@ label {
 <div class="modal-body" style="background:#fff !important">
 	<div class="row">
 		<div class="col-md-12 text-center">
-			<h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете</h5>
+                    <h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете
+                        <br><small>Товар будет доступен на площадке F-Market в течении 2 минут</small><h5>
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-12 text-center">
+		<div class="col-md-12 text-center upload-block">
                     <?php
                     $this->registerJs("
                         var uploadCrop = $('#upload-avatar').croppie({
                                 viewport: {
-                                        width: 178,
-                                        height: 121,
+                                        width: 240,
+                                        height: 135,
                                         //type: 'circle'
                                         type: 'square'
                                 },
@@ -187,7 +189,7 @@ label {
                     <div class="upload-demo-wrap">
                         <div id="upload-avatar"></div>
                     </div>
-                    <img id="newAvatar" width="176" height="119" style="background-color:#ccc"
+                    <img id="newAvatar" width="240" height="135" style="background-color:#ccc"
                          src="<?= (!empty($catalogBaseGoods['image']) && !$catalogBaseGoods->isNewRecord) ?
                             $catalogBaseGoods->imageUrl:
                             common\models\CatalogBaseGoods::DEFAULT_IMAGE ?>" class="avatar"/>
@@ -289,6 +291,7 @@ label {
     data-toggle="tooltip" 
     title="Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)"></span></span></div>{error}'])->
     textInput(['placeholder' => 'КРАТНОСТЬ ПОСТАВКИ']) ?>
+                                    
 				</div>
 				<div class="col-md-6">
                                     <label class="control-label" for="">Страна производитель</label>
@@ -336,10 +339,12 @@ label {
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
     textInput(['placeholder' => 'ВЕС УПАКОВКИ','style'=>'border-radius:3px']) ?>
                                     <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
-				</div>
+				
+                                </div>
 			</div>
 		</div>
 	</div>
+        
 	<div class="row">
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
                     <div class="pull-left" style="border: 2px dotted #84bf76;padding: 10px 10px 0px 10px;margin-top: 0;border-radius:8px;">
@@ -360,16 +365,35 @@ label {
                                 'options' =>['style'=>'font-weight: 700;']
                                 ]
                             ])->label(false);?>
-                            
-                        </div><!--h5 class="dp-text pull-left" style="margin-top: 6px;">ДОБАВИТЬ В F-MARKET</h5-->	
-			<div class="pull-right" style="margin-top: 10px;">
-			<?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
-                            '<i class="icon fa fa-plus-circle"></i> Создать' : 
-                            '<i class="icon fa fa-save"></i> Сохранить', 
-                            ['class' => $catalogBaseGoods->isNewRecord ? 
-                            'btn btn-success edit' : 'btn btn-success edit']) ?>
-                            <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
-			</div>	
+                    
+                    </div>
+                    <div class="pull-left" style="padding: 10px 10px 0px 10px;margin-top: 0;">    
+                        <?=$form->field($catalogBaseGoods, 'mp_show_price')->widget(CheckboxX::classname(), [
+                            //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                            'autoLabel' => true,
+                            'model' => $catalogBaseGoods,
+                            'attribute' => 'mp_show_price',
+                            'pluginOptions'=>[
+                                'threeState'=>false,
+                                'theme' => 'krajee-flatblue',
+                                'enclosedLabel' => false,
+                                'size'=>'lg',
+                                ],
+                            'labelSettings' => [
+                                'label' => 'Показывать цену в F-MARKET',
+                                'position' => CheckboxX::LABEL_RIGHT,
+                                'options' =>['style'=>'']
+                                ]
+                            ])->label(false);?>
+                    </div>    
+                    <div class="pull-right" style="margin-top: 10px;">
+                    <?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
+                        '<i class="icon fa fa-plus-circle"></i> Создать' : 
+                        '<i class="icon fa fa-save"></i> Сохранить', 
+                        ['class' => $catalogBaseGoods->isNewRecord ? 
+                        'btn btn-success edit' : 'btn btn-success edit']) ?>
+                        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+                    </div>	
 		</div>
 	</div>
 </div>

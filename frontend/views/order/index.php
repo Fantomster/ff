@@ -1,4 +1,5 @@
 <?php
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
@@ -28,6 +29,9 @@ $this->registerJs('
             }
         });
         $(".box-body").on("click", "td", function (e) {
+            if ($(this).find("a").hasClass("reorder")) {
+                return true;
+            }
             var id = $(this).parent("tr").data("id");
             if (id !== undefined) {
                 location.href = "' . Url::to(['order/view']) . '&id=" + id;
@@ -113,136 +117,158 @@ $this->registerCss("
             ]);
             ?>
             <div class="row">
-            <div class="col-lg-2 col-md-3 col-sm-6">
-            <?=
-                    $form->field($searchModel, 'status')
-                    ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter'])
-                    ->label('Статус', ['class' => 'label','style'=>'color:#555'])
-            ?>
-            </div>
-            <div class="col-lg-2 col-md-3 col-sm-6">
-            <?php
-            if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                echo $form->field($searchModel, 'vendor_id')
-                        ->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter'])
-                        ->label('Поставщики', ['class' => 'label','style'=>'color:#555']);
-            } else {
-                echo $form->field($searchModel, 'client_id')
-                        ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
-                        ->label('Рестораны', ['class' => 'label','style'=>'color:#555']);
-            }
-            ?>
-            </div>
-            <div class="col-lg-5 col-md-6 col-sm-6"> 
-                <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label','style'=>'color:#555']) ?>
-            <div class="form-group" style="width: 300px; height: 44px;">
-                <?=
-                DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'date_from',
-                    'attribute2' => 'date_to',
-                    'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
-                    'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
-                    'separator' => '-',
-                    'type' => DatePicker::TYPE_RANGE,
-                    'pluginOptions' => [
-                        'format' => 'dd.mm.yyyy',//'d M yyyy',//
-                        'autoclose' => true,
-                        'endDate' => "0d",
-                    ]
-                ])
-                ?>
-            </div>
-            </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <?=
+                            $form->field($searchModel, 'status')
+                            ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter'])
+                            ->label('Статус', ['class' => 'label', 'style' => 'color:#555'])
+                    ?>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <?php
+                    if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                        echo $form->field($searchModel, 'vendor_id')
+                                ->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter'])
+                                ->label('Поставщики', ['class' => 'label', 'style' => 'color:#555']);
+                    } else {
+                        echo $form->field($searchModel, 'client_id')
+                                ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
+                                ->label('Рестораны', ['class' => 'label', 'style' => 'color:#555']);
+                    }
+                    ?>
+                </div>
+                <div class="col-lg-5 col-md-6 col-sm-6"> 
+                    <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                    <div class="form-group" style="width: 300px; height: 44px;">
+                        <?=
+                        DatePicker::widget([
+                            'model' => $searchModel,
+                            'attribute' => 'date_from',
+                            'attribute2' => 'date_to',
+                            'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
+                            'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                            'separator' => '-',
+                            'type' => DatePicker::TYPE_RANGE,
+                            'pluginOptions' => [
+                                'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                'autoclose' => true,
+                                'endDate' => "0d",
+                            ]
+                        ])
+                        ?>
+                    </div>
+                </div>
             </div>
             <?php ActiveForm::end(); ?>
             <div class="row">
                 <div class="col-md-12">
-            <?=
-            GridView::widget([
-                'id' => 'orderHistory',
-                'dataProvider' => $dataProvider,
-                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
-                'filterModel' => $searchModel,
-                'filterPosition' => false,
-                'summary' => '',
-                'options' => ['class' => 'table-responsive'],
-                'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
-                'columns' => [
-                    [
-                        'attribute' => 'id',
-                        'value' => 'id',
-                        'label' => '№',
-                    ],
-                    $organization->type_id == Organization::TYPE_RESTAURANT ? [
-                        'attribute' => 'vendor.name',
-                        'value' => 'vendor.name',
-                        'label' => 'Поставщик',
-                        //'headerOptions' => ['class'=>'sorting',],
-                            ] : [
-                        'attribute' => 'client.name',
-                        'value' => 'client.name',
-                        'label' => 'Ресторан',
+                    <?=
+                    GridView::widget([
+                        'id' => 'orderHistory',
+                        'dataProvider' => $dataProvider,
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                        'filterModel' => $searchModel,
+                        'filterPosition' => false,
+                        'summary' => '',
+                        'options' => ['class' => 'table-responsive'],
+                        'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
+                        'columns' => [
+                            [
+                                'attribute' => 'id',
+                                'value' => 'id',
+                                'label' => '№',
                             ],
-                    [
-                        'attribute' => 'createdByProfile.full_name',
-                        'value' => 'createdByProfile.full_name',
-                        'label' => 'Заказ создал',
-                    ],
-                    [
-                        'attribute' => 'acceptedByProfile.full_name',
-                        'value' => 'acceptedByProfile.full_name',
-                        'label' => 'Заказ принял',
-                    ],
-                    [
-                        'format' => 'raw',
-                        'attribute' => 'total_price',
-                        'value' => function($data) {
-                            return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
+                            $organization->type_id == Organization::TYPE_RESTAURANT ? [
+                                'attribute' => 'vendor.name',
+                                'value' => 'vendor.name',
+                                'label' => 'Поставщик',
+                                    //'headerOptions' => ['class'=>'sorting',],
+                                    ] : [
+                                'attribute' => 'client.name',
+                                'value' => 'client.name',
+                                'label' => 'Ресторан',
+                                    ],
+                            [
+                                'attribute' => 'createdByProfile.full_name',
+                                'value' => 'createdByProfile.full_name',
+                                'label' => 'Заказ создал',
+                            ],
+                            [
+                                'attribute' => 'acceptedByProfile.full_name',
+                                'value' => 'acceptedByProfile.full_name',
+                                'label' => 'Заказ принял',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'total_price',
+                                'value' => function($data) {
+                                    return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
+                                },
+                                'label' => 'Сумма',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'created_at',
+                                'value' => function($data) {
+                                    $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
+                                    return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                                },
+                                'label' => 'Дата создания',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'status',
+                                'value' => function($data) {
+                                    switch ($data->status) {
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                                            $statusClass = 'new';
+                                            break;
+                                        case Order::STATUS_PROCESSING:
+                                            $statusClass = 'processing';
+                                            break;
+                                        case Order::STATUS_DONE:
+                                            $statusClass = 'done';
+                                            break;
+                                        case Order::STATUS_REJECTED:
+                                        case Order::STATUS_CANCELLED:
+                                            $statusClass = 'cancelled';
+                                            break;
+                                    }
+                                    return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
+                                },
+                                'label' => 'Статус',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'visible' => ($organization->type_id == Organization::TYPE_RESTAURANT),
+                                'value' => function($data) {
+                                    switch ($data->status) {
+                                        case Order::STATUS_DONE:
+                                        case Order::STATUS_REJECTED:
+                                        case Order::STATUS_CANCELLED:
+                                            return Html::a('<i class="fa fa-refresh"></i>', ['order/repeat', 'id' => $data->id], [
+                                                        'class' => 'reorder',
+                                                        'data' => [
+                                                            'toggle' => 'tooltip',
+                                                            'original-title' => 'Повторить заказ',
+                                                        ],
+                                            ]);
+                                            break;
+                                    }
+                                    return '';
+                                },
+                                        'contentOptions' => ['class' => 'text-center'],
+                                        'headerOptions' => ['style' => 'width: 20px;']
+                                    ],
+                                ],
+                                'rowOptions' => function ($model, $key, $index, $grid) {
+                            return ['data-id' => $model->id];
                         },
-                        'label' => 'Сумма',
-                    ],
-                    [
-                        'format' => 'raw',
-                        'attribute' => 'created_at',
-                        'value' => function($data) {
-                            $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                            return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
-                        },
-                        'label' => 'Дата создания',
-                    ],
-                    [
-                        'format' => 'raw',
-                        'attribute' => 'status',
-                        'value' => function($data) {
-                            switch ($data->status) {
-                                case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                                case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                    $statusClass = 'new';
-                                    break;
-                                case Order::STATUS_PROCESSING:
-                                    $statusClass = 'processing';
-                                    break;
-                                case Order::STATUS_DONE:
-                                    $statusClass = 'done';
-                                    break;
-                                case Order::STATUS_REJECTED:
-                                case Order::STATUS_CANCELLED:
-                                    $statusClass = 'cancelled';
-                                    break;
-                            }
-                            return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data->status) . '</span>'; //fa fa-circle-thin
-                        },
-                        'label' => 'Статус',
-                    ],
-                ],
-                'rowOptions' => function ($model, $key, $index, $grid) {
-            return ['data-id' => $model->id];
-        },
-            ]);
-            ?>
-                </div></div>
-            <?php Pjax::end() ?>
+                            ]);
+                            ?>
+                        </div></div>
+                    <?php Pjax::end() ?>
             <!-- /.table-responsive -->
         </div>
         <!-- /.box-body -->

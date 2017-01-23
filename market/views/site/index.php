@@ -1,53 +1,155 @@
 <?php
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\web\View;
 
-/* @var $this yii\web\View */
-
-$this->title = 'My Yii Application';
+$this->title = 'F-MARKET главная';
 ?>
-<div class="site-index">
-
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
-
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
-
-    <div class="body-content">
-
-        <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
-            </div>
-        </div>
-
-    </div>
+<div class="row">
+  <div class="col-md-12 min-padding">
+    <h3>Популярные товары</h3>  
+  </div>
 </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="row" id="product-block">
+        <?php
+        foreach($topProducts as $row){
+        ?>
+        <!--class="wow slideInLeft" data-wow-duration="2s" data-wow-delay="5s"-->
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
+            <div class="mp-product-block animated fadeIn">
+                <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
+                <img class="product-image wow animated fadeInUp" src="<?= $row->imageUrl ?>">
+                </a>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="product-title">
+                     <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>"><h3><?=$row->product; ?></h3></a>
+                  </div>
+                  <div class="product-category">
+                      <h5><?= \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name; ?>/<?=$row->subCategory->name; ?></h5>
+                  </div>
+                  <div class="product-company">
+                      <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
+                     <h5><?=$row->vendor->name; ?></h5>
+                      </a>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="product-price">
+                      <?php if(empty($row->mp_show_price)){ ?>
+                      <h4 style="color:#dfdfdf">договорная цена</h4>
+                      <?php } else {?>
+                      <h4><?=floatval($row->price); ?> <small>руб.</small></h4>
+                      <?php } ?>
+                  </div>
+                </div>
+                <div class="col-md-12">
+                  <div class="product-button">
+                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>">
+                        <isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ
+                    </a>
+                  </div>  
+                </div>
+              </div>
+            </div>  
+        </div>    
+        <?php    
+        }
+        ?> 
+    </div>
+    <div class="row">
+      <div class="col-md-12 min-padding" style="margin-bottom: 10px">
+        <a href="#" class="btn btn-100 btn-outline-default <?=$topProductsCount>6?'':'disabled'?>" id="product-more">ПОКАЗАТЬ ЕЩЕ</a>  
+      </div>   
+    </div>
+    <div class="row">
+      <div class="col-md-12 min-padding">
+        <h3 class="pull-left">Поставщики</h3>  
+        <a href="<?=Url::to(['/site/suppliers']);?>" class="pull-right text-success all-supplier-view">Все поставщики</a>
+      </div>
+    </div>
+    <div class="row" id="supplier-block">
+        <?php
+        foreach($topSuppliers as $row){
+        ?>
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
+        <div class="mp-suppiler-block animated fadeIn">
+          <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
+            <img class="supplier-image  animated fadeInUp" src="<?= $row->imageUrl ?>">
+          </a>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="supplier-title">
+                <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
+                <h3><?=$row->vendor->name;?></h3>
+                </a>
+              </div>
+              <div class="supplier-category">
+                <h5><?=!empty($row->vendor->city) ? $row->vendor->city : '&nbsp;';?></h5>
+              </div>
+            </div>
+            <div class="col-md-12">
+              <div class="supplier-button">
+                <a href="#" class="btn btn-100 btn-success invite-vendor" data-vendor-id="<?= $row->vendor->id ?>" style="width: 100%">ДОБАВИТЬ</a>
+              </div>
+            </div>
+          </div>
+        </div>  
+      </div>    
+        <?php    
+        }
+        ?> 
+    </div>
+    <div class="row">
+      <div class="col-md-12 min-padding">
+        <a href="#" class="btn btn-100 btn-outline-default <?=$topSuppliersCount>6?'':'disabled'?>" id="supplier-more">Показать еще</a>  
+      </div>   
+    </div>
+  </div> 
+</div> 
+<?php $customJs = <<< JS
+var num = 6;
+$('#product-more').on("click", function (e) {
+    e.preventDefault();
+    $('#product-more').addClass('disabled');
+    console.log('product click more');
+    $.ajax({
+      url: "index.php?r=site/ajax-product-more",
+      type: "GET",
+      data: {"num": num},
+      cache: false,
+      success: function(response){
+          if(response == 0){
+             //alert("Больше нет записей");
+          }else{
+             $("#product-block").append(response);
+             num = num + 6;
+             $('#product-more').removeClass('disabled');
+          }
+       }
+    });
+});
+$('#supplier-more').on("click", function (e) {
+    e.preventDefault();
+    console.log('supplier click more');
+    $.ajax({
+      url: "index.php?r=site/ajax-supplier-more",
+      type: "GET",
+      data: {"num": num},
+      cache: false,
+      success: function(response){
+          if(response == 0){
+             //alert("Больше нет записей");
+          }else{
+             $("#supplier-block").append(response);
+             num = num + 6;
+          }
+       }
+    });
+});       
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

@@ -4,6 +4,8 @@ namespace common\models;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+use common\behaviors\ImageUploadBehavior;
+use Imagine\Image\ManipulatorInterface;
 
 /**
  * This is the model class for table "organization".
@@ -19,12 +21,17 @@ use yii\helpers\ArrayHelper;
  * @property string $website
  * @property string $created_at
  * @property string $updated_at
+ * @property string $legal_entity
+ * @property string $contact_name
+ * @property string $about
+ * @property string $picture
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
  * @property User $users
  * @property OrderChat $unreadMessages
  * @property OrderChat $unreadSystem
+ * @property string $pictureUrl
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -34,11 +41,13 @@ class Organization extends \yii\db\ActiveRecord {
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only
     const STEP_ADD_CATALOG = 3; //vendors only
+    const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
+
+    public $resourceCategory = 'org-picture';
 
     /**
      * @inheritdoc
      */
-
     public static function tableName() {
         return 'organization';
     }
@@ -53,10 +62,11 @@ class Organization extends \yii\db\ActiveRecord {
             [['type_id', 'name'], 'required'],
             [['type_id', 'step'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website'], 'string', 'max' => 255],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'website'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['email'], 'email'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
+            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
         ];
     }
 
@@ -70,6 +80,16 @@ class Organization extends \yii\db\ActiveRecord {
                 'value' => function ($event) {
                     return gmdate("Y-m-d H:i:s");
                 },
+            ],
+            [
+                'class' => ImageUploadBehavior::className(),
+                'attribute' => 'picture',
+                'scenarios' => ['default'],
+                'path' => '@app/web/upload/temp/',
+                'url' => '/upload/temp/',
+                'thumbs' => [
+                    'picture' => ['width' => 420, 'height' => 236, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
+                ],
             ],
         ];
     }
@@ -90,6 +110,10 @@ class Organization extends \yii\db\ActiveRecord {
             'website' => 'Веб-сайт',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'legal_entity' => 'Название юридического лица',
+            'contact_name' => 'ФИО контактного лица',
+            'about' => 'Информация об организации',
+            'picture' => 'Аватар',
         ];
     }
 
@@ -414,6 +438,57 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function markViewed($orderId) {
         return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id' => $this->id]);
+    }
+
+    /**
+     * @return string url to avatar image
+     */
+    public function getPictureUrl() {
+        return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
+    }
+
+    public function inviteVendor($vendor, $invite, $status, $includeBaseCatalog = false) {
+        if ($this->type_id !== self::TYPE_RESTAURANT) {
+            return false;
+        }
+
+        $relation = new RelationSuppRest();
+        $relation->supp_org_id = $vendor->id;
+        $relation->rest_org_id = $this->id;
+        $relation->invite = $invite;
+        $relation->status = $status;
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $vendor->id, 'type' => Catalog::BASE_CATALOG]);
+        if ($includeBaseCatalog && $baseCatalog) {
+            $relation->cat_id = $baseCatalog;
+        }
+        return $relation->save();
+    }
+
+    public function getClientsCount() {
+        if ($this->type_id === self::TYPE_RESTAURANT) {
+            return 0;
+        }
+        return RelationSuppRest::find()->where(['supp_org_id' => $this->id, 'invite' => RelationSuppRest::INVITE_ON])->count();
+    }
+
+    public function getOrdersCount() {
+        if ($this->type_id === self::TYPE_RESTAURANT) {
+            return 0;
+        }
+        return Order::find()->where(['vendor_id' => $this->id, 'status' => Order::STATUS_DONE])->count();
+    }
+
+    public function getMarketGoodsCount() {
+        if ($this->type_id === self::TYPE_RESTAURANT) {
+            return 0;
+        }
+        return CatalogBaseGoods::find()
+                        ->where([
+                            'supp_org_id' => $this->id,
+                            'deleted' => CatalogBaseGoods::DELETED_OFF,
+                            'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                        ->groupBy(['category_id'])
+                        ->count();
     }
 
 }

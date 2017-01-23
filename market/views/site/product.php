@@ -66,7 +66,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
                 'label' => $product->category->name,
                 'url' => ['site/category', 'id' => $product->category_id],
             ],
-            $product->product,
+            Html::decode($product->product),
         ],
     ])
     ?>

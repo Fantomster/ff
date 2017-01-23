@@ -162,7 +162,8 @@ label {
 <div class="modal-body" style="background:#fff !important">
 	<div class="row">
 		<div class="col-md-12 text-center">
-			<h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете</h5>
+                    <h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете
+                        <br><small>Товар будет доступен на площадке F-Market в течении 2 минут</small><h5>
 		</div>
 	</div>
 	<div class="row">

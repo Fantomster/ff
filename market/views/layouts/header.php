@@ -60,8 +60,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             <div id="navbar6" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li class="active"><a href="<?= Url::home(); ?>">ГЛАВНАЯ</a></li>
-                    <li><a href="#">О&nbsp;НАС</a></li>
-                    <li><a href="#">КОНТАКТЫ</a></li>
+                    <li><a href="http://f-keeper.ru/index.php?r=site%2Fabout">О&nbsp;НАС</a></li>
+                    <li><a href="http://f-keeper.ru/index.php?r=site%2Fcontacts">КОНТАКТЫ</a></li>
                     <?php if (Yii::$app->user->isGuest) { ?>
                         <li><a class="btn-navbar" href="<?= Url::to(['/user/login']) ?>">войти / регистрация</a></li>
                     <?php } else { ?>

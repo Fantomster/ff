@@ -62,7 +62,7 @@ $this->title = 'F-MARKET фильтр поиска';
                 </div>
                 <div class="col-md-12">
                   <div class="product-button">
-                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
+                      <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
                   </div>  
                 </div>
               </div>

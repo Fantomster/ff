@@ -395,7 +395,6 @@ display: block; }
 .sub-cat h3 {
     font-size: 14px;
     padding: 17px 13px 17px 13px;
-    //border-bottom: 1px solid #c3c3c3;
     font-weight: 600;
 }
 .sub-cat h3 i {
@@ -858,4 +857,11 @@ text-decoration: none;
 }
 .grey-link:hover{
     color:#84bf76; 
+}
+.modal-header{
+    background:#84bf76;
+    color:#fff;
+    text-transform: uppercase;
+    border-bottom: 0;
+    text-align:center;
 }

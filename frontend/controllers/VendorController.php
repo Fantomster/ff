@@ -568,7 +568,7 @@ class VendorController extends DefaultController {
                                     . "units=:units,"
                                     . "price=:price,"
                                     . "ed=:ed,"
-                                    . "note=:note"
+                                    . "note=:note,"
                                     . "es_status=3"
                                     . " where article='{$row_article}' and cat_id=$id";
                             $command = \Yii::$app->db->createCommand($sql);

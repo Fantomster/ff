@@ -85,7 +85,7 @@ echo GridView::widget([
                     </div>
 
 <?=
-$canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
+(isset($canRepeatOrder) && $canRepeatOrder) ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
             'class' => 'btn btn-default pull-right',
             'style' => 'margin-right: 7px;'
         ]) : "" ?>

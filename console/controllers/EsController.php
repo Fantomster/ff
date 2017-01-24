@@ -12,7 +12,7 @@ class EsController extends Controller
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
 
-    $url = 'curl -XPUT \'http://localhost:9200/category\' -d \'{
+    $url = 'curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/category\' -d \'{
     "settings": {
                 "number_of_shards": 1,
                 "number_of_replicas": 0,
@@ -33,7 +33,7 @@ class EsController extends Controller
 		}
 	}
     }\' && echo
-    curl -XPUT \'http://localhost:9200/category/category/_mapping\' -d \'{
+    curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/category/category/_mapping\' -d \'{
             "category": {
                 "properties" : {
                         "category_id" : {"type" : "long"},
@@ -49,7 +49,7 @@ class EsController extends Controller
     '; 
     $res = shell_exec($url);  
     
-    $url = 'curl -XPUT \'http://localhost:9200/product\' -d \'{
+    $url = 'curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product\' -d \'{
     "settings": {
                 "number_of_shards": 1,
                 "number_of_replicas": 0,
@@ -70,7 +70,7 @@ class EsController extends Controller
 		}
 	}
     }\' && echo
-    curl -XPUT \'http://localhost:9200/product/product/_mapping\' -d \'{
+    curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/product/_mapping\' -d \'{
             "product": {
                 "properties" : {
                         "product_id"  :{"type" : "long"},
@@ -96,7 +96,7 @@ class EsController extends Controller
     $res = shell_exec($url); 
     
     
-    $url = 'curl -XPUT \'http://localhost:9200/supplier\' -d \'{
+    $url = 'curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/supplier\' -d \'{
     "settings": {
                 "number_of_shards": 1,
                 "number_of_replicas": 0,
@@ -117,7 +117,7 @@ class EsController extends Controller
 		}
 	}
     }\' && echo
-    curl -XPUT \'http://localhost:9200/supplier/supplier/_mapping\' -d \'{
+    curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/supplier/supplier/_mapping\' -d \'{
             "supplier": {
                 "properties" : {
                         "supplier_id" : {"type" : "long"},
@@ -152,7 +152,7 @@ class EsController extends Controller
         $category->save();
     }
     //var_dump($model);
-    $url = 'curl -XPOST \'http://localhost:9200/category/_refresh\'';
+    $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/category/_refresh\'';
     $res = shell_exec($url);
     }
     public function actionUpdateProduct() {
@@ -193,7 +193,7 @@ class EsController extends Controller
         $product->save();
         \common\models\CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $name->id]);
     }
-    $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
+    $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
     $res = shell_exec($url);
     }
     public function actionUpdateSupplier() {
@@ -217,7 +217,7 @@ class EsController extends Controller
             $suppliers->save();
         }
         
-        $url = 'curl -XPOST \'http://localhost:9200/supplier/_refresh\'';
+        $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/supplier/_refresh\'';
         $res = shell_exec($url);
     }
     public function actionDeleleProductCollection(){

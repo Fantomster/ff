@@ -87,7 +87,7 @@ class CronController extends Controller {
                 }
             }
             CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => 1]);
-            $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
+            $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
             $res = shell_exec($url);
          }
         //удалить
@@ -100,7 +100,7 @@ class CronController extends Controller {
              }    
             }
             CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => 2]);
-            $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
+            $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
             $res = shell_exec($url);
          
          }
@@ -169,7 +169,7 @@ class CronController extends Controller {
                 } 
                }
                
-               $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
+               $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
                $res = shell_exec($url);
             }
             if(CatalogBaseGoods::find()->where(['es_status' => '4'])->exists()){
@@ -182,7 +182,7 @@ class CronController extends Controller {
                 }
                } 
                
-               $url = 'curl -XPOST \'http://localhost:9200/product/_refresh\'';
+               $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
                $res = shell_exec($url);
             }
         }

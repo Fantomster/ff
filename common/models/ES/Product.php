@@ -1,5 +1,4 @@
 <?php
-
 namespace common\models\ES;
 
 use yii\elasticsearch\ActiveRecord;

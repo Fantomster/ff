@@ -771,8 +771,8 @@ class SiteController extends Controller {
             $position = new OrderContent();
             $position->order_id = $alteringOrder->id;
             $position->product_id = $product->id;
-            $position->quantity = ($product->units) ? $product->units: 1;
-            $position->price = $product->mp_show_price? $product->price : 1;
+            $position->quantity = ($product->units) ? $product->units : 1;
+            $position->price = $product->mp_show_price ? $product->price : 1;
             $position->product_name = $product->product;
             $position->units = $product->units;
             $position->article = $product->article;

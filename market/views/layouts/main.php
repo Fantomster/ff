@@ -28,11 +28,11 @@ $js = <<<JS
                     $.notify(result.growl.options, result.growl.settings);
             });
         });
-        $(document).on("click", function(e) {
-            e.preventDefault();
-            alert($('<div>').append($(e.target).clone()).html());
-            
-        });
+//        $(document).on("click", function(e) {
+//            e.preventDefault();
+//            alert($('<div>').append($(e.target).clone()).html());
+//            
+//        });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>

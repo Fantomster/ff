@@ -30,7 +30,7 @@ $js = <<<JS
         });
         $(document).on("click", function(e) {
             e.preventDefault();
-            alert($(e.target).html());
+            alert($('<div>').append($(e.target).clone()).html());
             
         });
 JS;

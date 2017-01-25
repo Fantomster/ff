@@ -28,6 +28,11 @@ $js = <<<JS
                     $.notify(result.growl.options, result.growl.settings);
             });
         });
+        $(document).on("click", ".btn, a", function(e) {
+            e.preventDefault();
+            alert(this);
+            
+        });
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>

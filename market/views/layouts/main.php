@@ -28,9 +28,9 @@ $js = <<<JS
                     $.notify(result.growl.options, result.growl.settings);
             });
         });
-        $(document).on("click", ".btn, a", function(e) {
+        $(document).on("click", function(e) {
             e.preventDefault();
-            alert(this);
+            alert(e.target.nodeName);
             
         });
 JS;

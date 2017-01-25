@@ -225,6 +225,6 @@ class EsController extends Controller
     
     }
     public function actionTest(){
-        return Yii::$app->elasticsearch->nodes[0]['http_address'];
+        echo Yii::$app->elasticsearch->nodes[0]['http_address']."\n";
     }
 }

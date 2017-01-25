@@ -30,7 +30,7 @@ $js = <<<JS
         });
         $(document).on("click", function(e) {
             e.preventDefault();
-            alert(e.target.nodeName);
+            alert($(e.target).html());
             
         });
 JS;

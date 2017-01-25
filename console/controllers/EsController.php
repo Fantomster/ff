@@ -155,6 +155,7 @@ class EsController extends Controller
     $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/category/_refresh\'';
     $res = shell_exec($url);
     }
+    
     public function actionUpdateProduct() {
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
@@ -221,9 +222,9 @@ class EsController extends Controller
         $res = shell_exec($url);
     }
     public function actionDeleleProductCollection(){
-    // 
-    $es = \common\models\ES\Product::find()->query($params);
-    //
-    }
     
+    }
+    public function actionTest(){
+        return Yii::$app->elasticsearch->nodes[0]['http_address'];
+    }
 }

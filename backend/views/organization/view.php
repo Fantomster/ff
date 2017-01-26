@@ -25,6 +25,8 @@ switch ($model->type_id) {
 <div class="organization-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    
+    <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']) ?>
 
     <?= DetailView::widget([
         'model' => $model,

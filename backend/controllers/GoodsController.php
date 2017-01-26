@@ -10,6 +10,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\Json;
 use yii\web\Response;
+use yii\filters\AccessControl;
 
 /**
  * GoodsController implements the CRUD actions for CatalogBaseGoods model.
@@ -25,6 +26,16 @@ class GoodsController extends Controller {
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', 'ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
                 ],
             ],
         ];

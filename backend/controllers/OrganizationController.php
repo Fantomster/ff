@@ -9,6 +9,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use common\components\AccessRule;
 
 /**
  * OrganizationController implements the CRUD actions for Organization model.
@@ -29,11 +30,14 @@ class OrganizationController extends Controller
             ],
             'access' => [
                 'class' => AccessControl::className(),
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
                 'rules' => [
                     [
                         'actions' => ['index', 'view', 'update'],
                         'allow' => true,
-                        'roles' => ['@'],
+                        'roles' => [\common\models\Role::ROLE_ADMIN],
                     ],
                 ],
             ],

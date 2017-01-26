@@ -713,7 +713,7 @@ class SiteController extends Controller {
     public function actionAjaxAddToCart() {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if (!Yii::$app->user->isGuest) {
+        if (Yii::$app->user->isGuest) {
             return $this->successNotify("Функция доступна зарегистрированным ресторанам!");
         }
 
@@ -790,7 +790,7 @@ class SiteController extends Controller {
     public function actionAjaxInviteVendor() {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if (!Yii::$app->user->isGuest) {
+        if (Yii::$app->user->isGuest) {
             return $this->successNotify("Функция доступна зарегистрированным ресторанам!");
         }
 

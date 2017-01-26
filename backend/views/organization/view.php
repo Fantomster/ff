@@ -8,7 +8,7 @@ use common\models\Organization;
 /* @var $model common\models\Organization */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Organizations', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Организации', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 switch ($model->type_id) {

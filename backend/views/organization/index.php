@@ -10,7 +10,7 @@ use kartik\export\ExportMenu;
 /* @var $searchModel backend\models\OrganizationSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Organizations';
+$this->title = 'Организации';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [

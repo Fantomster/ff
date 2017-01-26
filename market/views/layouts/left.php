@@ -8,7 +8,7 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
 .panel-group {margin-bottom: 0px;overflow: hidden;}  
 .panel-group .panel{border-radius:0;border:0;border-bottom:1px solid #ddd}
 .panel-body { padding:0px; }
-.panel-body table tr td { padding-left: 25px;padding-top:11px;}
+.panel-body table tr td span{ width:100%;display: block;padding-left: 15px;}
 .panel-body .table {margin-bottom: 0px;}
 .panel-group .panel+.panel {margin-top: 0px;}
 .panel-default>.panel-heading {
@@ -21,7 +21,7 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
     padding-bottom:0;
 }
 .panel-collapse{
-        background: #f6f3f3;
+        background: #f3f3f3;
 }
 .panel-default > .panel-heading + .panel-collapse > .panel-body {
     border-top: none; 
@@ -36,7 +36,7 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
     text-decoration: none;
     color:#84bf76;
 }
-.panel-body table tr td a{ text-decoration: none;color:#3f3e3e;}
+.panel-body table tr td a{ text-decoration: none;color:#7b7b7b;}
 .panel-body table tr td a:hover{ text-decoration: none;color:#84bf76;}
 </style>
 <div class="row">
@@ -70,7 +70,9 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
                     <table class="table">
                         <tr>
                             <td>
-                                <?='<a href="?r=site/category&id=' . $row2['id'] . '" title="">'.$row2['name'].'</a>'?>
+                              <a href="?r=site/category&id=<?=$row2['id']?>" title="<?=$row2['name']?>">
+                                <span><?=$row2['name']?></span>
+                              </a>
                             </td>
                         </tr>
                     </table>

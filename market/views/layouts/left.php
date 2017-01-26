@@ -17,7 +17,6 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
 foreach($left_menu_categorys as $row){
     echo '<div class="dropdown">
               <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown">'.$row['name'].' 
-                <!--span class="badge"></span-->
                 <span class="caret pull-right"></span>
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
@@ -26,10 +25,7 @@ foreach($left_menu_categorys as $row){
                     <ul class="list-unstyled">';
     foreach($left_menu_categorys_sub as $row2){
         if($row['id'] == $row2['parent']){
-            echo     '<li><a href="?r=site/category&id=' . $row2['id'] . '" title="">'.$row2['name'].' '
-                    . '<span class="badge">'
-                    .// \common\models\MpCategory::getCountProduct($row2['id']).
-                    '</span></a></li>';
+            echo     '<li><a href="?r=site/category&id=' . $row2['id'] . '" title="">'.$row2['name'].'</a></li>';
         }
     }
             echo   '</ul>

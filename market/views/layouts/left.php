@@ -8,7 +8,8 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
 .panel-group {margin-bottom: 0px;overflow: hidden;}  
 .panel-group .panel{border-radius:0;border:0;border-bottom:1px solid #ddd}
 .panel-body { padding:0px; }
-.panel-body table tr td span{ width:100%;display: block;padding-left: 15px;}
+.panel-body table tr td span{ width:100%;display: block;padding-left: 25px;padding-top:10px;padding-bottom:7px;}
+.panel-body table tr td {padding:0}
 .panel-body .table {margin-bottom: 0px;}
 .panel-group .panel+.panel {margin-top: 0px;}
 .panel-default>.panel-heading {

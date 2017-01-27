@@ -8,8 +8,24 @@ market\assets\AppAsset::register($this);
 
 $addAction = Url::to(["site/ajax-add-to-cart"]);
 $inviteAction = Url::to(["site/ajax-invite-vendor"]);
-
+$customJs = <<< JS
+var wow = new WOW(
+  {
+    boxClass:     'wow',      // animated element css class (default is wow)
+    animateClass: 'animated', // animation css class (default is animated)
+    offset:       11,          // distance to the element when triggering the animation (default is 0)
+    mobile:       false,       // trigger animations on mobile devices (default is true)
+    live:         true,       // act on asynchronously loaded content (default is true)
+  }
+);
+wow.init();       
+JS;
+$this->registerJs($customJs, View::POS_READY);
 $js = <<<JS
+        if(Cookies.get('left-menu')){
+        $("#accordion .panel-collapse").removeClass('in');
+        $("#" + Cookies.get('left-menu')).addClass("in");
+        }
         $(document).on("click", ".add-to-cart", function(e) {
             e.preventDefault();
             $.post(
@@ -28,6 +44,13 @@ $js = <<<JS
                     $.notify(result.growl.options, result.growl.settings);
             });
         });
+        $('#accordion').on('hidden.bs.collapse', function (e) {
+            Cookies.remove('left-menu');
+        })
+        $('#accordion').on('shown.bs.collapse', function (e) {
+            Cookies.set('left-menu', e.target.id);
+        })
+        
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>
@@ -70,18 +93,4 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 <?php $this->endBody() ?>
 </body>
 </html>
-<?php $this->endPage() ?>
-<?php $customJs = <<< JS
-var wow = new WOW(
-  {
-    boxClass:     'wow',      // animated element css class (default is wow)
-    animateClass: 'animated', // animation css class (default is animated)
-    offset:       11,          // distance to the element when triggering the animation (default is 0)
-    mobile:       false,       // trigger animations on mobile devices (default is true)
-    live:         true,       // act on asynchronously loaded content (default is true)
-  }
-);
-wow.init();       
-JS;
-$this->registerJs($customJs, View::POS_READY);
-?>        
+<?php $this->endPage() ?>      

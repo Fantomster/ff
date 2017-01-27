@@ -164,3 +164,12 @@ if(empty($i)){
     </div>
   </div>
 </div>
+<?php $customJs = <<< JS
+if($('#result .row').height() > $( window ).height()){
+   $('.res-block').css('height',$( window ).height()-130) 
+   }else{
+   $('.res-block').css('height',$('#result .row').height()+130)     
+}
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

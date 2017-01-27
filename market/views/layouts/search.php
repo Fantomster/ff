@@ -1,8 +1,9 @@
 <?php
 use yii\web\View;
 ?>
-<div id="overlow-search-result"></div>
-<section id="search_block">
+
+<section id="search_block"> 
+    
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -17,6 +18,7 @@ use yii\web\View;
     </div>
 </section>
 <section id="search-result">
+    <div id="overlow-search-result"></div>
     <div class="container">
         <div class="row">         
 <?=$this->render('../site/main/_search_form');?>
@@ -52,7 +54,7 @@ $(document).ready(function(){
                 var obj = $('#search-result');
                 var objs = $('#search_block');
                 var ovr = $('#overlow-search-result');
-                objs.addClass('shadow-bottom-light');
+                //objs.addClass('shadow-bottom-light');
                 $('#features1-u').addClass('blur');
                 obj.animate({ 
                         zIndex: 100,
@@ -66,7 +68,7 @@ $(document).ready(function(){
                 var obj = $('#search-result');
                 var objs = $('#search_block');
                 var ovr = $('#overlow-search-result');
-                objs.removeClass('shadow-bottom-light');
+                //objs.removeClass('shadow-bottom-light');
                 $('#features1-u').removeClass('blur');
                 obj.animate({ 
                         zIndex: '-1',
@@ -98,7 +100,7 @@ var scrollTop = $(window).scrollTop();
       top:0,
       width:'100%',
       position: 'fixed',
-      zIndex: 100,
+      zIndex: 101,
     });
     sRes.css({
       marginTop: 0,

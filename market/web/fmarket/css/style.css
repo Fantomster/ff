@@ -456,7 +456,7 @@ background: #efefef;
 }
 #search_block{
 position: relative;
-z-index: 100;	
+z-index: 101;	
 background-color: rgb(255, 255, 255);
 padding-top: 0;
 padding-bottom: 0;
@@ -496,12 +496,17 @@ z-index: -1;
 .search-result-block{
 padding-left: 15px;
 padding-right: 15px;
+z-index: 1;
+position: relative;
 }
 .res-block{
 background: #fff;
 border: 1px solid #ddd;
 border-top:0;
 padding: 15px;
+height: 400px;
+overflow-y: scroll;
+overflow-x: hidden;
 }
 
 .title-search-result{

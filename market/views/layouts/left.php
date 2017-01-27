@@ -12,31 +12,15 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
 .panel-body table tr td {padding:0}
 .panel-body .table {margin-bottom: 0px;}
 .panel-group .panel+.panel {margin-top: 0px;}
-.panel-default>.panel-heading {
-    color: #333;
-    background-color: #fff;
-}
+.panel-default>.panel-heading {color: #333;background-color: #fff;}
 #accordion {box-shadow: 0px 1px 3px rgba(9, 12, 17, 0.2);border-radius:3px;}
-.panel-default>.panel-heading {
-    padding-top:0;
-    padding-bottom:0;
-}
-.panel-collapse{
-        background: #f3f3f3;
-}
-.panel-default > .panel-heading + .panel-collapse > .panel-body {
-    border-top: none; 
-}
+.panel-default>.panel-heading {padding-top:0;padding-bottom:0;}
+.panel-collapse{background: #f3f3f3;}
+.panel-default > .panel-heading + .panel-collapse > .panel-body {border-top: none; }
 .panel-default>.panel-heading h4{padding-top:15px;padding-bottom:10px;}
 .caret{margin-top: -21px;}
-.panel-default>.panel-heading a{
-    text-decoration: none;
-    color:#3f3e3e;
-}
-.panel-default>.panel-heading a:hover{
-    text-decoration: none;
-    color:#84bf76;
-}
+.panel-default>.panel-heading a{text-decoration: none;color:#3f3e3e;}
+.panel-default>.panel-heading a:hover{text-decoration: none;color:#84bf76;}
 .panel-body table tr td a{ text-decoration: none;color:#7b7b7b;}
 .panel-body table tr td a:hover{ text-decoration: none;color:#84bf76;}
 </style>

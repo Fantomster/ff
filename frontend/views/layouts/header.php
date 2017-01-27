@@ -171,6 +171,9 @@ JS;
             <div class="navbar-custom-menu">
 
                 <ul class="nav navbar-nav">
+                    <li>
+                        <?= Html::a("<b>f</b>-market", "https://market.f-keeper.ru", ['class' => 'header-link']) ?>
+                    </li>
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                         <li>
                             <a href="<?= Url::to(['order/checkout']) ?>">
@@ -183,7 +186,7 @@ JS;
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
-                            <span class="label label-danger unread-messages-count" style="display: <?= count($unreadMessages) ? 'block' : 'none'?>"><?= count($unreadMessages) ?></span>
+                            <span class="label label-danger unread-messages-count" style="display: <?= count($unreadMessages) ? 'block' : 'none' ?>"><?= count($unreadMessages) ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="header">Непрочитанных сообщений: <span class="unread-messages-count"><?= count($unreadMessages) ?></span></li>
@@ -191,9 +194,9 @@ JS;
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-messages">
                                     <?php
-                                        foreach ($unreadMessages as $message) {
-                                            echo $this->render('/order/_header-message', compact('message'));
-                                        }
+                                    foreach ($unreadMessages as $message) {
+                                        echo $this->render('/order/_header-message', compact('message'));
+                                    }
                                     ?>
                                 </ul>
                             </li>
@@ -205,7 +208,7 @@ JS;
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-bell-o"></i>
-                            <span class="label label-warning unread-notifications-count" style="display: <?= count($unreadNotifications) ? 'block' : 'none'?>"><?= count($unreadNotifications) ?></span>
+                            <span class="label label-warning unread-notifications-count" style="display: <?= count($unreadNotifications) ? 'block' : 'none' ?>"><?= count($unreadNotifications) ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="header">Оповещений: <span class="unread-notifications-count"><?= count($unreadNotifications) ?></span></li>
@@ -213,9 +216,9 @@ JS;
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-notifications">
                                     <?php
-                                        foreach ($unreadNotifications as $message) {
-                                            echo $this->render('/order/_header-message', compact('message'));
-                                        }
+                                    foreach ($unreadNotifications as $message) {
+                                        echo $this->render('/order/_header-message', compact('message'));
+                                    }
                                     ?>
                                 </ul>
                             </li>

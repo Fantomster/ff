@@ -8,7 +8,7 @@ use common\models\Organization;
 /* @var $model common\models\Organization */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Organizations', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Организации', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 switch ($model->type_id) {
@@ -25,6 +25,8 @@ switch ($model->type_id) {
 <div class="organization-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    
+    <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']) ?>
 
     <?= DetailView::widget([
         'model' => $model,
@@ -35,12 +37,15 @@ switch ($model->type_id) {
                 'value' => $model->type->name,
             ],
             'name',
+            'legal_entity',
             'city',
             'address',
             'zip_code',
             'phone',
             'email:email',
             'website',
+            'contact_name',
+            'about',
             'created_at',
             'updated_at',
             'step',

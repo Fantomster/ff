@@ -34,6 +34,17 @@ $this->registerJs(
                 });
                 return false;
             });
+            $(".content").on("click", ".delete", function() {
+                var form = $("#user-form");
+                $.post(
+                    $(this).data("action"),
+                    {id:$(this).data("id")}
+                )
+                .done(function(result) {
+                    form.replaceWith(result);
+                });
+                return false;
+            });
             $("body").on("hidden.bs.modal", "#add-user", function() {
                 $(this).data("bs.modal", null);
                 $.pjax.reload({container: "#users-list"});

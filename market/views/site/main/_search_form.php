@@ -135,7 +135,7 @@ if(empty($i)){
                         <div class="media-left media-middle">
                           <a href="<?=Url::to(['/site/supplier', 'id' => $arr['_source']['supplier_id']]);?>">
                             <img alt="64x64" class="search-result-image" data-holder-rendered="true" style="width: 114px; height: 64px;" class="media-object" 
-                                 src="<?=empty($arr['_source']['supplier_image'])?\common\models\ES\Product::putNoImage():$arr['_source']['supplier_image'] ?>">
+                                 src="<?=empty($arr['_source']['supplier_image'])?\common\models\Organization::DEFAULT_VENDOR_AVATAR:$arr['_source']['supplier_image'] ?>">
                           </a>
                         </div>
                         <div class="media-body">

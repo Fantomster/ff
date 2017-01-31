@@ -20,7 +20,7 @@ foreach($sp as $row){
 <div class="mp-suppiler-block  animated fadeIn">
     <a href="<?=Url::to(['/site/supplier', 'id' => $row->supplier_id]);?>">
   <img class="supplier-image" src="<?=!empty($row->supplier_image) ? 
-        $row->supplier_image: \common\models\ES\Product::putNoImage(); ?>">
+        $row->supplier_image : \common\models\Organization::DEFAULT_VENDOR_AVATAR; ?>">
     </a>
   <div class="row">
     <div class="col-md-12">

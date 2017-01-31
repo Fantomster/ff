@@ -34,6 +34,7 @@ use yii\helpers\Url;
  * @property string $ed
  * @property integer $mp_show_price
  * 
+ * @property MpCountry $mpRegion
  * @property Organization $vendor
  * @property MpCategory $category
  * @property MpCategory $mainCategory
@@ -236,6 +237,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         }
             
     }
+    public function getMpRegion() {
+        return $this->hasOne(mpCountry::className(), ['id' => 'region']);
+    }
+    
     public function getMiniImageUrl() {
         return $this->image ? $this->getThumbUploadUrl('image', 'mini') : self::DEFAULT_IMAGE;
     }

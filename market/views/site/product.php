@@ -78,7 +78,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
         <div class="col-md-8 col-lg-8">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><?= $product->product ?> 
+                    <h3><?= $product->product ?> <br>
                         <a class="grey-link" href="<?=Url::to(['/site/supplier', 'id' => $vendor->id]);?>">
                             <small><?= $vendor->name ?></small>
                         </a>
@@ -90,11 +90,11 @@ font-family: "HelveticaBold",Arial,sans-serif;
               <?php } ?>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                    <a id="supp-phone">Показать телефон</a>
+                   <?=!empty($vendor->phone)? '<a id="supp-phone">Показать телефон</a>':'&nbsp;'?>
                 </div>
                 
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                    <a id="supp-email">Показать E-mail</a>
+                    <?=!empty($vendor->email)? '<a id="supp-email">Показать E-mail</a>':'&nbsp;'?>
                 </div>
                 <?php
 if(!\Yii::$app->user->isGuest){
@@ -161,7 +161,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6"> 
-                    <h5><span class="title-param">Страна:</span> <?= empty($product->region) ? '<span class="noinfo">нет информации</span>':$product->region ?></h5>   
+                    <h5><span class="title-param">Страна:</span> <?= empty($product->region) ? '<span class="noinfo">нет информации</span>':$product->mpRegion->name ?></h5>   
                     <h5><span class="title-param">Ед. измерения:</span> <?= empty($product->ed) ? '<span class="noinfo">нет информации</span>':$product->ed ?></h5>  
                     <h5><span class="title-param">Вес:</span> <?= empty($product->weight) ? '<span class="noinfo">нет информации</span>':$product->weight ?></h5>   
                     <h5><span class="title-param">Производитель:</span> <?= empty($product->brend) ? '<span class="noinfo">нет информации</span>':$product->brend ?></h5>   

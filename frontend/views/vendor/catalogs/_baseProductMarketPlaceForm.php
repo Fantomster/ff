@@ -291,7 +291,6 @@ label {
     data-toggle="tooltip" 
     title="Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)"></span></span></div>{error}'])->
     textInput(['placeholder' => 'КРАТНОСТЬ ПОСТАВКИ']) ?>
-                                    
 				</div>
 				<div class="col-md-6">
                                     <label class="control-label" for="">Страна производитель</label>
@@ -306,30 +305,6 @@ label {
                                             //'tags' => true,
                                         ],
                                     ])->label(false);
-                                    /*       
-                                    echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
-                                        'language'=>'ru',
-                                        'options' => ['placeholder' => 'Страна ...'], 
-                                        'pluginOptions' => [
-                                            'minimumInputLength' => 1,
-                                            'allowClear' => false,
-                                            'ajax' => [
-                                                'url' => \yii\helpers\Url::toRoute(['vendor/mp-country-list']),
-                                                'dataType' => 'json',
-                                                //'type' => 'GET',
-                                                'data' => new \yii\web\JsExpression('function(term,page) { return {wq:term}; }'),
-                                                'results' => new \yii\web\JsExpression('function(data,page) { return {results:data.results}; }'),
-                                                'initSelection' => new \yii\web\JsExpression('function(element,callback){
-                                                return callback('.
-                                                   ($model->isNewRecord
-                                                      ? '{"id":null,"text":""}'
-                                                     :Json::encode(["id"=>$model->streetid,"text"=>$model->name."[".$model->city->name."]"])
-                                                                       ).')
-                                                  }')
-                                            ],
-                                           
-                                        ], 
-                                    ])->label(false);*/
                                     ?>
                                     
                                     <?= $form->field($catalogBaseGoods, 'brand', 

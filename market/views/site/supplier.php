@@ -71,15 +71,15 @@ font-family: "HelveticaBold",Arial,sans-serif;
             <div class="row">
                 <div class="col-md-12">
                     <h3><?= $vendor->name ?></h3>
-                    <h5><span class="title-param">Контактное лицо:</span> <?= $vendor->contact_name ?></h5>
+                    <h5><span class="title-param">Контактное лицо:</span> <?= empty($vendor->contact_name) ? '<span class="noinfo">нет информации</span>':$vendor->contact_name ?></h5>
                     <hr>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                    <a id="supp-phone">Показать телефон</a>
+                   <?=!empty($vendor->phone)? '<a id="supp-phone">Показать телефон</a>':'&nbsp;'?>
                 </div>
                 
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                    <a id="supp-email">Показать E-mail</a>
+                    <?=!empty($vendor->email)? '<a id="supp-email">Показать E-mail</a>':'&nbsp;'?>
                 </div>
                 <?php
 if(!\Yii::$app->user->isGuest){

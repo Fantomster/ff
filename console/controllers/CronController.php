@@ -225,6 +225,7 @@ class CronController extends Controller {
                 ->where([
                     'es_status'=>Organization::ES_UPDATED,
                         ])
+                ->limit(100)
                 ->all(); 
        foreach($suppliers as $supplier){
            if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->exists()){

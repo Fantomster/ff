@@ -25,6 +25,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $contact_name
  * @property string $about
  * @property string $picture
+ * @property string $es_status
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
@@ -42,7 +43,10 @@ class Organization extends \yii\db\ActiveRecord {
     const STEP_ADD_VENDOR = 2; //restaurants only
     const STEP_ADD_CATALOG = 3; //vendors only
     const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
-
+    
+    const ES_INACTIVE = 0;
+    const ES_ACTIVE = 1;
+    
     public $resourceCategory = 'org-picture';
 
     /**
@@ -60,7 +64,7 @@ class Organization extends \yii\db\ActiveRecord {
             ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
             ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
             [['type_id', 'name'], 'required'],
-            [['type_id', 'step'], 'integer'],
+            [['type_id', 'step','es_status'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],

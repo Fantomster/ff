@@ -331,7 +331,7 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' => $search,
-                        //'analyzer' =>"ru",
+                            //'analyzer' =>"ru",
                         //'type' =>'phrase_prefix',
                         //'max_expansions' =>6
                         ]
@@ -637,7 +637,10 @@ class SiteController extends Controller {
             $params_categorys = [
                 'query' => [
                     'match' => [
-                        'category_name' => $search
+                        'category_name' => [
+                            'query' => $search,
+                            'analyzer' => "ru",
+                        ],   
                     ]
                 ]
             ];

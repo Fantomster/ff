@@ -133,7 +133,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
         </div>
         <div class="col-md-12" style="padding-top:25px">
            
-                <h5><span class="title-param">Адрес:</span> <?= $vendor->address ?></h5> 
+                <h5><span class="title-param">Адрес:</span> <?= empty($vendor->address) ? '<span class="noinfo">нет информации</span>':$vendor->address ?></h5> 
        
         </div>
         <div class="col-md-12">
@@ -149,22 +149,30 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6"> 
-                    <h5><span class="title-param">Клиентов:</span> <?= $vendor->getClientsCount() ?></h5>   
-                    <h5><span class="title-param">Заказов:</span> <?= $vendor->getOrdersCount() ?></h5>  
-                    <h5><span class="title-param">Категории:</span> <?= $vendor->getMarketGoodsCount() ?></h5> 
+                    <h5><span class="title-param">Клиентов:</span>
+                    <?= $vendor->getClientsCount() ?>
+                    </h5>   
+                    <h5><span class="title-param">Заказов:</span> 
+                    <?= $vendor->getOrdersCount() ?>
+                    </h5>  
+                    <h5><span class="title-param">Категории:</span> 
+                    <?= $vendor->getMarketGoodsCount() ?>
+                    </h5> 
                 </div>
                 <div class="col-md-6">
-                    <h5><span class="title-param">Стоимость доставки:</span> <?= $delivery->delivery_charge ?> руб.</h5>    
+                    <h5><span class="title-param">Стоимость доставки:</span> 
+                                      <?= $delivery->delivery_charge ?> руб.
+                    </h5>    
                     <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> руб.</h5> 
                     <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> руб.</h5>   
-                    <h5><span class="title-param">Адрес самовывоза:</span> </h5>   
+                    <h5><span class="title-param">Адрес самовывоза:</span> <span class="noinfo">нет информации</span></h5>   
                     <h5><span class="title-param">Дни доставки:</span> <?= $delivery->getDaysString() ?></h5>  
                 </div>
                 <div class="col-md-12">
                     <h4>ОПИСАНИЕ</h4>  
                 </div>
                 <div class="col-md-12" style="padding-bottom:10px;">
-                   <?= $vendor->about ?>  
+                   <?= empty($vendor->about) ? '<span class="noinfo">нет информации</span>':$vendor->about ?> 
                 </div>
             </div>
         </div>

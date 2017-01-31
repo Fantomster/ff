@@ -48,17 +48,35 @@ function heightDetect() {
                 $(window).scroll(function () {
                     headers();
                 });
-        $("#menu__burger").click(function () {
-                $(".nav_menu").slideToggle();
-            });
 JS;
-} else {
+} 
     $js = <<<JS
             $("#menu__burger").click(function () {
                 $(".nav_menu").slideToggle();
             });
+            
+            $(".top-mnu ul li a").click(function() {
+                $(".top-mnu").fadeOut(600);
+                $(".toggle-mnu").toggleClass("active");
+                $(".header-h").css("opacity", "1");
+                $(".toggle-mnu").removeClass("on");
+            }).append("<span>");
+
+            $(".toggle-mnu").click(function() {
+            if ($(".top-mnu").is(":visible")) {
+             $(".header-h").css("opacity", "1");
+             $(".top-mnu").fadeOut(600);
+             $(".top-mnu li a, .top-mnu li span, .phone-email").removeClass("fadeInUp animated");
+             $(this).removeClass("on");
+            } else {
+             $(".header-h").css("opacity", ".1");
+             $(".top-mnu").fadeIn(600);
+             $(".top-mnu li a, .top-mnu li span, .phone-email").addClass("fadeInUp animated");
+             $(this).addClass("on");
+            };
+         });            
 JS;
-}
+
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>
 <?php $this->beginPage() ?>

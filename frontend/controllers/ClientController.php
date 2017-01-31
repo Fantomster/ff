@@ -204,7 +204,24 @@ class ClientController extends DefaultController {
      */
 
     public function actionAjaxDeleteUser() {
-        //
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($post && isset($post['id'])) {
+                $user = User::findOne(['id' => $post['id']]);
+                $usersCount = count($user->organization->users);
+                if ($user && ($usersCount > 1)) {
+                    $user->role_id = Role::ROLE_USER;
+                    $user->organization_id = null;
+                    if ($user->save()) {
+                        $message = 'Пользователь удален!';
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
+                }
+                
+            }
+        }
+        $message = 'Не удалось удалить пользователя!';
+        return $this->renderAjax('settings/_success', ['message' => $message]);
     }
 
     /**

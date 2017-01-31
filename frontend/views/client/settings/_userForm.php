@@ -36,6 +36,12 @@ $form = ActiveForm::begin([
 </div>
 <div class="modal-footer">
     <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success edit']) ?>
+    <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', [
+        'class' => 'btn btn-danger delete', 
+        'data' => [
+            'id' => $user->id,
+            'action' => Url::to(["client/ajax-delete-user"]),
+        ]]) ?>
     <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
 </div>
 <?php ActiveForm::end(); ?>

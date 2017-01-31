@@ -108,8 +108,8 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                              <a href="<?=Url::to(['/site/supplier-products', 'id' => $vendor->id]);?>" class="btn btn-100 btn-success" data-product-id="">
-                                  КАТАЛОГ
+                              <a href="<?=Url::to(['/site/supplier-products', 'id' => $vendor->id]);?>" class="btn btn-100 btn-success view-catalog" data-product-id="">
+                                  <isc></isc>&nbsp;&nbsp;КАТАЛОГ
                               </a>
                             </div>
                         </div>

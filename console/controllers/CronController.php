@@ -55,7 +55,7 @@ class CronController extends Controller {
                       $es_supplier = new \common\models\ES\Supplier();  
                       $es_supplier->attributes = [
                         "supplier_id" => $supplier->id,
-                        "supplier_image" => !empty($supplier->image) ? $supplier->imageUrl : '',
+                        "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
                         "supplier_name"  => $supplier->name,
                       ];
                       $es_supplier->save();
@@ -221,6 +221,35 @@ class CronController extends Controller {
         }
     }
     public function actionUpdateSuppliers() {
+       $suppliers = Organization::find()
+                ->where([
+                    'es_status'=>Organization::ES_UPDATED,
+                        ])
+                ->all(); 
+       foreach($suppliers as $supplier){
+           if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->exists()){
+             $es_supplier = new \common\models\ES\Supplier();
+             $es_supplier->attributes = [
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
+             ];
+             $es_supplier->save();
+            }else{
+             $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+             $es_supplier->attributes = [
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
+             ];
+             $es_supplier->save();   
+            }
+           
+           Yii::$app->db->createCommand("update organization set es_status = 1 where id = " . $supplier->id);
+       }
+       
+    }
+    public function actionMassUpdateSuppliers() {
         /*$suppliers_array = Yii::$app->db->createCommand("SELECT * from organization
         join (SELECT DISTINCT `supp_org_id` FROM `catalog_base_goods` WHERE (`market_place`=1) AND (`deleted`=0))tb
         on (id = tb.supp_org_id)")->queryAll();*/
@@ -229,24 +258,35 @@ class CronController extends Controller {
                 ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->distinct()
                 ->all();
-        $arr = '';
-        $i = 0;
+        $arr = [];
         foreach($suppliers as $supplier){
-            $arr .= $supplier
-            $supplier->supp_org_id;
+            $arr[] = $supplier->supp_org_id;
+            
         }
-        //$suppliers_array = Yii::$app->db->createCommand("update organization set es_status=NULL where ")->execute();
-        /*foreach($suppliers_array as $supplier){
-            if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier['id']])->exists()){
+        $arr = implode(',',$arr);
+        if(!empty($arr)){
+           Yii::$app->db->createCommand("update organization set es_status = 1 where id in (" . $arr . ")");  
+           Yii::$app->db->createCommand("update organization set es_status = 0 where es_status is null");
+        }
+        $suppliers = Organization::findAll(['es_status'=>Organization::ES_ACTIVE]);
+        foreach($suppliers as $supplier){
+            if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->exists()){
              $es_supplier = new \common\models\ES\Supplier();
              $es_supplier->attributes = [
-                    "supplier_id" => $supplier['id'],
-                    "supplier_image" => $supplier['image'],
-                    "supplier_name"  => $supplier['name'],
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
              ];
              $es_supplier->save();
+            }else{
+             $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+             $es_supplier->attributes = [
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
+             ];
+             $es_supplier->save();   
             }
         }
-        Organization::updateAll(['es_status' => Organization::ES_INACTIVE], ('es_status is null'));*/
     }
 }

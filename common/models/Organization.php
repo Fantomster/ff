@@ -46,6 +46,7 @@ class Organization extends \yii\db\ActiveRecord {
     
     const ES_INACTIVE = 0;
     const ES_ACTIVE = 1;
+    const ES_UPDATED = 2;
     
     public $resourceCategory = 'org-picture';
 

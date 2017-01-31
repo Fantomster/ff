@@ -269,6 +269,7 @@ class CronController extends Controller {
            Yii::$app->db->createCommand("update organization set es_status = 1 where id in (" . $arr . ")");  
            Yii::$app->db->createCommand("update organization set es_status = 0 where es_status is null");
         }
+        var_dump($arr);
         $suppliers = Organization::findAll(['es_status'=>Organization::ES_ACTIVE]);
         foreach($suppliers as $supplier){
             if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->exists()){

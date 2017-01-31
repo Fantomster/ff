@@ -36,7 +36,7 @@ class GoodsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', 'ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market'],
+                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', 'ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market-place'],
                         'allow' => true,
                         'roles' => [\common\models\Role::ROLE_ADMIN],
                     ],

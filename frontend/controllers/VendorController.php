@@ -7,22 +7,17 @@ use yii\helpers\Json;
 use common\models\User;
 use common\models\Order;
 use common\models\Organization;
-use common\models\Delivery;
 use common\models\Role;
 use common\models\Profile;
 use common\models\search\UserSearch;
 use common\models\RelationSuppRest;
-use common\models\RelationCategory;
-use common\models\Category;
 use common\models\Catalog;
 use common\models\CatalogGoods;
-use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\web\UploadedFile;
-use yii\helpers\Url;
 
 /**
  * Controller for supplier
@@ -1068,6 +1063,10 @@ class VendorController extends DefaultController {
             if ($post && isset($post['id'])) {
                 $user = User::findOne(['id' => $post['id']]);
                 $usersCount = count($user->organization->users);
+                if ($user->id == $this->currentUser->id) {
+                    $message = 'Может воздержимся от удаления себя?';
+                    return $this->renderAjax('settings/_success', ['message' => $message]);
+                }
                 if ($user && ($usersCount > 1)) {
                     $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;

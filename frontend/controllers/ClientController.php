@@ -209,6 +209,10 @@ class ClientController extends DefaultController {
             if ($post && isset($post['id'])) {
                 $user = User::findOne(['id' => $post['id']]);
                 $usersCount = count($user->organization->users);
+                if ($user->id == $this->currentUser->id) {
+                    $message = 'Может воздержимся от удаления себя?';
+                    return $this->renderAjax('settings/_success', ['message' => $message]);
+                }
                 if ($user && ($usersCount > 1)) {
                     $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;

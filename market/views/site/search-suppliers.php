@@ -35,7 +35,7 @@ foreach($sp as $row){
     </div>
     <div class="col-md-12">
       <div class="supplier-button">
-        <a href="#" class="btn btn-100 btn-success invite-vendor" style="width: 100%" data-vendor-id="<?= $row->id ?>">Добавить</a>
+        <a href="#" class="btn btn-100 btn-success invite-vendor" style="width: 100%" data-vendor-id="<?= $row->supplier_id ?>">Добавить</a>
       </div>
     </div>
   </div>

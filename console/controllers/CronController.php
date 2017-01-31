@@ -5,6 +5,7 @@ namespace console\controllers;
 use Yii;
 use yii\console\Controller;
 use common\models\CatalogBaseGoods;
+use common\models\Organization;
 //`php yii cron/count`
 class CronController extends Controller {
 
@@ -32,8 +33,8 @@ class CronController extends Controller {
     public function actionUpdateCollection() {
         if(CatalogBaseGoods::find()->where('es_status is not null')->exists()){
         //обновить / добавить
-         if(CatalogBaseGoods::find()->where(['es_status' => '1'])->exists()){
-            $products = CatalogBaseGoods::find()->where(['es_status' => '1'])->all(); 
+         if(CatalogBaseGoods::find()->where(['es_status' => CatalogBaseGoods::ES_UPDATE])->exists()){
+            $products = CatalogBaseGoods::find()->where(['es_status' => CatalogBaseGoods::ES_UPDATE])->limit(500)->all(); 
             foreach($products as $catalogBaseGoods){
                 $product_id = $catalogBaseGoods->id;
                 $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
@@ -48,7 +49,20 @@ class CronController extends Controller {
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
                 
+                $supplier = Organization::findOne(['id' => $product_supp_id]);
+                //Если поставщика нет в ES, тогда его необходимо создать
+                if(!\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->exists()){ 
+                      $es_supplier = new \common\models\ES\Supplier();  
+                      $es_supplier->attributes = [
+                        "supplier_id" => $supplier->id,
+                        "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                        "supplier_name"  => $supplier->name,
+                      ];
+                      $es_supplier->save();
+                }
+                
                 if(\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()){
+                 
                 $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
                 $es_product->attributes = [
                     "product_id" => $product_id,
@@ -86,20 +100,39 @@ class CronController extends Controller {
                 
                 }
             }
-            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => 1]);
+            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => CatalogBaseGoods::ES_UPDATE]);
             $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
             $res = shell_exec($url);
          }
-        //удалить
-         if(CatalogBaseGoods::find()->where(['es_status' => '2'])->exists()){
-            $products = CatalogBaseGoods::find()->where(['es_status' => '2'])->all();    
+        //Удалить продукты из МП если es_status = 2
+         if(CatalogBaseGoods::find()->where(['es_status' => CatalogBaseGoods::ES_DELETED])->exists()){
+            $products = CatalogBaseGoods::find()->where(['es_status' => CatalogBaseGoods::ES_DELETED])->limit(500)->all();    
             foreach($products as $catalogBaseGoods){
-             if(\common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->exists()){
-             $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
-             $es_product->delete();    
-             }    
+                //Есть-ли продукт в ES? Если есть, тогда 
+                if(\common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->exists()){
+                    $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
+                    $es_product->delete();   
+                    //Если в данной итерации, продуктов в МП = 0, тогда необходимо удалить поставщика из МП
+                    //1) Если нету продуктов в МП у поставщика:
+                    if(!CatalogBaseGoods::find()->where(['supp_org_id'=>$catalogBaseGoods->supp_org_id, 'market_place' =>1, 'deleted'=>0])->exists()){
+                        //2) Берем организацию поставщика
+                        $supplier = Organization::findOne(['id' => $catalogBaseGoods->supp_org_id]);
+                        //3) проверяем, в каком статусе сейчас поставщик в МП и если он активен, тогда
+                        if($supplier->es_status==Organization::ES_ACTIVE){
+                            $supplier->es_status = Organization::ES_INACTIVE;
+                            $supplier->save();
+                        }
+                        //4)Проверяем его наличие в ES
+                        //Если организация есть в ES, тогда удяляем его из ES
+                        if(\common\models\ES\Supplier::find()->where(['supplier_id' => $catalogBaseGoods->supp_org_id])->exists()){ 
+                            $es_product = \common\models\ES\Supplier::find()->where(['supplier_id'=>$catalogBaseGoods->supp_org_id])->one();
+                            $es_product->delete();
+                        }   
+                    }
+                    
+                }    
             }
-            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => 2]);
+            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => CatalogBaseGoods::ES_DELETED]);
             $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
             $res = shell_exec($url);
          
@@ -175,15 +208,85 @@ class CronController extends Controller {
             if(CatalogBaseGoods::find()->where(['es_status' => '4'])->exists()){
                $products = CatalogBaseGoods::find()->where(['es_status' => '4'])->limit(1000)->all();
                foreach($products as $catalogBaseGoods){
-                if(\common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->exists()){
-                  $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
-                  $es_product->delete();  
-                  CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);
-                }
+                    if(\common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->exists()){
+                      $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
+                      $es_product->delete();  
+                      CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);
+                    }
                } 
                
                $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
                $res = shell_exec($url);
+            }
+        }
+    }
+    public function actionUpdateSuppliers() {
+       $suppliers = Organization::find()
+                ->where([
+                    'es_status'=>Organization::ES_UPDATED,
+                        ])
+                ->limit(100)
+                ->all(); 
+       foreach($suppliers as $supplier){
+           if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->exists()){
+             $es_supplier = new \common\models\ES\Supplier();
+             $es_supplier->attributes = [
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
+             ];
+             $es_supplier->save();
+            }else{
+             $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+             $es_supplier->attributes = [
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
+             ];
+             $es_supplier->save();   
+            }
+           
+           Yii::$app->db->createCommand("update organization set es_status = 1 where id = " . $supplier->id);
+       }
+       
+    }
+    public function actionMassUpdateSuppliers() {
+        /*$suppliers_array = Yii::$app->db->createCommand("SELECT * from organization
+        join (SELECT DISTINCT `supp_org_id` FROM `catalog_base_goods` WHERE (`market_place`=1) AND (`deleted`=0))tb
+        on (id = tb.supp_org_id)")->queryAll();*/
+        $suppliers = CatalogBaseGoods::find()
+                ->select('supp_org_id')
+                ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->distinct()
+                ->all();
+        $arr = [];
+        foreach($suppliers as $supplier){
+            $arr[] = $supplier->supp_org_id;
+            
+        }
+        $arr = implode(',',$arr);
+        if(!empty($arr)){
+           Yii::$app->db->createCommand("update organization set es_status = 1 where id in (" . $arr . ")");  
+           Yii::$app->db->createCommand("update organization set es_status = 0 where es_status is null");
+        }
+        $suppliers = Organization::findAll(['es_status'=>Organization::ES_ACTIVE]);
+        foreach($suppliers as $supplier){
+            if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->exists()){
+             $es_supplier = new \common\models\ES\Supplier();
+             $es_supplier->attributes = [
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
+             ];
+             $es_supplier->save();
+            }else{
+             $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+             $es_supplier->attributes = [
+                    "supplier_id" => $supplier->id,
+                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                    "supplier_name"  => $supplier->name,
+             ];
+             $es_supplier->save();   
             }
         }
     }

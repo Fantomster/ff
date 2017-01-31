@@ -129,7 +129,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
             </div>
         </div>
         <div class="col-md-4 col-lg-4">
-                <img class="mp-supplier-image" src="<?= $vendor->pictureUrl ?>">
+                <img class="mp-supplier-image" src="<?= empty($vendor->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $vendor->pictureUrl ?>">
         </div>
         <div class="col-md-12" style="padding-top:25px">
            

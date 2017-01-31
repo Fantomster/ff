@@ -78,7 +78,7 @@ $this->title = 'F-MARKET главная';
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
         <div class="mp-suppiler-block animated fadeIn">
           <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
-            <img class="supplier-image  animated fadeInUp" src="<?= $row->imageUrl ?>">
+            <img class="supplier-image  animated fadeInUp" src="<?= empty($row->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $row->pictureUrl ?>">
           </a>
           <div class="row">
             <div class="col-md-12">

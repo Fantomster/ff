@@ -42,7 +42,11 @@ class Organization extends \yii\db\ActiveRecord {
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only
     const STEP_ADD_CATALOG = 3; //vendors only
+    
     const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
+    
+    const DEFAULT_VENDOR_AVATAR = '/images/vendor-noavatar.gif' ;
+    const DEFAULT_CLIENT_AVATAR = '/images/restaurant-noavatar.gif';
     
     const ES_INACTIVE = 0;
     const ES_ACTIVE = 1;

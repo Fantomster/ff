@@ -436,7 +436,15 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
     }
+    public function actionRestaurant($id) {
+        $restaurant = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_RESTAURANT]);
 
+        if ($restaurant) {
+            return $this->render('/site/restaurant', compact('restaurant'));
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+    }
     public function actionAjaxProductMore($num) {
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];

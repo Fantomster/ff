@@ -238,7 +238,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             
     }
     public function getMpRegion() {
-        return $this->hasOne(mpCountry::className(), ['id' => 'region']);
+        return $this->hasOne(MpCountry::className(), ['id' => 'region']);
     }
     
     public function getMiniImageUrl() {

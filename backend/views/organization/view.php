@@ -21,12 +21,20 @@ switch ($model->type_id) {
         $goodsListUrl = ['goods/vendor', 'id' => $model->id];
         break;
 }
+
+$white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
 ?>
 <div class="organization-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
     
     <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']) ?>
+    
+    <?= 
+        $white ? 
+        Html::a('Одобрено для f-market!', ['white-list/view', 'id' => $white->id], ['class' => 'btn btn-success', 'style' => 'margin-bottom: 10px;']) : 
+        Html::a('Одобрить для f-market', ['white-list/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
+    ?>
 
     <?= DetailView::widget([
         'model' => $model,

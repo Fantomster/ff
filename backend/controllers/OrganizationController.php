@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\Organization;
+use common\models\WhiteList;
 use backend\models\OrganizationSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -14,13 +15,12 @@ use common\components\AccessRule;
 /**
  * OrganizationController implements the CRUD actions for Organization model.
  */
-class OrganizationController extends Controller
-{
+class OrganizationController extends Controller {
+
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -48,14 +48,13 @@ class OrganizationController extends Controller
      * Lists all Organization models.
      * @return mixed
      */
-    public function actionIndex()
-    {
+    public function actionIndex() {
         $searchModel = new OrganizationSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -64,10 +63,9 @@ class OrganizationController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id)
-    {
+    public function actionView($id) {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+                    'model' => $this->findModel($id),
         ]);
     }
 
@@ -95,15 +93,14 @@ class OrganizationController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionUpdate($id)
-    {
+    public function actionUpdate($id) {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('update', [
-                'model' => $model,
+                        'model' => $model,
             ]);
         }
     }
@@ -128,12 +125,12 @@ class OrganizationController extends Controller
      * @return Organization the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
-    {
+    protected function findModel($id) {
         if (($model = Organization::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
 }

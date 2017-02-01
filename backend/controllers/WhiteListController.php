@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\WhiteList;
+use common\models\Organization;
 use backend\models\WhiteListSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -35,7 +36,7 @@ class WhiteListController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update', 'delete', 'create'],
+                        'actions' => ['index', 'view', 'update', 'delete', 'create', 'approve'],
                         'allow' => true,
                         'roles' => [\common\models\Role::ROLE_ADMIN],
                     ],
@@ -119,6 +120,18 @@ class WhiteListController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionApprove($id) {
+        if (($wl = WhiteList::findOne($id)) !== null) {
+            return $this->redirect(['organization/index']);
+        } elseif (($org = Organization::findOne($id)) !== null) {
+            $new = new WhiteList();
+            $new->organization_id = $org->id;
+            $new->save();
+            return $this->redirect(['white-list/view', 'id' => $new->id]);
+        }
+        return $this->redirect(['organization/index']);
     }
 
     /**

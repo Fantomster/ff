@@ -480,9 +480,13 @@ class SiteController extends Controller {
     }
     public function actionRestaurants() {
         $restaurants = WhiteList::find()
+                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->joinWith('organization')
                 ->limit(12)
                 ->all();
         $restaurantsCount = WhiteList::find()
+                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->joinWith('organization')
                 ->limit(12)
                 ->count();
 
@@ -492,9 +496,13 @@ class SiteController extends Controller {
         
         $count = WhiteList::find()
                 ->limit(6)->offset($num)
+                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->joinWith('organization')
                 ->count();
         if ($count > 0) {
             $restaurants = WhiteList::find()
+                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->joinWith('organization')
                 ->limit(6)->offset($num)
                 ->all();
             return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));

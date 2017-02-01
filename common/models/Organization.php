@@ -46,7 +46,7 @@ class Organization extends \yii\db\ActiveRecord {
     const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
     
     const DEFAULT_VENDOR_AVATAR = '/images/vendor-noavatar.gif' ;
-    const DEFAULT_CLIENT_AVATAR = '/images/restaurant-noavatar.gif';
+    const DEFAULT_RESTAURANT_AVATAR = '/images/restaurant-noavatar.gif';
     
     const ES_INACTIVE = 0;
     const ES_ACTIVE = 1;

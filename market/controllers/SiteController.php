@@ -22,6 +22,7 @@ use common\models\CatalogGoods;
 use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
+use common\models\WhiteList;
 use common\components\AccessRule;
 use yii\helpers\Url;
 use yii\helpers\Json;
@@ -477,7 +478,28 @@ class SiteController extends Controller {
             return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
         }
     }
+    public function actionRestaurants() {
+        $restaurants = WhiteList::find()
+                ->limit(12)
+                ->all();
+        $restaurantsCount = WhiteList::find()
+                ->limit(12)
+                ->count();
 
+        return $this->render('restaurants', compact('restaurants', 'restaurantsCount'));
+    }
+    public function actionAjaxRestaurantsMore($num) {
+        
+        $count = WhiteList::find()
+                ->limit(6)->offset($num)
+                ->count();
+        if ($count > 0) {
+            $restaurants = WhiteList::find()
+                ->limit(6)->offset($num)
+                ->all();
+            return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));
+        }
+    }
     public function actionAjaxSupplierMore($num) {
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];

@@ -22,6 +22,7 @@ use common\models\CatalogGoods;
 use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
+use common\models\WhiteList;
 use common\components\AccessRule;
 use yii\helpers\Url;
 use yii\helpers\Json;
@@ -478,13 +479,10 @@ class SiteController extends Controller {
         }
     }
     public function actionRestaurants() {
-        $restaurants = Organization::find()
-                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+        $restaurants = WhiteList::find()
                 ->limit(12)
                 ->all();
-
-        $restaurantsCount = Organization::find()
-                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+        $restaurantsCount = WhiteList::find()
                 ->limit(12)
                 ->count();
 
@@ -492,13 +490,11 @@ class SiteController extends Controller {
     }
     public function actionAjaxRestaurantsMore($num) {
         
-        $count = Organization::find()
-                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+        $count = WhiteList::find()
                 ->limit(6)->offset($num)
                 ->count();
         if ($count > 0) {
-            $restaurants = Organization::find()
-                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+            $restaurants = WhiteList::find()
                 ->limit(6)->offset($num)
                 ->all();
             return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));

@@ -112,7 +112,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
             </div>
         </div>
         <div class="col-md-4 col-lg-4">
-                <img class="mp-supplier-image" src="<?= empty($restaurant->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $restaurant->pictureUrl ?>">
+                <img class="mp-supplier-image" src="<?= empty($restaurant->picture) ? \common\models\Organization::DEFAULT_RESTAURANT_AVATAR : $restaurant->pictureUrl ?>">
         </div>
         <div class="col-md-12">
             <div class="row">

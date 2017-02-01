@@ -14,6 +14,7 @@ use common\models\Organization;
 class WhiteListSearch extends WhiteList
 {
     public $org_name;
+    public $org_id;
     
     /**
      * @inheritdoc
@@ -22,7 +23,7 @@ class WhiteListSearch extends WhiteList
     {
         return [
             [['id', 'organization_id'], 'integer'],
-            [['org_name', 'info', 'created_at', 'updated_at'], 'safe'],
+            [['org_name', 'org_id', 'info', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -67,6 +68,10 @@ class WhiteListSearch extends WhiteList
             'asc' => ["$organizationTable.name" => SORT_ASC],
             'desc' => ["$organizationTable.name" => SORT_DESC],
         ];
+        $dataProvider->sort->attributes['org_id'] = [
+            'asc' => ["$organizationTable.id" => SORT_ASC],
+            'desc' => ["$organizationTable.id" => SORT_DESC],
+        ];
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -74,6 +79,7 @@ class WhiteListSearch extends WhiteList
             'organization_id' => $this->organization_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            "$organizationTable.id" => $this->org_id,
         ]);
 
         $query->andFilterWhere(['like', 'info', $this->info])

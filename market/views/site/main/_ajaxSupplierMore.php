@@ -10,7 +10,7 @@ foreach($sp as $row){
 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
 <div class="mp-suppiler-block  animated fadeIn">
     <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">
-  <img class="supplier-image animated fadeInUp" src="<?= empty($row->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $row->pictureUrl ?>">
+  <img class="supplier-image animated fadeInUp" src="<?= empty($row->vendor->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $row->vendor->pictureUrl ?>">
     </a>
   <div class="row">
     <div class="col-md-12">

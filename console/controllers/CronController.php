@@ -99,8 +99,9 @@ class CronController extends Controller {
                 $es_product->save();
                 
                 }
+                CatalogBaseGoods::updateAll(['es_status' => 0], ['supp_org_id' => $product_supp_id]);
             }
-            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => CatalogBaseGoods::ES_UPDATE]);
+            
             $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
             $res = shell_exec($url);
          }
@@ -132,7 +133,7 @@ class CronController extends Controller {
                     
                 }    
             }
-            CatalogBaseGoods::updateAll(['es_status' => 0], ['es_status' => CatalogBaseGoods::ES_DELETED]);
+            CatalogBaseGoods::updateAll(['es_status' => 0], ['supp_org_id' => $catalogBaseGoods->supp_org_id]);
             $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
             $res = shell_exec($url);
          

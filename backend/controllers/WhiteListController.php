@@ -36,7 +36,7 @@ class WhiteListController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update', 'delete', 'create', 'approve'],
+                        'actions' => ['index', 'view', 'update', 'delete', 'approve'],
                         'allow' => true,
                         'roles' => [\common\models\Role::ROLE_ADMIN],
                     ],
@@ -77,18 +77,18 @@ class WhiteListController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
-    {
-        $model = new WhiteList();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
-        }
-    }
+//    public function actionCreate()
+//    {
+//        $model = new WhiteList();
+//
+//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+//            return $this->redirect(['view', 'id' => $model->id]);
+//        } else {
+//            return $this->render('create', [
+//                'model' => $model,
+//            ]);
+//        }
+//    }
 
     /**
      * Updates an existing WhiteList model.
@@ -128,8 +128,11 @@ class WhiteListController extends Controller
         } elseif (($org = Organization::findOne($id)) !== null) {
             $new = new WhiteList();
             $new->organization_id = $org->id;
+            $new->legal_entity = $org->legal_entity;
+            $new->legal_email = $org->email;
+            $new->phone = $org->phone;
             $new->save();
-            return $this->redirect(['white-list/view', 'id' => $new->id]);
+            return $this->redirect(['white-list/update', 'id' => $new->id]);
         }
         return $this->redirect(['organization/index']);
     }

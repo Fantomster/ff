@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\WhiteList */
 
-$this->title = $model->id;
+$this->title = $model->organization->name;
 $this->params['breadcrumbs'][] = ['label' => 'White Lists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

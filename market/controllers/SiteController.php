@@ -477,7 +477,33 @@ class SiteController extends Controller {
             return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
         }
     }
+    public function actionRestaurants() {
+        $restaurants = Organization::find()
+                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+                ->limit(12)
+                ->all();
 
+        $restaurantsCount = Organization::find()
+                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+                ->limit(12)
+                ->count();
+
+        return $this->render('restaurants', compact('restaurants', 'restaurantsCount'));
+    }
+    public function actionAjaxRestaurantsMore($num) {
+        
+        $count = Organization::find()
+                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+                ->limit(6)->offset($num)
+                ->count();
+        if ($count > 0) {
+            $restaurants = Organization::find()
+                ->where(['type_id' => Organization::TYPE_RESTAURANT])
+                ->limit(6)->offset($num)
+                ->all();
+            return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));
+        }
+    }
     public function actionAjaxSupplierMore($num) {
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];

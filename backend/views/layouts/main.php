@@ -50,7 +50,19 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
     $menuItems = [
         //['label' => 'Home', 'url' => ['/site/index']],
         ['label' => 'Пользователи', 'url' =>['/client/index']],
-        ['label' => 'Организации', 'url' =>['/organization/index']],
+        [
+            'label' => 'Организации', 
+            'items' => [
+                [
+                    'label' => 'Общий список',
+                    'url' =>['/organization/index'],
+                ],
+                [
+                    'label' => 'Одобренные для f-market',
+                    'url' =>['/white-list/index'],
+                ],
+            ],
+        ],
         ['label' => 'Заказы', 'url' =>['/order/index']],
         ['label' => 'Товары', 'url' =>['/goods/index']],
     ];

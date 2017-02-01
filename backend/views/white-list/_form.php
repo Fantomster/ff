@@ -12,8 +12,30 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'organization_id')->textInput() ?>
-
+    <?= $form->field($model, 'signed')->textInput() ?>
+    
+    <?= $form->field($model, 'legal_entity')->textInput() ?>
+    
+    <?= $form->field($model, 'legal_address')->textInput() ?>
+    
+    <?= $form->field($model, 'legal_email')->textInput() ?>
+    
+    <?= $form->field($model, 'inn')->textInput() ?>
+    
+    <?= $form->field($model, 'kpp')->textInput() ?>
+    
+    <?= $form->field($model, 'ogrn')->textInput() ?>
+    
+    <?= $form->field($model, 'bank_name')->textInput() ?>
+    
+    <?= $form->field($model, 'bik')->textInput() ?>
+    
+    <?= $form->field($model, 'correspondent_account')->textInput() ?>
+    
+    <?= $form->field($model, 'checking_account')->textInput() ?>
+    
+    <?= $form->field($model, 'phone')->textInput() ?>
+    
     <?= $form->field($model, 'info')->textarea(['rows' => 6]) ?>
 
     <div class="form-group">

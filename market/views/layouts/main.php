@@ -90,7 +90,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
   </div>
 </section>
 <a id='backTop'>Back To Top</a>
-<?php $this->endBody() ?>
+<?php
+echo $this->render('_yandex');
+$this->endBody()
+?>
 </body>
 </html>
 <?php $this->endPage() ?>      

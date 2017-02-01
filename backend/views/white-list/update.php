@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\WhiteList */
 
-$this->title = 'Update White List: ' . $model->id;
+$this->title = 'Update White List: ' . $model->organization->name;
 $this->params['breadcrumbs'][] = ['label' => 'White Lists', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Update';

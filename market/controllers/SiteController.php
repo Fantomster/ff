@@ -436,7 +436,15 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
     }
+    public function actionRestaurant($id) {
+        $restaurant = Organization::findOne(['id' => $id, 'type_id' => Organization::TYPE_RESTAURANT]);
 
+        if ($restaurant) {
+            return $this->render('/site/restaurant', compact('restaurant'));
+        } else {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+    }
     public function actionAjaxProductMore($num) {
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
@@ -533,11 +541,21 @@ class SiteController extends Controller {
         if ($products) {
             return $this->render('category', compact('products', 'id', 'count', 'category'));
         } else {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            $title ='F-MARKET категории';
+            $breadcrumbs = \yii\widgets\Breadcrumbs::widget([
+                'options' => [
+                    'class' => 'breadcrumb',
+                    ],
+                'homeLink' => false,
+                'links' => [
+                \common\models\MpCategory::getCategory($category->parent),
+                \common\models\MpCategory::getCategory($category->id),
+                ],
+            ]);
+            $message = 'В данной категории, товаров нет';
+            return $this->render('not-found', compact('title','breadcrumbs','message','products','category'));
         }
-        throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
     }
-
     public function actionSuppliers() {
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];

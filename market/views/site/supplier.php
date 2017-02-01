@@ -71,15 +71,15 @@ font-family: "HelveticaBold",Arial,sans-serif;
             <div class="row">
                 <div class="col-md-12">
                     <h3><?= $vendor->name ?></h3>
-                    <h5><span class="title-param">Контактное лицо:</span> <?= $vendor->contact_name ?></h5>
+                    <h5><span class="title-param">Контактное лицо:</span> <?= empty($vendor->contact_name) ? '<span class="noinfo">нет информации</span>':$vendor->contact_name ?></h5>
                     <hr>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                    <a id="supp-phone">Показать телефон</a>
+                   <?=!empty($vendor->phone)? '<a id="supp-phone">Показать телефон</a>':'&nbsp;'?>
                 </div>
                 
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
-                    <a id="supp-email">Показать E-mail</a>
+                    <?=!empty($vendor->email)? '<a id="supp-email">Показать E-mail</a>':'&nbsp;'?>
                 </div>
                 <?php
 if(!\Yii::$app->user->isGuest){
@@ -108,8 +108,8 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                              <a href="<?=Url::to(['/site/supplier-products', 'id' => $vendor->id]);?>" class="btn btn-100 btn-success" data-product-id="">
-                                  КАТАЛОГ
+                              <a href="<?=Url::to(['/site/supplier-products', 'id' => $vendor->id]);?>" class="btn btn-100 btn-success view-catalog" data-product-id="">
+                                  <isc></isc>&nbsp;&nbsp;КАТАЛОГ
                               </a>
                             </div>
                         </div>
@@ -129,7 +129,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
             </div>
         </div>
         <div class="col-md-4 col-lg-4">
-                <img class="mp-supplier-image" src="<?= $vendor->pictureUrl ?>">
+                <img class="mp-supplier-image" src="<?= empty($vendor->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $vendor->pictureUrl ?>">
         </div>
         <div class="col-md-12" style="padding-top:25px">
            

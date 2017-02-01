@@ -131,6 +131,8 @@ yii\widgets\Menu::widget([
     'options' => ['class' => 'nav_menu'],
     'items' => [
         ['label' => 'Главная', 'url' => ['/site/index']],
+        ['label' => 'F-MARKET', 'url' => 'https://market.f-keeper.ru'],
+        ['label' => 'Франшиза', 'url' => 'https://franchise.f-keeper.ru'],
         ['label' => 'Новости', 'url' => 'http://blog.f-keeper.ru?news'],
         ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
         ['label' => 'О компании', 'url' => ['/site/about']],

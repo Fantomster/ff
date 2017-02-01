@@ -10,6 +10,55 @@ if (!Yii::$app->user->isGuest) {
     $organization = $user->organization;
 }
 ?>
+<style>
+  @media (min-width: 768px) {
+    ul.nav li.dropdown:hover ul.dropdown-menu{
+    display: block;    
+    }
+  }
+  @media (max-width: 767px) {
+    ul.dropdown-menu {
+        position: relative;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        display: block;
+        float: none; 
+        min-width: 160px;
+        padding: 5px 0;
+        margin: 2px 0 0;
+        font-size: 14px;
+        list-style: none;
+        background-color: none;
+        background:none;
+        border: none;
+        box-shadow: none;
+    }
+    li.dropdown a span.caret{
+        display:none;
+    }
+    .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+        color: #fff;
+        text-decoration: none;
+        background-color: none;
+        background:none;
+    }
+    .dropdown-menu > li > a {
+        text-align: center;
+        color:#fff;
+        font-size: 12px;
+        font-family: "HelveticaBold",Arial,sans-serif;
+    }
+  }
+  @media (min-width: 768px) {
+    .navbar-inverse .navbar-nav li:nth-child(3) a{padding-bottom:6px;
+    font-size: 12px;
+    font-family: "HelveticaBold",Arial,sans-serif;}
+    .navbar-inverse .navbar-nav li:nth-child(3) a:hover{      
+        border:none;
+    }
+  }
+</style>
 <section>
     <nav class="navbar navbar-inverse navbar-static-top example6 shadow-bottom">
         <div class="container" style="padding: 9px 30px">
@@ -24,9 +73,16 @@ if (!Yii::$app->user->isGuest) {
             </div>
             <div id="navbar6" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="active"><a href="<?= Url::home(); ?>">ГЛАВНАЯ</a></li>
-                    <li><a href="http://f-keeper.ru/index.php?r=site%2Fabout">О&nbsp;НАС</a></li>
-                    <li><a href="http://f-keeper.ru/index.php?r=site%2Fcontacts">КОНТАКТЫ</a></li>
+                    <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
+                    <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>
+                    <li class="dropdown">
+                        <a href="http://f-keeper.ru/index.php" class="dropdown-toggle">F-KEEPER <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="http://f-keeper.ru/index.php?r=site%2Fabout">О&nbsp;нас</a></li>
+                            <li><a href="http://f-keeper.ru/index.php?r=site%2Fcontacts">Контакты</a></li>
+                        </ul>
+                      </li>
+                    
                     <?php if (Yii::$app->user->isGuest) { ?>
                         <li><a class="btn-navbar" href="<?= Url::to(['/user/login']) ?>">войти / регистрация</a></li>
                     <?php } else { ?>

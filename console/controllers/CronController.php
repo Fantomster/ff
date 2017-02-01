@@ -51,7 +51,9 @@ class CronController extends Controller {
                 
                 $supplier = Organization::findOne(['id' => $product_supp_id]);
                 //Если поставщика нет в ES, тогда его необходимо создать
-                if(!\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->exists()){ 
+                if(\common\models\ES\Supplier::find()->where(['supplier_id' => $product_supp_id])->exists()){ 
+                    
+                }else{
                       $es_supplier = new \common\models\ES\Supplier();  
                       $es_supplier->attributes = [
                         "supplier_id" => $supplier->id,
@@ -102,8 +104,8 @@ class CronController extends Controller {
                 CatalogBaseGoods::updateAll(['es_status' => 0], ['supp_org_id' => $product_supp_id]);
             }
             
-            $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
-            $res = shell_exec($url);
+           // $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
+           // $res = shell_exec($url);
          }
         //Удалить продукты из МП если es_status = 2
          if(CatalogBaseGoods::find()->where(['es_status' => CatalogBaseGoods::ES_DELETED])->exists()){
@@ -134,8 +136,8 @@ class CronController extends Controller {
                 }    
             }
             CatalogBaseGoods::updateAll(['es_status' => 0], ['supp_org_id' => $catalogBaseGoods->supp_org_id]);
-            $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
-            $res = shell_exec($url);
+            //$url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
+            //$res = shell_exec($url);
          
          }
          

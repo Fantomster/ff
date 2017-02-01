@@ -6,12 +6,15 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\WhiteList;
+use common\models\Organization;
 
 /**
  * WhiteListSearch represents the model behind the search form about `common\models\WhiteList`.
  */
 class WhiteListSearch extends WhiteList
 {
+    public $org_name;
+    
     /**
      * @inheritdoc
      */
@@ -19,7 +22,7 @@ class WhiteListSearch extends WhiteList
     {
         return [
             [['id', 'organization_id'], 'integer'],
-            [['info', 'created_at', 'updated_at'], 'safe'],
+            [['org_name', 'info', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -41,7 +44,10 @@ class WhiteListSearch extends WhiteList
      */
     public function search($params)
     {
+        $organizationTable = Organization::tableName();
+        
         $query = WhiteList::find();
+        $query->joinWith(['organization']);
 
         // add conditions that should always apply here
 
@@ -57,6 +63,11 @@ class WhiteListSearch extends WhiteList
             return $dataProvider;
         }
 
+        $dataProvider->sort->attributes['org_name'] = [
+            'asc' => ["$organizationTable.name" => SORT_ASC],
+            'desc' => ["$organizationTable.name" => SORT_DESC],
+        ];
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -65,7 +76,8 @@ class WhiteListSearch extends WhiteList
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['like', 'info', $this->info]);
+        $query->andFilterWhere(['like', 'info', $this->info])
+            ->andFilterWhere(['like', "$organizationTable.name", $this->org_name]);
 
         return $dataProvider;
     }

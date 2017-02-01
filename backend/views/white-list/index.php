@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\WhiteListSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'White Lists';
+$this->title = 'Организации, одобренные для f-market';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="white-list-index">
@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create White List', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Добавить организацию', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 <?php Pjax::begin(); ?>    <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -26,6 +26,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'id',
             'organization_id',
+            [
+                'format' => 'raw',
+                'attribute' => 'org_name',
+                'value' => function ($data) {
+                    return Html::a($data['organization']['name'], ['organization/view', 'id' => $data['organization_id']]);
+                },
+                'label' => 'Название организации',
+            ],
             'info:ntext',
             'created_at',
             'updated_at',

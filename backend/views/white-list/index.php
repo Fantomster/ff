@@ -31,7 +31,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'label' => 'Название организации',
             ],
-            'info:ntext',
             'created_at',
             'updated_at',
 

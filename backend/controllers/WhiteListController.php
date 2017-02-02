@@ -5,6 +5,7 @@ namespace backend\controllers;
 use Yii;
 use common\models\WhiteList;
 use common\models\Organization;
+use common\models\Role;
 use backend\models\WhiteListSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -36,9 +37,17 @@ class WhiteListController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update', 'delete', 'approve'],
+                        'actions' => ['update', 'delete', 'approve'],
                         'allow' => true,
-                        'roles' => [\common\models\Role::ROLE_ADMIN],
+                        'roles' => [Role::ROLE_ADMIN],
+                    ],
+                    [
+                        'actions' => ['index', 'view'],
+                        'allow' => true,
+                        'roles' => [
+                            Role::ROLE_ADMIN,
+                            Role::ROLE_FKEEPER_OBSERVER,
+                        ],
                     ],
                 ],
             ],

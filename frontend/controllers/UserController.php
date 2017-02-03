@@ -201,11 +201,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
         if ($model->hasErrors()) {
             $test = $model->errors;
-            $confirmError = "Ссылка подтверждения была отправлена на email";
-            if (isset($test['email'][0]) && ($test['email'][0] === $confirmError)) {
-                $model->clearErrors();
-                $model->addError('password', "Аккаунт не подтвержден. $confirmError");
-            } else {
+            $confirmError = "Учетная запись не активирована!";
+            if (isset($test['email'][0]) && ($test['email'][0] !== $confirmError)) {
+//                $model->clearErrors();
+//                $model->addError('password', "Аккаунт не подтвержден. $confirmError");
+//            } else {
                 $model->clearErrors();
                 $model->addError('password', 'Вы указали неверную почту или пароль');
             }

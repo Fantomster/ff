@@ -63,6 +63,7 @@ return [
                 'Profile' => 'common\models\Profile',
                 'Role' => 'common\models\Role',
                 'Organization' => 'common\models\Organization',
+                'LoginForm' => 'common\models\forms\LoginForm',
             ],
             'emailViewPath' => '@common/mail',
         ],

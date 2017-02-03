@@ -154,7 +154,7 @@ class StatisticsController extends Controller {
                 ->andWhere([">=", "created_at", $date])
                 ->count();
         $acceptedOrderCountSinceDate = Order::find()
-                ->where(['status' => [Order::STATUS_PROCESSING, Order::STATUS_DONE]])
+                ->where(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
                 ->andWhere([">=", "created_at", $date])
                 ->count();
         $rejectedOrderCountSinceDate = Order::find()
@@ -182,7 +182,7 @@ class StatisticsController extends Controller {
                 ->andWhere(["between", "created_at", $from, $to])
                 ->count();
             $acceptedOrderCountForWeek = Order::find()
-                ->where(['status' => [Order::STATUS_PROCESSING, Order::STATUS_DONE]])
+                ->where(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
                 ->andWhere(["between", "created_at", $from, $to])
                 ->count();
             $rejectedOrderCountForWeek = Order::find()

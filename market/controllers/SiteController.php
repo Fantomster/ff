@@ -93,24 +93,37 @@ class SiteController extends Controller {
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
             }
         }
-        $topProducts = CatalogBaseGoods::find()->
-                where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+        $topProducts = CatalogBaseGoods::find()
+                ->joinWith('whiteList')
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->limit(6)
                 ->all();
+        
         $topSuppliers = CatalogBaseGoods::find()
+                ->joinWith('whiteList')
                 ->select('DISTINCT(`supp_org_id`) as supp_org_id')
-                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->limit(6)
                 ->all();
         $topProductsCount = CatalogBaseGoods::find()
-                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->joinWith('whiteList')
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->count();
         $topSuppliersCount = CatalogBaseGoods::find()
+                ->joinWith('whiteList')
                 ->select('supp_org_id')
-                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->distinct()
                 ->count();
@@ -463,18 +476,24 @@ class SiteController extends Controller {
             }
         }
         $count = CatalogBaseGoods::find()
-                ->where(['market_place' => 1])
+                ->joinWith('whiteList')
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->offset($num)
                 ->limit(6)
                 ->count();
         if ($count > 0) {
             $pr = CatalogBaseGoods::find()
-                    ->where(['market_place' => 1])
-                    ->andWhere($addwhere)
-                    ->offset($num)
-                    ->limit(6)
-                    ->all();
+                ->joinWith('whiteList')
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
+                ->andWhere($addwhere)
+                ->offset($num)
+                ->limit(6)
+                ->all();
             return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
         }
     }
@@ -482,11 +501,13 @@ class SiteController extends Controller {
         $restaurants = WhiteList::find()
                 ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->joinWith('organization')
+                ->andWhere('organization_id is not null')
                 ->limit(12)
                 ->all();
         $restaurantsCount = WhiteList::find()
                 ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->joinWith('organization')
+                ->andWhere('organization_id is not null')
                 ->limit(12)
                 ->count();
 
@@ -498,11 +519,13 @@ class SiteController extends Controller {
                 ->limit(6)->offset($num)
                 ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->joinWith('organization')
+                ->andWhere('organization_id is not null')
                 ->count();
         if ($count > 0) {
             $restaurants = WhiteList::find()
                 ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->joinWith('organization')
+                    ->andWhere('organization_id is not null')
                 ->limit(6)->offset($num)
                 ->all();
             return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));
@@ -524,16 +547,24 @@ class SiteController extends Controller {
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
             }
         }
+        
+        
         $count = CatalogBaseGoods::find()
+                ->joinWith('whiteList')
                 ->select('DISTINCT(`supp_org_id`) as supp_org_id')
-                ->where(['market_place' => 1])
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->limit(6)->offset($num)
                 ->count();
         if ($count > 0) {
             $sp = CatalogBaseGoods::find()
+                    ->joinWith('whiteList')
                     ->select('DISTINCT(`supp_org_id`) as supp_org_id')
-                    ->where(['market_place' => 1])
+                    ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                    ->andWhere('category_id is not null')
+                    ->andWhere('organization_id is not null')
                     ->andWhere($addwhere)
                     ->limit(6)->offset($num)
                     ->all();
@@ -558,12 +589,18 @@ class SiteController extends Controller {
             }
         }
         $count = CatalogBaseGoods::find()
-                ->where(['market_place' => 1, 'category_id' => $id])
+                ->joinWith('whiteList')
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0, 'category_id' => $id])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->limit(12)
                 ->count();
         $products = CatalogBaseGoods::find()
-                ->where(['market_place' => 1, 'category_id' => $id])
+                ->joinWith('whiteList')
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0, 'category_id' => $id])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->limit(12)
                 ->all();
@@ -603,15 +640,21 @@ class SiteController extends Controller {
             }
         }
         $suppliers = CatalogBaseGoods::find()
+                ->joinWith('whiteList')
                 ->select('DISTINCT(`supp_org_id`) as supp_org_id')
-                ->where(['market_place' => 1])
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->limit(12)
                 ->all();
 
         $suppliersCount = CatalogBaseGoods::find()
+                ->joinWith('whiteList')
                 ->select('supp_org_id')
-                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->distinct()
                 ->count();
@@ -637,7 +680,9 @@ class SiteController extends Controller {
         }
         if (Yii::$app->request->isAjax) {
             $count = CatalogBaseGoods::find()
-                    ->where(['category_id' => $category, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                    ->joinWith('whiteList')
+                    ->where(['category_id' => $category, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                    ->andWhere('organization_id is not null')
                     ->andWhere($addwhere)
                     ->offset($num)
                     ->limit(6)
@@ -645,7 +690,9 @@ class SiteController extends Controller {
 
             if ($count > 0) {
                 $pr = CatalogBaseGoods::find()
-                        ->where(['category_id' => $category, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
+                        ->joinWith('whiteList')
+                        ->where(['category_id' => $category, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+                        ->andWhere('organization_id is not null')
                         ->andWhere($addwhere)
                         ->offset($num)
                         ->limit(6)

@@ -32,17 +32,18 @@ class CronController extends Controller {
     }
     //обновление одного продукта (крон запускается каждые 2 минуты)
     public function actionUpdateCollection() {
-        $base = WhiteList::find()
+        $base = CatalogBaseGoods::find()
                 //->select('catalog_base_goods.*')
-                ->joinWith('catalogBaseGoods')
-                ->where(['markets_place' => 1,'deleted'=>0])
+                ->joinWith('whiteList')
+                ->where(['market_place' => 1,'deleted'=>0])
                 ->andWhere('category_id is not null')
                 ->andWhere(['in','es_status',[1,2]])
+                ->andWhere('organization_id is not null')
                 ->limit(500)
                 ->all();
         //var_dump($base->catalogBaseGoods);
-        foreach($base as $catalogBaseGoods){var_dump($catalogBaseGoods->catalogBaseGoods->product);}
-        /*
+        //foreach($base as $catalogBaseGoods){var_dump($catalogBaseGoods->whiteList->organization_id);}
+        
         foreach($base as $catalogBaseGoods){
                 $product_id = $catalogBaseGoods->id;
                 $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
@@ -108,7 +109,7 @@ class CronController extends Controller {
                 }
             CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $product_id]);
         }
-        */
+        
     }
     // В случае, если обновление каталога было файлом
     // обновлять порциями, максимум 1000 строк
@@ -192,6 +193,7 @@ class CronController extends Controller {
     public function actionUpdateSuppliers() {
        $suppliers = WhiteList::find()
                 ->joinWith('organization')
+                ->where(['type_id'=>  Organization::TYPE_SUPPLIER])
                 ->andWhere(['in','es_status',[
                     Organization::ES_ACTIVE,
                     Organization::ES_INACTIVE,
@@ -200,43 +202,43 @@ class CronController extends Controller {
                 ->limit(200)
                 ->all();
         foreach($suppliers as $supplier){
-            if($suppliers->es_status == Organization::ES_ACTIVE){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
+            if($supplier->organization->es_status == Organization::ES_ACTIVE){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() == 0){
                     $es_supplier = new \common\models\ES\Supplier();
                     $es_supplier->attributes = [
-                           "supplier_id" => $supplier->id,
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
+                           "supplier_id" => $supplier->organization->id,
+                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
+                           "supplier_name"  => $supplier->organization->name,
                     ];
                     $es_supplier->save();
                 }
             }
-            if($suppliers->es_status == Organization::ES_UPDATED){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
+            if($supplier->organization->es_status == Organization::ES_UPDATED){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() == 0){
                     $es_supplier = new \common\models\ES\Supplier();
                     $es_supplier->attributes = [
-                           "supplier_id" => $supplier->id,
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
+                           "supplier_id" => $supplier->organization->id,
+                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
+                           "supplier_name"  => $supplier->organization->name,
                     ];
                     $es_supplier->save();
                 }
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
-                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() > 0){
+                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->one();
                     $es_supplier->attributes = [
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
+                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
+                           "supplier_name"  => $supplier->organization->name,
                     ];
                     $es_supplier->save();  
                 }
             }
-            if($suppliers->es_status == Organization::ES_INACTIVE){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
+            if($supplier->organization->es_status == Organization::ES_INACTIVE){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() > 0){
                     $es_product = \common\models\ES\Supplier::find()->where(['supplier_id'=>$product_id])->one();
                     $es_product->delete();
                 }
             }
-            Yii::$app->db->createCommand("update organization set es_status = 1 where id = " . $supplier->id);
+            Yii::$app->db->createCommand("update organization set es_status = 1 where id = " . $supplier->organization->id);
         }
        
     }

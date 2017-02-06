@@ -27,7 +27,6 @@ use Yii;
  * @property boolean $partnership
  *
  * @property Organization $organization
- * @property CatalogBaseGoods $catalogBaseGoods
  */
 class WhiteList extends \yii\db\ActiveRecord
 {
@@ -101,9 +100,5 @@ class WhiteList extends \yii\db\ActiveRecord
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
-    }
-    public function getCatalogBaseGoods()
-    {
-        return $this->hasOne(CatalogBaseGoods::className(), ['supp_org_id' => 'organization_id']);
     }
 }

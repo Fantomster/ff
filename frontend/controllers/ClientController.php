@@ -500,6 +500,9 @@ class ClientController extends DefaultController {
                          * 
                          * */
                     $currentUser->sendInviteToVendor($user);
+                    $currentOrganization = $currentUser->organization;
+                    $currentOrganization->step = Organization::STEP_OK;
+                    $currentOrganization->save();
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
                         return $result;
@@ -1229,10 +1232,11 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
     public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $step = $currentUser->organization->step;
-        $user = new User;
-        $profile = new Profile;
-        $relationCategory = new RelationCategory;
-        $organization = new Organization;
+        $user = new User();
+        $profile = new Profile();
+        $relationCategory = new RelationCategory();
+        $relationSuppRest = new RelationSuppRest();
+        $organization = new Organization();
         $searchString = "";
         $where = "";
         if (Yii::$app->request->isAjax) {
@@ -1293,7 +1297,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 ]
             ],
         ]);
-        return $this->render("suppliers", compact("user", "organization", "relationCategory", "profile", "searchModel", "searchString", "dataProvider", "step"));
+        return $this->render("suppliers", compact("user", "organization", "relationCategory", "relationSuppRest", "profile", "searchModel", "searchString", "dataProvider", "step"));
     }
 
     public function actionSidebar() {

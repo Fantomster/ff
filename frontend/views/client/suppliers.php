@@ -3,12 +3,12 @@
 use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
-use yii\helpers\url;
 use yii\web\View;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
 use kartik\select2\Select2;
+use kartik\widgets\FileInput;
 use common\models\Category;
 
 kartik\select2\Select2Asset::register($this);
@@ -39,7 +39,8 @@ $this->title = 'Поставщики';
 $this->params['breadcrumbs'][] = $this->title;
 $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;height:400px;overflow: hidden;}
-.hide{dosplay:none}
+.hide{display:none}
+.file-input{width: 400px; float: left;}
 ');
 ?>
 <div id="modal_addProduct" class="modal fade" role="dialog">
@@ -58,6 +59,19 @@ $this->registerCss('
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
+                <?=
+                FileInput::widget([
+                    'model' => $relationSuppRest,
+                    'attribute' => 'uploaded_catalog',
+                    'pluginOptions' => [
+                        'showPreview' => false,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'removeLabel' => '',
+                    ],
+                ]);
+                ?>
                 <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success">Отправить</button>
             </div>
@@ -154,19 +168,19 @@ $gridColumnsCatalog = [
         'value' => function ($data) {
     if ($data["invite"] == 0) {
         return '<span class="text-danger">Ожидается<br>подтверждение</span>';
-    }else{
-            if ($data["status_invite"] == 2) {
-                return '<span class="text-yellow">Подтвержден /<br> Не авторизован</span>';
-            }
-            if ($data["status_invite"] == 3) {
-                if($data["catalog_status"] == 1){
-                return '<span class="text-success">Подтвержден</span>';    
-                }else{
-                return '<span class="text-success">Подтвержден<br>Обновление каталога</span>';    
-                } 
+    } else {
+        if ($data["status_invite"] == 2) {
+            return '<span class="text-yellow">Подтвержден /<br> Не авторизован</span>';
+        }
+        if ($data["status_invite"] == 3) {
+            if ($data["catalog_status"] == 1) {
+                return '<span class="text-success">Подтвержден</span>';
+            } else {
+                return '<span class="text-success">Подтвержден<br>Обновление каталога</span>';
             }
         }
     }
+}
     ],
     [
         'label' => '',
@@ -175,95 +189,95 @@ $gridColumnsCatalog = [
         'format' => 'raw',
         'value' => function ($data) {
     $result = "";
-    /*$data["invite"] == 0 ? 
-            $result .=
-            Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-                        'class' => 'btn btn-success btn-sm',
-                        'disabled' => 'disabled']) :
-                    $result .= 
-                    $data["cat_id"] == 0 ? 
-                            $result .= 
-                            Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-                        'class' => 'btn btn-success btn-sm',
-                        'disabled' => 'disabled']) :
-                            Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
-                        'OrderCatalogSearch[searchString]' => "",
-                        'OrderCatalogSearch[selectedCategory]' => "",
-                        'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-                            ], [
-                        'class' => 'btn btn-success btn-sm',
-                        'data-pjax' => 0,
-                            ]);
-                    $data["invite"] == 0 ? 
-                            $result .=
-                            Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']) :
-                            $result .= 
-                            $data["cat_id"] == 0 ? 
-                                $result .=
-                                 Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                            'class' => 'btn btn-default btn-sm',
-                            'disabled' => 'disabled']) :
-                            $data["status_invite"] == 2 ?
-                                Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
-                                'class' => 'btn btn-default btn-sm',
-                                'style' => 'text-center',
-                                'data-pjax' => 0,
-                                'data' => [
-                                    'target' => '#edit-catalog',
-                                    'toggle' => 'modal',
-                                    'backdrop' => 'static',]
-                                ]) :
-                                Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
-                                'class' => 'btn btn-default btn-sm',
-                                'style' => 'text-center',
-                                'data-pjax' => 0,
-                                'data' => [
-                                    'target' => '#view-catalog',
-                                    'toggle' => 'modal',
-                                    'backdrop' => 'static',
-                                ],
-                                ]);
-    $data["status_invite"] == 2 ?
-                    $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
-                        'id' => $data["supp_org_id"],
-                            ], [
-                        'class' => 'btn btn-default btn-sm resend-invite',
-                        'data-pjax' => 0,]) : 
-        $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']);
+    /* $data["invite"] == 0 ? 
+      $result .=
+      Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
+      'class' => 'btn btn-success btn-sm',
+      'disabled' => 'disabled']) :
+      $result .=
+      $data["cat_id"] == 0 ?
+      $result .=
+      Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
+      'class' => 'btn btn-success btn-sm',
+      'disabled' => 'disabled']) :
+      Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
+      'OrderCatalogSearch[searchString]' => "",
+      'OrderCatalogSearch[selectedCategory]' => "",
+      'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
+      ], [
+      'class' => 'btn btn-success btn-sm',
+      'data-pjax' => 0,
+      ]);
+      $data["invite"] == 0 ?
+      $result .=
+      Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
+      'class' => 'btn btn-default btn-sm',
+      'disabled' => 'disabled']) :
+      $result .=
+      $data["cat_id"] == 0 ?
+      $result .=
+      Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
+      'class' => 'btn btn-default btn-sm',
+      'disabled' => 'disabled']) :
+      $data["status_invite"] == 2 ?
+      Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
+      'class' => 'btn btn-default btn-sm',
+      'style' => 'text-center',
+      'data-pjax' => 0,
+      'data' => [
+      'target' => '#edit-catalog',
+      'toggle' => 'modal',
+      'backdrop' => 'static',]
+      ]) :
+      Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
+      'class' => 'btn btn-default btn-sm',
+      'style' => 'text-center',
+      'data-pjax' => 0,
+      'data' => [
+      'target' => '#view-catalog',
+      'toggle' => 'modal',
+      'backdrop' => 'static',
+      ],
+      ]);
+      $data["status_invite"] == 2 ?
+      $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
+      'id' => $data["supp_org_id"],
+      ], [
+      'class' => 'btn btn-default btn-sm resend-invite',
+      'data-pjax' => 0,]) :
+      $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
+      'class' => 'btn btn-default btn-sm',
+      'disabled' => 'disabled']);
 
-    $result .= Html::a('<i class="fa fa-trash m-r-xs"></i>', ['client/remove-supplier',
-                'id' => $data["supp_org_id"],
-                    ], [
-                'class' => 'btn btn-danger btn-sm remove-supplier',
-                'data-pjax' => 0,]);*/
-    if($data["invite"] == 0 || $data["cat_id"] == 0 || $data["catalog_status"]==0){
-    //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
-    $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-                        'class' => 'btn btn-success btn-sm',
-                        'disabled' => 'disabled']);   
-    $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']);
-    $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']);
-    }else{
-        /*if($data["status_invite"] == 1){
-            $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-                        'class' => 'btn btn-success btn-sm',
-                        'disabled' => 'disabled']);   
-            $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']);
-            $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-                        'class' => 'btn btn-default btn-sm',
-                        'disabled' => 'disabled']);
-        }*/
-        if($data["status_invite"] == 2){
+      $result .= Html::a('<i class="fa fa-trash m-r-xs"></i>', ['client/remove-supplier',
+      'id' => $data["supp_org_id"],
+      ], [
+      'class' => 'btn btn-danger btn-sm remove-supplier',
+      'data-pjax' => 0,]); */
+    if ($data["invite"] == 0 || $data["cat_id"] == 0 || $data["catalog_status"] == 0) {
+        //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
+        $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
+                    'class' => 'btn btn-success btn-sm',
+                    'disabled' => 'disabled']);
+        $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
+                    'class' => 'btn btn-default btn-sm',
+                    'disabled' => 'disabled']);
+        $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
+                    'class' => 'btn btn-default btn-sm',
+                    'disabled' => 'disabled']);
+    } else {
+        /* if($data["status_invite"] == 1){
+          $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
+          'class' => 'btn btn-success btn-sm',
+          'disabled' => 'disabled']);
+          $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
+          'class' => 'btn btn-default btn-sm',
+          'disabled' => 'disabled']);
+          $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
+          'class' => 'btn btn-default btn-sm',
+          'disabled' => 'disabled']);
+          } */
+        if ($data["status_invite"] == 2) {
             $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                         'OrderCatalogSearch[searchString]' => "",
                         'OrderCatalogSearch[selectedCategory]' => "",
@@ -271,26 +285,25 @@ $gridColumnsCatalog = [
                             ], [
                         'class' => 'btn btn-success btn-sm',
                         'data-pjax' => 0,
-                            ]);
-            
+            ]);
+
             $result .= Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
-                'class' => 'btn btn-default btn-sm',
-                'style' => 'text-center',
-                'data-pjax' => 0,
-                'data' => [
-                    'target' => '#edit-catalog',
-                    'toggle' => 'modal',
-                    'backdrop' => 'static',]
-                ]); 
-            
+                        'class' => 'btn btn-default btn-sm',
+                        'style' => 'text-center',
+                        'data-pjax' => 0,
+                        'data' => [
+                            'target' => '#edit-catalog',
+                            'toggle' => 'modal',
+                            'backdrop' => 'static',]
+            ]);
+
             $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
                         'id' => $data["supp_org_id"],
                             ], [
                         'class' => 'btn btn-default btn-sm resend-invite',
                         'data-pjax' => 0,]);
-            
-        } 
-        if($data["status_invite"] == 3){
+        }
+        if ($data["status_invite"] == 3) {
             $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                         'OrderCatalogSearch[searchString]' => "",
                         'OrderCatalogSearch[selectedCategory]' => "",
@@ -298,23 +311,23 @@ $gridColumnsCatalog = [
                             ], [
                         'class' => 'btn btn-success btn-sm',
                         'data-pjax' => 0,
-                            ]);
+            ]);
             $result .= Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
-                                'class' => 'btn btn-default btn-sm',
-                                'style' => 'text-center',
-                                'data-pjax' => 0,
-                                'data' => [
-                                    'target' => '#view-catalog',
-                                    'toggle' => 'modal',
-                                    'backdrop' => 'static',
-                                ],
-                                ]);
+                        'class' => 'btn btn-default btn-sm',
+                        'style' => 'text-center',
+                        'data-pjax' => 0,
+                        'data' => [
+                            'target' => '#view-catalog',
+                            'toggle' => 'modal',
+                            'backdrop' => 'static',
+                        ],
+            ]);
             $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
                         'class' => 'btn btn-default btn-sm',
                         'disabled' => 'disabled']);
-        }       
+        }
     }
-    
+
     return "<div class='btn-group'>" . $result . "</div>";
 }
     ],
@@ -657,8 +670,8 @@ e.preventDefault();
     });
 });
 $('#invite').click(function(e){	
-$('#loader-show').showLoading();
-e.preventDefault();
+    $('#loader-show').showLoading();
+    e.preventDefault();
 	var i, items, item, dataItem, data = [];
 	var cols = [ 'article', 'product', 'units', 'price', 'ed', 'note'];
 	$('#CreateCatalog tr').each(function() {

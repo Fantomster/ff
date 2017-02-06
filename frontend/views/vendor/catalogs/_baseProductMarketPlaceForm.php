@@ -321,6 +321,9 @@ label {
 	</div>
         
 	<div class="row">
+                <div class="col-md-12" style="padding: 0 28px;">
+                    <h5>Для того, чтобы разместиться на площадке F_MARKET, свяжитесь с нами</h5>
+                </div>
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
                     <div class="pull-left" style="border: 2px dotted #84bf76;padding: 10px 10px 0px 10px;margin-top: 0;border-radius:8px;">
                             <?=$form->field($catalogBaseGoods, 'market_place')->widget(CheckboxX::classname(), [

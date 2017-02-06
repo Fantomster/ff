@@ -1,6 +1,6 @@
 <?php
 use yii\helpers\Html;
-$count_products_from_mp = \common\models\CatalogBaseGoods::find()->where(['market_place'=>1])->count();
+$count_products_from_mp = \common\models\CatalogBaseGoods::find()->where(['market_place'=>1,'deleted'=>0])->count();
 $left_menu_categorys = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
 $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,parent,')->where('parent is not null')->asArray()->all();
 ?>

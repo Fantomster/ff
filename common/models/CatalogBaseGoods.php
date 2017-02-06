@@ -14,6 +14,7 @@ use yii\helpers\Url;
  * @property integer $id
  * @property integer $cat_id
  * @property integer $category_id
+ * @property integer $supp_org_id
  * @property string $article
  * @property string $product
  * @property number $units
@@ -133,6 +134,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'category_id' => 'Категория',
             'article' => 'Артикул',
             'product' => 'Товар',
+            'supp_org_id' => 'id поставщика',
             'units' => 'Кратность',
             'price' => 'Цена (руб.)',
             'status' => 'Статус',

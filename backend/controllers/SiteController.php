@@ -7,6 +7,7 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
 use common\components\AccessRule;
+use common\models\Role;
 
 /**
  * Site controller
@@ -32,7 +33,10 @@ class SiteController extends Controller
                     [
                         'actions' => ['logout', 'index'],
                         'allow' => true,
-                        'roles' => [\common\models\Role::ROLE_ADMIN],
+                        'roles' => [
+                            Role::ROLE_ADMIN,
+                            Role::ROLE_FKEEPER_OBSERVER,
+                        ],
                     ],
                 ],
             ],
@@ -65,7 +69,7 @@ class SiteController extends Controller
     public function actionIndex()
     {
         //return $this->render('index');
-        return $this->redirect(['/client/index']);
+        return $this->redirect(['/statistics/registered']);
     }
 
     /**

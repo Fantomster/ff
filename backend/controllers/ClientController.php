@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\User;
+use common\models\Role;
 use backend\models\UserSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -36,7 +37,10 @@ class ClientController extends Controller {
                     [
                         'actions' => ['index', 'view'],
                         'allow' => true,
-                        'roles' => [\common\models\Role::ROLE_ADMIN],
+                        'roles' => [
+                            Role::ROLE_ADMIN,
+                            Role::ROLE_FKEEPER_OBSERVER,
+                        ],
                     ],
                 ],
             ],

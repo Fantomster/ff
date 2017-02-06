@@ -24,6 +24,7 @@ use Yii;
  * @property string $correspondent_account
  * @property string $checking_account
  * @property string $phone
+ * @property boolean $partnership
  *
  * @property Organization $organization
  * @property CatalogBaseGoods $catalogBaseGoods
@@ -36,6 +37,20 @@ class WhiteList extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'white_list';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
     }
 
     /**
@@ -75,7 +90,8 @@ class WhiteList extends \yii\db\ActiveRecord
             'bik' => 'БИК',
             'correspondent_account' => 'р/с',
             'checking_account' => 'к/с',
-            'phone' => 'Phone',
+            'phone' => 'Телефон',
+            'partnership' => 'Наш партнер',
         ];
     }
 

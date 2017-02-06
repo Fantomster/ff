@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\CatalogBaseGoods;
+use common\models\Role;
 use backend\models\CatalogBaseGoodsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -36,9 +37,17 @@ class GoodsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', 'ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market-place'],
+                        'actions' => ['ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market-place'],
                         'allow' => true,
-                        'roles' => [\common\models\Role::ROLE_ADMIN],
+                        'roles' => [Role::ROLE_ADMIN],
+                    ],
+                    [
+                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', ],
+                        'allow' => true,
+                        'roles' => [
+                            Role::ROLE_ADMIN,
+                            Role::ROLE_FKEEPER_OBSERVER,
+                        ],
                     ],
                 ],
             ],

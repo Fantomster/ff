@@ -40,6 +40,10 @@ class Role extends \amnah\yii2\user\models\Role {
      * @var int f-keeper manager role
      */
     const ROLE_FKEEPER_MANAGER = 7;
+    /**
+     * @var int f-keeper observer role
+     */
+    const ROLE_FKEEPER_OBSERVER = 8;
     
     
     public static function getManagerRole($organization_type) {

@@ -4,7 +4,7 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\Organization;
-use common\models\WhiteList;
+use common\models\Role;
 use backend\models\OrganizationSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -35,9 +35,19 @@ class OrganizationController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update'],
+                        'actions' => ['index', 'view', ],
                         'allow' => true,
-                        'roles' => [\common\models\Role::ROLE_ADMIN],
+                        'roles' => [
+                            Role::ROLE_ADMIN,
+                            Role::ROLE_FKEEPER_OBSERVER,
+                        ],
+                    ],
+                    [
+                        'actions' => ['update'],
+                        'allow' => true,
+                        'roles' => [
+                            Role::ROLE_ADMIN,
+                        ],
                     ],
                 ],
             ],

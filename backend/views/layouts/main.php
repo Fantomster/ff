@@ -48,7 +48,19 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
         ],
     ]);
     $menuItems = [
-        //['label' => 'Home', 'url' => ['/site/index']],
+        [
+            'label' => 'Статистика', 
+            'items' => [
+                [
+                    'label' => 'Зарегистрировано',
+                    'url' =>['/statistics/registered'],
+                ],
+                [
+                    'label' => 'Заказы',
+                    'url' =>['/statistics/orders'],
+                ],
+            ],
+        ],
         ['label' => 'Пользователи', 'url' =>['/client/index']],
         [
             'label' => 'Организации', 

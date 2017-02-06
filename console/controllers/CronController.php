@@ -201,43 +201,43 @@ class CronController extends Controller {
                 ->limit(200)
                 ->all();
         foreach($suppliers as $supplier){
-            if($suppliers->es_status == Organization::ES_ACTIVE){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
+            if($supplier->organization->es_status == Organization::ES_ACTIVE){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() == 0){
                     $es_supplier = new \common\models\ES\Supplier();
                     $es_supplier->attributes = [
-                           "supplier_id" => $supplier->id,
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
+                           "supplier_id" => $supplier->organization->id,
+                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
+                           "supplier_name"  => $supplier->organization->name,
                     ];
                     $es_supplier->save();
                 }
             }
-            if($suppliers->es_status == Organization::ES_UPDATED){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
+            if($supplier->organization->es_status == Organization::ES_UPDATED){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() == 0){
                     $es_supplier = new \common\models\ES\Supplier();
                     $es_supplier->attributes = [
-                           "supplier_id" => $supplier->id,
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
+                           "supplier_id" => $supplier->organization->id,
+                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
+                           "supplier_name"  => $supplier->organization->name,
                     ];
                     $es_supplier->save();
                 }
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
-                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() > 0){
+                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->one();
                     $es_supplier->attributes = [
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
+                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
+                           "supplier_name"  => $supplier->organization->name,
                     ];
                     $es_supplier->save();  
                 }
             }
-            if($suppliers->es_status == Organization::ES_INACTIVE){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
+            if($supplier->organization->es_status == Organization::ES_INACTIVE){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() > 0){
                     $es_product = \common\models\ES\Supplier::find()->where(['supplier_id'=>$product_id])->one();
                     $es_product->delete();
                 }
             }
-            Yii::$app->db->createCommand("update organization set es_status = 1 where id = " . $supplier->id);
+            Yii::$app->db->createCommand("update organization set es_status = 1 where id = " . $supplier->organization->id);
         }
        
     }

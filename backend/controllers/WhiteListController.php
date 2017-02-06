@@ -132,7 +132,7 @@ class WhiteListController extends Controller
     }
 
     public function actionApprove($id) {
-        if (($wl = WhiteList::findOne($id)) !== null) {
+        if (($wl = WhiteList::findOne(['organization_id' => $id])) !== null) {
             return $this->redirect(['organization/index']);
         } elseif (($org = Organization::findOne($id)) !== null) {
             $new = new WhiteList();

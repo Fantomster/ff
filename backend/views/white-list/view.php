@@ -39,6 +39,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Название',
                 'value' => Html::a($model->organization->name, ['organization/view', 'id'=>$model->organization_id]),
             ],
+            [
+                'format' => 'raw',
+                'label' => 'Наш партнер',
+                'value' => $model->partnership ? 'Да' : 'Нет',
+            ],
             'info:ntext',
             'created_at',
             'updated_at',

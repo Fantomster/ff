@@ -23,7 +23,7 @@ class WhiteListSearch extends WhiteList {
     public function rules() {
         return [
             [['id', 'organization_id'], 'integer'],
-            [['org_name', 'org_id', 'org_type_id', 'info', 'created_at', 'updated_at'], 'safe'],
+            [['org_name', 'org_id', 'org_type_id', 'info', 'partnership', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -79,6 +79,7 @@ class WhiteListSearch extends WhiteList {
         $query->andFilterWhere([
             'id' => $this->id,
             'organization_id' => $this->organization_id,
+            'partnership' => $this->partnership,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             "$organizationTable.id" => $this->org_id,

@@ -36,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                         'label' => 'Название организации',
                     ],
+                    'partnership',
                     'created_at',
                     'updated_at',
                     ['class' => 'yii\grid\ActionColumn'],

@@ -24,6 +24,7 @@ use Yii;
  * @property string $correspondent_account
  * @property string $checking_account
  * @property string $phone
+ * @property boolean $partnership
  *
  * @property Organization $organization
  */
@@ -88,7 +89,8 @@ class WhiteList extends \yii\db\ActiveRecord
             'bik' => 'БИК',
             'correspondent_account' => 'р/с',
             'checking_account' => 'к/с',
-            'phone' => 'Phone',
+            'phone' => 'Телефон',
+            'partnership' => 'Наш партнер',
         ];
     }
 

@@ -12,6 +12,8 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
+    <?= $form->field($model, 'partnership')->checkbox() ?>
+    
     <?= $form->field($model, 'signed')->textInput() ?>
     
     <?= $form->field($model, 'legal_entity')->textInput() ?>

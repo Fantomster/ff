@@ -4,6 +4,8 @@ namespace common\models;
 
 use Yii;
 use yii\data\ActiveDataProvider;
+use common\behaviors\UploadBehavior;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "relation_supp_rest".
@@ -15,6 +17,8 @@ use yii\data\ActiveDataProvider;
  * @property integer $invite
  * @property string $created_at
  * @property string $updated_at
+ * @property string $uploaded_catalog
+ * @property booolean $uploaded_processed
  * 
  * @property Catalog $catalog
  */
@@ -38,10 +42,26 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
+    public function behaviors() {
+        return ArrayHelper::merge(parent::behaviors(), [
+                    [
+                        'class' => UploadBehavior::className(),
+                        'attribute' => 'uploaded_catalog',
+                        'scenarios' => ['default'],
+                        'path' => '@app/web/upload/temp/',
+                        'url' => '/upload/temp/',
+                    ],
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules() {
         return [
             [['rest_org_id', 'supp_org_id'], 'required'],
             [['rest_org_id', 'supp_org_id', 'cat_id'], 'integer'],
+            [['uploaded_catalog', 'uploaded_processed'], 'safe'],
         ];
     }
 

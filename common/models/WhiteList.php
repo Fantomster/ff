@@ -62,7 +62,7 @@ class WhiteList extends \yii\db\ActiveRecord
             [['organization_id'], 'required'],
             [['organization_id'], 'integer'],
             [['info'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'partnership'], 'safe'],
             [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'correspondent_account', 'checking_account', 'phone'], 'string', 'max' => 255],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
         ];

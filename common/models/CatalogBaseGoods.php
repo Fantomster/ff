@@ -263,7 +263,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }
     public function getWhiteList()
     {
-        return $this->hasOne(WhiteLIst::className(), ['organization_id' => 'supp_org_id']);
+        return $this->hasOne(WhiteList::className(), ['organization_id' => 'supp_org_id']);
     }
     
 }

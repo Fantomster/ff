@@ -193,6 +193,7 @@ class CronController extends Controller {
     public function actionUpdateSuppliers() {
        $suppliers = WhiteList::find()
                 ->joinWith('organization')
+                ->where(['type_id'=>  Organization::TYPE_SUPPLIER])
                 ->andWhere(['in','es_status',[
                     Organization::ES_ACTIVE,
                     Organization::ES_INACTIVE,

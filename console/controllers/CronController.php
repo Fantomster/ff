@@ -32,17 +32,18 @@ class CronController extends Controller {
     }
     //обновление одного продукта (крон запускается каждые 2 минуты)
     public function actionUpdateCollection() {
-        $base = WhiteList::find()
+        $base = CatalogBaseGoods::find()
                 //->select('catalog_base_goods.*')
-                ->joinWith('catalogBaseGoods')
-                ->where(['markets_place' => 1,'deleted'=>0])
+                ->joinWith('whiteList')
+                ->where(['market_place' => 1,'deleted'=>0])
                 ->andWhere('category_id is not null')
                 ->andWhere(['in','es_status',[1,2]])
+                ->andWhere('organization_id is not null')
                 ->limit(500)
                 ->all();
         //var_dump($base->catalogBaseGoods);
-        foreach($base as $catalogBaseGoods){var_dump($catalogBaseGoods->catalogBaseGoods->product);}
-        /*
+        //foreach($base as $catalogBaseGoods){var_dump($catalogBaseGoods->whiteList->organization_id);}
+        
         foreach($base as $catalogBaseGoods){
                 $product_id = $catalogBaseGoods->id;
                 $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
@@ -108,7 +109,7 @@ class CronController extends Controller {
                 }
             CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $product_id]);
         }
-        */
+        
     }
     // В случае, если обновление каталога было файлом
     // обновлять порциями, максимум 1000 строк

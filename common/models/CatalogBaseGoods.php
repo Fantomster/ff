@@ -39,6 +39,7 @@ use yii\helpers\Url;
  * @property Organization $vendor
  * @property MpCategory $category
  * @property MpCategory $mainCategory
+ * @property WhiteList $whiteList
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
@@ -259,6 +260,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public static function getCurCategory($id) {
     $parent = MpCategory::find()->where(['id' => $id])->one()->parent;
     return MpCategory::find()->where(['id' => $parent])->one();
+    }
+    public function getWhiteList()
+    {
+        return $this->hasOne(WhiteLIst::className(), ['organization_id' => 'supp_org_id']);
     }
     
 }

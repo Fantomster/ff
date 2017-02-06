@@ -3,8 +3,7 @@
 namespace frontend\controllers;
 
 use Yii;
-use yii\web\HttpException;
-use frontend\controllers\Controller;
+use yii\web\UploadedFile;
 use common\models\User;
 use common\models\Role;
 use common\models\Order;
@@ -260,15 +259,17 @@ class ClientController extends DefaultController {
             } else {
                 $user = new User();
             }
-            $relationSuppRest = new RelationSuppRest;
-            $relationCategory = new RelationCategory;
-            $organization = new Organization;
+            $relationSuppRest = new RelationSuppRest();
+            $relationCategory = new RelationCategory();
+            $organization = new Organization();
             $profile = new Profile();
 
             $post = Yii::$app->request->post();
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
+            $relationSuppRest->uploaded_catalog = UploadedFile::getInstance($relationSuppRest, 'uploaded_catalog');
+            
             $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -277,7 +278,7 @@ class ClientController extends DefaultController {
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
 
-                if ($arrCatalog === Array()) {
+                if (($arrCatalog === Array()) && !isset($relationSuppRest->uploaded_catalog)) {
                     $result = ['success' => false, 'message' => 'Каталог пустой!'];
                     return $result;
                     exit;

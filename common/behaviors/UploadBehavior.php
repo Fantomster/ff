@@ -114,10 +114,10 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         if (!$this->_deleting && ($this->_file instanceof UploadedFile)) {
             $path = $this->getUploadPath($this->attribute);
             if (is_string($path)) {
-                $this->beforeUpload();
+                //$this->beforeUpload();
                 $this->save($this->_file, $path);
                 $this->owner->setAttribute($this->attribute, $this->_file->name);
-                $this->afterUpload();
+                //$this->afterUpload();
             } else {
                 throw new InvalidParamException("Directory specified in 'path' attribute doesn't exist or cannot be created.");
             }

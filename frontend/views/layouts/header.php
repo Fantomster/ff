@@ -171,11 +171,6 @@ JS;
             <div class="navbar-custom-menu">
 
                 <ul class="nav navbar-nav">
-                    <li class="dropdown tasks-menu">
-                        <?=
-                        Html::a('<b>f</b>-market', ['https://market.f-keeper.ru'])
-                        ?>
-                    </li>
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                         <li>
                             <a href="<?= Url::to(['order/checkout']) ?>">

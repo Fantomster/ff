@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+use yii\bootstrap\Modal;
 
 ?>
 
@@ -100,10 +101,17 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                     <div class="row">
                         <div class="col-md-12 no-padding">
                             <div class="product-button">
-                                
-                              <a href="#" class="btn btn-100 btn-success send-service" data-product-id="">
-                                  <i class="fa fa-truck" aria-hidden="true"></i>&nbsp;&nbsp;Предложить свои услуги
-                              </a>
+                                <?=Html::a('<i class="fa fa-truck" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;&nbsp;предложить услуги', ['send-service',
+                                    'id' => $restaurant->id], [
+                                    'data' => [
+                                        'target' => '#sendService',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                    ],
+                                    'class' => 'btn btn-success send-service',
+                                    'style' => 'width:100%',
+                                ]);
+                                ?>
                                 <h5>* <small>Если вы поставщик, предложите ресторану свои услуги</small></h5>
                             </div>
                         </div>
@@ -140,4 +148,18 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
       </div>
   </div>
 </div>
-
+<?php
+Modal::begin([
+    'id' => 'sendService',
+    'size' => 'modal-md',
+    'clientOptions' => false,
+]);
+Modal::end();
+?>
+<?php $customJs = <<< JS
+$("body").on("hidden.bs.modal", "#sendService", function() {
+    $(this).data("bs.modal", null);
+})
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

@@ -66,7 +66,6 @@ Modal::begin([
     'clientOptions' => false,
 ]);
 Modal::end();
-
 ?>
 <?php $customJs = <<< JS
 var inProgress = false;

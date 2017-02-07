@@ -24,8 +24,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Поставщик',
             ],
             [
+                'format' => 'raw',
                 'value' => function ($data) {
-                    return Html::a($data, ['#']);
+                    return Html::a('Каталог', $data->getUploadUrl('uploaded_catalog'));
                 },
                 'label' => 'Загруженный каталог',
             ],

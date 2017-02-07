@@ -32,6 +32,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     const INVITE_OFF = 0;
     const INVITE_ON = 1;
 
+    public $resourceCategory = 'uploaded_catalogs';
+    
     /**
      * @inheritdoc
      */
@@ -61,7 +63,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         return [
             [['rest_org_id', 'supp_org_id'], 'required'],
             [['rest_org_id', 'supp_org_id', 'cat_id'], 'integer'],
-            [['uploaded_catalog', 'uploaded_processed'], 'safe'],
+            [['uploaded_catalog'], 'file'],
+            [['uploaded_processed'], 'safe'],
         ];
     }
 

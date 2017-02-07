@@ -692,11 +692,17 @@ $('#invite').click(function(e){
 	});
 	var catalog = data;
 	catalog = JSON.stringify(catalog);
+        var form = $("#SuppliersFormSend")[0];
+        var formData = new FormData(form);
+        formData.append('catalog', catalog);
+        formData.append('RelationSuppRest[uploaded_catalog]', $('input[type=file]')[0].files[0]);
 	$.ajax({
+                    processData: false,
+                    contentType: false,
 		  url: 'index.php?r=client/create',
 		  type: 'POST',
 		  dataType: "json",
-		  data: $("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
+		  data: formData, //$("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
 		  cache: false,
 		  success: function (response) {
                         if(response.success){

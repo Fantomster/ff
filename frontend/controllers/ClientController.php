@@ -494,6 +494,9 @@ class ClientController extends DefaultController {
                     $relationSuppRest->cat_id = $lastInsert_cat_id;
                     $relationSuppRest->status = 1;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
+                    if (isset($relationSuppRest->uploaded_catalog)) {
+                        $relationSuppRest->uploaded_processed = 0;
+                    }
                     $relationSuppRest->save();
                     /**
                          *

@@ -3,6 +3,7 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use yii\bootstrap\Modal;
 ?>
 <?php
 foreach($restaurants as $row){
@@ -25,7 +26,17 @@ foreach($restaurants as $row){
     </div>
     <div class="col-md-12">
       <div class="supplier-button">
-        <a href="#" class="btn btn-100 btn-success send-service" style="width: 100%">Предложить услуги</a>
+        <?=Html::a('предложить услуги', ['send-service',
+                'id' => $row->organization_id], [
+                'data' => [
+                    'target' => '#sendService',
+                    'toggle' => 'modal',
+                    'backdrop' => 'static',
+                ],
+                'class' => 'btn btn-success send-service',
+                'style' => 'width:100%',
+        ]);
+        ?>
       </div>
     </div>
   </div>

@@ -12,7 +12,7 @@ class AppAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        //'fmarket/plugins/bootstrap-3.3.7/css/bootstrap.min.css',           
+        'fmarket/plugins/bootstrap-3.3.7/css/bootstrap.min.css',           
         'fmarket/plugins/font-awesome-4.7.0/css/font-awesome.min.css',
         'fmarket/plugins/animate/animate.css', 
         'fmarket/plugins/back-to-top/backTop.css',

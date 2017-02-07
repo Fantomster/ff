@@ -39,7 +39,7 @@ class GoodsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market-place'],
+                        'actions' => ['ajax-clear-category', 'ajax-set-category', 'ajax-update-product-market-place', 'import-catalog'],
                         'allow' => true,
                         'roles' => [Role::ROLE_ADMIN],
                     ],
@@ -217,6 +217,11 @@ class GoodsController extends Controller {
             'query' => $query,
         ]);
         return $this->render("uploaded-catalogs", compact("dataProvider"));
+    }
+    
+    public function actionImportCatalog($id) {
+        $relation = RelationSuppRest::findOne(['id' => $id]);
+        return $this->render("import-catalog", compact("relation"));
     }
     
     /**

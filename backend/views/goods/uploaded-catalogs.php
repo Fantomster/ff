@@ -36,6 +36,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'label' => 'Загруженный каталог',
             ],
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    return Html::a('Импортировать', ['goods/import-catalog', 'id' => $data->id]);
+                }
+            ],
         ],
     ]);
     ?>

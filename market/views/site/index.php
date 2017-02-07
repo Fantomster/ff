@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 
+market\assets\AppAsset::register($this);
+
 $this->title = 'F-MARKET главная';
 ?>
 <div class="row">

@@ -3,7 +3,9 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use yii\bootstrap\Modal;
 ?>
+
 <div class="row">
     <div class="col-md-12">
       <h3>Рестораны <small></small></h3>
@@ -29,7 +31,18 @@ use yii\web\View;
                 </div>
                 <div class="col-md-12">
                   <div class="supplier-button">
-                    <a href="#" class="btn btn-success send-service" data-vendor-id="<?= $row->organization->id ?>" style="width: 100%">предложить услуги</a>
+                    <?=Html::a('предложить услуги', ['send-service',
+                            'id' => $row->organization->id], [
+                            'data' => [
+                                'target' => '#sendService',
+                                'toggle' => 'modal',
+                                'backdrop' => 'static',
+                            ],
+                            'class' => 'btn btn-success send-service',
+                            'style' => 'width:100%'
+                    ]);
+                    ?>
+                    <!--a href="#" class="btn btn-success send-service" data-vendor-id="<?= $row->organization->id ?>" style="width: 100%">предложить услуги</a-->
                   </div>
                 </div>
               </div>
@@ -46,7 +59,14 @@ use yii\web\View;
         </div>
     </div>
 </div>
-
+<?php
+Modal::begin([
+    'id' => 'sendService',
+    'clientOptions' => false,
+    'size' => 'modal-md',
+]);
+Modal::end();
+?>
 <?php $customJs = <<< JS
 var inProgress = false;
 var num = 12;
@@ -92,7 +112,11 @@ $('#supplier-more').on("click", function (e) {
           }
        }
     });
-});       
+});
+$("body").on("hidden.bs.modal", "#send-service", function() {
+    $(this).data("bs.modal", null);
+})
+$('#send-service').removeAttr('tabindex');
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

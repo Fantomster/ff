@@ -158,7 +158,11 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
     }
-
+    
+    public function actionSendService($id) {
+        return $this->renderAjax('/site/restaurant/_formSendService', compact('id'));
+    }
+    
     public function actionSearchProducts($search) {
         if (\Yii::$app->user->isGuest) {
             $filterNotIn = [];

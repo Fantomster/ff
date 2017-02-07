@@ -16,7 +16,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'columns' => [
             [
-                'value' => 'client.name',
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return Html::a('Каталог', $data->getUploadUrl('uploaded_catalog'));
+                },
                 'label' => 'Ресторан',
             ],
             [

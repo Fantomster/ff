@@ -39,7 +39,7 @@ use yii\bootstrap\Modal;
                                 'backdrop' => 'static',
                             ],
                             'class' => 'btn btn-success send-service',
-                            'style' => 'width:100%'
+                            'style' => 'width:100%',
                     ]);
                     ?>
                     <!--a href="#" class="btn btn-success send-service" data-vendor-id="<?= $row->organization->id ?>" style="width: 100%">предложить услуги</a-->
@@ -62,8 +62,8 @@ use yii\bootstrap\Modal;
 <?php
 Modal::begin([
     'id' => 'sendService',
-    'clientOptions' => false,
     'size' => 'modal-md',
+    'clientOptions' => false,
 ]);
 Modal::end();
 
@@ -117,7 +117,6 @@ $('#supplier-more').on("click", function (e) {
 $("body").on("hidden.bs.modal", "#sendService", function() {
     $(this).data("bs.modal", null);
 })
-$('#sendService').removeAttr('tabindex');
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -5,6 +5,8 @@ use yii\helpers\Url;
 
 kartik\growl\GrowlAsset::register($this);
 market\assets\AppAsset::register($this);
+//\yii\bootstrap\BootstrapAsset::register($this);
+\yii\bootstrap\BootstrapPluginAsset::register($this);
 
 $addAction = Url::to(["site/ajax-add-to-cart"]);
 $inviteAction = Url::to(["site/ajax-invite-vendor"]);

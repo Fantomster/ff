@@ -90,7 +90,7 @@ $this->registerCss('
   ]); */
 ?>
 <?php
-if ($step == common\models\Organization::STEP_ADD_VENDOR) {
+if (false) {//$step == common\models\Organization::STEP_ADD_VENDOR
     $this->registerJs('
         $("document").ready(function(){
             $("#showVideo").modal("show");

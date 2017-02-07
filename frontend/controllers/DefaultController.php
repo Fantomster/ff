@@ -44,9 +44,9 @@ class DefaultController extends Controller {
                     if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings && !$isTutorial) {
                         return $this->redirect(['client/settings']);
                     }
-                    if (($organization->step == Organization::STEP_ADD_VENDOR) && !$isSuppliers && !$isTutorial) {
-                        return $this->redirect(['client/suppliers']);
-                    }
+//                    if (($organization->step == Organization::STEP_ADD_VENDOR) && !$isSuppliers && !$isTutorial) {
+//                        return $this->redirect(['client/suppliers']);
+//                    }
                     
                     break;
                 case Organization::TYPE_SUPPLIER:
@@ -63,9 +63,9 @@ class DefaultController extends Controller {
                     if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings && !$isTutorial) {
                         return $this->redirect(['vendor/settings']);
                     }
-                    if (($organization->step == Organization::STEP_ADD_CATALOG) && !$isCatalogs && !$isTutorial) {
-                        return $this->redirect(['vendor/catalogs']);
-                    }
+//                    if (($organization->step == Organization::STEP_ADD_CATALOG) && !$isCatalogs && !$isTutorial) {
+//                        return $this->redirect(['vendor/catalogs']);
+//                    }
                     break;
             }
         }

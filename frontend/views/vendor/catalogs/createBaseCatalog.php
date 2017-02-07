@@ -51,7 +51,7 @@ if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
  */
 ?>
 <?php
-if ($step == common\models\Organization::STEP_ADD_CATALOG) {
+if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
     $this->registerJs('
         $("document").ready(function(){
             $("#showVideo").modal("show");

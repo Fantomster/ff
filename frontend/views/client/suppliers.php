@@ -59,6 +59,7 @@ $this->registerCss('
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
+                <p style="text-align: center; padding-top: 3px; font-style: italic;">Вы можете загрузить каталог вашего поставщика, а наши менеджеры подготовят его для работы!</p>
                 <?=
                 FileInput::widget([
                     'model' => $relationSuppRest,
@@ -69,6 +70,7 @@ $this->registerCss('
                         'showRemove' => true,
                         'showUpload' => false,
                         'removeLabel' => '',
+                        'browseLabel' => 'Загрузить...'
                     ],
                 ]);
                 ?>
@@ -88,7 +90,7 @@ $this->registerCss('
   ]); */
 ?>
 <?php
-if ($step == common\models\Organization::STEP_ADD_VENDOR) {
+if (false) {//$step == common\models\Organization::STEP_ADD_VENDOR
     $this->registerJs('
         $("document").ready(function(){
             $("#showVideo").modal("show");

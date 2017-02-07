@@ -66,6 +66,7 @@ Modal::begin([
     'size' => 'modal-md',
 ]);
 Modal::end();
+
 ?>
 <?php $customJs = <<< JS
 var inProgress = false;
@@ -113,10 +114,10 @@ $('#supplier-more').on("click", function (e) {
        }
     });
 });
-$("body").on("hidden.bs.modal", "#send-service", function() {
+$("body").on("hidden.bs.modal", "#sendService", function() {
     $(this).data("bs.modal", null);
 })
-$('#send-service').removeAttr('tabindex');
+$('#sendService').removeAttr('tabindex');
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

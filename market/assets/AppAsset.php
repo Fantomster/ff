@@ -19,7 +19,7 @@ class AppAsset extends AssetBundle
         'fmarket/css/style.css', 
     ];
     public $js = [
-        'fmarket/plugins/bootstrap-3.3.7/js/bootstrap.min.js',
+        //'fmarket/plugins/bootstrap-3.3.7/js/bootstrap.min.js',
         'fmarket/js/js-cookie.js',
         'fmarket/plugins/animate/wow.min.js',
         'fmarket/plugins/back-to-top/jquery.backTop.min.js',

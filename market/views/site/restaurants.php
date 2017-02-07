@@ -15,13 +15,13 @@ use yii\bootstrap\Modal;
             ?>
             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
             <div class="mp-suppiler-block">
-              <a href="<?=Url::to(['/site/restaurant', 'id' => $row->id]);?>">
+              <a href="<?=Url::to(['/site/restaurant', 'id' => $row->organization_id]);?>">
                 <img class="supplier-image" src="<?= empty($row->organization->picture) ? \common\models\Organization::DEFAULT_RESTAURANT_AVATAR : $row->organization->pictureUrl ?>">
               </a>
               <div class="row">
                 <div class="col-md-12">
                   <div class="supplier-title">
-                    <a href="<?=Url::to(['/site/restaurant', 'id' => $row->organization->id]);?>">
+                    <a href="<?=Url::to(['/site/restaurant', 'id' => $row->organization_id]);?>">
                     <h3><?=$row->organization->name;?></h3>
                     </a>
                   </div>
@@ -32,7 +32,7 @@ use yii\bootstrap\Modal;
                 <div class="col-md-12">
                   <div class="supplier-button">
                     <?=Html::a('предложить услуги', ['send-service',
-                            'id' => $row->organization->id], [
+                            'id' => $row->organization_id], [
                             'data' => [
                                 'target' => '#sendService',
                                 'toggle' => 'modal',
@@ -42,7 +42,7 @@ use yii\bootstrap\Modal;
                             'style' => 'width:100%',
                     ]);
                     ?>
-                    <!--a href="#" class="btn btn-success send-service" data-vendor-id="<?= $row->organization->id ?>" style="width: 100%">предложить услуги</a-->
+                    <!--a href="#" class="btn btn-success send-service" data-vendor-id="<?= $row->organization_id ?>" style="width: 100%">предложить услуги</a-->
                   </div>
                 </div>
               </div>

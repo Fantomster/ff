@@ -21,6 +21,8 @@ use yii\helpers\ArrayHelper;
  * @property booolean $uploaded_processed
  * 
  * @property Catalog $catalog
+ * @property Organization $client
+ * @property Organization $vendor
  */
 class RelationSuppRest extends \yii\db\ActiveRecord {
 
@@ -31,6 +33,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     const CATALOG_STATUS_ON = 1;
     const INVITE_OFF = 0;
     const INVITE_ON = 1;
+    const UPLOADED_NOT_PROCESSED = 0;
+    const UPLOADED_PROCESSED = 1;
 
     public $resourceCategory = 'uploaded_catalogs';
     
@@ -143,4 +147,18 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVendor() {
+        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClient() {
+        return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
+    }
+    
 }

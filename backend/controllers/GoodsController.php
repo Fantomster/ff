@@ -5,6 +5,7 @@ namespace backend\controllers;
 use Yii;
 use common\models\CatalogBaseGoods;
 use common\models\Role;
+use common\models\RelationSuppRest;
 use backend\models\CatalogBaseGoodsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -13,6 +14,7 @@ use yii\helpers\Json;
 use yii\web\Response;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
+use yii\data\ActiveDataProvider;
 
 /**
  * GoodsController implements the CRUD actions for CatalogBaseGoods model.
@@ -42,7 +44,7 @@ class GoodsController extends Controller {
                         'roles' => [Role::ROLE_ADMIN],
                     ],
                     [
-                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', ],
+                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', 'uploaded-catalogs'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -207,6 +209,14 @@ class GoodsController extends Controller {
             return $product->save(false);
         }
         return false;
+    }
+    
+    public function actionUploadedCatalogs() {
+        $query = RelationSuppRest::find()->where('uploaded_catalog is not null')->andWhere(['uploaded_processed' => RelationSuppRest::UPLOADED_NOT_PROCESSED]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+        return $this->render("uploaded-catalogs", compact("dataProvider"));
     }
     
     /**

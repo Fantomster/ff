@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
-$this->title = 'Каталоги загруженные ресторанами';
+$this->title = 'Каталоги, загруженные ресторанами';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="uploaded-catalogs-index">

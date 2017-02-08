@@ -68,7 +68,7 @@ class StatisticsController extends Controller {
                 ->count();
         $totalCount = $clientTotalCount + $vendorTotalCount;
 
-        $allTime = [$totalCount, $clientTotalCount, $vendorTotalCount];
+        $allTime = [$clientTotalCount, $vendorTotalCount];
         
         $thisMonthStart = $today->format('Y-m-01 00:00:00');
         $thisDayStart = $today->format('Y-m-d 00:00:00');
@@ -87,7 +87,7 @@ class StatisticsController extends Controller {
                 ->count();
         $countThisMonth = $clientCountThisMonth + $vendorCountThisMonth;
         
-        $thisMonth = [$countThisMonth, $clientCountThisMonth, $vendorCountThisMonth];
+        $thisMonth = [$clientCountThisMonth, $vendorCountThisMonth];
 
         $clientCountThisDay = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
@@ -103,7 +103,7 @@ class StatisticsController extends Controller {
                 ->count();
         $countThisDay = $clientCountThisDay + $vendorCountThisDay;
         
-        $thisDay = [$countThisDay, $clientCountThisDay, $vendorCountThisDay];
+        $thisDay = [$clientCountThisDay, $vendorCountThisDay];
 
         $weekArray = [];
         $all = [];

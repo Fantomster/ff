@@ -44,12 +44,12 @@ $form = ActiveForm::begin([
                 'width' => 200,
             ],
             'data' => [
-                'labels' => ['Все', 'Рестораны', 'Поставщики'],
+                'labels' => ['Рестораны', 'Поставщики'],
                 'datasets' => [
                     [
                         'data' => $allTime,
-                        'backgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
-                        'hoverBackgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                        'backgroundColor' => ["#FF0000", "#00FF00"],
+                        'hoverBackgroundColor' => ["#FF0000", "#00FF00"],
                     ]
                 ],
             ],
@@ -66,12 +66,12 @@ $form = ActiveForm::begin([
                 'width' => 200,
             ],
             'data' => [
-                'labels' => ['Все', 'Рестораны', 'Поставщики'],
+                'labels' => ['Рестораны', 'Поставщики'],
                 'datasets' => [
                     [
                         'data' => $thisMonth,
-                        'backgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
-                        'hoverBackgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                        'backgroundColor' => ["#FF0000", "#00FF00"],
+                        'hoverBackgroundColor' => ["#FF0000", "#00FF00"],
                     ]
                 ],
             ],
@@ -88,12 +88,12 @@ $form = ActiveForm::begin([
                 'width' => 200,
             ],
             'data' => [
-                'labels' => ['Все', 'Рестораны', 'Поставщики'],
+                'labels' => ['Рестораны', 'Поставщики'],
                 'datasets' => [
                     [
                         'data' => $thisDay,
-                        'backgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
-                        'hoverBackgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                        'backgroundColor' => ["#FF0000", "#00FF00"],
+                        'hoverBackgroundColor' => ["#FF0000", "#00FF00"],
                     ]
                 ],
             ],

@@ -54,6 +54,7 @@ class StatisticsController extends Controller {
         $dt = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilter . " 00:00:00");
         $day = $dt->format('w');
         $date = $dt->format('Y-m-d');
+        $today = new \DateTime();
 
         $clientTotalCount = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
@@ -67,19 +68,42 @@ class StatisticsController extends Controller {
                 ->count();
         $totalCount = $clientTotalCount + $vendorTotalCount;
 
-        $clientCountSinceDate = Organization::find()
+        $allTime = [$totalCount, $clientTotalCount, $vendorTotalCount];
+        
+        $thisMonthStart = $today->format('Y-m-01 00:00:00');
+        $thisDayStart = $today->format('Y-m-d 00:00:00');
+        
+        $clientCountThisMonth = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
                 ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT])
-                ->andWhere([">=", "$orgTable.created_at", $date])
+                ->andWhere([">=", "$orgTable.created_at", $thisMonthStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
-        $vendorCountSinceDate = Organization::find()
+        $vendorCountThisMonth = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
                 ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
-                ->andWhere([">=", "$orgTable.created_at", $date])
+                ->andWhere([">=", "$orgTable.created_at", $thisMonthStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
-        $countSinceDate = $clientCountSinceDate + $vendorCountSinceDate;
+        $countThisMonth = $clientCountThisMonth + $vendorCountThisMonth;
+        
+        $thisMonth = [$countThisMonth, $clientCountThisMonth, $vendorCountThisMonth];
+
+        $clientCountThisDay = Organization::find()
+                ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT])
+                ->andWhere([">=", "$orgTable.created_at", $thisDayStart])
+                ->groupBy(["$orgTable.id"])
+                ->count();
+        $vendorCountThisDay = Organization::find()
+                ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
+                ->andWhere([">=", "$orgTable.created_at", $thisDayStart])
+                ->groupBy(["$orgTable.id"])
+                ->count();
+        $countThisDay = $clientCountThisMonth + $vendorCountThisMonth;
+        
+        $thisDay = [$countThisDay, $clientCountThisDay, $vendorCountThisDay];
 
         $weekArray = [];
         $all = [];
@@ -87,7 +111,6 @@ class StatisticsController extends Controller {
         $vendors = [];
         $weeks = [];
         
-        $today = new \DateTime();
         $start = $dt;
         if (!$day) {
             $day = 7;
@@ -109,13 +132,6 @@ class StatisticsController extends Controller {
                             ->groupBy(["$orgTable.id"])->count();
             $countForWeek = $clientCountForWeek + $vendorCountForWeek;
             //if ($countForWeek) {
-            $weekArray[] = [
-                'start' => $from,
-                'end' => ($today > $end) ? $to : $today->format('Y-m-d H:i:s'),
-                'count' => $countForWeek,
-                'clientCount' => $clientCountForWeek,
-                'vendorCount' => $vendorCountForWeek,
-            ];
             $all[] = $countForWeek;
             $clients[] = $clientCountForWeek;
             $vendors[] = $vendorCountForWeek;
@@ -127,33 +143,25 @@ class StatisticsController extends Controller {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('registered', compact(
-                    'totalCount', 
-                    'clientTotalCount', 
-                    'vendorTotalCount', 
-                    'countSinceDate', 
-                    'clientCountSinceDate', 
-                    'vendorCountSinceDate', 
                     'dateFilter', 
-                    'weekArray',
                     'clients',
                     'vendors',
                     'all',
-                    'weeks'
+                    'weeks',
+                    'allTime',
+                    'thisMonth',
+                    'thisDay'
                     ));
         } else {
             return $this->render('registered', compact(
-                    'totalCount', 
-                    'clientTotalCount', 
-                    'vendorTotalCount', 
-                    'countSinceDate', 
-                    'clientCountSinceDate', 
-                    'vendorCountSinceDate', 
                     'dateFilter', 
-                    'weekArray',
                     'clients',
                     'vendors',
                     'all',
-                    'weeks'
+                    'weeks',
+                    'allTime',
+                    'thisMonth',
+                    'thisDay'
                     ));
         }
     }

@@ -30,11 +30,77 @@ $form = ActiveForm::begin([
             'method' => 'post',
         ]);
 ?>
-<h3>Зарегистрировано за все время.</h3>
-
-<div>Всего: <?= $totalCount ?></div>
-<div>Ресторанов: <?= $clientTotalCount ?></div>
-<div>Поставщиков: <?= $vendorTotalCount ?></div>
+<div class="row">
+    <div class="col-md-12" style="text-align: center;">
+        <h3>Зарегистрировано</h3>
+    </div>
+    <div class="col-md-4 col-sm-12" style="text-align: center;">
+        <h4>За все время.</h4>
+        <?=
+        ChartJs::widget([
+            'type' => 'pie',
+            'options' => [
+                'height' => 200,
+                'width' => 200,
+            ],
+            'data' => [
+                'labels' => ['Все', 'Рестораны', 'Поставщики'],
+                'datasets' => [
+                    [
+                        'data' => $allTime,
+                        'backgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                        'hoverBackgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                    ]
+                ],
+            ],
+        ]);
+        ?>
+    </div>
+    <div class="col-md-4 col-sm-12" style="text-align: center;">
+        <h4>За текущий месяц</h4>
+        <?=
+        ChartJs::widget([
+            'type' => 'pie',
+            'options' => [
+                'height' => 200,
+                'width' => 200,
+            ],
+            'data' => [
+                'labels' => ['Все', 'Рестораны', 'Поставщики'],
+                'datasets' => [
+                    [
+                        'data' => $thisMonth,
+                        'backgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                        'hoverBackgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                    ]
+                ],
+            ],
+        ]);
+        ?>
+    </div>
+    <div class="col-md-4 col-sm-12" style="text-align: center;">
+        <h4>Сегодня</h4>
+        <?=
+        ChartJs::widget([
+            'type' => 'pie',
+            'options' => [
+                'height' => 200,
+                'width' => 200,
+            ],
+            'data' => [
+                'labels' => ['Все', 'Рестораны', 'Поставщики'],
+                'datasets' => [
+                    [
+                        'data' => $thisDay,
+                        'backgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                        'hoverBackgroundColor' => ["#0000FF", "#FF0000", "#00FF00"],
+                    ]
+                ],
+            ],
+        ]);
+        ?>
+    </div>
+</div>
 
 <h3>Зарегистрировано с </h3><?=
 DatePicker::widget([
@@ -50,11 +116,6 @@ DatePicker::widget([
 ])
 ?>
 
-<div>Всего: <?= $countSinceDate ?></div>
-<div>Ресторанов: <?= $clientCountSinceDate ?></div>
-<div>Поставщиков: <?= $vendorCountSinceDate ?></div>
-
-<br>
 <?=
 ChartJs::widget([
     'type' => 'line',
@@ -108,13 +169,6 @@ ChartJs::widget([
     ],
 ])
 ?>
-<?php foreach ($weekArray as $week) { ?>
-    <!--<h4>Неделя с <?= $week['start'] ?> до <?= $week['end'] ?>:</h4>
-    <div>Всего: <?= $week['count'] ?></div>
-    <div>Ресторанов: <?= $week['clientCount'] ?></div>
-    <div>Поставщиков: <?= $week['vendorCount'] ?></div>
-    <br>-->
-<?php } ?>
 
 <?php ActiveForm::end(); ?>
 

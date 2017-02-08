@@ -66,7 +66,7 @@ class StatisticsController extends Controller {
                 ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
                 ->groupBy(["$orgTable.id"])
                 ->count();
-        $totalCount = $clientTotalCount + $vendorTotalCount;
+        $allTimeCount = $clientTotalCount + $vendorTotalCount;
 
         $allTime = [$clientTotalCount, $vendorTotalCount];
         
@@ -85,7 +85,7 @@ class StatisticsController extends Controller {
                 ->andWhere([">=", "$orgTable.created_at", $thisMonthStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
-        $countThisMonth = $clientCountThisMonth + $vendorCountThisMonth;
+        $thisMonthCount = $clientCountThisMonth + $vendorCountThisMonth;
         
         $thisMonth = [$clientCountThisMonth, $vendorCountThisMonth];
 
@@ -101,9 +101,9 @@ class StatisticsController extends Controller {
                 ->andWhere([">=", "$orgTable.created_at", $thisDayStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
-        $countThisDay = $clientCountThisDay + $vendorCountThisDay;
+        $todayCount = $clientCountThisDay + $vendorCountThisDay;
         
-        $thisDay = [$clientCountThisDay, $vendorCountThisDay];
+        $today = [$clientCountThisDay, $vendorCountThisDay];
 
         $weekArray = [];
         $all = [];
@@ -150,7 +150,10 @@ class StatisticsController extends Controller {
                     'weeks',
                     'allTime',
                     'thisMonth',
-                    'thisDay'
+                    'today',
+                    'todayCount',
+                    'thisMonthCount',
+                    'allTimeCount'
                     ));
         } else {
             return $this->render('registered', compact(
@@ -161,7 +164,10 @@ class StatisticsController extends Controller {
                     'weeks',
                     'allTime',
                     'thisMonth',
-                    'thisDay'
+                    'today',
+                    'todayCount',
+                    'thisMonthCount',
+                    'allTimeCount'
                     ));
         }
     }

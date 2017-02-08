@@ -35,7 +35,7 @@ $form = ActiveForm::begin([
         <h3>Зарегистрировано</h3>
     </div>
     <div class="col-md-4 col-sm-12" style="text-align: center;">
-        <h4>За все время.</h4>
+        <h4>За все время (<?=$allTimeCount?>)</h4>
         <?=
         ChartJs::widget([
             'type' => 'pie',
@@ -57,7 +57,7 @@ $form = ActiveForm::begin([
         ?>
     </div>
     <div class="col-md-4 col-sm-12" style="text-align: center;">
-        <h4>За текущий месяц</h4>
+        <h4>За текущий месяц (<?=$thisMonthCount?>)</h4>
         <?=
         ChartJs::widget([
             'type' => 'pie',
@@ -79,7 +79,7 @@ $form = ActiveForm::begin([
         ?>
     </div>
     <div class="col-md-4 col-sm-12" style="text-align: center;">
-        <h4>Сегодня</h4>
+        <h4>Сегодня (<?=$todayCount?>)</h4>
         <?=
         ChartJs::widget([
             'type' => 'pie',
@@ -91,7 +91,7 @@ $form = ActiveForm::begin([
                 'labels' => ['Рестораны', 'Поставщики'],
                 'datasets' => [
                     [
-                        'data' => $thisDay,
+                        'data' => $today,
                         'backgroundColor' => ["#FF0000", "#00FF00"],
                         'hoverBackgroundColor' => ["#FF0000", "#00FF00"],
                     ]

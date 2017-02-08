@@ -1,13 +1,9 @@
 <?php
-use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\grid\GridView;
-use common\models\Order;
-use common\models\Organization;
+
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
-use yii\widgets\Breadcrumbs;
+use dosamigos\chartjs\ChartJs;
 
 $this->registerJs('
     $("document").ready(function(){
@@ -40,29 +36,84 @@ $form = ActiveForm::begin([
 <div>Ресторанов: <?= $clientTotalCount ?></div>
 <div>Поставщиков: <?= $vendorTotalCount ?></div>
 
-<h3>Зарегистрировано с </h3><?= DatePicker::widget([
+<h3>Зарегистрировано с </h3><?=
+DatePicker::widget([
     'name' => 'date',
     'type' => DatePicker::TYPE_INPUT,
     'value' => $dateFilter,
     'options' => ['id' => 'date', 'style' => 'width: 100px;'],
     'pluginOptions' => [
-        'autoclose'=>true,
+        'autoclose' => true,
         'format' => 'dd.mm.yyyy',
         'endDate' => "0d",
     ]
-]) ?>
+])
+?>
 
 <div>Всего: <?= $countSinceDate ?></div>
 <div>Ресторанов: <?= $clientCountSinceDate ?></div>
 <div>Поставщиков: <?= $vendorCountSinceDate ?></div>
 
 <br>
+<?=
+ChartJs::widget([
+    'type' => 'line',
+    'options' => [
+        'height' => 400,
+        'width' => 800,
+    ],
+    'data' => [
+        'labels' => $weeks,
+        'datasets' => [
+            [
+                'label' => 'Все организации',
+                'backgroundColor' => "rgba(0,0,255,0.2)",
+                'borderColor' => "rgba(0,0,255,1)",
+                'pointBackgroundColor' => "rgba(0,0,255,1)",
+                'pointBorderColor' => "#00f",
+                'pointHoverBackgroundColor' => "#00f",
+                'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                'data' => $all,
+                'spanGaps' => false,
+                'borderJoinStyle' => 'miter',
+                'fill' => false,
+            ],
+            [
+                'label' => 'Рестораны',
+                'backgroundColor' => "rgba(255,0,0,0.2)",
+                'borderColor' => "rgba(255,0,0,1)",
+                'pointBackgroundColor' => "rgba(255,0,0,1)",
+                'pointBorderColor' => "#f00",
+                'pointHoverBackgroundColor' => "#f00",
+                'pointHoverBorderColor' => "rgba(255,0,0,1)",
+                'data' => $clients,
+                'spanGaps' => false,
+                'borderJoinStyle' => 'miter',
+                'fill' => false,
+            ],
+            [
+                'label' => 'Поставщики',
+                'backgroundColor' => "rgba(0,255,0,0.2)",
+                'borderColor' => "rgba(0,255,0,1)",
+                'pointBackgroundColor' => "rgba(0,255,0,1)",
+                'pointBorderColor' => "#0f0",
+                'pointHoverBackgroundColor' => "#0f0",
+                'pointHoverBorderColor' => "rgba(0,255,0,1)",
+                'data' => $vendors,
+                'spanGaps' => false,
+                'borderJoinStyle' => 'miter',
+                'fill' => false,
+            ],
+        ]
+    ],
+])
+?>
 <?php foreach ($weekArray as $week) { ?>
-<h4>Неделя с <?= $week['start'] ?> до <?= $week['end'] ?>:</h4>
-<div>Всего: <?= $week['count'] ?></div>
-<div>Ресторанов: <?= $week['clientCount'] ?></div>
-<div>Поставщиков: <?= $week['vendorCount'] ?></div>
-<br>
+    <!--<h4>Неделя с <?= $week['start'] ?> до <?= $week['end'] ?>:</h4>
+    <div>Всего: <?= $week['count'] ?></div>
+    <div>Ресторанов: <?= $week['clientCount'] ?></div>
+    <div>Поставщиков: <?= $week['vendorCount'] ?></div>
+    <br>-->
 <?php } ?>
 
 <?php ActiveForm::end(); ?>

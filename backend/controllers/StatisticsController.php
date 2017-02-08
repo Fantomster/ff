@@ -82,6 +82,11 @@ class StatisticsController extends Controller {
         $countSinceDate = $clientCountSinceDate + $vendorCountSinceDate;
 
         $weekArray = [];
+        $all = [];
+        $clients = [];
+        $vendors = [];
+        $weeks = [];
+        
         $today = new \DateTime();
         $start = $dt;
         if (!$day) {
@@ -111,6 +116,10 @@ class StatisticsController extends Controller {
                 'clientCount' => $clientCountForWeek,
                 'vendorCount' => $vendorCountForWeek,
             ];
+            $all[] = $countForWeek;
+            $clients[] = $clientCountForWeek;
+            $vendors[] = $vendorCountForWeek;
+            $weeks[] = $start->format('jS M y') . '-' . (($today > $end) ? $end->format('jS M y') : $today->format('jS M y'));
             // }
             $start = $end;
             $end = $start->add(new \DateInterval('P7D'));
@@ -118,10 +127,34 @@ class StatisticsController extends Controller {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('registered', compact(
-                                    'totalCount', 'clientTotalCount', 'vendorTotalCount', 'countSinceDate', 'clientCountSinceDate', 'vendorCountSinceDate', 'dateFilter', 'weekArray'));
+                    'totalCount', 
+                    'clientTotalCount', 
+                    'vendorTotalCount', 
+                    'countSinceDate', 
+                    'clientCountSinceDate', 
+                    'vendorCountSinceDate', 
+                    'dateFilter', 
+                    'weekArray',
+                    'clients',
+                    'vendors',
+                    'all',
+                    'weeks'
+                    ));
         } else {
             return $this->render('registered', compact(
-                                    'totalCount', 'clientTotalCount', 'vendorTotalCount', 'countSinceDate', 'clientCountSinceDate', 'vendorCountSinceDate', 'dateFilter', 'weekArray'));
+                    'totalCount', 
+                    'clientTotalCount', 
+                    'vendorTotalCount', 
+                    'countSinceDate', 
+                    'clientCountSinceDate', 
+                    'vendorCountSinceDate', 
+                    'dateFilter', 
+                    'weekArray',
+                    'clients',
+                    'vendors',
+                    'all',
+                    'weeks'
+                    ));
         }
     }
 

@@ -5,6 +5,17 @@ use yii\helpers\Url;
 use kartik\widgets\FileInput;
 use yii\widgets\ActiveForm;
 use yii\widgets\Breadcrumbs;
+use nirvana\showloading\ShowLoadingAsset;
+
+ShowLoadingAsset::register($this);
+$this->registerJs(
+        '$("document").ready(function(){
+            $("#register-form").on("submit", function(e) {
+                $("#loader-show").showLoading();
+            });
+        });'
+);
+$this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
 ?>
 <section class="content-header">
     <?=

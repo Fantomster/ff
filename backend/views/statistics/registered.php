@@ -4,11 +4,12 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use dosamigos\chartjs\ChartJs;
+use yii\helpers\Html;
 
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
-        $(document).on("change", "#date", function() {
+        $(document).on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
                 $("#regStatForm").submit();
                 justSubmitted = true;
@@ -31,10 +32,10 @@ $form = ActiveForm::begin([
         ]);
 ?>
 <div class="row">
-    <div class="col-md-12" style="text-align: center;">
+    <div class="col-md-12 text-center">
         <h3>Зарегистрировано</h3>
     </div>
-    <div class="col-md-4 col-sm-12" style="text-align: center;">
+    <div class="col-md-4 col-sm-12 text-center">
         <h4>За все время (<?=$allTimeCount?>)</h4>
         <?=
         ChartJs::widget([
@@ -56,7 +57,7 @@ $form = ActiveForm::begin([
         ]);
         ?>
     </div>
-    <div class="col-md-4 col-sm-12" style="text-align: center;">
+    <div class="col-md-4 col-sm-12 text-center">
         <h4>За текущий месяц (<?=$thisMonthCount?>)</h4>
         <?=
         ChartJs::widget([
@@ -78,7 +79,7 @@ $form = ActiveForm::begin([
         ]);
         ?>
     </div>
-    <div class="col-md-4 col-sm-12" style="text-align: center;">
+    <div class="col-md-4 col-sm-12 text-center">
         <h4>Сегодня (<?=$todayCount?>)</h4>
         <?=
         ChartJs::widget([
@@ -101,21 +102,30 @@ $form = ActiveForm::begin([
         ?>
     </div>
 </div>
-
-<h3>Зарегистрировано с </h3><?=
-DatePicker::widget([
+<div class="row">
+    <div class="col-md-12 text-center"> 
+        <h3>Зарегистрировано в период </h3>
+                    <div class="form-group" style="width: 350px; margin: 0 auto; padding-bottom: 10px;">
+                        <?=
+                        DatePicker::widget([
     'name' => 'date',
-    'type' => DatePicker::TYPE_INPUT,
-    'value' => $dateFilter,
-    'options' => ['id' => 'date', 'style' => 'width: 100px;'],
-    'pluginOptions' => [
-        'autoclose' => true,
-        'format' => 'dd.mm.yyyy',
-        'endDate' => "0d",
-    ]
-])
-?>
-
+    'name2' => 'date2',
+                            'value' => $dateFilterFrom,
+                            'value2' => $dateFilterTo,
+                            'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
+                            'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                            'separator' => '-',
+                            'type' => DatePicker::TYPE_RANGE,
+                            'pluginOptions' => [
+                                'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                                'autoclose' => true,
+                                'endDate' => "0d",
+                            ]
+                        ])
+                        ?>
+                    </div>
+                </div>
+</div>
 <?=
 ChartJs::widget([
     'type' => 'line',

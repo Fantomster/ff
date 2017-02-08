@@ -49,12 +49,15 @@ class StatisticsController extends Controller {
     public function actionRegistered() {
         $userTable = User::tableName();
         $orgTable = Organization::tableName();
-        $dateFilter = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
-
-        $dt = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilter . " 00:00:00");
+        
+        $today = new \DateTime();
+        $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
+        $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
+        
+        $dt = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 23:59:59");
         $day = $dt->format('w');
         $date = $dt->format('Y-m-d');
-        $today = new \DateTime();
 
         $clientTotalCount = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
@@ -116,7 +119,7 @@ class StatisticsController extends Controller {
         }
         $end = $start->add(new \DateInterval('P' . (8 - $day) . 'D'));
 
-        while ($today > $start) {
+        while ($dtEnd > $start) {
             $from = $start->format('Y-m-d H:i:s');
             $to = $end->format('Y-m-d H:i:s');
             $clientCountForWeek = Organization::find()
@@ -134,7 +137,7 @@ class StatisticsController extends Controller {
             $all[] = $countForWeek;
             $clients[] = $clientCountForWeek;
             $vendors[] = $vendorCountForWeek;
-            $weeks[] = $start->format('jS M y') . '-' . (($today > $end) ? $end->format('jS M y') : $today->format('jS M y'));
+            $weeks[] = $start->format('jS M y') . '-' . (($dtEnd > $end) ? $end->format('jS M y') : $dtEnd->format('jS M y'));
             // }
             $start = $end;
             $end = $start->add(new \DateInterval('P7D'));
@@ -142,7 +145,8 @@ class StatisticsController extends Controller {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('registered', compact(
-                    'dateFilter', 
+                    'dateFilterFrom', 
+                    'dateFilterTo', 
                     'clients',
                     'vendors',
                     'all',
@@ -156,7 +160,8 @@ class StatisticsController extends Controller {
                     ));
         } else {
             return $this->render('registered', compact(
-                    'dateFilter', 
+                    'dateFilterFrom', 
+                    'dateFilterTo', 
                     'clients',
                     'vendors',
                     'all',

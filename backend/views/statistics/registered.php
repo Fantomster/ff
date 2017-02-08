@@ -91,7 +91,7 @@ $form = ActiveForm::begin([
                 'labels' => ['Рестораны', 'Поставщики'],
                 'datasets' => [
                     [
-                        'data' => $today,
+                        'data' => $todayArr,
                         'backgroundColor' => ["#FF0000", "#00FF00"],
                         'hoverBackgroundColor' => ["#FF0000", "#00FF00"],
                     ]

@@ -103,9 +103,8 @@ class StatisticsController extends Controller {
                 ->count();
         $todayCount = $clientCountThisDay + $vendorCountThisDay;
         
-        $today = [$clientCountThisDay, $vendorCountThisDay];
+        $todayArr = [$clientCountThisDay, $vendorCountThisDay];
 
-        $weekArray = [];
         $all = [];
         $clients = [];
         $vendors = [];
@@ -150,7 +149,7 @@ class StatisticsController extends Controller {
                     'weeks',
                     'allTime',
                     'thisMonth',
-                    'today',
+                    'todayArr',
                     'todayCount',
                     'thisMonthCount',
                     'allTimeCount'
@@ -164,7 +163,7 @@ class StatisticsController extends Controller {
                     'weeks',
                     'allTime',
                     'thisMonth',
-                    'today',
+                    'todayArr',
                     'todayCount',
                     'thisMonthCount',
                     'allTimeCount'

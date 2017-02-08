@@ -6,6 +6,8 @@ use Yii;
 use common\models\CatalogBaseGoods;
 use common\models\Role;
 use common\models\RelationSuppRest;
+use common\models\Catalog;
+use common\models\CatalogGoods;
 use backend\models\CatalogBaseGoodsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -15,6 +17,7 @@ use yii\web\Response;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
 use yii\data\ActiveDataProvider;
+use yii\web\UploadedFile;
 
 /**
  * GoodsController implements the CRUD actions for CatalogBaseGoods model.
@@ -79,7 +82,7 @@ class GoodsController extends Controller {
 
         return $this->render('vendor', compact('id', 'searchModel', 'dataProvider'));
     }
-    
+
     public function actionAjaxUpdateProductMarketPlace($id) {
         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
         $catalogBaseGoods->scenario = 'marketPlace';
@@ -91,7 +94,6 @@ class GoodsController extends Controller {
 //        ]);
 //        $categorys->addRule(['sub1', 'sub2'], 'required', ['message' => Yii::t('app', 'Укажите категорию товара')])
 //                ->addRule(['sub1', 'sub2'], 'integer');
-
 //        if (!empty($catalogBaseGoods->category_id)) {
 //            $categorys->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
 //            $categorys->sub2 = $catalogBaseGoods->category_id;
@@ -173,21 +175,21 @@ class GoodsController extends Controller {
         }
         echo Json::encode(['output' => '', 'selected' => '']);
     }
-    
+
     public function actionCategory($vendor_id, $id) {
         $vendor = \common\models\Organization::findOne(['id' => $vendor_id]);
-        
+
         $searchModel = new CatalogBaseGoodsSearch();
-        
+
         $dataProviderCategory = $searchModel->search();
         $dataProviderCategory->query->andWhere(['category_id' => $id, 'supp_org_id' => $vendor_id]);
-        
+
         $dataProviderEmpty = $searchModel->search();
         $dataProviderEmpty->query->andWhere(['supp_org_id' => $vendor_id]);
         $dataProviderEmpty->query->andWhere('(category_id is null) OR (category_id = 0)');
         $subCategory = \common\models\MpCategory::findOne(['id' => $id]);
         $category = \common\models\MpCategory::findOne(['id' => $subCategory->parent]);
-        
+
         return $this->render('category', compact('id', 'dataProviderCategory', 'dataProviderEmpty', 'vendor', 'subCategory', 'category'));
     }
 
@@ -200,9 +202,9 @@ class GoodsController extends Controller {
         }
         return false;
     }
-    
+
     public function actionAjaxSetCategory() {
-         $post = Yii::$app->request->post();
+        $post = Yii::$app->request->post();
         if ($post) {
             $product = CatalogBaseGoods::findOne(['id' => $post['id']]);
             $product->category_id = $post['category_id'];
@@ -210,7 +212,7 @@ class GoodsController extends Controller {
         }
         return false;
     }
-    
+
     public function actionUploadedCatalogs() {
         $query = RelationSuppRest::find()->where('uploaded_catalog is not null')->andWhere(['uploaded_processed' => RelationSuppRest::UPLOADED_NOT_PROCESSED]);
         $dataProvider = new ActiveDataProvider([
@@ -218,12 +220,100 @@ class GoodsController extends Controller {
         ]);
         return $this->render("uploaded-catalogs", compact("dataProvider"));
     }
-    
+
     public function actionImportCatalog($id) {
         $relation = RelationSuppRest::findOne(['id' => $id]);
-        return $this->render("import-catalog", compact("relation"));
+        if (empty($relation)) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        $importModel = new \common\models\upload\UploadForm();
+        if (Yii::$app->request->isPost) {
+            $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
+            $path = $importModel->upload();
+            if (!is_readable($path)) {
+                Yii::$app->session->setFlash('fail', 'Ошибка загрузки файла!');
+                return $this->render("import-catalog", compact("relation", "importModel"));
+            }
+            $localFile = \PHPExcel_IOFactory::identify($path);
+            $objReader = \PHPExcel_IOFactory::createReader($localFile);
+            $objPHPExcel = $objReader->load($path);
+
+            $worksheet = $objPHPExcel->getSheet(0);
+            $highestRow = $worksheet->getHighestRow(); // получаем количество строк
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $baseCatalog = Catalog::findOne(['supp_org_id' => $relation->supp_org_id, 'type' => Catalog::BASE_CATALOG]);
+
+                for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+                    $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
+                    $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
+                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //валюта
+                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); //единица измерения
+                    if (!empty($row_article && $row_product && $row_price && $row_ed)) {
+                        if (empty($row_units) || $row_units < 0) {
+                            $row_units = 0;
+                        }
+                        $baseProduct = new CatalogBaseGoods();
+                        $baseProduct->cat_id = $baseCatalog->id;
+                        $baseProduct->supp_org_id = $relation->supp_org_id;
+                        $baseProduct->article = $row_article;
+                        $baseProduct->product = $row_product;
+                        $baseProduct->units = $row_units;
+                        $baseProduct->price = $row_price;
+                        $baseProduct->ed = $row_ed;
+                        $baseProduct->note = $row_note;
+                        $baseProduct->status = CatalogBaseGoods::STATUS_ON;
+                        $baseProduct->save();
+                        $product = new CatalogGoods();
+                        $product->cat_id = $relation->cat_id;
+                        $product->base_goods_id = $baseProduct->id;
+                        $product->price = $row_price;
+                        $product->save();
+                    }
+                }
+                $relation->uploaded_processed = RelationSuppRest::UPLOADED_PROCESSED;
+                $relation->save();
+                $transaction->commit();
+                unlink($path);
+            } catch (Exception $e) {
+                unlink($path);
+                $transaction->rollback();
+                Yii::$app->session->setFlash('fail', 'Ошибка сохранения, повторите действие!');
+            }
+        }
+        return $this->render("import-catalog", compact("relation", "importModel"));
     }
-    
+
+    private function fillNewBaseCatalog($worksheet, $highestRow, $catalogId, $vendorId) {
+        for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+            $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+            $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+            $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
+            $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
+            $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //валюта
+            $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); //единица измерения
+            if (!empty($row_article && $row_product && $row_price && $row_ed)) {
+                if (empty($row_units) || $row_units < 0) {
+                    $row_units = 0;
+                }
+                $product = new CatalogBaseGoods();
+                $product->cat_id = $catalogId;
+                $product->supp_org_id = $vendorId;
+                $product->article = $row_article;
+                $product->product = $row_product;
+                $product->units = $row_units;
+                $product->price = $row_price;
+                $product->ed = $row_ed;
+                $product->note = $row_note;
+                $product->status = CatalogBaseGoods::STATUS_ON;
+                $product->save();
+            }
+        }
+    }
+
     /**
      * Finds the CatalogBaseGoods model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

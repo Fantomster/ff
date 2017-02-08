@@ -101,7 +101,7 @@ class StatisticsController extends Controller {
                 ->andWhere([">=", "$orgTable.created_at", $thisDayStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
-        $countThisDay = $clientCountThisMonth + $vendorCountThisMonth;
+        $countThisDay = $clientCountThisDay + $vendorCountThisDay;
         
         $thisDay = [$countThisDay, $clientCountThisDay, $vendorCountThisDay];
 

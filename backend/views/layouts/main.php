@@ -124,7 +124,7 @@ NavBar::end();
                 <p class="pull-right"><?= Yii::powered() ?></p>
             </div>
         </footer>
-
+<div id="loader-show"></div>
 <?php $this->endBody() ?>
     </body>
 </html>

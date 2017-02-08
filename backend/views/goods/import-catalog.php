@@ -10,7 +10,7 @@ use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
 $this->registerJs(
         '$("document").ready(function(){
-            $("#register-form").on("submit", function(e) {
+            $("form").on("submit", function(e) {
                 $("#loader-show").showLoading();
             });
         });'

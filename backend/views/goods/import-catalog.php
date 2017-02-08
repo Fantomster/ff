@@ -4,7 +4,24 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use kartik\widgets\FileInput;
 use yii\widgets\ActiveForm;
+use yii\widgets\Breadcrumbs;
 ?>
+<section class="content-header">
+    <?=
+    Breadcrumbs::widget([
+        'options' => [
+            'class' => 'breadcrumb',
+        ],
+        'links' => [
+            [
+                'label' => 'Каталоги, загруженные ресторанами',
+                'url' => ['goods/uploaded-catalogs'],
+            ],
+            'Импорт каталога',
+        ],
+    ])
+    ?>
+</section>
 <section>
     <?php if ($relation->uploaded_processed) { ?>
         <div class="row">

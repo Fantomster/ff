@@ -670,12 +670,12 @@ class ClientController extends DefaultController {
                     . " FROM `catalog` "
                     . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
                     . " WHERE "
-                    . " catalog_base_goods.cat_id = $id and deleted != 1");
+                    . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
                             . " FROM `catalog` "
                             . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
                             . " WHERE "
-                            . " catalog_base_goods.cat_id = $id and deleted != 1")->queryScalar();
+                            . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
         }
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status "
@@ -683,13 +683,13 @@ class ClientController extends DefaultController {
                     . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
                     . " WHERE "
-                    . " catalog_goods.cat_id = $id and deleted != 1");
+                    . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
                             . " FROM `catalog` "
                             . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                             . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
                             . " WHERE "
-                            . " catalog_goods.cat_id = $id and deleted != 1")->queryScalar();
+                            . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
@@ -1110,10 +1110,6 @@ class ClientController extends DefaultController {
         return $this->render('tutorial');
     }
     
-    public function actionTest() {
-        return $this->render('tutorial');
-    }
-
     public function actionSupport() {
         return $this->render('/site/underConstruction');
     }

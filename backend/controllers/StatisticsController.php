@@ -119,34 +119,11 @@ class StatisticsController extends Controller {
         }
         $end = $start->add(new \DateInterval('P' . (8 - $day) . 'D'));
 
-//        while ($dtEnd > $start) {
-//            $from = $start->format('Y-m-d H:i:s');
-//            $to = $end->format('Y-m-d H:i:s');
-//            $clientCountForWeek = Organization::find()
-//                            ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-//                            ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT,])
-//                            ->andWhere(["between", "$orgTable.created_at", $from, $to])
-//                            ->groupBy(["$orgTable.id"])->count();
-//            $vendorCountForWeek = Organization::find()
-//                            ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-//                            ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
-//                            ->andWhere(["between", "$orgTable.created_at", $from, $to])
-//                            ->groupBy(["$orgTable.id"])->count();
-//            $countForWeek = $clientCountForWeek + $vendorCountForWeek;
-//            //if ($countForWeek) {
-//            $all[] = $countForWeek;
-//            $clients[] = $clientCountForWeek;
-//            $vendors[] = $vendorCountForWeek;
-//            $weeks[] = $start->format('jS M y') . '-' . (($dtEnd > $end) ? $end->format('jS M y') : $dtEnd->format('jS M y'));
-//            // }
-//            $start = $end;
-//            $end = $start->add(new \DateInterval('P7D'));
-//        }
         $sql = "SELECT COUNT($orgTable.id) AS count, "
                 . "SUM(CASE WHEN organization.type_id=1 THEN 1 ELSE 0 END) AS clients, SUM(CASE WHEN organization.type_id=2 THEN 1 ELSE 0 END) AS vendors, "
                 . "YEAR($orgTable.created_at) AS year, MONTH($orgTable.created_at) AS month, DAY($orgTable.created_at) AS day FROM $orgTable "
                 . "LEFT JOIN $userTable ON $orgTable.id = $userTable.organization_id "
-                . "WHERE (($userTable.status=1) AND ($orgTable.type_id=1)) AND ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) "
+                . "WHERE ($userTable.status=1) AND ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) "
                 . "GROUP BY YEAR($orgTable.created_at), MONTH($orgTable.created_at), DAY($orgTable.created_at)";
         $command = Yii::$app->db->createCommand($sql, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $dtEnd->format('Y-m-d')]);
         $raw = $command->getRawSql();
@@ -166,8 +143,6 @@ class StatisticsController extends Controller {
                     'dateFilterTo', 
                     'clients',
                     'vendors',
-//                    'all',
-//                    'weeks',
                     'allTime',
                     'thisMonth',
                     'todayArr',
@@ -183,8 +158,6 @@ class StatisticsController extends Controller {
                     'dateFilterTo', 
                     'clients',
                     'vendors',
-//                    'all',
-//                    'weeks',
                     'allTime',
                     'thisMonth',
                     'todayArr',

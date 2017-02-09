@@ -12,7 +12,7 @@ use yii\widgets\Breadcrumbs;
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
-        $(document).on("change", "#date", function() {
+        $(document).on("change", "[name=\'statuses[]\']", function() {
             if (!justSubmitted) {
                 $("#orderStatForm").submit();
                 justSubmitted = true;
@@ -34,6 +34,16 @@ $form = ActiveForm::begin([
             'method' => 'post',
         ]);
 ?>
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h3>Заказы за все время</h3>
+    </div>
+    <div class="col-md-4 col-sm-12">
+        <?= Html::checkboxList('statuses', null, Order::getStatusList(), ['separator'=>'<br/>']) ?>
+    </div>
+</div>
+
 <h3>Заказы за все время.</h3>
 
 <div>Всего создано: <?= $orderCount ?></div>

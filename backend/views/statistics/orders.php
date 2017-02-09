@@ -40,43 +40,9 @@ $form = ActiveForm::begin([
         <h3>Заказы за все время</h3>
     </div>
     <div class="col-md-4 col-sm-12">
-        <?= Html::checkboxList('statuses', null, Order::getStatusList(), ['separator'=>'<br/>']) ?>
+        <?= Html::checkboxList('statuses', $statuses, Order::getStatusList(), ['separator'=>'<br/>']) ?>
     </div>
 </div>
-
-<h3>Заказы за все время.</h3>
-
-<div>Всего создано: <?= $orderCount ?></div>
-<div>Отменено ресторанами: <?= $cancelledOrderCount ?></div>
-<div>Принято поставщиками: <?= $acceptedOrderCount ?></div>
-<div>Отменено поставщиками: <?= $rejectedOrderCount ?></div>
-
-<h3>Создано с </h3><?= DatePicker::widget([
-    'name' => 'date',
-    'type' => DatePicker::TYPE_INPUT,
-    'value' => $dateFilter,
-    'options' => ['id' => 'date', 'style' => 'width: 100px;'],
-    'pluginOptions' => [
-        'autoclose'=>true,
-        'format' => 'dd.mm.yyyy',
-        'endDate' => "0d",
-    ]
-]) ?>
-
-<div>Всего создано: <?= $orderCountSinceDate ?></div>
-<div>Отменено ресторанами: <?= $cancelledOrderCountSinceDate ?></div>
-<div>Принято поставщиками: <?= $acceptedOrderCountSinceDate ?></div>
-<div>Отменено поставщиками: <?= $rejectedOrderCountSinceDate ?></div>
-
-<br>
-<?php foreach ($weekArray as $week) { ?>
-<h4>Неделя с <?= $week['start'] ?> до <?= $week['end'] ?>:</h4>
-<div>Всего создано: <?= $week['count'] ?></div>
-<div>Отменено ресторанами: <?= $week['cancelled'] ?></div>
-<div>Принято поставщиками: <?= $week['accepted'] ?></div>
-<div>Отменено поставщиками: <?= $week['rejected'] ?></div>
-<br>
-<?php } ?>
 
 <?php ActiveForm::end(); ?>
 

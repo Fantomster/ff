@@ -176,100 +176,23 @@ class StatisticsController extends Controller {
         $dt = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilter . " 00:00:00");
         $day = $dt->format('w');
         $date = $dt->format('Y-m-d');
-
-        $orderCount = Order::find()
-                ->where(['<>', 'status' , Order::STATUS_FORMING])
-                ->count();
-        $cancelledOrderCount = Order::find()
-                ->where(['status' => Order::STATUS_CANCELLED])
-                ->count();
-        $acceptedOrderCount = Order::find()
-                ->where(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
-                ->count();
-        $rejectedOrderCount = Order::find()
-                ->where(['status' => Order::STATUS_REJECTED])
-                ->count();
-
-        $orderCountSinceDate = Order::find()
-                ->where(['<>', 'status' , Order::STATUS_FORMING])
-                ->andWhere([">=", "created_at", $date])
-                ->count();
-        $cancelledOrderCountSinceDate = Order::find()
-                ->where(['status' => Order::STATUS_CANCELLED])
-                ->andWhere([">=", "created_at", $date])
-                ->count();
-        $acceptedOrderCountSinceDate = Order::find()
-                ->where(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
-                ->andWhere([">=", "created_at", $date])
-                ->count();
-        $rejectedOrderCountSinceDate = Order::find()
-                ->where(['status' => Order::STATUS_REJECTED])
-                ->andWhere([">=", "created_at", $date])
-                ->count();
-
-        $weekArray = [];
-        $today = new \DateTime();
-        $start = $dt;
-        if (!$day) {
-            $day = 7;
-        }
-        $end = $start->add(new \DateInterval('P' . (8 - $day) . 'D'));
-
-        while ($today > $start) {
-            $from = $start->format('Y-m-d H:i:s');
-            $to = $end->format('Y-m-d H:i:s');
-            $orderCountForWeek = Order::find()
-                ->where(['<>', 'status' , Order::STATUS_FORMING])
-                ->andWhere(["between", "created_at", $from, $to])
-                ->count();
-            $cancelledOrderCountForWeek = Order::find()
-                ->where(['status' => Order::STATUS_CANCELLED])
-                ->andWhere(["between", "created_at", $from, $to])
-                ->count();
-            $acceptedOrderCountForWeek = Order::find()
-                ->where(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
-                ->andWhere(["between", "created_at", $from, $to])
-                ->count();
-            $rejectedOrderCountForWeek = Order::find()
-                ->where(['status' => Order::STATUS_REJECTED])
-                ->andWhere(["between", "created_at", $from, $to])
-                ->count();
-            $weekArray[] = [
-                'start' => $from,
-                'end' => ($today > $end) ? $to : $today->format('Y-m-d H:i:s'),
-                'count' => $orderCountForWeek,
-                'cancelled' => $cancelledOrderCountForWeek,
-                'accepted' => $acceptedOrderCountForWeek,
-                'rejected' => $rejectedOrderCountForWeek,
-            ];
-            $start = $end;
-            $end = $start->add(new \DateInterval('P7D'));
+        
+        $statuses = !empty(Yii::$app->request->post("statuses")) ? Yii::$app->request->post("statuses") : [];
+        
+        $select = "count(id) as count";
+        
+        foreach ($statuses as $status) {
+            $select .= 
         }
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
-                    'orderCount', 
-                    'cancelledOrderCount', 
-                    'acceptedOrderCount',
-                    'rejectedOrderCount',
-                    'orderCountSinceDate', 
-                    'cancelledOrderCountSinceDate', 
-                    'acceptedOrderCountSinceDate',
-                    'rejectedOrderCountSinceDate',
-                    'dateFilter', 
-                    'weekArray'));
+                    'statuses'
+                    ));
         } else {
             return $this->render('orders', compact(
-                    'orderCount', 
-                    'cancelledOrderCount', 
-                    'acceptedOrderCount',
-                    'rejectedOrderCount',
-                    'orderCountSinceDate', 
-                    'cancelledOrderCountSinceDate', 
-                    'acceptedOrderCountSinceDate',
-                    'rejectedOrderCountSinceDate',
-                    'dateFilter', 
-                    'weekArray'));
+                    'statuses'
+                    ));
         }
     }
 }

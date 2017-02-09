@@ -154,7 +154,7 @@ class StatisticsController extends Controller {
         $dayLabels = [];
         $dayStats = [];
         foreach ($clientsByDay as $day) {
-            $dayLabels[] = $day["day"] . " " . jdmonthname($day["month"], 0) . " " . $day["year"];
+            $dayLabels[] = $day["day"] . " " . jdmonthname($day["month"], 2) . " " . $day["year"];
             $dayStats[] = $day["count"];
             $clients[] = $day["clients"];
             $vendors[] = $day["vendors"];

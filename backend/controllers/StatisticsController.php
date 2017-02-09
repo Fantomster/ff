@@ -54,8 +54,8 @@ class StatisticsController extends Controller {
         $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
         $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
         
-        $dt = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
-        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 23:59:59");
+        $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+        $dtEnd = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 23:59:59");
         $day = $dt->format('w');
         $date = $dt->format('Y-m-d');
 
@@ -119,44 +119,63 @@ class StatisticsController extends Controller {
         }
         $end = $start->add(new \DateInterval('P' . (8 - $day) . 'D'));
 
-        while ($dtEnd > $start) {
-            $from = $start->format('Y-m-d H:i:s');
-            $to = $end->format('Y-m-d H:i:s');
-            $clientCountForWeek = Organization::find()
-                            ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                            ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT])
-                            ->andWhere(["between", "$orgTable.created_at", $from, $to])
-                            ->groupBy(["$orgTable.id"])->count();
-            $vendorCountForWeek = Organization::find()
-                            ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                            ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
-                            ->andWhere(["between", "$orgTable.created_at", $from, $to])
-                            ->groupBy(["$orgTable.id"])->count();
-            $countForWeek = $clientCountForWeek + $vendorCountForWeek;
-            //if ($countForWeek) {
-            $all[] = $countForWeek;
-            $clients[] = $clientCountForWeek;
-            $vendors[] = $vendorCountForWeek;
-            $weeks[] = $start->format('jS M y') . '-' . (($dtEnd > $end) ? $end->format('jS M y') : $dtEnd->format('jS M y'));
-            // }
-            $start = $end;
-            $end = $start->add(new \DateInterval('P7D'));
+//        while ($dtEnd > $start) {
+//            $from = $start->format('Y-m-d H:i:s');
+//            $to = $end->format('Y-m-d H:i:s');
+//            $clientCountForWeek = Organization::find()
+//                            ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
+//                            ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT,])
+//                            ->andWhere(["between", "$orgTable.created_at", $from, $to])
+//                            ->groupBy(["$orgTable.id"])->count();
+//            $vendorCountForWeek = Organization::find()
+//                            ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
+//                            ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
+//                            ->andWhere(["between", "$orgTable.created_at", $from, $to])
+//                            ->groupBy(["$orgTable.id"])->count();
+//            $countForWeek = $clientCountForWeek + $vendorCountForWeek;
+//            //if ($countForWeek) {
+//            $all[] = $countForWeek;
+//            $clients[] = $clientCountForWeek;
+//            $vendors[] = $vendorCountForWeek;
+//            $weeks[] = $start->format('jS M y') . '-' . (($dtEnd > $end) ? $end->format('jS M y') : $dtEnd->format('jS M y'));
+//            // }
+//            $start = $end;
+//            $end = $start->add(new \DateInterval('P7D'));
+//        }
+        $sql = "SELECT COUNT($orgTable.id) AS count, "
+                . "SUM(CASE WHEN organization.type_id=1 THEN 1 ELSE 0 END) AS clients, SUM(CASE WHEN organization.type_id=2 THEN 1 ELSE 0 END) AS vendors, "
+                . "YEAR($orgTable.created_at) AS year, MONTH($orgTable.created_at) AS month, DAY($orgTable.created_at) AS day FROM $orgTable "
+                . "LEFT JOIN $userTable ON $orgTable.id = $userTable.organization_id "
+                . "WHERE (($userTable.status=1) AND ($orgTable.type_id=1)) AND ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) "
+                . "GROUP BY YEAR($orgTable.created_at), MONTH($orgTable.created_at), DAY($orgTable.created_at)";
+        $command = Yii::$app->db->createCommand($sql, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $dtEnd->format('Y-m-d')]);
+        $raw = $command->getRawSql();
+        $clientsByDay = $command->queryAll();
+        $dayLabels = [];
+        $dayStats = [];
+        foreach ($clientsByDay as $day) {
+            $dayLabels[] = $day["day"] . " " . jdmonthname($day["month"], 0) . " " . $day["year"];
+            $dayStats[] = $day["count"];
+            $clients[] = $day["clients"];
+            $vendors[] = $day["vendors"];
         }
-
+        
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('registered', compact(
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'clients',
                     'vendors',
-                    'all',
-                    'weeks',
+//                    'all',
+//                    'weeks',
                     'allTime',
                     'thisMonth',
                     'todayArr',
                     'todayCount',
                     'thisMonthCount',
-                    'allTimeCount'
+                    'allTimeCount',
+                    'dayLabels',
+                    'dayStats'
                     ));
         } else {
             return $this->render('registered', compact(
@@ -164,14 +183,16 @@ class StatisticsController extends Controller {
                     'dateFilterTo', 
                     'clients',
                     'vendors',
-                    'all',
-                    'weeks',
+//                    'all',
+//                    'weeks',
                     'allTime',
                     'thisMonth',
                     'todayArr',
                     'todayCount',
                     'thisMonthCount',
-                    'allTimeCount'
+                    'allTimeCount',
+                    'dayLabels',
+                    'dayStats'
                     ));
         }
     }

@@ -134,7 +134,7 @@ ChartJs::widget([
         'width' => 800,
     ],
     'data' => [
-        'labels' => $weeks,
+        'labels' => $dayLabels,
         'datasets' => [
             [
                 'label' => 'Все организации',
@@ -144,7 +144,7 @@ ChartJs::widget([
                 'pointBorderColor' => "#00f",
                 'pointHoverBackgroundColor' => "#00f",
                 'pointHoverBorderColor' => "rgba(0,0,255,1)",
-                'data' => $all,
+                'data' => $dayStats,
                 'spanGaps' => false,
                 'borderJoinStyle' => 'miter',
                 'fill' => false,

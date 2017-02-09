@@ -804,20 +804,22 @@ class ClientController extends DefaultController {
             }
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                $sql = "delete gn " .
-                        "from goods_notes gn " .
-                        "inner join catalog_goods cg " .
-                        "on gn.catalog_base_goods_id = cg.base_goods_id " .
-                        "where cg.cat_id=$catalog_id";
-                \Yii::$app->db->createCommand($sql)->execute();
-                $sql = "delete cb " .
-                        "from catalog_base_goods cb " .
-                        "inner join catalog_goods c " .
-                        "on cb.id=c.base_goods_id  " .
-                        "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
-                \Yii::$app->db->createCommand($sql)->execute();
-                $sql = "delete from catalog_goods where cat_id=$catalog_id";
-                \Yii::$app->db->createCommand($sql)->execute();
+//                $sql = "delete gn " .
+//                        "from goods_notes gn " .
+//                        "inner join catalog_goods cg " .
+//                        "on gn.catalog_base_goods_id = cg.base_goods_id " .
+//                        "where cg.cat_id=$catalog_id";
+//                \Yii::$app->db->createCommand($sql)->execute();
+//                $sql = "delete cb " .
+//                        "from catalog_base_goods cb " .
+//                        "inner join catalog_goods c " .
+//                        "on cb.id=c.base_goods_id  " .
+//                        "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
+//                \Yii::$app->db->createCommand($sql)->execute();
+//                $sql = "delete from catalog_goods where cat_id=$catalog_id";
+                $query = "update " . CatalogBaseGoods::tableName() . " set deleted = " . CatalogBaseGoods::DELETED_ON . " where cat_id = $catalog_id and id > 1";
+                \Yii::$app->db->createCommand($query)->execute();
+                //\Yii::$app->db->createCommand($sql)->execute();
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = trim($arrCatalogs['dataItem']['article']);

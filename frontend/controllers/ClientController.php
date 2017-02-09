@@ -741,6 +741,8 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;     
                 }
+            $query = "update " . CatalogBaseGoods::tableName() . " set deleted = " . CatalogBaseGoods::DELETED_ON . " where cat_id = $catalog_id and id > 1";
+                //\Yii::$app->db->createCommand($query)->execute();    
             foreach ($arrCatalog as $arrCatalogs) {
                 $product = trim($arrCatalogs['dataItem']['product']);
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -817,8 +819,7 @@ class ClientController extends DefaultController {
 //                        "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
 //                \Yii::$app->db->createCommand($sql)->execute();
 //                $sql = "delete from catalog_goods where cat_id=$catalog_id";
-                $query = "update " . CatalogBaseGoods::tableName() . " set deleted = " . CatalogBaseGoods::DELETED_ON . " where cat_id = $catalog_id and id > 1";
-                \Yii::$app->db->createCommand($query)->execute();
+                
                 //\Yii::$app->db->createCommand($sql)->execute();
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
@@ -847,7 +848,7 @@ class ClientController extends DefaultController {
                     $command->bindParam(":units", $units);
                     $command->bindParam(":price", $price);
                     $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
-                    $command->execute();
+                    //$command->execute();
                     $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
 
                     $sql = "insert into {{%catalog_goods}}" .
@@ -859,7 +860,7 @@ class ClientController extends DefaultController {
                     $command = \Yii::$app->db->createCommand($sql);
                     $command->bindParam(":cat_id", $catalog_id, \PDO::PARAM_INT);
                     $command->bindParam(":price", $price);
-                    $command->execute();
+                    //$command->execute();
 
                     if (!empty($note)) {
                         $sql = "insert into " . GoodsNotes::tableName() .
@@ -870,7 +871,7 @@ class ClientController extends DefaultController {
                                 . "NOW())";
                         $command = \Yii::$app->db->createCommand($sql);
                         $command->bindParam(":note", $note, \PDO::PARAM_STR);
-                        $command->execute();
+                        //$command->execute();
                     }
                 }
                 $transaction->commit();

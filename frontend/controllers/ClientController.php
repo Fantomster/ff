@@ -905,7 +905,7 @@ class ClientController extends DefaultController {
                 . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                 . "LEFT JOIN goods_notes on catalog_base_goods.id = goods_notes.catalog_base_goods_id "
-                . "WHERE catalog.id = $id";
+                . "WHERE catalog.id = $id AND deleted=" . CatalogBaseGoods::DELETED_OFF;
         $arr = \Yii::$app->db->createCommand($sql)->queryAll();
         $array = [];
         foreach ($arr as $arrs) {

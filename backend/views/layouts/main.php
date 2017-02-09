@@ -119,9 +119,9 @@ NavBar::end();
 
         <footer class="footer">
             <div class="container">
-                <p class="pull-left">&copy; My Company <?= date('Y') ?></p>
+                <p class="pull-left">&copy; f-keeper <?= date('Y') ?></p>
 
-                <p class="pull-right"><?= Yii::powered() ?></p>
+                <p class="pull-right">Работает, оно работает!</p>
             </div>
         </footer>
 <div id="loader-show"></div>

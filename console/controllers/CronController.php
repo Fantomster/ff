@@ -100,7 +100,7 @@ class CronController extends Controller {
 
                         }
                 }
-                if($catalogBaseGoods->es_status == 2){
+                if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0){
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
                                 $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
                                 $es_product->delete();

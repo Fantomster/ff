@@ -35,7 +35,7 @@ class CronController extends Controller {
         $base = CatalogBaseGoods::find()
                 //->select('catalog_base_goods.*')
                 ->joinWith('whiteList')
-                ->where(['market_place' => 1,'deleted'=>0])
+                //->where(['market_place' => 1,'deleted'=>0])
                 ->andWhere('category_id is not null')
                 ->andWhere(['in','es_status',[1,2]])
                 ->andWhere('organization_id is not null')
@@ -58,7 +58,7 @@ class CronController extends Controller {
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
 
-                if($catalogBaseGoods->es_status == 1){
+                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1){
 
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
 
@@ -100,8 +100,7 @@ class CronController extends Controller {
 
                         }
                 }
-                if($catalogBaseGoods->es_status == 2){
-
+                if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0){
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
                                 $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
                                 $es_product->delete();

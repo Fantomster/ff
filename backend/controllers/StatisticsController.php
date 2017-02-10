@@ -55,7 +55,7 @@ class StatisticsController extends Controller {
         $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
         
         $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
-        $dtEnd = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 23:59:59");
+        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
         $day = $dt->format('w');
         $date = $dt->format('Y-m-d');
 
@@ -117,7 +117,7 @@ class StatisticsController extends Controller {
         if (!$day) {
             $day = 7;
         }
-        $end = $start->add(new \DateInterval('P' . (8 - $day) . 'D'));
+        $end = $dtEnd->add(new \DateInterval('P1D'));
 
         $sql = "SELECT COUNT($orgTable.id) AS count, "
                 . "SUM(CASE WHEN organization.type_id=1 THEN 1 ELSE 0 END) AS clients, SUM(CASE WHEN organization.type_id=2 THEN 1 ELSE 0 END) AS vendors, "
@@ -125,7 +125,7 @@ class StatisticsController extends Controller {
                 . "LEFT JOIN $userTable ON $orgTable.id = $userTable.organization_id "
                 . "WHERE ($userTable.status=1) AND ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) "
                 . "GROUP BY YEAR($orgTable.created_at), MONTH($orgTable.created_at), DAY($orgTable.created_at)";
-        $command = Yii::$app->db->createCommand($sql, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $dtEnd->format('Y-m-d')]);
+        $command = Yii::$app->db->createCommand($sql, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $raw = $command->getRawSql();
         $clientsByDay = $command->queryAll();
         $dayLabels = [];
@@ -181,9 +181,9 @@ class StatisticsController extends Controller {
         
         $select = "count(id) as count";
         
-        foreach ($statuses as $status) {
-            $select .= 
-        }
+//        foreach ($statuses as $status) {
+//            $select .= 
+//        }
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(

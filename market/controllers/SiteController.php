@@ -80,10 +80,12 @@ class SiteController extends Controller {
     public function actionIndex() {
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
+            $addwhereS = [];
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             $addwhere = [];
+            $addwhereS = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -91,17 +93,32 @@ class SiteController extends Controller {
                         ->asArray()
                         ->all();
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                $addwhereS = ['not in', 'id', $relationSupplier];
             }
         }
         $topProducts = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
+                ->leftJoin('white_list','catalog_base_goods.supp_org_id = white_list.organization_id')
                 ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
                 ->andWhere('category_id is not null')
                 ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
+                //->orderBy(['partnership'=>SORT_DESC])
                 ->limit(6)
                 ->all();
-        
+ 
+        /*$subquery = (new \yii\db\Query())
+        ->select(['catalog_base_goods.id as id','product','supp_org_id','price','category_id','partnership','image'])
+        ->from(CatalogBaseGoods::tableName())
+        ->leftJoin(WhiteList::tableName(), 
+                CatalogBaseGoods::tableName() . '.supp_org_id = ' . WhiteList::tableName() . '.organization_id')
+        ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+        ->andWhere('category_id is not null');
+        $topProducts = (new \yii\db\Query)
+                ->from(['wl' => $subquery])
+                ->orderBy(['partnership'=>SORT_DESC])
+                ->limit(6)
+                ->all();
+        foreach($topProducts as $row){var_dump($row['image']);}*/
         $topSuppliers = CatalogBaseGoods::find()
                 ->joinWith('whiteList')
                 ->select('DISTINCT(`supp_org_id`) as supp_org_id')
@@ -111,6 +128,14 @@ class SiteController extends Controller {
                 ->andWhere($addwhere)
                 ->limit(6)
                 ->all();
+        /*
+        $topSuppliers = Organization::find()
+                ->rightJoin('white_list','organization.id = white_list.organization_id')
+                ->andWhere($addwhereS)
+                ->orderBy(['partnership'=>SORT_DESC])
+                ->limit(6)
+                ->all();
+        */        
         $topProductsCount = CatalogBaseGoods::find()
                 ->joinWith('whiteList')
                 ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
@@ -118,6 +143,7 @@ class SiteController extends Controller {
                 ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->count();
+        
         $topSuppliersCount = CatalogBaseGoods::find()
                 ->joinWith('whiteList')
                 ->select('supp_org_id')

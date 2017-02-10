@@ -201,7 +201,7 @@ yii\widgets\Menu::widget([
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="copy">
-                                        <span>© 2016 F-Keeper — ООО «Онлайн Маркет» </span>
+                                        <span>© <?= date('Y') ?> F-Keeper — ООО «Онлайн Маркет» </span>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-sm-4">

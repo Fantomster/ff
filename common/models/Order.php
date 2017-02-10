@@ -202,6 +202,18 @@ class Order extends \yii\db\ActiveRecord {
         ];
     }
 
+    public static function getStatusColors() {
+        return [
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => '#11F011',
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => '#11A011',
+            Order::STATUS_PROCESSING => '#555555',
+            Order::STATUS_DONE => '#1111FF',
+            Order::STATUS_REJECTED => '#FF5555',
+            Order::STATUS_CANCELLED => '#FF1111',
+            Order::STATUS_FORMING => '#999999',
+        ];
+    }
+
     public function getPositionCount() {
         return $this->hasMany(OrderContent::className(), ['order_id' => 'id'])->count();
     }

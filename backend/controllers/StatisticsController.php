@@ -126,7 +126,6 @@ class StatisticsController extends Controller {
                 . "WHERE ($userTable.status=1) AND ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) "
                 . "GROUP BY YEAR($orgTable.created_at), MONTH($orgTable.created_at), DAY($orgTable.created_at)";
         $command = Yii::$app->db->createCommand($sql, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
-        $raw = $command->getRawSql();
         $clientsByDay = $command->queryAll();
         $dayLabels = [];
         $dayStats = [];
@@ -177,21 +176,46 @@ class StatisticsController extends Controller {
         $day = $dt->format('w');
         $date = $dt->format('Y-m-d');
         
-        $statuses = !empty(Yii::$app->request->post("statuses")) ? Yii::$app->request->post("statuses") : [];
+        $orderTable = Order::tableName();
+        
+        $statuses = !empty(Yii::$app->request->post("statuses")) ? Yii::$app->request->post("statuses") : [Order::STATUS_DONE];
+        $labelsTotal = [];
+        $colorsTotal = [];
+        $statusesList = Order::getStatusList();
+        $colorsList = Order::getStatusColors();
         
         $select = "count(id) as count";
         
-//        foreach ($statuses as $status) {
-//            $select .= 
-//        }
-
+        foreach ($statuses as $status) {
+            $status = (int)$status;
+            $select .= ", sum(case when status=$status then 1 else 0 end) as status_$status";
+            $labelsTotal[] = $statusesList[$status];
+            $colorsTotal[] = $colorsList[$status];
+        }
+        
+        $query = "select " . $select . " from `$orderTable` where 1";
+        $command = Yii::$app->db->createCommand($query);
+        $raw = $command->getRawSql();
+        $ordersStat = $command->queryAll()[0];
+        
+        $totalCount = $ordersStat["count"];
+        unset($ordersStat["count"]);
+        
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
-                    'statuses'
+                    'labelsTotal',
+                    'ordersStat',
+                    'colorsTotal',
+                    'statuses',
+                    'totalCount'
                     ));
         } else {
             return $this->render('orders', compact(
-                    'statuses'
+                    'labelsTotal',
+                    'ordersStat',
+                    'colorsTotal',
+                    'statuses',
+                    'totalCount'
                     ));
         }
     }

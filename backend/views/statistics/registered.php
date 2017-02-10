@@ -1,10 +1,8 @@
 <?php
-
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use dosamigos\chartjs\ChartJs;
-use yii\helpers\Html;
 
 $this->registerJs('
     $("document").ready(function(){

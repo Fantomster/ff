@@ -670,12 +670,12 @@ class ClientController extends DefaultController {
                     . " FROM `catalog` "
                     . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
                     . " WHERE "
-                    . " catalog_base_goods.cat_id = $id and deleted != 1");
+                    . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
                             . " FROM `catalog` "
                             . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
                             . " WHERE "
-                            . " catalog_base_goods.cat_id = $id and deleted != 1")->queryScalar();
+                            . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
         }
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status "
@@ -683,13 +683,13 @@ class ClientController extends DefaultController {
                     . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
                     . " WHERE "
-                    . " catalog_goods.cat_id = $id and deleted != 1");
+                    . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
                             . " FROM `catalog` "
                             . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                             . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
                             . " WHERE "
-                            . " catalog_goods.cat_id = $id and deleted != 1")->queryScalar();
+                            . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
@@ -741,6 +741,8 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;     
                 }
+            $query = "update " . CatalogBaseGoods::tableName() . " set deleted = " . CatalogBaseGoods::DELETED_ON . " where cat_id = $catalog_id and id > 1";
+                //\Yii::$app->db->createCommand($query)->execute();    
             foreach ($arrCatalog as $arrCatalogs) {
                 $product = trim($arrCatalogs['dataItem']['product']);
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -804,20 +806,21 @@ class ClientController extends DefaultController {
             }
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                $sql = "delete gn " .
-                        "from goods_notes gn " .
-                        "inner join catalog_goods cg " .
-                        "on gn.catalog_base_goods_id = cg.base_goods_id " .
-                        "where cg.cat_id=$catalog_id";
-                \Yii::$app->db->createCommand($sql)->execute();
-                $sql = "delete cb " .
-                        "from catalog_base_goods cb " .
-                        "inner join catalog_goods c " .
-                        "on cb.id=c.base_goods_id  " .
-                        "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
-                \Yii::$app->db->createCommand($sql)->execute();
-                $sql = "delete from catalog_goods where cat_id=$catalog_id";
-                \Yii::$app->db->createCommand($sql)->execute();
+//                $sql = "delete gn " .
+//                        "from goods_notes gn " .
+//                        "inner join catalog_goods cg " .
+//                        "on gn.catalog_base_goods_id = cg.base_goods_id " .
+//                        "where cg.cat_id=$catalog_id";
+//                \Yii::$app->db->createCommand($sql)->execute();
+//                $sql = "delete cb " .
+//                        "from catalog_base_goods cb " .
+//                        "inner join catalog_goods c " .
+//                        "on cb.id=c.base_goods_id  " .
+//                        "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
+//                \Yii::$app->db->createCommand($sql)->execute();
+//                $sql = "delete from catalog_goods where cat_id=$catalog_id";
+                
+                //\Yii::$app->db->createCommand($sql)->execute();
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = trim($arrCatalogs['dataItem']['article']);
@@ -845,7 +848,7 @@ class ClientController extends DefaultController {
                     $command->bindParam(":units", $units);
                     $command->bindParam(":price", $price);
                     $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
-                    $command->execute();
+                    //$command->execute();
                     $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
 
                     $sql = "insert into {{%catalog_goods}}" .
@@ -857,7 +860,7 @@ class ClientController extends DefaultController {
                     $command = \Yii::$app->db->createCommand($sql);
                     $command->bindParam(":cat_id", $catalog_id, \PDO::PARAM_INT);
                     $command->bindParam(":price", $price);
-                    $command->execute();
+                    //$command->execute();
 
                     if (!empty($note)) {
                         $sql = "insert into " . GoodsNotes::tableName() .
@@ -868,7 +871,7 @@ class ClientController extends DefaultController {
                                 . "NOW())";
                         $command = \Yii::$app->db->createCommand($sql);
                         $command->bindParam(":note", $note, \PDO::PARAM_STR);
-                        $command->execute();
+                        //$command->execute();
                     }
                 }
                 $transaction->commit();
@@ -903,7 +906,7 @@ class ClientController extends DefaultController {
                 . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                 . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
                 . "LEFT JOIN goods_notes on catalog_base_goods.id = goods_notes.catalog_base_goods_id "
-                . "WHERE catalog.id = $id";
+                . "WHERE catalog.id = $id AND deleted=" . CatalogBaseGoods::DELETED_OFF;
         $arr = \Yii::$app->db->createCommand($sql)->queryAll();
         $array = [];
         foreach ($arr as $arrs) {
@@ -1108,10 +1111,6 @@ class ClientController extends DefaultController {
         return $this->render('tutorial');
     }
     
-    public function actionTest() {
-        return $this->render('tutorial');
-    }
-
     public function actionSupport() {
         return $this->render('/site/underConstruction');
     }

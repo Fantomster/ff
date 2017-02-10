@@ -141,6 +141,8 @@ class WhiteListController extends Controller
             $new->legal_email = $org->email;
             $new->phone = $org->phone;
             $new->save();
+            $org->es_status = Organization::ES_ACTIVE;
+            $org->save();
             return $this->redirect(['white-list/update', 'id' => $new->id]);
         }
         return $this->redirect(['organization/index']);

@@ -50,6 +50,7 @@ function heightDetect() {
                 });
 JS;
 } 
+$this->registerJs($js, \yii\web\View::POS_READY);
     $js = <<<JS
             $("#menu__burger").click(function () {
                 $(".nav_menu").slideToggle();

@@ -197,7 +197,7 @@ class StatisticsController extends Controller {
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id where $userTable.email not like '%f-keeper.ru'";
+        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id where $userTable.email not like '%f-keeper.ru' and created_by_id > 8";
         $command = Yii::$app->db->createCommand($query);
         $ordersStat = $command->queryAll()[0];
         
@@ -208,7 +208,7 @@ class StatisticsController extends Controller {
         $thisDayStart = $today->format('Y-m-d 00:00:00');
         
         $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id "
-                . "where $userTable.email not like '%f-keeper.ru' and `$orderTable`.created_at > '$thisMonthStart'";
+                . "where $userTable.email not like '%f-keeper.ru' and created_by_id > 8 and `$orderTable`.created_at > '$thisMonthStart'";
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisMonth = $command->queryAll()[0];
         
@@ -216,7 +216,7 @@ class StatisticsController extends Controller {
         unset($ordersStatThisMonth["count"]);
 
         $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id "
-                . "where $userTable.email not like '%f-keeper.ru' and `$orderTable`.created_at > '$thisDayStart'";
+                . "where $userTable.email not like '%f-keeper.ru' and created_by_id > 8 and `$orderTable`.created_at > '$thisDayStart'";
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisDay = $command->queryAll()[0];
 

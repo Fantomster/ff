@@ -177,7 +177,7 @@ $form = ActiveForm::begin([
 </div>
 <div class="row">
     <div class="col-md-12 text-center">
-        <h3>Средний оборот в месяц</h3>
+        <h3>Средний оборот в месяц (на 1 ресторан)</h3>
         <?=
         ChartJs::widget([
             'type' => 'bar',

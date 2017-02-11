@@ -184,6 +184,7 @@ class StatisticsController extends Controller {
         $labelsTotal = [];
         $colorsTotal = [];
         $statusesList = Order::getStatusList();
+        unset($statusesList[Order::STATUS_FORMING]);
         $statuses = array_keys($statusesList);
         $colorsList = Order::getStatusColors();
         

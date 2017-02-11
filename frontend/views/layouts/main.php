@@ -169,7 +169,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 <ul class="contacts">
                                     <li><span class="phone"><span class="glyphicon glyphicon-phone"></span> 8-499-404-10-18</span></li>
                                     <li><a href="mailto:info@f-keeper.ru"><span class="email"><span class="glyphicon glyphicon-envelope"></span>info@f-keeper.ru</span></a></li>
-                                    <li><span class="address"><span class="glyphicon glyphicon-map-marker"></span>Москва ул. Оршанская 5</li>
+                                    <li><span class="address"><span class="glyphicon glyphicon-map-marker"></span>Москва, ул.Привольная, 70</li>
                                 </ul>
                             </div>	
                         </div>
@@ -207,11 +207,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="sot__set_block">
-                                        <a href="#"><i class="demo-icon icon-vk">&#xe800;</i></a>
+                                        <a href="https://vk.com/f_keeper"><i class="demo-icon icon-vk">&#xe800;</i></a>
                                         <a href="#"><i class="demo-icon icon-linkedin">&#xe801;</i> </a>
                                         <a href="#"><i class="demo-icon icon-youtube">&#xe802;</i></a>
                                         <a href="#"><i class="demo-icon icon-twitter">&#xe803;</i></a>
-                                        <a href="#"><i class="demo-icon icon-facebook">&#xe804;</i></a>
+                                        <a href="https://www.facebook.com/fkeeper.ru/"><i class="demo-icon icon-facebook">&#xe804;</i></a>
                                     </div>
                                 </div>
                             </div>

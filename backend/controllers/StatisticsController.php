@@ -248,7 +248,7 @@ class StatisticsController extends Controller {
         $averageSpent = [];
         $averageCheque = [];
         foreach ($money as $month) {
-            $monthLabels[] = date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $monthLabels[] = date('M', strtotime("2000-$month[month]-01")) . " " . $month["year"];
             $averageSpent[] = $month["spent"];
             $averageCheque[] = $month["cheque"];
         }

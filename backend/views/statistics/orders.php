@@ -180,7 +180,7 @@ $form = ActiveForm::begin([
         <h3>Средний оборот в месяц</h3>
         <?=
         ChartJs::widget([
-            'type' => 'line',
+            'type' => 'bar',
             'options' => [
                 'height' => 400,
                 'width' => 800,
@@ -192,14 +192,7 @@ $form = ActiveForm::begin([
                         'label' => 'Средний оборот',
                         'backgroundColor' => "rgba(0,0,255,0.2)",
                         'borderColor' => "rgba(0,0,255,1)",
-                        'pointBackgroundColor' => "rgba(0,0,255,1)",
-                        'pointBorderColor' => "#00f",
-                        'pointHoverBackgroundColor' => "#00f",
-                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
                         'data' => $averageSpent,
-                        'spanGaps' => true,
-                        'borderJoinStyle' => 'miter',
-                        'fill' => false,
                     ],
                 ]
             ],
@@ -212,7 +205,7 @@ $form = ActiveForm::begin([
         <h3>Средний чек в месяц</h3>
         <?=
         ChartJs::widget([
-            'type' => 'line',
+            'type' => 'bar',
             'options' => [
                 'height' => 400,
                 'width' => 800,
@@ -224,14 +217,7 @@ $form = ActiveForm::begin([
                         'label' => 'Средний чек',
                         'backgroundColor' => "rgba(0,0,255,0.2)",
                         'borderColor' => "rgba(0,0,255,1)",
-                        'pointBackgroundColor' => "rgba(0,0,255,1)",
-                        'pointBorderColor' => "#00f",
-                        'pointHoverBackgroundColor' => "#00f",
-                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
                         'data' => $averageCheque,
-                        'spanGaps' => true,
-                        'borderJoinStyle' => 'miter',
-                        'fill' => false,
                     ],
                 ]
             ],

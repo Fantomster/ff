@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
@@ -34,7 +35,7 @@ $form = ActiveForm::begin([
         <h3>Зарегистрировано</h3>
     </div>
     <div class="col-md-4 col-sm-12 text-center">
-        <h4>За все время (<?=$allTimeCount?>)</h4>
+        <h4>За все время (<?= $allTimeCount ?>)</h4>
         <?=
         ChartJs::widget([
             'type' => 'pie',
@@ -56,7 +57,7 @@ $form = ActiveForm::begin([
         ?>
     </div>
     <div class="col-md-4 col-sm-12 text-center">
-        <h4>За текущий месяц (<?=$thisMonthCount?>)</h4>
+        <h4>За текущий месяц (<?= $thisMonthCount ?>)</h4>
         <?=
         ChartJs::widget([
             'type' => 'pie',
@@ -78,7 +79,7 @@ $form = ActiveForm::begin([
         ?>
     </div>
     <div class="col-md-4 col-sm-12 text-center">
-        <h4>Сегодня (<?=$todayCount?>)</h4>
+        <h4>Сегодня (<?= $todayCount ?>)</h4>
         <?=
         ChartJs::widget([
             'type' => 'pie',
@@ -103,80 +104,83 @@ $form = ActiveForm::begin([
 <div class="row">
     <div class="col-md-12 text-center"> 
         <h3>Зарегистрировано в период </h3>
-                    <div class="form-group" style="width: 350px; margin: 0 auto; padding-bottom: 10px;">
-                        <?=
-                        DatePicker::widget([
-    'name' => 'date',
-    'name2' => 'date2',
-                            'value' => $dateFilterFrom,
-                            'value2' => $dateFilterTo,
-                            'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
-                            'separator' => '-',
-                            'type' => DatePicker::TYPE_RANGE,
-                            'pluginOptions' => [
-                                'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                                'autoclose' => true,
-                                'endDate' => "0d",
-                            ]
-                        ])
-                        ?>
-                    </div>
-                </div>
+        <div class="form-group" style="width: 350px; margin: 0 auto; padding-bottom: 10px;">
+            <?=
+            DatePicker::widget([
+                'name' => 'date',
+                'name2' => 'date2',
+                'value' => $dateFilterFrom,
+                'value2' => $dateFilterTo,
+                'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
+                'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                'separator' => '-',
+                'type' => DatePicker::TYPE_RANGE,
+                'pluginOptions' => [
+                    'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                    'autoclose' => true,
+                    'endDate' => "0d",
+                ]
+            ])
+            ?>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <?=
+        ChartJs::widget([
+            'type' => 'line',
+            'options' => [
+                'height' => 400,
+                'width' => 800,
+            ],
+            'data' => [
+                'labels' => $dayLabels,
+                'datasets' => [
+                    [
+                        'label' => 'Все организации',
+                        'backgroundColor' => "rgba(0,0,255,0.2)",
+                        'borderColor' => "rgba(0,0,255,1)",
+                        'pointBackgroundColor' => "rgba(0,0,255,1)",
+                        'pointBorderColor' => "#00f",
+                        'pointHoverBackgroundColor' => "#00f",
+                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                        'data' => $dayStats,
+                        'spanGaps' => true,
+                        'borderJoinStyle' => 'miter',
+                        'fill' => false,
+                    ],
+                    [
+                        'label' => 'Рестораны',
+                        'backgroundColor' => "rgba(255,0,0,0.2)",
+                        'borderColor' => "rgba(255,0,0,1)",
+                        'pointBackgroundColor' => "rgba(255,0,0,1)",
+                        'pointBorderColor' => "#f00",
+                        'pointHoverBackgroundColor' => "#f00",
+                        'pointHoverBorderColor' => "rgba(255,0,0,1)",
+                        'data' => $clients,
+                        'spanGaps' => true,
+                        'borderJoinStyle' => 'miter',
+                        'fill' => false,
+                    ],
+                    [
+                        'label' => 'Поставщики',
+                        'backgroundColor' => "rgba(0,255,0,0.2)",
+                        'borderColor' => "rgba(0,255,0,1)",
+                        'pointBackgroundColor' => "rgba(0,255,0,1)",
+                        'pointBorderColor' => "#0f0",
+                        'pointHoverBackgroundColor' => "#0f0",
+                        'pointHoverBorderColor' => "rgba(0,255,0,1)",
+                        'data' => $vendors,
+                        'spanGaps' => true,
+                        'borderJoinStyle' => 'miter',
+                        'fill' => false,
+                    ],
+                ]
+            ],
+        ])
+        ?>
+
+    </div>
 </div>
-<?=
-ChartJs::widget([
-    'type' => 'line',
-    'options' => [
-        'height' => 400,
-        'width' => 800,
-    ],
-    'data' => [
-        'labels' => $dayLabels,
-        'datasets' => [
-            [
-                'label' => 'Все организации',
-                'backgroundColor' => "rgba(0,0,255,0.2)",
-                'borderColor' => "rgba(0,0,255,1)",
-                'pointBackgroundColor' => "rgba(0,0,255,1)",
-                'pointBorderColor' => "#00f",
-                'pointHoverBackgroundColor' => "#00f",
-                'pointHoverBorderColor' => "rgba(0,0,255,1)",
-                'data' => $dayStats,
-                'spanGaps' => true,
-                'borderJoinStyle' => 'miter',
-                'fill' => false,
-            ],
-            [
-                'label' => 'Рестораны',
-                'backgroundColor' => "rgba(255,0,0,0.2)",
-                'borderColor' => "rgba(255,0,0,1)",
-                'pointBackgroundColor' => "rgba(255,0,0,1)",
-                'pointBorderColor' => "#f00",
-                'pointHoverBackgroundColor' => "#f00",
-                'pointHoverBorderColor' => "rgba(255,0,0,1)",
-                'data' => $clients,
-                'spanGaps' => true,
-                'borderJoinStyle' => 'miter',
-                'fill' => false,
-            ],
-            [
-                'label' => 'Поставщики',
-                'backgroundColor' => "rgba(0,255,0,0.2)",
-                'borderColor' => "rgba(0,255,0,1)",
-                'pointBackgroundColor' => "rgba(0,255,0,1)",
-                'pointBorderColor' => "#0f0",
-                'pointHoverBackgroundColor' => "#0f0",
-                'pointHoverBorderColor' => "rgba(0,255,0,1)",
-                'data' => $vendors,
-                'spanGaps' => true,
-                'borderJoinStyle' => 'miter',
-                'fill' => false,
-            ],
-        ]
-    ],
-])
-?>
 
 <?php ActiveForm::end(); ?>
 

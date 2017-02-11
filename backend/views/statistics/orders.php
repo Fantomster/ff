@@ -111,67 +111,134 @@ $form = ActiveForm::begin([
 <div class="row">
     <div class="col-md-12 text-center"> 
         <h3>Заказов в период </h3>
-                    <div class="form-group" style="width: 350px; margin: 0 auto; padding-bottom: 10px;">
-                        <?=
-                        DatePicker::widget([
-    'name' => 'date',
-    'name2' => 'date2',
-                            'value' => $dateFilterFrom,
-                            'value2' => $dateFilterTo,
-                            'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
-                            'separator' => '-',
-                            'type' => DatePicker::TYPE_RANGE,
-                            'pluginOptions' => [
-                                'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                                'autoclose' => true,
-                                'endDate' => "0d",
-                            ]
-                        ])
-                        ?>
-                    </div>
-                </div>
+        <div class="form-group" style="width: 350px; margin: 0 auto; padding-bottom: 10px;">
+            <?=
+            DatePicker::widget([
+                'name' => 'date',
+                'name2' => 'date2',
+                'value' => $dateFilterFrom,
+                'value2' => $dateFilterTo,
+                'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
+                'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                'separator' => '-',
+                'type' => DatePicker::TYPE_RANGE,
+                'pluginOptions' => [
+                    'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                    'autoclose' => true,
+                    'endDate' => "0d",
+                ]
+            ])
+            ?>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <?=
+        ChartJs::widget([
+            'type' => 'line',
+            'options' => [
+                'height' => 400,
+                'width' => 800,
+            ],
+            'data' => [
+                'labels' => $dayLabels,
+                'datasets' => [
+                    [
+                        'label' => 'Все заказы',
+                        'backgroundColor' => "rgba(0,0,255,0.2)",
+                        'borderColor' => "rgba(0,0,255,1)",
+                        'pointBackgroundColor' => "rgba(0,0,255,1)",
+                        'pointBorderColor' => "#00f",
+                        'pointHoverBackgroundColor' => "#00f",
+                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                        'data' => $dayStats,
+                        'spanGaps' => true,
+                        'borderJoinStyle' => 'miter',
+                        'fill' => false,
+                    ],
+                    [
+                        'label' => 'Первые заказы',
+                        'backgroundColor' => "rgba(255,0,0,0.2)",
+                        'borderColor' => "rgba(255,0,0,1)",
+                        'pointBackgroundColor' => "rgba(255,0,0,1)",
+                        'pointBorderColor' => "#f00",
+                        'pointHoverBackgroundColor' => "#f00",
+                        'pointHoverBorderColor' => "rgba(255,0,0,1)",
+                        'data' => $firstDayStats,
+                        'spanGaps' => true,
+                        'borderJoinStyle' => 'miter',
+                        'fill' => false,
+                    ],
+                ]
+            ],
+        ])
+        ?>
+
+    </div>
 </div>
-<?=
-ChartJs::widget([
-    'type' => 'line',
-    'options' => [
-        'height' => 400,
-        'width' => 800,
-    ],
-    'data' => [
-        'labels' => $dayLabels,
-        'datasets' => [
-            [
-                'label' => 'Все заказы',
-                'backgroundColor' => "rgba(0,0,255,0.2)",
-                'borderColor' => "rgba(0,0,255,1)",
-                'pointBackgroundColor' => "rgba(0,0,255,1)",
-                'pointBorderColor' => "#00f",
-                'pointHoverBackgroundColor' => "#00f",
-                'pointHoverBorderColor' => "rgba(0,0,255,1)",
-                'data' => $dayStats,
-                'spanGaps' => true,
-                'borderJoinStyle' => 'miter',
-                'fill' => false,
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h3>Средний оборот в месяц</h3>
+        <?=
+        ChartJs::widget([
+            'type' => 'line',
+            'options' => [
+                'height' => 400,
+                'width' => 800,
             ],
-            [
-                'label' => 'Первые заказы',
-                'backgroundColor' => "rgba(255,0,0,0.2)",
-                'borderColor' => "rgba(255,0,0,1)",
-                'pointBackgroundColor' => "rgba(255,0,0,1)",
-                'pointBorderColor' => "#f00",
-                'pointHoverBackgroundColor' => "#f00",
-                'pointHoverBorderColor' => "rgba(255,0,0,1)",
-                'data' => $firstDayStats,
-                'spanGaps' => true,
-                'borderJoinStyle' => 'miter',
-                'fill' => false,
+            'data' => [
+                'labels' => $monthLabels,
+                'datasets' => [
+                    [
+                        'label' => 'Средний оборот',
+                        'backgroundColor' => "rgba(0,0,255,0.2)",
+                        'borderColor' => "rgba(0,0,255,1)",
+                        'pointBackgroundColor' => "rgba(0,0,255,1)",
+                        'pointBorderColor' => "#00f",
+                        'pointHoverBackgroundColor' => "#00f",
+                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                        'data' => $averageSpent,
+                        'spanGaps' => true,
+                        'borderJoinStyle' => 'miter',
+                        'fill' => false,
+                    ],
+                ]
             ],
-        ]
-    ],
-])
-?>
+        ])
+        ?>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h3>Средний чек в месяц</h3>
+        <?=
+        ChartJs::widget([
+            'type' => 'line',
+            'options' => [
+                'height' => 400,
+                'width' => 800,
+            ],
+            'data' => [
+                'labels' => $monthLabels,
+                'datasets' => [
+                    [
+                        'label' => 'Средний чек',
+                        'backgroundColor' => "rgba(0,0,255,0.2)",
+                        'borderColor' => "rgba(0,0,255,1)",
+                        'pointBackgroundColor' => "rgba(0,0,255,1)",
+                        'pointBorderColor' => "#00f",
+                        'pointHoverBackgroundColor' => "#00f",
+                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                        'data' => $averageCheque,
+                        'spanGaps' => true,
+                        'borderJoinStyle' => 'miter',
+                        'fill' => false,
+                    ],
+                ]
+            ],
+        ])
+        ?>
+    </div>
+</div>
 
 <?php ActiveForm::end(); ?>
 

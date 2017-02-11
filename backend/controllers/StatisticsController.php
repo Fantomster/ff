@@ -21,7 +21,7 @@ use common\components\AccessRule;
  */
 class StatisticsController extends Controller {
     
-    private $blacklist = '(1,2,5,16,63,88,99,108,111,114,116,272,333,526,673,784,824)';
+    private $blacklist = '(1,2,5,16,63,88,99,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037)';
 
     public function behaviors() {
         return [
@@ -200,7 +200,7 @@ class StatisticsController extends Controller {
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` where created_by_id not in ".$this->blacklist;
+        $query = "select " . $select . " from `$orderTable` where client_id not in ".$this->blacklist;
         $command = Yii::$app->db->createCommand($query);
         $ordersStat = $command->queryAll()[0];
         
@@ -211,7 +211,7 @@ class StatisticsController extends Controller {
         $thisDayStart = $today->format('Y-m-d 00:00:00');
         
         $query = "select " . $select . " from `$orderTable` "
-                . "where created_by_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'";
+                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'";
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisMonth = $command->queryAll()[0];
         
@@ -219,7 +219,7 @@ class StatisticsController extends Controller {
         unset($ordersStatThisMonth["count"]);
 
         $query = "select " . $select . " from `$orderTable` "
-                . "where created_by_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'";
+                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'";
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisDay = $command->queryAll()[0];
 
@@ -241,8 +241,23 @@ class StatisticsController extends Controller {
             $firstDayStats[] = $order["first"];
         }
         
+        $query = "SELECT sum(total_price)/count(distinct client_id) as spent,sum(total_price)/count(id) as cheque, year(created_at) as year, month(created_at) as month FROM `f-keeper`.order where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.") and client_id not in ".$this->blacklist." group by year(created_at), month(created_at)";
+        $command = Yii::$app->db->createCommand($query);
+        $money = $command->queryAll();
+        $monthLabels = [];
+        $averageSpent = [];
+        $averageCheque = [];
+        foreach ($money as $month) {
+            $monthLabels[] = date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $averageSpent[] = $month["spent"];
+            $averageCheque[] = $month["cheque"];
+        }
+        
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
+                    'monthLabels',
+                    'averageSpent',
+                    'averageCheque',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'ordersStatThisMonth',
@@ -259,6 +274,9 @@ class StatisticsController extends Controller {
                     ));
         } else {
             return $this->render('orders', compact(
+                    'monthLabels',
+                    'averageSpent',
+                    'averageCheque',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'ordersStatThisMonth',

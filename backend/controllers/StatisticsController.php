@@ -226,7 +226,7 @@ class StatisticsController extends Controller {
         $totalCountThisDay = $ordersStatThisDay["count"];
         unset($ordersStatThisDay["count"]);
         
-        $query = "SELECT count(id) as count, year(created_at), month(created_at), day(created_at) FROM `f-keeper`.order "
+        $query = "SELECT count(id) as count, year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order "
                 . "where created_by_id not in ".$this->blacklist." and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo "
                 . "group by year(created_at), month(created_at), day(created_at)";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
@@ -238,7 +238,7 @@ class StatisticsController extends Controller {
             $dayStats[] = $order["count"];
         }
         
-        $query = "select count(b.id),year(b.created_at), month(b.created_at), day(b.created_at) "
+        $query = "select count(b.id) as count,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day "
                 . "from (select * from `f-keeper`.order a where a.created_by_id not in ".$this->blacklist." and a.status <> 7 group by a.client_id order by a.id and a.created_at BETWEEN :dateFrom AND :dateTo) b "
                 . "group by year(b.created_at), month(b.created_at), day(b.created_at)";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);

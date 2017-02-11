@@ -49,9 +49,9 @@ function heightDetect() {
                     headers();
                 });
 JS;
-} 
-$this->registerJs($js, \yii\web\View::POS_READY);
-    $js = <<<JS
+    $this->registerJs($js, \yii\web\View::POS_READY);
+}
+$js = <<<JS
             $("#menu__burger").click(function () {
                 $(".nav_menu").slideToggle();
             });
@@ -86,11 +86,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
     <head>
         <meta charset="<?= Yii::$app->charset ?>"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<?= Html::csrfMetaTags() ?>
+        <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <link href="css/style.css" rel="stylesheet">
         <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
-<?php $this->head() ?>
+        <?php $this->head() ?>
         <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -105,7 +105,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         </style>
     </head>
     <body>	
-<?php $this->beginBody() ?>
+        <?php $this->beginBody() ?>
         <div id="loader-show"></div>
 
         <div class="wrapper">
@@ -122,31 +122,31 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="registr-block">
                             <div class="registr__block">
-<?= Html::a('вход / регистрация', ["/user/login"]) ?>
+                                <?= Html::a('вход / регистрация', ["/user/login"]) ?>
                             </div>
                         </div>
                         <div class="nav__block">
                             <span id="menu__burger">Меню</span>
-<?=
-yii\widgets\Menu::widget([
-    'options' => ['class' => 'nav_menu'],
-    'items' => [
-        ['label' => 'Главная', 'url' => ['/site/index']],
-        ['label' => 'F-MARKET', 'url' => 'https://market.f-keeper.ru'],
-        ['label' => 'Франшиза', 'url' => 'http://fr.f-keeper.ru'],
-        ['label' => 'Новости', 'url' => 'http://blog.f-keeper.ru?news'],
-        ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
-        ['label' => 'О компании', 'url' => ['/site/about']],
-        ['label' => 'Контакты', 'url' => ['/site/contacts']],
-    ]
-])
-?>
+                            <?=
+                            yii\widgets\Menu::widget([
+                                'options' => ['class' => 'nav_menu'],
+                                'items' => [
+                                    ['label' => 'Главная', 'url' => ['/site/index']],
+                                    ['label' => 'F-MARKET', 'url' => 'https://market.f-keeper.ru'],
+                                    ['label' => 'Франшиза', 'url' => 'http://fr.f-keeper.ru'],
+                                    ['label' => 'Новости', 'url' => 'http://blog.f-keeper.ru?news'],
+                                    ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
+                                    ['label' => 'О компании', 'url' => ['/site/about']],
+                                    ['label' => 'Контакты', 'url' => ['/site/contacts']],
+                                ]
+                            ])
+                            ?>
                         </div>
                     </div>
                 </div>
             </header><!-- .header-nav-->
 
-<?= $content ?>
+            <?= $content ?>
             <footer class="footer">
                 <div class="inside__block">
                     <div class="container-fluid">
@@ -222,15 +222,22 @@ yii\widgets\Menu::widget([
             </footer><!-- .footer -->
 
         </div><!-- .wrapper -->
-<?php
-echo $this->render('_yandex');
-$this->endBody()
-?>
+        <?php
+        echo $this->render('_yandex');
+        $this->endBody()
+        ?>
         <!-- BEGIN JIVOSITE CODE {literal} -->
-<script type='text/javascript'>
-(function(){ var widget_id = 'RI0YDaTCe9';
-var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true; s.src = '//code.jivosite.com/script/widget/'+widget_id; var ss = document.getElementsByTagName('script')[0]; ss.parentNode.insertBefore(s, ss);})();</script>
-<!-- {/literal} END JIVOSITE CODE -->
+        <script type='text/javascript'>
+            (function () {
+                var widget_id = 'RI0YDaTCe9';
+                var s = document.createElement('script');
+                s.type = 'text/javascript';
+                s.async = true;
+                s.src = '//code.jivosite.com/script/widget/' + widget_id;
+                var ss = document.getElementsByTagName('script')[0];
+                ss.parentNode.insertBefore(s, ss);
+            })();</script>
+        <!-- {/literal} END JIVOSITE CODE -->
 
     </body>
 </html>

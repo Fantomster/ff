@@ -20,6 +20,8 @@ use common\components\AccessRule;
  * @author sharaf
  */
 class StatisticsController extends Controller {
+    
+    private $blacklist = '(1,2,5,16,63,88,99,108,111,114,116,272,333,526,673,784,824)';
 
     public function behaviors() {
         return [
@@ -179,6 +181,7 @@ class StatisticsController extends Controller {
         
         $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
         $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
+        $end = $dtEnd->add(new \DateInterval('P1D'));
         $date = $dt->format('Y-m-d');       
         
         $labelsTotal = [];
@@ -197,7 +200,7 @@ class StatisticsController extends Controller {
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id where $userTable.email not like '%f-keeper.ru' and created_by_id > 8";
+        $query = "select " . $select . " from `$orderTable` where created_by_id not in ".$this->blacklist;
         $command = Yii::$app->db->createCommand($query);
         $ordersStat = $command->queryAll()[0];
         
@@ -207,24 +210,48 @@ class StatisticsController extends Controller {
         $thisMonthStart = $today->format('Y-m-01 00:00:00');
         $thisDayStart = $today->format('Y-m-d 00:00:00');
         
-        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id "
-                . "where $userTable.email not like '%f-keeper.ru' and created_by_id > 8 and `$orderTable`.created_at > '$thisMonthStart'";
+        $query = "select " . $select . " from `$orderTable` "
+                . "where created_by_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'";
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisMonth = $command->queryAll()[0];
         
         $totalCountThisMonth = $ordersStatThisMonth["count"];
         unset($ordersStatThisMonth["count"]);
 
-        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id "
-                . "where $userTable.email not like '%f-keeper.ru' and created_by_id > 8 and `$orderTable`.created_at > '$thisDayStart'";
+        $query = "select " . $select . " from `$orderTable` "
+                . "where created_by_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'";
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisDay = $command->queryAll()[0];
 
         $totalCountThisDay = $ordersStatThisDay["count"];
         unset($ordersStatThisDay["count"]);
         
+        $query = "SELECT count(id) as count, year(created_at), month(created_at), day(created_at) FROM `f-keeper`.order "
+                . "where created_by_id not in ".$this->blacklist." and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo "
+                . "group by year(created_at), month(created_at), day(created_at)";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $ordersByDay = $command->queryAll();
+        $dayLabels = [];
+        $dayStats = [];
+        foreach ($ordersByDay as $order) {
+            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayStats[] = $order["count"];
+        }
+        
+        $query = "select count(b.id),year(b.created_at), month(b.created_at), day(b.created_at) "
+                . "from (select * from `f-keeper`.order a where a.created_by_id not in ".$this->blacklist." and a.status <> 7 group by a.client_id order by a.id and a.created_at BETWEEN :dateFrom AND :dateTo) b "
+                . "group by year(b.created_at), month(b.created_at), day(b.created_at)";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $firstOrdersByDay = $command->queryAll();
+        $firstDayStats = [];
+        foreach ($firstOrdersByDay as $order) {
+            $firstDayStats[] = $order["count"];
+        }
+        
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
+                    'dateFilterFrom', 
+                    'dateFilterTo', 
                     'ordersStatThisMonth',
                     'ordersStatThisDay',
                     'labelsTotal',
@@ -232,10 +259,15 @@ class StatisticsController extends Controller {
                     'colorsTotal',
                     'totalCountThisMonth',
                     'totalCountThisDay',
-                    'totalCount'
+                    'totalCount',
+                    'firstDayStats',
+                    'dayLabels',
+                    'dayStats'
                     ));
         } else {
             return $this->render('orders', compact(
+                    'dateFilterFrom', 
+                    'dateFilterTo', 
                     'ordersStatThisMonth',
                     'ordersStatThisDay',
                     'labelsTotal',
@@ -243,7 +275,10 @@ class StatisticsController extends Controller {
                     'colorsTotal',
                     'totalCountThisMonth',
                     'totalCountThisDay',
-                    'totalCount'
+                    'totalCount',
+                    'firstDayStats',
+                    'dayLabels',
+                    'dayStats'
                     ));
         }
     }

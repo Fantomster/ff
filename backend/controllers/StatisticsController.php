@@ -241,7 +241,9 @@ class StatisticsController extends Controller {
             $firstDayStats[] = $order["first"];
         }
         
-        $query = "SELECT sum(total_price)/count(distinct client_id) as spent,sum(total_price)/count(id) as cheque, year(created_at) as year, month(created_at) as month FROM `f-keeper`.order where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.") and client_id not in ".$this->blacklist." group by year(created_at), month(created_at)";
+        $query = "SELECT sum(total_price)/count(distinct client_id) as spent,sum(total_price)/count(id) as cheque, year(created_at) as year, month(created_at) as month FROM `f-keeper`.order "
+                . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and client_id not in ".$this->blacklist." "
+                . "group by year(created_at), month(created_at)";
         $command = Yii::$app->db->createCommand($query);
         $money = $command->queryAll();
         $monthLabels = [];

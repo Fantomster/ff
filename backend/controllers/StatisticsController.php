@@ -170,51 +170,78 @@ class StatisticsController extends Controller {
     }
 
     public function actionOrders() {
-        $dateFilter = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
-
-        $dt = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilter . " 00:00:00");
-        $day = $dt->format('w');
-        $date = $dt->format('Y-m-d');
-        
         $orderTable = Order::tableName();
+        $userTable = User::tableName();
+
+        $today = new \DateTime();
+        $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
+        $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
         
-        $statuses = !empty(Yii::$app->request->post("statuses")) ? Yii::$app->request->post("statuses") : [Order::STATUS_DONE];
+        $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
+        $date = $dt->format('Y-m-d');       
+        
         $labelsTotal = [];
         $colorsTotal = [];
         $statusesList = Order::getStatusList();
+        $statuses = array_keys($statusesList);
         $colorsList = Order::getStatusColors();
         
-        $select = "count(id) as count";
+        $select = "count($orderTable.id) as count";
         
         foreach ($statuses as $status) {
             $status = (int)$status;
-            $select .= ", sum(case when status=$status then 1 else 0 end) as status_$status";
+            $select .= ", sum(case when $orderTable.status=$status then 1 else 0 end) as status_$status";
             $labelsTotal[] = $statusesList[$status];
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` where 1";
+        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id where $userTable.email not like '%f-keeper.ru'";
         $command = Yii::$app->db->createCommand($query);
-        $raw = $command->getRawSql();
         $ordersStat = $command->queryAll()[0];
         
         $totalCount = $ordersStat["count"];
         unset($ordersStat["count"]);
         
+        $thisMonthStart = $today->format('Y-m-01 00:00:00');
+        $thisDayStart = $today->format('Y-m-d 00:00:00');
+        
+        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id "
+                . "where $userTable.email not like '%f-keeper.ru' and `$orderTable`.created_at > '$thisMonthStart'";
+        $command = Yii::$app->db->createCommand($query);
+        $ordersStatThisMonth = $command->queryAll()[0];
+        
+        $totalCountThisMonth = $ordersStatThisMonth["count"];
+        unset($ordersStatThisMonth["count"]);
+
+        $query = "select " . $select . " from `$orderTable` left join $userTable on $orderTable.created_by_id=$userTable.id "
+                . "where $userTable.email not like '%f-keeper.ru' and `$orderTable`.created_at > '$thisDayStart'";
+        $command = Yii::$app->db->createCommand($query);
+        $ordersStatThisDay = $command->queryAll()[0];
+
+        $totalCountThisDay = $ordersStatThisDay["count"];
+        unset($ordersStatThisDay["count"]);
+        
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
+                    'ordersStatThisMonth',
+                    'ordersStatThisDay',
                     'labelsTotal',
                     'ordersStat',
                     'colorsTotal',
-                    'statuses',
+                    'totalCountThisMonth',
+                    'totalCountThisDay',
                     'totalCount'
                     ));
         } else {
             return $this->render('orders', compact(
+                    'ordersStatThisMonth',
+                    'ordersStatThisDay',
                     'labelsTotal',
                     'ordersStat',
                     'colorsTotal',
-                    'statuses',
+                    'totalCountThisMonth',
+                    'totalCountThisDay',
                     'totalCount'
                     ));
         }

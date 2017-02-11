@@ -151,7 +151,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 <div class="inside__block">
                     <div class="container-fluid">
 
-                        <div class="col-md-3 col-sm-3">
+                        <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
@@ -163,7 +163,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </ul>
                             </div>	
                         </div>
-                        <div class="col-md-3 col-sm-3">
+                        <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
                                 <span class="title__menu">связаться с нами</span>
                                 <ul class="contacts">
@@ -173,6 +173,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </ul>
                             </div>	
                         </div>
+                        <?php /*
                         <div class="col-md-3 col-sm-3">
                             <div class="footer__menu_block">
                                 <span class="title__menu">ФОТО / видео</span>
@@ -181,8 +182,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                     <li><a href="#">Видео архив</a></li>
                                 </ul>
                             </div>	
-                        </div>
-                        <div class="col-md-3 col-sm-3">
+                        </div> */ ?>
+                        <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
                                 <span class="title__menu">Вход / регистрация</span>
                                 <ul class="links">

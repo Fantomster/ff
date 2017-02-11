@@ -14,7 +14,7 @@ use dosamigos\chartjs\ChartJs;
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
-        $(document).on("change", "[name=\'statuses[]\']", function() {
+        $(document).on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
                 $("#orderStatForm").submit();
                 justSubmitted = true;
@@ -157,12 +157,12 @@ $form = ActiveForm::begin([
                     ],
                     [
                         'label' => 'Первые заказы',
-                        'backgroundColor' => "rgba(255,0,0,0.2)",
-                        'borderColor' => "rgba(255,0,0,1)",
-                        'pointBackgroundColor' => "rgba(255,0,0,1)",
+                        'backgroundColor' => "rgba(179, 66, 244,0.2)",
+                        'borderColor' => "rgba(179, 66, 244,1)",
+                        'pointBackgroundColor' => "rgba(179, 66, 244,1)",
                         'pointBorderColor' => "#f00",
                         'pointHoverBackgroundColor' => "#f00",
-                        'pointHoverBorderColor' => "rgba(255,0,0,1)",
+                        'pointHoverBorderColor' => "rgba(179, 66, 244,1)",
                         'data' => $firstDayStats,
                         'spanGaps' => true,
                         'borderJoinStyle' => 'miter',

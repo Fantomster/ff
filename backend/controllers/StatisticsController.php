@@ -226,26 +226,19 @@ class StatisticsController extends Controller {
         $totalCountThisDay = $ordersStatThisDay["count"];
         unset($ordersStatThisDay["count"]);
         
-        $query = "SELECT count(id) as count, year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order "
-                . "where created_by_id not in ".$this->blacklist." and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo "
-                . "group by year(created_at), month(created_at), day(created_at)";
+        $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
+            from (SELECT count(id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order where status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
+            left outer join (select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day from (select * from `f-keeper`.order a where a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)) bb
+            on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];
         $dayStats = [];
+        $firstDayStats = [];
         foreach ($ordersByDay as $order) {
             $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
-            $dayStats[] = $order["count"];
-        }
-        
-        $query = "select count(b.id) as count,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day "
-                . "from (select * from `f-keeper`.order a where a.created_by_id not in ".$this->blacklist." and a.status <> 7 group by a.client_id order by a.id and a.created_at BETWEEN :dateFrom AND :dateTo) b "
-                . "group by year(b.created_at), month(b.created_at), day(b.created_at)";
-        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
-        $firstOrdersByDay = $command->queryAll();
-        $firstDayStats = [];
-        foreach ($firstOrdersByDay as $order) {
-            $firstDayStats[] = $order["count"];
+            $dayStats[] = $order["total"];
+            $firstDayStats[] = $order["first"];
         }
         
         if (Yii::$app->request->isPjax) {

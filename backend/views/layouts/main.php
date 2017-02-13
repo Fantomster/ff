@@ -50,12 +50,16 @@ $menuItems = [
         'label' => 'Статистика',
         'items' => [
             [
-                'label' => 'Зарегистрировано',
+                'label' => 'Регистрация',
                 'url' => ['/statistics/registered'],
             ],
             [
                 'label' => 'Заказы',
                 'url' => ['/statistics/orders'],
+            ],
+            [
+                'label' => 'Оборот',
+                'url' => ['/statistics/turnover'],
             ],
         ],
     ],

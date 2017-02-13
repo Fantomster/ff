@@ -175,56 +175,6 @@ $form = ActiveForm::begin([
 
     </div>
 </div>
-<div class="row">
-    <div class="col-md-12 text-center">
-        <h3>Средний оборот в месяц (на 1 ресторан)</h3>
-        <?=
-        ChartJs::widget([
-            'type' => 'bar',
-            'options' => [
-                'height' => 400,
-                'width' => 800,
-            ],
-            'data' => [
-                'labels' => $monthLabels,
-                'datasets' => [
-                    [
-                        'label' => 'Средний оборот',
-                        'backgroundColor' => "rgba(0,0,255,0.2)",
-                        'borderColor' => "rgba(0,0,255,1)",
-                        'data' => $averageSpent,
-                    ],
-                ]
-            ],
-        ])
-        ?>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12 text-center">
-        <h3>Средний чек в месяц (на 1 заказ)</h3>
-        <?=
-        ChartJs::widget([
-            'type' => 'bar',
-            'options' => [
-                'height' => 400,
-                'width' => 800,
-            ],
-            'data' => [
-                'labels' => $monthLabels,
-                'datasets' => [
-                    [
-                        'label' => 'Средний чек',
-                        'backgroundColor' => "rgba(0,0,255,0.2)",
-                        'borderColor' => "rgba(0,0,255,1)",
-                        'data' => $averageCheque,
-                    ],
-                ]
-            ],
-        ])
-        ?>
-    </div>
-</div>
 
 <?php ActiveForm::end(); ?>
 

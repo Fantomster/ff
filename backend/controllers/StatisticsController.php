@@ -361,7 +361,7 @@ class StatisticsController extends Controller {
         }
         
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('orders', compact(
+            return $this->renderPartial('turnover', compact(
                     'monthLabels',
                     'averageSpent',
                     'averageCheque',
@@ -380,7 +380,7 @@ class StatisticsController extends Controller {
                     'dayStats'
                     ));
         } else {
-            return $this->render('orders', compact(
+            return $this->render('turnover', compact(
                     'monthLabels',
                     'averageSpent',
                     'averageCheque',

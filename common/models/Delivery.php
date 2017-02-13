@@ -102,7 +102,7 @@ class Delivery extends \yii\db\ActiveRecord
             $days[] = 'Пт';
         }
         if ($this->sat) {
-            $daysp[] = 'Сб';
+            $days[] = 'Сб';
         }
         if ($this->sun) {
             $days[] = 'Вс';

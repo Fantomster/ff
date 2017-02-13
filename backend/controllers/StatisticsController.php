@@ -298,9 +298,11 @@ class StatisticsController extends Controller {
         $dayLabels = [];
         $dayTurnover = [];
         $dayCheque = [];
+        $total = 0;
         foreach ($ordersByDay as $order) {
             $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
             $dayTurnover[] = $order["spent"];
+            $total += $order["spent"];
             $dayCheque[] = $order["cheque"];
         }
         
@@ -320,6 +322,7 @@ class StatisticsController extends Controller {
         
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('turnover', compact(
+                    'total',
                     'monthLabels',
                     'averageSpent',
                     'averageCheque',
@@ -331,6 +334,7 @@ class StatisticsController extends Controller {
                     ));
         } else {
             return $this->render('turnover', compact(
+                    'total',
                     'monthLabels',
                     'averageSpent',
                     'averageCheque',

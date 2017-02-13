@@ -59,6 +59,7 @@ $form = ActiveForm::begin([
             ])
             ?>
         </div>
+        <span class="text-bold"><?= $total ?> руб </span>
     </div>
     <div class="col-md-12">
         <?=

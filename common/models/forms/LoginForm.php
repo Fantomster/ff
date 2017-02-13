@@ -2,6 +2,8 @@
 
 namespace common\models\forms;
 
+use Yii;
+
 /**
  * Description of LoginForm
  *

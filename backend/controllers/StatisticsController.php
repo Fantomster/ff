@@ -32,7 +32,7 @@ class StatisticsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'registered', 'orders'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -227,7 +227,7 @@ class StatisticsController extends Controller {
         unset($ordersStatThisDay["count"]);
         
         $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
-            from (SELECT count(id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order where status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
+            from (SELECT count(id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order where client_id not in ".$this->blacklist." and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
             left outer join (select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day from (select * from `f-keeper`.order a where a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)) bb
             on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
@@ -332,7 +332,7 @@ class StatisticsController extends Controller {
         unset($ordersStatThisDay["count"]);
         
         $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
-            from (SELECT count(id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order where status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
+            from (SELECT count(id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order where client_id not in ".$this->blacklist." and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
             left outer join (select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day from (select * from `f-keeper`.order a where a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)) bb
             on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);

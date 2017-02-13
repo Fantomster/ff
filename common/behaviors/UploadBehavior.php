@@ -19,30 +19,109 @@ use yii\imagine\Image;
 class UploadBehavior extends \mongosoft\file\UploadBehavior {
 
     /**
+     * @event Event an event that is triggered before a file is uploaded.
+     */
+    const EVENT_BEFORE_UPLOAD = 'beforeUpload';
+    /**
+     * @event Event an event that is triggered after a file is uploaded.
+     */
+    const EVENT_AFTER_UPLOAD = 'afterUpload';
+
+    /**
+     * @var string the attribute which holds the attachment.
+     */
+    public $attribute;
+    /**
+     * @var array the scenarios in which the behavior will be triggered
+     */
+    public $scenarios = [];
+    /**
+     * @var string the base path or path alias to the directory in which to save files.
+     */
+    public $path;
+    /**
+     * @var string the base URL or path alias for this file
+     */
+    public $url;
+    /**
      * @var ResourceManagerInterface handles resource to upload/uploaded.
      */
     public $resourceManager;
-
     /**
      * @var array options to resourceManager->save() function
      */
     public $saveOptions = [];
-    private $_resourceNames = [];
+    /**
+     * @var bool Getting file instance by name
+     */
+    public $instanceByName = false;
+    /**
+     * @var boolean|callable generate a new unique name for the file
+     * set true or anonymous function takes the old filename and returns a new name.
+     * @see self::generateFileName()
+     */
+    public $generateNewName = true;
+    /**
+     * @var boolean If `true` current attribute file will be deleted
+     */
+    public $unlinkOnSave = true;
+    /**
+     * @var boolean If `true` current attribute file will be deleted after model deletion.
+     */
+    public $unlinkOnDelete = true;
+    /**
+     * @var boolean $deleteTempFile whether to delete the temporary file after saving.
+     */
+    public $deleteTempFile = false;
 
     /**
      * @var UploadedFile the uploaded file instance.
      */
     protected $_file;
+
     protected $_oldValue;
+
     protected $_deleting = false;
+
 
     /**
      * @inheritdoc
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
 
-        $this->resourceManager = $this->resourceManager ? : Yii::$app->get('resourceManager');
+        if ($this->attribute === null) {
+            throw new InvalidConfigException('The "attribute" property must be set.');
+        }
+        if ($this->path === null) {
+            throw new InvalidConfigException('The "path" property must be set.');
+        }
+        if ($this->url === null) {
+            throw new InvalidConfigException('The "url" property must be set.');
+        }
+        $this->resourceManager = $this->resourceManager ?: Yii::$app->get('resourceManager');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function events()
+    {
+        return [
+            BaseActiveRecord::EVENT_AFTER_FIND => 'afterFind',
+            BaseActiveRecord::EVENT_BEFORE_VALIDATE => 'beforeValidate',
+            BaseActiveRecord::EVENT_BEFORE_INSERT => 'beforeSave',
+            BaseActiveRecord::EVENT_BEFORE_UPDATE => 'beforeSave',
+            BaseActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
+            BaseActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
+            BaseActiveRecord::EVENT_BEFORE_DELETE => 'beforeDelete',
+        ];
+    }
+
+    public function afterFind()
+    {
+        $this->_oldValue = $this->owner->getAttribute($this->attribute);
     }
 
     /**
@@ -114,10 +193,10 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         if (!$this->_deleting && ($this->_file instanceof UploadedFile)) {
             $path = $this->getUploadPath($this->attribute);
             if (is_string($path)) {
-                //$this->beforeUpload();
+                $this->beforeUpload();
                 $this->save($this->_file, $path);
                 $this->owner->setAttribute($this->attribute, $this->_file->name);
-                //$this->afterUpload();
+                $this->afterUpload();
             } else {
                 throw new InvalidParamException("Directory specified in 'path' attribute doesn't exist or cannot be created.");
             }
@@ -129,6 +208,28 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
     }
 
     /**
+     * This method is invoked before uploading a file.
+     * The default implementation raises the [[EVENT_BEFORE_UPLOAD]] event.
+     * You may override this method to do processing before the file is uploaded.
+     * Make sure you call the parent implementation so that the event is raised properly.
+     */
+    protected function beforeUpload()
+    {
+        $this->owner->trigger(self::EVENT_BEFORE_UPLOAD);
+    }
+
+    /**
+     * This method is invoked after uploading a file.
+     * The default implementation raises the [[EVENT_AFTER_UPLOAD]] event.
+     * You may override this method to do postprocessing after the file is uploaded.
+     * Make sure you call the parent implementation so that the event is raised properly.
+     */
+    protected function afterUpload()
+    {
+        $this->owner->trigger(self::EVENT_AFTER_UPLOAD);
+    }
+    
+    /**
      * Returns file url for the attribute.
      * @param string $attribute
      * @return string|null
@@ -139,6 +240,8 @@ class UploadBehavior extends \mongosoft\file\UploadBehavior {
         return $url ? $this->resourceManager->getUrl($resourceName) : null;
     }
 
+    private $_resourceNames = [];    
+    
     /**
      * Return resource file name (for dosamigos\resourcemanager)
      * @param $path

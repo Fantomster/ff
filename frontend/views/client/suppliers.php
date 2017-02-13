@@ -127,6 +127,16 @@ if (false) {//$step == common\models\Organization::STEP_ADD_VENDOR
     Modal::end();
 }
 ?>
+    <?=
+     yii\bootstrap\Alert::widget([
+        'options' => [
+            'class' => 'alert-warning fade in',
+        ],
+        'body' => 'Редактирование каталогов поставщика временно отключено! Приносим извинения за неудобства.',
+    ]);
+
+?>
+
 <section class="content-header">
     <h1>
         <i class="fa fa-users"></i> Поставщики

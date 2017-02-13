@@ -79,10 +79,10 @@ class ImageUploadBehavior extends UploadBehavior {
      */
     protected function beforeUpload()
     {
-        //parent::beforeUpload();
-//        if ($this->createThumbsOnSave) {
-//            $this->createThumbs();
-//        }
+        parent::beforeUpload();
+        if ($this->createThumbsOnSave) {
+            $this->createThumbs();
+        }
     }
 
     /**
@@ -91,9 +91,9 @@ class ImageUploadBehavior extends UploadBehavior {
     protected function afterUpload()
     {
         parent::afterUpload();
-        if ($this->createThumbsOnSave) {
-            $this->createThumbs();
-        }
+//        if ($this->createThumbsOnSave) {
+//            $this->createThumbs();
+//        }
     }
 
     public function isExists($attribute, $profile = 'thumb')

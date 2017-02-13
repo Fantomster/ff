@@ -16,7 +16,7 @@ $this->registerJs('
         var justSubmitted = false;
         $(document).on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
-                $("#orderStatForm").submit();
+                $("#turnoverStatForm").submit();
                 justSubmitted = true;
                 setTimeout(function() {
                     justSubmitted = false;

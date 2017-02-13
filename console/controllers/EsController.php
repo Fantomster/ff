@@ -225,18 +225,10 @@ class EsController extends Controller
     
     }
     public function actionTest(){
-        $con_phone = '89057446157';
+        $target = '79057446157';
         $text = 'Тестовое сообщение';
-        
-        
-         function send_sms($con_phone,$text)
-        {
-            $target=$con_phone;
-            $sender='ClientInfo';
-            $period=600;
-            $sms = new \common\components\QTSMS();
-            $region=$sms->post_message($text, $target, $sender, 'x124127456',$period);
-        }
-        send_sms($con_phone,$text);
+
+        $sms = new \common\components\QTSMS();
+        $sms->post_message($text, $target);
     }
 }

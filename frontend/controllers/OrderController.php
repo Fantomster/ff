@@ -1044,6 +1044,7 @@ class OrderController extends DefaultController {
 
         foreach ($recipientOrg->users as $recipient) {
             $email = $recipient->email;
+                
 //            Yii::$app->mailqueue->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
 //                ->setTo($email)
 //                ->setSubject($subject)

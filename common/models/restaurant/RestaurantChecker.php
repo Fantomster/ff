@@ -19,6 +19,7 @@ class RestaurantChecker
 		$sql = "SELECT "
                         . "`user`.`id` as user_id, "
                         . "`profile`.`full_name` as user_full_name, "
+                        . "`profile`.`phone` as phone, "
                         . "`user`.`organization_id` as organization_id, "
                         . "`organization`.`type_id` as organization_type_id, "
                         . "`organization`.`name` as organization_name, "
@@ -33,6 +34,7 @@ class RestaurantChecker
                 $vendor_info->queryOne();
                 $vendor_info = $vendor_info->queryOne();
                 $userProfileFullName = $vendor_info['user_full_name'];
+                $userProfilePhone = $vendor_info['phone'];
                 $userProfileStatus = $vendor_info['user_status']; //есть менеджеры или нет (user.status > 0)
                 
                 $userProfileOrgId = $vendor_info['organization_id'];
@@ -49,6 +51,7 @@ class RestaurantChecker
 					//есть связь с поставщиком invite_on
 					$result = ['success'=>true,'eventType'=>1,'message'=>'Данный поставщик уже имеется в вашем списке контактов!',
 					'fio' => $userProfileFullName,
+                                        'phone' => $userProfilePhone,
 					'organization' => $userOrgName]; 
 	
 					return $result;
@@ -58,6 +61,7 @@ class RestaurantChecker
 					//поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
 					$result = ['success'=>true,'eventType'=>2,'message'=>'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика',
 					'fio' => $userProfileFullName,
+                                        'phone' => $userProfilePhone,
 					'organization' => $userOrgName]; 
 						
 					return $result;
@@ -70,6 +74,7 @@ class RestaurantChecker
 					//добавляем к базовому каталогу поставщика каталог ресторана и создаем связь    
 					$result = ['success'=>true,'eventType'=>3,'message'=>'Поставщик еще не авторизован / добавляем каталог',
 					'fio' => $userProfileFullName,
+                                        'phone' => $userProfilePhone,
 					'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
 			
 					return $result;
@@ -81,6 +86,7 @@ class RestaurantChecker
                                             'eventType'=>6,
                                             'message'=>'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>',
                                             'fio' => $userProfileFullName,
+                                            'phone' => $userProfilePhone,
                                             'organization' => $userOrgName,
                                             'org_id'=>$userProfileOrgId
                                                    ];

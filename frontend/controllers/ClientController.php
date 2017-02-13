@@ -507,6 +507,13 @@ class ClientController extends DefaultController {
                     $currentOrganization = $currentUser->organization;
                     $currentOrganization->step = Organization::STEP_OK;
                     $currentOrganization->save();
+                    
+                    if(!empty($profile->phone)){
+                    $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                    $target = $profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target);
+                    }
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
                         return $result;

@@ -4,8 +4,20 @@
 /* v. 1.6 */
 namespace common\components;
 class QTSMS {
+    /*
+    const ADD_ORDER_FROM_FKEEPER = '111';
+    const ADD_ORDER_FROM_FMARKET = '111';
+    
+    const ADD_SUPPLIER_FROM_FKEEPER = '111';
+    const ADD_SUPPLIER_FROM_FMARKET = '111';
+    
+    const SET_CATALOG_TO_RESTAURANT = '111';
+    */
 	var $user='37251';			// ваш логин в системе 
 	var $pass='!1asdf';			// ваш пароль в системе
+        var $sendler = 'f-keeper.ru';           // Имя отправителя
+        var $period = 600;                      // период
+        var $post_id = 'x124127456';            // пост id
 	var $hostname='service.qtelecom.ru';	// host замените на адрес сервера указанный в меню "Поддержка -> протокол HTTP"  без префикса http://
 	var $path='/public/http/';
 	var $on_ssl=0; 				// 1 - использовать HTTPS соединение, 0 - HTTP 
@@ -13,10 +25,13 @@ class QTSMS {
 	var $post_data=array();			// данные передаваемые на сервер
 	var $multipost=false;			// множественный запрос по умолчанию false
 	
-	function __construct($user=false,$pass=false,$hostname=false) {
+	function __construct($user=false,$pass=false,$hostname=false,$sendler=false,$period=false,$post_id=false) {
 		if($user) $this->user=$user;
 		if($pass) $this->pass=$pass;
 		if($hostname) $this->hostname=$hostname;
+                if($sendler) $this->sendler=$sendler;
+                if($period) $this->sendler=$period;
+                if($post_id) $this->sendler=$post_id;
 	}
 	
 	// команда на начало мульти запроса
@@ -290,3 +305,4 @@ if(!function_exists('http_build_query')) {
 		return implode($sep, $ret); 
 	};
 };
+

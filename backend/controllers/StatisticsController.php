@@ -289,7 +289,7 @@ class StatisticsController extends Controller {
         $end = $dtEnd->add(new \DateInterval('P1D'));
         $date = $dt->format('Y-m-d');       
         
-        $query = "SELECT truncate(sum(total_price)/count(distinct client_id),1) as spent,truncate(sum(total_price)/count(id),1) as cheque, year(created_at) as year, month(created_at) as month, day(created_at) as day "
+        $query = "SELECT truncate(sum(total_price),1) as spent,truncate(sum(total_price)/count(id),1) as cheque, year(created_at) as year, month(created_at) as month, day(created_at) as day "
                 . "FROM `f-keeper`.order "
                 . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and client_id not in ".$this->blacklist." and created_at between :dateFrom and :dateTo "
                 . "group by year(created_at), month(created_at), day(created_at)";

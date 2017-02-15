@@ -776,7 +776,7 @@ class SiteController extends Controller {
                             'product_name' => [
                                 'query' => $search,
                                 'analyzer' => "ru",
-                            //'type' =>'phrase_prefix',
+                                
                             //'max_expansions' =>6
                             ]
                         ]
@@ -797,8 +797,10 @@ class SiteController extends Controller {
                     'query' => [
                         'match' => [
                             'supplier_name' => [
-                                'query' => $search
-                            ]
+                                'query' => $search,
+                                'analyzer' => 'ru',
+                                'type' => 'phrase'
+                            ]   
                         ]
                     ],
                     'filter' => [
@@ -808,7 +810,12 @@ class SiteController extends Controller {
                                     'supplier_id' => $filterNotIn
                                 ]
                             ]
-                        ]
+                        ],
+                        /*'regexp' => [
+                            'supplier_name' => [
+                                'value' =>'.*'
+                            ]
+                        ]*/
                     ]
                 ]
             ];
@@ -909,6 +916,7 @@ class SiteController extends Controller {
         $cartCount = $client->getCartCount();
         if (!$relation) {
             $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
+           // $this->sendInvite($client,$product->vendor);
         }
         $this->sendCartChange($client, $cartCount);
 
@@ -930,7 +938,7 @@ class SiteController extends Controller {
         }
 
         $post = Yii::$app->request->post();
-
+        
         if ($post && $post['vendor_id']) {
             $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
             if (empty($vendor)) {
@@ -945,10 +953,19 @@ class SiteController extends Controller {
         }
 
         $client->inviteVendor($vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
-
+        $this->sendInvite($client,$vendor);
         return $this->successNotify("Запрос поставщику отправлен!");
     }
-
+    private function sendInvite($client, $vendor) {
+        foreach($vendor->users as $recipient){
+            if($recipient->profile->phone && $recipient->profile->sms_allow){
+                $text = "Ресторан " . $client->name . " добавил Вас через торговую площадку market.f-keeper.ru";
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target); 
+            } 
+        }
+    }
     private function sendCartChange($client, $cartCount) {
         $clientUsers = $client->users;
 

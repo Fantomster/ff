@@ -400,6 +400,7 @@ class OrderController extends DefaultController {
                     $order->save();
                     $this->sendNewOrder($order->vendor);
                     $this->sendOrderCreated($this->currentUser, $order->vendor, $order->id);
+                    
                 }
             }
             $cartCount = $client->getCartCount();
@@ -1043,8 +1044,7 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
 
         foreach ($recipientOrg->users as $recipient) {
-            $email = $recipient->email;
-                
+            $email = $recipient->email;  
 //            Yii::$app->mailqueue->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
 //                ->setTo($email)
 //                ->setSubject($subject)
@@ -1053,6 +1053,12 @@ class OrderController extends DefaultController {
                     ->setTo($email)
                     ->setSubject($subject)
                     ->send();
+            if($recipient->profile->phone && $recipient->profile->sms_allow){
+                    $text = "f-keeper: Создан новый заказ №" . $order_id;
+                    $target = $recipient->profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target); 
+            }
         }
     }
 

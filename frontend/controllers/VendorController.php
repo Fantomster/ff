@@ -1017,7 +1017,15 @@ class VendorController extends DefaultController {
                 $relation_supp_rest->cat_id = $curCat;
                 $relation_supp_rest->status = 1;
                 $relation_supp_rest->update();
-
+                $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
+                foreach($rows as $row){
+                    if($row->profile->phone && $row->profile->sms_allow){
+                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                        $target = $row->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target); 
+                    }
+                }
                 return (['success' => true, 'Подписан']);
                 exit;
             } else {
@@ -1365,7 +1373,15 @@ class VendorController extends DefaultController {
                     $relation_supp_rest->cat_id = $cat_id;
                     $relation_supp_rest->status = 1;
                     $relation_supp_rest->update();
-
+                    $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
+                    foreach($rows as $row){
+                        if($row->profile->phone && $row->profile->sms_allow){
+                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                            $target = $row->profile->phone;
+                            $sms = new \common\components\QTSMS();
+                            $sms->post_message($text, $target); 
+                        }
+                    }
                     return (['success' => true, 'Подписан']);
                     exit;
                 } else {

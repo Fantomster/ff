@@ -5,6 +5,8 @@ use yii\widgets\ActiveForm;
 use common\models\OrganizationType;
 use kartik\select2\Select2;
 use nirvana\showloading\ShowLoadingAsset;
+use kartik\checkbox\CheckboxX;
+kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
 ShowLoadingAsset::register($this);
 $this->registerJs(
@@ -77,6 +79,25 @@ $form = ActiveForm::begin([
             ->label(false)
             ->textInput(['class' => 'form-control', 'placeholder' => 'телефон'])
     ?>
+    
+    <?=$form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
+        //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+        'autoLabel' => true,
+        'model' => $profile,
+        'attribute' => 'sms_allow',
+        'pluginOptions'=>[
+            'threeState'=>false,
+            'theme' => 'krajee-flatblue',
+            'enclosedLabel' => false,
+            'size'=>'md',
+            ],
+        'labelSettings' => [
+            'label' => 'Разрешить СМС уведомление',
+            'position' => CheckboxX::LABEL_RIGHT,
+            'options' =>['style'=>'']
+            ]
+        ])->label(false);?>
+    
     <?=
             $form->field($user, 'email')
             ->label(false)

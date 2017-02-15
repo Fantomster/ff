@@ -10,46 +10,37 @@ use common\models\RelationSuppRest;
 
 class RestaurantChecker
 {
-	public static function checkEmail($email)
+    const RELATION_INVITED = 1; //есть связь с поставщиком invite_on
+    const RELATION_INVITE_IN_PROGRESS = 2; //поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
+    const NO_AUTH_ADD_RELATION_AND_CATALOG = 3; //поставщик не авторизован // добавляем к базовому каталогу поставщика каталог ресторана и создаем связь
+    const THIS_IS_RESTAURANT = 4; //email ресторана
+    const NEW_VENDOR = 5; //нет в базе такого email
+    const AUTH_SEND_INVITE = 6; //поставщик авторизован invite
+    
+    public static function checkEmail($email)
     {           
             $currentUser = User::findIdentity(Yii::$app->user->id);
             
 		if(User::find()->select('email')->where(['email' => $email])->exists())
 		{
-		$sql = "SELECT "
-                        . "`user`.`id` as user_id, "
-                        . "`profile`.`full_name` as user_full_name, "
-                        . "`profile`.`phone` as phone, "
-                        . "`user`.`organization_id` as organization_id, "
-                        . "`organization`.`type_id` as organization_type_id, "
-                        . "`organization`.`name` as organization_name, "
-                        . "`user`.`status` as user_status, "
-                        . "`user`.`email` as user_email "
-                . " FROM {{%user}} "
-                . " LEFT JOIN {{%organization}} on `user`.`organization_id` = `organization`.`id` "
-                . " LEFT JOIN {{%profile}} on `user`.`id` = `profile`.`user_id`"
-                . " WHERE `user`.`email` = :email";
-                $vendor_info = \Yii::$app->db->createCommand($sql);
-                $vendor_info->bindParam(":email",$email,\PDO::PARAM_STR);
-                $vendor_info->queryOne();
-                $vendor_info = $vendor_info->queryOne();
-                $userProfileFullName = $vendor_info['user_full_name'];
-                $userProfilePhone = $vendor_info['phone'];
-                $userProfileStatus = $vendor_info['user_status']; //есть менеджеры или нет (user.status > 0)
-                
-                $userProfileOrgId = $vendor_info['organization_id'];
-                $userOrgTypeId = $vendor_info['organization_type_id'];
-                $userOrgName = $vendor_info['organization_name'];
-			if($userOrgTypeId==2)
+                    $vendor = User::find()->where(['email' => $email])->one();
+                    $userProfileFullName = $vendor->profile->full_name;
+                    $userProfilePhone = $vendor->profile->phone;
+                    $userOrgId = $vendor->organization_id;
+                    $userOrgTypeId = $vendor->organization->type_id;
+                    $userOrgName = $vendor->organization->name;
+			if($userOrgTypeId==Organization::TYPE_SUPPLIER)
 			{
-				if(RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userProfileOrgId])->exists())
+				if(RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userOrgId])->exists())
 				{
-				$userRelationSuppRest = RelationSuppRest::find()->select('invite')->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userProfileOrgId])->one();
-					if($userRelationSuppRest['invite']==RelationSuppRest::INVITE_ON)
+				$userRelationSuppRest = RelationSuppRest::find()
+                                        ->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userOrgId])
+                                        ->one();
+					if($userRelationSuppRest->invite==RelationSuppRest::INVITE_ON)
 					{
 	
 					//есть связь с поставщиком invite_on
-					$result = ['success'=>true,'eventType'=>1,'message'=>'Данный поставщик уже имеется в вашем списке контактов!',
+					$result = ['success'=>true,'eventType'=>self::RELATION_INVITED,'message'=>'Данный поставщик уже имеется в вашем списке контактов!',
 					'fio' => $userProfileFullName,
                                         'phone' => $userProfilePhone,
 					'organization' => $userOrgName]; 
@@ -59,7 +50,7 @@ class RestaurantChecker
 					}else{
 	
 					//поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
-					$result = ['success'=>true,'eventType'=>2,'message'=>'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика',
+					$result = ['success'=>true,'eventType'=>self::RELATION_INVITE_IN_PROGRESS,'message'=>'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика',
 					'fio' => $userProfileFullName,
                                         'phone' => $userProfilePhone,
 					'organization' => $userOrgName]; 
@@ -68,14 +59,15 @@ class RestaurantChecker
 	
 					} 
 				}else{
-                                        $managersIsActive = User::find()->where(['organization_id' => $userProfileOrgId, 'status' =>1])->count();
+                                        $managersIsActive = User::find()->where(['organization_id' => $userOrgId, 'status' =>1])->count();
 					if($managersIsActive==0){
 					//поставщик не авторизован
 					//добавляем к базовому каталогу поставщика каталог ресторана и создаем связь    
-					$result = ['success'=>true,'eventType'=>3,'message'=>'Поставщик еще не авторизован / добавляем каталог',
+					$result = ['success'=>true,'eventType'=>self::NO_AUTH_ADD_RELATION_AND_CATALOG,'message'=>'Поставщик еще не авторизован / добавляем каталог',
 					'fio' => $userProfileFullName,
                                         'phone' => $userProfilePhone,
-					'organization' => $userOrgName,'org_id'=>$userProfileOrgId];
+					'organization' => $userOrgName,
+                                        'org_id'=>$userOrgId];
 			
 					return $result;
 
@@ -83,12 +75,12 @@ class RestaurantChecker
 					//поставщик авторизован
 					$result = [
                                             'success'=>true,
-                                            'eventType'=>6,
+                                            'eventType'=>self::AUTH_SEND_INVITE,
                                             'message'=>'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>',
                                             'fio' => $userProfileFullName,
                                             'phone' => $userProfilePhone,
                                             'organization' => $userOrgName,
-                                            'org_id'=>$userProfileOrgId
+                                            'org_id'=>$userOrgId
                                                    ];
 			
 					return $result;
@@ -97,13 +89,13 @@ class RestaurantChecker
 				} 
 			}else{
 			//найден email ресторана
-			$result = ['success'=>true,'eventType'=>4,'message'=>'Данный email не может быть использован']; 
+			$result = ['success'=>true,'eventType'=>self::THIS_IS_RESTAURANT,'message'=>'Данный email не может быть использован']; 
 			return $result;
 	
 			}
 		}else{
 			//нет в базе такого email
-			$result = ['success'=>true,'eventType'=>5,'message'=>'Нет совпадений по Email'];
+			$result = ['success'=>true,'eventType'=>self::NEW_VENDOR,'message'=>'Нет совпадений по Email'];
 			return $result;
 			exit;  
 			  

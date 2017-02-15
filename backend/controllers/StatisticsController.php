@@ -131,15 +131,18 @@ class StatisticsController extends Controller {
         $clientsByDay = $command->queryAll();
         $dayLabels = [];
         $dayStats = [];
+        $total = 0;
         foreach ($clientsByDay as $day) {
             $dayLabels[] = $day["day"] . " " . date('M', strtotime("2000-$day[month]-01")) . " " . $day["year"];
             $dayStats[] = $day["count"];
+            $total += $day["count"];
             $clients[] = $day["clients"];
             $vendors[] = $day["vendors"];
         }
         
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('registered', compact(
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'clients',
@@ -155,6 +158,7 @@ class StatisticsController extends Controller {
                     ));
         } else {
             return $this->render('registered', compact(
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'clients',
@@ -235,14 +239,17 @@ class StatisticsController extends Controller {
         $dayLabels = [];
         $dayStats = [];
         $firstDayStats = [];
+        $total = 0;
         foreach ($ordersByDay as $order) {
             $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
             $dayStats[] = $order["total"];
+            $total += $order["total"];
             $firstDayStats[] = $order["first"];
         }
         
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
+                    '$total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'ordersStatThisMonth',
@@ -259,6 +266,7 @@ class StatisticsController extends Controller {
                     ));
         } else {
             return $this->render('orders', compact(
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'ordersStatThisMonth',

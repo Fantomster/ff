@@ -16,7 +16,7 @@ $this->registerJs('
         var justSubmitted = false;
         $(document).on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
-                $("#orderStatForm").submit();
+                $("#turnoverStatForm").submit();
                 justSubmitted = true;
                 setTimeout(function() {
                     justSubmitted = false;
@@ -59,6 +59,7 @@ $form = ActiveForm::begin([
             ])
             ?>
         </div>
+        <span class="text-bold"><?= $total ?> руб </span>
     </div>
     <div class="col-md-12">
         <?=

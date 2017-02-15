@@ -249,7 +249,7 @@ class StatisticsController extends Controller {
         
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
-                    '$total',
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'ordersStatThisMonth',

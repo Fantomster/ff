@@ -204,7 +204,7 @@ class StatisticsController extends Controller {
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` where client_id not in ".$this->blacklist;
+        $query = "select " . $select . " from `$orderTable` where client_id not in ".$this->blacklist." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStat = $command->queryAll()[0];
         
@@ -215,7 +215,7 @@ class StatisticsController extends Controller {
         $thisDayStart = $today->format('Y-m-d 00:00:00');
         
         $query = "select " . $select . " from `$orderTable` "
-                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'";
+                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'"." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisMonth = $command->queryAll()[0];
         
@@ -223,7 +223,7 @@ class StatisticsController extends Controller {
         unset($ordersStatThisMonth["count"]);
 
         $query = "select " . $select . " from `$orderTable` "
-                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'";
+                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'"." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisDay = $command->queryAll()[0];
 

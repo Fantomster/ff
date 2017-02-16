@@ -327,7 +327,7 @@ a:focus {
 @media (min-width: 1070px) {	
     .header-nav {
         position: fixed;
-        z-index: 1000;
+        z-index: 10000;
         top: 0;
         left: 0;
         padding-top: 20px;

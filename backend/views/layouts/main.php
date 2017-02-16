@@ -81,6 +81,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Одобренные для f-market',
                                     'url' => ['/white-list/index'],
                                 ],
+                                [
+                                    'label' => 'Франшиза',
+                                    'url' => ['/franchisee/index'],
+                                ],
                             ],
                         ],
                         ['label' => 'Заказы', 'url' => ['/order/index']],

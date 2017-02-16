@@ -58,6 +58,17 @@ class User extends \amnah\yii2\user\models\User {
         return $this;
     }
 
+    public function setFranchisee($fr_id) {
+        $franchisee = Franchisee::findOne(['id' => $fr_id]);
+        if ($franchisee) {
+            $franchiseeUser = new FranchiseeUser();
+            $franchiseeUser->franchisee_id = $fr_id;
+            $franchiseeUser->user_id = $this->id;
+            $franchiseeUser->save();
+        }
+        return $this;
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */

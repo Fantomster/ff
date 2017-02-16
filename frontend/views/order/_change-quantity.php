@@ -29,7 +29,7 @@ echo Html::hiddenInput('product_id', $product_id);
                                 'max' => PHP_INT_MAX,
                                 'step' => (isset($units) && ($units)) ? $units : 1,
                                 'decimals' => (empty($units) || (fmod($units, 1) > 0)) ? 3 : 0,
-                                'forcestepdivisibility' => (isset($units) && ($units)) ? 'floor' : 'none',
+                                'forcestepdivisibility' => (isset($units) && ($units) && (floor($units) == $units)) ? 'floor' : 'none',
                                 'buttonup_class' => 'btn btn-default',
                                 'buttondown_class' => 'btn btn-default',
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',

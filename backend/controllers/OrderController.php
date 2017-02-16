@@ -40,7 +40,7 @@ class OrderController extends Controller
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
-                            Role::ROLE_FKEEPER_OBSERVER,
+//                            Role::ROLE_FKEEPER_OBSERVER,
                         ],
                     ],
                 ],

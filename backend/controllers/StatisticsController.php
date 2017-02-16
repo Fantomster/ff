@@ -131,15 +131,18 @@ class StatisticsController extends Controller {
         $clientsByDay = $command->queryAll();
         $dayLabels = [];
         $dayStats = [];
+        $total = 0;
         foreach ($clientsByDay as $day) {
             $dayLabels[] = $day["day"] . " " . date('M', strtotime("2000-$day[month]-01")) . " " . $day["year"];
             $dayStats[] = $day["count"];
+            $total += $day["count"];
             $clients[] = $day["clients"];
             $vendors[] = $day["vendors"];
         }
         
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('registered', compact(
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'clients',
@@ -155,6 +158,7 @@ class StatisticsController extends Controller {
                     ));
         } else {
             return $this->render('registered', compact(
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'clients',
@@ -200,7 +204,7 @@ class StatisticsController extends Controller {
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` where client_id not in ".$this->blacklist;
+        $query = "select " . $select . " from `$orderTable` where client_id not in ".$this->blacklist." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStat = $command->queryAll()[0];
         
@@ -211,7 +215,7 @@ class StatisticsController extends Controller {
         $thisDayStart = $today->format('Y-m-d 00:00:00');
         
         $query = "select " . $select . " from `$orderTable` "
-                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'";
+                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'"." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisMonth = $command->queryAll()[0];
         
@@ -219,7 +223,7 @@ class StatisticsController extends Controller {
         unset($ordersStatThisMonth["count"]);
 
         $query = "select " . $select . " from `$orderTable` "
-                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'";
+                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'"." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisDay = $command->queryAll()[0];
 
@@ -235,14 +239,17 @@ class StatisticsController extends Controller {
         $dayLabels = [];
         $dayStats = [];
         $firstDayStats = [];
+        $total = 0;
         foreach ($ordersByDay as $order) {
             $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
             $dayStats[] = $order["total"];
+            $total += $order["total"];
             $firstDayStats[] = $order["first"];
         }
         
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact(
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'ordersStatThisMonth',
@@ -259,6 +266,7 @@ class StatisticsController extends Controller {
                     ));
         } else {
             return $this->render('orders', compact(
+                    'total',
                     'dateFilterFrom', 
                     'dateFilterTo', 
                     'ordersStatThisMonth',

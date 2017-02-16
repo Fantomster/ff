@@ -123,6 +123,7 @@ $form = ActiveForm::begin([
             ])
             ?>
         </div>
+        <span class="text-bold"><?= $total ?></span>
     </div>
     <div class="col-md-12">
         <?=

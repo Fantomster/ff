@@ -270,7 +270,7 @@ class ClientController extends DefaultController {
             $organization->load($post); //name
             $relationSuppRest->uploaded_catalog = UploadedFile::getInstance($relationSuppRest, 'uploaded_catalog');
             
-            $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
+            $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
@@ -562,7 +562,7 @@ class ClientController extends DefaultController {
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
-            $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
+            $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 

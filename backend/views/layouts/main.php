@@ -29,93 +29,97 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
     <head>
         <meta charset="<?= Yii::$app->charset ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-<?= Html::csrfMetaTags() ?>
+        <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <?php $this->head() ?>
     </head>
     <body>
-<?php $this->beginBody() ?>
+        <?php $this->beginBody() ?>
         <div id="loader-show"></div>
         <div class="wrap">
-<?php
-NavBar::begin([
-    'brandLabel' => 'f-keeper',
-    'brandUrl' => Yii::$app->homeUrl,
-    'options' => [
-        'class' => 'navbar-inverse navbar-fixed-top',
-    ],
-]);
-$menuItems = [
-    [
-        'label' => 'Статистика',
-        'items' => [
-            [
-                'label' => 'Регистрация',
-                'url' => ['/statistics/registered'],
-            ],
-            [
-                'label' => 'Заказы',
-                'url' => ['/statistics/orders'],
-            ],
-            [
-                'label' => 'Оборот',
-                'url' => ['/statistics/turnover'],
-            ],
-        ],
-    ],
-    ['label' => 'Пользователи', 'url' => ['/client/index']],
-    [
-        'label' => 'Организации',
-        'items' => [
-            [
-                'label' => 'Общий список',
-                'url' => ['/organization/index'],
-            ],
-            [
-                'label' => 'Одобренные для f-market',
-                'url' => ['/white-list/index'],
-            ],
-        ],
-    ],
-    ['label' => 'Заказы', 'url' => ['/order/index']],
-    [
-        'label' => 'Товары',
-        'items' => [
-            [
-                'label' => 'Общий список',
-                'url' => ['/goods/index'],
-            ],
-            [
-                'label' => 'Загруженные каталоги',
-                'url' => ['/goods/uploaded-catalogs'],
-            ],
-        ],
-    ],
-];
-if (Yii::$app->user->isGuest) {
-    $menuItems[] = ['label' => 'Login', 'url' => ['/user/login']];
-} else {
-    $menuItems[] = '<li>'
-            . Html::beginForm(['/site/logout'], 'post')
-            . Html::submitButton(
-                    'Logout (' . Yii::$app->user->identity->email . ')', ['class' => 'btn btn-link']
-            )
-            . Html::endForm()
-            . '</li>';
-}
-echo Nav::widget([
-    'options' => ['class' => 'navbar-nav navbar-right'],
-    'items' => $menuItems,
-]);
-NavBar::end();
-?>
+            <?php
+            NavBar::begin([
+                'brandLabel' => 'f-keeper',
+                'brandUrl' => Yii::$app->homeUrl,
+                'options' => [
+                    'class' => 'navbar-inverse navbar-fixed-top',
+                ],
+            ]);
+            $menuItems = [
+                [
+                    'label' => 'Статистика',
+                    'items' => [
+                        [
+                            'label' => 'Регистрация',
+                            'url' => ['/statistics/registered'],
+                        ],
+                        [
+                            'label' => 'Заказы',
+                            'url' => ['/statistics/orders'],
+                        ],
+                        [
+                            'label' => 'Оборот',
+                            'url' => ['/statistics/turnover'],
+                        ],
+                    ],
+                ],
+            ];
+            if (Yii::$app->user->isGuest) {
+                $menuItems[] = ['label' => 'Login', 'url' => ['/user/login']];
+            } else {
+                if (Yii::$app->user->identity->role_id === \common\models\Role::ROLE_ADMIN) {
+                    $menuItems = array_merge($menuItems, [
+                        ['label' => 'Пользователи', 'url' => ['/client/index']],
+                        [
+                            'label' => 'Организации',
+                            'items' => [
+                                [
+                                    'label' => 'Общий список',
+                                    'url' => ['/organization/index'],
+                                ],
+                                [
+                                    'label' => 'Одобренные для f-market',
+                                    'url' => ['/white-list/index'],
+                                ],
+                            ],
+                        ],
+                        ['label' => 'Заказы', 'url' => ['/order/index']],
+                        [
+                            'label' => 'Товары',
+                            'items' => [
+                                [
+                                    'label' => 'Общий список',
+                                    'url' => ['/goods/index'],
+                                ],
+                                [
+                                    'label' => 'Загруженные каталоги',
+                                    'url' => ['/goods/uploaded-catalogs'],
+                                ],
+                            ],
+                        ],
+                    ]);
+                }
+                $menuItems[] = '<li>'
+                        . Html::beginForm(['/site/logout'], 'post')
+                        . Html::submitButton(
+                                'Logout (' . Yii::$app->user->identity->email . ')', ['class' => 'btn btn-link']
+                        )
+                        . Html::endForm()
+                        . '</li>';
+            }
+            echo Nav::widget([
+                'options' => ['class' => 'navbar-nav navbar-right'],
+                'items' => $menuItems,
+            ]);
+            NavBar::end();
+            ?>
 
             <div class="container">
-            <?=
-            Breadcrumbs::widget([
-                'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-            ])
-            ?>
+                <?=
+                Breadcrumbs::widget([
+                    'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+                ])
+                ?>
                 <?= Alert::widget() ?>
                 <?= $content ?>
             </div>
@@ -128,8 +132,8 @@ NavBar::end();
                 <p class="pull-right">Работает, оно работает!</p>
             </div>
         </footer>
-<div id="loader-show"></div>
-<?php $this->endBody() ?>
+        <div id="loader-show"></div>
+        <?php $this->endBody() ?>
     </body>
 </html>
 <?php $this->endPage() ?>

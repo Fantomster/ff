@@ -13,7 +13,7 @@ $this->title = 'Контакты';
             <div class="col-md-4">
                 <div class="inside__contact">
                     <b>Адрес </b>
-                    <span>Москва ул. Оршанская 5.</span>
+                    <span>Москва, ул.Привольная, 70</span>
                 </div>
             </div>
             <div class="col-md-4">
@@ -31,6 +31,6 @@ $this->title = 'Контакты';
         </div>
     </div>
     <div class="map">
-        <script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?sid=5zZGbc_VLkf2216n4n4sHLLyGd5r1lQK&amp;width=100%&amp;height=720&amp;lang=ru_RU&amp;sourceType=constructor&amp;scroll=true"></script>
+        <script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?sid=zsxY6q3M7ehFAJKZ8tviP4FWNB_Swd72&amp;width=100%25&amp;height=720&amp;lang=ru_RU&amp;sourceType=constructor&amp;scroll=true"></script>
     </div>
 </main><!-- .content -->

@@ -1438,6 +1438,7 @@ class VendorController extends DefaultController {
         $relation_supp_rest = RelationSuppRest::find()->where([
                     'rest_org_id' => $client_id,
                     'supp_org_id' => $currentUser->organization_id])->one();
+        $curCatalog = $relation_supp_rest->cat_id;
         $catalogs = \yii\helpers\ArrayHelper::map(Catalog::find()->
                                 where(['supp_org_id' => $currentUser->organization_id])->
                                 all(), 'id', 'name');
@@ -1445,9 +1446,7 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($relation_supp_rest->load($post)) {
                 if ($relation_supp_rest->validate()) {
-                    
-                    $relation_supp_rest->update();
-                    $message = 'Сохранено';
+                    if($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)){
                     foreach ($organization->users as $recipient) { 
                         if($recipient->profile->phone && $recipient->profile->sms_allow){
                             $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
@@ -1455,7 +1454,11 @@ class VendorController extends DefaultController {
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target); 
                         }
+                    }    
                     }
+                    $relation_supp_rest->update();
+                    $message = 'Сохранено';
+                    
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
             }

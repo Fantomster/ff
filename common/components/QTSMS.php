@@ -16,8 +16,8 @@ class QTSMS {
 	var $user='37251';			// ваш логин в системе 
 	var $pass='!1asdf';			// ваш пароль в системе
         var $sendler = 'f-keeper.ru';           // Имя отправителя
-        var $period = 600;                      // период
-        var $post_id = 'x124127456';            // пост id
+        var $period = false;                      // период
+        var $post_id = 'x1209448';            // пост id
 	var $hostname='service.qtelecom.ru';	// host замените на адрес сервера указанный в меню "Поддержка -> протокол HTTP"  без префикса http://
 	var $path='/public/http/';
 	var $on_ssl=0; 				// 1 - использовать HTTPS соединение, 0 - HTTP 

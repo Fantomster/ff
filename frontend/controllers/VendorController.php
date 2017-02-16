@@ -1445,9 +1445,17 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($relation_supp_rest->load($post)) {
                 if ($relation_supp_rest->validate()) {
-
+                    
                     $relation_supp_rest->update();
                     $message = 'Сохранено';
+                    foreach ($organization->users as $recipient) { 
+                        if($recipient->profile->phone && $recipient->profile->sms_allow){
+                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                            $target = $recipient->profile->phone;
+                            $sms = new \common\components\QTSMS();
+                            $sms->post_message($text, $target); 
+                        }
+                    }
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
             }

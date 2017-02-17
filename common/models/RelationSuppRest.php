@@ -37,7 +37,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     const UPLOADED_PROCESSED = 1;
 
     public $resourceCategory = 'uploaded_catalogs';
-    
+
     /**
      * @inheritdoc
      */
@@ -50,6 +50,12 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
      */
     public function behaviors() {
         return ArrayHelper::merge(parent::behaviors(), [
+                    'timestamp' => [
+                        'class' => 'yii\behaviors\TimestampBehavior',
+                        'value' => function ($event) {
+                            return gmdate("Y-m-d H:i:s");
+                        },
+                    ],
                     [
                         'class' => UploadBehavior::className(),
                         'attribute' => 'uploaded_catalog',
@@ -153,12 +159,12 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     public function getVendor() {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getClient() {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
-    
+
 }

@@ -96,7 +96,7 @@ use kartik\widgets\TouchSpin;
             'max' => PHP_INT_MAX,
             'step' => (isset($baseProduct->units) && ($baseProduct->units)) ? $baseProduct->units : 1,
             'decimals' => 1,
-            'forcestepdivisibility' => (isset($baseProduct->units) && ($baseProduct->units)) ? 'floor' : 'none',
+            'forcestepdivisibility' => (isset($baseProduct->units) && ($baseProduct->units) && (floor($baseProduct->units) == $baseProduct->units)) ? 'floor' : 'none',
             'buttonup_class' => 'btn btn-default',
             'buttondown_class' => 'btn btn-default',
             'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',

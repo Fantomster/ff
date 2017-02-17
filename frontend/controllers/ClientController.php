@@ -52,6 +52,7 @@ class ClientController extends DefaultController {
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                     [
@@ -62,6 +63,7 @@ class ClientController extends DefaultController {
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                 ],
@@ -270,7 +272,7 @@ class ClientController extends DefaultController {
             $organization->load($post); //name
             $relationSuppRest->uploaded_catalog = UploadedFile::getInstance($relationSuppRest, 'uploaded_catalog');
             
-            $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
+            $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
@@ -358,7 +360,9 @@ class ClientController extends DefaultController {
                          *    
                          * */
                         $user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
-                        $profile->setUser($user->id)->save();
+                        $profile->setUser($user->id);
+                        $profile->sms_allow = Profile::SMS_ALLOW;        
+                        $profile->save();
                         $organization->save();
                         $user->setOrganization($organization)->save();
                         $get_supp_org_id = $organization->id;
@@ -507,6 +511,13 @@ class ClientController extends DefaultController {
                     $currentOrganization = $currentUser->organization;
                     $currentOrganization->step = Organization::STEP_OK;
                     $currentOrganization->save();
+                    
+                    if(!empty($profile->phone)){
+                    $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                    $target = $profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target);
+                    }
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
                         return $result;
@@ -553,7 +564,7 @@ class ClientController extends DefaultController {
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
-            $organization->type_id = OrganizationType::TYPE_SUPPLIER; //org type_id
+            $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
@@ -564,13 +575,14 @@ class ClientController extends DefaultController {
                     $org = $organization->name;
                     $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
+                    
                     if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
-                    $supp_base_cat_id = Catalog::find()->where(['supp_org_id'=>$get_supp_org_id, 'type'=>1])->one()->id;
-                    $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`,`cat_id`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1,$supp_base_cat_id)";
-                    \Yii::$app->db->createCommand($sql)->execute();
+                        $supp_base_cat_id = Catalog::find()->where(['supp_org_id'=>$get_supp_org_id, 'type'=>1])->one()->id;
+                        $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`,`cat_id`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1,$supp_base_cat_id)";
+                        \Yii::$app->db->createCommand($sql)->execute();
                     }else{
-                    $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1)";
-                    \Yii::$app->db->createCommand($sql)->execute();    
+                        $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1)";
+                        \Yii::$app->db->createCommand($sql)->execute();    
                     }
                     if(!empty($categorys)){
                         foreach ($categorys as $arrCategorys) {
@@ -580,6 +592,17 @@ class ClientController extends DefaultController {
                     }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
                     $currentOrganization = $currentUser->organization;
+                    
+                    $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
+                    foreach($rows as $row){
+                        if($row->profile->phone && $row->profile->sms_allow){
+                           $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                            $target = $row->profile->phone;
+                            $sms = new \common\components\QTSMS();
+                            $sms->post_message($text, $target); 
+                        }
+                    }
+                    
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
                         $currentOrganization->step = Organization::STEP_OK;
                         $currentOrganization->save();
@@ -656,8 +679,15 @@ class ClientController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $currentUser = User::findIdentity(Yii::$app->user->id);
             $organization = Organization::find()->where(['id' => $id])->one();
-            $user = User::find()->where(['email' => $organization->email])->one();
-            $currentUser->sendInviteToVendor($user);
+            foreach ($organization->users as $recipient) {
+                $currentUser->sendInviteToVendor($recipient);  
+                if($recipient->profile->phone && $recipient->profile->sms_allow){
+                    $text = "Повторное приглашение в систему F-keeper от " . $currentUser->organization->name;
+                    $target = $recipient->profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target); 
+                }
+            }
         }
     }
 

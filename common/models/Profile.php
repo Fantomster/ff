@@ -12,6 +12,7 @@ use yii\helpers\ArrayHelper;
  * @inheritdoc
  *
  * @property string $phone
+ * @property string $sms_allow
  * @property string $avatar
  * 
  * @property string $avatarUrl
@@ -20,6 +21,10 @@ use yii\helpers\ArrayHelper;
 class Profile extends \amnah\yii2\user\models\Profile {
 
     const DEFAULT_AVATAR = '/images/no-avatar.jpg';
+    
+    const SMS_ALLOW = 1;
+    const SMS_DISALLOW = 0;
+    
     
     public $resourceCategory = 'avatar';
 
@@ -56,7 +61,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['phone'], 'default', 'value' => null];
         $rules[] = [['phone'], 'required', 'on' => 'register', 'message' => 'Пожалуйста, введите свой номер телефона'];
         $rules[] = [['avatar'], 'image', 'extensions' => 'jpg, jpeg, gif, png'];
-        
+        $rules[] = [['sms_allow'], 'default', 'value' => 0];
 //        //переопределим сообщения валидации быдланским способом
 //        $pos = array_search(['email', 'required'], $rules);
 //        $rules[$pos]['message'] = 'Пожалуйста, напишите ваш адрес электронной почты';

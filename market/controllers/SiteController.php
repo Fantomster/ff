@@ -80,10 +80,12 @@ class SiteController extends Controller {
     public function actionIndex() {
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
+            $addwhereS = [];
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             $addwhere = [];
+            $addwhereS = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -91,17 +93,32 @@ class SiteController extends Controller {
                         ->asArray()
                         ->all();
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                $addwhereS = ['not in', 'id', $relationSupplier];
             }
         }
         $topProducts = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
+                ->leftJoin('white_list','catalog_base_goods.supp_org_id = white_list.organization_id')
                 ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
                 ->andWhere('category_id is not null')
                 ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
+                //->orderBy(['partnership'=>SORT_DESC])
                 ->limit(6)
                 ->all();
-        
+ 
+        /*$subquery = (new \yii\db\Query())
+        ->select(['catalog_base_goods.id as id','product','supp_org_id','price','category_id','partnership','image'])
+        ->from(CatalogBaseGoods::tableName())
+        ->leftJoin(WhiteList::tableName(), 
+                CatalogBaseGoods::tableName() . '.supp_org_id = ' . WhiteList::tableName() . '.organization_id')
+        ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
+        ->andWhere('category_id is not null');
+        $topProducts = (new \yii\db\Query)
+                ->from(['wl' => $subquery])
+                ->orderBy(['partnership'=>SORT_DESC])
+                ->limit(6)
+                ->all();
+        foreach($topProducts as $row){var_dump($row['image']);}*/
         $topSuppliers = CatalogBaseGoods::find()
                 ->joinWith('whiteList')
                 ->select('DISTINCT(`supp_org_id`) as supp_org_id')
@@ -111,6 +128,14 @@ class SiteController extends Controller {
                 ->andWhere($addwhere)
                 ->limit(6)
                 ->all();
+        /*
+        $topSuppliers = Organization::find()
+                ->rightJoin('white_list','organization.id = white_list.organization_id')
+                ->andWhere($addwhereS)
+                ->orderBy(['partnership'=>SORT_DESC])
+                ->limit(6)
+                ->all();
+        */        
         $topProductsCount = CatalogBaseGoods::find()
                 ->joinWith('whiteList')
                 ->where(['market_place' => CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
@@ -118,6 +143,7 @@ class SiteController extends Controller {
                 ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
                 ->count();
+        
         $topSuppliersCount = CatalogBaseGoods::find()
                 ->joinWith('whiteList')
                 ->select('supp_org_id')
@@ -750,7 +776,7 @@ class SiteController extends Controller {
                             'product_name' => [
                                 'query' => $search,
                                 'analyzer' => "ru",
-                            //'type' =>'phrase_prefix',
+                                
                             //'max_expansions' =>6
                             ]
                         ]
@@ -771,8 +797,10 @@ class SiteController extends Controller {
                     'query' => [
                         'match' => [
                             'supplier_name' => [
-                                'query' => $search
-                            ]
+                                'query' => $search,
+                                'analyzer' => 'ru',
+                                'type' => 'phrase'
+                            ]   
                         ]
                     ],
                     'filter' => [
@@ -782,7 +810,12 @@ class SiteController extends Controller {
                                     'supplier_id' => $filterNotIn
                                 ]
                             ]
-                        ]
+                        ],
+                        /*'regexp' => [
+                            'supplier_name' => [
+                                'value' =>'.*'
+                            ]
+                        ]*/
                     ]
                 ]
             ];
@@ -883,6 +916,7 @@ class SiteController extends Controller {
         $cartCount = $client->getCartCount();
         if (!$relation) {
             $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
+           // $this->sendInvite($client,$product->vendor);
         }
         $this->sendCartChange($client, $cartCount);
 
@@ -904,7 +938,7 @@ class SiteController extends Controller {
         }
 
         $post = Yii::$app->request->post();
-
+        
         if ($post && $post['vendor_id']) {
             $vendor = Organization::findOne(['id' => $post['vendor_id'], 'type_id' => Organization::TYPE_SUPPLIER]);
             if (empty($vendor)) {
@@ -919,10 +953,19 @@ class SiteController extends Controller {
         }
 
         $client->inviteVendor($vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
-
+        $this->sendInvite($client,$vendor);
         return $this->successNotify("Запрос поставщику отправлен!");
     }
-
+    private function sendInvite($client, $vendor) {
+        foreach($vendor->users as $recipient){
+            if($recipient->profile->phone && $recipient->profile->sms_allow){
+                $text = "Ресторан " . $client->name . " добавил Вас через торговую площадку market.f-keeper.ru";
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target); 
+            } 
+        }
+    }
     private function sendCartChange($client, $cartCount) {
         $clientUsers = $client->users;
 

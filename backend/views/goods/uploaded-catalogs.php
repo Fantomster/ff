@@ -18,12 +18,15 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'value' => function ($data) {
-                    return Html::a('Каталог', $data->getUploadUrl('uploaded_catalog'));
+                    return Html::a($data->client->name, ['organization/view', 'id' => $data->rest_org_id]);
                 },
                 'label' => 'Ресторан',
             ],
             [
-                'value' => 'vendor.name',
+                'format' => 'raw',
+                'value' => function ($data) {
+                    return Html::a($data->vendor->name, ['organization/view', 'id' => $data->supp_org_id]);
+                },
                 'label' => 'Поставщик',
             ],
             [
@@ -32,6 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Html::a('Каталог', $data->getUploadUrl('uploaded_catalog'));
                 },
                 'label' => 'Загруженный каталог',
+            ],
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    return Html::a('Импортировать', ['goods/import-catalog', 'id' => $data->id]);
+                }
             ],
         ],
     ]);

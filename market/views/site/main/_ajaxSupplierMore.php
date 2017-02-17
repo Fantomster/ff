@@ -25,7 +25,7 @@ foreach($sp as $row){
     </div>
     <div class="col-md-12">
       <div class="supplier-button">
-        <a href="#" class="btn btn-100 btn-success" style="width: 100%">Добавить</a>
+        <a href="#" class="btn btn-100 btn-success invite-vendor" data-vendor-id="<?= $row->vendor->id ?>" style="width: 100%">Добавить</a>
       </div>
     </div>
   </div>

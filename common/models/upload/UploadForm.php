@@ -14,7 +14,7 @@ class UploadForm extends Model
     public function rules()
     {
         return [
-            [['importFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'xlsx'],
+            [['importFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'xlsx', 'checkExtensionByMimeType' => false],
         ];
     }
     

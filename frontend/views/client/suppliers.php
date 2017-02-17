@@ -398,6 +398,11 @@ $gridColumnsCatalog = [
                 <div class="box-body">
                     <?= $form->field($user, 'email') ?>
                     <?= $form->field($profile, 'full_name')->label('ФИО') ?>
+                    <?= $form->field($profile, 'phone')
+                        ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+                        ->label('Телефон')
+                        ->textInput()
+                    ?>
                     <?= $form->field($organization, 'name')->label('Организация') ?>
                     <?=
                     $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
@@ -542,6 +547,7 @@ $('#modal_addProduct').on('hidden.bs.modal', function (e) {
 * 6 поставщик авторизован, связи не найдено, invite	
 */
 $('#profile-full_name').attr('readonly','readonly');
+$('#profile-phone').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');
 $('#relationcategory-category_id').attr('disabled','disabled');
 $('.select2-search__field').css('width','100%');
@@ -564,13 +570,15 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
                         // Поставщик уже есть в списке контактов (лочим все кнопки)
 	                if(response.eventType==1){ 
 		        var fio = response.fio;
+                        var phone = response.phone;
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
+                        $('#profile-phone').val(phone);
 	                $('#organization-name').val(organization); 
 	                $('#addProduct').removeClass('hide');
 	                $('#inviteSupplier').addClass('hide');
                         $('#addProduct').attr('disabled','disabled');
-		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
+		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log(organization);    
@@ -578,13 +586,15 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                // Вы уже отправили приглашение этому поставщику, ожидается отклик поставщика (лочим кнопки)
 	                if(response.eventType==2){
 		        var fio = response.fio;
+                        var phone = response.phone;
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
+                        $('#profile-phone').val(phone);
 	                $('#organization-name').val(organization); 
 	                $('#addProduct').removeClass('hide');
 	                $('#inviteSupplier').addClass('hide');
                         $('#addProduct').attr('disabled','disabled');
-		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
+		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log('type = 2');    
@@ -592,12 +602,14 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                // Связи не найдено - просто invite (#inviteSupplier)
 	                if(response.eventType==3){
 		        var fio = response.fio;
+                        var phone = response.phone; 
 	                var organization = response.organization;
 	                $('#profile-full_name').val(fio);
+                        $('#profile-phone').val(phone);
 	                $('#organization-name').val(organization);  
 		            $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide');
-		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
+		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
                             console.log('type = 3');     
 	                }
@@ -606,7 +618,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide');
                             $('#addProduct').attr('disabled','disabled'); 
-		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
+		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
 		            $('#relationcategory-category_id').attr('disabled','disabled');
 		            bootboxDialogShow(response.message);
 		            console.log('type = 4');  
@@ -616,18 +628,20 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
                             $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
-		            $('#profile-full_name,#organization-name').removeAttr('readonly');
+		            $('#profile-full_name,#profile-phone,#organization-name').removeAttr('readonly');
                             console.log('type = 5');    
 	                }
                         // 
 	                if(response.eventType==6){
 		        var fio = response.fio;
+                        var phone = response.phone; 
                         var organization = response.organization;
 	                $('#profile-full_name').val(fio);
+                        $('#profile-phone').val(phone);
 	                $('#organization-name').val(organization); 
 	                $('#addProduct').addClass('hide');
 	                $('#inviteSupplier').removeClass('hide');
-		            $('#profile-full_name,#organization-name').attr('readonly','readonly');
+		            $('#profile-full_name,#profile-phone,#organization-name').attr('readonly','readonly');
                             $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
 		            console.log('type = 6');    
 	                }

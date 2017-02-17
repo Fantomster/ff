@@ -46,6 +46,7 @@ class SiteController extends Controller {
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_ADMIN,
                         ],
                         'denyCallback' => function($rule, $action) {
                             $this->redirect(Url::to(['/client/index']));
@@ -57,6 +58,7 @@ class SiteController extends Controller {
                         'roles' => [
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_ADMIN,
                         ],
                         'denyCallback' => function($rule, $action) {
                             $this->redirect(Url::to(['/vendor/index']));

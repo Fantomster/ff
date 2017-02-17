@@ -52,6 +52,7 @@ class ClientController extends DefaultController {
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                     [
@@ -62,6 +63,7 @@ class ClientController extends DefaultController {
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                 ],

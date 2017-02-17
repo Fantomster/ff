@@ -47,6 +47,7 @@ class VendorController extends DefaultController {
                         'roles' => [
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                     [
@@ -57,6 +58,7 @@ class VendorController extends DefaultController {
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                 ],

@@ -225,10 +225,6 @@ class EsController extends Controller
     
     }
     public function actionTest(){
-        $target = '79057446157';
-        $text = 'Тестовое сообщение';
-
-        $sms = new \common\components\QTSMS();
-        $sms->post_message($text, $target);
+        
     }
 }

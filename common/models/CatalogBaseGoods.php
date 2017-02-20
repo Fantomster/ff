@@ -40,11 +40,17 @@ use yii\helpers\Url;
  * @property MpCategory $category
  * @property MpCategory $mainCategory
  * @property WhiteList $whiteList
+ * @property RatingStars $ratingStars
+ * @property RatingPercent $ratingPercent
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
     const STATUS_ON = 1;
     const STATUS_OFF = 0;
+    
+    const MP_SHOW_PRICE = 1;
+    const MP_HIDE_PRICE = 0;
+    
     const MARKETPLACE_ON = 1;
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;
@@ -56,6 +62,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const ES_MASS_UPDATED = 3; //в случае,  если обновили весь каталог через файл, крон работает ночью, порционально добавляет в бд по 1000 товаров
     const ES_MASS_DELETED = 4; //массовое удаление, пока не используется, но может понадобиться
     
+    const MAX_RATING = \common\models\Organization::MAX_RATING + 10;
     
     public $USER_TYPE;
     public $searchString; 
@@ -64,7 +71,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     
     public $sub1;
     public $sub2;
-
+    
+        
     /**
      * @inheritdoc
      */
@@ -154,9 +162,19 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
     public function beforeSave($insert)
     {
-    if (parent::beforeSave($insert)) {
+    if (parent::beforeSave($insert)) { 
+            if($this->market_place == self::MARKETPLACE_ON){
+                (int)$rating = 0;
+                
+                if($this->OldAttributes['image'] || $this->image){
+                   $rating = $rating + 5; 
+                }    
+                if($this->mp_show_price == self::MP_SHOW_PRICE){$rating = $rating + 5;}    
+                $this->rating = $rating;
+            }
             $this->price = str_replace(",", ".", $this->price);
             $this->units = str_replace(",", ".", $this->units);
+            var_dump($this->OldAttributes['image']);
             return true;
         }
         return false;
@@ -265,5 +283,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     {
         return $this->hasOne(WhiteList::className(), ['organization_id' => 'supp_org_id']);
     }
-    
+    public function getRatingStars() {
+        return number_format(($this->rating+$this->vendor->rating) / (self::MAX_RATING/5),1);
+    }
+    public function getRatingPercent() {
+        return number_format(((($this->rating+$this->vendor->rating) / (self::MAX_RATING/5))/5*100),1);
+    }
 }

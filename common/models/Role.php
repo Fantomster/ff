@@ -57,7 +57,6 @@ class Role extends \amnah\yii2\user\models\Role {
      */
     const ROLE_FRANCHISEE_ACCOUNTANT = 11;
     
-    
     public static function getManagerRole($organization_type) {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [
             ':orgType' => $organization_type

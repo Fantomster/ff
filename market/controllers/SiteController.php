@@ -419,6 +419,7 @@ class SiteController extends Controller {
                 ->andWhere(['organization.white_list' => Organization::WHITE_LIST_ON])
                 ->andWhere($addwhere)
                 ->count();
+        $cbgTable = CatalogBaseGoods::tableName();
         $products = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
@@ -429,7 +430,7 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC])
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
         $vendor = \common\models\Organization::find()->where(['id' => $id])->one();
@@ -464,7 +465,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->orderBy(['rating'=>SORT_DESC])
+                ->orderBy([CatalogBaseGoods::tableName().'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
                 ->all();
@@ -533,6 +534,7 @@ class SiteController extends Controller {
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
             }
         }
+        $cbgTable = CatalogBaseGoods::tableName();
         $count = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
@@ -542,7 +544,7 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC])
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
                 ->count();
@@ -556,7 +558,7 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC])
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
                 ->all();
@@ -659,6 +661,7 @@ class SiteController extends Controller {
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
             }
         }
+        $cbgTable = CatalogBaseGoods::tableName();
         $count = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
@@ -668,7 +671,7 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC]) 
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC]) 
                 ->limit(12)
                 ->count();
         $products = CatalogBaseGoods::find()
@@ -680,7 +683,7 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC])
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
         $category = \common\models\MpCategory::find()->where(['id' => $id])->one();
@@ -739,6 +742,7 @@ class SiteController extends Controller {
     }
 
     public function actionAjaxProductCatLoader($num, $category) {
+        $cbgTable = CatalogBaseGoods::tableName();
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
         } else {
@@ -764,7 +768,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                     ->andWhere($addwhere)
-                    ->orderBy(['rating'=>SORT_DESC])
+                    ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(6)
                     ->count();
@@ -779,7 +783,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                     ->andWhere($addwhere)
-                    ->orderBy(['rating'=>SORT_DESC])
+                    ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
                         ->limit(6)
                         ->all();

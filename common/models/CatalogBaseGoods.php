@@ -102,7 +102,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['cat_id','article','price','product','ed'], 'required'],
-            [['cat_id', 'category_id','supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price'], 'integer'],
+            [['cat_id', 'category_id','supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price','rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             [['article'], 'string', 'max' => 50],
             [['product','brand','region','weight'], 'string', 'max' => 255],
@@ -155,6 +155,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'region' => 'Страна производитель',
             'weight' => 'Вес',
             'mp_show_price' => 'Показывать цену в F-MARKET',
+            'rating' => 'Рейтинг'
                 //'importCatalog'=>'Files'
         ];
     }
@@ -162,19 +163,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function beforeSave($insert)
     {
     if (parent::beforeSave($insert)) { 
-            if($this->market_place == self::MARKETPLACE_ON){
-                (int)$rating = 0;
-                
-                if($this->OldAttributes['image'] || $this->image){
-                   $rating = $rating + 5; 
-                }    
-                if($this->mp_show_price == self::MP_SHOW_PRICE){$rating = $rating + 5;}    
-                $this->rating = $rating;
-            }
-            $this->price = str_replace(",", ".", $this->price);
-            $this->units = str_replace(",", ".", $this->units);
-            var_dump($this->OldAttributes['image']);
-            return true;
+        
+        $this->es_status = CatalogBaseGoods::ES_UPDATE;
+        return true;
         }
         return false;
     }
@@ -283,9 +274,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return $this->hasOne(WhiteList::className(), ['organization_id' => 'supp_org_id']);
     }
     public function getRatingStars() {
-        return number_format(($this->rating+$this->vendor->rating) / (self::MAX_RATING/5),1);
+        return number_format(($this->rating) / (self::MAX_RATING/5),1);
     }
     public function getRatingPercent() {
-        return number_format(((($this->rating+$this->vendor->rating) / (self::MAX_RATING/5))/5*100),1);
+        return number_format(((($this->rating) / (self::MAX_RATING/5))/5*100),1);
     }
 }

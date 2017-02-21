@@ -33,16 +33,10 @@ class CronController extends Controller {
     //обновление одного продукта (крон запускается каждые 2 минуты)
     public function actionUpdateCollection() {
         $base = CatalogBaseGoods::find()
-                //->select('catalog_base_goods.*')
-                ->joinWith('whiteList')
-                //->where(['market_place' => 1,'deleted'=>0])
                 ->andWhere('category_id is not null')
                 ->andWhere(['in','es_status',[1,2]])
-                ->andWhere('organization_id is not null')
                 ->limit(500)
                 ->all();
-        //var_dump($base->catalogBaseGoods);
-        //foreach($base as $catalogBaseGoods){var_dump($catalogBaseGoods->whiteList->organization_id);}
         
         foreach($base as $catalogBaseGoods){
                 $product_id = $catalogBaseGoods->id;
@@ -57,7 +51,12 @@ class CronController extends Controller {
                 $product_category_sub_name = $catalogBaseGoods->category->name;
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
-
+                
+                $rating = $catalogBaseGoods->vendor->rating;
+                if($product_image){$rating = $rating + 5;}
+                if($product_show_price){$rating = $rating + 5;}
+                
+                
                 if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1){
 
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
@@ -75,7 +74,8 @@ class CronController extends Controller {
                                 "product_category_sub_id" => $product_category_sub_id,
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
-                                "product_created_at"  => $product_created_at
+                                "product_created_at"  => $product_created_at,
+                                "product_rating"  => $rating   
                                         ];
                                 $es_product->save();
 
@@ -94,7 +94,8 @@ class CronController extends Controller {
                                 "product_category_sub_id" => $product_category_sub_id,
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
-                                "product_created_at"  => $product_created_at
+                                "product_created_at"  => $product_created_at,
+                                "product_rating"  => $rating
                                         ];
                                         $es_product->save();
 
@@ -106,172 +107,81 @@ class CronController extends Controller {
                                 $es_product->delete();
                         }
                 }
-            CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $product_id]);
+            
+            Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
+                    . "es_status = 0, "
+                    . "rating = " . $rating . " "
+                    . "where id = " . $product_id)->execute();
         }
         
     }
-    // В случае, если обновление каталога было файлом
-    // обновлять порциями, максимум 1000 строк
-    // этот крон отрабатывается ночью с 00:00 по 05:00, каждые 10 минут
-    // 0/10 00-05 * * * php yii cron/mass-update-collection
-    public function actionMassUpdateCollection() {
-        $base = CatalogBaseGoods::find()
-                //->select('catalog_base_goods.*')
-                ->joinWith('whiteList')
-                //->where(['market_place' => 1,'deleted'=>0])
-                ->andWhere('category_id is not null')
-                ->andWhere(['in','es_status',[3,4]])
-                ->andWhere('organization_id is not null')
-                ->limit(500)
-                ->all();
-        foreach($base as $catalogBaseGoods){
-                $product_id = $catalogBaseGoods->id;
-                $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
-                $product_name = $catalogBaseGoods->product; 
-                $product_supp_id = $catalogBaseGoods->supp_org_id;
-                $product_supp_name = $catalogBaseGoods->vendor->name; 
-                $product_price = $catalogBaseGoods->price; 
-                $product_category_id = $catalogBaseGoods->category->parent; 
-                $product_category_name = \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category->parent])->one()->name; 
-                $product_category_sub_id = $catalogBaseGoods->category->id; 
-                $product_category_sub_name = $catalogBaseGoods->category->name;
-                $product_show_price = $catalogBaseGoods->mp_show_price;
-                $product_created_at = $catalogBaseGoods->created_at;
-
-                if($catalogBaseGoods->es_status == 3 && $catalogBaseGoods->market_place == 1){
-                    if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
-                        $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-                        $es_product->attributes = [
-                        "product_id" => $product_id,
-                        "product_image" => $product_image,
-                        "product_name"  => $product_name,
-                        "product_supp_id"  => $product_supp_id,
-                        "product_supp_name"  => $product_supp_name,
-                        "product_price"  => $product_price,
-                        "product_category_id" => $product_category_id,
-                        "product_category_name" => $product_category_name,
-                        "product_category_sub_id" => $product_category_sub_id,
-                        "product_category_sub_name" => $product_category_sub_name,
-                        "product_show_price" => $product_show_price,
-                        "product_created_at"  => $product_created_at
-                                ];
-                        $es_product->save();
-                    }else{
-                        $es_product = new \common\models\ES\Product();
-                        $es_product->attributes = [
-                        "product_id" => $product_id,
-                        "product_image" => $product_image,
-                        "product_name"  => $product_name,
-                        "product_supp_id"  => $product_supp_id,
-                        "product_supp_name"  => $product_supp_name,
-                        "product_price"  => $product_price,
-                        "product_category_id" => $product_category_id,
-                        "product_category_name" => $product_category_name,
-                        "product_category_sub_id" => $product_category_sub_id,
-                        "product_category_sub_name" => $product_category_sub_name,
-                        "product_show_price" => $product_show_price,
-                        "product_created_at"  => $product_created_at
-                                ];
-                        $es_product->save();
-
-                    }
-                }
-                if($catalogBaseGoods->es_status == 4 || $catalogBaseGoods->market_place == 0){
-                        if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
-                                $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-                                $es_product->delete();
-                        }
-                }
-                CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $product_id]);
-        }
-    }
+    
     public function actionUpdateSuppliers() {
-       $suppliers = WhiteList::find()
-                ->joinWith('organization')
+        $suppliers = Organization::find()
                 ->where(['type_id'=>  Organization::TYPE_SUPPLIER])
                 ->andWhere(['in','es_status',[
-                    Organization::ES_ACTIVE,
-                    Organization::ES_INACTIVE,
-                    Organization::ES_UPDATED
+                    Organization::ES_UPDATED,
+                    Organization::ES_DELETED
                     ]])
                 ->limit(200)
                 ->all();
         foreach($suppliers as $supplier){
-            if($supplier->organization->es_status == Organization::ES_ACTIVE){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() == 0){
+            $rating = 0;
+            if($supplier->partnership){$rating = $rating + 16;}
+            if($supplier->picture){$rating = $rating + 5;} 
+            if($supplier->contact_name){$rating = $rating + 2;} 
+            if($supplier->phone){$rating = $rating + 2;} 
+            if($supplier->email){$rating = $rating + 2;} 
+            if($supplier->address){$rating = $rating + 2;} 
+            if($supplier->about){$rating = $rating + 2;}
+            
+            if($supplier->es_status == Organization::ES_UPDATED){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
                     $es_supplier = new \common\models\ES\Supplier();
                     $es_supplier->attributes = [
-                           "supplier_id" => $supplier->organization->id,
-                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
-                           "supplier_name"  => $supplier->organization->name,
+                           "supplier_id" => $supplier->id,
+                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                           "supplier_name"  => $supplier->name,
+                           "supplier_rating"  => $rating,
                     ];
                     $es_supplier->save();
                 }
-            }
-            if($supplier->organization->es_status == Organization::ES_UPDATED){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() == 0){
-                    $es_supplier = new \common\models\ES\Supplier();
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
+                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
                     $es_supplier->attributes = [
-                           "supplier_id" => $supplier->organization->id,
-                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
-                           "supplier_name"  => $supplier->organization->name,
-                    ];
-                    $es_supplier->save();
-                }
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() > 0){
-                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->one();
-                    $es_supplier->attributes = [
-                           "supplier_image" => !empty($supplier->organization->picture) ? $supplier->organization->pictureUrl : '',
-                           "supplier_name"  => $supplier->organization->name,
+                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                           "supplier_name"  => $supplier->name,
+                           "supplier_rating"  => $rating,
                     ];
                     $es_supplier->save();  
                 }
             }
-            if($supplier->organization->es_status == Organization::ES_INACTIVE){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->organization->id])->count() > 0){
+            if($supplier->es_status == Organization::ES_DELETED){
+                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
                     $es_product = \common\models\ES\Supplier::find()->where(['supplier_id'=>$product_id])->one();
                     $es_product->delete();
                 }
             }
-            Yii::$app->db->createCommand("update organization set es_status = 0 where id = " . $supplier->organization->id);
+            Yii::$app->db->createCommand("update organization set "
+                    . "es_status = ".Organization::ES_INACTIVE.","
+                    . "rating = ".$rating." "
+                    . "where id = " . $supplier->id);
+            if($suppliers->white_list){
+            Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
+                    . "es_status = ".CatalogBaseGoods::ES_UPDATE.", "
+                    . "where supp_org_id = " . $suppliers->id);
+            }
         }
        
     }
-    /*public function actionMassUpdateSuppliers() {
-        $suppliers = CatalogBaseGoods::find()
-                ->select('supp_org_id')
-                ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->distinct()
-                ->all();
-        $arr = [];
-        foreach($suppliers as $supplier){
-            $arr[] = $supplier->supp_org_id;
-            
-        }
-        $arr = implode(',',$arr);
-        if(!empty($arr)){
-           Yii::$app->db->createCommand("update organization set es_status = 1 where id in (" . $arr . ")")->execute();  
-           Yii::$app->db->createCommand("update organization set es_status = 0 where es_status is null")->execute();
-        }
-        $suppliers = Organization::findAll(['es_status'=>Organization::ES_ACTIVE]);
-        foreach($suppliers as $supplier){
-            if(!\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->exists()){
-             $es_supplier = new \common\models\ES\Supplier();
-             $es_supplier->attributes = [
-                    "supplier_id" => $supplier->id,
-                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                    "supplier_name"  => $supplier->name,
-             ];
-             $es_supplier->save();
-            }else{
-             $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
-             $es_supplier->attributes = [
-                    "supplier_id" => $supplier->id,
-                    "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                    "supplier_name"  => $supplier->name,
-             ];
-             $es_supplier->save();   
-            }
-        }
-    }*/
+    
+    public function actionUpdateOrganizationRating() {
+        
+        
+    }
+    
+    public function actionUpdateProductRating() {
+        
+        
+    }
 }

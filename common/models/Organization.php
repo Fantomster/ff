@@ -26,6 +26,8 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $about
  * @property string $picture
  * @property string $es_status
+ * @property boolean $white_list
+ * @property boolean $partnership
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
@@ -77,7 +79,7 @@ class Organization extends \yii\db\ActiveRecord {
             ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
             [['type_id', 'name'], 'required'],
             [['type_id', 'step','es_status'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['email'], 'email'],
@@ -130,6 +132,8 @@ class Organization extends \yii\db\ActiveRecord {
             'contact_name' => 'ФИО контактного лица',
             'about' => 'Информация об организации',
             'picture' => 'Аватар',
+            'white_list' => 'Одобрено для f-market',
+            'partnership' => 'Партнерство',
         ];
     }
     public function beforeSave($insert)

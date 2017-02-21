@@ -16,8 +16,8 @@ LandingAsset::register($this);
         <meta http-equiv="X-UA-Compatible" content="IE=Edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Подключись к франшизе по автоматизации HoReCa с прибылью 3 100 000 руб./год от 150 000 рублей в своем городе">
-        <link rel="icon" href="img/favicon/favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="images/favicon/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
         <?= Html::csrfMetaTags() ?>
         <?php $this->head() ?>
     </head>

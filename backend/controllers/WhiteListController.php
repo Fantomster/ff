@@ -16,13 +16,12 @@ use common\components\AccessRule;
 /**
  * WhiteListController implements the CRUD actions for WhiteList model.
  */
-class WhiteListController extends Controller
-{
+class WhiteListController extends Controller {
+
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -58,14 +57,13 @@ class WhiteListController extends Controller
      * Lists all WhiteList models.
      * @return mixed
      */
-    public function actionIndex()
-    {
+    public function actionIndex() {
         $searchModel = new WhiteListSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -74,10 +72,9 @@ class WhiteListController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id)
-    {
+    public function actionView($id) {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+                    'model' => $this->findModel($id),
         ]);
     }
 
@@ -105,15 +102,14 @@ class WhiteListController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionUpdate($id)
-    {
+    public function actionUpdate($id) {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('update', [
-                'model' => $model,
+                        'model' => $model,
             ]);
         }
     }
@@ -124,8 +120,7 @@ class WhiteListController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionDelete($id)
-    {
+    public function actionDelete($id) {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -135,15 +130,22 @@ class WhiteListController extends Controller
         if (($wl = WhiteList::findOne(['organization_id' => $id])) !== null) {
             return $this->redirect(['organization/index']);
         } elseif (($org = Organization::findOne($id)) !== null) {
-            $new = new WhiteList();
-            $new->organization_id = $org->id;
-            $new->legal_entity = $org->legal_entity;
-            $new->legal_email = $org->email;
-            $new->phone = $org->phone;
-            $new->save();
-            $org->es_status = Organization::ES_ACTIVE;
-            $org->save();
-            return $this->redirect(['white-list/update', 'id' => $new->id]);
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $new = new WhiteList();
+                $new->organization_id = $org->id;
+                $new->legal_entity = $org->legal_entity;
+                $new->legal_email = $org->email;
+                $new->phone = $org->phone;
+                $new->save();
+                $org->es_status = Organization::ES_ACTIVE;
+                $org->white_list = true;
+                $org->save();
+                $transaction->commit();
+                return $this->redirect(['white-list/update', 'id' => $new->id]);
+            } catch (Exception $e) {
+                $transaction->rollback();
+            }
         }
         return $this->redirect(['organization/index']);
     }
@@ -155,12 +157,12 @@ class WhiteListController extends Controller
      * @return WhiteList the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
-    {
+    protected function findModel($id) {
         if (($model = WhiteList::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
 }

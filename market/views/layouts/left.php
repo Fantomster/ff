@@ -5,7 +5,6 @@ $count_products_from_mp = CatalogBaseGoods::find()
         ->joinWith('vendor')
         ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON,'deleted' => CatalogBaseGoods::DELETED_OFF])
         ->andWhere('category_id is not null')
-        ->andWhere('organization_id is not null')
         ->andWhere(['organization.white_list' => common\models\Organization::WHITE_LIST_ON])
         ->count();
 $left_menu_categorys = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();

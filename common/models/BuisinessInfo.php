@@ -5,7 +5,7 @@ namespace common\models;
 use Yii;
 
 /**
- * This is the model class for table "white_list".
+ * This is the model class for table "buisiness_onfo".
  *
  * @property integer $id
  * @property integer $organization_id
@@ -24,18 +24,17 @@ use Yii;
  * @property string $correspondent_account
  * @property string $checking_account
  * @property string $phone
- * @property boolean $partnership
  *
  * @property Organization $organization
  */
-class WhiteList extends \yii\db\ActiveRecord
+class BuisinessInfo extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'white_list';
+        return 'buisiness_info';
     }
 
     /**
@@ -62,7 +61,7 @@ class WhiteList extends \yii\db\ActiveRecord
             [['organization_id'], 'integer'],
             [['organization_id'], 'unique'],
             [['info'], 'string'],
-            [['created_at', 'updated_at', 'partnership'], 'safe'],
+            [['created_at', 'updated_at'], 'safe'],
             [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'correspondent_account', 'checking_account', 'phone'], 'string', 'max' => 255],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
         ];
@@ -91,7 +90,6 @@ class WhiteList extends \yii\db\ActiveRecord
             'correspondent_account' => 'р/с',
             'checking_account' => 'к/с',
             'phone' => 'Телефон',
-            'partnership' => 'Наш партнер',
         ];
     }
 

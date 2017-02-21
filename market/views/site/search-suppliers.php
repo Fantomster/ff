@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+use common\models\ES\Supplier;
 ?>
 
 <?php
@@ -18,6 +19,13 @@ foreach($sp as $row){
 ?>
 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
 <div class="mp-suppiler-block  animated fadeIn">
+    <div class="mp-rating">
+        <div class="Fr-star size-3" data-title="<?=number_format($row->supplier_rating / (Supplier::MAX_RATING/5),1)?>" data-rating="<?=number_format($row->supplier_rating / (Supplier::MAX_RATING/5),1)?>">
+            <div class="Fr-star-value" style="width:<?=($row->supplier_rating / (Supplier::MAX_RATING/5))/5*100?>%"></div>
+            <div class="Fr-star-bg"></div>
+        </div>
+    </div>
+    <?=empty($row->supplier_partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
     <a href="<?=Url::to(['/site/supplier', 'id' => $row->supplier_id]);?>">
   <img class="supplier-image" src="<?=!empty($row->supplier_image) ? 
         $row->supplier_image : \common\models\Organization::DEFAULT_VENDOR_AVATAR; ?>">

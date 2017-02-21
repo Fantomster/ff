@@ -51,6 +51,7 @@ class CronController extends Controller {
                 $product_category_sub_name = $catalogBaseGoods->category->name;
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
+                $product_partnership = $catalogBaseGoods->vendor->partnership; 
                 
                 $rating = $catalogBaseGoods->vendor->rating;
                 if($product_image){$rating = $rating + 5;}
@@ -75,7 +76,8 @@ class CronController extends Controller {
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
                                 "product_created_at"  => $product_created_at,
-                                "product_rating"  => $rating   
+                                "product_rating"  => $rating,
+                                "product_partnership"  => $product_partnership
                                         ];
                                 $es_product->save();
 
@@ -95,9 +97,10 @@ class CronController extends Controller {
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
                                 "product_created_at"  => $product_created_at,
-                                "product_rating"  => $rating
+                                "product_rating"  => $rating,
+                                "product_partnership"  => $product_partnership
                                         ];
-                                        $es_product->save();
+                                $es_product->save();
 
                         }
                 }
@@ -143,6 +146,7 @@ class CronController extends Controller {
                            "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
                            "supplier_name"  => $supplier->name,
                            "supplier_rating"  => $rating,
+                           "supplier_partnership"  => $supplier->partnership
                     ];
                     $es_supplier->save();
                 }
@@ -152,6 +156,7 @@ class CronController extends Controller {
                            "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
                            "supplier_name"  => $supplier->name,
                            "supplier_rating"  => $rating,
+                           "supplier_partnership"  => $supplier->partnership
                     ];
                     $es_supplier->save();  
                 }

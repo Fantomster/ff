@@ -40,7 +40,7 @@ $this->title = 'F-MARKET фильтр поиска';
                         <div class="Fr-star-bg"></div>
                     </div>
                 </div>
-                <?=empty($row->whiteList->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
+                <?=empty($row->vendor->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
                 <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
                 <img class="product-image" src="<?= $row->imageUrl ?>">
                 </a>

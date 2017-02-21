@@ -6,6 +6,10 @@ use Yii;
 
 class Product extends ActiveRecord
 {  
+    
+    const MAX_RATING = \common\models\CatalogBaseGoods::MAX_RATING;
+    
+    
     public static function index() 
     {  
         return 'product'; 
@@ -29,7 +33,9 @@ class Product extends ActiveRecord
             "product_category_name",
             "product_category_sub_name",
             "product_show_price",
-            "product_created_at"    
+            "product_created_at",
+            "product_rating", 
+            "product_partnership",
           ];
       }
     public function rules() 

@@ -89,7 +89,8 @@ class EsController extends Controller
                         "product_category_sub_name" : {"type" : "string"},
                         "product_created_at" : {"type" : "string"},
                         "product_show_price" : {"type" : "long"},
-                        "product_rating" : {"type" : "long"}
+                        "product_rating" : {"type" : "long"},
+                        "product_partnership" : {"type" : "long"}
                 }
             }
     }\'
@@ -128,7 +129,8 @@ class EsController extends Controller
                             "term_vector" : "with_positions_offsets"
                         },
                         "supplier_image" : {"type" : "string"},
-                        "supplier_rating" : {"type" : "long"}
+                        "supplier_rating" : {"type" : "long"},
+                        "supplier_partnership" : {"type" : "long"}
                 }
             }
     }\'
@@ -141,92 +143,20 @@ class EsController extends Controller
     ini_set('memory_limit', '128M');
     
     $model = \common\models\MpCategory::find()->where('parent is not null')->all();
-    foreach ($model as $name) {
-        $category_id = $name->parent;
-        $category_sub_id = $name->id;
-        $category_name = $name->name;
-        $category = new \common\models\ES\Category();
-        $category->attributes = [
-            "category_id" => $category_id,
-            "category_sub_id" => $category_sub_id,
-            "category_name" => $category_name
-        ];
-        $category->save();
-    }
-    //var_dump($model);
-    $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/category/_refresh\'';
-    $res = shell_exec($url);
-    }
-    
-    public function actionUpdateProduct() {
-    ini_set("max_execution_time", "180");
-    ini_set('memory_limit', '128M');
-    
-    $model = \common\models\CatalogBaseGoods::find()
-    ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON, 'es_status' => 3])->limit(1300)
-    ->all();
-    foreach ($model as $name) {
-        $product_id = $name->id;
-        $product_image = !empty($name->image) ? $name->imageUrl : ''; 
-        $product_name = $name->product; 
-        $product_supp_id = $name->supp_org_id;
-        $product_supp_name = $name->vendor->name; 
-        $product_price = $name->price; 
-        $product_category_id = $name->category->parent; 
-        $product_category_name = \common\models\MpCategory::find()->where(['id'=>$name->category->parent])->one()->name; 
-        $product_category_sub_id = $name->category->id; 
-        $product_category_sub_name = $name->category->name;
-        $product_created_at = $name->created_at;
-        $product_show_price = $name->mp_show_price;
-        $product_rating = $name->rating;
-        $product = new \common\models\ES\Product();
-        $product->attributes = [
-            "product_id" => $product_id,
-            "product_image" => $product_image,
-            "product_name"  => $product_name,
-            "product_supp_id"  => $product_supp_id,
-            "product_supp_name"  => $product_supp_name,
-            "product_price"  => $product_price,
-            "product_category_id" => $product_category_id,
-            "product_category_name" => $product_category_name,
-            "product_category_sub_id" => $product_category_sub_id,
-            "product_category_sub_name" => $product_category_sub_name,
-            "product_created_at"  => $product_created_at,
-            "product_show_price" => $product_show_price,
-            "product_rating" => $product_rating,
-        ];
-        $product->save();
-        \common\models\CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $name->id]);
-    }
-    $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
-    $res = shell_exec($url);
-    }
-    public function actionUpdateSupplier() {
-    ini_set("max_execution_time", "180");
-    ini_set('memory_limit', '128M');
-    
-    $sql = "SELECT organization.id as id, organization.name as name 
-            FROM user JOIN organization ON user.organization_id = organization.id
-            WHERE type_id = 2";
-        $model = \Yii::$app->db->createCommand($sql)->queryAll();
         foreach ($model as $name) {
-            $supplier_id = $name['id'];
-            $supplier_image = '';
-            $supplier_name = $name['name'];
-            $supplier_rating = $name['rating'];
-            $suppliers = new \common\models\ES\Supplier();
-            $suppliers->attributes = [
-                "supplier_id" => $supplier_id,
-                "supplier_image" => $supplier_image,
-                "supplier_name" => $supplier_name,
-                "supplier_rating" => $supplier_rating
+            $category_id = $name->parent;
+            $category_sub_id = $name->id;
+            $category_name = $name->name;
+            $category = new \common\models\ES\Category();
+            $category->attributes = [
+                "category_id" => $category_id,
+                "category_sub_id" => $category_sub_id,
+                "category_name" => $category_name
             ];
-            $suppliers->save();
+            $category->save();
         }
-        
-        $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/supplier/_refresh\'';
-        $res = shell_exec($url);
     }
+    
     public function actionDeleleProductCollection(){
     
     }

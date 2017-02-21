@@ -40,6 +40,13 @@ $this->title = 'F-MARKET Продукты поставщика';
         ?>
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
             <div class="mp-product-block">
+                <div class="mp-rating">
+                    <div class="Fr-star size-3" data-title="<?=$row->ratingStars?>" data-rating="<?=$row->ratingStars?>">
+                        <div class="Fr-star-value" style="width:<?=$row->ratingPercent?>%"></div>
+                        <div class="Fr-star-bg"></div>
+                    </div>
+                </div>
+                <?=empty($row->vendor->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
                 <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
                 <img class="product-image" src="<?= $row->imageUrl ?>">
                 </a>

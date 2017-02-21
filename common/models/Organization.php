@@ -45,6 +45,9 @@ class Organization extends \yii\db\ActiveRecord {
     const TYPE_SUPPLIER = 2;
     const TYPE_FRANCHISEE = 3;
     
+    const WHITE_LIST_OFF = 0;
+    const WHITE_LIST_ON = 1;
+    
     const STEP_OK = 0;
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only

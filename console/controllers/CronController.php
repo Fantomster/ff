@@ -174,8 +174,8 @@ class CronController extends Controller {
             Yii::$app->db->createCommand("update organization set "
                     . "es_status = ".Organization::ES_INACTIVE.","
                     . "rating = ".$rating." "
-                    . "where id = " . $supplier->id);
-            if($supplier->white_list){
+                    . "where id = " . $supplier->id)->execute();
+            if($supplier->white_list == 1){
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
                     . "es_status = ".CatalogBaseGoods::ES_UPDATE." "
                     . "where supp_org_id = " . $supplier->id . " and "

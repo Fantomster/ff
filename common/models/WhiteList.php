@@ -94,7 +94,6 @@ class WhiteList extends \yii\db\ActiveRecord
             'partnership' => 'Наш партнер',
         ];
     }
-
     /**
      * @return \yii\db\ActiveQuery
      */

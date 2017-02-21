@@ -27,11 +27,11 @@ class SiteController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['login', 'error'],
+                        'actions' => ['login', 'error', 'logout'],
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index'],
+                        'actions' => ['index'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,

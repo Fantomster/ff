@@ -5,13 +5,13 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $searchModel backend\models\WhiteListSearch */
+/* @var $searchModel backend\models\BusinessInfoSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Организации, одобренные для f-market';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="white-list-index">
+<div class="buisiness-info-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]);  ?>
@@ -36,7 +36,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                         'label' => 'Название организации',
                     ],
-                    'partnership',
                     'created_at',
                     'updated_at',
                     ['class' => 'yii\grid\ActionColumn'],

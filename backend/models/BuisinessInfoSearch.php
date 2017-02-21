@@ -5,13 +5,13 @@ namespace backend\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\WhiteList;
+use common\models\BuisinessInfo;
 use common\models\Organization;
 
 /**
- * WhiteListSearch represents the model behind the search form about `common\models\WhiteList`.
+ * BuisinessInfoSearch represents the model behind the search form about `common\models\BuisinessInfo`.
  */
-class WhiteListSearch extends WhiteList {
+class BuisinessInfoSearch extends BuisinessInfo {
 
     public $org_name;
     public $org_id;
@@ -23,7 +23,7 @@ class WhiteListSearch extends WhiteList {
     public function rules() {
         return [
             [['id', 'organization_id'], 'integer'],
-            [['org_name', 'org_id', 'org_type_id', 'info', 'partnership', 'created_at', 'updated_at'], 'safe'],
+            [['org_name', 'org_id', 'org_type_id', 'info', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -45,7 +45,7 @@ class WhiteListSearch extends WhiteList {
     public function search($params) {
         $organizationTable = Organization::tableName();
 
-        $query = WhiteList::find();
+        $query = BuisinessInfo::find();
         $query->joinWith(['organization']);
 
         // add conditions that should always apply here
@@ -79,7 +79,6 @@ class WhiteListSearch extends WhiteList {
         $query->andFilterWhere([
             'id' => $this->id,
             'organization_id' => $this->organization_id,
-            'partnership' => $this->partnership,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             "$organizationTable.id" => $this->org_id,
@@ -87,7 +86,8 @@ class WhiteListSearch extends WhiteList {
 
         $query->andFilterWhere(['like', 'info', $this->info])
                 ->andFilterWhere(["$organizationTable.type_id" => $this->org_type_id])
-                ->andFilterWhere(['like', "$organizationTable.name", $this->org_name]);
+                ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
+                ->andWhere(["$organizationTable.white_list" => 1]);
 
         return $dataProvider;
     }

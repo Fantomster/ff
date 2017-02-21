@@ -6,11 +6,11 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\WhiteList */
 
-$this->title = 'Create White List';
-$this->params['breadcrumbs'][] = ['label' => 'White Lists', 'url' => ['index']];
+$this->title = 'Create Business Info';
+$this->params['breadcrumbs'][] = ['label' => 'Business Info', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="white-list-create">
+<div class="buisiness-info-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

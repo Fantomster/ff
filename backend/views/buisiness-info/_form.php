@@ -4,16 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\WhiteList */
+/* @var $model common\models\BusinessInfo */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="white-list-form">
+<div class="buisiness-info-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'partnership')->checkbox() ?>
-    
     <?= $form->field($model, 'signed')->textInput() ?>
     
     <?= $form->field($model, 'legal_entity')->textInput() ?>

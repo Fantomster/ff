@@ -27,12 +27,14 @@ $gridColumns = [
         'value' => function ($data) {
             return Html::a($data['name'], ['organization/view', 'id' => $data['id']]);
         },
-    ],
-    'city',
+            ],
+            'white_list',
+            'partnership',
+            'city',
 //    'address',
 //    'zip_code',
-    'phone',
-    'email:email',
+            'phone',
+            'email:email',
 //    'website',
                 // 'created_at',
                 // 'updated_at',
@@ -61,4 +63,4 @@ $gridColumns = [
                 'columns' => $gridColumns,
             ]);
             ?>
-        <?php Pjax::end(); ?></div>
+            <?php Pjax::end(); ?></div>

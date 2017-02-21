@@ -3,10 +3,10 @@
 namespace backend\controllers;
 
 use Yii;
-use common\models\WhiteList;
+use common\models\BuisinessInfo;
 use common\models\Organization;
 use common\models\Role;
-use backend\models\WhiteListSearch;
+use backend\models\BuisinessInfoSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -14,15 +14,14 @@ use yii\filters\AccessControl;
 use common\components\AccessRule;
 
 /**
- * WhiteListController implements the CRUD actions for WhiteList model.
+ * BuisinessInfoController implements the CRUD actions for BuisinessInfo model.
  */
-class WhiteListController extends Controller
-{
+class BuisinessInfoController extends Controller {
+
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -55,40 +54,38 @@ class WhiteListController extends Controller
     }
 
     /**
-     * Lists all WhiteList models.
+     * Lists all BuisinessInfo models.
      * @return mixed
      */
-    public function actionIndex()
-    {
-        $searchModel = new WhiteListSearch();
+    public function actionIndex() {
+        $searchModel = new BuisinessInfoSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Displays a single WhiteList model.
+     * Displays a single BuisinessInfo model.
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id)
-    {
+    public function actionView($id) {
         return $this->render('view', [
-            'model' => $this->findModel($id),
+                    'model' => $this->findModel($id),
         ]);
     }
 
     /**
-     * Creates a new WhiteList model.
+     * Creates a new BuisinessInfo model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
 //    public function actionCreate()
 //    {
-//        $model = new WhiteList();
+//        $model = new BuisinessInfo();
 //
 //        if ($model->load(Yii::$app->request->post()) && $model->save()) {
 //            return $this->redirect(['view', 'id' => $model->id]);
@@ -100,67 +97,72 @@ class WhiteListController extends Controller
 //    }
 
     /**
-     * Updates an existing WhiteList model.
+     * Updates an existing BuisinessInfo model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
      */
-    public function actionUpdate($id)
-    {
+    public function actionUpdate($id) {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('update', [
-                'model' => $model,
+                        'model' => $model,
             ]);
         }
     }
 
     /**
-     * Deletes an existing WhiteList model.
+     * Deletes an existing BuisinessInfo model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
      */
-    public function actionDelete($id)
-    {
+    public function actionDelete($id) {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
     public function actionApprove($id) {
-        if (($wl = WhiteList::findOne(['organization_id' => $id])) !== null) {
+        if (($wl = BuisinessInfo::findOne(['organization_id' => $id])) !== null) {
             return $this->redirect(['organization/index']);
         } elseif (($org = Organization::findOne($id)) !== null) {
-            $new = new WhiteList();
-            $new->organization_id = $org->id;
-            $new->legal_entity = $org->legal_entity;
-            $new->legal_email = $org->email;
-            $new->phone = $org->phone;
-            $new->save();
-            $org->es_status = Organization::ES_ACTIVE;
-            $org->save();
-            return $this->redirect(['white-list/update', 'id' => $new->id]);
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $new = new BuisinessInfo();
+                $new->organization_id = $org->id;
+                $new->legal_entity = $org->legal_entity;
+                $new->legal_email = $org->email;
+                $new->phone = $org->phone;
+                $new->save();
+                $org->es_status = Organization::ES_ACTIVE;
+                $org->white_list = true;
+                $org->save();
+                $transaction->commit();
+                return $this->redirect(['buisiness-info/update', 'id' => $new->id]);
+            } catch (Exception $e) {
+                $transaction->rollback();
+            }
         }
         return $this->redirect(['organization/index']);
     }
 
     /**
-     * Finds the WhiteList model based on its primary key value.
+     * Finds the BuisinessInfo model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return WhiteList the loaded model
+     * @return BuisinessInfo the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
-    {
-        if (($model = WhiteList::findOne($id)) !== null) {
+    protected function findModel($id) {
+        if (($model = BuisinessInfo::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
 }

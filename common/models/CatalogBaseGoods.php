@@ -18,7 +18,7 @@ use yii\helpers\Url;
  * @property string $article
  * @property string $product
  * @property number $units
- * @property integer $price
+ * @property string $price
  * @property integer $status
  * @property integer $market_place
  * @property integer $deleted
@@ -39,7 +39,6 @@ use yii\helpers\Url;
  * @property Organization $vendor
  * @property MpCategory $category
  * @property MpCategory $mainCategory
- * @property WhiteList $whiteList
  * @property RatingStars $ratingStars
  * @property RatingPercent $ratingPercent
  */

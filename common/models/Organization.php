@@ -31,7 +31,6 @@ use Imagine\Image\ManipulatorInterface;
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
- * @property WhiteList $whiteList
  * @property User $users
  * @property OrderChat $unreadMessages
  * @property OrderChat $unreadSystem
@@ -490,6 +489,7 @@ class Organization extends \yii\db\ActiveRecord {
     {
         return $this->hasOne(WhiteList::className(), ['organization_id' => 'id']);
     }
+    
     /**
      * @return string url to avatar image
      */
@@ -540,9 +540,11 @@ class Organization extends \yii\db\ActiveRecord {
                         ->groupBy(['category_id'])
                         ->count();
     }
+    
     public function getRatingStars() {
         return number_format($this->rating / (self::MAX_RATING/5),1);
     }
+    
     public function getRatingPercent() {
         return(($this->rating / (self::MAX_RATING/5))/5*100);
     }

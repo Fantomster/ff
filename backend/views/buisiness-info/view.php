@@ -4,13 +4,13 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\WhiteList */
+/* @var $model common\models\BusinessInfo */
 
 $this->title = $model->organization->name;
-$this->params['breadcrumbs'][] = ['label' => 'White Lists', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Business Info', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="white-list-view">
+<div class="buisiness-info-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'label' => 'Наш партнер',
-                'value' => $model->partnership ? 'Да' : 'Нет',
+                'value' => $model->organization->partnership ? 'Да' : 'Нет',
             ],
             'info:ntext',
             'created_at',

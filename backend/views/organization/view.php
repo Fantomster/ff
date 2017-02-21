@@ -22,7 +22,7 @@ switch ($model->type_id) {
         break;
 }
 
-$white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
+$buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $model->id]);
 ?>
 <div class="organization-view">
 
@@ -31,9 +31,9 @@ $white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
     <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']) ?>
     
     <?= 
-        $white ? 
-        Html::a('Одобрено для f-market!', ['white-list/view', 'id' => $white->id], ['class' => 'btn btn-success', 'style' => 'margin-bottom: 10px;']) : 
-        Html::a('Одобрить для f-market', ['white-list/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
+        $buisinessInfo ? 
+        Html::a('Просмотреть реквизиты', ['buisiness-info/view', 'id' => $buisinessInfo->id], ['class' => 'btn btn-success', 'style' => 'margin-bottom: 10px;']) : 
+        Html::a('Заполнить реквизиты', ['buisiness-info/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
     ?>
 
     <?= DetailView::widget([
@@ -45,6 +45,8 @@ $white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
                 'value' => $model->type->name,
             ],
             'name',
+            'white_list',
+            'partnership',
             'legal_entity',
             'city',
             'address',

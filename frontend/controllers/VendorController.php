@@ -567,7 +567,7 @@ class VendorController extends DefaultController {
                                     . "ed=:ed,"
                                     . "note=:note,"
                                     . "es_status=1"
-                                    . " where cat_id=" . $id . " and article='" . $row_article . "'";
+                                    . " where cat_id=$id and article='{$row_article}' ";
                             $command = \Yii::$app->db->createCommand($sql);
                             $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
                             $command->bindParam(":product", $row_product, \PDO::PARAM_STR);

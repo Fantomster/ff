@@ -626,7 +626,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhereOrg)
+                ->andWhere($addwhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)->offset($num)
                 ->count();
@@ -636,7 +636,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhereOrg)
+                ->andWhere($addwhere)
                 ->orderBy(['rating'=>SORT_DESC]) 
                 ->limit(6)->offset($num)
                 ->all();

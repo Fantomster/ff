@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'label' => 'Наш партнер',
-                'value' => $model->partnership ? 'Да' : 'Нет',
+                'value' => $model->organization->partnership ? 'Да' : 'Нет',
             ],
             'info:ntext',
             'created_at',

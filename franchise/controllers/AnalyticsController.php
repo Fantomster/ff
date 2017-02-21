@@ -13,7 +13,7 @@ use common\components\AccessRule;
  *
  * @author sharaf
  */
-class AnalyticsController extends Controller {
+class AnalyticsController extends DefaultController {
 
     /**
      * Displays analytics index

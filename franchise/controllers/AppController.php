@@ -14,7 +14,7 @@ use common\models\Role;
  *
  * @author sharaf
  */
-class AppController extends Controller {
+class AppController extends DefaultController {
 
     /**
      * @inheritdoc

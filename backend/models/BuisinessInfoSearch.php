@@ -86,7 +86,8 @@ class BuisinessInfoSearch extends BuisinessInfo {
 
         $query->andFilterWhere(['like', 'info', $this->info])
                 ->andFilterWhere(["$organizationTable.type_id" => $this->org_type_id])
-                ->andFilterWhere(['like', "$organizationTable.name", $this->org_name]);
+                ->andFilterWhere(['like', "$organizationTable.name", $this->org_name])
+                ->andWhere(["$organizationTable.white_list" => 1]);
 
         return $dataProvider;
     }

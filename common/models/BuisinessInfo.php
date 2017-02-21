@@ -24,6 +24,7 @@ use Yii;
  * @property string $correspondent_account
  * @property string $checking_account
  * @property string $phone
+ * @property string $reward
  *
  * @property Organization $organization
  */
@@ -57,10 +58,10 @@ class BuisinessInfo extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['organization_id'], 'required'],
             [['organization_id'], 'integer'],
             [['organization_id'], 'unique'],
             [['info'], 'string'],
+            [['reward'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
             [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'correspondent_account', 'checking_account', 'phone'], 'string', 'max' => 255],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
@@ -90,6 +91,7 @@ class BuisinessInfo extends \yii\db\ActiveRecord
             'correspondent_account' => 'р/с',
             'checking_account' => 'к/с',
             'phone' => 'Телефон',
+            'reward' => 'Маленький гешефт',
         ];
     }
 
@@ -99,5 +101,13 @@ class BuisinessInfo extends \yii\db\ActiveRecord
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+    }
+    
+    /**
+     * Sets organization
+     */
+    public function setOrganization($organization) {
+        $this->organization_id = $organization->id;
+        return $this->save();
     }
 }

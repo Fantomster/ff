@@ -13,7 +13,7 @@ use common\components\AccessRule;
  *
  * @author sharaf
  */
-class FinanceController extends Controller {
+class FinanceController extends DefaultController {
 
     /**
      * Displays finance index

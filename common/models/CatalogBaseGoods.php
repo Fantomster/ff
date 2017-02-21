@@ -18,7 +18,7 @@ use yii\helpers\Url;
  * @property string $article
  * @property string $product
  * @property number $units
- * @property integer $price
+ * @property string $price
  * @property integer $status
  * @property integer $market_place
  * @property integer $deleted

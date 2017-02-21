@@ -31,9 +31,9 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
     <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']) ?>
     
     <?= 
-        $model->white_list ? 
-        Html::a('Одобрено для f-market!', ['buisiness-info/view', 'id' => $buisinessInfo->id], ['class' => 'btn btn-success', 'style' => 'margin-bottom: 10px;']) : 
-        Html::a('Одобрить для f-market', ['buisiness-info/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
+        $buisinessInfo ? 
+        Html::a('Просмотреть реквизиты', ['buisiness-info/view', 'id' => $buisinessInfo->id], ['class' => 'btn btn-success', 'style' => 'margin-bottom: 10px;']) : 
+        Html::a('Заполнить реквизиты', ['buisiness-info/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
     ?>
 
     <?= DetailView::widget([
@@ -45,6 +45,8 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
                 'value' => $model->type->name,
             ],
             'name',
+            'white_list',
+            'partnership',
             'legal_entity',
             'city',
             'address',

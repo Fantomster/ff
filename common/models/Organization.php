@@ -31,7 +31,6 @@ use Imagine\Image\ManipulatorInterface;
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
- * @property WhiteList $whiteList
  * @property User $users
  * @property OrderChat $unreadMessages
  * @property OrderChat $unreadSystem

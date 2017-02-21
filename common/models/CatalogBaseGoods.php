@@ -39,7 +39,6 @@ use yii\helpers\Url;
  * @property Organization $vendor
  * @property MpCategory $category
  * @property MpCategory $mainCategory
- * @property WhiteList $whiteList
  * @property RatingStars $ratingStars
  * @property RatingPercent $ratingPercent
  */

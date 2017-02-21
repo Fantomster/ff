@@ -22,7 +22,6 @@ use common\models\CatalogGoods;
 use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
-use common\models\WhiteList;
 use common\components\AccessRule;
 use yii\helpers\Url;
 use yii\helpers\Json;
@@ -116,7 +115,6 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere(['organization.white_list' => Organization::WHITE_LIST_ON])
                 ->andWhere($addwhere)
                 ->count();
         $topSuppliers = Organization::find()
@@ -417,7 +415,6 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere(['organization.white_list' => Organization::WHITE_LIST_ON])
                 ->andWhere($addwhere)
                 ->count();
         $products = CatalogBaseGoods::find()
@@ -625,7 +622,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhereOrg)
+                ->andWhere($addwhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)->offset($num)
                 ->count();
@@ -635,7 +632,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhereOrg)
+                ->andWhere($addwhere)
                 ->orderBy(['rating'=>SORT_DESC]) 
                 ->limit(6)->offset($num)
                 ->all();

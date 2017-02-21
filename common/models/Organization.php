@@ -6,7 +6,6 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
-
 /**
  * This is the model class for table "organization".
  *
@@ -26,7 +25,6 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $about
  * @property string $picture
  * @property string $es_status
- * @property boolean $white_list
  * @property boolean $partnership
  *
  * @property OrganizationType $type
@@ -37,6 +35,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $pictureUrl
  * @property RatingStars $ratingStars
  * @property RatingPercent $ratingPercent
+ * @property BuisinessInfo $buisinessInfo
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -142,22 +141,7 @@ class Organization extends \yii\db\ActiveRecord {
     {
     if (parent::beforeSave($insert)) { 
         $this->es_status = Organization::ES_UPDATED;
-            /*if($this->OldAttributes['type_id'] == self::TYPE_SUPPLIER){
-                if($this->whiteList->organization_id){
-                    (int)$rating = 0; 
-                    if($this->whiteList->partnership){$rating = $rating + 16;}
-                    if($this->OldAttributes['picture'] || $this->picture){
-                       $rating = $rating + 5; 
-                    } 
-                    if($this->contact_name){$rating = $rating + 2;} 
-                    if($this->phone){$rating = $rating + 2;} 
-                    if($this->email){$rating = $rating + 2;} 
-                    if($this->address){$rating = $rating + 2;} 
-                    if($this->about){$rating = $rating + 2;} 
-                    $this->rating = $rating;
-                    
-                }
-            }*/
+            
             return true;
         }
         return false;
@@ -485,9 +469,9 @@ class Organization extends \yii\db\ActiveRecord {
         return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id' => $this->id]);
     }
     
-    public function getWhiteList()
+    public function getBuisinessInfo()
     {
-        return $this->hasOne(WhiteList::className(), ['organization_id' => 'id']);
+        return $this->hasOne(BuisinessInfo::className(), ['organization_id' => 'id']);
     }
     
     /**

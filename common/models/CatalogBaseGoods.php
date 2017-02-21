@@ -269,10 +269,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     $parent = MpCategory::find()->where(['id' => $id])->one()->parent;
     return MpCategory::find()->where(['id' => $parent])->one();
     }
-    public function getWhiteList()
-    {
-        return $this->hasOne(WhiteList::className(), ['organization_id' => 'supp_org_id']);
-    }
     public function getRatingStars() {
         return number_format(($this->rating) / (self::MAX_RATING/5),1);
     }

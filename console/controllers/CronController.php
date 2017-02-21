@@ -163,9 +163,13 @@ class CronController extends Controller {
             }
             if($supplier->es_status == Organization::ES_DELETED){
                 if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
-                    $es_product = \common\models\ES\Supplier::find()->where(['supplier_id'=>$product_id])->one();
-                    $es_product->delete();
+                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+                    $es_supplier->delete();
                 }
+                Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
+                    . "es_status = ".Organization::ES_DELETED." "
+                    . "where supp_org_id = " . $supplier->id)->execute();
+                
             }
             Yii::$app->db->createCommand("update organization set "
                     . "es_status = ".Organization::ES_INACTIVE.","
@@ -173,8 +177,9 @@ class CronController extends Controller {
                     . "where id = " . $supplier->id);
             if($supplier->white_list){
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
-                    . "es_status = ".CatalogBaseGoods::ES_UPDATE.", "
-                    . "where supp_org_id = " . $supplier->id);
+                    . "es_status = ".CatalogBaseGoods::ES_UPDATE." "
+                    . "where supp_org_id = " . $supplier->id . " and "
+                    . "es_status <> " . CatalogBaseGoods::ES_DELETED)->execute();
             }
         }
        

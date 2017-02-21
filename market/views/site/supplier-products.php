@@ -127,7 +127,7 @@ $('#product-more').on("click", function (e) {
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-product-loader",
+      url: "index.php?r=site/ajax-product-more",
       type: "GET",
       data: {"num": num, "supp_org_id":$id},
       cache: false,

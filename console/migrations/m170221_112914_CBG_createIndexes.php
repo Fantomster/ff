@@ -1,7 +1,7 @@
 <?php
 
 use yii\db\Migration;
-
+//m170221_112914_CBG_createIndexes
 class m170221_112914_CBG_createIndexes extends Migration
 {
     public function safeUp()

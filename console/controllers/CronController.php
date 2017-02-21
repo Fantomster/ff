@@ -58,7 +58,7 @@ class CronController extends Controller {
                 if($product_show_price){$rating = $rating + 5;}
                 
                 
-                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1){
+                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted = 0){
 
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
 
@@ -104,7 +104,7 @@ class CronController extends Controller {
 
                         }
                 }
-                if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0){
+                if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0 || $catalogBaseGoods->deleted = 1){
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
                                 $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
                                 $es_product->delete();

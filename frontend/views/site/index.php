@@ -182,4 +182,5 @@ $this->registerJs('
         $("#cartoonVideo").attr(\'src\', url);
     });     
 ');
+
 ?>

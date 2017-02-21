@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use common\models\Role;
+use kartik\checkbox\CheckboxX;
+kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -30,6 +32,24 @@ $form = ActiveForm::begin([
     <?= $form->field($profile, 'full_name') ?>
 
     <?= $form->field($profile, 'phone')->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',]) ?>
+    
+    <?=$form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
+                            //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                            'autoLabel' => true,
+                            'model' => $profile,
+                            'attribute' => 'sms_allow',
+                            'pluginOptions'=>[
+                                'threeState'=>false,
+                                'theme' => 'krajee-flatblue',
+                                'enclosedLabel' => false,
+                                'size'=>'md',
+                                ],
+                            'labelSettings' => [
+                                'label' => 'Разрешить СМС уведомление',
+                                'position' => CheckboxX::LABEL_RIGHT,
+                                'options' =>['style'=>'']
+                                ]
+                            ])->label(false);?>
 
     <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType)) ?>
 

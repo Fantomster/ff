@@ -62,7 +62,7 @@ return [
             }
             return;
         }
-        if (!Yii::$app->user->can('admin')) {
+        if (!Yii::$app->user->can('observe')) {
             $event->isValid = false;
             Yii::$app->response->statusCode = 403;
         }

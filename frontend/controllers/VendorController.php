@@ -47,6 +47,7 @@ class VendorController extends DefaultController {
                         'roles' => [
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                     [
@@ -57,6 +58,7 @@ class VendorController extends DefaultController {
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
                         ],
                     ],
                 ],
@@ -1017,7 +1019,15 @@ class VendorController extends DefaultController {
                 $relation_supp_rest->cat_id = $curCat;
                 $relation_supp_rest->status = 1;
                 $relation_supp_rest->update();
-
+                $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
+                foreach($rows as $row){
+                    if($row->profile->phone && $row->profile->sms_allow){
+                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                        $target = $row->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target); 
+                    }
+                }
                 return (['success' => true, 'Подписан']);
                 exit;
             } else {
@@ -1365,7 +1375,15 @@ class VendorController extends DefaultController {
                     $relation_supp_rest->cat_id = $cat_id;
                     $relation_supp_rest->status = 1;
                     $relation_supp_rest->update();
-
+                    $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
+                    foreach($rows as $row){
+                        if($row->profile->phone && $row->profile->sms_allow){
+                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                            $target = $row->profile->phone;
+                            $sms = new \common\components\QTSMS();
+                            $sms->post_message($text, $target); 
+                        }
+                    }
                     return (['success' => true, 'Подписан']);
                     exit;
                 } else {
@@ -1422,6 +1440,7 @@ class VendorController extends DefaultController {
         $relation_supp_rest = RelationSuppRest::find()->where([
                     'rest_org_id' => $client_id,
                     'supp_org_id' => $currentUser->organization_id])->one();
+        $curCatalog = $relation_supp_rest->cat_id;
         $catalogs = \yii\helpers\ArrayHelper::map(Catalog::find()->
                                 where(['supp_org_id' => $currentUser->organization_id])->
                                 all(), 'id', 'name');
@@ -1429,9 +1448,19 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($relation_supp_rest->load($post)) {
                 if ($relation_supp_rest->validate()) {
-
+                    if($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)){
+                    foreach ($organization->users as $recipient) { 
+                        if($recipient->profile->phone && $recipient->profile->sms_allow){
+                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                            $target = $recipient->profile->phone;
+                            $sms = new \common\components\QTSMS();
+                            $sms->post_message($text, $target); 
+                        }
+                    }    
+                    }
                     $relation_supp_rest->update();
                     $message = 'Сохранено';
+                    
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
             }

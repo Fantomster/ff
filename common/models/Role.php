@@ -44,6 +44,18 @@ class Role extends \amnah\yii2\user\models\Role {
      * @var int f-keeper observer role
      */
     const ROLE_FKEEPER_OBSERVER = 8;
+    /**
+     * @var int franchisee owner role
+     */
+    const ROLE_FRANCHISEE_OWNER = 9;
+    /**
+     * @var int franchisee operator role
+     */
+    const ROLE_FRANCHISEE_OPERATOR = 10;
+    /**
+     * @var int franchisee accountant role
+     */
+    const ROLE_FRANCHISEE_ACCOUNTANT = 11;
     
     
     public static function getManagerRole($organization_type) {

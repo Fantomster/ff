@@ -35,7 +35,7 @@ class CronController extends Controller {
         $base = CatalogBaseGoods::find()
                 //->select('catalog_base_goods.*')
                 ->joinWith('whiteList')
-                ->where(['market_place' => 1,'deleted'=>0])
+                //->where(['market_place' => 1,'deleted'=>0])
                 ->andWhere('category_id is not null')
                 ->andWhere(['in','es_status',[1,2]])
                 ->andWhere('organization_id is not null')
@@ -58,7 +58,7 @@ class CronController extends Controller {
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
 
-                if($catalogBaseGoods->es_status == 1){
+                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1){
 
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
 
@@ -100,8 +100,7 @@ class CronController extends Controller {
 
                         }
                 }
-                if($catalogBaseGoods->es_status == 2){
-
+                if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0){
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
                                 $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
                                 $es_product->delete();
@@ -116,10 +115,16 @@ class CronController extends Controller {
     // этот крон отрабатывается ночью с 00:00 по 05:00, каждые 10 минут
     // 0/10 00-05 * * * php yii cron/mass-update-collection
     public function actionMassUpdateCollection() {
-        if(CatalogBaseGoods::find()->where('es_status is not null')->exists()){
-            if(CatalogBaseGoods::find()->where(['es_status' => '3'])->exists()){
-               $products = CatalogBaseGoods::find()->where(['es_status' => '3'])->limit(1000)->all();
-               foreach($products as $catalogBaseGoods){
+        $base = CatalogBaseGoods::find()
+                //->select('catalog_base_goods.*')
+                ->joinWith('whiteList')
+                //->where(['market_place' => 1,'deleted'=>0])
+                ->andWhere('category_id is not null')
+                ->andWhere(['in','es_status',[3,4]])
+                ->andWhere('organization_id is not null')
+                ->limit(500)
+                ->all();
+        foreach($base as $catalogBaseGoods){
                 $product_id = $catalogBaseGoods->id;
                 $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
                 $product_name = $catalogBaseGoods->product; 
@@ -132,62 +137,52 @@ class CronController extends Controller {
                 $product_category_sub_name = $catalogBaseGoods->category->name;
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
-                
-                if(\common\models\ES\Product::find()->where(['product_id' => $catalogBaseGoods->id])->exists()){
-                $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
-                $es_product->attributes = [
-                    "product_id" => $product_id,
-                    "product_image" => $product_image,
-                    "product_name"  => $product_name,
-                    "product_supp_id"  => $product_supp_id,
-                    "product_supp_name"  => $product_supp_name,
-                    "product_price"  => $product_price,
-                    "product_category_id" => $product_category_id,
-                    "product_category_name" => $product_category_name,
-                    "product_category_sub_id" => $product_category_sub_id,
-                    "product_category_sub_name" => $product_category_sub_name,
-                    "product_show_price" => $product_show_price,
-                    "product_created_at"  => $product_created_at
-                ];
-                $es_product->save();
-                CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);
-                }else{
-                $es_product = new \common\models\ES\Product();
-                $es_product->attributes = [
-                    "product_id" => $product_id,
-                    "product_image" => $product_image,
-                    "product_name"  => $product_name,
-                    "product_supp_id"  => $product_supp_id,
-                    "product_supp_name"  => $product_supp_name,
-                    "product_price"  => $product_price,
-                    "product_category_id" => $product_category_id,
-                    "product_category_name" => $product_category_name,
-                    "product_category_sub_id" => $product_category_sub_id,
-                    "product_category_sub_name" => $product_category_sub_name,
-                    "product_show_price" => $product_show_price,
-                    "product_created_at"  => $product_created_at
-                ];
-                $es_product->save();
-                CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);    
-                } 
-               }
-               
-               //$url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
-               //$res = shell_exec($url);
-            }
-            if(CatalogBaseGoods::find()->where(['es_status' => '4'])->exists()){
-               $products = CatalogBaseGoods::find()->where(['es_status' => '4'])->limit(1000)->all();
-               foreach($products as $catalogBaseGoods){
-                    if(\common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->exists()){
-                      $es_product = \common\models\ES\Product::find()->where(['product_id'=>$catalogBaseGoods->id])->one();
-                      $es_product->delete();  
-                      CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $catalogBaseGoods->id]);
+
+                if($catalogBaseGoods->es_status == 3 && $catalogBaseGoods->market_place == 1){
+                    if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
+                        $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
+                        $es_product->attributes = [
+                        "product_id" => $product_id,
+                        "product_image" => $product_image,
+                        "product_name"  => $product_name,
+                        "product_supp_id"  => $product_supp_id,
+                        "product_supp_name"  => $product_supp_name,
+                        "product_price"  => $product_price,
+                        "product_category_id" => $product_category_id,
+                        "product_category_name" => $product_category_name,
+                        "product_category_sub_id" => $product_category_sub_id,
+                        "product_category_sub_name" => $product_category_sub_name,
+                        "product_show_price" => $product_show_price,
+                        "product_created_at"  => $product_created_at
+                                ];
+                        $es_product->save();
+                    }else{
+                        $es_product = new \common\models\ES\Product();
+                        $es_product->attributes = [
+                        "product_id" => $product_id,
+                        "product_image" => $product_image,
+                        "product_name"  => $product_name,
+                        "product_supp_id"  => $product_supp_id,
+                        "product_supp_name"  => $product_supp_name,
+                        "product_price"  => $product_price,
+                        "product_category_id" => $product_category_id,
+                        "product_category_name" => $product_category_name,
+                        "product_category_sub_id" => $product_category_sub_id,
+                        "product_category_sub_name" => $product_category_sub_name,
+                        "product_show_price" => $product_show_price,
+                        "product_created_at"  => $product_created_at
+                                ];
+                        $es_product->save();
+
                     }
-               } 
-               
-               $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_refresh\'';
-               $res = shell_exec($url);
-            }
+                }
+                if($catalogBaseGoods->es_status == 4 || $catalogBaseGoods->market_place == 0){
+                        if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
+                                $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
+                                $es_product->delete();
+                        }
+                }
+                CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $product_id]);
         }
     }
     public function actionUpdateSuppliers() {
@@ -238,14 +233,11 @@ class CronController extends Controller {
                     $es_product->delete();
                 }
             }
-            Yii::$app->db->createCommand("update organization set es_status = 1 where id = " . $supplier->organization->id);
+            Yii::$app->db->createCommand("update organization set es_status = 0 where id = " . $supplier->organization->id);
         }
        
     }
-    public function actionMassUpdateSuppliers() {
-        /*$suppliers_array = Yii::$app->db->createCommand("SELECT * from organization
-        join (SELECT DISTINCT `supp_org_id` FROM `catalog_base_goods` WHERE (`market_place`=1) AND (`deleted`=0))tb
-        on (id = tb.supp_org_id)")->queryAll();*/
+    /*public function actionMassUpdateSuppliers() {
         $suppliers = CatalogBaseGoods::find()
                 ->select('supp_org_id')
                 ->where(['market_place'=>CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>CatalogBaseGoods::DELETED_OFF])
@@ -281,5 +273,5 @@ class CronController extends Controller {
              $es_supplier->save();   
             }
         }
-    }
+    }*/
 }

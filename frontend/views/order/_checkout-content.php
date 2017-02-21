@@ -41,7 +41,7 @@ echo GridView::widget([
                                 'max' => PHP_INT_MAX,
                                 'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
                                 'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
-                                'forcestepdivisibility' => (isset($data['units']) && ($data['units'])) ? 'floor' : 'none',
+                                'forcestepdivisibility' => (isset($data['units']) && ($data['units'] && (floor($data['units']) == $data['units']))) ? 'floor' : 'none',
                                 'buttonup_class' => 'btn btn-default',
                                 'buttondown_class' => 'btn btn-default',
                                 'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',

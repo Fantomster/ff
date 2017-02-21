@@ -29,6 +29,7 @@ use Imagine\Image\ManipulatorInterface;
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
+ * @property WhiteList $whiteList
  * @property User $users
  * @property OrderChat $unreadMessages
  * @property OrderChat $unreadSystem
@@ -38,6 +39,8 @@ class Organization extends \yii\db\ActiveRecord {
 
     const TYPE_RESTAURANT = 1;
     const TYPE_SUPPLIER = 2;
+    const TYPE_FRANCHISEE = 3;
+    
     const STEP_OK = 0;
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only
@@ -448,7 +451,11 @@ class Organization extends \yii\db\ActiveRecord {
     public function markViewed($orderId) {
         return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id' => $this->id]);
     }
-
+    
+    public function getWhiteList()
+    {
+        return $this->hasOne(WhiteList::className(), ['organization_id' => 'id']);
+    }
     /**
      * @return string url to avatar image
      */

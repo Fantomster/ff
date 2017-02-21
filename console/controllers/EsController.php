@@ -225,6 +225,10 @@ class EsController extends Controller
     
     }
     public function actionTest(){
-        echo Yii::$app->elasticsearch->nodes[0]['http_address']."\n";
+        $target = '79057446157';
+        $text = 'Тестовое сообщение';
+
+        $sms = new \common\components\QTSMS();
+        $sms->post_message($text, $target);
     }
 }

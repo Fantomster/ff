@@ -127,13 +127,13 @@ class CronController extends Controller {
                 ->all();
         foreach($suppliers as $supplier){
             $rating = 0;
-            if($suppliers->partnership){$rating = $rating + 16;}
-            if($suppliers->picture){$rating = $rating + 5;} 
-            if($suppliers->contact_name){$rating = $rating + 2;} 
-            if($suppliers->phone){$rating = $rating + 2;} 
-            if($suppliers->email){$rating = $rating + 2;} 
-            if($suppliers->address){$rating = $rating + 2;} 
-            if($suppliers->about){$rating = $rating + 2;}
+            if($supplier->partnership){$rating = $rating + 16;}
+            if($supplier->picture){$rating = $rating + 5;} 
+            if($supplier->contact_name){$rating = $rating + 2;} 
+            if($supplier->phone){$rating = $rating + 2;} 
+            if($supplier->email){$rating = $rating + 2;} 
+            if($supplier->address){$rating = $rating + 2;} 
+            if($supplier->about){$rating = $rating + 2;}
             
             if($supplier->es_status == Organization::ES_UPDATED){
                 if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){

@@ -27,7 +27,7 @@ $this->title = 'F-MARKET главная';
                         <div class="Fr-star-bg"></div>
                     </div>
                 </div>
-                <?=empty($row->whiteList->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
+                <?=empty($row->vendor->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
                 <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
                 <img class="product-image wow animated fadeInUp" src="<?= $row->imageUrl ?>">
                 </a>
@@ -91,7 +91,7 @@ $this->title = 'F-MARKET главная';
                 <div class="Fr-star-bg"></div>
             </div>
          </div>
-          <?=empty($row->whiteList->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
+          <?=empty($row->vendor->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
           <a href="<?=Url::to(['/site/supplier', 'id' => $row->id]);?>">
             <img class="supplier-image  animated fadeInUp" src="<?= empty($row->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $row->pictureUrl ?>">
           </a>

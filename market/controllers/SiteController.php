@@ -22,7 +22,6 @@ use common\models\CatalogGoods;
 use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
-use common\models\WhiteList;
 use common\components\AccessRule;
 use yii\helpers\Url;
 use yii\helpers\Json;

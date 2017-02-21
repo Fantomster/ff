@@ -166,10 +166,10 @@ class CronController extends Controller {
                     . "es_status = ".Organization::ES_INACTIVE.","
                     . "rating = ".$rating." "
                     . "where id = " . $supplier->id);
-            if($suppliers->white_list){
+            if($supplier->white_list){
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
                     . "es_status = ".CatalogBaseGoods::ES_UPDATE.", "
-                    . "where supp_org_id = " . $suppliers->id);
+                    . "where supp_org_id = " . $supplier->id);
             }
         }
        

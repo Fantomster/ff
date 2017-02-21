@@ -34,6 +34,8 @@ use Imagine\Image\ManipulatorInterface;
  * @property OrderChat $unreadMessages
  * @property OrderChat $unreadSystem
  * @property string $pictureUrl
+ * @property RatingStars $ratingStars
+ * @property RatingPercent $ratingPercent
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -54,6 +56,8 @@ class Organization extends \yii\db\ActiveRecord {
     const ES_INACTIVE = 0;
     const ES_ACTIVE = 1;
     const ES_UPDATED = 2;
+    
+    const MAX_RATING = 31;
     
     public $resourceCategory = 'org-picture';
 
@@ -128,7 +132,27 @@ class Organization extends \yii\db\ActiveRecord {
             'picture' => 'Аватар',
         ];
     }
-
+    public function beforeSave($insert)
+    {
+    if (parent::beforeSave($insert)) { 
+            if($this->OldAttributes['type_id'] == self::TYPE_SUPPLIER){
+                (int)$rating = 0; 
+                if($this->whiteList->partnership){$rating = $rating + 16;}
+                if($this->OldAttributes['picture'] || $this->picture){
+                   $rating = $rating + 5; 
+                } 
+                if($this->OldAttributes['contact_name']){$rating = $rating + 2;} 
+                if($this->OldAttributes['phone']){$rating = $rating + 2;} 
+                if($this->OldAttributes['email']){$rating = $rating + 2;} 
+                if($this->OldAttributes['address']){$rating = $rating + 2;} 
+                if($this->OldAttributes['about']){$rating = $rating + 2;} 
+                $this->rating = $rating;
+               
+            }
+            return true;
+        }
+        return false;
+    }
     public static function getOrganization($id) {
         $getOrganization = Organization::find()
                         ->where(['id' => $id])->one();
@@ -506,5 +530,10 @@ class Organization extends \yii\db\ActiveRecord {
                         ->groupBy(['category_id'])
                         ->count();
     }
-
+    public function getRatingStars() {
+        return number_format($this->rating / (self::MAX_RATING/5),1);
+    }
+    public function getRatingPercent() {
+        return number_format((($this->rating / (self::MAX_RATING/5))/5*100),1);
+    }
 }

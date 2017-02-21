@@ -56,8 +56,8 @@ class Organization extends \yii\db\ActiveRecord {
     const DEFAULT_RESTAURANT_AVATAR = '/images/restaurant-noavatar.gif';
     
     const ES_INACTIVE = 0;
-    const ES_ACTIVE = 1;
-    const ES_UPDATED = 2;
+    const ES_UPDATED = 1;
+    const ES_DELETED = 2;
     
     const MAX_RATING = 31;
     
@@ -541,6 +541,6 @@ class Organization extends \yii\db\ActiveRecord {
         return number_format($this->rating / (self::MAX_RATING/5),1);
     }
     public function getRatingPercent() {
-        return number_format((($this->rating / (self::MAX_RATING/5))/5*100),1);
+        return(($this->rating / (self::MAX_RATING/5))/5*100);
     }
 }

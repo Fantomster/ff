@@ -88,7 +88,8 @@ class EsController extends Controller
                         "product_category_name" : {"type" : "string"},
                         "product_category_sub_name" : {"type" : "string"},
                         "product_created_at" : {"type" : "string"},
-                        "product_show_price" : {"type" : "long"}
+                        "product_show_price" : {"type" : "long"},
+                        "product_rating" : {"type" : "long"}
                 }
             }
     }\'
@@ -126,7 +127,8 @@ class EsController extends Controller
                             "analyzer" : "ru",
                             "term_vector" : "with_positions_offsets"
                         },
-                        "supplier_image" : {"type" : "string"}
+                        "supplier_image" : {"type" : "string"},
+                        "supplier_rating" : {"type" : "long"}
                 }
             }
     }\'
@@ -176,6 +178,7 @@ class EsController extends Controller
         $product_category_sub_name = $name->category->name;
         $product_created_at = $name->created_at;
         $product_show_price = $name->mp_show_price;
+        $product_rating = $name->rating;
         $product = new \common\models\ES\Product();
         $product->attributes = [
             "product_id" => $product_id,
@@ -190,6 +193,7 @@ class EsController extends Controller
             "product_category_sub_name" => $product_category_sub_name,
             "product_created_at"  => $product_created_at,
             "product_show_price" => $product_show_price,
+            "product_rating" => $product_rating,
         ];
         $product->save();
         \common\models\CatalogBaseGoods::updateAll(['es_status' => 0], ['id' => $name->id]);
@@ -209,11 +213,13 @@ class EsController extends Controller
             $supplier_id = $name['id'];
             $supplier_image = '';
             $supplier_name = $name['name'];
+            $supplier_rating = $name['rating'];
             $suppliers = new \common\models\ES\Supplier();
             $suppliers->attributes = [
                 "supplier_id" => $supplier_id,
                 "supplier_image" => $supplier_image,
-                "supplier_name" => $supplier_name
+                "supplier_name" => $supplier_name,
+                "supplier_rating" => $supplier_rating
             ];
             $suppliers->save();
         }

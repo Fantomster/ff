@@ -33,14 +33,10 @@ class CronController extends Controller {
     //обновление одного продукта (крон запускается каждые 2 минуты)
     public function actionUpdateCollection() {
         $base = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
                 ->andWhere('category_id is not null')
                 ->andWhere(['in','es_status',[1,2]])
-                ->andWhere('organization_id is not null')
                 ->limit(500)
                 ->all();
-        //var_dump($base->catalogBaseGoods);
-        //foreach($base as $catalogBaseGoods){var_dump($catalogBaseGoods->whiteList->organization_id);}
         
         foreach($base as $catalogBaseGoods){
                 $product_id = $catalogBaseGoods->id;
@@ -57,8 +53,8 @@ class CronController extends Controller {
                 $product_created_at = $catalogBaseGoods->created_at;
                 
                 $rating = $catalogBaseGoods->vendor->rating;
-                if(!empty($product_image)){$rating = $rating + 5;}
-                if(!empty($product_show_price)){$rating = $rating + 5;}
+                if($product_image){$rating = $rating + 5;}
+                if($product_show_price){$rating = $rating + 5;}
                 
                 
                 if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1){
@@ -78,7 +74,8 @@ class CronController extends Controller {
                                 "product_category_sub_id" => $product_category_sub_id,
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
-                                "product_created_at"  => $product_created_at
+                                "product_created_at"  => $product_created_at,
+                                "product_rating"  => $rating   
                                         ];
                                 $es_product->save();
 
@@ -97,7 +94,8 @@ class CronController extends Controller {
                                 "product_category_sub_id" => $product_category_sub_id,
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
-                                "product_created_at"  => $product_created_at
+                                "product_created_at"  => $product_created_at,
+                                "product_rating"  => $rating
                                         ];
                                         $es_product->save();
 
@@ -112,8 +110,8 @@ class CronController extends Controller {
             
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
                     . "es_status = 0, "
-                    . "rating = ".$rating." "
-                    . "where id = " . $product_id);
+                    . "rating = " . $rating . " "
+                    . "where id = " . $product_id)->execute();
         }
         
     }
@@ -122,9 +120,8 @@ class CronController extends Controller {
         $suppliers = Organization::find()
                 ->where(['type_id'=>  Organization::TYPE_SUPPLIER])
                 ->andWhere(['in','es_status',[
-                    Organization::ES_ACTIVE,
-                    Organization::ES_INACTIVE,
-                    Organization::ES_UPDATED
+                    Organization::ES_UPDATED,
+                    Organization::ES_DELETED
                     ]])
                 ->limit(200)
                 ->all();
@@ -138,17 +135,6 @@ class CronController extends Controller {
             if($suppliers->address){$rating = $rating + 2;} 
             if($suppliers->about){$rating = $rating + 2;}
             
-            if($supplier->es_status == Organization::ES_ACTIVE){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
-                    $es_supplier = new \common\models\ES\Supplier();
-                    $es_supplier->attributes = [
-                           "supplier_id" => $supplier->id,
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
-                    ];
-                    $es_supplier->save();
-                }
-            }
             if($supplier->es_status == Organization::ES_UPDATED){
                 if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
                     $es_supplier = new \common\models\ES\Supplier();
@@ -156,6 +142,7 @@ class CronController extends Controller {
                            "supplier_id" => $supplier->id,
                            "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
                            "supplier_name"  => $supplier->name,
+                           "supplier_rating"  => $rating,
                     ];
                     $es_supplier->save();
                 }
@@ -164,23 +151,26 @@ class CronController extends Controller {
                     $es_supplier->attributes = [
                            "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
                            "supplier_name"  => $supplier->name,
+                           "supplier_rating"  => $rating,
                     ];
                     $es_supplier->save();  
                 }
             }
-            if($supplier->es_status == Organization::ES_INACTIVE){
+            if($supplier->es_status == Organization::ES_DELETED){
                 if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
                     $es_product = \common\models\ES\Supplier::find()->where(['supplier_id'=>$product_id])->one();
                     $es_product->delete();
                 }
             }
             Yii::$app->db->createCommand("update organization set "
-                    . "es_status = 0,"
+                    . "es_status = ".Organization::ES_INACTIVE.","
                     . "rating = ".$rating." "
                     . "where id = " . $supplier->id);
+            if($suppliers->white_list){
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
                     . "es_status = ".CatalogBaseGoods::ES_UPDATE.", "
                     . "where supp_org_id = " . $suppliers->id);
+            }
         }
        
     }

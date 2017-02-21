@@ -553,21 +553,21 @@ class VendorController extends DefaultController {
                     $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
                     $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
-                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); 
+                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row));  //Комментарий
                     if (!empty($row_article && $row_product && $row_price && $row_ed)) {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
                         }
                         if (in_array($row_article, $arr)) {
-                            $sql = "update {{%catalog_base_goods}} set "
+                           $sql = "update {{%catalog_base_goods}} set "
                                     . "article=:article,"
                                     . "product=:product,"
                                     . "units=:units,"
                                     . "price=:price,"
                                     . "ed=:ed,"
                                     . "note=:note,"
-                                    . "es_status=3"
-                                    . " where article='{$row_article}' and cat_id=$id";
+                                    . "es_status=1"
+                                    . " where cat_id=" . $id . " and article='" . $row_article . "'";
                             $command = \Yii::$app->db->createCommand($sql);
                             $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
                             $command->bindParam(":product", $row_product, \PDO::PARAM_STR);

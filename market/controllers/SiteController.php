@@ -669,7 +669,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere('category_id is not null')
+                ->andWhere(['category_id' => $id])
                 ->andWhere($addwhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC]) 
                 ->limit(12)
@@ -681,7 +681,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere('category_id is not null')
+                ->andWhere(['category_id' => $id])
                 ->andWhere($addwhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)

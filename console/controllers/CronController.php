@@ -169,7 +169,7 @@ class CronController extends Controller {
             if($supplier->white_list){
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
                     . "es_status = ".CatalogBaseGoods::ES_UPDATE.", "
-                    . "where supp_org_id = " . $suppliers->id);
+                    . "where supp_org_id = " . $supplier->id);
             }
         }
        

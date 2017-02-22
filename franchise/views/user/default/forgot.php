@@ -7,23 +7,12 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use nirvana\showloading\ShowLoadingAsset;
-
-ShowLoadingAsset::register($this);
-$this->registerJs(
-        '$("document").ready(function(){
-            $("#forgot-form").on("submit", function(e) {
-                $("#loader-show").showLoading();
-            });
-        });'
-);
-$this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
 
 $this->title = Yii::t('user', 'Forgot password');
 ?>
 <div class="login__block">
     <div class="login__inside">
-        <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-inner.png" alt=""/></a>
+        <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-fk-white.png" alt=""/></a>
         <div class="contact__form">
             <?php if ($flash = Yii::$app->session->getFlash('Forgot-success')): ?>
 

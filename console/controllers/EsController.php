@@ -161,6 +161,7 @@ class EsController extends Controller
     
     }
     public function actionTest(){
-        
+    $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_open\' ';
+    $res = shell_exec($url);
     }
 }

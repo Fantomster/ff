@@ -14,7 +14,7 @@ $this->title = Yii::t('user', 'Reset');
 ?>
 <div class="login__block">
     <div class="login__inside">
-        <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-inner.png" alt=""/></a>
+        <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-fk-white.png" alt=""/></a>
         <div class="contact__form">
     <?php if (!empty($success)): ?>
 

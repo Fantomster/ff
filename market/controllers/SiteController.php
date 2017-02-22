@@ -304,8 +304,9 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' => $search,
-                        //'analyzer' =>"ru",
-                        //'type' =>'phrase_prefix',
+                            'fuzziness' => 'AUTO'
+                           //'analyzer' =>"ru",
+                           //'type' =>'phrase_prefix',
                         // 'max_expansions' =>6
                         ]
                     ]
@@ -823,8 +824,9 @@ class SiteController extends Controller {
                         'match' => [
                             'supplier_name' => [
                                 'query' => $search,
-                                'analyzer' => 'ru',
-                                'type' => 'phrase'
+                                'fuzziness' => 'AUTO'
+                                //'analyzer' => 'ru',
+                                //'type' => 'phrase'
                             ]   
                         ]
                     ],
@@ -862,7 +864,7 @@ class SiteController extends Controller {
                               ]
                               ]) */
                             ->limit(4)->asArray()->all();
-            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->orderBy(['supplier_rating'=>SORT_DESC])
                             ->limit(4)->asArray()->all();
         }
 

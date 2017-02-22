@@ -531,6 +531,55 @@ class SiteController extends Controller {
             return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
         }
     }
+    public function actionAjaxSuppProductMore($num,$supp_org_id) {
+        if (\Yii::$app->user->isGuest) {
+            $addwhere = [];
+        } else {
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+            $addwhere = [];
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $relationSupplier = RelationSuppRest::find()
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->asArray()
+                        ->all();
+                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+            }
+        }
+        $cbgTable = CatalogBaseGoods::tableName();
+        $count = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'supp_org_id' => $supp_org_id,
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->andWhere($addwhere)
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                ->offset($num)
+                ->limit(6)
+                ->count();
+        if ($count > 0) {
+            $pr = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'supp_org_id' => $supp_org_id,
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->andWhere($addwhere)
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                ->offset($num)
+                ->limit(6)
+                ->all();
+            return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
+        }
+    }
     public function actionRestaurants() {
         $restaurants = Organization::find()
                 ->where([

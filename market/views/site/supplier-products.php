@@ -101,7 +101,7 @@ $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#product-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-product-loader",
+        url: "index.php?r=site/ajax-supp-product-more",
         type: "GET",
         data: {"num": num, "supp_org_id":$id},
         beforeSend: function() {
@@ -127,7 +127,7 @@ $('#product-more').on("click", function (e) {
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-product-more",
+      url: "index.php?r=site/ajax-supp-product-more",
       type: "GET",
       data: {"num": num, "supp_org_id":$id},
       cache: false,

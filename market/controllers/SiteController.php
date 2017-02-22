@@ -217,7 +217,7 @@ class SiteController extends Controller {
                         ->limit(10000)->count();
         if (!empty($count)) {
             $products = \common\models\ES\Product::find()->query($params)
-                            ->orderBy('product_rating')->limit(12)->all();
+                            ->orderBy(['product_rating'=>SORT_DESC])->limit(12)->all();
             return $this->render('/site/search-products', compact('count', 'products', 'search'));
         } else {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
@@ -380,7 +380,7 @@ class SiteController extends Controller {
 
         if ($count > 0) {
             $sp = \common\models\ES\Supplier::find()->query($params)
-                    ->orderBy(['product_rating'=>SORT_DESC])
+                    ->orderBy(['supplier_rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(12)
                     ->all();
@@ -466,7 +466,6 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list' => Organization::WHITE_LIST_ON
                         ])
-                ->andWhere($addwhere)
                 ->one();
         if ($vendor && !$relationSupplier) {
             return $this->render('/site/supplier', compact('vendor'));
@@ -853,7 +852,7 @@ class SiteController extends Controller {
 
             $search_categorys = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(1000)->asArray()->all();
-            $search_products = \common\models\ES\Product::find()->query($params_products)
+            $search_products = \common\models\ES\Product::find()->query($params_products)->orderBy(['product_rating'=>SORT_DESC])
                             /* ->highlight([
                               "pre_tags"  => "<em>",
                               "post_tags" => "</em>",

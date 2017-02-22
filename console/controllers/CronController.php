@@ -101,12 +101,16 @@ class CronController extends Controller {
                                 $es_product->save();
 
                         }
-                }
-                if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0 || $catalogBaseGoods->deleted == 1){
+                }else{
+                if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
+                    $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
+                    $es_product->delete();
+                } 
+                /*if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0 || $catalogBaseGoods->deleted == 1){
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
                                 $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
                                 $es_product->delete();
-                        }
+                        }*/
                 }
             
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "

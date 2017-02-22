@@ -56,8 +56,8 @@ class CronController extends Controller {
                 $product_rating = $catalogBaseGoods->vendor->rating;
                 if(!empty($product_image)){$product_rating = $product_rating + 5;}
                 if(!empty($product_show_price)){$product_rating = $product_rating + 5;}
-                
-                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted = 0){
+               
+                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted == 0){
 
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
 
@@ -81,7 +81,6 @@ class CronController extends Controller {
                                 $es_product->save();
 
                         }else{
-
                                 $es_product = new \common\models\ES\Product();
                                 $es_product->attributes = [
                                 "product_id" => $product_id,
@@ -102,12 +101,16 @@ class CronController extends Controller {
                                 $es_product->save();
 
                         }
-                }
-                if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0 || $catalogBaseGoods->deleted = 1){
+                }else{
+                if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
+                    $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
+                    $es_product->delete();
+                } 
+                /*if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0 || $catalogBaseGoods->deleted == 1){
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
                                 $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
                                 $es_product->delete();
-                        }
+                        }*/
                 }
             
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "

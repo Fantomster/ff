@@ -35,7 +35,7 @@ class Product extends ActiveRecord
             "product_show_price",
             "product_created_at",
             "product_rating", 
-            "product_partnership",
+            "product_partnership"
           ];
       }
     public function rules() 

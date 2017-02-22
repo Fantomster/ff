@@ -26,6 +26,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $picture
  * @property string $es_status
  * @property boolean $partnership
+ * @property integer $rating
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
@@ -79,7 +80,7 @@ class Organization extends \yii\db\ActiveRecord {
             ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
             ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
             [['type_id', 'name'], 'required'],
-            [['type_id', 'step','es_status'], 'integer'],
+            [['id','type_id', 'step','es_status','rating'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],

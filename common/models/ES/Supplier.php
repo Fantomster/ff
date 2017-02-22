@@ -25,7 +25,7 @@ class Supplier extends ActiveRecord
             "supplier_name",
             "supplier_image",
             "supplier_rating", 
-            "supplier_partnership",
+            "supplier_partnership"
           ];
       }
     public function rules() 

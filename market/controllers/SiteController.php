@@ -77,24 +77,38 @@ class SiteController extends Controller {
      * @return string
      */
     public function actionIndex() {
+        $relationSuppliers = [];
         if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-            $addwhereOrg = [];
+            
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
-            $addwhereOrg = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                $relationSuppliers = RelationSuppRest::find()
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
-                $addwhereOrg = ['not in', 'id', $relationSupplier];
+                        ->all();  
             }
         }
+        $topSuppliers = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
+                ->andWhere(['not in', 'id', $relationSuppliers])
+                ->orderBy(['rating'=>SORT_DESC])
+                ->limit(6)
+                ->all();
+        
+        $topSuppliersCount = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
+                ->andWhere(['not in', 'id', $relationSuppliers])
+                ->count();
+        
         $topProducts = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
@@ -103,7 +117,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)
                 ->all();
@@ -115,43 +129,27 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
                 ->count();
-        $topSuppliers = Organization::find()
-                ->where([
-                    'type_id' => Organization::TYPE_SUPPLIER,
-                    'white_list'=>  Organization::WHITE_LIST_ON
-                    ])
-                ->andWhere($addwhereOrg)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->limit(6)
-                ->all();
-        $topSuppliersCount = Organization::find()
-                ->where([
-                    'type_id' => Organization::TYPE_SUPPLIER,
-                    'white_list'=>  Organization::WHITE_LIST_ON
-                    ])
-                ->andWhere($addwhereOrg)
-                ->count();
+
+        
         
         return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
     }
 
     public function actionProduct($id) {
+        $relationSupplier = [];
         if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
+            
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
-
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();   
             }
         }
 
@@ -161,7 +159,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSupplier])
                 ->one();
         if ($product) {
             return $this->render('/site/product', compact('product'));
@@ -391,19 +389,18 @@ class SiteController extends Controller {
     }
 
     public function actionSupplierProducts($id) {
+        $relationSupplier = [];
         if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
+            
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();   
             }
         }
         $productsCount = CatalogBaseGoods::find()
@@ -415,7 +412,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSupplier])
                 ->count();
         $cbgTable = CatalogBaseGoods::tableName();
         $products = CatalogBaseGoods::find()
@@ -427,7 +424,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSupplier])
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
@@ -440,37 +437,7 @@ class SiteController extends Controller {
         }
     }
 
-    public function actionAjaxProductLoader($num, $supp_org_id) {
-
-        if (Yii::$app->request->isAjax) {
-            $count = CatalogBaseGoods::find()
-                    ->where(['supp_org_id' => $supp_org_id, 
-                        'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                        'status' => CatalogBaseGoods::STATUS_ON,
-                        'deleted'=>CatalogBaseGoods::DELETED_OFF
-                        ])
-                    ->offset($num)
-                    ->limit(6)
-                    ->count();
-
-            if ($count > 0) {
-                $pr = CatalogBaseGoods::find()
-                ->joinWith('vendor')
-                ->where([
-                    'supp_org_id' => $supp_org_id,
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere('category_id is not null')
-                ->orderBy([CatalogBaseGoods::tableName().'.rating'=>SORT_DESC])
-                ->offset($num)
-                ->limit(6)
-                ->all();
-                return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
-            }
-        }
-    }
+    
 
     public function actionSupplier($id) {
         if (\Yii::$app->user->isGuest) {
@@ -525,7 +492,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
@@ -611,7 +578,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id])
                         ->asArray()
                         ->all();
@@ -652,7 +619,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id])
                         ->asArray()
                         ->all();
@@ -712,7 +679,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
@@ -749,7 +716,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
@@ -799,7 +766,7 @@ class SiteController extends Controller {
             $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->all();
                 $filterNotIn = [];

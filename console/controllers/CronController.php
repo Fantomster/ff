@@ -53,10 +53,9 @@ class CronController extends Controller {
                 $product_created_at = $catalogBaseGoods->created_at;
                 $product_partnership = $catalogBaseGoods->vendor->partnership; 
                 
-                $rating = $catalogBaseGoods->vendor->rating;
-                if($product_image){$rating = $rating + 5;}
-                if($product_show_price){$rating = $rating + 5;}
-                
+                $product_rating = $catalogBaseGoods->vendor->rating;
+                if(!empty($product_image)){$product_rating = $product_rating + 5;}
+                if(!empty($product_show_price)){$product_rating = $product_rating + 5;}
                 
                 if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted = 0){
 
@@ -76,7 +75,7 @@ class CronController extends Controller {
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
                                 "product_created_at"  => $product_created_at,
-                                "product_rating"  => $rating,
+                                "product_rating"  => $product_rating,
                                 "product_partnership"  => $product_partnership
                                         ];
                                 $es_product->save();
@@ -97,7 +96,7 @@ class CronController extends Controller {
                                 "product_category_sub_name" => $product_category_sub_name,
                                 "product_show_price" => $product_show_price,
                                 "product_created_at"  => $product_created_at,
-                                "product_rating"  => $rating,
+                                "product_rating"  => $product_rating,
                                 "product_partnership"  => $product_partnership
                                         ];
                                 $es_product->save();
@@ -113,7 +112,7 @@ class CronController extends Controller {
             
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
                     . "es_status = 0, "
-                    . "rating = " . $rating . " "
+                    . "rating = " . $product_rating . " "
                     . "where id = " . $product_id)->execute();
         }
         

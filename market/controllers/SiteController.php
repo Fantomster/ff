@@ -440,6 +440,13 @@ class SiteController extends Controller {
     
 
     public function actionSupplier($id) {
+        $vendor = Organization::find()
+                ->where([
+                    'organization.id' => $id, 
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list' => Organization::WHITE_LIST_ON
+                        ])
+                ->one();
         if (\Yii::$app->user->isGuest) {
             $relationSupplier = false;
             $addwhere = [];
@@ -460,13 +467,7 @@ class SiteController extends Controller {
                 $relationSupplier = false;
             }
         }
-        $vendor = Organization::find()
-                ->where([
-                    'organization.id' => $id, 
-                    'type_id' => Organization::TYPE_SUPPLIER,
-                    'white_list' => Organization::WHITE_LIST_ON
-                        ])
-                ->one();
+        
         if ($vendor && !$relationSupplier) {
             return $this->render('/site/supplier', compact('vendor'));
         } else {

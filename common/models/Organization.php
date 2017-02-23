@@ -37,6 +37,8 @@ use Imagine\Image\ManipulatorInterface;
  * @property RatingStars $ratingStars
  * @property RatingPercent $ratingPercent
  * @property BuisinessInfo $buisinessInfo
+ * @property FranchiseeAssociate $franchiseeAssotiate
+ * @property RelationSuppRest $assotiates
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -473,6 +475,11 @@ class Organization extends \yii\db\ActiveRecord {
     public function getBuisinessInfo()
     {
         return $this->hasOne(BuisinessInfo::className(), ['organization_id' => 'id']);
+    }
+    
+    public function getFranchiseeAssotiate()
+    {
+        return $this->hasOne(FranchiseeAssociate::className(), ['organization_id' => 'id']);
     }
     
     /**

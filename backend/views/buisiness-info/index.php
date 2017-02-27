@@ -36,8 +36,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                         'label' => 'Название организации',
                     ],
-                    'created_at',
-                    'updated_at',
+                    [
+                        'attribute' => 'created_at',
+                        'label' => 'Дата создания',
+                        'value' => function ($data) {
+                            return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                        }
+                    ],
+                    [
+                        'attribute' => 'updated_at',
+                        'label' => 'Последнее изменение',
+                        'value' => function ($data) {
+                            return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
+                        }
+                    ],
                     ['class' => 'yii\grid\ActionColumn'],
                 ],
             ]);

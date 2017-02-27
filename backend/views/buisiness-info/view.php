@@ -16,16 +16,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        <?=
+        Html::a('Delete', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
                 'method' => 'post',
             ],
-        ]) ?>
+        ])
+        ?>
     </p>
 
-    <?= DetailView::widget([
+    <?=
+    DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
@@ -37,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'raw',
                 'label' => 'Название',
-                'value' => Html::a($model->organization->name, ['organization/view', 'id'=>$model->organization_id]),
+                'value' => Html::a($model->organization->name, ['organization/view', 'id' => $model->organization_id]),
             ],
             [
                 'format' => 'raw',
@@ -45,9 +48,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => $model->organization->partnership ? 'Да' : 'Нет',
             ],
             'info:ntext',
-            'created_at',
-            'updated_at',
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата создания',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'label' => 'Последнее изменение',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
+                }
+            ],
         ],
-    ]) ?>
+    ])
+    ?>
 
 </div>

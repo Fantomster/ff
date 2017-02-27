@@ -84,7 +84,7 @@ $this->registerJs('
                                 'id' => 'searchString',
                                 'class' => 'form-control',
                                 'placeholder' => 'Поиск'])
-                            ->label('Статус', ['style' => 'color:#555'])
+                            ->label('Поиск', ['style' => 'color:#555'])
                     ?>
                 </div>
 
@@ -118,7 +118,7 @@ $this->registerJs('
                 <div class="col-md-12">
                     <?=
                     GridView::widget([
-                        'id' => 'orderHistory',
+                        'id' => 'vendorsList',
                         'dataProvider' => $dataProvider,
                         'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                         'filterModel' => $searchModel,

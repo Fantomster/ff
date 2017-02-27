@@ -3,7 +3,6 @@
 namespace franchise\controllers;
 
 use Yii;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
@@ -11,6 +10,7 @@ use common\models\Role;
 use common\models\User;
 use common\models\Profile;
 use common\models\Organization;
+use common\models\Order;
 use yii\web\Response;
 
 /**
@@ -63,9 +63,57 @@ class AppController extends DefaultController {
      * @return mixed
      */
     public function actionIndex() {
-        return $this->render('/site/under-construction');
+                
+        //---graph start
+        $query = "SELECT truncate(sum(total_price),1) as spent, year(created_at) as year, month(created_at) as month, day(created_at) as day "
+                . "FROM `order` LEFT JOIN `franchisee_associate` ON `order`.vendor_id = `franchisee_associate`.organization_id "
+                . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") "
+                . "and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " "
+                . "group by year(created_at), month(created_at), day(created_at)";
+        $command = Yii::$app->db->createCommand($query);
+        $ordersByDay = $command->queryAll();
+        $dayLabels = [];
+        $dayTurnover = [];
+        $total = 0;
+        foreach ($ordersByDay as $order) {
+            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayTurnover[] = $order["spent"];
+            $total += $order["spent"];
+        }
+        //---graph end
+
+        $params = Yii::$app->request->getQueryParams();
+        $searchModel = new \franchise\models\OrderSearch();
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
+
+        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover'));
     }
-    
+
+    /**
+     * Displays general settings
+     * 
+     * @return mixed
+     */
+    public function actionOrders() {
+        $searchModel = new \franchise\models\OrderSearch();
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = "01.02.2017";
+
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("OrderSearch")) {
+            $params['OrderSearch'] = Yii::$app->request->post("OrderSearch");
+        }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('orders', compact('searchModel', 'dataProvider'));
+        } else {
+            return $this->render('orders', compact('searchModel', 'dataProvider'));
+        }
+    }
+
     /**
      * Displays general settings
      * 
@@ -74,7 +122,7 @@ class AppController extends DefaultController {
     public function actionSettings() {
         return $this->render('/site/under-construction');
     }
-    
+
     /**
      * Displays franchise users list
      * 
@@ -94,7 +142,7 @@ class AppController extends DefaultController {
             return $this->render('employees', compact('searchModel', 'dataProvider'));
         }
     }
-    
+
     /*
      *  User validate
      */
@@ -155,7 +203,7 @@ class AppController extends DefaultController {
                 ->where([
                     'franchisee_user.franchisee_id' => $this->currentFranchisee->id,
                     'user.id' => $id
-                        ])
+                ])
                 ->one();
         $user->setScenario("manage");
         $profile = $user->profile;
@@ -189,12 +237,12 @@ class AppController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($post && isset($post['id'])) {
                 $user = $user = User::find()
-                ->joinWith("franchiseeUser")
-                ->where([
-                    'franchisee_user.franchisee_id' => $this->currentFranchisee->id,
-                    'user.id' => $post["id"],
+                        ->joinWith("franchiseeUser")
+                        ->where([
+                            'franchisee_user.franchisee_id' => $this->currentFranchisee->id,
+                            'user.id' => $post["id"],
                         ])
-                ->one();
+                        ->one();
                 $usersCount = count($this->currentFranchisee->franchiseeUsers);
                 if ($user->id == $this->currentUser->id) {
                     $message = 'Может воздержимся от удаления себя?';
@@ -213,6 +261,7 @@ class AppController extends DefaultController {
         $message = 'Не удалось удалить пользователя!';
         return $this->renderAjax('settings/_success', ['message' => $message]);
     }
+
     /**
      * Displays promotion
      * 
@@ -226,4 +275,5 @@ class AppController extends DefaultController {
         
         return $this->render('catalog');
     }
+
 }

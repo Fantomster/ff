@@ -65,7 +65,14 @@ $gridColumns = [
         'filter' => common\models\Order::getStatusList(),
     ],
     'total_price',
-    'created_at',
+    [
+        'attribute' => 'created_at',
+        'label' => 'Дата заказа',
+        'value' => function ($data) {
+            return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+        }
+    ],
+//    'created_at',
         // 'updated_at',
 //             'requested_delivery',
 //             'actual_delivery',

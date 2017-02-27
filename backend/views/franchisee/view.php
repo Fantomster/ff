@@ -16,17 +16,20 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= ''
+        <?=
+        ''
 //        Html::a('Delete', ['delete', 'id' => $model->id], [
 //            'class' => 'btn btn-danger',
 //            'data' => [
 //                'confirm' => 'Are you sure you want to delete this item?',
 //                'method' => 'post',
 //            ],
-//        ]) ?>
+//        ]) 
+        ?>
     </p>
 
-    <?= DetailView::widget([
+    <?=
+    DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
@@ -43,14 +46,27 @@ $this->params['breadcrumbs'][] = $this->title;
             'correspondent_account',
             'checking_account',
             'info:ntext',
-            'created_at',
-            'updated_at',
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата создания',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'label' => 'Последнее изменение',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
+                }
+            ],
             [
                 'format' => 'raw',
                 'label' => 'Пользователи',
-                'value' => Html::a('Список', ['franchisee/users', 'id'=>$model->id])
+                'value' => Html::a('Список', ['franchisee/users', 'id' => $model->id])
             ],
         ],
-    ]) ?>
+    ])
+    ?>
 
 </div>

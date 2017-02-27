@@ -314,7 +314,7 @@ class StatisticsController extends Controller {
             $dayCheque[] = $order["cheque"];
         }
         
-        $query = "SELECT truncate(sum(total_price)/count(distinct client_id),1) as spent,truncate(sum(total_price)/count(id),1) as cheque, year(created_at) as year, month(created_at) as month FROM `f-keeper`.order "
+        $query = "SELECT truncate(sum(total_price),1) as total_month, truncate(sum(total_price)/count(distinct client_id),1) as spent,truncate(sum(total_price)/count(id),1) as cheque, year(created_at) as year, month(created_at) as month FROM `f-keeper`.order "
                 . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and client_id not in ".$this->blacklist." "
                 . "group by year(created_at), month(created_at)";
         $command = Yii::$app->db->createCommand($query);
@@ -322,15 +322,18 @@ class StatisticsController extends Controller {
         $monthLabels = [];
         $averageSpent = [];
         $averageCheque = [];
+        $totalSpent = [];
         foreach ($money as $month) {
             $monthLabels[] = date('M', strtotime("2000-$month[month]-01")) . " " . $month["year"];
             $averageSpent[] = $month["spent"];
             $averageCheque[] = $month["cheque"];
+            $totalSpent[] = $month["total_month"];
         }
         
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('turnover', compact(
                     'total',
+                    'totalSpent',
                     'monthLabels',
                     'averageSpent',
                     'averageCheque',
@@ -343,6 +346,7 @@ class StatisticsController extends Controller {
         } else {
             return $this->render('turnover', compact(
                     'total',
+                    'totalSpent',
                     'monthLabels',
                     'averageSpent',
                     'averageCheque',

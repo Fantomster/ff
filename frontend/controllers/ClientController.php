@@ -1013,7 +1013,7 @@ class ClientController extends DefaultController {
                 'units' => $catalog_elem->baseProduct->units,
                 'ed' => $catalog_elem->baseProduct->ed,
                 'price' => $catalog_elem->baseProduct->price,
-                'note' => $catalog_elem->goodsNotes->note?$catalog_elem->goodsNotes->note:''
+                'note' => isset($catalog_elem->goodsNotes->note)?$catalog_elem->goodsNotes->note:''
                     ]);
         }
         $array = json_encode($array, JSON_UNESCAPED_UNICODE);

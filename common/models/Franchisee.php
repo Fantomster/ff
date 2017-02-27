@@ -27,13 +27,12 @@ use Yii;
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
  */
-class Franchisee extends \yii\db\ActiveRecord
-{
+class Franchisee extends \yii\db\ActiveRecord {
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'franchisee';
     }
 
@@ -54,8 +53,7 @@ class Franchisee extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['info'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
@@ -66,8 +64,7 @@ class Franchisee extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'info' => 'Поле для заметок',
@@ -91,23 +88,39 @@ class Franchisee extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFranchiseeAssociates()
-    {
+    public function getFranchiseeAssociates() {
         return $this->hasMany(FranchiseeAssociate::className(), ['franchisee_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFranchiseeUsers()
-    {
+    public function getFranchiseeUsers() {
         return $this->hasMany(FranchiseeUser::className(), ['franchisee_id' => 'id']);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getUsers() {
         return $this->hasMany(User::className(), ['id' => 'user_id'])->via('franchiseeUsers');
     }
+
+    public function getFirstOrganizationDate() {
+        $today = new \DateTime();
+        $result = $today->format('d.m.Y');
+
+        $firstOrg = Organization::find()
+                ->joinWith('franchiseeAssociate')
+                ->where(['franchisee_associate.franchisee_id' => $this->id])
+                ->orderBy(['organization.created_at' => SORT_ASC])
+                ->limit(1)
+                ->one();
+
+        if ($firstOrg) {
+            $result = $firstOrg->created_at;
+        }
+        return $result;
+    }
+
 }

@@ -13,20 +13,18 @@ use common\models\Organization;
  * @author sharaf
  */
 class VendorSearch extends Organization {
-    
-    public $clientCount;
-    public $orderCount;
-    public $orderSum;
+
+    public $searchString;
     public $date_from;
     public $date_to;
-    
+
     /**
      * @inheritdoc
      */
     public function rules() {
         return [
             [['id', 'type_id'], 'integer'],
-            [['name', 'clientCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to'], 'safe'],
+            [['name', 'clientCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'search_string'], 'safe'],
         ];
     }
 
@@ -46,47 +44,51 @@ class VendorSearch extends Organization {
      * @return ActiveDataProvider
      */
     public function search($params, $franchisee_id) {
-        $query = Organization::find();
-
-        $query->joinWith("franchiseeAssotiate");
-        $query->joinWith("assotiates");
-        $query->where(['type_id' => Organization::TYPE_SUPPLIER, 'franchisee_id' => $franchisee_id]);
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_ASC]],
-        ]);
-
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
+        $searchString = "%$this->searchString%";
 
-        $dataProvider->sort->attributes['clientCount'] = [
-            'asc' => ["clientCount" => SORT_ASC],
-            'desc' => ["clientCount" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['orderCount'] = [
-            'asc' => ["orderCount" => SORT_ASC],
-            'desc' => ["orderCount" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['orderSum'] = [
-            'asc' => ["orderSum" => SORT_ASC],
-            'desc' => ["orderSum" => SORT_DESC],
-        ];
+        $query = "SELECT org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
+                (select count(id) from relation_supp_rest where supp_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE()) as clientCount_prev30, 
+                count(ord.id) as orderCount,
+                (select count(id) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() ) as orderCount_prev30,
+                sum(ord.total_price) as orderSum,
+                (select sum(total_price) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() ) as orderSum_prev30,
+                org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
+                FROM `organization` AS org
+                LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id
+                left join `order` as ord on org.id=ord.vendor_id
+                WHERE fa.franchisee_id = $franchisee_id and org.type_id=2 and ord.status in (1,2,3,4) and org.created_at between :dateFrom and :dateTo
+                and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)
+                GROUP by ord.vendor_id";
 
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'created_at' => $this->created_at,
+        $count = Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $this->date_from, 'dateTo' => $this->date_to])->queryScalar();
+
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query,
+            'params' => [':searchString' => $searchString, ':dateFrom' => $this->date_from, 'dateTo' => $this->date_to],
+            'totalCount' => $count,
+            'pagination' => [
+                'pageSize' => 20,
+                'page' => isset($params['page']) ? ($params['page'] - 1) : 0,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'name',
+                    'clientCount',
+                    'orderCount',
+                    'orderSum',
+                    'created_at',
+                    'contact_name',
+                    'phone'
+                ],
+                'defaultOrder' => [
+                    'created_at' => SORT_ASC
+                ]
+            ],
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-                ->andFilterWhere(['like', 'phone', $this->phone])
-                ->andFilterWhere(['like', 'contact_name', $this->website]);
-        
         return $dataProvider;
     }
+
 }

@@ -746,13 +746,22 @@ class ClientController extends DefaultController {
     }
 
     public function actionEditCatalog($id) {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $supp_org_id = Catalog::find()->where(['id' => $id])->one()->supp_org_id;
         $catalog_id = $id;
-        $base_catalog_id = Catalog::find()->where(['supp_org_id' => $supp_org_id, 'type' => 1])->one()->id;
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $supp_org_id = Catalog::find()->where(['id' => $catalog_id])->one()->supp_org_id;
+        $supplier = Organization::find()->where(['id'=>$supp_org_id])->one();
+        
+        $catalog = CatalogGoods::find()->where(['cat_id' => $catalog_id])->all();
+        //var_dump(ArrayHelper::isIn('123689', ArrayHelper::getValue($catalog, 'base_goods_id')));
+        $array_base_goods_id = ArrayHelper::getColumn($catalog, 'base_goods_id');
+        $array_goods_id = ArrayHelper::getColumn($catalog, 'id');
+        
+        $base_catalog_id = Catalog::find()->where(['supp_org_id' => $supplier->id, 'type' => Catalog::BASE_CATALOG])->one()->id;
+        
         if (Yii::$app->request->isAjax && Yii::$app->request->post('catalog')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
+            
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             if ($arrCatalog === Array()) {
                     $result = ['success' => false, 'alert' => [
@@ -766,20 +775,44 @@ class ClientController extends DefaultController {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
                             'title' => 'Уведомление',
-                            'body' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                            'body' => 'Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами '
                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>']];
                     return $result;
                     exit;     
-                }
-            $query = "update " . CatalogBaseGoods::tableName() . " set deleted = " . CatalogBaseGoods::DELETED_ON . " where cat_id = $catalog_id and id > 1";
-                //\Yii::$app->db->createCommand($query)->execute();    
+                }   
             foreach ($arrCatalog as $arrCatalogs) {
+                $base_goods_id = trim($arrCatalogs['dataItem']['base_goods_id']);
+                $goods_id = trim($arrCatalogs['dataItem']['goods_id']);
                 $product = trim($arrCatalogs['dataItem']['product']);
-                $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
+                $article = trim($arrCatalogs['dataItem']['article']);
                 $units = trim($arrCatalogs['dataItem']['units']);
-                $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
-                $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
-                $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
+                $price = trim($arrCatalogs['dataItem']['price']);
+                $ed = trim($arrCatalogs['dataItem']['ed']);
+                $note = trim($arrCatalogs['dataItem']['note']);
+                if(
+                        !empty($base_goods_id) && 
+                        !ArrayHelper::isIn($base_goods_id,$array_base_goods_id)
+                  )
+                {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Ай ай ай как не хорошо!']];
+                    return $result;
+                    exit;
+                }
+                if(
+                        !empty($goods_id) && 
+                        !ArrayHelper::isIn($goods_id,$array_goods_id)
+                  )
+                {
+                    $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Ай ай ай как не хорошо!']];
+                    return $result;
+                    exit;
+                }
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
@@ -834,80 +867,91 @@ class ClientController extends DefaultController {
                     exit;
                 }
             }
+            
             $transaction = Yii::$app->db->beginTransaction();
             try {
-//                $sql = "delete gn " .
-//                        "from goods_notes gn " .
-//                        "inner join catalog_goods cg " .
-//                        "on gn.catalog_base_goods_id = cg.base_goods_id " .
-//                        "where cg.cat_id=$catalog_id";
-//                \Yii::$app->db->createCommand($sql)->execute();
-//                $sql = "delete cb " .
-//                        "from catalog_base_goods cb " .
-//                        "inner join catalog_goods c " .
-//                        "on cb.id=c.base_goods_id  " .
-//                        "where cb.supp_org_id=$supp_org_id and c.cat_id=$catalog_id";
-//                \Yii::$app->db->createCommand($sql)->execute();
-//                $sql = "delete from catalog_goods where cat_id=$catalog_id";
-                
-                //\Yii::$app->db->createCommand($sql)->execute();
+                $array_ids = [];
                 foreach ($arrCatalog as $arrCatalogs) {
+                    $base_goods_id = trim($arrCatalogs['dataItem']['base_goods_id']);
+                    $goods_id = trim($arrCatalogs['dataItem']['goods_id']);
                     $product = trim($arrCatalogs['dataItem']['product']);
                     $article = trim($arrCatalogs['dataItem']['article']);
                     $units = trim($arrCatalogs['dataItem']['units']);
                     $price = trim($arrCatalogs['dataItem']['price']);
                     $ed = trim($arrCatalogs['dataItem']['ed']);
                     $note = trim($arrCatalogs['dataItem']['note']);
-
-                    $sql = "insert into {{%catalog_base_goods}}" .
-                            "(`cat_id`,`supp_org_id`,`article`,`product`,"
-                            . "`units`,`price`,`ed`,`status`,`created_at`) VALUES ("
-                            . ":cat_id,"
-                            . $supp_org_id . ","
-                            . ":article,"
-                            . ":product,"
-                            . ":units,"
-                            . ":price,"
-                            . ":ed,"
-                            . CatalogBaseGoods::STATUS_ON . ","
-                            . "NOW())";
-                    $command = \Yii::$app->db->createCommand($sql);
-                    $command->bindParam(":cat_id", $base_catalog_id, \PDO::PARAM_INT);
-                    $command->bindParam(":article", $article, \PDO::PARAM_STR);
-                    $command->bindParam(":product", $product, \PDO::PARAM_STR);
-                    $command->bindParam(":units", $units);
-                    $command->bindParam(":price", $price);
-                    $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
-                    //$command->execute();
-                    $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
-
-                    $sql = "insert into {{%catalog_goods}}" .
-                            "(`cat_id`,`base_goods_id`,`price`,`created_at`) VALUES ("
-                            . ":cat_id,"
-                            . $lastInsert_base_goods_id . ","
-                            . ":price,"
-                            . "NOW())";
-                    $command = \Yii::$app->db->createCommand($sql);
-                    $command->bindParam(":cat_id", $catalog_id, \PDO::PARAM_INT);
-                    $command->bindParam(":price", $price);
-                    //$command->execute();
-
-                    if (!empty($note)) {
-                        $sql = "insert into " . GoodsNotes::tableName() .
-                                " (`rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES ("
-                                . $currentUser->organization_id . ","
-                                . $lastInsert_base_goods_id . ","
-                                . ":note,"
-                                . "NOW())";
-                        $command = \Yii::$app->db->createCommand($sql);
-                        $command->bindParam(":note", $note, \PDO::PARAM_STR);
-                        //$command->execute();
+                    
+                    if(!ArrayHelper::isIn($goods_id,$array_goods_id)){
+                        
+                        $CatalogBaseGoods = new CatalogBaseGoods();
+                        $CatalogBaseGoods->cat_id = $base_catalog_id;
+                        $CatalogBaseGoods->article = $article;
+                        $CatalogBaseGoods->product = $product;
+                        $CatalogBaseGoods->units = $units;
+                        $CatalogBaseGoods->price = $price;
+                        $CatalogBaseGoods->ed = $ed;
+                        $CatalogBaseGoods->save();
+                        
+                        $CatalogGoods = new CatalogGoods();
+                        $CatalogGoods->cat_id = $catalog_id;
+                        $CatalogGoods->base_goods_id = $CatalogBaseGoods->id;
+                        $CatalogGoods->price = $price;
+                        $CatalogGoods->save();
+                        
+                        if (!empty($note)) {
+                            $GoodsNotes = new GoodsNotes();  
+                            $GoodsNotes->rest_org_id = $currentUser->organization_id;
+                            $GoodsNotes->catalog_base_goods_id = $CatalogBaseGoods->id;
+                            $GoodsNotes->note = $note;
+                            $GoodsNotes->save();
+                        }    
+                    }else{
+                        $CatalogBaseGoods = CatalogBaseGoods::find()->where(['id'=>$base_goods_id])->one();
+                        $CatalogBaseGoods->article = $article;
+                        $CatalogBaseGoods->product = $product;
+                        $CatalogBaseGoods->units = $units;
+                        $CatalogBaseGoods->price = $price;
+                        $CatalogBaseGoods->ed = $ed;
+                        $CatalogBaseGoods->save();
+                        
+                        $CatalogGoods = CatalogGoods::find()->where(['id'=>$goods_id])->one();
+                        $CatalogGoods->price = $price;
+                        $CatalogGoods->save();
+                        
+                            if($GoodsNotes = GoodsNotes::find()->where([
+                                'rest_org_id'=>$currentUser->organization_id,
+                                'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                ])->exists()){
+                                $GoodsNotes = GoodsNotes::find()->where([
+                                'rest_org_id'=>$currentUser->organization_id,
+                                'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                ])->one();
+                                }else{
+                                $GoodsNotes = new GoodsNotes();  
+                                } 
+                            $GoodsNotes->rest_org_id = $currentUser->organization_id;
+                            $GoodsNotes->catalog_base_goods_id = $CatalogBaseGoods->id;
+                            $GoodsNotes->note = $note;
+                            $GoodsNotes->save();
+                    }
+                    
+                    if($base_goods_id){
+                       array_push($array_ids, $base_goods_id);
+                    }
+                    
+                }
+                $delete_ids = array_diff($array_base_goods_id, $array_ids);
+                if(!empty($delete_ids)){
+                    foreach($delete_ids as $delete_id){
+                        $CatalogBaseGoods = CatalogBaseGoods::find()->where(['id'=>$delete_id])->one();
+                        $CatalogBaseGoods->deleted = CatalogBaseGoods::DELETED_ON;
+                        $CatalogBaseGoods->save();
                     }
                 }
                 $transaction->commit();
                 $result = ['success' => false, 'alert' => [
                         'class' => 'success-fk',
-                        'title' => 'Сохранено',
+                        'title' => 'Каталог обновлен',
                         'body' => 'Каталог был успешно обновлен']];
                 return $result;
                 exit;
@@ -923,42 +967,29 @@ class ClientController extends DefaultController {
             //$message =  'Успех';   
             //return $this->renderAjax('suppliers/_success', ['message' => $message]);
         }
-        $sql = "SELECT "
-                . "catalog.id as catalog_id,"
-                . "catalog_base_goods.id as goods_base_id,"
-                . "article,"
-                . "product,"
-                . "units,"
-                . "ed,"
-                . "catalog_base_goods.price,"
-                . "goods_notes.note"
-                . " FROM `catalog` "
-                . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                . "LEFT JOIN goods_notes on catalog_base_goods.id = goods_notes.catalog_base_goods_id "
-                . "WHERE catalog.id = $id AND deleted=" . CatalogBaseGoods::DELETED_OFF;
-        $arr = \Yii::$app->db->createCommand($sql)->queryAll();
+        $catalog = CatalogGoods::find()
+                ->joinWith('baseProduct')
+                ->joinWith('notes')
+                ->where([
+                    CatalogGoods::tableName() . '.cat_id'=>$catalog_id,
+                    CatalogBaseGoods::tableName() . '.deleted'=>CatalogBaseGoods::DELETED_OFF
+                        ])
+                ->all();
         $array = [];
-        foreach ($arr as $arrs) {
-            $c_catalog_id = $arrs['catalog_id'];
-            $c_goods_base_id = $arrs['goods_base_id'];
-            $c_article = $arrs['article'];
-            $c_product = $arrs['product'];
-            $c_units = $arrs['units'];
-            $c_ed = $arrs['ed'];
-            $c_price = $arrs['price'];
-            $c_note = $arrs['note'];
+        foreach ($catalog as $catalog_elem) {
             array_push($array, [
-                'catalog_id' => $c_catalog_id,
-                'goods_base_id' => $c_goods_base_id,
-                'article' => $c_article,
-                'product' => $c_product,
-                'units' => $c_units,
-                'ed' => $c_ed,
-                'price' => $c_price,
-                'note' => $c_note]);
+                'catalog_id' => $catalog_elem->cat_id,
+                'goods_id' => $catalog_elem->id,
+                'base_goods_id' =>  $catalog_elem->base_goods_id,
+                'article' => $catalog_elem->baseProduct->article,
+                'product' => $catalog_elem->baseProduct->product,
+                'units' => $catalog_elem->baseProduct->units,
+                'ed' => $catalog_elem->baseProduct->ed,
+                'price' => $catalog_elem->baseProduct->price,
+                'note' => $catalog_elem->notes->note
+                    ]);
         }
-
+        $array = json_encode($array, JSON_UNESCAPED_UNICODE);
         return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array'));
     }
 
@@ -1272,6 +1303,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $organization = new Organization();
         $searchString = "";
         $where = "";
+        
         if (Yii::$app->request->isAjax) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
             empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";

@@ -146,11 +146,6 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
    fillHandle: false,
    minSpareCols: 0,
    minSpareRows: 0,
-   /*columnSorting: {
-    column: 0,
-    sortOrder: false   
-  },*/
-  //sortIndicator: true,
   rowHeaders: true,
   columns: [
     {data: 'article',readOnly: true},

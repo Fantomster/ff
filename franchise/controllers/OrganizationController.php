@@ -27,7 +27,32 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionClients() {
-        return $this->render("/site/under-construction");
+        $searchModel = new \franchise\models\ClientSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        $today = new \DateTime();
+
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+
+        if (Yii::$app->request->post("ClientSearch")) {
+            $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
+        }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('clients', compact('dataProvider', 'searchModel'));
+        } else {
+            return $this->render('clients', compact('dataProvider', 'searchModel'));
+        }
+    }
+
+    public function actionAjaxShowClient($id) {
+        $client = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->one();
+        return $this->renderAjax("_ajax-show-client", compact('client'));
     }
 
     /**
@@ -96,7 +121,7 @@ class OrganizationController extends DefaultController {
     public function actionAjaxShowVendor($id) {
         $vendor = Organization::find()
                 ->joinWith("franchiseeAssociate")
-                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id])
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
         return $this->renderAjax("_ajax-show-vendor", compact('vendor'));
     }

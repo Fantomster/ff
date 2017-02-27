@@ -24,7 +24,7 @@ class VendorSearch extends Organization {
     public function rules() {
         return [
             [['id', 'type_id'], 'integer'],
-            [['name', 'clientCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'search_string'], 'safe'],
+            [['name', 'clientCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'searchString'], 'safe'],
         ];
     }
 
@@ -41,12 +41,24 @@ class VendorSearch extends Organization {
      *
      * @param array $params
      *
-     * @return ActiveDataProvider
+     * @return SqlDataProvider
      */
     public function search($params, $franchisee_id) {
         $this->load($params);
 
-        $searchString = "%$this->searchString%";
+        $searchString = "%{$this->searchString}%";
+        $filter_date_from = strtotime($this->date_from);
+        $filter_date_to = strtotime($this->date_to);
+
+        $from = \DateTime::createFromFormat('d.m.Y', $this->date_from);
+        if ($from) {
+            $t1_f = $from->format('Y-m-d');
+        }
+        $to = \DateTime::createFromFormat('d.m.Y', $this->date_to);
+        if ($to) {
+            $to->add(new \DateInterval('P1D'));
+            $t2_f = $to->format('Y-m-d');
+        }
 
         $query = "SELECT org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
                 (select count(id) from relation_supp_rest where supp_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE()) as clientCount_prev30, 
@@ -62,11 +74,11 @@ class VendorSearch extends Organization {
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)
                 GROUP by ord.vendor_id";
 
-        $count = Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $this->date_from, 'dateTo' => $this->date_to])->queryScalar();
+        $count = Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryScalar();
 
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query,
-            'params' => [':searchString' => $searchString, ':dateFrom' => $this->date_from, 'dateTo' => $this->date_to],
+            'params' => [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f],
             'totalCount' => $count,
             'pagination' => [
                 'pageSize' => 20,

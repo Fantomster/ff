@@ -22,7 +22,7 @@
                                 'url' => '#', //['client/settings'],
                                 'options' => ['class' => "treeview hidden-xs"],
                                 'items' => [
-                                    ['label' => 'Общие', 'icon' => 'fa fa-circle-o', 'url' => ['app/settings']],
+                                    //['label' => 'Общие', 'icon' => 'fa fa-circle-o', 'url' => ['app/settings']],
                                     ['label' => 'Сотрудники', 'icon' => 'fa fa-circle-o', 'url' => ['app/users']],
                                 ]
                             ],

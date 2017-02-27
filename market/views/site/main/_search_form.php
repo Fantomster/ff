@@ -20,9 +20,7 @@ if(!empty($search_products_count)){ $i++;}
 if(!empty($search_suppliers_count)){ $i++;}
 ?>
 <div class="search-result-block <?php
-if(empty($i)){
-    
-}else{
+if($i > 0){
     if($i==1){echo "col-md-6";}
     if($i==2){echo "col-md-8";}
     if($i==3){echo "col-md-12";}

@@ -538,6 +538,6 @@ class Organization extends \yii\db\ActiveRecord {
     }
     
     public function getRatingPercent() {
-        return(($this->rating / (self::MAX_RATING/5))/5*100);
+        return (($this->rating / (self::MAX_RATING/5))/5*100);
     }
 }

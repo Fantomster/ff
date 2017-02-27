@@ -18,17 +18,27 @@ use yii\widgets\Pjax;
     <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
 </div>
 <?php
-$arr= json_encode($array, JSON_UNESCAPED_UNICODE);
+$arr= $array;
 $arr_count = count($array);
 $customJs = <<< JS
 var data = $arr;
 var container = document.getElementById('editCatalogSupplier');
 var save = document.getElementById('save-catalog-supplier'), hot, originalColWidths = [], colWidths = [];         
 hot = new Handsontable(container, {
+removeRowPlugin: true,
 data: JSON.parse(JSON.stringify(data)),
-colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
-colWidths: [40, 60, 40, 30, 40, 60],
+colHeaders : ['base_goods_id', 'goods_id', 'Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
+colWidths: [0, 0, 50, 60, 40, 30, 40, 60],
 columns: [
+        
+    {
+        data: 'base_goods_id',
+        copyPaste: false
+    },  
+    {
+        data: 'goods_id',
+        copyPaste: false
+    },
     {
         data: 'article'
     },
@@ -57,11 +67,24 @@ stretchH : 'all',
 minSpareRows: 1,
 Controller: true,
 tableClassName: ['table-hover']
-});  
+}); 
+colWidths[0] = 0.1; colWidths[1] = 0.1;
+        
+hot.updateSettings({colWidths: colWidths});
+function getRowsFromObjects(queryResult) {
+    rows = [];
+    for (var i = 0, l = queryResult.length; i < l; i++) {
+      //                        debugger
+      rows.push(queryResult[i].row);
+
+    }
+    console.log('rows', rows);
+    return rows;
+  }
 Handsontable.Dom.addEvent(save, 'click', function() {
   var dataTable = hot.getData(),i, item, dataItem, datas=[]; 
   var cleanedData = {};
-  var cols = ['article','product','units','price','ed','note'];
+  var cols = ['base_goods_id','goods_id','article','product','units','price','ed','note'];
     
     $.each(dataTable, function( rowKey, object) {
         if (!hot.isEmptyRow(rowKey)){

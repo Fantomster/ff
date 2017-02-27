@@ -73,7 +73,32 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionVendors() {
-        return $this->render("/site/under-construction");
+        $searchModel = new \franchise\models\VendorSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        $today = new \DateTime();
+
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+
+        if (Yii::$app->request->post("VendorSearch")) {
+            $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
+        }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('vendors', compact('dataProvider', 'searchModel'));
+        } else {
+            return $this->render('vendors', compact('dataProvider', 'searchModel'));
+        }
+    }
+    
+    public function actionAjaxShowVendor($id) {
+        $vendor = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id])
+                ->one();
+        return $this->renderAjax("_ajax-show-vendor", compact('vendor'));
     }
 
     /**

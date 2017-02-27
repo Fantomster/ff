@@ -9,6 +9,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
+use dosamigos\chartjs\ChartJs;
+
 ?>
 <section class="content-header">
     <h1>
@@ -28,7 +30,33 @@ use yii\widgets\Pjax;
                 </div>
                 <div class="box-body">
                     <div class="chart">
-                        <canvas id="lineChart" style="height: 383px; width: 760px;" height="250" width="760"></canvas>
+                        <?=
+                        ChartJs::widget([
+                            'type' => 'line',
+                            'options' => [
+                                'height' => 400,
+                                'width' => 800,
+                            ],
+                            'data' => [
+                                'labels' => $dayLabels,
+                                'datasets' => [
+                                    [
+                                        'label' => 'Все заказы',
+                                        'backgroundColor' => "rgba(0,0,255,0.2)",
+                                        'borderColor' => "rgba(0,0,255,1)",
+                                        'pointBackgroundColor' => "rgba(0,0,255,1)",
+                                        'pointBorderColor' => "#00f",
+                                        'pointHoverBackgroundColor' => "#00f",
+                                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                                        'data' => $dayTurnover,
+                                        'spanGaps' => true,
+                                        'borderJoinStyle' => 'miter',
+                                        'fill' => false,
+                                    ],
+                                ]
+                            ],
+                        ])
+                        ?>
                     </div>
                 </div>
                 <!-- /.box-body -->

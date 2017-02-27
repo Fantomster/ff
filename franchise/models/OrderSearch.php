@@ -104,7 +104,7 @@ class OrderSearch extends Order {
             },
                 ], true);
         $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = vendor.id");
-        $query->where(Order::tableName() . '.status!= :status', ['status' => Order::STATUS_FORMING]);
+        $query->where(Order::tableName() . '.status != ' .Order::STATUS_FORMING);
         $query->andWhere(['franchisee_associate.franchisee_id' => $franchisee_id]);
         
         $dataProvider = new ActiveDataProvider([
@@ -140,19 +140,21 @@ class OrderSearch extends Order {
         ];
 
         // grid filtering conditions
+        $query->andFilterWhere(['or', 
+            ['like', 'client.name', $this->searchString],
+            ['like', 'vendor.name', $this->searchString],
+            ['like', 'createdByProfile.full_name', $this->searchString],
+            ['like', 'acceptedByProfile.full_name', $this->searchString],
+            ]);
+
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,
             'total_price' => $this->total_price,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
-        $query->andFilterWhere(['like', 'client.name', $this->clientName])
-                ->andFilterWhere(['like', 'vendor.name', $this->vendorName])
-                ->andFilterWhere(['like', 'createdByProfile.full_name', $this->clientManager])
-                ->andFilterWhere(['like', 'acceptedByProfile.full_name', $this->vendorManager]);
-
         if ($prev30) {
-            $query->andWhere("$orderTable.created_at between CURDATE() - INTERVAL 30 DAY and CURDATE()");
+            $query->andWhere("$orderTable.created_at between CURDATE() - INTERVAL 30 DAY and CURDATE() + INTERVAL 1 DAY ");
         } else {
             $query->andFilterWhere(['>=', "$orderTable.created_at", $t1_f]);
             $query->andFilterWhere(['<=', "$orderTable.created_at", $t2_f]);

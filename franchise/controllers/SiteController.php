@@ -28,6 +28,9 @@ class SiteController extends Controller {
      * @return mixed
      */
     public function actionIndex() {
+        if (!Yii::$app->user->isGuest) {
+            return $this->redirect(["app/index"]);
+        }
         $this->layout = 'main-landing';
         if (Yii::$app->request->post('FIELDS')) {
             $fields = Yii::$app->request->post('FIELDS');

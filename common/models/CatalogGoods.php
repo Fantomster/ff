@@ -19,7 +19,7 @@ use yii\data\ActiveDataProvider;
  * @property string $updated_at
  *
  * @property CatalogBaseGoods $baseProduct  
- * @property Notes $notes
+ * @property GoodsNotes $notes
  * @property Organization $organization
  */
 class CatalogGoods extends \yii\db\ActiveRecord {
@@ -125,7 +125,7 @@ class CatalogGoods extends \yii\db\ActiveRecord {
         return $this->hasOne(CatalogBaseGoods::className(), ['id' => 'base_goods_id']);
     }
     
-    public function getNotes() {
+    public function getGoodsNotes() {
         return $this->hasOne(GoodsNotes::className(), ['catalog_base_goods_id' => 'base_goods_id']);
         
     }

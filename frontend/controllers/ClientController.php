@@ -968,13 +968,18 @@ class ClientController extends DefaultController {
             //return $this->renderAjax('suppliers/_success', ['message' => $message]);
         }
         $catalog = CatalogGoods::find()
-                ->joinWith('baseProduct')
-                ->joinWith('notes')
-                ->where([
-                    CatalogGoods::tableName() . '.cat_id'=>$catalog_id,
-                    CatalogBaseGoods::tableName() . '.deleted'=>CatalogBaseGoods::DELETED_OFF
-                        ])
+                ->joinWith([
+                    'baseProduct' => function ($q) { $q->where([
+                        CatalogBaseGoods::tableName() . '.deleted'=>CatalogBaseGoods::DELETED_OFF]);
+                },'goodsNotes'])
+                ->where([CatalogGoods::tableName() . '.cat_id'=>$catalog_id])
                 ->all();
+                
+                
+                
+                
+                
+                
         $array = [];
         foreach ($catalog as $catalog_elem) {
             array_push($array, [
@@ -986,7 +991,7 @@ class ClientController extends DefaultController {
                 'units' => $catalog_elem->baseProduct->units,
                 'ed' => $catalog_elem->baseProduct->ed,
                 'price' => $catalog_elem->baseProduct->price,
-                'note' => $catalog_elem->notes->note
+                'note' => isset($catalog_elem->goodsNotes->note)?$catalog_elem->goodsNotes->note:''
                     ]);
         }
         $array = json_encode($array, JSON_UNESCAPED_UNICODE);

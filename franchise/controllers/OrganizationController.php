@@ -81,6 +81,9 @@ class OrganizationController extends DefaultController {
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
+        if (Yii::$app->request->post("VendorSearch")) {
+            $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
+        }
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 
         if (Yii::$app->request->isPjax) {

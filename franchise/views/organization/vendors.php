@@ -13,15 +13,24 @@ $this->registerJs('
     $("document").ready(function(){
         $("#vendorInfo").data("bs.modal", null);
         var justSubmitted = false;
+        var timer;
         $("body").on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
-                $("#search-form").submit();
+                $("#searchАorm").submit();
                 justSubmitted = true;
                 setTimeout(function() {
                     justSubmitted = false;
                 }, 500);
             }
         });
+        $("body").on("change keyup paste cut", "#searchString", function() {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    $("#searchForm").submit();
+                }, 700);
+            });
         $("body").on("hidden.bs.modal", "#vendorInfo", function() {
                 $(this).data("bs.modal", null);
             });
@@ -50,16 +59,12 @@ $this->registerJs('
     <div class="box box-info order-history">
         <div class="box-body">
             <?php
-            Pjax::begin(['enablePushState' => false, 'id' => 'vendor-list',]);
             $form = ActiveForm::begin([
                         'options' => [
-                            'data-pjax' => true,
-                            'id' => 'search-form',
+                            'id' => 'searchForm',
                             //'class' => "navbar-form",
                             'role' => 'search',
                         ],
-                        'enableClientValidation' => false,
-                        'method' => 'get',
             ]);
             ?>
             <div class="row">
@@ -105,7 +110,9 @@ $this->registerJs('
                     </div>
                 </div>
             </div>
-            <?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); 
+                        Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
+?>
             <div class="row">
                 <div class="col-md-12">
                     <?=

@@ -3,7 +3,6 @@
 namespace franchise\controllers;
 
 use Yii;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
@@ -11,6 +10,7 @@ use common\models\Role;
 use common\models\User;
 use common\models\Profile;
 use common\models\Organization;
+use common\models\Order;
 use yii\web\Response;
 
 /**
@@ -63,7 +63,11 @@ class AppController extends DefaultController {
      * @return mixed
      */
     public function actionIndex() {
-        return $this->render('/site/under-construction');
+        $params = Yii::$app->request->getQueryParams();
+        $searchModel = new \franchise\models\OrderSearch();
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
+
+        return $this->render('index', compact('dataProvider'));
     }
     
     /**

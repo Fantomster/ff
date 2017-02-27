@@ -586,7 +586,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->orderBy(['rating'=>SORT_DESC])
+                //->orderBy(['rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
         $restaurantsCount = Organization::find()

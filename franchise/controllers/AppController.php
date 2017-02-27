@@ -221,4 +221,9 @@ class AppController extends DefaultController {
     public function actionPromotion() {
         return $this->render('promotion');
     }
+    public function actionCatalog() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        
+        return $this->render('catalog');
+    }
 }

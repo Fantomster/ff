@@ -34,10 +34,19 @@ if (!Yii::$app->user->isGuest) {
             <div class="navbar-custom-menu">
 
                 <ul class="nav navbar-nav">
+                    <li class="dropdown btn-add-menu">
+                        <a class="btn-add-client dropdown-toggle" data-toggle="dropdown" href="#" style="background: rgba(0, 0, 0, 0.1); font-weight: bold;" aria-expanded="false">
+                            <i class="fa fa-user-plus"></i> Добавить клиента <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="<?= Url::to(['organization/create-vendor']) ?>">Добавить поставщика</a></li>
+                            <li><a href="<?= Url::to(['organization/create-client']) ?>">Добавить ресторан</a></li>
+                        </ul>
+                    </li>
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-bell-o"></i>
-                            <span class="label label-warning unread-notifications-count" style="display: <?= false ? 'block' : 'none'?>"><?= 0 ?></span>
+                            <span class="label label-warning unread-notifications-count" style="display: <?= false ? 'block' : 'none' ?>"><?= 0 ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="header">Оповещений: <span class="unread-notifications-count"><?= 0 ?></span></li>
@@ -71,7 +80,7 @@ if (!Yii::$app->user->isGuest) {
                                 <p>
                                     <?= $user->profile->full_name ?> - <?= $user->role->name ?>
                                     <small><?= $user->email ?></small>
-                                    <small><?= ''//$organization->name ?></small>
+                                    <small><?= ''//$organization->name  ?></small>
                                 </p>
                             </li>
                             <!-- Menu Body -->

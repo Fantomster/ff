@@ -11,7 +11,7 @@ use yii\bootstrap\Modal;
 
 $this->registerJs('
     $("document").ready(function(){
-        $("#vendorInfo").data("bs.modal", null);
+        $("#clientInfo").data("bs.modal", null);
         var justSubmitted = false;
         var timer;
         $("body").on("change", "#dateFrom, #dateTo", function() {
@@ -31,7 +31,7 @@ $this->registerJs('
                     $("#searchForm").submit();
                 }, 700);
             });
-        $("body").on("hidden.bs.modal", "#vendorInfo", function() {
+        $("body").on("hidden.bs.modal", "#clientInfo", function() {
                 $(this).data("bs.modal", null);
             });
     });
@@ -40,8 +40,8 @@ $this->registerJs('
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i>  Ваши поставщики
-        <small>Подключенные Вами поставщики и информация о них</small>
+        <i class="fa fa-home"></i>  Ваши рестораны
+        <small>Подключенные Вами рестораны и информация о них</small>
     </h1>
     <?= ''
 //    Breadcrumbs::widget([
@@ -49,7 +49,7 @@ $this->registerJs('
 //            'class' => 'breadcrumb',
 //        ],
 //        'links' => [
-//            'Список ваших поставщиков',
+//            'Список ваших ресторанов',
 //        ],
 //    ])
     ?>
@@ -112,7 +112,7 @@ $this->registerJs('
             </div>
             <?php
             ActiveForm::end();
-            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
+            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'client-list', 'timeout' => 5000]);
             ?>
             <div class="row">
                 <div class="col-md-12">
@@ -136,9 +136,9 @@ $this->registerJs('
                                 'format' => 'raw',
                                 'attribute' => 'name',
                                 'value' => function ($data) {
-                                    $link = Html::a($data["name"], ['organization/ajax-show-vendor', 'id' => $data["id"]], [
+                                    $link = Html::a($data["name"], ['organization/ajax-show-client', 'id' => $data["id"]], [
                                                 'data' => [
-                                                    'target' => '#vendorInfo',
+                                                    'target' => '#clientInfo',
                                                     'toggle' => 'modal',
                                                     'backdrop' => 'static',
                                                 ]
@@ -163,7 +163,7 @@ $this->registerJs('
                                             }
                                             return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                         },
-                                        'label' => 'Кол-во ресторанов',
+                                        'label' => 'Кол-во поставщиков',
                                     ],
                                     [
                                         'format' => 'raw',
@@ -223,7 +223,7 @@ $this->registerJs('
                                     [
                                         'format' => 'raw',
                                         'value' => function($data) {
-                                            return Html::a('<i class="fa fa-signal"></i>', ['vendor/stats', 'id' => $data["id"]]);
+                                            return Html::a('<i class="fa fa-signal"></i>', ['client/stats', 'id' => $data["id"]]);
                                         },
                                             ],
                                         ],
@@ -237,7 +237,7 @@ $this->registerJs('
                     </div>
                     <?php
                     Modal::begin([
-                        'id' => 'vendorInfo',
+                        'id' => 'clientInfo',
                     ]);
                     ?>
                 <?php Modal::end(); ?>

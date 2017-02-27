@@ -1,45 +1,44 @@
 <div class="modal-dialog nav-tabs-custom" style="border-radius: 3px;">
             <ul class="nav nav-tabs">
-              <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">Поставщик</a></li>
+              <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">Ресторан</a></li>
               <li class=""><a href="#tab_2" data-toggle="tab" aria-expanded="false">Контактное лицо</a></li>
               <li class=""><a href="#tab_3" data-toggle="tab" aria-expanded="false">Реквизиты</a></li>
             </ul>
             <div class="modal-content tab-content" style="box-shadow: 0 2px 3px rgba(0,0,0,0.125);">
               <div class="modal-header" style="background-color: #fff; border-bottom: 1px solid #e5e5e5; color: #33363b;">
-                <h4 class="modal-title" style="text-align: left;"><?= $vendor->name ?></h4>
+                <h4 class="modal-title" style="text-align: left;"><?= $client->name ?></h4>
                 
               </div>
               <div class="modal-body tab-pane active" id="tab_1">
                 <div class="row">
                   <div class="col-md-4">
-                    <img width="163" height="100" src="<?= $vendor->pictureUrl ?>">
+                      <img width="163" height="100" src="<?= $client->pictureUrl ?>">
                     <div class="btn-edite">
-                      <button type="button" class="btn btn-green btn-block">Базовый прайс-лист</button>
                       <!-- <button type="button" class="btn btn-strip-green btn-block">Аналитика</button> -->
                     </div>
                   </div>
                   <div class="col-md-8">
                     <div class="edite-place">
                       <div class="form-group">
-                        <label for="exampleInputEmail1">Название поставщика:</label>
-                        <p><?= $vendor->name ?></p>
+                        <label for="exampleInputEmail1">Название ресторана:</label>
+                        <p><?= $client->name ?></p>
                       </div>
                       
                       <div class="form-group">
                         <label for="exampleInputEmail1">Название юр. лица:</label>
-                        <p><?= $vendor->legal_entity ?></p>
+                        <p><?= $client->legal_entity ?></p>
                       </div>
                       <div class="form-group">
                         <label for="exampleInputEmail1">Город:</label>
-                        <p><?= $vendor->city ?></p>
+                        <p><?= $client->city ?></p>
                       </div>
                       <div class="form-group">
                         <label for="exampleInputEmail1">Адрес:</label>
-                        <p><?= $vendor->address ?></p>
+                        <p><?= $client->address ?></p>
                       </div>
                       <div class="form-group">
                         <label for="exampleInputEmail1">Краткая информация:</label>
-                        <p><?= $vendor->about ?></p>
+                        <p><?= $client->about ?></p>
                       </div>
                       
                     </div>
@@ -49,9 +48,8 @@
               <div class="modal-body tab-pane" id="tab_2">
                 <div class="row">
                   <div class="col-md-4">
-                    <img width="163" height="100" src="<?= $vendor->pictureUrl ?>">
+                    <img width="163" height="100" src="<?= $client->pictureUrl ?>">
                     <div class="btn-edite">
-                      <button type="button" class="btn btn-green btn-block">Базовый прайс-лист</button>
                       <button type="button" class="btn btn-strip-green btn-block">Аналитика</button>
                     </div>
                   </div>
@@ -59,16 +57,16 @@
                     <div class="edite-place">
                       <div class="form-group">
                         <label for="exampleInputEmail1">ФИО контактного лица:</label>
-                        <p><?= $vendor->contact_name ?></p>
+                        <p><?= $client->contact_name ?></p>
                       </div>
                       
                       <div class="form-group">
                         <label for="exampleInputEmail1">E-mail контактного лица:</label>
-                        <p><?= $vendor->email ?></p>
+                        <p><?= $client->email ?></p>
                       </div>
                       <div class="form-group">
                         <label for="exampleInputEmail1">Телефон контактного лица:</label>
-                        <p><?= $vendor->phone ?></p>
+                        <p><?= $client->phone ?></p>
                       </div>
                       
                     </div>

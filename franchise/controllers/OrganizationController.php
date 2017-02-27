@@ -22,12 +22,74 @@ use common\models\FranchiseeAssociate;
 class OrganizationController extends DefaultController {
 
     /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'only' => ['index', 'clients', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
+                'rules' => [
+                    [
+                        'actions' => ['index', 'clients', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
+                        'allow' => true,
+                        'roles' => [
+                            Role::ROLE_FRANCHISEE_OWNER,
+                            Role::ROLE_FRANCHISEE_OPERATOR,
+                            Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                ],
+            /* 'denyCallback' => function($rule, $action) {
+              throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+              } */
+            ],
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'logout' => ['post'],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Displays clients list
      * 
      * @return mixed
      */
     public function actionClients() {
-        return $this->render("/site/under-construction");
+        $searchModel = new \franchise\models\ClientSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        $today = new \DateTime();
+
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+
+        if (Yii::$app->request->post("ClientSearch")) {
+            $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
+        }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('clients', compact('dataProvider', 'searchModel'));
+        } else {
+            return $this->render('clients', compact('dataProvider', 'searchModel'));
+        }
+    }
+
+    public function actionAjaxShowClient($id) {
+        $client = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->one();
+        return $this->renderAjax("_ajax-show-client", compact('client'));
     }
 
     /**
@@ -96,7 +158,7 @@ class OrganizationController extends DefaultController {
     public function actionAjaxShowVendor($id) {
         $vendor = Organization::find()
                 ->joinWith("franchiseeAssociate")
-                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id])
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
         return $this->renderAjax("_ajax-show-vendor", compact('vendor'));
     }

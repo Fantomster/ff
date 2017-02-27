@@ -752,12 +752,11 @@ class ClientController extends DefaultController {
         $supplier = Organization::find()->where(['id'=>$supp_org_id])->one();
         
         $catalog = CatalogGoods::find()->where(['cat_id' => $catalog_id])->all();
-        //var_dump(ArrayHelper::isIn('123689', ArrayHelper::getValue($catalog, 'base_goods_id')));
         $array_base_goods_id = ArrayHelper::getColumn($catalog, 'base_goods_id');
         $array_goods_id = ArrayHelper::getColumn($catalog, 'id');
         
-        $base_catalog_id = Catalog::find()->where(['supp_org_id' => $supplier->id, 'type' => Catalog::BASE_CATALOG])->one()->id;
-        
+        $base_catalog = Catalog::find()->where(['supp_org_id' => $supplier->id, 'type' => Catalog::BASE_CATALOG])->one();
+        $arr_check_double_article = [];
         if (Yii::$app->request->isAjax && Yii::$app->request->post('catalog')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
@@ -866,8 +865,16 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;
                 }
+                array_push($arr_check_double_article,$arrCatalogs['dataItem']['article']);
             }
-            
+            if(array_diff(array_count_values($arr_check_double_article), array('1'))){
+            $result = ['success' => false, 'alert' => [
+                            'class' => 'danger-fk',
+                            'title' => 'УПС! Ошибка',
+                            'body' => 'Артикул товара должен быть уникальным!']];
+                    return $result;
+                    exit;    
+            }
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 $array_ids = [];
@@ -884,7 +891,7 @@ class ClientController extends DefaultController {
                     if(!ArrayHelper::isIn($goods_id,$array_goods_id)){
                         
                         $CatalogBaseGoods = new CatalogBaseGoods();
-                        $CatalogBaseGoods->cat_id = $base_catalog_id;
+                        $CatalogBaseGoods->cat_id = $base_catalog->id;
                         $CatalogBaseGoods->article = $article;
                         $CatalogBaseGoods->product = $product;
                         $CatalogBaseGoods->units = $units;
@@ -917,15 +924,18 @@ class ClientController extends DefaultController {
                         $CatalogGoods = CatalogGoods::find()->where(['id'=>$goods_id])->one();
                         $CatalogGoods->price = $price;
                         $CatalogGoods->save();
-                        
+                        if (!empty($note)) {
                             if($GoodsNotes = GoodsNotes::find()->where([
                                 'rest_org_id'=>$currentUser->organization_id,
                                 'catalog_base_goods_id' => $CatalogBaseGoods->id
                                 ])->exists()){
+                                
+                                
                                 $GoodsNotes = GoodsNotes::find()->where([
                                 'rest_org_id'=>$currentUser->organization_id,
                                 'catalog_base_goods_id' => $CatalogBaseGoods->id
                                 ])->one();
+                                
                                 }else{
                                 $GoodsNotes = new GoodsNotes();  
                                 } 
@@ -933,6 +943,22 @@ class ClientController extends DefaultController {
                             $GoodsNotes->catalog_base_goods_id = $CatalogBaseGoods->id;
                             $GoodsNotes->note = $note;
                             $GoodsNotes->save();
+                        }else{
+                            if($GoodsNotes = GoodsNotes::find()->where([
+                                'rest_org_id'=>$currentUser->organization_id,
+                                'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                ])->exists()){
+                                
+                                $GoodsNotes = GoodsNotes::find()->where([
+                                'rest_org_id'=>$currentUser->organization_id,
+                                'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                ])->one();
+                                $GoodsNotes->rest_org_id = $currentUser->organization_id;
+                                $GoodsNotes->catalog_base_goods_id = $CatalogBaseGoods->id;
+                                $GoodsNotes->note = $note;
+                                $GoodsNotes->save();
+                            }
+                        }
                     }
                     
                     if($base_goods_id){
@@ -975,11 +1001,7 @@ class ClientController extends DefaultController {
                 ->where([CatalogGoods::tableName() . '.cat_id'=>$catalog_id])
                 ->all();
                 
-                
-                
-                
-                
-                
+               
         $array = [];
         foreach ($catalog as $catalog_elem) {
             array_push($array, [
@@ -991,7 +1013,7 @@ class ClientController extends DefaultController {
                 'units' => $catalog_elem->baseProduct->units,
                 'ed' => $catalog_elem->baseProduct->ed,
                 'price' => $catalog_elem->baseProduct->price,
-                'note' => isset($catalog_elem->goodsNotes->note)?$catalog_elem->goodsNotes->note:''
+                'note' => $catalog_elem->goodsNotes->note?$catalog_elem->goodsNotes->note:''
                     ]);
         }
         $array = json_encode($array, JSON_UNESCAPED_UNICODE);

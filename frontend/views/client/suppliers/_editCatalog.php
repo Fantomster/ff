@@ -33,13 +33,11 @@ columns: [
         
     {
         data: 'base_goods_id',
-        copyPaste: false,
-        skipColumnOnPasteBoolean : true
+        copyPaste: false
     },  
     {
         data: 'goods_id',
-        copyPaste: false,
-        skipColumnOnPasteBoolean : true
+        copyPaste: false
     },
     {
         data: 'article'

@@ -270,10 +270,58 @@ class AppController extends DefaultController {
     public function actionPromotion() {
         return $this->render('promotion');
     }
-    public function actionCatalog() {
+    public function actionCatalog($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        
-        return $this->render('catalog');
+        $searchString = "";
+        if (!empty(trim(\Yii::$app->request->get('searchString')))) {
+            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+//            
+//            $count = \common\models\CatalogBaseGoods::find()
+//            ->where([
+//            'cat_id'=>$id, 
+//            'deleted'=>\common\models\CatalogBaseGoods::DELETED_OFF
+//            ])
+//            ->andWhere(['like','product',$searchString])
+//            ->count();
+//            
+            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
+                    . "WHERE cat_id = $id AND "
+                    . "deleted=0 AND (product LIKE :product or article LIKE :article)";
+            $query = \Yii::$app->db->createCommand($sql);
+            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $id AND "
+                            . "deleted=0 AND (product LIKE :product or article LIKE :article)", 
+                    [':article' => $searchString, ':product' => $searchString])->queryScalar();
+        } else {
+            $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
+                    . "WHERE cat_id = $id AND "
+                    . "deleted=0";
+            $query = \Yii::$app->db->createCommand($sql);
+            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $id AND "
+                            . "deleted=0", [':article' => $searchString, ':product' => $searchString])->queryScalar();
+        }
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'params' => [':article' => $searchString, ':product' => $searchString],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'ed',
+                    'note',
+                    'status'
+                ],
+            ],
+        ]);
+        return $this->render('catalog', compact('searchString', 'dataProvider', 'id'));
     }
 
 }

@@ -13,7 +13,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="user-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?= DetailView::widget([
+    <?=
+    DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
@@ -27,8 +28,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'logged_in_ip',
             'logged_in_at',
             'created_ip',
-            'created_at',
-            'updated_at',
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата создания',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'label' => 'Последнее изменение',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
+                }
+            ],
 //            'banned_at',
 //            'banned_reason',
 //            'organization_id',
@@ -42,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Организация',
             ],
         ],
-    ]) ?>
+    ])
+    ?>
 
 </div>

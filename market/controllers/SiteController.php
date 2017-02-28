@@ -586,7 +586,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->orderBy(['rating'=>SORT_DESC])
+                //->orderBy(['rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
         $restaurantsCount = Organization::find()
@@ -606,7 +606,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->limit(12)->offset($num)
+                ->limit(6)->offset($num)
                 ->count();
         if ($count > 0) {
             $restaurants = Organization::find()
@@ -614,7 +614,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->limit(12)->offset($num)
+                ->limit(6)->offset($num)
                 ->all();
             return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));
         }

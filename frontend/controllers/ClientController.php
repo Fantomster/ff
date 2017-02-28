@@ -893,6 +893,7 @@ class ClientController extends DefaultController {
                         $CatalogBaseGoods = new CatalogBaseGoods();
                         $CatalogBaseGoods->cat_id = $base_catalog->id;
                         $CatalogBaseGoods->article = $article;
+                        $CatalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                         $CatalogBaseGoods->product = $product;
                         $CatalogBaseGoods->units = $units;
                         $CatalogBaseGoods->price = $price;
@@ -915,6 +916,7 @@ class ClientController extends DefaultController {
                     }else{
                         $CatalogBaseGoods = CatalogBaseGoods::find()->where(['id'=>$base_goods_id])->one();
                         $CatalogBaseGoods->article = $article;
+                        $CatalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                         $CatalogBaseGoods->product = $product;
                         $CatalogBaseGoods->units = $units;
                         $CatalogBaseGoods->price = $price;

@@ -24,7 +24,18 @@ Tabs::widget([
         ],
         [
             'label' => 'Оборот',
-            'content' => $this->render("_turnover"),
+            'content' => $this->render("_turnover", compact(
+                    'total',
+                    'totalSpent',
+                    'monthLabels',
+                    'averageSpent',
+                    'averageCheque',
+                    'dateFilterFrom', 
+                    'dateFilterTo', 
+                    'dayLabels',
+                    'dayTurnover',
+                    'dayCheque'
+                    )),
             'active' => true
         ],
     ],

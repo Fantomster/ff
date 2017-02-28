@@ -63,7 +63,6 @@ class AnalyticsController extends DefaultController {
      * @return mixed
      */
     public function actionIndex() {
-        $userTable = User::tableName();
         $orgTable = Organization::tableName();
         $fraTable = FranchiseeAssociate::tableName();
 
@@ -191,7 +190,6 @@ class AnalyticsController extends DefaultController {
      */
     public function actionPage2() {
         $orderTable = Order::tableName();
-        $userTable = User::tableName();
         $fraTable = FranchiseeAssociate::tableName();
 
         $today = new \DateTime();
@@ -253,10 +251,8 @@ class AnalyticsController extends DefaultController {
             left outer join (
                 select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day 
                 from (select a.* 
-                    from `$orderTable` a left join $fraTable on $fraTable.organization_id=a.vendor_id  
-                    where $fraTable.franchisee_id = ".$this->currentFranchisee->id." and a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id
-                        ) b 
-                group by year(b.created_at), month(b.created_at), day(b.created_at)
+                    from `f-keeper`.order a left join $fraTable on $fraTable.organization_id=a.vendor_id  
+                    where $fraTable.franchisee_id = ".$this->currentFranchisee->id." and a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)
                 ) bb
             on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
@@ -315,7 +311,79 @@ class AnalyticsController extends DefaultController {
      * @return mixed
      */
     public function actionPage3() {
-        return $this->render("page3");
+        $orderTable = Order::tableName();
+        $fraTable = FranchiseeAssociate::tableName();
+
+        $today = new \DateTime();
+        $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
+        $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
+        
+        $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
+        $end = $dtEnd->add(new \DateInterval('P1D'));
+        $date = $dt->format('Y-m-d');       
+        
+        $query = "SELECT truncate(sum(total_price),1) as spent,truncate(sum(total_price)/count(`$orderTable`.id),1) as cheque, year(created_at) as year, month(created_at) as month, day(created_at) as day "
+                . "FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id "
+                . "where $fraTable.franchisee_id = ".$this->currentFranchisee->id." and status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and created_at between :dateFrom and :dateTo "
+                . "group by year(created_at), month(created_at), day(created_at)";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $ordersByDay = $command->queryAll();
+        $dayLabels = [];
+        $dayTurnover = [];
+        $dayCheque = [];
+        $total = 0;
+        foreach ($ordersByDay as $order) {
+            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayTurnover[] = $order["spent"];
+            $total += $order["spent"];
+            $dayCheque[] = $order["cheque"];
+        }
+        
+        $query = "SELECT truncate(sum(total_price),1) as total_month, truncate(sum(total_price)/count(distinct client_id),1) as spent,truncate(sum(total_price)/count(`$orderTable`.id),1) as cheque, year(created_at) as year, month(created_at) as month "
+                . "FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id "
+                . "where $fraTable.franchisee_id = ".$this->currentFranchisee->id." and status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") "
+                . "group by year(created_at), month(created_at)";
+        $command = Yii::$app->db->createCommand($query);
+        $money = $command->queryAll();
+        $monthLabels = [];
+        $averageSpent = [];
+        $averageCheque = [];
+        $totalSpent = [];
+        foreach ($money as $month) {
+            $monthLabels[] = date('M', strtotime("2000-$month[month]-01")) . " " . $month["year"];
+            $averageSpent[] = $month["spent"];
+            $averageCheque[] = $month["cheque"];
+            $totalSpent[] = $month["total_month"];
+        }
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('page3', compact(
+                    'total',
+                    'totalSpent',
+                    'monthLabels',
+                    'averageSpent',
+                    'averageCheque',
+                    'dateFilterFrom', 
+                    'dateFilterTo', 
+                    'dayLabels',
+                    'dayTurnover',
+                    'dayCheque'
+                    ));
+        } else {
+            return $this->render('page3', compact(
+                    'total',
+                    'totalSpent',
+                    'monthLabels',
+                    'averageSpent',
+                    'averageCheque',
+                    'dateFilterFrom', 
+                    'dateFilterTo', 
+                    'dayLabels',
+                    'dayTurnover',
+                    'dayCheque'
+                    ));
+        }
     }
 
 }

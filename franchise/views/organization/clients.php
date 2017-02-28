@@ -145,13 +145,13 @@ $this->registerJs('
                                     ]);
                                     return $link;
                                 },
-                                        'label' => 'Имя поставщика',
+                                        'label' => 'Имя ресторана',
                                     ],
                                     [
                                         'format' => 'raw',
                                         'attribute' => 'clientCount',
                                         'value' => function ($data) {
-                                            $progress = round($data["clientCount_prev30"] * 100 / $data["clientCount"], 2);
+                                            $progress = $data["clientCount"] > 0 ? round($data["clientCount_prev30"] * 100 / $data["clientCount"], 2) : 0;
 //                                            if ($progress > 0) {
                                                 $divider = '<i class="fa fa-caret-up"></i>';
   //                                          }
@@ -169,7 +169,7 @@ $this->registerJs('
                                         'format' => 'raw',
                                         'attribute' => 'orderCount',
                                         'value' => function ($data) {
-                                            $progress = round($data["orderCount_prev30"] * 100 / $data["orderCount"], 2);
+                                            $progress = $data["orderCount"] > 0 ? round($data["orderCount_prev30"] * 100 / $data["orderCount"], 2) : 0;
 //                                            if ($progress > 0) {
                                                 $divider = '<i class="fa fa-caret-up"></i>';
   //                                          }
@@ -187,7 +187,7 @@ $this->registerJs('
                                         'format' => 'raw',
                                         'attribute' => 'orderSum',
                                         'value' => function ($data) {
-                                            $progress = round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2);
+                                            $progress = $data["orderSum"] > 0 ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
 //                                            if ($progress > 0) {
                                                 $divider = '<i class="fa fa-caret-up"></i>';
   //                                          }

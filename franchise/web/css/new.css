@@ -14,7 +14,7 @@
     background-color: #fff;
     border: 1px solid #fff; 
     border-bottom-color: transparent;
-    box-shadow: 0 2px 3px rgba(0,0,0,0.125);
+    // box-shadow: 0 2px 3px rgba(0,0,0,0.125);
 }
 
 
@@ -71,7 +71,7 @@ label {
 }
 
 .table-hover>tbody>tr:hover {
-    background-color: #368cbf;
+    background-color: transparent; //hover-effect
     color: #fff;
 }
 
@@ -137,6 +137,10 @@ label {
   color: #33363B;
 
 }
+
+// .nav-tabs-custom>.nav-tabs>li {
+//   margin-bottom: 0;
+// }
 
 
 

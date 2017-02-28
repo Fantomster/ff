@@ -61,18 +61,16 @@ class ClientSearch extends Organization {
         }
 
         $query = "SELECT org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as clientCount, 
-                (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
-                count(ord.id) as orderCount,
-                (select count(id) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                sum(ord.total_price) as orderSum,
-                (select sum(total_price) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30,
+                (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as clientCount_prev30, 
+                (select count(id) from `order` where client_id=org.id and status in (1,2,3,4)) as orderCount,
+                (select count(id) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as orderCount_prev30,
+                (select sum(total_price) from `order` where client_id=org.id and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as orderSum_prev30,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
                 FROM `organization` AS org
                 LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id
-                left join `order` as ord on org.id=ord.client_id
-                WHERE fa.franchisee_id = $franchisee_id and org.type_id=1 and ord.status in (1,2,3,4) and org.created_at between :dateFrom and :dateTo
-                and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)
-                GROUP by ord.client_id";
+                WHERE fa.franchisee_id = $franchisee_id and org.type_id=1 and org.created_at between :dateFrom and :dateTo
+                and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
 
         $count = Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryScalar();
 

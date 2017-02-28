@@ -45,6 +45,9 @@ $form = ActiveForm::begin([
                         'options' => [
                             'height' => 200,
                             'width' => 200,
+                        'legend' => [
+                            'display' => false,
+                        ],
                         ],
                         'data' => [
                             'labels' => ['Рестораны', 'Поставщики'],

@@ -4,8 +4,8 @@ use yii\helpers\Url;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> Промо-материалы
-        <small>Логотипы, шрифты, картинки</small>
+        <i class="fa fa-home"></i> Аналитика
+        <small>Статистика по регистрациям</small>
     </h1>
 </section>
 <section class="content body">

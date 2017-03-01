@@ -356,7 +356,7 @@ class AnalyticsController extends DefaultController {
             $averageCheque[] = $month["cheque"];
             $totalSpent[] = $month["total_month"];
         }
-        //jj
+
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('page3', compact(
                     'total',

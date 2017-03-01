@@ -59,12 +59,6 @@ $this->title = 'Каталог №' . $id;
 
 $this->registerCss('');
 ?>
-<?=
-Modal::widget([
-    'id' => 'add-edit-product',
-    'clientOptions' => false,
-])
-?>
 <?php
 Modal::begin([
     'id' => 'add-product-market-place',
@@ -120,57 +114,21 @@ $grid = [
         'contentOptions' => ['style' => 'vertical-align:middle;'],
     ],
     [
-        'attribute' => 'status',
-        'label' => 'Наличие',
-        'format' => 'raw',
-        'contentOptions' => ['style' => 'vertical-align:middle;'],
-        'value' => function ($data) {
-        $link = CheckboxX::widget([
-                'name' => 'status_' . $data['id'],
-                'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                'value' => $data['status'] == 0 ? 0 : 1,
-                'autoLabel' => true,
-                'options' => [
-                    'id' => 'status_' . $data['id'], 
-                    'data-id' => $data['id'], 
-                    'event-type' => 'set-status'
-                    ],
-                'pluginOptions' => [
-                    'threeState' => false,
-                    'theme' => 'krajee-flatblue',
-                    'enclosedLabel' => true,
-                    'size' => 'lg',
-                ]
-        ]);
-        return $link;
-        },
-    ],
-    [
         'attribute' => '',
         'label' => '',
         'format' => 'raw',
         'contentOptions' => ['style' => 'width:70px'],
         'headerOptions' => ['class' => 'text-center'],
         'value' => function ($data) {
-            $data['market_place'] == 0 ?
-                    $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/vendor/ajax-update-product-market-place',
-                        'id' => $data['id']], [
+                    $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/app/ajax-edit-catalog-form',
+                        'product_id' => $data['id'],'catalog' => $data['cat_id']], [
                         'data' => [
                             'target' => '#add-product-market-place',
                             'toggle' => 'modal',
                             'backdrop' => 'static',
                         ],
-                        'class' => 'btn btn-sm btn-outline-success'
-                    ]) :
-                    $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/vendor/ajax-update-product-market-place',
-                        'id' => $data['id']], [
-                        'data' => [
-                            'target' => '#add-product-market-place',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
-                        'class' => 'btn btn-sm btn-success'
-            ]);
+                        'class' => 'btn btn-sm btn-default'
+                    ]);
             return $link;
         },
     ],
@@ -201,10 +159,10 @@ $grid = [
         ],
         'links' => [
             [
-                'label' => 'Каталоги',
-                'url' => ['vendor/catalogs'],
+                'label' => 'Поставщики',
+                'url' => ['#'],
             ],
-            'Главный каталог',
+            'Каталог №' . $id,
         ],
     ])
     ?>
@@ -235,7 +193,7 @@ $grid = [
                 'tag' => 'a',
                 'data-target' => '#add-product-market-place',
                 'class' => 'btn btn-fk-success btn-sm pull-right',
-                'href' => Url::to(['/vendor/ajax-create-product-market-place', 'id' => Yii::$app->request->get('id')]),
+                'href' => Url::to(['/app/ajax-edit-catalog-form', 'catalog' => $id]),
             ],
         ])
         ?>
@@ -268,3 +226,81 @@ $grid = [
         </div>
     </div>  
 </section>
+<?php
+$customJs = <<< JS
+var timer;
+$('#search').on("keyup", function () {
+window.clearTimeout(timer);
+   timer = setTimeout(function () {
+       $.pjax({
+        type: 'GET',
+        push: true,
+        timeout: 10000,
+        url: 'index.php?r=app/catalog&id=$id',
+        container: '#kv-unique-id-1',
+        data: {searchString: $('#search').val()}
+      })
+   }, 700);
+});
+
+$(document).on("click",".del-product", function(e){
+    var id = $(this).attr('data-id');
+	bootbox.confirm({
+            title: "Удалить этот продукт?",
+            message: "Продукт будет удален из всех каталогов", 
+            buttons: {
+                confirm: {
+                    label: 'Удалить',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
+            },
+            className: "danger-fk",
+            callback: function(result) {
+		if(result){
+		$.ajax({
+	        url: "index.php?r=app/ajax-delete-product",
+	        type: "POST",
+	        dataType: "json",
+	        data: {'id' : id},
+	        cache: false,
+	        success: function(response) {
+		        if(response.success){
+			        $.pjax.reload({container: "#kv-unique-id-1"}); 
+			        }else{
+				    console.log('Что-то пошло не так');    
+			        }
+		        }	
+		    });
+		}else{
+		console.log('cancel');	
+		}
+	}});      
+}) 
+$("body").on("hidden.bs.modal", "#add-product-market-place", function() {
+    $(this).data("bs.modal", null);
+})
+$("body").on("show.bs.modal", "#add-product-market-place", function() {
+    $('#add-product-market-place>.modal-dialog').css('margin-top','13px');
+})        
+$(document).on("submit", "#marketplace-product-form", function(e) {
+        e.preventDefault();
+    var form = $("#marketplace-product-form");
+    $('#loader-show').showLoading();
+    $.post(
+        form.attr("action"),
+            form.serialize()
+            )
+            .done(function(result) {
+            $('#loader-show').hideLoading();
+            form.replaceWith(result);
+        $.pjax.reload({container: "#kv-unique-id-1"});
+        });
+        return false;
+    });
+  $('#add-product-market-place').removeAttr('tabindex');
+JS;
+$this->registerJs($customJs, View::POS_READY);

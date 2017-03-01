@@ -378,7 +378,7 @@ class AnalyticsController extends DefaultController {
                     'averageSpent',
                     'averageCheque',
                     'dateFilterFrom', 
-                    'dateFilterTo', 
+                    'dateFilterTo',
                     'dayLabels',
                     'dayTurnover',
                     'dayCheque'

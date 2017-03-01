@@ -53,7 +53,7 @@ class UserSearch extends User {
      *
      * @return ActiveDataProvider
      */
-    public function search($params) {
+    public function search($params, $role_id = null) {
         $query = User::find();
 
         $userTable = User::tableName();
@@ -104,6 +104,7 @@ class UserSearch extends User {
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'organization_id' => $this->organization_id,
+            'role_id' => $role_id,
         ]);
 
         $query->andFilterWhere(['like', 'user.email', $this->email])

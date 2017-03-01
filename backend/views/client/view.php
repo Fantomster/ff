@@ -13,6 +13,21 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="user-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
+
+    <?php
+    if ($model->role_id === \common\models\Role::ROLE_FKEEPER_MANAGER) {
+        echo Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
+        echo Html::a('Удалить', ['delete', 'id' => $model->id], [
+            'class' => 'btn btn-danger',
+            'style' => 'margin-bottom: 10px; margin-left: 10px;',
+            'data' => [
+                'confirm' => 'Are you sure you want to delete this item?',
+                'method' => 'post',
+            ],
+        ]);
+    }
+    ?>
+
     <?=
     DetailView::widget([
         'model' => $model,
@@ -51,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'format' => 'raw',
-                'value' => Html::a($model->organization->name, ['organization/view', 'id' => $model->organization_id]),
+                'value' => isset($model->organization) ? Html::a($model->organization->name, ['organization/view', 'id' => $model->organization_id]) : 'Отсутствует',
                 'label' => 'Организация',
             ],
         ],

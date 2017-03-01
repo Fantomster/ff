@@ -31,6 +31,7 @@ class User extends \amnah\yii2\user\models\User {
         $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
         $rules[] = [['role_id'], 'compare', 'compareValue' => Role::ROLE_ADMIN, 'operator' => '>'];
         $rules[] = [['email'], 'unique', 'on'=>'sendInviteFromVendor', 'message' => 'ooo'];
+        $rules[] = [['organization_id'], 'integer'];
 //        $rules[] = [['email'], 'required', 'message' => 'Пожалуйста, напишите ваш адрес электронной почты'];
         
         //переопределим сообщения валидации быдланским способом

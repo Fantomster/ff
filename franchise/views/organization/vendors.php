@@ -34,8 +34,20 @@ $this->registerJs('
         $("body").on("hidden.bs.modal", "#vendorInfo", function() {
                 $(this).data("bs.modal", null);
             });
+        $("body").on("click", "td", function (e) {
+            if ($(this).find("a").hasClass("stats")) {
+                return true;
+            }
+            var url = $(this).parent("tr").data("url");
+            if (url !== undefined) {
+                $("#vendorInfo").modal({backdrop:"static",toggle:"modal"}).load(url);
+            }
+        });
     });
         ');
+$this->registerCss("
+    tr:hover{cursor: pointer;}
+        ");
 ?>
 
 <section class="content-header">
@@ -43,7 +55,8 @@ $this->registerJs('
         <i class="fa fa-home"></i>  Ваши поставщики
         <small>Подключенные Вами поставщики и информация о них</small>
     </h1>
-    <?= ''
+    <?=
+    ''
 //    Breadcrumbs::widget([
 //        'options' => [
 //            'class' => 'breadcrumb',
@@ -89,7 +102,7 @@ $this->registerJs('
                 </div>
 
                 <div class="col-lg-5 col-md-6 col-sm-6"> 
-                    <?= Html::label('Начальная дата / Конечная дата', null, ['style' => 'color:#555']) ?>
+                        <?= Html::label('Начальная дата / Конечная дата', null, ['style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
                         <?=
                         DatePicker::widget([
@@ -135,110 +148,104 @@ $this->registerJs('
                             [
                                 'format' => 'raw',
                                 'attribute' => 'name',
+                                'value' => 'name',
+                                'label' => 'Имя поставщика',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'clientCount',
                                 'value' => function ($data) {
-                                    $link = Html::a($data["name"], ['organization/ajax-show-vendor', 'id' => $data["id"]], [
-                                                'data' => [
-                                                    'target' => '#vendorInfo',
-                                                    'toggle' => 'modal',
-                                                    'backdrop' => 'static',
-                                                ]
-                                    ]);
-                                    return $link;
+                                    $progress = $data["clientCount"] > 0 ? round($data["clientCount_prev30"] * 100 / $data["clientCount"], 2) : 0;
+//                                            if ($progress > 0) {
+                                    $divider = '<i class="fa fa-caret-up"></i>';
+                                    //                                          }
+                                    $class = "text-red";
+                                    if ($progress > 20) {
+                                        $class = "text-green";
+                                    } elseif ($progress > 0) {
+                                        $class = " text-orange";
+                                    }
+                                    return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                        'label' => 'Имя поставщика',
-                                    ],
-                                    [
-                                        'format' => 'raw',
-                                        'attribute' => 'clientCount',
-                                        'value' => function ($data) {
-                                            $progress = round($data["clientCount_prev30"] * 100 / $data["clientCount"], 2);
+                                'label' => 'Кол-во ресторанов',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'orderCount',
+                                'value' => function ($data) {
+                                    $progress = $data["orderCount"] > 0 ? round($data["orderCount_prev30"] * 100 / $data["orderCount"], 2) : 0;
 //                                            if ($progress > 0) {
-                                                $divider = '<i class="fa fa-caret-up"></i>';
-  //                                          }
-                                            $class = "text-red";
-                                            if ($progress > 20) {
-                                                $class = "text-green";
-                                            } elseif ($progress > 0) {
-                                                $class = " text-orange";
-                                            }
-                                            return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
-                                        },
-                                        'label' => 'Кол-во ресторанов',
-                                    ],
-                                    [
-                                        'format' => 'raw',
-                                        'attribute' => 'orderCount',
-                                        'value' => function ($data) {
-                                            $progress = round($data["orderCount_prev30"] * 100 / $data["orderCount"], 2);
+                                    $divider = '<i class="fa fa-caret-up"></i>';
+                                    //                                          }
+                                    $class = "text-red";
+                                    if ($progress > 20) {
+                                        $class = "text-green";
+                                    } elseif ($progress > 0) {
+                                        $class = " text-orange";
+                                    }
+                                    return $data["orderCount"] . " <span class='description-percentage $class'>$divider $progress%";
+                                },
+                                'label' => 'Кол-во заказов',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'orderSum',
+                                'value' => function ($data) {
+                                    $progress = $data["orderSum"] ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
 //                                            if ($progress > 0) {
-                                                $divider = '<i class="fa fa-caret-up"></i>';
-  //                                          }
-                                            $class = "text-red";
-                                            if ($progress > 20) {
-                                                $class = "text-green";
-                                            } elseif ($progress > 0) {
-                                                $class = " text-orange";
-                                            }
-                                            return $data["orderCount"] . " <span class='description-percentage $class'>$divider $progress%";
-                                        },
-                                        'label' => 'Кол-во заказов',
+                                    $divider = '<i class="fa fa-caret-up"></i>';
+                                    //                                          }
+                                    $class = "text-red";
+                                    if ($progress > 20) {
+                                        $class = "text-green";
+                                    } elseif ($progress > 0) {
+                                        $class = " text-orange";
+                                    }
+                                    return $data["orderSum"] . " <span class='description-percentage $class'>$divider $progress%";
+                                },
+                                'label' => 'Сумма заказов',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'created_at',
+                                'value' => function($data) {
+                                    $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
+                                    return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                                },
+                                'label' => 'Дата регистрации',
+                            ],
+                            [
+                                'attribute' => 'contact_name',
+                                'value' => 'contact_name',
+                                'label' => 'Контакт',
+                            ],
+                            [
+                                'attribute' => 'phone',
+                                'value' => 'phone',
+                                'label' => 'Телефон',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return Html::a('<i class="fa fa-signal"></i>', ['vendor/stats', 'id' => $data["id"]]);
+                                },
                                     ],
-                                    [
-                                        'format' => 'raw',
-                                        'attribute' => 'orderSum',
-                                        'value' => function ($data) {
-                                            $progress = round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2);
-//                                            if ($progress > 0) {
-                                                $divider = '<i class="fa fa-caret-up"></i>';
-  //                                          }
-                                            $class = "text-red";
-                                            if ($progress > 20) {
-                                                $class = "text-green";
-                                            } elseif ($progress > 0) {
-                                                $class = " text-orange";
-                                            }
-                                            return $data["orderSum"] . " <span class='description-percentage $class'>$divider $progress%";
-                                        },
-                                        'label' => 'Сумма заказов',
-                                    ],
-                                    [
-                                        'format' => 'raw',
-                                        'attribute' => 'created_at',
-                                        'value' => function($data) {
-                                            $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
-                                            return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
-                                        },
-                                        'label' => 'Дата регистрации',
-                                    ],
-                                    [
-                                        'attribute' => 'contact_name',
-                                        'value' => 'contact_name',
-                                        'label' => 'Контакт',
-                                    ],
-                                    [
-                                        'attribute' => 'phone',
-                                        'value' => 'phone',
-                                        'label' => 'Телефон',
-                                    ],
-                                    [
-                                        'format' => 'raw',
-                                        'value' => function($data) {
-                                            return Html::a('<i class="fa fa-signal"></i>', ['vendor/stats', 'id' => $data["id"]]);
-                                        },
-                                            ],
-                                        ],
-                                    ]);
-                                    ?>
-                                </div></div>
-                <?php Pjax::end() ?>
-                            <!-- /.table-responsive -->
-                        </div>
-                        <!-- /.box-body -->
-                    </div>
-                    <?php
-                    Modal::begin([
-                        'id' => 'vendorInfo',
-                    ]);
-                    ?>
-                <?php Modal::end(); ?>
+                                ],
+                                'rowOptions' => function ($model, $key, $index, $grid) {
+                            return ['data-url' => Url::to(['organization/ajax-show-vendor', 'id' => $model["id"]])];
+                        },
+                            ]);
+                            ?>
+                        </div></div>
+        <?php Pjax::end() ?>
+                    <!-- /.table-responsive -->
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <?php
+            Modal::begin([
+                'id' => 'vendorInfo',
+            ]);
+            ?>
+        <?php Modal::end(); ?>
 </section>

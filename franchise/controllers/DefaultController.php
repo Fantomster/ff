@@ -20,7 +20,8 @@ class DefaultController extends Controller {
 
     protected function loadCurrentUser() {
         $this->currentUser = Yii::$app->user->identity;
-        $this->currentFranchisee = \common\models\FranchiseeUser::findOne(['user_id' => $this->currentUser->id])->franchisee;
+        $frUser = \common\models\FranchiseeUser::findOne(['user_id' => $this->currentUser->id]);
+        $this->currentFranchisee = empty($rUser) ? null : $frUser->franchisee;
     }
     
     public function beforeAction($action) {

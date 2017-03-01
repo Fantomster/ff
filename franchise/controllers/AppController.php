@@ -5,12 +5,14 @@ namespace franchise\controllers;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use yii\helpers\Json;
 use common\components\AccessRule;
 use common\models\Role;
 use common\models\User;
 use common\models\Profile;
 use common\models\Organization;
 use common\models\Order;
+use common\models\CatalogBaseGoods;
 use yii\web\Response;
 
 /**
@@ -270,10 +272,147 @@ class AppController extends DefaultController {
     public function actionPromotion() {
         return $this->render('promotion');
     }
-    public function actionCatalog() {
+    public function actionCatalog($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        
-        return $this->render('catalog');
+        $searchString = "";
+        if (!empty(trim(\Yii::$app->request->get('searchString')))) {
+            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+//            
+//            $count = \common\models\CatalogBaseGoods::find()
+//            ->where([
+//            'cat_id'=>$id, 
+//            'deleted'=>\common\models\CatalogBaseGoods::DELETED_OFF
+//            ])
+//            ->andWhere(['like','product',$searchString])
+//            ->count();
+//            
+            $sql = "SELECT id,cat_id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
+                    . "WHERE cat_id = $id AND "
+                    . "deleted=0 AND (product LIKE :product or article LIKE :article)";
+            $query = \Yii::$app->db->createCommand($sql);
+            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $id AND "
+                            . "deleted=".CatalogBaseGoods::DELETED_OFF." AND (product LIKE :product or article LIKE :article)", 
+                    [':article' => $searchString, ':product' => $searchString])->queryScalar();
+        } else {
+            $sql = "SELECT id,article,cat_id,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
+                    . "WHERE cat_id = $id AND "
+                    . "deleted=".CatalogBaseGoods::DELETED_OFF;
+            $query = \Yii::$app->db->createCommand($sql);
+            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $id AND "
+                            . "deleted=".CatalogBaseGoods::DELETED_OFF, [':article' => $searchString, ':product' => $searchString])->queryScalar();
+        }
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'params' => [':article' => $searchString, ':product' => $searchString],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'ed',
+                    'note',
+                    'status',
+                    'cat_id'
+                ],
+            ],
+        ]);
+        return $this->render('catalog', compact('searchString', 'dataProvider', 'id'));
     }
+    public function actionAjaxEditCatalogForm() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $catalog = isset(Yii::$app->request->get()['catalog']) ? 
+                Yii::$app->request->get()['catalog'] : 
+                Yii::$app->request->post()['catalog'];
+        $product_id = isset(Yii::$app->request->get()['product_id'])?
+            Yii::$app->request->get()['product_id']:
+            $product_id = null;
+        
+        if(!empty(isset($product_id))){
+         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $product_id])->one(); 
+         $catalogBaseGoods->scenario = 'marketPlace';
+         if (!empty($catalogBaseGoods->category_id)) {
+            $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
+            $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
+        }
+        }else{
+         $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);  
+        }
+        
+        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
+	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
+        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
 
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($catalogBaseGoods->load($post)) {
+                $catalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
+                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+                if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->save();
+                        
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('catalog/_success', ['message' => $message]);
+                }
+            }
+        }
+        return $this->renderAjax('catalog/_ajaxEditCatalogForm', compact('catalogBaseGoods', 'countrys', 'catalog'));
+    }
+    
+    public function actionGetSubCat() {
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $id = end($_POST['depdrop_parents']);
+            $list = \common\models\MpCategory::find()->select(['id', 'name'])->
+                    andWhere(['parent' => $id])->
+                    asArray()->
+                    all();
+            $selected = null;
+            if ($id != null && count($list) > 0) {
+                $selected = '';
+                if (!empty($_POST['depdrop_params'])) {
+                    $params = $_POST['depdrop_params'];
+                    $id1 = $params[0]; // get the value of 1
+                    $id2 = $params[1]; // get the value of 2
+                    foreach ($list as $i => $cat) {
+                        $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
+                        if ($cat['id'] == $id1) {
+                            $selected = $cat['id'];
+                        }
+                        if ($cat['id'] == $id2) {
+                            $selected = $id2;
+                        }
+                    }
+                }
+                echo Json::encode(['output' => $out, 'selected' => $selected]);
+                return;
+            }
+        }
+        echo Json::encode(['output' => '', 'selected' => '']);
+    }
+    
+    public function actionAjaxDeleteProduct() {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $product_id = \Yii::$app->request->post('id');
+            $catalogBaseGoods = CatalogBaseGoods::updateAll([
+                'deleted' => CatalogBaseGoods::DELETED_ON,
+                'es_status' => CatalogBaseGoods::ES_DELETED
+                ], ['id' => $product_id]);
+            
+            $result = ['success' => true];
+            return $result;
+            exit;
+        }
+    }
+    
 }

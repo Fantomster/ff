@@ -887,7 +887,8 @@ class ClientController extends DefaultController {
                     $price = trim($arrCatalogs['dataItem']['price']);
                     $ed = trim($arrCatalogs['dataItem']['ed']);
                     $note = trim($arrCatalogs['dataItem']['note']);
-                    
+                    //сравниваем массивы каталога и пришедший массив
+                    //Если пришедший ID п есть в массиве каталога 
                     if(!ArrayHelper::isIn($goods_id,$array_goods_id)){
                         
                         $CatalogBaseGoods = new CatalogBaseGoods();

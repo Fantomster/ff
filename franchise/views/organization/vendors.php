@@ -227,7 +227,7 @@ $this->registerCss("
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a('<i class="fa fa-signal"></i>', ['vendor/stats', 'id' => $data["id"]]);
+                                    return Html::a('<i class="fa fa-signal"></i>', ['organization/vendor-stats', 'id' => $data["id"]]);
                                 },
                                     ],
                                 ],

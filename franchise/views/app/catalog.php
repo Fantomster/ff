@@ -167,7 +167,7 @@ $grid = [
         'attribute' => '',
         'label' => '',
         'format' => 'raw',
-        'contentOptions' => ['style' => 'width:50px;'],
+        'contentOptions' => ['style' => 'width:40px;'],
         'value' => function ($data) {
             $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                         'class' => 'btn btn-xs btn-danger del-product',

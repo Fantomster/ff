@@ -141,7 +141,7 @@ class AnalyticsController extends DefaultController {
                 ->groupBy(["$orgTable.id"])
                 ->count();
         $todayCount = $clientCountThisDay + $vendorCountThisDay;
-
+        
         $todayArr = [$clientCountThisDay, $vendorCountThisDay];
 
         $all = [];

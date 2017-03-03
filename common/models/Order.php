@@ -201,14 +201,14 @@ class Order extends \yii\db\ActiveRecord {
             Order::STATUS_FORMING => 'Формируется',
         ];
     }
-
+    
     public static function getStatusColors() {
         return [
-            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => '#11F011',
-            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => '#11A011',
-            Order::STATUS_PROCESSING => '#555555',
-            Order::STATUS_DONE => '#1111FF',
-            Order::STATUS_REJECTED => '#FF5555',
+            Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => '#368CBF',
+            Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT => '#f39c12',
+            Order::STATUS_PROCESSING => '#ccc',
+            Order::STATUS_DONE => '#7EBC59',
+            Order::STATUS_REJECTED => '#FB3640',
             Order::STATUS_CANCELLED => '#FF1111',
             Order::STATUS_FORMING => '#999999',
         ];

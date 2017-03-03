@@ -106,9 +106,9 @@ $form = ActiveForm::begin([
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row" style="margin-top:50px">
         <div class="col-md-12">
-            <h3>Зарегистрировано в период</h3>
+            <h3>Зарегистрировано за период <span class="text-bold text-primary">(<?= $total ?>)</span></h3>
             <div class="form-group" style="width: 350px;">
                 <?=
                 DatePicker::widget([
@@ -128,7 +128,6 @@ $form = ActiveForm::begin([
                 ])
                 ?>
             </div>
-            <span class="text-bold"><?= $total ?></span>
             <?=
             ChartJs::widget([
                 'type' => 'line',

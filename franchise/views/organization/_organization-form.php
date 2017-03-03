@@ -24,7 +24,7 @@ use common\models\Organization;
                             ->textInput()
                     ?>                    
                     <?= $form->field($organization, 'website')->textInput() ?>
-                    <?= $form->field($organization, 'about')->textarea(['rows' => 6]) ?>
+                    <?= $form->field($organization, 'about')->textarea(['rows' => 6,'style'=>'height: 96px;']) ?>
                     <br>
                     <fieldset>
                         <legend>Первый пользователь (Менеджер)</legend>

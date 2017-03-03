@@ -8,9 +8,9 @@ use yii\helpers\Url;
         <small>Статистика по заказам</small>
     </h1>
 </section>
-<section class="content body">
-    <div class="row">
-        <div class="col-md-12 nav-tabs-custom">
+<section class="content">
+    <div class="box box-info">
+        <div class="box-body">
 <?= 
 Tabs::widget([
     'items' => [

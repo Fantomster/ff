@@ -37,32 +37,32 @@ $form = ActiveForm::begin([
         ]);
 ?>
 
-<div class="row">
-    <div class="col-md-12 box box-primary"> 
+<div class="row" style="margin-top:50px">
+    <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title">Оборот в период</h3>
-            <div class="form-group" style="width: 350px;">
-                <?=
-                DatePicker::widget([
-                    'name' => 'date',
-                    'name2' => 'date2',
-                    'value' => $dateFilterFrom,
-                    'value2' => $dateFilterTo,
-                    'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
-                    'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
-                    'separator' => '-',
-                    'type' => DatePicker::TYPE_RANGE,
-                    'pluginOptions' => [
-                        'format' => 'dd.mm.yyyy', //'d M yyyy',//
-                        'autoclose' => true,
-                        'endDate' => "0d",
-                    ]
-                ])
-                ?>
-            </div>
-            <span class="text-bold"><?= $total ?> руб </span>
+            <h3 class="box-title">Оборот за период &nbsp;<span class="text-bold text-success"><?= $total ?> руб</span></h3>
         </div>
-        <div class="box-body">
+        <div class="form-group" style="width: 350px;">
+            <?=
+            DatePicker::widget([
+                'name' => 'date',
+                'name2' => 'date2',
+                'value' => $dateFilterFrom,
+                'value2' => $dateFilterTo,
+                'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
+                'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                'separator' => '-',
+                'type' => DatePicker::TYPE_RANGE,
+                'pluginOptions' => [
+                    'format' => 'dd.mm.yyyy', //'d M yyyy',//
+                    'autoclose' => true,
+                    'endDate' => "0d",
+                ]
+            ])
+            ?>
+        </div>
+    </div>
+    <div class="col-md-12">
             <?=
             ChartJs::widget([
                 'type' => 'line',
@@ -91,15 +91,13 @@ $form = ActiveForm::begin([
             ])
             ?>
 
-        </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-md-12 box box-primary"> 
+<div class="row" style="margin-top:50px">
+    <div class="col-md-12"> 
         <div class="box-header with-border">
             <h3 class="box-title">Общий оборот в месяц</h3>
         </div>
-        <div class="box-body">
             <?=
             ChartJs::widget([
                 'type' => 'bar',
@@ -120,15 +118,13 @@ $form = ActiveForm::begin([
                 ],
             ])
             ?>
-        </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-md-12 box box-primary"> 
+<div class="row" style="margin-top:50px">
+    <div class="col-md-12"> 
         <div class="box-header with-border">
             <h3 class="box-title">Средний оборот в месяц (на 1 ресторан)</h3>
         </div>
-        <div class="box-body">
             <?=
             ChartJs::widget([
                 'type' => 'bar',
@@ -149,15 +145,13 @@ $form = ActiveForm::begin([
                 ],
             ])
             ?>
-        </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-md-12 box box-primary"> 
+<div class="row" style="margin-top:50px">
+    <div class="col-md-12"> 
         <div class="box-header with-border">
             <h3 class="box-title">Средний чек в месяц (на 1 заказ)</h3>
         </div>
-        <div class="box-body">
             <?=
             ChartJs::widget([
                 'type' => 'bar',
@@ -178,7 +172,6 @@ $form = ActiveForm::begin([
                 ],
             ])
             ?>
-        </div>
     </div>
 </div>
 

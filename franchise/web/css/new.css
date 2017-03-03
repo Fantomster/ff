@@ -240,3 +240,6 @@ th > a:hover {
 .btn-fk-success:hover {
     background-color: #367fa9;
 }
+.skin-blue .main-header .navbar .sidebar-toggle:hover {
+    background-color: #367fa9;
+}

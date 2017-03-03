@@ -35,7 +35,7 @@ if (!Yii::$app->user->isGuest) {
 
                 <ul class="nav navbar-nav">
                     <li class="dropdown btn-add-menu">
-                        <a class="btn-add-client dropdown-toggle" data-toggle="dropdown" href="#" style="background: rgba(0, 0, 0, 0.1); font-weight: bold;" aria-expanded="false">
+                        <a class="btn-add-client dropdown-toggle" data-toggle="dropdown" href="#" style="background: rgba(0, 0, 0, 0.1);" aria-expanded="false">
                             <i class="fa fa-user-plus"></i> Добавить клиента <i class="fa fa-caret-down"></i>
                         </a>
                         <ul class="dropdown-menu">

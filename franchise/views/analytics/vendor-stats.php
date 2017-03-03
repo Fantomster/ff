@@ -8,7 +8,7 @@ use kartik\grid\GridView;
 <section class="content-header">
     <h1>
         <i class="fa fa-signal"></i> Аналитика
-        <small>Статистика ресторана <?= $client->name ?></small>
+        <small>Статистика поставщика <?= $vendor->name ?></small>
     </h1>
     <?= ''
 //    Breadcrumbs::widget([
@@ -26,7 +26,7 @@ use kartik\grid\GridView;
     <!-- /.box-header -->
     <div class="box-body">
         <div class="row">
-        <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
                     <span class="info-box-number"><?=$headerStats["ordersCount"];?></span>
@@ -34,15 +34,23 @@ use kartik\grid\GridView;
                 </div>
             </div>
         </div>
-        <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
-                    <span class="info-box-number"><?=$headerStats["vendorsCount"]?></span>
-                    <span class="info-box-text">Всего поставщиков</span>
+                    <span class="info-box-number"><?=$headerStats["goodsCount"];?></span>
+                    <span class="info-box-text">Всего товаров</span>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="col-md-3 col-sm-6 col-xs-12">
+            <div class="info-box bg-total-price">
+                <div class="info-box-content">
+                    <span class="info-box-number"><?=$headerStats["clientsCount"]?></span>
+                    <span class="info-box-text">Всего клиентов</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
                     <span class="info-box-number"><?=$headerStats["totalTurnover"];?> <i class="fa fa-fw fa-rub"></i></span>

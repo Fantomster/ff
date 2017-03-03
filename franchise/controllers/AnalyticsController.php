@@ -418,9 +418,9 @@ class AnalyticsController extends DefaultController {
         //---turnover by vendor end
         
         //---top goods start
-        $query = "SELECT TRUNCATE(SUM($contTable.price*quantity),2) AS sum_spent,SUM(quantity) AS quantity, $cbgTable.ed AS ed "
+        $query = "SELECT TRUNCATE(SUM($contTable.price*quantity),2) AS sum_spent,SUM(quantity) AS quantity, $cbgTable.ed AS ed, $cbgTable.product as name "
                 . "FROM $contTable LEFT JOIN `$orderTable` ON $contTable.order_id = `$orderTable`.id LEFT JOIN $cbgTable ON $contTable.product_id = $cbgTable.id "
-                . "WHERE status IN (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
+                . "WHERE `$orderTable`.status IN (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
                     . "AND `$orderTable`.client_id=" . $client->id . " AND `$orderTable`.created_at BETWEEN :dateFrom AND :dateTo "
                 . "GROUP BY product_id ORDER BY SUM($contTable.price*quantity) DESC";
         $topGoodsDP = new SqlDataProvider([
@@ -431,11 +431,110 @@ class AnalyticsController extends DefaultController {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('client-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'client'
             ));
         } else {
             return $this->render('client-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'client'
+            ));
+        }
+    }
+
+    /**
+     * Displays analytics for vendor
+     * 
+     * @return mixed
+     */
+    public function actionVendorStats($id) {
+        $vendor = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
+                ->one();
+
+        $orgTable = Organization::tableName();
+        $orderTable = Order::tableName();
+        $contTable = OrderContent::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+
+        //---header stats start
+        $headerStats["ordersCount"] = Order::find()
+                ->where(["vendor_id" => $vendor->id])
+                ->count();
+        $headerStats["goodsCount"] = CatalogBaseGoods::find()
+                ->where(["supp_org_id" => $vendor->id, "status" => CatalogBaseGoods::STATUS_ON, "deleted" => CatalogBaseGoods::DELETED_OFF])
+                ->count();
+        $headerStats["clientsCount"] = RelationSuppRest::find()
+                ->where(["supp_org_id" => $vendor->id])
+                ->count();
+        $headerStats["totalTurnover"] = Order::find()
+                ->where(['vendor_id' => $vendor->id, 'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
+                ->sum('total_price');
+        //---header stats end
+
+        $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : date("d.m.Y", strtotime(" -1 months"));
+        $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : date("d.m.Y");
+
+        $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
+        $end = $dtEnd->add(new \DateInterval('P1D'));
+        $date = $dt->format('Y-m-d');
+
+        //---turnover by day start
+
+        $query = "SELECT TRUNCATE(SUM(total_price),1) AS spent, YEAR(created_at) AS year, MONTH(created_at) AS month, DAY(created_at) AS day "
+                . "FROM `$orderTable` "
+                . "WHERE status IN (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
+                . "AND vendor_id = " . $vendor->id . " AND created_at BETWEEN :dateFrom AND :dateTo "
+                . "GROUP BY YEAR(created_at), MONTH(created_at), DAY(created_at)";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $ordersByDay = $command->queryAll();
+        $dayLabels = [];
+        $dayTurnover = [];
+        $dayCheque = [];
+        $total = 0;
+        foreach ($ordersByDay as $order) {
+            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayTurnover[] = $order["spent"];
+        }
+        //---turnover by day end
+        
+        //---turnover by client start
+        $query = "SELECT TRUNCATE(SUM(total_price),1) AS client_turnover, `$orgTable`.name AS name "
+                . "FROM `$orderTable` LEFT JOIN `$orgTable` ON `$orderTable`.vendor_id=`$orgTable`.id "
+                . "WHERE status IN (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
+                . "AND vendor_id = " . $vendor->id . " AND `$orderTable`.created_at BETWEEN :dateFrom AND :dateTo "
+                . "GROUP BY vendor_id";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $turnoverByClient = $command->queryAll();
+        $clientsTurnover['stats'] = [];
+        $clientsTurnover['labels'] = [];
+        $clientsTurnover['colors'] = [];
+        foreach ($turnoverByClient as $client) {
+            $clientsTurnover['stats'][] = $client['client_turnover'];
+            $clientsTurnover['labels'][] = $client['name'];
+            $clientsTurnover['colors'][] = $this->hex();
+        }
+        //---turnover by client end
+        
+        //---top goods start
+        $query = "SELECT TRUNCATE(SUM($contTable.price*quantity),2) AS sum_spent,SUM(quantity) AS quantity, $cbgTable.ed AS ed "
+                . "FROM $contTable LEFT JOIN `$orderTable` ON $contTable.order_id = `$orderTable`.id LEFT JOIN $cbgTable ON $contTable.product_id = $cbgTable.id "
+                . "WHERE `$orderTable`.status IN (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
+                    . "AND `$orderTable`.vendor_id=" . $vendor->id . " AND `$orderTable`.created_at BETWEEN :dateFrom AND :dateTo "
+                . "GROUP BY product_id ORDER BY SUM($contTable.price*quantity) DESC";
+        $topGoodsDP = new SqlDataProvider([
+            'sql' => $query,
+            'params' => [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')],
+        ]);
+        //---top goods end
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('vendor-stats', compact(
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'vendor'
+            ));
+        } else {
+            return $this->render('vendor-stats', compact(
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'vendor'
             ));
         }
     }

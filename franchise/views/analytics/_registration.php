@@ -51,8 +51,8 @@ $form = ActiveForm::begin([
                             'datasets' => [
                                 [
                                     'data' => $allTime,
-                                    'backgroundColor' => ["#b342f4", "#00FF00"],
-                                    'hoverBackgroundColor' => ["#b342f4", "#00FF00"],
+                                    'backgroundColor' => ["#7EBC59", "#368CBF"],
+                                    'hoverBackgroundColor' => ["#7EBC59", "#368CBF"],
                                 ]
                             ],
                         ],
@@ -73,8 +73,8 @@ $form = ActiveForm::begin([
                             'datasets' => [
                                 [
                                     'data' => $thisMonth,
-                                    'backgroundColor' => ["#b342f4", "#00FF00"],
-                                    'hoverBackgroundColor' => ["#b342f4", "#00FF00"],
+                                    'backgroundColor' => ["#7EBC59", "#368CBF"],
+                                    'hoverBackgroundColor' => ["#7EBC59", "#368CBF"],
                                 ]
                             ],
                         ],
@@ -95,8 +95,8 @@ $form = ActiveForm::begin([
                             'datasets' => [
                                 [
                                     'data' => $todayArr,
-                                    'backgroundColor' => ["#b342f4", "#00FF00"],
-                                    'hoverBackgroundColor' => ["#b342f4", "#00FF00"],
+                                    'backgroundColor' => ["#7EBC59", "#368CBF"],
+                                    'hoverBackgroundColor' => ["#7EBC59", "#368CBF"],
                                 ]
                             ],
                         ],
@@ -141,12 +141,12 @@ $form = ActiveForm::begin([
                     'datasets' => [
                         [
                             'label' => 'Все организации',
-                            'backgroundColor' => "rgba(0,0,255,0.2)",
-                            'borderColor' => "rgba(0,0,255,1)",
-                            'pointBackgroundColor' => "rgba(0,0,255,1)",
-                            'pointBorderColor' => "#00f",
-                            'pointHoverBackgroundColor' => "#00f",
-                            'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                            'backgroundColor' => "rgba(51,54,59,.2)",
+                            'borderColor' => "rgba(51,54,59,.8)",
+                            'pointBackgroundColor' => "rgba(51,54,59,1)",
+                            'pointBorderColor' => "rgba(51,54,59,1)",
+                            'pointHoverBackgroundColor' => "rgba(51,54,59,1)",
+                            'pointHoverBorderColor' => "rgba(51,54,59,1)",
                             'data' => $dayStats,
                             'spanGaps' => true,
                             'borderJoinStyle' => 'miter',
@@ -154,12 +154,12 @@ $form = ActiveForm::begin([
                         ],
                         [
                             'label' => 'Рестораны',
-                            'backgroundColor' => "rgba(179, 66, 244,0.2)",
-                            'borderColor' => "rgba(179, 66, 244,1)",
-                            'pointBackgroundColor' => "rgba(179, 66, 244,1)",
-                            'pointBorderColor' => "#f00",
-                            'pointHoverBackgroundColor' => "#f00",
-                            'pointHoverBorderColor' => "rgba(179, 66, 244,1)",
+                            'backgroundColor' => "rgba(126,188,89,.2)",
+                            'borderColor' => "rgba(126,188,89,.8)",
+                            'pointBackgroundColor' => "rgba(126,188,89,1)",
+                            'pointBorderColor' => "rgba(126,188,89,1)",
+                            'pointHoverBackgroundColor' => "rgba(126,188,89,1)",
+                            'pointHoverBorderColor' => "rgba(126,188,89,1)",
                             'data' => $clients,
                             'spanGaps' => true,
                             'borderJoinStyle' => 'miter',
@@ -167,12 +167,12 @@ $form = ActiveForm::begin([
                         ],
                         [
                             'label' => 'Поставщики',
-                            'backgroundColor' => "rgba(0,255,0,0.2)",
-                            'borderColor' => "rgba(0,255,0,1)",
-                            'pointBackgroundColor' => "rgba(0,255,0,1)",
-                            'pointBorderColor' => "#0f0",
-                            'pointHoverBackgroundColor' => "#0f0",
-                            'pointHoverBorderColor' => "rgba(0,255,0,1)",
+                            'backgroundColor' => "rgba(54,140,191,.2)",
+                            'borderColor' => "rgba(54,140,191,.8)",
+                            'pointBackgroundColor' => "rgba(54,140,191,1)",
+                            'pointBorderColor' => "rgba(54,140,191,1)",
+                            'pointHoverBackgroundColor' => "rgba(54,140,191,1)",
+                            'pointHoverBorderColor' => "rgba(54,140,191,1)",
                             'data' => $vendors,
                             'spanGaps' => true,
                             'borderJoinStyle' => 'miter',

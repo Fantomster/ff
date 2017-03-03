@@ -147,12 +147,12 @@ $form = ActiveForm::begin([
                     'datasets' => [
                         [
                             'label' => 'Все заказы',
-                            'backgroundColor' => "rgba(0,0,255,0.2)",
-                            'borderColor' => "rgba(0,0,255,1)",
-                            'pointBackgroundColor' => "rgba(0,0,255,1)",
-                            'pointBorderColor' => "#00f",
-                            'pointHoverBackgroundColor' => "#00f",
-                            'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                            'backgroundColor' => "rgba(54,140,191,.2)",
+                            'borderColor' => "rgba(54,140,191,.8)",
+                            'pointBackgroundColor' => "rgba(54,140,191,1)",
+                            'pointBorderColor' => "rgba(54,140,191,1)",
+                            'pointHoverBackgroundColor' => "rgba(54,140,191,1)",
+                            'pointHoverBorderColor' => "rgba(54,140,191,1)",
                             'data' => $dayStats,
                             'spanGaps' => true,
                             'borderJoinStyle' => 'miter',
@@ -160,12 +160,12 @@ $form = ActiveForm::begin([
                         ],
                         [
                             'label' => 'Первые заказы',
-                            'backgroundColor' => "rgba(179, 66, 244,0.2)",
-                            'borderColor' => "rgba(179, 66, 244,1)",
-                            'pointBackgroundColor' => "rgba(179, 66, 244,1)",
-                            'pointBorderColor' => "#f00",
-                            'pointHoverBackgroundColor' => "#f00",
-                            'pointHoverBorderColor' => "rgba(179, 66, 244,1)",
+                            'backgroundColor' => "rgba(126,188,89,.2)",
+                            'borderColor' => "rgba(126,188,89,.8)",
+                            'pointBackgroundColor' => "rgba(126,188,89,.1)",
+                            'pointBorderColor' => "rgba(126,188,89,1)",
+                            'pointHoverBackgroundColor' => "rgba(126,188,89,1)",
+                            'pointHoverBorderColor' => "rgba(126,188,89,1)",
                             'data' => $firstDayStats,
                             'spanGaps' => true,
                             'borderJoinStyle' => 'miter',
@@ -175,7 +175,6 @@ $form = ActiveForm::begin([
                 ],
             ])
             ?>
-
         </div>
     </div>
 </div>

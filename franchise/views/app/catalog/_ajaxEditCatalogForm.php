@@ -160,13 +160,7 @@ label {
     <h4 class="modal-title"><?=$catalogBaseGoods->isNewRecord ? 'ДОБАВЛЕНИЕ ТОВАРА':'РЕДАКТИРОВАНИЕ ТОВАРА'?></h4>
 </div>
 <div class="modal-body" style="background:#fff !important">
-	<div class="row">
-		<div class="col-md-12 text-center">
-                    <h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете
-                        <br><small>Товар будет доступен на площадке F-Market в течении 2 минут</small><h5>
-		</div>
-	</div>
-	<div class="row">
+	<!--div class="row">
 		<div class="col-md-12 text-center upload-block">
                     <?php
                     $this->registerJs("
@@ -205,7 +199,7 @@ label {
                             ->fileInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','id'=>'upload','accept'=>'image/*','style'=>'opacity: 0; z-index: -1;position: absolute;left: -9999px;']) ?>
                     <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
 		</div>
-	</div>
+	</div-->
 	<div class="row">
 		<div class="col-md-12">
 			<div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">

@@ -639,7 +639,7 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
 
-            if ($highestRow > 5000) {
+            if ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
@@ -668,7 +668,7 @@ class VendorController extends DefaultController {
                                 "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
                                 . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
                                 . ":cat_id,"
-                                . "0,"
+                                . "NULL,"
                                 . $currentUser->organization_id . ","
                                 . ":article,"
                                 . ":product,"

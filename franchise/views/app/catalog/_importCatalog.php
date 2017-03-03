@@ -10,15 +10,13 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
     'id' => 'import-form',
     'enableAjaxValidation' => false,
     'options' => ['enctype' => 'multipart/form-data'],
-    'action' => Url::toRoute(['vendor/import-to-xls','id'=>Yii::$app->request->get('id')])])
+    'action' => Url::toRoute(['app/import-from-xls','id'=>Yii::$app->request->get('id')])])
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Импорт товаров</h4>
 </div>
 <div class="modal-body">
-
-<?php //= Html::error($importModel, 'importFile', ['class' => 'help-block']); ?>
 <?= $form->field($importModel, 'importFile',['template' => "{error}\n{label}\n{hint}\n{input}"])->fileInput()->label('Выберите .XLSX') ?>
 </div>
 <div class="modal-footer">

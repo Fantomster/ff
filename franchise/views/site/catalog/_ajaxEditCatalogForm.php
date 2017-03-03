@@ -150,8 +150,8 @@ label {
     'id' => 'marketplace-product-form',
     'enableClientValidation' => true,
     'action' => $catalogBaseGoods->isNewRecord ? 
-        Url::toRoute(['app/ajax-edit-catalog-form', 'catalog' => $catalog]) : 
-        Url::toRoute(['app/ajax-edit-catalog-form', 'product_id' => $catalogBaseGoods->id, 'catalog' => $catalogBaseGoods->cat_id]),  
+        Url::toRoute(['site/ajax-edit-catalog-form', 'catalog' => $catalog]) : 
+        Url::toRoute(['site/ajax-edit-catalog-form', 'product_id' => $catalogBaseGoods->id, 'catalog' => $catalogBaseGoods->cat_id]),  
 ]); 
 ?>
 
@@ -189,7 +189,7 @@ label {
                                 'pluginOptions'=>[
                                     'depends'=>['catalogbasegoods-sub1'],
                                     'placeholder' => false,
-                                    'url' => Url::to(['app/get-sub-cat']),
+                                    'url' => Url::to(['site/get-sub-cat']),
                                     'loadingText' => 'Загрузка...',
                                     'initialize' => true,
                                     'params'=>['catalogBaseGoods_id1','input-type-2'],

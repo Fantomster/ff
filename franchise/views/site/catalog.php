@@ -151,7 +151,7 @@ $grid = [
                 'format' => 'raw',
                 'headerOptions' => ['style' => 'width:40px'],
                 'value' => function ($data) {
-            $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/app/ajax-edit-catalog-form',
+            $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/site/ajax-edit-catalog-form',
                         'product_id' => $data['id'], 'catalog' => $data['cat_id']], [
                         'data' => [
                             'target' => '#add-product-market-place',
@@ -212,7 +212,7 @@ $grid = [
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
-                            'href' => Url::to(['/app/ajax-edit-catalog-form', 'catalog' => $id]),
+                            'href' => Url::to(['/site/ajax-edit-catalog-form', 'catalog' => $id]),
                         ],
                     ])
                     ?>
@@ -227,7 +227,7 @@ $grid = [
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
-                            'href' => Url::to(['/app/import-from-xls', 'id' => $id]),
+                            'href' => Url::to(['/site/import-from-xls', 'id' => $id]),
                             'style' => 'margin-right:10px;',
                         ],
                     ])
@@ -325,7 +325,7 @@ window.clearTimeout(timer);
         type: 'GET',
         push: true,
         timeout: 10000,
-        url: 'index.php?r=app/catalog&id=$id',
+        url: 'index.php?r=site/catalog&id=$id',
         container: '#kv-unique-id-1',
         data: {searchString: $('#search').val()}
       })
@@ -351,7 +351,7 @@ $(document).on("click",".del-product", function(e){
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: "index.php?r=app/ajax-delete-product",
+	        url: "index.php?r=site/ajax-delete-product",
 	        type: "POST",
 	        dataType: "json",
 	        data: {'id' : id},

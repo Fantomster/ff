@@ -3,13 +3,25 @@
 namespace franchise\controllers;
 
 use Yii;
-use yii\web\Controller;
-use yii\helpers\Html;
+use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+use yii\helpers\Json;
+use common\components\AccessRule;
+use common\models\Role;
+use common\models\User;
+use common\models\Profile;
+use common\models\Organization;
+use common\models\Order;
+use common\models\CatalogBaseGoods;
+use yii\web\Response;
+use yii\web\UploadedFile;
 
 /**
- * Site controller
+ * Description of AppController
+ *
+ * @author sharaf
  */
-class SiteController extends Controller {
+class SiteController extends DefaultController {
 
     /**
      * @inheritdoc
@@ -23,176 +35,498 @@ class SiteController extends Controller {
     }
 
     /**
-     * Displays homepage.
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'only' => ['index', 'settings', 'promotion', 'users'],
+                'rules' => [
+                    [
+                        'actions' => ['index', 'settings', 'promotion', 'users'],
+                        'allow' => true,
+                        'roles' => [
+                            Role::ROLE_FRANCHISEE_OWNER,
+                            Role::ROLE_FRANCHISEE_OPERATOR,
+                            Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                ],
+//             'denyCallback' => function($rule, $action) {
+//              throw new \yii\web\HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+//              } 
+            ],
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'logout' => ['post'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Displays desktop.
      *
      * @return mixed
      */
     public function actionIndex() {
-        if (!Yii::$app->user->isGuest) {
-            return $this->redirect(["app/index"]);
+                
+        //---graph start
+        $query = "SELECT truncate(sum(total_price),1) as spent, year(created_at) as year, month(created_at) as month, day(created_at) as day "
+                . "FROM `order` LEFT JOIN `franchisee_associate` ON `order`.vendor_id = `franchisee_associate`.organization_id "
+                . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") "
+                . "and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " "
+                . "group by year(created_at), month(created_at), day(created_at)";
+        $command = Yii::$app->db->createCommand($query);
+        $ordersByDay = $command->queryAll();
+        $dayLabels = [];
+        $dayTurnover = [];
+        $total = 0;
+        foreach ($ordersByDay as $order) {
+            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayTurnover[] = $order["spent"];
+            $total += $order["spent"];
         }
-        $this->layout = 'main-landing';
-        if (Yii::$app->request->post('FIELDS')) {
-            $fields = Yii::$app->request->post('FIELDS');
-            $cname = Html::encode($fields['name']);
-            $cphone = Html::encode($fields['phone']);
-            $cemail = Html::encode($fields['email']);
+        //---graph end
 
-            $lpartner = isset($fields['partner']) ? Html::encode($fields['partner']) : '';
-            $lname = Html::encode($fields['lead_name']);
-            $response = null;
-            if (strlen(trim($cname)) < 2 || strlen(trim($cphone)) < 7 || strlen(trim($cemail)) < 2) {
-                die('error');
-            }
+        $params = Yii::$app->request->getQueryParams();
+        $searchModel = new \franchise\models\OrderSearch();
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
 
-            $responsible_user_id = 1295688; //id ответственного по сделке, контакту, компании
-            $lead_name = $lname; //Название добавляемой сделки
-            $lead_status_id = 465726; //id этапа продаж, куда помещать сделку
-            $contact_name = $cname; //Название добавляемого контакта
-            $contact_phone = $cphone; //Телефон контакта
-            $contact_email = $cemail; //Емейл контакта
-            $lead_partner = $lpartner; //Тип партнерства
-            //АВТОРИЗАЦИЯ
-            $user = array(
-                'USER_LOGIN' => 'artur@f-keeper.ru', #логин
-                'USER_HASH' => '98343695877a420c329e30940df91d71' #Хэш для доступа к API
-            );
-            $subdomain = 'fkeeper';
+        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover'));
+    }
 
-            #Формируем ссылку для запроса
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/auth.php?type=json';
-            $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
-            #Устанавливаем необходимые опции для сеанса cURL
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
-            curl_setopt($curl, CURLOPT_URL, $link);
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($user));
-            curl_setopt($curl, CURLOPT_HEADER, false);
-            curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
-            curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-            $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
-            $code = curl_getinfo($curl, CURLINFO_HTTP_CODE); #Получим HTTP-код ответа сервера
-            curl_close($curl);  #Завершаем сеанс cURL
-            $Response = json_decode($out, true);
+    /**
+     * Displays general settings
+     * 
+     * @return mixed
+     */
+    public function actionOrders() {
+        $searchModel = new \franchise\models\OrderSearch();
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = "01.02.2017";
 
-            //ПОЛУЧАЕМ ДАННЫЕ АККАУНТА
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/accounts/current'; #$subdomain уже объявляли выше
-            $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
-            //Устанавливаем необходимые опции для сеанса cURL
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
-            curl_setopt($curl, CURLOPT_URL, $link);
-            curl_setopt($curl, CURLOPT_HEADER, false);
-            curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
-            curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-            $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
-            $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            curl_close($curl);
-            $Response = json_decode($out, true);
-            $account = $Response['response']['account'];
-            //ПОЛУЧАЕМ СУЩЕСТВУЮЩИЕ ПОЛЯ
-            $amoAllFields = $account['custom_fields']; //Все поля
-            $amoConactsFields = $account['custom_fields']['contacts']; //Поля контактов
-            //echo '<b>Поля из амо:</b>'; echo '<pre>'; print_r($amoConactsFields); echo '</pre>';
-            //ФОРМИРУЕМ МАССИВ С ЗАПОЛНЕННЫМИ ПОЛЯМИ КОНТАКТА
-            //Стандартные поля амо:
-            $sFields = array_flip(array(
-                'PHONE', //Телефон. Варианты: WORK, WORKDD, MOB, FAX, HOME, OTHER
-                'EMAIL' //Email. Варианты: WORK, PRIV, OTHER
-                    )
-            );
-            //Проставляем id этих полей из базы амо
-            foreach ($amoConactsFields as $afield) {
-                if (isset($sFields[$afield['code']])) {
-                    $sFields[$afield['code']] = $afield['id'];
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("OrderSearch")) {
+            $params['OrderSearch'] = Yii::$app->request->post("OrderSearch");
+        }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('orders', compact('searchModel', 'dataProvider'));
+        } else {
+            return $this->render('orders', compact('searchModel', 'dataProvider'));
+        }
+    }
+
+    /**
+     * Displays general settings
+     * 
+     * @return mixed
+     */
+    public function actionSettings() {
+        return $this->render('/site/under-construction');
+    }
+
+    /**
+     * Displays franchise users list
+     * 
+     * @return mixed
+     */
+    public function actionUsers() {
+        /** @var \common\models\search\UserSearch $searchModel */
+        $searchModel = new \franchise\models\UserSearch();
+        //$params = Yii::$app->request->getQueryParams();
+        $params['UserSearch'] = Yii::$app->request->post("UserSearch");
+        $this->loadCurrentUser();
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('employees', compact('searchModel', 'dataProvider'));
+        } else {
+            return $this->render('employees', compact('searchModel', 'dataProvider'));
+        }
+    }
+
+    /*
+     *  User validate
+     */
+
+    public function actionAjaxValidateUser() {
+        $user = new User();
+        $profile = new Profile();
+
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($user->load($post)) {
+                $profile->load($post);
+
+                if ($user->validate() && $profile->validate()) {
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+                    return json_encode(ActiveForm::validateMultiple([$user, $profile]));
                 }
             }
+        }
+    }
 
-            //// Проверка на уже существующий контакт
+    /*
+     *  User create
+     */
 
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
-            $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
-            //Устанавливаем необходимые опции для сеанса cURL
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
-            curl_setopt($curl, CURLOPT_URL, $link);
-            curl_setopt($curl, CURLOPT_HEADER, false);
-            curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
-            curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+    public function actionAjaxCreateUser() {
+        $user = new User(['scenario' => 'manageNew']);
+        $profile = new Profile();
+        $organizationType = Organization::TYPE_FRANCHISEE;
 
-            $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
-            $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            curl_close($curl);
-            $this->CheckCurlResponse($code);
-            if ($out) {
-            //die('Контакт с таким телефоном уже существует в amoCRM');
-                die('errorPhone');
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($user->load($post)) {
+                $profile->load($post);
+
+                if ($user->validate() && $profile->validate()) {
+
+                    $user->setRegisterAttributes($user->role_id)->save();
+                    $profile->setUser($user->id)->save();
+                    $user->setFranchisee($this->currentFranchisee->id);
+//                    $this->currentUser->sendEmployeeConfirmation($user);
+                    $message = 'Пользователь добавлен!';
+                    return $this->renderAjax('settings/_success', ['message' => $message]);
+                }
             }
+        }
+
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+    }
+
+    /*
+     *  User update
+     */
+
+    public function actionAjaxUpdateUser($id) {
+        $user = User::find()
+                ->joinWith("franchiseeUser")
+                ->where([
+                    'franchisee_user.franchisee_id' => $this->currentFranchisee->id,
+                    'user.id' => $id
+                ])
+                ->one();
+        $user->setScenario("manage");
+        $profile = $user->profile;
+        $organizationType = Organization::TYPE_FRANCHISEE;
+
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($user->load($post)) {
+                $profile->load($post);
+
+                if ($user->validate() && $profile->validate()) {
+
+                    $user->save();
+                    $profile->save();
+
+                    $message = 'Пользователь обновлен!';
+                    return $this->renderAjax('settings/_success', ['message' => $message]);
+                }
+            }
+        }
+
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+    }
+
+    /*
+     *  User delete (not actual delete, just remove organization relation)
+     */
+
+    public function actionAjaxDeleteUser() {
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($post && isset($post['id'])) {
+                $user = $user = User::find()
+                        ->joinWith("franchiseeUser")
+                        ->where([
+                            'franchisee_user.franchisee_id' => $this->currentFranchisee->id,
+                            'user.id' => $post["id"],
+                        ])
+                        ->one();
+                $usersCount = count($this->currentFranchisee->franchiseeUsers);
+                if ($user->id == $this->currentUser->id) {
+                    $message = 'Может воздержимся от удаления себя?';
+                    return $this->renderAjax('settings/_success', ['message' => $message]);
+                }
+                if ($user && ($usersCount > 1)) {
+                    $user->role_id = Role::ROLE_USER;
+                    $user->organization_id = null;
+                    if ($user->save() && $user->franchiseeUser->delete()) {
+                        $message = 'Пользователь удален!';
+                        return $this->renderAjax('settings/_success', ['message' => $message]);
+                    }
+                }
+            }
+        }
+        $message = 'Не удалось удалить пользователя!';
+        return $this->renderAjax('settings/_success', ['message' => $message]);
+    }
+
+    /**
+     * Displays promotion
+     * 
+     * @return mixed
+     */
+    public function actionPromotion() {
+        return $this->render('promotion');
+    }
+    public function actionCatalog($id) {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchString = "";
+        if (!empty(trim(\Yii::$app->request->get('searchString')))) {
+            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+//            
+//            $count = \common\models\CatalogBaseGoods::find()
+//            ->where([
+//            'cat_id'=>$id, 
+//            'deleted'=>\common\models\CatalogBaseGoods::DELETED_OFF
+//            ])
+//            ->andWhere(['like','product',$searchString])
+//            ->count();
+//            
+            $sql = "SELECT id,cat_id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
+                    . "WHERE cat_id = $id AND "
+                    . "deleted=0 AND (product LIKE :product or article LIKE :article)";
+            $query = \Yii::$app->db->createCommand($sql);
+            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $id AND "
+                            . "deleted=".CatalogBaseGoods::DELETED_OFF." AND (product LIKE :product or article LIKE :article)", 
+                    [':article' => $searchString, ':product' => $searchString])->queryScalar();
+        } else {
+            $sql = "SELECT id,article,cat_id,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
+                    . "WHERE cat_id = $id AND "
+                    . "deleted=".CatalogBaseGoods::DELETED_OFF;
+            $query = \Yii::$app->db->createCommand($sql);
+            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
+                            . "WHERE cat_id = $id AND "
+                            . "deleted=".CatalogBaseGoods::DELETED_OFF, [':article' => $searchString, ':product' => $searchString])->queryScalar();
+        }
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => $query->sql,
+            'totalCount' => $totalCount,
+            'params' => [':article' => $searchString, ':product' => $searchString],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'article',
+                    'product',
+                    'units',
+                    'category_id',
+                    'price',
+                    'ed',
+                    'note',
+                    'status',
+                    'cat_id'
+                ],
+            ],
+        ]);
+        return $this->render('catalog', compact('searchString', 'dataProvider', 'id'));
+    }
+    public function actionAjaxEditCatalogForm() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $catalog = isset(Yii::$app->request->get()['catalog']) ? 
+                Yii::$app->request->get()['catalog'] : 
+                Yii::$app->request->post()['catalog'];
+        $product_id = isset(Yii::$app->request->get()['product_id'])?
+            Yii::$app->request->get()['product_id']:
+            $product_id = null;
+        
+        if(!empty(isset($product_id))){
+         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $product_id])->one(); 
+         $catalogBaseGoods->scenario = 'marketPlace';
+         if (!empty($catalogBaseGoods->category_id)) {
+            $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
+            $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
+        }
+        }else{
+         $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);  
+        }
+        
+        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
+	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
+        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($catalogBaseGoods->load($post)) {
+                $catalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
+                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+                if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->save();
+                        
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('catalog/_success', ['message' => $message]);
+                }
+            }
+        }
+        return $this->renderAjax('catalog/_ajaxEditCatalogForm', compact('catalogBaseGoods', 'countrys', 'catalog'));
+    }
+    
+    public function actionGetSubCat() {
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $id = end($_POST['depdrop_parents']);
+            $list = \common\models\MpCategory::find()->select(['id', 'name'])->
+                    andWhere(['parent' => $id])->
+                    asArray()->
+                    all();
+            $selected = null;
+            if ($id != null && count($list) > 0) {
+                $selected = '';
+                if (!empty($_POST['depdrop_params'])) {
+                    $params = $_POST['depdrop_params'];
+                    $id1 = $params[0]; // get the value of 1
+                    $id2 = $params[1]; // get the value of 2
+                    foreach ($list as $i => $cat) {
+                        $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
+                        if ($cat['id'] == $id1) {
+                            $selected = $cat['id'];
+                        }
+                        if ($cat['id'] == $id2) {
+                            $selected = $id2;
+                        }
+                    }
+                }
+                echo Json::encode(['output' => $out, 'selected' => $selected]);
+                return;
+            }
+        }
+        echo Json::encode(['output' => '', 'selected' => '']);
+    }
+    
+    public function actionAjaxDeleteProduct() {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $product_id = \Yii::$app->request->post('id');
+            $catalogBaseGoods = CatalogBaseGoods::updateAll([
+                'deleted' => CatalogBaseGoods::DELETED_ON,
+                'es_status' => CatalogBaseGoods::ES_DELETED
+                ], ['id' => $product_id]);
             
-            //ДОБАВЛЯЕМ СДЕЛКУ
-            $roistatData = array(
-                'roistat' => isset($_COOKIE['roistat_visit']) ? $_COOKIE['roistat_visit'] : null,
-                'key' => 'MTMyMjU6MzQwNjY6Mzk0MDdmZjFmMDljMDQ3N2Y3Mjc1Yzk1MTg4ZWNjYTk=', // Замените SECRET_KEY на секретный ключ из пункта меню Каталог интеграций -> Ваша CRM -> Настройки -> в нижней части экрана и строчке Ключ для интеграций
-                'title' => $lname,
-                //'comment' => 'Комментарий к сделке',
-                'name' => $cname,
-                'email' => $cemail,
-                'phone' => $cphone,
-                'is_need_callback' => '0', // Для автоматического использования обратного звонка при отправке контакта и сделки нужно поменять 0 на 1
-                'fields' => array(
-                    // Массив дополнительных полей, если нужны, или просто пустой массив. Более подробно про работу доп. полей можно посмотреть в видео в начале статьи
-                    // Примеры использования:
-                    "price" => 0, // Поле бюджет в amoCRM
-                    "responsible_user_id" => $responsible_user_id, // Ответственный по сделке
-                    '85130' => $lpartner, // Заполнение доп. поля 
-                    "status_id" => $lead_status_id, // Создавать лид с определенным статусом в определенной воронке. Указывать необходимо ID статуса.
-                //"charset" => "Windows-1251", // Сервер преобразует значения полей из указанной кодировки в UTF-8
-                //"tags" => "Тег1, Тег2", // Название тегов через запятую
-                ),
-            );
-            $this->send_form("https://cloud.roistat.com/api/proxy/1.0/leads/add?" . http_build_query($roistatData));
-            die('success');
-        }
-        return $this->render('index');
-    }
-
-    private function CheckCurlResponse($code) {
-        $code = (int) $code;
-        $errors = array(
-            301 => 'Moved permanently',
-            400 => 'Bad request',
-            401 => 'Unauthorized',
-            403 => 'Forbidden',
-            404 => 'Not found',
-            500 => 'Internal server error',
-            502 => 'Bad gateway',
-            503 => 'Service unavailable'
-        );
-        try {
-            #Если код ответа не равен 200 или 204 - возвращаем сообщение об ошибке
-            if ($code != 200 && $code != 204)
-                throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error', $code);
-        } catch (Exception $E) {
-            //die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-            die('error');
+            $result = ['success' => true];
+            return $result;
+            exit;
         }
     }
+    public function actionImportFromXls($id) {
+        $vendor = \common\models\Catalog::find()->where([
+            'id'=>$id,
+            'type'=>\common\models\Catalog::BASE_CATALOG
+                ])
+                ->one()
+                ->vendor;
+        $importModel = new \common\models\upload\UploadForm();
+        if (Yii::$app->request->isPost) {
+            $unique = 'article'; //уникальное поле
+            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where([
+                'cat_id' => $id, 
+                'deleted' => CatalogBaseGoods::DELETED_OFF
+                    ])->asArray()->all();
+            $count_array = count($sql_array_products);
+            $arr = [];
+            //массив артикулов из базы
+            for ($i = 0; $i < $count_array; $i++) {
+                array_push($arr, $sql_array_products[$i][$unique]);
+            }
 
-    private function send_form($url) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Устанавливаем параметр, чтобы curl возвращал данные, вместо того, чтобы выводить их в браузер.
-        curl_setopt($ch, CURLOPT_URL, $url);
-        $data = curl_exec($ch);
-        curl_close($ch);
-        die('success');
+            $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
+            $path = $importModel->upload();
+            if (!is_readable($path)) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
+                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }
+            $localFile = \PHPExcel_IOFactory::identify($path);
+            $objReader = \PHPExcel_IOFactory::createReader($localFile);
+            $objPHPExcel = $objReader->load($path);
+
+            $worksheet = $objPHPExcel->getSheet(0);
+            $highestRow = $worksheet->getHighestRow(); // получаем количество строк
+            $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
+            $newRows = 0;
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                if (!in_array($row_article, $arr)) {
+                    $newRows++;
+                }
+            }
+            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше '.CatalogBaseGoods::MAX_INSERT_FROM_XLS.' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+                    $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
+                    $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
+                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
+                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row));  //Комментарий
+                    if (!empty($row_article && $row_product && $row_price && $row_ed)) {
+                        if (empty($row_units) || $row_units < 0) {
+                            $row_units = 0;
+                        }
+                        if (in_array($row_article, $arr)) {
+                            $CatalogBaseGoods = CatalogBaseGoods::find()->where([
+                            'cat_id' => $id,
+                            'article' => $row_article 
+                            ])->one();
+                            $CatalogBaseGoods->product = $row_product;
+                            $CatalogBaseGoods->units = $row_units;
+                            $CatalogBaseGoods->price = $row_price;
+                            $CatalogBaseGoods->ed = $row_ed;
+                            $CatalogBaseGoods->note = $row_note;
+                            $CatalogBaseGoods->es_status = CatalogBaseGoods::ES_UPDATE;
+                            $CatalogBaseGoods->save();
+                           
+                        } else {
+                            $CatalogBaseGoods = new CatalogBaseGoods();
+                            $CatalogBaseGoods->cat_id = $id;
+                            $CatalogBaseGoods->supp_org_id = $vendor->id;
+                            $CatalogBaseGoods->article = $row_article;
+                            $CatalogBaseGoods->product = $row_product;
+                            $CatalogBaseGoods->units = $row_units;
+                            $CatalogBaseGoods->price = $row_price;
+                            $CatalogBaseGoods->ed = $row_ed;
+                            $CatalogBaseGoods->note = $row_note;
+                            $CatalogBaseGoods->save();
+                        }
+                    }
+                }
+                $transaction->commit();
+                unlink($path);
+                return $this->redirect(['site/catalog', 'id' => $id]);
+            } catch (Exception $e) {
+                unlink($path);
+                $transaction->rollback();
+                Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
+                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+            }
+        }
+
+        return $this->renderAjax('catalog/_importCatalog', compact('importModel'));
     }
-
 }

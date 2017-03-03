@@ -19,7 +19,7 @@ use yii\helpers\Html;
                   <div class="col-md-4">
                     <img width="163" height="100" src="<?= $vendor->pictureUrl ?>">
                     <div class="btn-edite">
-                      <?=Html::a('Базовый прайс-лист',['app/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block'])?>
+                      <?=Html::a('Базовый прайс-лист',['site/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block'])?>
                       <!-- <button type="button" class="btn btn-strip-green btn-block">Аналитика</button> -->
                     </div>
                   </div>
@@ -56,7 +56,7 @@ use yii\helpers\Html;
                   <div class="col-md-4">
                     <img width="163" height="100" src="<?= $vendor->pictureUrl ?>">
                     <div class="btn-edite">
-                      <?=Html::a('Базовый прайс-лист',['app/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block'])?>
+                      <?=Html::a('Базовый прайс-лист',['site/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block'])?>
                       <a href="" class="btn btn-strip-green btn-block">Аналитика</a>
                     </div>
                   </div>

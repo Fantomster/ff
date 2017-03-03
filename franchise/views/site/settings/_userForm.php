@@ -15,11 +15,11 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                     'id' => 'user-form',
                     'enableAjaxValidation' => true,
                     'enableClientValidation' => true,
-                    'action' => $user->isNewRecord ? Url::toRoute('app/ajax-create-user') : Url::toRoute(['app/ajax-update-user', 'id' => $user->id]),
+                    'action' => $user->isNewRecord ? Url::toRoute('site/ajax-create-user') : Url::toRoute(['site/ajax-update-user', 'id' => $user->id]),
                     'options' => [
                         'class' => 'user-form',
                     ],
-                    'validationUrl' => Url::toRoute('app/ajax-validate-user'),
+                    'validationUrl' => Url::toRoute('site/ajax-validate-user'),
         ]);
         ?>
         <div class="modal-header">

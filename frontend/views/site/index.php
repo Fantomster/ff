@@ -17,8 +17,10 @@ $this->title = 'F-keeper';
 <header class="header" style="background-image: url(images/header-banner.jpg)">
     <div class="inside__block">
         <div class="site__title"> 
-            <h1>Автоматизация закупок<br/>между поставщиками и ресторанами</h1>
-            <h2>Никогда закупка не была проще, чем сейчас</h2>
+            <h1>Онлайн-сервис 
+                для автоматизации закупок<br>
+в сфере HoReCa
+</h1>
         </div>
         <div class="buttons__block">
             <?= Html::a('<span>для ресторанов</span>', ["/site/restaurant"], ['class' => 'for__restaurants']) ?>

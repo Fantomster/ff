@@ -1,3 +1,8 @@
+<?php
+use yii\helpers\Url;
+use yii\web\View;
+use yii\helpers\Html;
+?>
 <div class="modal-dialog nav-tabs-custom" style="border-radius: 3px;">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">Поставщик</a></li>
@@ -14,7 +19,7 @@
                   <div class="col-md-4">
                     <img width="163" height="100" src="<?= $vendor->pictureUrl ?>">
                     <div class="btn-edite">
-                      <button type="button" class="btn btn-green btn-block">Базовый прайс-лист</button>
+                      <?=Html::a('Базовый прайс-лист',['app/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block'])?>
                       <!-- <button type="button" class="btn btn-strip-green btn-block">Аналитика</button> -->
                     </div>
                   </div>
@@ -51,8 +56,8 @@
                   <div class="col-md-4">
                     <img width="163" height="100" src="<?= $vendor->pictureUrl ?>">
                     <div class="btn-edite">
-                      <button type="button" class="btn btn-green btn-block">Базовый прайс-лист</button>
-                      <button type="button" class="btn btn-strip-green btn-block">Аналитика</button>
+                      <?=Html::a('Базовый прайс-лист',['app/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block'])?>
+                      <a href="" class="btn btn-strip-green btn-block">Аналитика</a>
                     </div>
                   </div>
                   <div class="col-md-8">

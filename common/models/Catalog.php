@@ -17,11 +17,11 @@ use Yii;
  */
 class Catalog extends \yii\db\ActiveRecord
 {    
-	const BASE_CATALOG = 1;
-	const CATALOG = 2;
+    const BASE_CATALOG = 1;
+    const CATALOG = 2;
 	
     const NON_CATALOG = 0;
-    
+    const CATALOG_BASE_NAME = 'Главный каталог';
     const STATUS_ON = 1;
     const STATUS_OFF = 0;
     /**

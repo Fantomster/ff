@@ -1,11 +1,10 @@
-// --------------------------------------- NEWWWWWW ----------------------------------//
-
+body {
+    color: #33363B;
+}
 .modal-header {
-  background: #000 !important;
-  color: #fff;
-  text-transform: uppercase;
-  border-bottom: 0;
-  text-align: center;
+    text-transform: uppercase;
+    border-bottom: 0;
+    text-align: center;
 }
 
 .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
@@ -14,7 +13,6 @@
     background-color: #fff;
     border: 1px solid #fff; 
     border-bottom-color: transparent;
-    // box-shadow: 0 2px 3px rgba(0,0,0,0.125);
 }
 
 
@@ -28,30 +26,30 @@
 }
 
 .btn-edite {
-  margin-top: 5px;
+    margin-top: 5px;
 }
 
 .btn-strip-green {
-  border: 1px solid #7EBC59;
-  color: #7EBC59;
-  background-color: transparent;
-  border-radius: 0;
+    border: 1px solid #7EBC59;
+    color: #7EBC59;
+    background-color: transparent;
+    border-radius: 0;
 }
 
 .btn-strip-green:hover {
-  border: 1px solid #33363b;
-  color: #33363b;
+    border: 1px solid #33363b;
+    color: #33363b;
 }
 
 .btn-green {
-  background-color: #7EBC59;
-  color: #fff;
-  border-radius: 0;
+    background-color: #7EBC59;
+    color: #fff;
+    border-radius: 0;
 }
 
 .btn-green:hover {
-  color: #fff;
-  background-color: rgba(126, 188, 89, 0.8);
+    color: #fff;
+    background-color: rgba(126, 188, 89, 0.8);
 }
 
 label {
@@ -62,17 +60,12 @@ label {
 }
 
 .edite-place .form-group {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .pagination > .active > a, .pagination > .active > span, .pagination > .active > a:hover, .pagination > .active > span:hover, .pagination > .active > a:focus, .pagination > .active > span:focus {
     background-color: #368cbf;
     border-color: #317eac;
-}
-
-.table-hover>tbody>tr:hover {
-    background-color: transparent; //hover-effect
-    color: #fff;
 }
 
 .text-green {
@@ -117,42 +110,119 @@ label {
 }
 
 .btn-add-catalogs {
-  display: block;
-  width: 300px;
-  margin: 0 auto;
-  padding: 6px 10px;
+    display: block;
+    width: 300px;
+    margin: 0 auto;
+    padding: 6px 10px;
 }
 
 legend {
-  color: #368cbf;
-  border-bottom: 2px solid #368cbf;
-  background-color: #fff;
-  padding: 5px 5px;
-  // border-radius: 20px;
-  font-size: 18px;
-  font-weight: bold;
+    color: #368cbf;
+    border-bottom: 2px solid #368cbf;
+    background-color: #fff;
+    padding: 5px 5px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 label {
-  color: #33363B;
+    color: #33363B;
 
 }
 
-// .nav-tabs-custom>.nav-tabs>li {
-//   margin-bottom: 0;
-// }
+.box {
+    position: relative;
+    border-radius: 3px;
+    background: #ffffff;
+    border-top: 3px solid #368CBF;
+    margin-bottom: 20px;
+    width: 100%;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.3);
+}
+
+.filters {
+    margin-top: 20px;
+}
 
 
+.table-max >tbody>tr>td {
+    padding: 20px;
+    color: rgba(51, 54, 59, 0.8);
+}
 
+.table-max >tbody>tr>th {
+    padding: 0 20px 20px 20px;
+    border-top: 0px solid #7EBC59;
+    color: rgba(51, 54, 59, 1);
+}
 
+tr.tr-id {
+    cursor: pointer;
+}
 
+.tr-id:hover {
+    background-color: #f8f9fb !important;
+}
 
+.tr-id:focus, .tr-id:active, .tr-id:visited {
+    background-color: #fff !important;
+    border: 2px solid #7EBC59 !important;
+}
 
+.tr-id:focus, .tr-id:active, .tr-id:visited td {
+    color: #fff;
+}
 
+.table-btns a {
+    padding-right: 7px;
+}
 
+.box-title, .box-title a {
+    color: #33363B;
+}
 
+.box-title a .line-before {
+    display: inline-block;
+    width: 20px;
+    height: 2px;
+    background-color: #368CBF;
+    margin-bottom: 4px;
+    margin-right: 10px;
+}
 
+.arrow-open {
+    display: inline-block;
+    padding-left: 5px;
+}
 
+.arrow-open i {
+    font-size: 14px;
+}
 
+.pay-table tr td {
+    padding: 8px 0;
+}
 
+.pay-table tr th {
+    padding: 12px 0;
+}
 
+.download-by-m {
+    margin-top: 15px;
+}
+
+.skin-blue .main-header li.user-header {
+    background-color: #fff;
+}
+.navbar-nav>.user-menu>.dropdown-menu>li.user-header>p {
+    color: #33363B;
+}
+.form-control:focus {
+    border-color: #368CBF;
+}
+.datepicker table tr td.active.active {
+    background-color: #368CBF;
+}
+.datepicker table tr td.active.active:hover {
+    background-color: rgba(54,140,191,0.6);
+}

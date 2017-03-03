@@ -1,3 +1,6 @@
+<?php
+use yii\helpers\Html;
+?>
 <div class="modal-dialog nav-tabs-custom" style="border-radius: 3px;">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">Ресторан</a></li>
@@ -14,7 +17,7 @@
                   <div class="col-md-4">
                       <img width="163" height="100" src="<?= $client->pictureUrl ?>">
                     <div class="btn-edite">
-                      <!-- <button type="button" class="btn btn-strip-green btn-block">Аналитика</button> -->
+                      <?= Html::a('Аналитика', ['analytics/client-stats', 'id' => $client->id], ['class' => "btn btn-strip-green btn-block"]) ?>
                     </div>
                   </div>
                   <div class="col-md-8">
@@ -50,7 +53,7 @@
                   <div class="col-md-4">
                     <img width="163" height="100" src="<?= $client->pictureUrl ?>">
                     <div class="btn-edite">
-                      <button type="button" class="btn btn-strip-green btn-block">Аналитика</button>
+                      <?= Html::a('Аналитика', ['analytics/client-stats', 'id' => $client->id], ['class' => "btn btn-strip-green btn-block"]) ?>
                     </div>
                   </div>
                   <div class="col-md-8">

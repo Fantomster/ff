@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\Breadcrumbs;
 use common\models\Order;
 use common\models\Organization;
@@ -10,7 +11,6 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 use dosamigos\chartjs\ChartJs;
-
 ?>
 <section class="content-header">
     <h1>
@@ -25,7 +25,7 @@ use dosamigos\chartjs\ChartJs;
                 <div class="box-header with-border">
                     <h3 class="box-title">Объем продаж ваших клиентов</h3>
                     <div class="box-tools pull-right">
-<?= Html::a("Аналитика", ["analytics/index"], ["class" => "btn btn-success btn-sm"]) ?>
+                        <?= Html::a("Аналитика", ["analytics/index"], ["class" => "btn btn-success btn-sm"]) ?>
                     </div>
                 </div>
                 <div class="box-body">
@@ -34,20 +34,21 @@ use dosamigos\chartjs\ChartJs;
                         ChartJs::widget([
                             'type' => 'line',
                             'options' => [
-                                'height' => 400,
-                                'width' => 800,
+                                'height' => 396,
+                                'width' => 1055,
+                               // 'maintainAspectRatio' => false,
                             ],
                             'data' => [
                                 'labels' => $dayLabels,
                                 'datasets' => [
                                     [
                                         'label' => 'Все заказы',
-                                        'backgroundColor' => "rgba(0,0,255,0.2)",
-                                        'borderColor' => "rgba(0,0,255,1)",
-                                        'pointBackgroundColor' => "rgba(0,0,255,1)",
-                                        'pointBorderColor' => "#00f",
-                                        'pointHoverBackgroundColor' => "#00f",
-                                        'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                                        'backgroundColor' => "rgba(126,188,89,0.2)",
+                                        'borderColor' => "rgba(126,188,89,1)",
+                                        'pointBackgroundColor' => "rgba(126,188,89,1)",
+                                        'pointBorderColor' => "#7EBC59",
+                                        'pointHoverBackgroundColor' => "#7EBC59",
+                                        'pointHoverBorderColor' => "rgba(126,188,89,1)",
                                         'data' => $dayTurnover,
                                         'spanGaps' => true,
                                         'borderJoinStyle' => 'miter',
@@ -107,30 +108,63 @@ use dosamigos\chartjs\ChartJs;
             <div class="box box-info">
                 <div class="box-header with-border">
                     <h3 class="box-title">Статистика</h3>
-
                     <div class="box-tools pull-right">
-<?= Html::a("Аналитика", ["analytics/index"], ["class" => "btn btn-success btn-sm"]) ?>
-                    </div>
+                        <a class="btn btn-success btn-sm" href="/index.php?r=client%2Fsuppliers">Финансовая аналитика</a>          </div>
                 </div>
-                <div class="box-body">
-                    <div id="suppliers-list" data-pjax-container="" data-pjax-timeout="10000">            <div id="w0" class="table-responsive hide-resize" data-krajee-grid="kvGridInit_0dd787c6">
-                            <div id="w0-container" class="table-responsive kv-grid-container"><table class="table no-margin kv-grid-table table-hover kv-table-wrap"><tbody>
-                                        <tr data-key="0"><td data-col-seq="0">Кол-во поставщиков:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200</h5></td></tr>
 
-                                        <tr data-key="0"><td data-col-seq="0">Кол-во ресторанов:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200</h5></td></tr>
-                                        <tr data-key="0"><td data-col-seq="0">Долг на начало месяца:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200 руб.</h5></td></tr>
-                                        <tr data-key="0"><td data-col-seq="0">Долг на конец месяца:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200 руб.</h5></td></tr>
-                                        <tr data-key="0"><td data-col-seq="0">Начислено:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200 руб.</h5></td></tr>
-                                        <tr data-key="0"><td data-col-seq="0">Перерасчет:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200 руб.</h5></td></tr>
-                                        <tr data-key="0"><td data-col-seq="0">Баланс за день:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200 руб. / <span style="color: #dd4b39;">2800 руб.</span></h5></td></tr>
-                                        <tr data-key="0"><td data-col-seq="0">Баланс за месяц:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200 руб. / <span style="color: #dd4b39;">2800 руб.</span></h5></td></tr>
-                                        <tr data-key="0"><td data-col-seq="0">Баланс за год:</td><td data-col-seq="1" style="float:right;"> <h5 class="description-header" style="font-size: 16px;">1200 руб. / <span style="color: #dd4b39;">2800 руб.</span></h5></td></tr>
-                                    </tbody></table></div>
-                        </div> 
-                    </div>            </div>
+                <div class="box-body">
+                    <div class="home-pay-chek">
+                        <table class="pay-table" width="100%">
+                            <tbody><tr>
+                                    <th>Общая финансовая аналитика</th>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">Поставщики Мне:</td>
+                                    <td style="text-align: right; font-size: 18px; color: rgba(51, 54, 59, 0.8); font-weight: bold;">123 000 руб.</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">F-keeper Мне:</td>
+                                    <td style="text-align: right; font-size: 18px; color: #7EBC59; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-plus"></i></span> 123 000 руб.</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">Я F-keeper'у:</td>
+                                    <td style="text-align: right; font-size: 18px; color: #FB3640; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-minus"></i></span> 180 000 руб.</td>
+                                </tr>
+                                <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
+                                    <td style="text-align: left; font-weight: bold;">Итого заработано:</td>
+                                    <td style="text-align: right; font-size: 22px; font-weight: bold;">328 462 389 руб.</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th>Зарегистрировано</th>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">Поставщиков:</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> 123 000 руб.</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">Ресторанов:</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> 180 000 руб.</td>
+                                </tr>
+                                <tr><td></td></tr>
+                                <tr>
+                                    <th>Заказы и оборот</th>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">Заказов:</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> 123 000 руб.</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">Оборот:</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> 180 000 руб.</td>
+                                </tr>
+                            </tbody></table>
+                    </div>         
+                </div>
                 <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
+            </div>            <!-- /.box -->
         </div>
     </div>
     <div class="row">
@@ -179,10 +213,10 @@ use dosamigos\chartjs\ChartJs;
                                 'format' => 'raw',
                                 'attribute' => 'total_price',
                                 'value' => function($data) {
-                                    return (float)$data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
+                                    return (float) $data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
                                 },
                                 'label' => 'Сумма',
-                                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],        
+                                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],
                             ],
                             [
                                 'format' => 'raw',
@@ -195,7 +229,7 @@ use dosamigos\chartjs\ChartJs;
                             ],
                             [
                                 'attribute' => 'status',
-                                'label'=>'Статус',
+                                'label' => 'Статус',
                                 'format' => 'raw',
                                 'value' => function($data) {
                                     switch ($data['status']) {
@@ -214,7 +248,7 @@ use dosamigos\chartjs\ChartJs;
                                             $statusClass = 'cancelled';
                                             break;
                                     }
-                                    return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data['status']) . '</span>';//fa fa-circle-thin
+                                    return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data['status']) . '</span>'; //fa fa-circle-thin
                                 },
                             ]
                         ],

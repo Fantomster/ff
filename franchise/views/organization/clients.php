@@ -36,7 +36,8 @@ $this->registerJs('
             });
         $("body").on("click", "td", function (e) {
             if ($(this).find("a").hasClass("stats")) {
-                return true;
+                document.location = $(this).find("a").attr("href");
+                return false;
             }
             var url = $(this).parent("tr").data("url");
             if (url !== undefined) {
@@ -201,7 +202,7 @@ $this->registerCss("
                                     } elseif ($progress > 0) {
                                         $class = " text-orange";
                                     }
-                                    return $data["orderSum"] . " <span class='description-percentage $class'>$divider $progress%";
+                                    return ($data["orderSum"] ? $data["orderSum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
                                 },
                                 'label' => 'Сумма заказов',
                             ],
@@ -227,7 +228,7 @@ $this->registerCss("
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    return Html::a('<i class="fa fa-signal"></i>', ['analytics/client-stats', 'id' => $data["id"]]);
+                                    return Html::a('<i class="fa fa-signal"></i>', ['analytics/client-stats', 'id' => $data["id"]], ['class' => 'stats']);
                                 },
                                     ],
                                 ],

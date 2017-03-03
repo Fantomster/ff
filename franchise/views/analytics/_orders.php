@@ -140,7 +140,7 @@ $form = ActiveForm::begin([
                 'type' => 'line',
                 'options' => [
                     'height' => 400,
-                    'width' => 800,
+                    'width' => 1200,
                 ],
                 'data' => [
                     'labels' => $dayLabels,

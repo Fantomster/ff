@@ -117,8 +117,7 @@ $grid = [
                 'attribute' => '',
                 'label' => '',
                 'format' => 'raw',
-                'contentOptions' => ['style' => 'width:70px'],
-                'headerOptions' => ['class' => 'text-center'],
+                'headerOptions' => ['style' => 'width:40px'],
                 'value' => function ($data) {
             $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/app/ajax-edit-catalog-form',
                         'product_id' => $data['id'], 'catalog' => $data['cat_id']], [
@@ -127,7 +126,7 @@ $grid = [
                             'toggle' => 'modal',
                             'backdrop' => 'static',
                         ],
-                        'class' => 'btn btn-sm btn-default'
+                        'class' => 'btn btn-xs btn-default'
             ]);
             return $link;
         },
@@ -136,10 +135,10 @@ $grid = [
                 'attribute' => '',
                 'label' => '',
                 'format' => 'raw',
-                'contentOptions' => ['style' => 'width:50px;'],
+                'headerOptions' => ['style' => 'width:40px'],
                 'value' => function ($data) {
             $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
-                        'class' => 'btn btn-sm btn-danger del-product',
+                        'class' => 'btn btn-xs btn-danger del-product',
                         'data' => ['id' => $data['id']],
             ]);
             return $link;

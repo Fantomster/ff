@@ -229,3 +229,14 @@ tr.tr-id {
 th > a:hover {
     color: #368CBF;
 }
+.modal-header {
+    background: #368CBF;
+}
+.btn-fk-success, .btn-fk-success:focus {
+    background-color: #368CBF;
+    border-color: #367fa9;
+    color: #fff;
+}
+.btn-fk-success:hover {
+    background-color: #367fa9;
+}

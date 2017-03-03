@@ -68,7 +68,7 @@ $form = ActiveForm::begin([
                 'type' => 'line',
                 'options' => [
                     'height' => 400,
-                    'width' => 800,
+                    'width' => 1200,
                 ],
                 'data' => [
                     'labels' => $dayLabels,
@@ -105,7 +105,7 @@ $form = ActiveForm::begin([
                 'type' => 'bar',
                 'options' => [
                     'height' => 400,
-                    'width' => 800,
+                    'width' => 1200,
                 ],
                 'data' => [
                     'labels' => $monthLabels,
@@ -134,7 +134,7 @@ $form = ActiveForm::begin([
                 'type' => 'bar',
                 'options' => [
                     'height' => 400,
-                    'width' => 800,
+                    'width' => 1200,
                 ],
                 'data' => [
                     'labels' => $monthLabels,
@@ -163,7 +163,7 @@ $form = ActiveForm::begin([
                 'type' => 'bar',
                 'options' => [
                     'height' => 400,
-                    'width' => 800,
+                    'width' => 1200,
                 ],
                 'data' => [
                     'labels' => $monthLabels,

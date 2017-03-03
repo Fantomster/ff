@@ -30,12 +30,9 @@ $form = ActiveForm::begin([
             'method' => 'post',
         ]);
 ?>
-<div class="row">
-    <div class="col-md-12 box box-primary">
-        <div class="box-header with-border">
-            <h3 class="box-title">Зарегистрировано</h3>
-        </div>        
-        <div class="box-body">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Зарегистрировано</h3>
             <div class="row">
                 <div class="col-md-4 col-sm-12 text-center">
                     <h4>За все время (<?= $allTimeCount ?>)</h4>
@@ -45,9 +42,9 @@ $form = ActiveForm::begin([
                         'options' => [
                             'height' => 200,
                             'width' => 200,
-                        'legend' => [
-                            'display' => false,
-                        ],
+                            'legend' => [
+                                'display' => false,
+                            ],
                         ],
                         'data' => [
                             'labels' => ['Рестораны', 'Поставщики'],
@@ -109,11 +106,9 @@ $form = ActiveForm::begin([
             </div>
         </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-md-12 box box-primary">
-        <div class="box-header with-border">
-            <h3 class="box-title">Зарегистрировано в период</h3>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Зарегистрировано в период</h3>
             <div class="form-group" style="width: 350px;">
                 <?=
                 DatePicker::widget([
@@ -134,14 +129,12 @@ $form = ActiveForm::begin([
                 ?>
             </div>
             <span class="text-bold"><?= $total ?></span>
-        </div>        
-        <div class="box-body">
             <?=
             ChartJs::widget([
                 'type' => 'line',
                 'options' => [
                     'height' => 400,
-                    'width' => 800,
+                    'width' => 1200,
                 ],
                 'data' => [
                     'labels' => $dayLabels,
@@ -189,11 +182,8 @@ $form = ActiveForm::begin([
                 ],
             ])
             ?>
-
-        </div>
+        </div>        
     </div>
-</div>
-
 <?php ActiveForm::end(); ?>
 
 <?php Pjax::end() ?>

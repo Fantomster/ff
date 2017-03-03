@@ -160,7 +160,8 @@ class OrganizationController extends DefaultController {
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
-        return $this->renderAjax("_ajax-show-vendor", compact('vendor'));
+        $catalog = \common\models\Catalog::find()->where(['supp_org_id'=>$vendor->id, 'type'=>  \common\models\Catalog::BASE_CATALOG])->one();
+        return $this->renderAjax("_ajax-show-vendor", compact('vendor','catalog'));
     }
 
     /**
@@ -168,7 +169,8 @@ class OrganizationController extends DefaultController {
      */
     public function actionCreateVendor() {
         $vendor = new Organization();
-        $vendor->type_id = Organization::TYPE_RESTAURANT;
+        $catalog = new \common\models\Catalog();
+        $vendor->type_id = Organization::TYPE_SUPPLIER;
         $user = new User();
         $user->password = uniqid();
         $profile = new Profile();
@@ -182,9 +184,13 @@ class OrganizationController extends DefaultController {
 
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        $user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE)->save();
+                        $user->setRegisterAttributes(Role::ROLE_SUPPLIER_MANAGER, User::STATUS_ACTIVE)->save();
                         $profile->setUser($user->id)->save();
                         $vendor->save();
+                        $catalog->name = \common\models\Catalog::CATALOG_BASE_NAME;
+                        $catalog->type = \common\models\Catalog::BASE_CATALOG;
+                        $catalog->supp_org_id = $vendor->id;
+                        $catalog->save();
                         $user->setOrganization($vendor);
                         $this->addOrganization($vendor);
                         $buisinessInfo->setOrganization($vendor);

@@ -7,10 +7,11 @@ use yii\helpers\Html;
 use kartik\export\ExportMenu;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
+use yii\web\View;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
-use yii\web\View;
+
 use common\models\Category;
 use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
@@ -152,20 +153,6 @@ $grid = [
         <i class="fa fa-list-alt"></i> Каталог № <?=$id?>
         <small></small>
     </h1>
-    <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'links' => [
-            [
-                'label' => 'Поставщики',
-                'url' => ['#'],
-            ],
-            'Каталог №' . $id,
-        ],
-    ])
-    ?>
 </section>
 <section class="content">
 <?php if (Yii::$app->session->hasFlash('success')): ?>
@@ -175,15 +162,14 @@ $grid = [
         <?= Yii::$app->session->getFlash('success') ?>
     </div>
 <?php endif; ?>
-    <div class="panel-body">
-        <div class="box-body no-padding">
+    <div class="box box-info order-history">
+        <div class="box-body">
                 <div class="input-group">
                     <span class="input-group-addon">
                         <i class="fa fa-search"></i>
                     </span>
                 <?= Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style'=>'width:300px']) ?>
-                </div>
-                <div class="input-group">
+                
         <?=
         Modal::widget([
             'id' => 'add-product',
@@ -196,12 +182,7 @@ $grid = [
                 'href' => Url::to(['/app/ajax-edit-catalog-form', 'catalog' => $id]),
             ],
         ])
-        ?>
-                </div>
-        </div>
-    </div> 
-    <div class="panel-body">
-        <div class="box-body table-responsive no-padding">
+        ?></div>
             <?=
             GridView::widget([
                 'dataProvider' => $dataProvider,

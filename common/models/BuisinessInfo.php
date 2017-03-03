@@ -60,6 +60,7 @@ class BuisinessInfo extends \yii\db\ActiveRecord
         return [
             [['organization_id'], 'integer'],
             [['organization_id'], 'unique'],
+            [['reward'], 'required'],
             [['info'], 'string'],
             [['reward'], 'number'],
             [['created_at', 'updated_at'], 'safe'],
@@ -91,7 +92,7 @@ class BuisinessInfo extends \yii\db\ActiveRecord
             'correspondent_account' => 'р/с',
             'checking_account' => 'к/с',
             'phone' => 'Телефон',
-            'reward' => 'Маленький гешефт',
+            'reward' => 'Процент с оборота',
         ];
     }
 

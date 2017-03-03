@@ -163,6 +163,19 @@ $grid = [
             return $link;
         },
     ],
+    [
+        'attribute' => '',
+        'label' => '',
+        'format' => 'raw',
+        'contentOptions' => ['style' => 'width:50px;'],
+        'value' => function ($data) {
+            $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                        'class' => 'btn btn-xs btn-danger del-product',
+                        'data' => ['id' => $data['id']],
+            ]);
+            return $link;
+        },
+    ],
 ];
 ?> 
 <section class="content-header">

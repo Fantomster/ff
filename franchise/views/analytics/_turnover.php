@@ -75,12 +75,12 @@ $form = ActiveForm::begin([
                     'datasets' => [
                         [
                             'label' => 'Все заказы',
-                            'backgroundColor' => "rgba(0,0,255,0.2)",
-                            'borderColor' => "rgba(0,0,255,1)",
-                            'pointBackgroundColor' => "rgba(0,0,255,1)",
-                            'pointBorderColor' => "#00f",
-                            'pointHoverBackgroundColor' => "#00f",
-                            'pointHoverBorderColor' => "rgba(0,0,255,1)",
+                            'backgroundColor' => "rgba(54,140,191,.2)",
+                            'borderColor' => "rgba(54,140,191,.8)",
+                            'pointBackgroundColor' => "rgba(54,140,191,1)",
+                            'pointBorderColor' => "rgba(54,140,191,1)",
+                            'pointHoverBackgroundColor' => "rgba(54,140,191,1)",
+                            'pointHoverBorderColor' => "rgba(54,140,191,1)",
                             'data' => $dayTurnover,
                             'spanGaps' => true,
                             'borderJoinStyle' => 'miter',
@@ -112,8 +112,8 @@ $form = ActiveForm::begin([
                     'datasets' => [
                         [
                             'label' => 'Общий оборот',
-                            'backgroundColor' => "rgba(0,0,255,0.2)",
-                            'borderColor' => "rgba(0,0,255,1)",
+                            'backgroundColor' => "rgba(54,140,191,.2)",
+                            'borderColor' => "rgba(54,140,191,1)",
                             'data' => $totalSpent,
                         ],
                     ]
@@ -141,8 +141,8 @@ $form = ActiveForm::begin([
                     'datasets' => [
                         [
                             'label' => 'Средний оборот',
-                            'backgroundColor' => "rgba(0,0,255,0.2)",
-                            'borderColor' => "rgba(0,0,255,1)",
+                            'backgroundColor' => "rgba(54,140,191,.2)",
+                            'borderColor' => "rgba(54,140,191,1)",
                             'data' => $averageSpent,
                         ],
                     ]
@@ -170,8 +170,8 @@ $form = ActiveForm::begin([
                     'datasets' => [
                         [
                             'label' => 'Средний чек',
-                            'backgroundColor' => "rgba(0,0,255,0.2)",
-                            'borderColor' => "rgba(0,0,255,1)",
+                            'backgroundColor' => "rgba(54,140,191,.2)",
+                            'borderColor' => "rgba(54,140,191,1)",
                             'data' => $averageCheque,
                         ],
                     ]

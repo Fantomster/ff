@@ -43,12 +43,12 @@ use dosamigos\chartjs\ChartJs;
                                 'datasets' => [
                                     [
                                         'label' => 'Все заказы',
-                                        'backgroundColor' => "rgba(126,188,89,0.2)",
-                                        'borderColor' => "rgba(126,188,89,1)",
-                                        'pointBackgroundColor' => "rgba(126,188,89,1)",
-                                        'pointBorderColor' => "#7EBC59",
-                                        'pointHoverBackgroundColor' => "#7EBC59",
-                                        'pointHoverBorderColor' => "rgba(126,188,89,1)",
+                                        'backgroundColor' => "rgba(54,140,191,.2)",
+                                        'borderColor' => "rgba(54,140,191,.8)",
+                                        'pointBackgroundColor' => "rgba(54,140,191,1)",
+                                        'pointBorderColor' => "rgba(54,140,191,1)",
+                                        'pointHoverBackgroundColor' => "rgba(54,140,191,1)",
+                                        'pointHoverBorderColor' => "rgba(54,140,191,1)",
                                         'data' => $dayTurnover,
                                         'spanGaps' => true,
                                         'borderJoinStyle' => 'miter',

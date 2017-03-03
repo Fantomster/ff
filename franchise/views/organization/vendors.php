@@ -140,6 +140,9 @@ $this->registerCss("
                         'summary' => '',
                         'options' => ['class' => 'table-responsive'],
                         'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
+                        'pager' => [
+                                'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
+                            ],
                         'columns' => [
                             [
                                 'attribute' => 'id',

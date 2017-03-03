@@ -160,46 +160,6 @@ label {
     <h4 class="modal-title"><?=$catalogBaseGoods->isNewRecord ? 'ДОБАВЛЕНИЕ ТОВАРА':'РЕДАКТИРОВАНИЕ ТОВАРА'?></h4>
 </div>
 <div class="modal-body" style="background:#fff !important">
-	<!--div class="row">
-		<div class="col-md-12 text-center upload-block">
-                    <?php
-                    $this->registerJs("
-                        var uploadCrop = $('#upload-avatar').croppie({
-                                viewport: {
-                                        width: 240,
-                                        height: 135,
-                                        type: 'square'
-                                },
-                                update: function(){
-                                    uploadCrop.croppie('result', {type:'canvas'}).then(function (resp) {
-                                        $('#image-crop-result').val(resp);
-                                    });
-                                },
-                                enableExif: true
-                        });
-                    ");
-                    ?>
-                    <div class="upload-demo-wrap">
-                        <div id="upload-avatar"></div>
-                    </div>
-                    <img id="newAvatar" width="240" height="135" style="background-color:#ccc"
-                         src="<?= (!empty($catalogBaseGoods['image']) && !$catalogBaseGoods->isNewRecord) ?
-                            $catalogBaseGoods->imageUrl:
-                            common\models\CatalogBaseGoods::DEFAULT_IMAGE ?>" class="avatar"/>
-                    <?=
-                    Html::a('<i class="fa fa-trash"></i>', '#', [
-                            'class' => 'btn btn-outline-danger btn-sm hide',
-                            'style'=>'position:absolute;top:10px;left:0;right:0;margin:0 auto;width:37px;z-index:33',
-                            'id' => 'deleteAvatar',
-                        ]);
-                    ?>
-                    <label for="upload" class="uploadButton">Загрузить файл</label>
-                    <?= $form->field($catalogBaseGoods, 'image',
-                            ['template'=>'<div class="input-group">{input}</div>{error}'])
-                            ->fileInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','id'=>'upload','accept'=>'image/*','style'=>'opacity: 0; z-index: -1;position: absolute;left: -9999px;']) ?>
-                    <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
-		</div>
-	</div-->
 	<div class="row">
 		<div class="col-md-12">
 			<div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">

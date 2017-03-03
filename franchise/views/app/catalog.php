@@ -22,6 +22,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 kartik\select2\Select2Asset::register($this);
 ?>
 <?php
+/*
 $this->registerJs("           
    // var uploadCrop;
 
@@ -53,7 +54,7 @@ $(document).on('change', '#upload', function () {
         readFile(this); 
     }
 });"
-);
+);*/
 ?>
 <?php
 $this->title = 'Каталог №' . $id;
@@ -67,6 +68,37 @@ Modal::begin([
     'size' => 'modal-lg',
 ]);
 Modal::end();
+?>
+<?php
+$exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
+$exportColumns = [
+    [
+        'label' => 'Артикул',
+        'value' => 'article',
+    ],
+    [
+        'label' => 'Наименование',
+        'value' => 'product',
+    ],
+    [
+        'label' => 'Кратность',
+        'value' => 'units',
+    ],
+    [
+        'label' => 'Цена',
+        'value' => 'price',
+    ],
+    [
+        'label' => 'Единица измерения',
+        'value' => 'ed',
+    ],
+    [
+        'label' => 'Комментарий',
+        'value' => function ($data) {
+            return $data['note'] ? $data['note'] : '';
+        },
+    ]
+        ]
 ?>
 <?php
 $grid = [
@@ -164,46 +196,124 @@ $grid = [
 <?php endif; ?>
     <div class="box box-info order-history">
         <div class="box-body">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                        <i class="fa fa-search"></i>
-                    </span>
-                <?= Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style'=>'width:300px']) ?>
-                
-        <?=
-        Modal::widget([
-            'id' => 'add-product',
-            'clientOptions' => ['class' => 'pull-right'],
-            'toggleButton' => [
-                'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
-                'tag' => 'a',
-                'data-target' => '#add-product-market-place',
-                'class' => 'btn btn-fk-success btn-sm pull-right',
-                'href' => Url::to(['/app/ajax-edit-catalog-form', 'catalog' => $id]),
-            ],
-        ])
-        ?></div>
-            <?=
-            GridView::widget([
-                'dataProvider' => $dataProvider,
-                'pjax' => true,
-                'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
-                'filterPosition' => false,
-                'columns' => $grid,
-                'options' => ['class' => 'table-responsive'],
-                'tableOptions' => ['class' => 'table table-bordered', 'role' => 'grid'],
-                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                'bordered' => false,
-                'striped' => false,
-                'condensed' => false,
-                'responsive' => false,
-                'hover' => false,
-                'resizableColumns' => false,
-                'export' => [
-                    'fontAwesome' => true,
-                ],
-            ]);
-            ?> 
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="input-group  pull-left">
+                        <span class="input-group-addon">
+                            <i class="fa fa-search"></i>
+                        </span>
+                        <?= Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style'=>'width:300px']) ?>
+                    </div>
+                    
+                    <?=
+                    Modal::widget([
+                        'id' => 'add-product',
+                        'clientOptions' => ['class' => 'pull-right'],
+                        'toggleButton' => [
+                            'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
+                            'tag' => 'a',
+                            'data-target' => '#add-product-market-place',
+                            'class' => 'btn btn-fk-success btn-sm pull-right',
+                            'href' => Url::to(['/app/ajax-edit-catalog-form', 'catalog' => $id]),
+                        ],
+                    ])
+                    ?>
+                    
+                    <?=
+                    Modal::widget([
+                        'id' => 'importToXls',
+                        'clientOptions' => false,
+                        'size' => 'modal-md',
+                        'toggleButton' => [
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
+                            'tag' => 'a',
+                            'data-target' => '#importToXls',
+                            'class' => 'btn btn-outline-default btn-sm pull-right',
+                            'href' => Url::to(['/app/import-from-xls', 'id' => $id]),
+                            'style' => 'margin-right:10px;',
+                        ],
+                    ])
+                    ?>
+                    <div class="pull-right">
+                    <?=ExportMenu::widget([
+                        'dataProvider' => $dataProvider,
+                        'columns' => $exportColumns,
+                        'fontAwesome' => true,
+                        'filename' => 'Главный каталог - ' . date('Y-m-d'),
+                        'encoding' => 'UTF-8',
+                        'target' => ExportMenu::TARGET_SELF,
+                        'showConfirmAlert' => false,
+                        'showColumnSelector' => false,
+                        'dropdownOptions' => [
+                            'label' => '<span class="text-label">Скачать каталог</span>',
+                            'class' => ['btn btn-outline-default btn-sm'],
+                            'style' => 'margin-right:10px;',
+                        ],
+                        'exportConfig' => [
+                            ExportMenu::FORMAT_HTML => false,
+                            ExportMenu::FORMAT_TEXT => false,
+                            ExportMenu::FORMAT_EXCEL => false,
+                            ExportMenu::FORMAT_PDF => false,
+                            ExportMenu::FORMAT_CSV => false,
+                            ExportMenu::FORMAT_EXCEL_X => [
+                                'label' => Yii::t('kvexport', 'Excel'),
+                                'icon' => 'file-excel-o',
+                                'iconOptions' => ['class' => 'text-success'],
+                                'linkOptions' => [],
+                                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'extension' => 'xlsx',
+                                'writer' => 'Excel2007',
+                                'styleOptions' => [
+                                    'font' => [
+                                        'bold' => true,
+                                        'color' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                    ],
+                                    'fill' => [
+                                        'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                        'startcolor' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                        'endcolor' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                    ],
+                                ]
+                            ],
+                        ],
+                    ]);
+                    ?>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                <?=
+                GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'pjax' => true,
+                    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
+                    'filterPosition' => false,
+                    'columns' => $grid,
+                    'options' => ['class' => 'table-responsive'],
+                    'tableOptions' => ['class' => 'table table-bordered', 'role' => 'grid'],
+                    'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                    'bordered' => false,
+                    'striped' => false,
+                    'condensed' => false,
+                    'responsive' => false,
+                    'hover' => false,
+                    'resizableColumns' => false,
+                    'export' => [
+                        'fontAwesome' => true,
+                    ],
+                ]);
+                ?>
+                </div>
+            </div>       
         </div>
     </div>  
 </section>

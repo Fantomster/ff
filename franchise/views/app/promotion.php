@@ -8,10 +8,6 @@
   <div class="row">
     <div class="col-md-12">
       <section id="introduction">
-        <p class="lead">
-          <b>F-keeper</b> это система, которая имеет свой фирменный стиль: логотип, цвета, изображения.
-          </p><p>Используя эти материалы, как полноправный член франшизы, Вы можете создавать группы в социальных сетях, визитки и тд</p>
-        <p></p>
         <br>
         
         
@@ -35,23 +31,23 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>Логотипы</code></td>
+                  <td>Логотипы</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Цвета</code></td>
+                  <td>Цвета</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-blue-light" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Презентация</code></td>
+                  <td>Презентация</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-yellow" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Видео</code></td>
+                  <td>Видео</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-yellow-light" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Документация</code></td>
+                  <td>Документация</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-green" class="btn btn-success btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 
@@ -75,23 +71,23 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>Логотипы</code></td>
+                  <td>Логотипы</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Цвета</code></td>
+                  <td>Цвета</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-blue-light" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Презентация</code></td>
+                  <td>Презентация</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-yellow" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Видео</code></td>
+                  <td>Видео</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-yellow-light" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Документация</code></td>
+                  <td>Документация</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-green" class="btn btn-success btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 
@@ -115,23 +111,23 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><code>Логотипы</code></td>
+                  <td>Логотипы</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Цвета</code></td>
+                  <td>Цвета</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-blue-light" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Презентация</code></td>
+                  <td>Презентация</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-yellow" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Видео</code></td>
+                  <td>Видео</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-yellow-light" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td><code>Документация</code></td>
+                  <td>Документация</td>
                   <td style="text-align: center;"><a href="#" data-skin="skin-green" class="btn btn-success btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 

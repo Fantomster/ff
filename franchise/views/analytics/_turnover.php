@@ -96,7 +96,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title">Общий оборот в месяц</h3>
+            <h3 class="box-title">Общий оборот по месяцам</h3>
         </div>
             <?=
             ChartJs::widget([
@@ -150,7 +150,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title">Средний чек в месяц (на 1 заказ)</h3>
+            <h3 class="box-title">Средний чек на 1 заказ</h3>
         </div>
             <?=
             ChartJs::widget([

@@ -243,3 +243,15 @@ th > a:hover {
 .skin-blue .main-header .navbar .sidebar-toggle:hover {
     background-color: #367fa9;
 }
+.btn-success:hover, .btn-success:active, .btn-success.hover {
+    background-color: #317eac;
+}
+.btn-success.focus, .btn-success:focus {
+    color: #fff;
+    background-color: #317eac;
+    border-color: #317eac;
+}
+.btn-success:active:focus{
+    background-color: #317eac;
+    border-color: #317eac;
+}

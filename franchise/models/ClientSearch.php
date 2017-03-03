@@ -80,7 +80,6 @@ class ClientSearch extends Organization {
             'totalCount' => $count,
             'pagination' => [
                 'pageSize' => 20,
-                'page' => isset($params['page']) ? ($params['page'] - 1) : 0,
             ],
             'sort' => [
                 'attributes' => [

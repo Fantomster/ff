@@ -49,8 +49,17 @@ $this->registerJs(
                 $(this).data("bs.modal", null);
                 $.pjax.reload({container: "#users-list"});
             });
+            $("body").on("click", "td", function (e) {
+                var url = $(this).parent("tr").data("url");
+                if (url !== undefined) {
+                    $("#userEdit").modal({backdrop:"static",toggle:"modal"}).load(url);
+                }
+            });
         });'
 );
+$this->registerCss("
+    tr:hover{cursor: pointer;}
+        ");
 ?>
 <section class="content-header">
     <h1>
@@ -58,81 +67,73 @@ $this->registerJs(
         <small>Список сотрудников организации</small>
     </h1>
     <?=
-    Breadcrumbs::widget([
-        'options' => [
-            'class' => 'breadcrumb',
-        ],
-        'links' => [
-            'Настройки',
-            'Сотрудники',
-        ],
-    ])
+    ''
+//    Breadcrumbs::widget([
+//        'options' => [
+//            'class' => 'breadcrumb',
+//        ],
+//        'links' => [
+//            'Настройки',
+//            'Сотрудники',
+//        ],
+//    ])
     ?>
 </section>
 <section class="content">
     <div class="box box-info settings">
         <div class="box-header">
-        <?php
-        $form = ActiveForm::begin([
-                    'options' => [
-                      //  'data-pjax' => true,
-                        'id' => 'search-form',
-                        'role' => 'search',
-                    ],
-                    //'method' => 'get',
-        ]);
-        ?>
+            <?php
+            $form = ActiveForm::begin([
+                        'options' => [
+                            //  'data-pjax' => true,
+                            'id' => 'search-form',
+                            'role' => 'search',
+                        ],
+                            //'method' => 'get',
+            ]);
+            ?>
             <div class="row">
-                
-            <div class="col-md-3">
-        <?=
-        $form->field($searchModel, 'searchString')->textInput([
-            'id' => 'searchString',
-            'class' => 'form-control',
-            'placeholder' => 'Поиск'])->label(false)
-        ?>
-            </div><div class="col-md-9">
-        <?=
-        Modal::widget([
-            'id' => 'add-user',
-            'clientOptions' => false,
-            'toggleButton' => [
-                'label' => '<i class="icon fa fa-user-plus"></i>  Добавить сотрудника',
-                'tag' => 'a',
-                'data-target' => '#add-user',
-                'class' => 'btn btn-success pull-right',
-                'href' => Url::to(['ajax-create-user']),
-            ],
-        ])
-        ?>
+
+                <div class="col-md-3">
+                    <?=
+                    $form->field($searchModel, 'searchString')->textInput([
+                        'id' => 'searchString',
+                        'class' => 'form-control',
+                        'placeholder' => 'Поиск'])->label(false)
+                    ?>
+                </div><div class="col-md-9">
+                    <?=
+                    Modal::widget([
+                        'id' => 'add-user',
+                        'clientOptions' => false,
+                        'toggleButton' => [
+                            'label' => '<i class="icon fa fa-user-plus"></i>  Добавить сотрудника',
+                            'tag' => 'a',
+                            'data-target' => '#add-user',
+                            'class' => 'btn btn-success pull-right',
+                            'href' => Url::to(['ajax-create-user']),
+                        ],
+                    ])
+                    ?>
+                </div>
+<?php ActiveForm::end(); ?>
             </div>
-        <?php ActiveForm::end(); ?>
-        </div>
-       <div class="box-body no-padding">
-        <!--?= Html::button('Добавить пользователя', ['id' => 'add-user', 'class' => 'btn btn-primary']) ?-->
-        <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'users-list', 'timeout' => 5000]); ?>
-        <?=
-        GridView::widget([
-            'dataProvider' => $dataProvider,
-            'filterModel' => $searchModel,
-            'filterPosition' => false,
-            'options' => ['class' => 'table-responsive'],
-            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-            'summary' => '',
-            'columns' => [
-                [
-                    'attribute' => 'profile.full_name',
-                    'format' => 'raw',
-                    'value' => function ($data) {
-                        $link = Html::a($data->profile->full_name, ['ajax-update-user', 'id' => $data->id], [
-                                    'data' => [
-                                        'target' => '#add-user',
-                                        'toggle' => 'modal',
-                                        'backdrop' => 'static',
-                                    ]
-                        ]);
-                        return $link;
-                    },
+            <div class="box-body no-padding">
+                <!--?= Html::button('Добавить пользователя', ['id' => 'add-user', 'class' => 'btn btn-primary']) ?-->
+                <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'users-list', 'timeout' => 5000]); ?>
+                <?=
+                GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'filterModel' => $searchModel,
+                    'filterPosition' => false,
+                    'options' => ['class' => 'table-responsive'],
+                    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                    'summary' => '',
+                    'columns' => [
+                        [
+                            'attribute' => 'profile.full_name',
+                            'format' => 'raw',
+                            'value' => 'profile.full_name',
                         ],
                         'email',
                         'profile.phone',
@@ -147,15 +148,18 @@ $this->registerJs(
                             },
                         ],
                     ],
+                    'rowOptions' => function ($model, $key, $index, $grid) {
+                return ['data-url' => Url::to(['ajax-update-user', 'id' => $model->id])];
+            },
                 ]);
                 ?>
-                <?php Pjax::end(); ?>
+<?php Pjax::end(); ?>
             </div>
-            </div>
-            <?php
-            Modal::begin([
-                'id' => 'user-edit',
-            ]);
-            ?>
-            <?php Modal::end(); ?>
+        </div>
+        <?php
+        Modal::begin([
+            'id' => 'userEdit',
+        ]);
+        ?>
+<?php Modal::end(); ?>
 </section>

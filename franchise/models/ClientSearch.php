@@ -60,8 +60,8 @@ class ClientSearch extends Organization {
             $t2_f = $to->format('Y-m-d');
         }
 
-        $query = "SELECT org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as clientCount, 
-                (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as clientCount_prev30, 
+        $query = "SELECT org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as vendorCount, 
+                (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as vendorCount_prev30, 
                 (select count(id) from `order` where client_id=org.id and status in (1,2,3,4)) as orderCount,
                 (select count(id) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as orderCount_prev30,
                 (select sum(total_price) from `order` where client_id=org.id and status in (1,2,3,4)) as orderSum,

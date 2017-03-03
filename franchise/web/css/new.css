@@ -226,3 +226,6 @@ tr.tr-id {
 .datepicker table tr td.active.active:hover {
     background-color: rgba(54,140,191,0.6);
 }
+th > a:hover {
+    color: #368CBF;
+}

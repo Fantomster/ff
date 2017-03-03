@@ -59,6 +59,6 @@ class FinanceController extends DefaultController {
      * @return mixed
      */
     public function actionIndex() {
-        return $this->render("/site/under-construction");
+        return $this->render("index");
     }
 }

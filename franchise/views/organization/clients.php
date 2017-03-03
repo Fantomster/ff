@@ -154,9 +154,9 @@ $this->registerCss("
                             ],
                             [
                                 'format' => 'raw',
-                                'attribute' => 'clientCount',
+                                'attribute' => 'vendorCount',
                                 'value' => function ($data) {
-                                    $progress = $data["clientCount"] > 0 ? round($data["clientCount_prev30"] * 100 / $data["clientCount"], 2) : 0;
+                                    $progress = $data["vendorCount"] > 0 ? round($data["vendorCount_prev30"] * 100 / $data["vendorCount"], 2) : 0;
 //                                            if ($progress > 0) {
                                     $divider = '<i class="fa fa-caret-up"></i>';
                                     //                                          }
@@ -166,7 +166,7 @@ $this->registerCss("
                                     } elseif ($progress > 0) {
                                         $class = " text-orange";
                                     }
-                                    return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
+                                    return $data["vendorCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
                                 'label' => 'Кол-во поставщиков',
                             ],

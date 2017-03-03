@@ -11,7 +11,6 @@ use yii\web\View;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
-
 use common\models\Category;
 use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
@@ -94,121 +93,121 @@ $grid = [
         'attribute' => 'category_id',
         'label' => 'Категория',
         'value' => function ($data) {
-            $data['category_id'] == 0 ? $category_name = '' : 
-                $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
+            $data['category_id'] == 0 ? $category_name = '' :
+                            $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
             return $category_name;
         },
                 'contentOptions' => ['style' => 'vertical-align:middle;'],
-    ],
-    [
-        'attribute' => 'price',
-        'label' => 'Цена',
-        'value' => 'price',
-        'contentOptions' => ['style' => 'vertical-align:middle;'],
-    ],
-    [
-        'attribute' => 'ed',
-        'label' => 'Ед. измерения',
-        'value' => function ($data) {
-            return $data['ed'];
-        },
-        'contentOptions' => ['style' => 'vertical-align:middle;'],
-    ],
-    [
-        'attribute' => '',
-        'label' => '',
-        'format' => 'raw',
-        'contentOptions' => ['style' => 'width:70px'],
-        'headerOptions' => ['class' => 'text-center'],
-        'value' => function ($data) {
-                    $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/app/ajax-edit-catalog-form',
-                        'product_id' => $data['id'],'catalog' => $data['cat_id']], [
+            ],
+            [
+                'attribute' => 'price',
+                'label' => 'Цена',
+                'value' => 'price',
+                'contentOptions' => ['style' => 'vertical-align:middle;'],
+            ],
+            [
+                'attribute' => 'ed',
+                'label' => 'Ед. измерения',
+                'value' => function ($data) {
+                    return $data['ed'];
+                },
+                'contentOptions' => ['style' => 'vertical-align:middle;'],
+            ],
+            [
+                'attribute' => '',
+                'label' => '',
+                'format' => 'raw',
+                'contentOptions' => ['style' => 'width:70px'],
+                'headerOptions' => ['class' => 'text-center'],
+                'value' => function ($data) {
+            $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/app/ajax-edit-catalog-form',
+                        'product_id' => $data['id'], 'catalog' => $data['cat_id']], [
                         'data' => [
                             'target' => '#add-product-market-place',
                             'toggle' => 'modal',
                             'backdrop' => 'static',
                         ],
                         'class' => 'btn btn-sm btn-default'
-                    ]);
-            return $link;
-        },
-    ],
-    [
-        'attribute' => '',
-        'label' => '',
-        'format' => 'raw',
-        'contentOptions' => ['style' => 'width:50px;'],
-        'value' => function ($data) {
-    $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
-                'class' => 'btn btn-sm btn-danger del-product',
-                'data' => ['id' => $data['id']],
             ]);
             return $link;
         },
-    ],
-];
-?> 
-<section class="content-header">
-    <h1>
-        <i class="fa fa-list-alt"></i> Каталог № <?=$id?>
-        <small></small>
-    </h1>
-</section>
-<section class="content">
-<?php if (Yii::$app->session->hasFlash('success')): ?>
-    <div class="alert alert-danger alert-dismissable">
-        <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-        <h4><i class="icon fa fa-check"></i>Ошибка</h4>
-        <?= Yii::$app->session->getFlash('success') ?>
-    </div>
-<?php endif; ?>
-    <div class="box box-info order-history">
-        <div class="box-body">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                        <i class="fa fa-search"></i>
-                    </span>
-                <?= Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style'=>'width:300px']) ?>
-                
-        <?=
-        Modal::widget([
-            'id' => 'add-product',
-            'clientOptions' => ['class' => 'pull-right'],
-            'toggleButton' => [
-                'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
-                'tag' => 'a',
-                'data-target' => '#add-product-market-place',
-                'class' => 'btn btn-fk-success btn-sm pull-right',
-                'href' => Url::to(['/app/ajax-edit-catalog-form', 'catalog' => $id]),
             ],
-        ])
-        ?></div>
-            <?=
-            GridView::widget([
-                'dataProvider' => $dataProvider,
-                'pjax' => true,
-                'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
-                'filterPosition' => false,
-                'columns' => $grid,
-                'options' => ['class' => 'table-responsive'],
-                'tableOptions' => ['class' => 'table table-bordered', 'role' => 'grid'],
-                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                'bordered' => false,
-                'striped' => false,
-                'condensed' => false,
-                'responsive' => false,
-                'hover' => false,
-                'resizableColumns' => false,
-                'export' => [
-                    'fontAwesome' => true,
-                ],
+            [
+                'attribute' => '',
+                'label' => '',
+                'format' => 'raw',
+                'contentOptions' => ['style' => 'width:50px;'],
+                'value' => function ($data) {
+            $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                        'class' => 'btn btn-sm btn-danger del-product',
+                        'data' => ['id' => $data['id']],
             ]);
-            ?> 
-        </div>
-    </div>  
-</section>
-<?php
-$customJs = <<< JS
+            return $link;
+        },
+            ],
+        ];
+        ?> 
+        <section class="content-header">
+            <h1>
+                <i class="fa fa-list-alt"></i> Каталог № <?= $id ?>
+                <small></small>
+            </h1>
+        </section>
+        <section class="content">
+            <?php if (Yii::$app->session->hasFlash('success')): ?>
+                <div class="alert alert-danger alert-dismissable">
+                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                    <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+                    <?= Yii::$app->session->getFlash('success') ?>
+                </div>
+            <?php endif; ?>
+            <div class="box box-info order-history">
+                <div class="box-body">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-search"></i>
+                        </span>
+                        <?= Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style' => 'width:300px']) ?>
+
+                        <?=
+                        Modal::widget([
+                            'id' => 'add-product',
+                            'clientOptions' => ['class' => 'pull-right'],
+                            'toggleButton' => [
+                                'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
+                                'tag' => 'a',
+                                'data-target' => '#add-product-market-place',
+                                'class' => 'btn btn-fk-success btn-sm pull-right',
+                                'href' => Url::to(['/app/ajax-edit-catalog-form', 'catalog' => $id]),
+                            ],
+                        ])
+                        ?></div>
+                        <?=
+                    GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'pjax' => true,
+                        'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
+                        'filterPosition' => false,
+                        'columns' => $grid,
+                        'options' => ['class' => 'table-responsive'],
+                        'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                        'bordered' => false,
+                        'striped' => false,
+                        'condensed' => false,
+                        'responsive' => false,
+                        'hover' => false,
+                        'resizableColumns' => false,
+                        'export' => [
+                            'fontAwesome' => true,
+                        ],
+                    ]);
+                    ?> 
+                </div>
+            </div>  
+        </section>
+        <?php
+        $customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
 window.clearTimeout(timer);
@@ -284,4 +283,5 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
     });
   $('#add-product-market-place').removeAttr('tabindex');
 JS;
-$this->registerJs($customJs, View::POS_READY);
+        $this->registerJs($customJs, View::POS_READY);
+        

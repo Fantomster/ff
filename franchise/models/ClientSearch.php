@@ -72,7 +72,7 @@ class ClientSearch extends Organization {
                 WHERE fa.franchisee_id = $franchisee_id and org.type_id=1 and org.created_at between :dateFrom and :dateTo
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
 
-        $count = Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryScalar();
+        $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());
 
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query,

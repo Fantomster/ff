@@ -431,11 +431,11 @@ class AnalyticsController extends DefaultController {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('client-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'client'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'client'
             ));
         } else {
             return $this->render('client-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'client'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'client'
             ));
         }
     }
@@ -530,11 +530,11 @@ class AnalyticsController extends DefaultController {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('vendor-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'vendor'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor'
             ));
         } else {
             return $this->render('vendor-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'ordersByDay', 'dayLabels', 'vendorsTurnover', 'topGoodsDP', 'vendor'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor'
             ));
         }
     }

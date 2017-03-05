@@ -45,10 +45,10 @@ class SiteController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'settings', 'promotion', 'users'],
+                'only' => ['index', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'settings', 'promotion', 'users'],
+                        'actions' => ['index', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,

@@ -89,6 +89,11 @@ class OrganizationController extends DefaultController {
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->one();
+        if (empty($client->buisinessInfo)) {
+            $buisinessInfo = new BuisinessInfo();
+            $buisinessInfo->setOrganization($client);
+            $client->refresh();
+        }
         return $this->renderAjax("_ajax-show-client", compact('client'));
     }
 
@@ -130,6 +135,46 @@ class OrganizationController extends DefaultController {
     }
 
     /**
+     * Update restaurant
+     */
+    public function actionUpdateClient($id) {
+        $client = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->one();
+        if (empty($client)) {
+            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+        }
+        if (empty($client->buisinessInfo)) {
+            $buisinessInfo = new BuisinessInfo();
+            $buisinessInfo->setOrganization($client);
+        } else {
+            $buisinessInfo = $client->buisinessInfo;
+        }
+
+        if (Yii::$app->request->post()) {
+            $post = Yii::$app->request->post();
+            if ($client->load($post) && $buisinessInfo->load($post)) {
+
+                if ($client->validate() && $buisinessInfo->validate()) {
+
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        $client->save();
+                        $buisinessInfo->save();
+                        $transaction->commit();
+                        return $this->redirect(['organization/clients']);
+                    } catch (Exception $e) {
+                        $transaction->rollback();
+                    }
+                }
+            }
+        }
+
+        return $this->render('update-client', compact('client', 'buisinessInfo'));
+    }
+
+    /**
      * Displays vendors list
      * 
      * @return mixed
@@ -160,6 +205,11 @@ class OrganizationController extends DefaultController {
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
+        if (empty($vendor->buisinessInfo)) {
+            $buisinessInfo = new BuisinessInfo();
+            $buisinessInfo->setOrganization($vendor);
+            $vendor->refresh();
+        }
         $catalog = \common\models\Catalog::find()->where(['supp_org_id'=>$vendor->id, 'type'=>  \common\models\Catalog::BASE_CATALOG])->one();
         return $this->renderAjax("_ajax-show-vendor", compact('vendor','catalog'));
     }
@@ -204,6 +254,46 @@ class OrganizationController extends DefaultController {
         }
 
         return $this->render('create-vendor', compact('vendor', 'user', 'profile', 'buisinessInfo'));
+    }
+
+    /**
+     * Update vendor
+     */
+    public function actionUpdateVendor($id) {
+        $vendor = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
+                ->one();
+        if (empty($vendor)) {
+            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+        }
+        if (empty($vendor->buisinessInfo)) {
+            $buisinessInfo = new BuisinessInfo();
+            $buisinessInfo->setOrganization($vendor);
+        } else {
+            $buisinessInfo = $vendor->buisinessInfo;
+        }
+
+        if (Yii::$app->request->post()) {
+            $post = Yii::$app->request->post();
+            if ($vendor->load($post) && $buisinessInfo->load($post)) {
+
+                if ($vendor->validate() && $buisinessInfo->validate()) {
+
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        $vendor->save();
+                        $buisinessInfo->save();
+                        $transaction->commit();
+                        return $this->redirect(['organization/vendors']);
+                    } catch (Exception $e) {
+                        $transaction->rollback();
+                    }
+                }
+            }
+        }
+
+        return $this->render('update-vendor', compact('vendor', 'buisinessInfo'));
     }
 
     /**

@@ -81,12 +81,38 @@ use yii\helpers\Html;
                 </div>
               </div>
               <div class="modal-body tab-pane" id="tab_3">
-                <p>One fine body… 3 </p>
+                  <label>Процент с оборота</label>
+                  <p><?= $vendor->buisinessInfo->reward ?></p>
+                  <label>Подписант</label>
+                  <p><?= $vendor->buisinessInfo->signed ?></p>
+                  <label>Юридическое название</label>
+                  <p><?= $vendor->buisinessInfo->legal_entity ?></p>
+                  <label>Юридический адрес</label>
+                  <p><?= $vendor->buisinessInfo->legal_address ?></p>
+                  <label>Официальный email</label>
+                  <p><?= $vendor->buisinessInfo->legal_email ?></p>
+                  <label>ИНН</label>
+                  <p><?= $vendor->buisinessInfo->inn ?></p>
+                  <label>КПП</label>
+                  <p><?= $vendor->buisinessInfo->kpp ?></p>
+                  <label>ОГРН</label>
+                  <p><?= $vendor->buisinessInfo->ogrn ?></p>
+                  <label>Банк</label>
+                  <p><?= $vendor->buisinessInfo->bank_name ?></p>
+                  <label>БИК</label>
+                  <p><?= $vendor->buisinessInfo->bik ?></p>
+                  <label>Телефон</label>
+                  <p><?= $vendor->buisinessInfo->phone ?></p>
+                  <label>р/с</label>
+                  <p><?= $vendor->buisinessInfo->correspondent_account ?></p>
+                  <label>к/с</label>
+                  <p><?= $vendor->buisinessInfo->checking_account ?></p>
+                  <label>Поле для заметок</label>
+                  <p><?= $vendor->buisinessInfo->info ?></p>
               </div>
               <div class="modal-footer" style="background-color: #fff; border-top: 1px solid #e5e5e5;">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i class="fa fa-fw fa-close"></i> Закрыть</button>
-                <button type="button" class="btn btn-primary"><i class="fa fa-fw fa-pencil"></i> Редактировать</button>
-                
+                <?= Html::a('<i class="fa fa-fw fa-pencil"></i> Редактировать', ['organization/update-vendor', 'id' => $vendor->id], ['class' => 'btn btn-primary']) ?>
               </div>
             </div>
             <!-- /.modal-content -->

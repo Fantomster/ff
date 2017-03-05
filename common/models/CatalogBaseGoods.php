@@ -61,7 +61,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const ES_UPDATE = 1; //обновление существующего или добавление нового товара, крон на каждые 2 мин
     const ES_DELETED = 2; //Удаление, крон на каждые 2 мин
     const ES_MASS_UPDATED = 3; //в случае,  если обновили весь каталог через файл, крон работает ночью, порционально добавляет в бд по 1000 товаров
-    const ES_MASS_DELETED = 4; //массовое удаление, пока не используется, но может понадобиться
+    const ES_MASS_DELETED = 4; //массовое удаление, пока не используется, но может  понадобиться
     
     const MAX_RATING = \common\models\Organization::MAX_RATING + 10;
     

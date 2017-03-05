@@ -4,6 +4,22 @@ use yii\helpers\Html;
 use kartik\widgets\DatePicker;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
+use dosamigos\chartjs\ChartJs;
+
+$this->registerJs('
+    $("document").ready(function(){
+        var justSubmitted = false;
+        $(document).on("change", "#dateFrom, #dateTo", function() {
+            if (!justSubmitted) {
+                $("#orderStatForm").submit();
+                justSubmitted = true;
+                setTimeout(function() {
+                    justSubmitted = false;
+                }, 500);
+            }
+        });
+    });
+        ');
 ?>
 <section class="content-header">
     <h1>
@@ -22,7 +38,17 @@ use kartik\grid\GridView;
     ?>
 </section>
 <section class="content">
-<div class="box box-info order-history">
+<?php
+    Pjax::begin(['enablePushState' => false, 'id' => 'orderStat',]);
+    $form = ActiveForm::begin([
+                'options' => [
+                    'data-pjax' => true,
+                    'id' => 'orderStatForm',
+                ],
+                'method' => 'post',
+    ]);
+    ?>
+    <div class="box box-info order-history">
     <!-- /.box-header -->
     <div class="box-body">
         <div class="row">
@@ -89,16 +115,35 @@ use kartik\grid\GridView;
       <div class="box box-info">
         <div class="box-header with-border">
           <h3 class="box-title">Объем заказов</h3>
-
-          <div class="box-tools pull-right">
-            
-            </button>
-          </div>
         </div>
         <div class="box-body" style="display: block;">
-          <div class="chart">
-            <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
-          </div>
+                    <?=
+                    ChartJs::widget([
+                        'type' => 'line',
+                        'options' => [
+                            'height' => 400,
+                            'width' => 1200,
+                        ],
+                        'data' => [
+                            'labels' => $dayLabels,
+                            'datasets' => [
+                                [
+                                    'label' => 'Все заказы',
+                                    'backgroundColor' => "rgba(54,140,191,.2)",
+                                    'borderColor' => "rgba(54,140,191,.8)",
+                                    'pointBackgroundColor' => "rgba(54,140,191,1)",
+                                    'pointBorderColor' => "rgba(54,140,191,1)",
+                                    'pointHoverBackgroundColor' => "rgba(54,140,191,1)",
+                                    'pointHoverBorderColor' => "rgba(54,140,191,1)",
+                                    'data' => $dayTurnover,
+                                    'spanGaps' => true,
+                                    'borderJoinStyle' => 'miter',
+                                    'fill' => false,
+                                ],
+                            ]
+                        ],
+                    ])
+                    ?>
         </div>
         <!-- /.box-body -->
       </div>
@@ -109,16 +154,28 @@ use kartik\grid\GridView;
       <div class="box box-info">
         <div class="box-header with-border">
           <h3 class="box-title">Объем по поставщикам</h3>
-
-          <div class="box-tools pull-right">
-            
-            </button>
-          </div>
         </div>
         <div class="box-body" style="display: block;">
-          <div class="chart">
-          <canvas id="pieChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>  
-          </div>
+                    <?=
+                    ChartJs::widget([
+                        'type' => 'bar',
+                        'options' => [
+                            'height' => 400,
+                            'width' => 1200,
+                        ],
+                        'data' => [
+                            'labels' => $clientsTurnover['labels'],
+                            'datasets' => [
+                                [
+                                    'label' => 'Общий оборот',
+                                    'backgroundColor' => $clientsTurnover['colors'],
+                                    'borderColor' => $clientsTurnover['colors'],
+                                    'data' => $clientsTurnover['stats'],
+                                ],
+                            ]
+                        ],
+                    ])
+                    ?>
         </div>
         <!-- /.box-body -->
       </div>
@@ -136,7 +193,6 @@ use kartik\grid\GridView;
           </div>
         </div>
         <div class="box-body" style="display: block;">
-          <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
              <?php 
             $columns = [
                 [
@@ -175,10 +231,13 @@ use kartik\grid\GridView;
             'summary' => false,
             ]);
             ?> 
-            <?php  Pjax::end(); ?>
         </div>
         <!-- /.box-body -->
       </div>
       <!-- /.box -->
     </div>
 </div>
+<?php ActiveForm::end(); ?>
+
+<?php Pjax::end() ?>
+</section>

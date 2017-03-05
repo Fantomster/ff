@@ -24,23 +24,25 @@ use common\models\Organization;
                             ->textInput()
                     ?>                    
                     <?= $form->field($organization, 'website')->textInput() ?>
-                    <?= $form->field($organization, 'about')->textarea(['rows' => 6,'style'=>'height: 96px;']) ?>
+                    <?= $form->field($organization, 'about')->textarea(['rows' => 6, 'style' => 'height: 96px;']) ?>
                     <br>
-                    <fieldset>
-                        <legend>Первый пользователь (Менеджер)</legend>
-                        <?= $form->field($profile, 'full_name')->textInput() ?>
+                    <?php if (isset($user)) { ?>
+                        <fieldset>
+                            <legend>Первый пользователь (Менеджер)</legend>
+                            <?= $form->field($profile, 'full_name')->textInput() ?>
 
-                        <?= $form->field($user, 'email')->textInput() ?>
+                            <?= $form->field($user, 'email')->textInput() ?>
 
-                        <?=
-                                $form->field($profile, 'phone', [
+                            <?=
+                                    $form->field($profile, 'phone', [
 //                    'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
-                                ])
-                                ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
-                                ->label('Телефон')
-                                ->textInput()
-                        ?>
-                    </fieldset>
+                                    ])
+                                    ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+                                    ->label('Телефон')
+                                    ->textInput()
+                            ?>
+                        </fieldset>
+                    <?php } ?>
             </div>
             <div class="col-md-6">
                 <fieldset>
@@ -70,7 +72,10 @@ use common\models\Organization;
 </div>
 <div class="box-footer">
     <div class="form-group">
-        <?= Html::submitButton('Добавить ' . (($organizationType == Organization::TYPE_RESTAURANT) ? "ресторан" : "поставщика"), ['class' => 'btn btn-success btn-sm']) ?>
+        <?php
+        $label = $organization->isNewRecord ? 'Добавить ' . (($organizationType == Organization::TYPE_RESTAURANT) ? "ресторан" : "поставщика") : "Сохранить";
+        echo Html::submitButton($label, ['class' => 'btn btn-success btn-sm'])
+        ?>
     </div>
 </div>
 <?php ActiveForm::end(); ?>

@@ -60,7 +60,6 @@ class BuisinessInfo extends \yii\db\ActiveRecord
         return [
             [['organization_id'], 'integer'],
             [['organization_id'], 'unique'],
-            [['reward'], 'required'],
             [['info'], 'string'],
             [['reward'], 'number'],
             [['created_at', 'updated_at'], 'safe'],

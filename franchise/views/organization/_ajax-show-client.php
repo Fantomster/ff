@@ -77,31 +77,31 @@ use yii\helpers\Html;
                 </div>
               </div>
               <div class="modal-body tab-pane" id="tab_3">
-                  <label>Подписант</label>
+                  <label>Подписант: </label>
                   <p><?= $client->buisinessInfo->signed ?></p>
-                  <label>Юридическое название</label>
+                  <label>Юридическое название: </label>
                   <p><?= $client->buisinessInfo->legal_entity ?></p>
-                  <label>Юридический адрес</label>
+                  <label>Юридический адрес: </label>
                   <p><?= $client->buisinessInfo->legal_address ?></p>
-                  <label>Официальный email</label>
+                  <label>Официальный email: </label>
                   <p><?= $client->buisinessInfo->legal_email ?></p>
-                  <label>ИНН</label>
+                  <label>ИНН: </label>
                   <p><?= $client->buisinessInfo->inn ?></p>
-                  <label>КПП</label>
+                  <label>КПП: </label>
                   <p><?= $client->buisinessInfo->kpp ?></p>
-                  <label>ОГРН</label>
+                  <label>ОГРН: </label>
                   <p><?= $client->buisinessInfo->ogrn ?></p>
-                  <label>Банк</label>
+                  <label>Банк: </label>
                   <p><?= $client->buisinessInfo->bank_name ?></p>
-                  <label>БИК</label>
+                  <label>БИК: </label>
                   <p><?= $client->buisinessInfo->bik ?></p>
-                  <label>Телефон</label>
+                  <label>Телефон: </label>
                   <p><?= $client->buisinessInfo->phone ?></p>
-                  <label>р/с</label>
+                  <label>р/с: </label>
                   <p><?= $client->buisinessInfo->correspondent_account ?></p>
-                  <label>к/с</label>
+                  <label>к/с: </label>
                   <p><?= $client->buisinessInfo->checking_account ?></p>
-                  <label>Поле для заметок</label>
+                  <label>Поле для заметок: </label>
                   <p><?= $client->buisinessInfo->info ?></p>
               </div>
               <div class="modal-footer" style="background-color: #fff; border-top: 1px solid #e5e5e5;">

@@ -81,33 +81,33 @@ use yii\helpers\Html;
                 </div>
               </div>
               <div class="modal-body tab-pane" id="tab_3">
-                  <label>Процент с оборота</label>
+                  <label>Процент с оборота: </label>
                   <p><?= $vendor->buisinessInfo->reward ?></p>
-                  <label>Подписант</label>
+                  <label>Подписант: </label>
                   <p><?= $vendor->buisinessInfo->signed ?></p>
-                  <label>Юридическое название</label>
+                  <label>Юридическое название: </label>
                   <p><?= $vendor->buisinessInfo->legal_entity ?></p>
-                  <label>Юридический адрес</label>
+                  <label>Юридический адрес: </label>
                   <p><?= $vendor->buisinessInfo->legal_address ?></p>
-                  <label>Официальный email</label>
+                  <label>Официальный email: </label>
                   <p><?= $vendor->buisinessInfo->legal_email ?></p>
-                  <label>ИНН</label>
+                  <label>ИНН: </label>
                   <p><?= $vendor->buisinessInfo->inn ?></p>
-                  <label>КПП</label>
+                  <label>КПП: </label>
                   <p><?= $vendor->buisinessInfo->kpp ?></p>
-                  <label>ОГРН</label>
+                  <label>ОГРН: </label>
                   <p><?= $vendor->buisinessInfo->ogrn ?></p>
-                  <label>Банк</label>
+                  <label>Банк: </label>
                   <p><?= $vendor->buisinessInfo->bank_name ?></p>
-                  <label>БИК</label>
+                  <label>БИК: </label>
                   <p><?= $vendor->buisinessInfo->bik ?></p>
-                  <label>Телефон</label>
+                  <label>Телефон: </label>
                   <p><?= $vendor->buisinessInfo->phone ?></p>
-                  <label>р/с</label>
+                  <label>р/с: </label>
                   <p><?= $vendor->buisinessInfo->correspondent_account ?></p>
-                  <label>к/с</label>
+                  <label>к/с: </label>
                   <p><?= $vendor->buisinessInfo->checking_account ?></p>
-                  <label>Поле для заметок</label>
+                  <label>Поле для заметок: </label>
                   <p><?= $vendor->buisinessInfo->info ?></p>
               </div>
               <div class="modal-footer" style="background-color: #fff; border-top: 1px solid #e5e5e5;">

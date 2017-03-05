@@ -97,7 +97,7 @@ use yii\helpers\Html;
                   <p><?= $client->buisinessInfo->bik ?></p>
                   <label>Телефон: </label>
                   <p><?= $client->buisinessInfo->phone ?></p>
-                  <label>р/с: </label>
+                  <label>р/с: </label> 
                   <p><?= $client->buisinessInfo->correspondent_account ?></p>
                   <label>к/с: </label>
                   <p><?= $client->buisinessInfo->checking_account ?></p>

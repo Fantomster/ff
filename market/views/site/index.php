@@ -19,9 +19,15 @@ $this->title = 'F-MARKET главная';
         <?php
         foreach($topProducts as $row){
         ?>
-        <!--class="wow slideInLeft" data-wow-duration="2s" data-wow-delay="5s"-->
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
             <div class="mp-product-block animated fadeIn">
+                <div class="mp-rating">
+                    <div class="Fr-star size-3" data-title="<?=$row->ratingStars?>" data-rating="<?=$row->ratingStars?>">
+                        <div class="Fr-star-value" style="width:<?=$row->ratingPercent?>%"></div>
+                        <div class="Fr-star-bg"></div>
+                    </div>
+                </div>
+                <?=empty($row->vendor->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
                 <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>">
                 <img class="product-image wow animated fadeInUp" src="<?= $row->imageUrl ?>">
                 </a>
@@ -79,6 +85,13 @@ $this->title = 'F-MARKET главная';
         ?>
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
         <div class="mp-suppiler-block animated fadeIn">
+         <div class="mp-rating">
+            <div class="Fr-star size-3" data-title="<?=$row->ratingStars?>" data-rating="<?=$row->ratingStars?>">
+                <div class="Fr-star-value" style="width:<?=$row->ratingPercent?>%"></div>
+                <div class="Fr-star-bg"></div>
+            </div>
+         </div>
+          <?=empty($row->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
           <a href="<?=Url::to(['/site/supplier', 'id' => $row->id]);?>">
             <img class="supplier-image  animated fadeInUp" src="<?= empty($row->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $row->pictureUrl ?>">
           </a>

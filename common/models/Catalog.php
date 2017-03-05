@@ -14,14 +14,15 @@ use Yii;
  * @property integer $type
  * @property string $created_at
  * @property string $updated_at
+ * @property Vendor $vendor
  */
 class Catalog extends \yii\db\ActiveRecord
 {    
-	const BASE_CATALOG = 1;
-	const CATALOG = 2;
+    const BASE_CATALOG = 1;
+    const CATALOG = 2;
 	
     const NON_CATALOG = 0;
-    
+    const CATALOG_BASE_NAME = 'Главный каталог';
     const STATUS_ON = 1;
     const STATUS_OFF = 0;
     /**
@@ -100,5 +101,8 @@ class Catalog extends \yii\db\ActiveRecord
 		->select(['id','status','name','created_at'])
 		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();   
 		return $catalog;
+    }
+    public function getVendor() {
+        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 }

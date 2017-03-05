@@ -30,7 +30,7 @@ Modal::widget([
 <?=
 Modal::widget([
     'id' => 'edit-catalog',
-    'size' => 'modal-lg',
+    'size' => 'modal-big',
     'clientOptions' => false,
 ])
 ?>
@@ -41,6 +41,7 @@ $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;height:400px;overflow: hidden;}
 .hide{display:none}
 .file-input{width: 400px; float: left;}
+
 ');
 ?>
 <div id="modal_addProduct" class="modal fade" role="dialog">
@@ -127,15 +128,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_VENDOR
     Modal::end();
 }
 ?>
-    <?=
-     yii\bootstrap\Alert::widget([
-        'options' => [
-            'class' => 'alert-warning fade in',
-        ],
-        'body' => 'Редактирование каталогов поставщика временно отключено! Приносим извинения за неудобства.',
-    ]);
 
-?>
 
 <section class="content-header">
     <h1>

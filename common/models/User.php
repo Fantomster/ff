@@ -18,6 +18,7 @@ use Yii;
  * @property integer $organization_id
  * 
  * @property Organization $organization
+ * @property FranchiseeUser $franchiseeUser
  */
 class User extends \amnah\yii2\user\models\User {
 
@@ -28,7 +29,9 @@ class User extends \amnah\yii2\user\models\User {
         $rules = parent::rules();
         $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite', 'manageNew']];
         $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
+        $rules[] = [['role_id'], 'compare', 'compareValue' => Role::ROLE_ADMIN, 'operator' => '>'];
         $rules[] = [['email'], 'unique', 'on'=>'sendInviteFromVendor', 'message' => 'ooo'];
+        $rules[] = [['organization_id'], 'integer'];
 //        $rules[] = [['email'], 'required', 'message' => 'Пожалуйста, напишите ваш адрес электронной почты'];
         
         //переопределим сообщения валидации быдланским способом
@@ -75,6 +78,13 @@ class User extends \amnah\yii2\user\models\User {
     public function getOrganization() {
         $organization = $this->module->model("Organization");
         return $this->hasOne($organization::className(), ['id' => 'organization_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFranchiseeUser() {
+        return $this->hasOne(FranchiseeUser::className(), ['user_id' => 'id']);
     }
 
     /**

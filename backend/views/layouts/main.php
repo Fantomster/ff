@@ -69,7 +69,19 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             } else {
                 if (Yii::$app->user->identity->role_id === \common\models\Role::ROLE_ADMIN) {
                     $menuItems = array_merge($menuItems, [
-                        ['label' => 'Пользователи', 'url' => ['/client/index']],
+                        [
+                            'label' => 'Пользователи',
+                            'items' => [
+                                [
+                                    'label' => 'Общий список',
+                                    'url' => ['/client/index'],
+                                ],
+                                [
+                                    'label' => 'Менеджеры f-keeper',
+                                    'url' => ['/client/managers'],
+                                ],
+                            ],
+                        ],
                         [
                             'label' => 'Организации',
                             'items' => [
@@ -79,7 +91,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 ],
                                 [
                                     'label' => 'Одобренные для f-market',
-                                    'url' => ['/white-list/index'],
+                                    'url' => ['/buisiness-info/index'],
                                 ],
                                 [
                                     'label' => 'Франшиза',

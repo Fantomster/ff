@@ -14,7 +14,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= DetailView::widget([
+    <?=
+    DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
@@ -24,14 +25,39 @@ $this->params['breadcrumbs'][] = $this->title;
             'accepted_by_id',
             'status',
             'total_price',
-            'created_at',
-            'updated_at',
-            'requested_delivery',
-            'actual_delivery',
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата заказа',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'label' => 'Последнее изменение',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'requested_delivery',
+                'label' => 'Запрошенная дата доставки',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->requested_delivery, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'actual_delivery',
+                'label' => 'Фактическая дата доставки',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->actual_delivery, "php:j M Y, H:i:s");
+                }
+            ],
             'comment:ntext',
             'discount',
             'discount_type',
         ],
-    ]) ?>
+    ])
+    ?>
 
 </div>

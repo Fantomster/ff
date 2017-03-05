@@ -18,7 +18,7 @@ use yii\helpers\Url;
  * @property string $article
  * @property string $product
  * @property number $units
- * @property integer $price
+ * @property string $price
  * @property integer $status
  * @property integer $market_place
  * @property integer $deleted
@@ -39,12 +39,19 @@ use yii\helpers\Url;
  * @property Organization $vendor
  * @property MpCategory $category
  * @property MpCategory $mainCategory
- * @property WhiteList $whiteList
+ * @property RatingStars $ratingStars
+ * @property RatingPercent $ratingPercent
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
     const STATUS_ON = 1;
     const STATUS_OFF = 0;
+    
+    const MP_SHOW_PRICE = 1;
+    const MP_HIDE_PRICE = 0;
+    
+    const MAX_INSERT_FROM_XLS = 5000;
+    
     const MARKETPLACE_ON = 1;
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;
@@ -56,6 +63,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const ES_MASS_UPDATED = 3; //в случае,  если обновили весь каталог через файл, крон работает ночью, порционально добавляет в бд по 1000 товаров
     const ES_MASS_DELETED = 4; //массовое удаление, пока не используется, но может понадобиться
     
+    const MAX_RATING = \common\models\Organization::MAX_RATING + 10;
     
     public $USER_TYPE;
     public $searchString; 
@@ -64,7 +72,8 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     
     public $sub1;
     public $sub2;
-
+    
+        
     /**
      * @inheritdoc
      */
@@ -95,7 +104,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['cat_id','article','price','product','ed'], 'required'],
-            [['cat_id', 'category_id','supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price'], 'integer'],
+            [['cat_id', 'category_id','supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price','rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             [['article'], 'string', 'max' => 50],
             [['product','brand','region','weight'], 'string', 'max' => 255],
@@ -148,16 +157,17 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'region' => 'Страна производитель',
             'weight' => 'Вес',
             'mp_show_price' => 'Показывать цену в F-MARKET',
+            'rating' => 'Рейтинг'
                 //'importCatalog'=>'Files'
         ];
     }
 
     public function beforeSave($insert)
     {
-    if (parent::beforeSave($insert)) {
-            $this->price = str_replace(",", ".", $this->price);
-            $this->units = str_replace(",", ".", $this->units);
-            return true;
+    if (parent::beforeSave($insert)) { 
+        
+        $this->es_status = CatalogBaseGoods::ES_UPDATE;
+        return true;
         }
         return false;
     }
@@ -261,9 +271,10 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     $parent = MpCategory::find()->where(['id' => $id])->one()->parent;
     return MpCategory::find()->where(['id' => $parent])->one();
     }
-    public function getWhiteList()
-    {
-        return $this->hasOne(WhiteList::className(), ['organization_id' => 'supp_org_id']);
+    public function getRatingStars() {
+        return number_format(($this->rating) / (self::MAX_RATING/5),1);
     }
-    
+    public function getRatingPercent() {
+        return number_format(((($this->rating) / (self::MAX_RATING/5))/5*100),1);
+    }
 }

@@ -14,6 +14,10 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'white_list')->checkbox(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'partnership')->checkBox(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'legal_entity')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'city')->textInput(['maxlength' => true]) ?>

@@ -881,3 +881,66 @@ text-decoration: none;
     z-index:9999;
 }
 #sendService{margin-top:5%}
+.pro-partner {
+    font-family: "HelveticaBold",Arial,sans-serif !important;
+    font-color: #3f3e3e;
+    font-size:11px;
+    border:1px solid #3f3e3e;
+    padding:6px 10px 3px 10px;
+    border-radius:3px;
+    display:inline-block;
+    float: right;
+    margin-top:15px;
+    margin-right:15px;
+}
+.mp-rating{
+    float: left;
+    margin-top: 19px;
+    margin-bottom: 5px;
+    margin-left: 15px;
+}
+.Fr-star {
+  width: 225px;
+  height: 40px;
+  position: relative;
+  background-color: #ddd;
+}
+.Fr-star[data-title]:hover:after {
+  content: attr(data-title);
+  padding: 4px 8px;
+  color: #333;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 20;
+  white-space: nowrap;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: 0px 0px 4px #222;
+  -webkit-box-shadow: 0px 0px 4px #222;
+  box-shadow: 0px 0px 4px #222;
+  background-image: -moz-linear-gradient(top, #eeeeee, #cccccc);
+  background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0, #eeeeee),color-stop(1, #cccccc));
+  background-image: -webkit-linear-gradient(top, #eeeeee, #cccccc);
+  background-image: -moz-linear-gradient(top, #eeeeee, #cccccc);
+  background-image: -ms-linear-gradient(top, #eeeeee, #cccccc);
+  background-image: -o-linear-gradient(top, #eeeeee, #cccccc);
+}
+.Fr-star .Fr-star-bg{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: url(../images/Fr-star.svg) repeat;
+  background-size: contain;
+}
+.Fr-star .Fr-star-value{
+  height: 100%;
+  position: absolute;
+  background-color: #84bf76;
+}
+
+.Fr-star.size-3{
+  width: 95px;
+  height: 17px;
+}

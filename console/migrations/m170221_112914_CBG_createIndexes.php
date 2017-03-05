@@ -16,4 +16,3 @@ class m170221_112914_CBG_createIndexes extends Migration
         $this->dropIndex('article', '{{%catalog_base_goods}}', 'article');
     }
 }
-

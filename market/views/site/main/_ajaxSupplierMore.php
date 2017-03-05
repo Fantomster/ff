@@ -8,6 +8,13 @@ foreach($suppliers as $row){
 ?>
 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
 <div class="mp-suppiler-block  animated fadeIn">
+    <div class="mp-rating">
+        <div class="Fr-star size-3" data-title="<?=$row->ratingStars?>" data-rating="<?=$row->ratingStars?>">
+            <div class="Fr-star-value" style="width:<?=$row->ratingPercent?>%"></div>
+            <div class="Fr-star-bg"></div>
+        </div>
+    </div>
+    <?=empty($row->partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
     <a href="<?=Url::to(['/site/supplier', 'id' => $row->id]);?>">
   <img class="supplier-image animated fadeInUp" src="<?= empty($row->picture) ? \common\models\Organization::DEFAULT_VENDOR_AVATAR : $row->pictureUrl ?>">
     </a>

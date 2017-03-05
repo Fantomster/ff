@@ -10,24 +10,22 @@ use common\models\Organization;
 /**
  * OrganizationSearch represents the model behind the search form about `common\models\Organization`.
  */
-class OrganizationSearch extends Organization
-{
+class OrganizationSearch extends Organization {
+
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['id', 'type_id', 'step'], 'integer'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    public function scenarios()
-    {
+    public function scenarios() {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
@@ -39,8 +37,7 @@ class OrganizationSearch extends Organization
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
-    {
+    public function search($params) {
         $query = Organization::find();
 
         // add conditions that should always apply here
@@ -68,13 +65,16 @@ class OrganizationSearch extends Organization
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'city', $this->city])
-            ->andFilterWhere(['like', 'address', $this->address])
-            ->andFilterWhere(['like', 'zip_code', $this->zip_code])
-            ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'website', $this->website]);
+                ->andFilterWhere(['like', 'city', $this->city])
+                ->andFilterWhere(['like', 'address', $this->address])
+                ->andFilterWhere(['like', 'zip_code', $this->zip_code])
+                ->andFilterWhere(['like', 'phone', $this->phone])
+                ->andFilterWhere(['like', 'email', $this->email])
+                ->andFilterWhere(['like', 'website', $this->website])
+                ->andFilterWhere(['white_list' => $this->white_list])
+                ->andFilterWhere(['partnership' => $this->partnership]);
 
         return $dataProvider;
     }
+
 }

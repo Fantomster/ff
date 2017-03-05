@@ -35,7 +35,7 @@ class ClientController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index', 'view', 'update', 'managers', 'delete'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -56,6 +56,20 @@ class ClientController extends Controller {
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+                    'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Lists all f-keeper managers.
+     * @return mixed
+     */
+    public function actionManagers() {
+        $searchModel = new UserSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Role::ROLE_FKEEPER_MANAGER);
+
+        return $this->render('managers', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
         ]);
@@ -96,30 +110,46 @@ class ClientController extends Controller {
      * @param integer $id
      * @return mixed
      */
-//    public function actionUpdate($id)
-//    {
-//        $model = $this->findModel($id);
-//
-//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            return $this->redirect(['view', 'id' => $model->id]);
-//        } else {
-//            return $this->render('update', [
-//                'model' => $model,
-//            ]);
-//        }
-//    }
-//    /**
-//     * Deletes an existing User model.
-//     * If deletion is successful, the browser will be redirected to the 'index' page.
-//     * @param integer $id
-//     * @return mixed
-//     */
-//    public function actionDelete($id)
-//    {
-//        $this->findModel($id)->delete();
-//
-//        return $this->redirect(['index']);
-//    }
+    public function actionUpdate($id) {
+        $model = User::findOne(['id' => $id, 'role_id' => Role::ROLE_FKEEPER_MANAGER]);
+
+        if (empty($model)) {
+            throw new NotFoundHttpException('Нет здесь ничего такого, проходите, гражданин!');
+        }
+
+        try {
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            } else {
+                return $this->render('update', [
+                            'model' => $model,
+                ]);
+            }
+        } catch (Exception $e) {
+            throw new NotFoundHttpException('Ошибочка вышла!');
+        }
+    }
+
+    /**
+     * Deactivates an existing manager.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param integer $id
+     * @return mixed
+     */
+    public function actionDelete($id) {
+        $model = User::findOne(['id' => $id, 'role_id' => Role::ROLE_FKEEPER_MANAGER]);
+
+        if (empty($model)) {
+            throw new NotFoundHttpException('Нет здесь ничего такого, проходите, гражданин!');
+        }
+
+        $model->role_id = Role::ROLE_USER;
+        $model->organization_id = null;
+        $model->status = User::STATUS_INACTIVE;
+        $model->save();
+
+        return $this->redirect(['managers']);
+    }
 
     /**
      * Finds the User model based on its primary key value.

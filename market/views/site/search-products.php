@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
+use common\models\ES\Product;
 ?>
 
 <?php
@@ -32,6 +33,13 @@ $this->title = 'F-MARKET результаты поиска';
         ?>
         <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 min-padding">
             <div class="mp-product-block">
+                <div class="mp-rating">
+                    <div class="Fr-star size-3" data-title="<?=number_format($row->product_rating / (Product::MAX_RATING/5),1)?>" data-rating="<?=number_format($row->product_rating / (Product::MAX_RATING/5),1)?>">
+                        <div class="Fr-star-value" style="width:<?=($row->product_rating / (Product::MAX_RATING/5))/5*100?>%"></div>
+                        <div class="Fr-star-bg"></div>
+                    </div>
+                </div>
+                <?=empty($row->product_partnership) ? '' : '<div class="pro-partner">PRO</div>' ?>
                 <a href="<?=Url::to(['/site/product', 'id' => $row->product_id]);?>">
                 <img class="product-image" src="<?=!empty($row->product_image) ? 
         $row->product_image : 

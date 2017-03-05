@@ -22,21 +22,22 @@ switch ($model->type_id) {
         break;
 }
 
-$white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
+$buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $model->id]);
 ?>
 <div class="organization-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    
+
     <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']) ?>
-    
-    <?= 
-        $white ? 
-        Html::a('Одобрено для f-market!', ['white-list/view', 'id' => $white->id], ['class' => 'btn btn-success', 'style' => 'margin-bottom: 10px;']) : 
-        Html::a('Одобрить для f-market', ['white-list/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
+
+    <?=
+    $buisinessInfo ?
+            Html::a('Просмотреть реквизиты', ['buisiness-info/view', 'id' => $buisinessInfo->id], ['class' => 'btn btn-success', 'style' => 'margin-bottom: 10px;']) :
+            Html::a('Заполнить реквизиты', ['buisiness-info/approve', 'id' => $model->id], ['class' => 'btn btn-default', 'style' => 'margin-bottom: 10px;'])
     ?>
 
-    <?= DetailView::widget([
+    <?=
+    DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
@@ -45,6 +46,8 @@ $white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
                 'value' => $model->type->name,
             ],
             'name',
+            'white_list',
+            'partnership',
             'legal_entity',
             'city',
             'address',
@@ -54,13 +57,25 @@ $white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
             'website',
             'contact_name',
             'about',
-            'created_at',
-            'updated_at',
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата создания',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'label' => 'Последнее изменение',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
+                }
+            ],
             'step',
             [
                 'format' => 'raw',
                 'label' => 'Работники',
-                'value' => Html::a('Список', ['client/index', 'UserSearch[organization_id]'=>$model->id])
+                'value' => Html::a('Список', ['client/index', 'UserSearch[organization_id]' => $model->id])
             ],
             [
                 'format' => 'raw',
@@ -73,6 +88,7 @@ $white = \common\models\WhiteList::findOne(['organization_id' => $model->id]);
                 'value' => $goodsListUrl ? Html::a('Список', $goodsListUrl) : '',
             ],
         ],
-    ]) ?>
+    ])
+    ?>
 
 </div>

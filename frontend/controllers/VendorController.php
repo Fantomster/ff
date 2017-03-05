@@ -553,13 +553,13 @@ class VendorController extends DefaultController {
                     $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
                     $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
-                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); 
+                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row));  //Комментарий
                     if (!empty($row_article && $row_product && $row_price && $row_ed)) {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
                         }
                         if (in_array($row_article, $arr)) {
-                            $sql = "update {{%catalog_base_goods}} set "
+                           $sql = "update {{%catalog_base_goods}} set "
                                     . "article=:article,"
                                     . "product=:product,"
                                     . "units=:units,"
@@ -639,7 +639,7 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
 
-            if ($highestRow > 5000) {
+            if ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
@@ -668,7 +668,7 @@ class VendorController extends DefaultController {
                                 "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
                                 . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
                                 . ":cat_id,"
-                                . "0,"
+                                . "NULL,"
                                 . $currentUser->organization_id . ","
                                 . ":article,"
                                 . ":product,"
@@ -890,7 +890,7 @@ class VendorController extends DefaultController {
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
             $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
         }
-
+        
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {

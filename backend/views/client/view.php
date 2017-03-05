@@ -13,7 +13,23 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="user-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?= DetailView::widget([
+
+    <?php
+    if ($model->role_id === \common\models\Role::ROLE_FKEEPER_MANAGER) {
+        echo Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
+        echo Html::a('Удалить', ['delete', 'id' => $model->id], [
+            'class' => 'btn btn-danger',
+            'style' => 'margin-bottom: 10px; margin-left: 10px;',
+            'data' => [
+                'confirm' => 'Are you sure you want to delete this item?',
+                'method' => 'post',
+            ],
+        ]);
+    }
+    ?>
+
+    <?=
+    DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
@@ -27,8 +43,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'logged_in_ip',
             'logged_in_at',
             'created_ip',
-            'created_at',
-            'updated_at',
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата создания',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'label' => 'Последнее изменение',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->updated_at, "php:j M Y, H:i:s");
+                }
+            ],
 //            'banned_at',
 //            'banned_reason',
 //            'organization_id',
@@ -38,10 +66,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'format' => 'raw',
-                'value' => Html::a($model->organization->name, ['organization/view', 'id' => $model->organization_id]),
+                'value' => isset($model->organization) ? Html::a($model->organization->name, ['organization/view', 'id' => $model->organization_id]) : 'Отсутствует',
                 'label' => 'Организация',
             ],
         ],
-    ]) ?>
+    ])
+    ?>
 
 </div>

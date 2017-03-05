@@ -22,7 +22,6 @@ use common\models\CatalogGoods;
 use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
-use common\models\WhiteList;
 use common\components\AccessRule;
 use yii\helpers\Url;
 use yii\helpers\Json;
@@ -78,79 +77,79 @@ class SiteController extends Controller {
      * @return string
      */
     public function actionIndex() {
+        $relationSuppliers = [];
         if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-            $addwhereOrg = [];
+            
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
-            $addwhereOrg = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                $relationSuppliers = RelationSuppRest::find()
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
-                $addwhereOrg = ['not in', 'id', $relationSupplier];
+                        ->all();  
             }
         }
-        $topProducts = CatalogBaseGoods::find()
-                ->leftJoin('white_list','catalog_base_goods.supp_org_id = white_list.organization_id')
+        $topSuppliers = Organization::find()
                 ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
+                ->andWhere(['not in', 'id', $relationSuppliers])
+                ->orderBy(['rating'=>SORT_DESC])
+                ->limit(6)
+                ->all();
+        
+        $topSuppliersCount = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
+                ->andWhere(['not in', 'id', $relationSuppliers])
+                ->count();
+        
+        $topProducts = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere('organization_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)
                 ->all();
         $topProductsCount = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
+                ->joinWith('vendor')
                 ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
                     'market_place'=>CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere('organization_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
                 ->count();
-        $topSuppliers = Organization::find()
-                ->joinWith('whiteList')
-                ->where(['type_id' => Organization::TYPE_SUPPLIER])
-                ->andWhere('organization_id is not null')
-                ->andWhere($addwhereOrg)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->limit(6)
-                ->all();
-        $topSuppliersCount = Organization::find()
-                ->joinWith('whiteList')
-                ->where(['type_id' => Organization::TYPE_SUPPLIER])
-                ->andWhere('organization_id is not null')
-                ->andWhere($addwhereOrg)
-                ->count();
+
+        
         
         return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
     }
 
     public function actionProduct($id) {
+        $relationSupplier = [];
         if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
+            
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
-
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();   
             }
         }
 
@@ -160,7 +159,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere($addwhere)
+                ->andWhere(['not in', 'supp_org_id', $relationSupplier])
                 ->one();
         if ($product) {
             return $this->render('/site/product', compact('product'));
@@ -218,7 +217,7 @@ class SiteController extends Controller {
                         ->limit(10000)->count();
         if (!empty($count)) {
             $products = \common\models\ES\Product::find()->query($params)
-                            ->limit(12)->all();
+                            ->orderBy(['product_rating'=>SORT_DESC])->limit(12)->all();
             return $this->render('/site/search-products', compact('count', 'products', 'search'));
         } else {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
@@ -273,6 +272,7 @@ class SiteController extends Controller {
 
         if ($count > 0) {
             $pr = \common\models\ES\Product::find()->query($params)
+                    ->orderBy(['product_rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(12)
                     ->all();
@@ -304,8 +304,9 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' => $search,
-                        //'analyzer' =>"ru",
-                        //'type' =>'phrase_prefix',
+                            'fuzziness' => 'AUTO'
+                           //'analyzer' =>"ru",
+                           //'type' =>'phrase_prefix',
                         // 'max_expansions' =>6
                         ]
                     ]
@@ -324,7 +325,7 @@ class SiteController extends Controller {
         $count = \common\models\ES\Supplier::find()->query($params)
                         ->limit(10000)->count();
         if (!empty($count)) {
-            $sp = \common\models\ES\Supplier::find()->query($params)
+            $sp = \common\models\ES\Supplier::find()->query($params)->orderBy(['supplier_rating'=>SORT_DESC])
                             ->limit(12)->all();
             return $this->render('/site/search-suppliers', compact('count', 'sp', 'search'));
         } else {
@@ -380,6 +381,7 @@ class SiteController extends Controller {
 
         if ($count > 0) {
             $sp = \common\models\ES\Supplier::find()->query($params)
+                    ->orderBy(['supplier_rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(12)
                     ->all();
@@ -388,36 +390,45 @@ class SiteController extends Controller {
     }
 
     public function actionSupplierProducts($id) {
+        $relationSupplier = [];
         if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
+            
         } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();   
             }
         }
         $productsCount = CatalogBaseGoods::find()
+                ->joinWith('vendor')
                 ->where([
                     'supp_org_id' => $id,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF, 
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
-                ->andWhere($addwhere)
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place'=>CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->andWhere(['not in', 'supp_org_id', $relationSupplier])
                 ->count();
+        $cbgTable = CatalogBaseGoods::tableName();
         $products = CatalogBaseGoods::find()
+                ->joinWith('vendor')
                 ->where([
                     'supp_org_id' => $id,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF, 
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON])
-                ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->limit(12)->all();
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->andWhere(['not in', 'supp_org_id', $relationSupplier])
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                ->limit(12)
+                ->all();
         $vendor = \common\models\Organization::find()->where(['id' => $id])->one();
 
         if ($products) {
@@ -427,34 +438,16 @@ class SiteController extends Controller {
         }
     }
 
-    public function actionAjaxProductLoader($num, $supp_org_id) {
-
-        if (Yii::$app->request->isAjax) {
-            $count = CatalogBaseGoods::find()
-                    ->where(['supp_org_id' => $supp_org_id, 
-                        'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                        'status' => CatalogBaseGoods::STATUS_ON,
-                        'deleted'=>CatalogBaseGoods::DELETED_OFF
-                        ])
-                    ->offset($num)
-                    ->limit(6)
-                    ->count();
-
-            if ($count > 0) {
-                $pr = CatalogBaseGoods::find()->where([
-                    'supp_org_id' => $supp_org_id, 
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF
-                        ])
-                    ->orderBy(['rating'=>SORT_DESC])    
-                    ->offset($num)->limit(6)->all();
-                return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
-            }
-        }
-    }
+    
 
     public function actionSupplier($id) {
+        $vendor = Organization::find()
+                ->where([
+                    'organization.id' => $id, 
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list' => Organization::WHITE_LIST_ON
+                        ])
+                ->one();
         if (\Yii::$app->user->isGuest) {
             $relationSupplier = false;
             $addwhere = [];
@@ -475,13 +468,7 @@ class SiteController extends Controller {
                 $relationSupplier = false;
             }
         }
-        $vendor = Organization::find()
-                ->select('organization.*')
-                ->joinWith('whiteList')
-                ->where(['organization.id' => $id, 'type_id' => Organization::TYPE_SUPPLIER])
-                ->andWhere('organization_id is not null')
-                ->andWhere($addwhere)
-                ->one();
+        
         if ($vendor && !$relationSupplier) {
             return $this->render('/site/supplier', compact('vendor'));
         } else {
@@ -506,37 +493,87 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
             }
         }
+        $cbgTable = CatalogBaseGoods::tableName();
         $count = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
+                ->joinWith('vendor')
                 ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>0])
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC]) 
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
                 ->count();
         if ($count > 0) {
             $pr = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
+                ->joinWith('vendor')
                 ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>0])
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere('organization_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC]) 
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                ->offset($num)
+                ->limit(6)
+                ->all();
+            return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
+        }
+    }
+    public function actionAjaxSuppProductMore($num,$supp_org_id) {
+        if (\Yii::$app->user->isGuest) {
+            $addwhere = [];
+        } else {
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+            $addwhere = [];
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $relationSupplier = RelationSuppRest::find()
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->asArray()
+                        ->all();
+                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+            }
+        }
+        $cbgTable = CatalogBaseGoods::tableName();
+        $count = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'supp_org_id' => $supp_org_id,
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->andWhere($addwhere)
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                ->offset($num)
+                ->limit(6)
+                ->count();
+        if ($count > 0) {
+            $pr = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'supp_org_id' => $supp_org_id,
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->andWhere($addwhere)
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
                 ->all();
@@ -544,16 +581,19 @@ class SiteController extends Controller {
         }
     }
     public function actionRestaurants() {
-        $restaurants = WhiteList::find()
-                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
-                ->joinWith('organization')
-                ->andWhere('organization_id is not null')
+        $restaurants = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_RESTAURANT,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
+                //->orderBy(['rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
-        $restaurantsCount = WhiteList::find()
-                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
-                ->joinWith('organization')
-                ->andWhere('organization_id is not null')
+        $restaurantsCount = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_RESTAURANT,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
                 ->limit(12)
                 ->count();
 
@@ -561,17 +601,19 @@ class SiteController extends Controller {
     }
     public function actionAjaxRestaurantsMore($num) {
         
-        $count = WhiteList::find()
+        $count = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_RESTAURANT,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
                 ->limit(6)->offset($num)
-                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
-                ->joinWith('organization')
-                ->andWhere('organization_id is not null')
                 ->count();
         if ($count > 0) {
-            $restaurants = WhiteList::find()
-                ->where(['organization.type_id' => Organization::TYPE_RESTAURANT])
-                ->joinWith('organization')
-                    ->andWhere('organization_id is not null')
+            $restaurants = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_RESTAURANT,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
                 ->limit(6)->offset($num)
                 ->all();
             return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));
@@ -586,7 +628,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id])
                         ->asArray()
                         ->all();
@@ -595,18 +637,20 @@ class SiteController extends Controller {
         }
         
         $suppliersCount = Organization::find()
-                ->joinWith('whiteList')
-                ->where(['type_id' => Organization::TYPE_SUPPLIER])
-                ->andWhere('organization_id is not null')
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC]) 
+                ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)->offset($num)
                 ->count();
         if ($suppliersCount > 0) {
         $suppliers = Organization::find()
-                ->joinWith('whiteList')
-                ->where(['type_id' => Organization::TYPE_SUPPLIER])
-                ->andWhere('organization_id is not null')
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
                 ->andWhere($addwhere)
                 ->orderBy(['rating'=>SORT_DESC]) 
                 ->limit(6)->offset($num)
@@ -625,35 +669,36 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id])
                         ->asArray()
                         ->all();
                 $addwhere = ['not in', 'supp_org_id', $relationSupplier];
             }
         }
+        $cbgTable = CatalogBaseGoods::tableName();
         $count = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
+                ->joinWith('vendor')
                 ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>0, 
-                    'category_id' => $id])
-                ->andWhere('organization_id is not null')
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere(['category_id' => $id])
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC]) 
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC]) 
                 ->limit(12)
                 ->count();
         $products = CatalogBaseGoods::find()
-                ->joinWith('whiteList')
+                ->joinWith('vendor')
                 ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>0, 
-                    'category_id' => $id])
-                ->andWhere('organization_id is not null')
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere(['category_id' => $id])
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC]) 
+                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
         $category = \common\models\MpCategory::find()->where(['id' => $id])->one();
@@ -684,7 +729,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
@@ -692,23 +737,27 @@ class SiteController extends Controller {
             }
         }
         $suppliers = Organization::find()
-                ->joinWith('whiteList')
-                ->where(['type_id' => Organization::TYPE_SUPPLIER])
-                ->andWhere('organization_id is not null')
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
                 ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC]) 
+                ->orderBy(['rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
         $suppliersCount = Organization::find()
-                ->joinWith('whiteList')
-                ->where(['type_id' => Organization::TYPE_SUPPLIER])
-                ->andWhere('organization_id is not null')
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
                 ->andWhere($addwhere)
+                ->orderBy(['rating'=>SORT_DESC])
                 ->count();
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
     }
 
     public function actionAjaxProductCatLoader($num, $category) {
+        $cbgTable = CatalogBaseGoods::tableName();
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
         } else {
@@ -717,7 +766,7 @@ class SiteController extends Controller {
             $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
                         ->all();
@@ -726,29 +775,31 @@ class SiteController extends Controller {
         }
         if (Yii::$app->request->isAjax) {
             $count = CatalogBaseGoods::find()
-                    ->joinWith('whiteList')
+                    ->joinWith('vendor')
                     ->where([
-                        'category_id' => $category, 
-                        'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                        'status' => CatalogBaseGoods::STATUS_ON,
-                        'deleted'=>0])
-                    ->andWhere('organization_id is not null')
+                    'category_id' => $category, 
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
                     ->andWhere($addwhere)
+                    ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(6)
                     ->count();
 
             if ($count > 0) {
                 $pr = CatalogBaseGoods::find()
-                        ->joinWith('whiteList')
-                        ->where([
-                            'category_id' => $category, 
-                            'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                            'status' => CatalogBaseGoods::STATUS_ON,
-                            'deleted'=>0])
-                        ->andWhere('organization_id is not null')
-                        ->andWhere($addwhere)
-                        ->offset($num)
+                    ->joinWith('vendor')
+                    ->where([
+                    'category_id' => $category, 
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                    ->andWhere($addwhere)
+                    ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                    ->offset($num)
                         ->limit(6)
                         ->all();
                 return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
@@ -765,7 +816,7 @@ class SiteController extends Controller {
             $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
-                        ->select('supp_org_id')
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->all();
                 $filterNotIn = [];
@@ -822,8 +873,9 @@ class SiteController extends Controller {
                         'match' => [
                             'supplier_name' => [
                                 'query' => $search,
-                                'analyzer' => 'ru',
-                                'type' => 'phrase'
+                                'fuzziness' => 'AUTO'
+                                //'analyzer' => 'ru',
+                                //'type' => 'phrase'
                             ]   
                         ]
                     ],
@@ -852,7 +904,7 @@ class SiteController extends Controller {
 
             $search_categorys = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(1000)->asArray()->all();
-            $search_products = \common\models\ES\Product::find()->query($params_products)
+            $search_products = \common\models\ES\Product::find()->query($params_products)->orderBy(['product_rating'=>SORT_DESC])
                             /* ->highlight([
                               "pre_tags"  => "<em>",
                               "post_tags" => "</em>",
@@ -861,7 +913,7 @@ class SiteController extends Controller {
                               ]
                               ]) */
                             ->limit(4)->asArray()->all();
-            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->orderBy(['supplier_rating'=>SORT_DESC])
                             ->limit(4)->asArray()->all();
         }
 

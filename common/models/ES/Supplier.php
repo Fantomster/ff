@@ -7,6 +7,8 @@ use Yii;
 
 class Supplier extends ActiveRecord
 {  
+    const MAX_RATING = \common\models\Organization::MAX_RATING;
+    
     public static function index() 
     {  
         return 'supplier'; 
@@ -21,7 +23,9 @@ class Supplier extends ActiveRecord
         return [            
             "supplier_id",
             "supplier_name",
-            "supplier_image" 
+            "supplier_image",
+            "supplier_rating", 
+            "supplier_partnership"
           ];
       }
     public function rules() 

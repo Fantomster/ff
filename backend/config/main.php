@@ -54,6 +54,7 @@ return [
 //            ],
 //        ],
 //    ],
+    /*
     'on beforeAction' => function ($event) {
         if (Yii::$app->user->isGuest) {
             if ($event->action->id !== 'login') {
@@ -67,4 +68,6 @@ return [
             Yii::$app->response->statusCode = 403;
         }
     },
+    */
+
 ];

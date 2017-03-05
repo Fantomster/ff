@@ -36,6 +36,10 @@ return [
             'backend/web/assets',
             'frontend/runtime',
             'frontend/web/assets',
+            'market/runtime',
+            'market/web/assets',
+            'franchise/runtime',
+            'franchise/web/assets',
         ],
         'setExecutable' => [
             'yii',
@@ -44,6 +48,8 @@ return [
         'setCookieValidationKey' => [
             'backend/config/main-local.php',
             'frontend/config/main-local.php',
+            'market/config/main-local.php',
+            'franchise/config/main-local.php',
         ],
     ],
     'Production' => [
@@ -53,6 +59,10 @@ return [
             'backend/web/assets',
             'frontend/runtime',
             'frontend/web/assets',
+            'market/runtime',
+            'market/web/assets',
+            'franchise/runtime',
+            'franchise/web/assets',
         ],
         'setExecutable' => [
             'yii',
@@ -60,6 +70,8 @@ return [
         'setCookieValidationKey' => [
             'backend/config/main-local.php',
             'frontend/config/main-local.php',
+            'market/config/main-local.php',
+            'franchise/config/main-local.php',
         ],
     ],
 ];

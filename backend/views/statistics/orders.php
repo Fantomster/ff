@@ -1,14 +1,7 @@
 <?php
-
-use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\grid\GridView;
-use common\models\Order;
-use common\models\Organization;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
-use yii\widgets\Breadcrumbs;
 use dosamigos\chartjs\ChartJs;
 
 $this->registerJs('

@@ -1,11 +1,17 @@
 <?php
 use yii\helpers\Html;
-$count_products_from_mp = \common\models\CatalogBaseGoods::find()
-        ->joinWith('whiteList')->joinWith('whiteList')
-        ->where(['market_place' => \common\models\CatalogBaseGoods::MARKETPLACE_ON,'deleted'=>0])
-        ->andWhere('category_id is not null')
-        ->andWhere('organization_id is not null')
-        ->count();
+use common\models\Organization;
+use common\models\CatalogBaseGoods;
+
+$count_products_from_mp = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place'=>CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->count();
 $left_menu_categorys = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
 $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,parent,')->where('parent is not null')->asArray()->all();
 ?>

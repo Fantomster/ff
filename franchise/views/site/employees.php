@@ -110,7 +110,7 @@ $this->registerCss("
                             'label' => '<i class="icon fa fa-user-plus"></i>  Добавить сотрудника',
                             'tag' => 'a',
                             'data-target' => '#add-user',
-                            'class' => 'btn btn-success pull-right',
+                            'class' => 'btn btn-sm btn-success pull-right',
                             'href' => Url::to(['ajax-create-user']),
                         ],
                     ])

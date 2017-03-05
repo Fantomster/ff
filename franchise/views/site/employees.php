@@ -137,7 +137,11 @@ $this->registerCss("
                         ],
                         'email',
                         'profile.phone',
-                        'role.name',
+                        [
+                            'attribute' => 'role.name',
+                            'label' => 'Роль',
+                            'value' => 'role.name'
+                        ],
                         [
                             'attribute' => 'status',
                             'label' => Yii::t('user', 'Status'),

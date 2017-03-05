@@ -3,7 +3,7 @@
     <h1>
         <i class="fa fa-home"></i> Ваши финансы
         <small>Узнайте ваши денежные потоки</small>
-    </h1>
+    </h1> 
     <div class="nav-tabs-custom" style="cursor: move; margin-top:15px;">
         <!-- Tabs within a box -->
         <!-- <ul class="nav nav-tabs pull-right ui-sortable-handle">

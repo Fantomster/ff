@@ -28,7 +28,7 @@ use yii\helpers\Html;
                       <div class="form-group">
                         <label for="exampleInputEmail1">Название поставщика:</label>
                         <p><?= $vendor->name ?></p>
-                      </div>
+                      </div> 
                       
                       <div class="form-group">
                         <label for="exampleInputEmail1">Название юр. лица:</label>

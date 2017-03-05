@@ -90,7 +90,7 @@ class SiteController extends DefaultController {
         $dayTurnover = [];
         $total = 0;
         foreach ($ordersByDay as $order) {
-            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayLabels[] = $order["day"] . " " . Yii::$app->formatter->asDatetime(strtotime("2000-$order[month]-01"), "php:M") . " " . $order["year"];
             $dayTurnover[] = $order["spent"];
             $total += $order["spent"];
         }

@@ -167,7 +167,7 @@ class AnalyticsController extends DefaultController {
         $dayStats = [];
         $total = 0;
         foreach ($clientsByDay as $day) {
-            $dayLabels[] = $day["day"] . " " . date('M', strtotime("2000-$day[month]-01")) . " " . $day["year"];
+            $dayLabels[] = $day["day"] . " " . Yii::$app->formatter->asDatetime(strtotime("2000-$day[month]-01"), "php:M") . " " . $day["year"];
             $dayStats[] = $day["count"];
             $total += $day["count"];
             $clients[] = $day["clients"];
@@ -264,7 +264,7 @@ class AnalyticsController extends DefaultController {
         $firstDayStats = [];
         $total = 0;
         foreach ($ordersByDay as $order) {
-            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayLabels[] = $order["day"] . " " . Yii::$app->formatter->asDatetime(strtotime("2000-$order[month]-01"), "php:M") . " " . $order["year"];
             $dayStats[] = $order["total"];
             $total += $order["total"];
             $firstDayStats[] = $order["first"];
@@ -310,7 +310,7 @@ class AnalyticsController extends DefaultController {
         $dayCheque = [];
         $total = 0;
         foreach ($ordersByDay as $order) {
-            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayLabels[] = $order["day"] . " " . Yii::$app->formatter->asDatetime(strtotime("2000-$order[month]-01"), "php:M") . " " . $order["year"];
             $dayTurnover[] = $order["spent"];
             $total += $order["spent"];
             $dayCheque[] = $order["cheque"];
@@ -327,7 +327,7 @@ class AnalyticsController extends DefaultController {
         $averageCheque = [];
         $totalSpent = [];
         foreach ($money as $month) {
-            $monthLabels[] = date('M', strtotime("2000-$month[month]-01")) . " " . $month["year"];
+            $monthLabels[] = Yii::$app->formatter->asDatetime(strtotime("2000-$month[month]-01"), "php:M") . " " . $month["year"];
             $averageSpent[] = $month["spent"];
             $averageCheque[] = $month["cheque"];
             $totalSpent[] = $month["total_month"];
@@ -394,7 +394,7 @@ class AnalyticsController extends DefaultController {
         $dayCheque = [];
         $total = 0;
         foreach ($ordersByDay as $order) {
-            $dayLabels[] = $order["day"] . " " . date('M', strtotime("2000-$order[month]-01")) . " " . $order["year"];
+            $dayLabels[] = $order["day"] . " " . Yii::$app->formatter->asDatetime(strtotime("2000-$order[month]-01"), "php:M") . " " . $order["year"];
             $dayTurnover[] = $order["spent"];
         }
         //---turnover by day end

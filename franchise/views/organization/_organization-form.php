@@ -23,6 +23,7 @@ use common\models\Organization;
                             ->label('Телефон контактного лица')
                             ->textInput()
                     ?>                    
+                    <?= $form->field($organization, 'email')->textInput()->label("Email контактного лица") ?>
                     <?= $form->field($organization, 'website')->textInput() ?>
                     <?= $form->field($organization, 'about')->textarea(['rows' => 6, 'style' => 'height: 96px;']) ?>
                     <br>

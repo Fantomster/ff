@@ -500,10 +500,10 @@ class AnalyticsController extends DefaultController {
         
         //---turnover by client start
         $query = "SELECT TRUNCATE(SUM(total_price),1) AS client_turnover, `$orgTable`.name AS name "
-                . "FROM `$orderTable` LEFT JOIN `$orgTable` ON `$orderTable`.vendor_id=`$orgTable`.id "
+                . "FROM `$orderTable` LEFT JOIN `$orgTable` ON `$orderTable`.client_id=`$orgTable`.id "
                 . "WHERE status IN (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
                 . "AND vendor_id = " . $vendor->id . " AND `$orderTable`.created_at BETWEEN :dateFrom AND :dateTo "
-                . "GROUP BY vendor_id";
+                . "GROUP BY client_id";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $turnoverByClient = $command->queryAll();
         $clientsTurnover['stats'] = [];

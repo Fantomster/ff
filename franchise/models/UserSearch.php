@@ -91,10 +91,12 @@ class UserSearch extends \common\models\User {
             return $dataProvider;
         }
 
-        $query->orFilterWhere(['like', 'email', $this->searchString])
-            ->orFilterWhere(['like', "profile.full_name", $this->searchString])
-            ->orFilterWhere(['like', "profile.phone", $this->searchString])
-            ->orFilterWhere(['like', "role.name", $this->searchString]);
+        $query->andFilterWhere(['or', 
+            ['like', 'email', $this->searchString],
+            ['like', 'profile.full_name', $this->searchString],
+            ['like', 'profile.phone', $this->searchString],
+            ['like', 'role.name', $this->searchString],
+            ]);
         $query->andFilterWhere([
             'status' => $this->status,
         ]);

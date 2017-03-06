@@ -96,11 +96,21 @@ class SiteController extends DefaultController {
         }
         //---graph end
 
+        $clientsCount = $client = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->count();
+        $vendorsCount = $client = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
+                ->count();
+        $totalCount = $clientsCount + $vendorsCount;
+        
         $params = Yii::$app->request->getQueryParams();
         $searchModel = new \franchise\models\OrderSearch();
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
 
-        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover'));
+        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'totalCount', 'clientsCount', 'vendorsCount'));
     }
 
     /**
@@ -172,7 +182,7 @@ class SiteController extends DefaultController {
 
                 if ($user->validate() && $profile->validate()) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
-                    return json_encode(ActiveForm::validateMultiple([$user, $profile]));
+                    return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
                 }
             }
         }

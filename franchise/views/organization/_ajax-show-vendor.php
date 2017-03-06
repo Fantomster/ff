@@ -32,7 +32,7 @@ use yii\helpers\Html;
                       
                       <div class="form-group">
                         <label for="exampleInputEmail1">Название юр. лица:</label>
-                        <p><?= $vendor->legal_entity ?></p>
+                        <p><?= $vendor->buisinessInfo->legal_entity ?></p>
                       </div>
                       <div class="form-group">
                         <label for="exampleInputEmail1">Город:</label>

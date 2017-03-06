@@ -153,7 +153,7 @@ $this->registerJs('
       <!-- AREA CHART -->
       <div class="box box-info">
         <div class="box-header with-border">
-          <h3 class="box-title">Объем по поставщикам</h3>
+          <h3 class="box-title">Объем по клиентам</h3>
         </div>
         <div class="box-body" style="display: block;">
                     <?=

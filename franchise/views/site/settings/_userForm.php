@@ -66,7 +66,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                 'class' => 'btn btn-danger delete',
                 'data' => [
                     'id' => $user->id,
-                    'action' => Url::to(["app/ajax-delete-user"]),
+                    'action' => Url::to(["site/ajax-delete-user"]),
         ]])
             ?>
             <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>

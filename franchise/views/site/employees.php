@@ -15,6 +15,7 @@ $role = new Role();
 
 $this->registerJs(
         '$("document").ready(function(){
+            var timer;
             $(".content").on("change keyup paste cut", "#searchString", function() {
                 if (timer) {
                     clearTimeout(timer);
@@ -45,7 +46,7 @@ $this->registerJs(
                 });
                 return false;
             });
-            $("body").on("hidden.bs.modal", "#add-user", function() {
+            $("body").on("hidden.bs.modal", "#add-user, #userEdit", function() {
                 $(this).data("bs.modal", null);
                 $.pjax.reload({container: "#users-list"});
             });

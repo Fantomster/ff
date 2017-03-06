@@ -93,7 +93,7 @@ use dosamigos\chartjs\ChartJs;
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block">
                                 <span class="description-percentage text-red"><i class="fa fa-caret-down"></i> 18%</span>
-                                <h5 class="description-header">120</h5>
+                                <h5 class="description-header"><?= $totalCount ?></h5>
                                 <span class="description-text">Клиентов</span>
                             </div>
                             <!-- /.description-block -->
@@ -142,11 +142,11 @@ use dosamigos\chartjs\ChartJs;
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">Поставщиков:</td>
-                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> 70</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= $vendorsCount ?></td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">Ресторанов:</td>
-                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> 50</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= $clientsCount ?></td>
                                 </tr>
                                 <tr><td></td></tr>
                                 <tr>

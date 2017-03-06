@@ -182,7 +182,7 @@ class SiteController extends DefaultController {
 
                 if ($user->validate() && $profile->validate()) {
                     Yii::$app->response->format = Response::FORMAT_JSON;
-                    return json_encode(ActiveForm::validateMultiple([$user, $profile]));
+                    return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
                 }
             }
         }

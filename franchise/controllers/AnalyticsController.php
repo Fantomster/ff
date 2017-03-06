@@ -517,7 +517,7 @@ class AnalyticsController extends DefaultController {
         //---turnover by client end
         
         //---top goods start
-        $query = "SELECT TRUNCATE(SUM($contTable.price*quantity),2) AS sum_spent,SUM(quantity) AS quantity, $cbgTable.ed AS ed "
+        $query = "SELECT TRUNCATE(SUM($contTable.price*quantity),2) AS sum_spent,SUM(quantity) AS quantity, $cbgTable.ed AS ed, $cbgTable.product as name "
                 . "FROM $contTable LEFT JOIN `$orderTable` ON $contTable.order_id = `$orderTable`.id LEFT JOIN $cbgTable ON $contTable.product_id = $cbgTable.id "
                 . "WHERE `$orderTable`.status IN (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
                     . "AND `$orderTable`.vendor_id=" . $vendor->id . " AND `$orderTable`.created_at BETWEEN :dateFrom AND :dateTo "

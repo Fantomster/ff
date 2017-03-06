@@ -87,7 +87,7 @@
                                 <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
                             </tr>
                             <tr class="tr-id">
-                                <td>ООО Marr Russia</td>
+                                <td>ООО "Кардис"</td>
                                 <td>Март-2017</td>
                                 <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
                                 <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
@@ -95,7 +95,7 @@
                                 <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
                             </tr>
                             <tr class="tr-id">
-                                <td>ООО Marr Russia</td>
+                                <td>Фрутти Рум</td>
                                 <td>Март-2017</td>
                                 <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
                                 <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
@@ -103,7 +103,7 @@
                                 <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
                             </tr>
                             <tr class="tr-id">
-                                <td>ООО Marr Russia</td>
+                                <td>Рус Алко</td>
                                 <td>Март-2017</td>
                                 <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
                                 <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>

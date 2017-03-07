@@ -1,4 +1,5 @@
 <?php
 return [
-    'adminEmail' => 'admin@example.com',
+    'adminEmail' => 'noreply@f-keeper.ru',
+    'notificationsUrl' => 'https://notifications.f-keeper.ru:443',
 ];

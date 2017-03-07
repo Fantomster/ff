@@ -1,9 +1,19 @@
 var app = require('express')();
-var server;// = require('http').Server(app);
+var server;
 
-var sslOptions;// = require('./sslOptions');
+var sslOptions;
 
-var server;// = require('https').Server(sslOptions, app);
+var server;
+
+//local sslOptions.js:
+//
+//var fs = require('fs');
+//var sslOptions = {
+//  key: fs.readFileSync('./cert/ssl-cert-snakeoil.key'),
+//  cert: fs.readFileSync('./cert/ssl-cert-snakeoil.pem')
+//};
+//
+//module.exports = sslOptions;
 
 try {
     sslOptions = require('./sslOptions');
@@ -14,9 +24,33 @@ try {
 
 var io = require('socket.io')(server);
 var redis = require('redis');
+
+//local redisOptions.js:
+//
+//module.exports = {host: "localhost"};
+
 var redisOptions = require('./redisOptions');
 
-server.listen(8890);
+//local port.js:
+//
+//module.exports = 8890;
+
+server.listen(require('./port'));
+
+//local db.js:
+//
+//var mysql = require('mysql');
+//
+//var pool = mysql.createPool({
+//    connectionLimit: 100,
+//    host: 'localhost',
+//    user: 'root',
+//    password: 'f4simba',
+//    database: 'f-keeper',
+//    debug: false
+//});
+//
+//module.exports = pool;
 
 var pool = require('./db');
 

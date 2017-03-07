@@ -42,3 +42,4 @@ phpunit.phar
 /instant/sslOptions.js
 /instant/cert/ssl-cert-snakeoil.pem
 /instant/cert/ssl-cert-snakeoil.key
+/instant/port.js

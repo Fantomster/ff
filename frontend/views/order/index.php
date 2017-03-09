@@ -32,10 +32,14 @@ $this->registerJs('
             if ($(this).find("a").hasClass("reorder")) {
                 return true;
             }
-            var id = $(this).parent("tr").data("id");
-            if (id !== undefined) {
-                location.href = "' . Url::to(['order/view']) . '&id=" + id;
+            var url = $(this).parent("tr").data("url");
+            if (url !== undefined) {
+                location.href = url;
             }
+//            var id = $(this).parent("tr").data("id");
+//            if (id !== undefined) {
+//                location.href = "' . Url::to(['order/view']) . '&id=" + id;
+//            }
         });
     });
         ');
@@ -263,7 +267,7 @@ $this->registerCss("
                                     ],
                                 ],
                                 'rowOptions' => function ($model, $key, $index, $grid) {
-                            return ['data-id' => $model->id];
+                            return ['data-url' => Url::to(['order/view', 'id' => $model->id])];
                         },
                             ]);
                             ?>

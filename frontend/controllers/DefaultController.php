@@ -51,21 +51,9 @@ class DefaultController extends Controller {
                     break;
                 case Organization::TYPE_SUPPLIER:
                     $this->layout = 'main-vendor';
-//                    //проверка, имеет ли крестьянин базовый каталог, если нет, то направляем создавать
-//                    $baseCatalogs = Catalog::findOne(['supp_org_id' => $organization->id]);
-//                    $isIndex = ($this->id === 'vendor') && ($this->action->id === 'index');
-//                    if (!isset($baseCatalogs) && $isIndex) {
-//                        return $this->redirect(['vendor/catalogs']);
-//                    }
-                    $isSettings = ($this->id === 'vendor') && ($this->action->id === 'settings');
-                    $isTutorial = ($this->id === 'vendor') && ($this->action->id === 'tutorial');
-                    $isCatalogs = ($this->id === 'vendor') && (($this->action->id === 'catalogs') || ($this->action->id === 'supplier-start-catalog-create') || ($this->action->id === 'import-base-catalog-from-xls'));
-                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings && !$isTutorial) {
-                        return $this->redirect(['vendor/settings']);
+                    if ($organization->step != Organization::STEP_OK) {
+                        return $this->redirect(Yii::$app->params['demoUrl']);
                     }
-//                    if (($organization->step == Organization::STEP_ADD_CATALOG) && !$isCatalogs && !$isTutorial) {
-//                        return $this->redirect(['vendor/catalogs']);
-//                    }
                     break;
             }
         }

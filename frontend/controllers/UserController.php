@@ -11,7 +11,9 @@ namespace frontend\controllers;
 use Yii;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use yii\web\HttpException;
+use common\models\User;
+use common\models\Profile;
+use common\models\Organization;
 
 /**
  * Custom user controller
@@ -82,7 +84,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // validate for ajax request
             if (Yii::$app->request->isAjax) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
-                $test = ActiveForm::validate($user, $profile, $organization);
                 return ActiveForm::validate($user, $profile, $organization);
             }
 
@@ -91,10 +92,20 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
                 // perform registration
                 $role = $this->module->model("Role");
-                $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
-                $profile->setUser($user->id)->save();
-                $organization->save();
-                $user->setOrganization($organization, true)->save();
+
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
+                    $profile->setUser($user->id)->save();
+                    $organization->save();
+                    $user->setOrganization($organization, true)->save();
+                    $transaction->commit();
+                } catch (Exception $ex) {
+                    $transaction->rollBack();
+                }
+                if ($organization->type_id == Organization::TYPE_SUPPLIER) {
+                    $this->initDemoData($user, $profile, $organization);
+                }
                 $this->afterRegister($user);
 
                 // set flash
@@ -254,6 +265,54 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             }
         }
         return ['success' => false];
+    }
+
+    /*
+     * initDemoData
+     * 
+     * Fills data at demo server for new organization
+     * 
+     * @param User $user
+     * @param Profile $profile
+     * @param Organization $organization
+     * 
+     * @return boolean
+     */
+
+    private function initDemoData($user, $profile, $organization) {
+        $transaction = Yii::$app->dbDemo->beginTransaction();
+        try {
+            Yii::$app->dbDemo->createCommand()->insert('organization', [
+                'id' => $organization->id,
+                'type_id' => $organization->type_id,
+                'name' => $organization->name,
+            ])->execute();
+            Yii::$app->dbDemo->createCommand()->insert('user', [
+                'id' => $user->id,
+                'role_id' => $user->role_id,
+                'status' => User::STATUS_ACTIVE,
+                'email' => $user->email,
+                'password' => $user->password,
+                'auth_key' => $user->auth_key,
+                'access_token' => $user->access_token,
+                'created_ip' => $user->created_ip,
+                'created_at' => $user->created_at,
+                'organization_id' => $user->organization_id,
+            ])->execute();
+            Yii::$app->dbDemo->createCommand()->insert('profile', [
+                'id' => $profile->id,
+                'user_id' => $profile->user_id,
+                'created_at' => $profile->created_at,
+                'full_name' => $profile->full_name,
+                'phone' => $profile->phone,
+                'sms_allow' => $profile->sms_allow,
+            ])->execute();
+            $transaction->commit();
+            return true;
+        } catch (Exception $e) {
+            $transaction->rollback();
+            return false;
+        }
     }
 
 }

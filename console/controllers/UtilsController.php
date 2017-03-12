@@ -39,7 +39,7 @@ class UtilsController extends Controller {
     }
 
     public function actionCheckProductPictures() {
-        $products = \common\models\CatalogBaseGoods::find("image is not null")->all();
+        $products = \common\models\CatalogBaseGoods::find()->where("image is not null")->andWhere("deleted = 0")->all();
         foreach ($products as $product) {
             if ($product->image) {
                 $headers = get_headers($product->imageUrl);

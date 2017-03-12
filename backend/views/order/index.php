@@ -39,6 +39,21 @@ $gridColumns = [
         },
         'label' => 'Поставщик',
     ],
+//            'created_by_id',
+//            'accepted_by_id',
+    [
+        'attribute' => 'status',
+        'value' => 'statusText',
+        'filter' => common\models\Order::getStatusList(),
+    ],
+    'total_price',
+    [
+        'attribute' => 'created_at',
+        'label' => 'Дата заказа',
+        'value' => function ($data) {
+            return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
+        }
+    ],
     [
         'format' => 'raw',
         'attribute' => 'client_manager',
@@ -56,21 +71,6 @@ $gridColumns = [
             return Html::a($data['acceptedByProfile']['full_name'], ['client/view', 'id' => $data['accepted_by_id']]);
         },
         'label' => 'Принят',
-    ],
-//            'created_by_id',
-//            'accepted_by_id',
-    [
-        'attribute' => 'status',
-        'value' => 'statusText',
-        'filter' => common\models\Order::getStatusList(),
-    ],
-    'total_price',
-    [
-        'attribute' => 'created_at',
-        'label' => 'Дата заказа',
-        'value' => function ($data) {
-            return Yii::$app->formatter->asTime($data->created_at, "php:j M Y, H:i:s");
-        }
     ],
 //    'created_at',
         // 'updated_at',

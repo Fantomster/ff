@@ -82,7 +82,7 @@ class OrderSearch extends Order {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
         ]);
 
         $dataProvider->sort->attributes['client_name'] = [

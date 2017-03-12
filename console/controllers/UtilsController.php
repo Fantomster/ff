@@ -39,7 +39,7 @@ class UtilsController extends Controller {
     }
 
     public function actionCheckProductPictures() {
-        $products = \common\models\CatalogBaseGoods::find()->all();
+        $products = \common\models\CatalogBaseGoods::find("image is not null")->all();
         foreach ($products as $product) {
             if ($product->image) {
                 $headers = get_headers($product->imageUrl);
@@ -51,7 +51,7 @@ class UtilsController extends Controller {
     }
 
     public function actionCheckOrganizationPictures() {
-        $organizations = \common\models\Organization::find()->limit(1000)->all();
+        $organizations = \common\models\Organization::find()->all();
         foreach ($organizations as $organization) {
             if ($organization->picture) {
                 $headers = get_headers($organization->pictureUrl);

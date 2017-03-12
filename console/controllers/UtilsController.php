@@ -39,7 +39,15 @@ class UtilsController extends Controller {
     }
 
     public function actionCheckProductPictures() {
-        //
+        $products = \common\models\CatalogBaseGoods::find()->all();
+        foreach ($products as $product) {
+            if ($product->image) {
+                $headers = get_headers($product->imageUrl);
+                if ($headers[0] == 'HTTP/1.1 403 Forbidden') {
+                    echo $product->id."\n";
+                }
+            }
+        }
     }
 
     public function actionCheckOrganizationPictures() {

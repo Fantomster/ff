@@ -1078,7 +1078,7 @@ class VendorController extends DefaultController {
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
-                    $user->role_id = Role::ROLE_USER;
+//                    $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save()) {
                         $message = 'Пользователь удален!';

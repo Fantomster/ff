@@ -48,7 +48,10 @@ class UtilsController extends Controller {
             if ($organization->picture) {
                 $headers = get_headers($organization->pictureUrl);
                 if ($headers[0] == 'HTTP/1.1 403 Forbidden') {
-                    echo $organization->id."\n";
+                    echo $organization->id;
+                    $organization->picture = null;
+                    $organization->save();
+                    echo " - fixed\n";
                 }
             }
         }

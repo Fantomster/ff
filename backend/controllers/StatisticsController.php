@@ -434,7 +434,13 @@ class StatisticsController extends Controller {
                 ->count();
         $productsOnMarketCount = CatalogBaseGoods::find()
                 ->leftJoin("$orgTable", "$orgTable.id = $cbgTable.supp_org_id")
-                ->where(['deleted' => CatalogBaseGoods::DELETED_OFF, 'market_place' => CatalogBaseGoods::MARKETPLACE_ON, 'white_list' => Organization::WHITE_LIST_ON])
+                ->where([
+                    'deleted' => CatalogBaseGoods::DELETED_OFF, 
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON, 
+                    'white_list' => Organization::WHITE_LIST_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                        ])
+                ->andWhere('category_id is not null')
                 ->andWhere(['between', "$cbgTable.created_at", $dt->format('Y-m-d'), $end->format('Y-m-d')])
                 ->count();
         

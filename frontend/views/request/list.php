@@ -99,7 +99,7 @@ use yii\web\View;
                             'options' => [
                             'class' => 'pagination col-md-12  no-padding'
                         ],
-                        'linkOptions'=>['data-pjax'=>true]
+                        //'linkOptions'=>['data-pjax'=>false]
                     ],
                     'options'=>[
                       'class'=>'col-lg-12 list-wrapper inline'

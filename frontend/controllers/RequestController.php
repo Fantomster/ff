@@ -35,9 +35,10 @@ class RequestController extends DefaultController {
             ],
         ]);
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial("lists", compact('dataListRequest','search'));
+            return $this->renderPartial("list", compact('dataListRequest','search'));
+        }else{
+            return $this->render("list", compact('dataListRequest','search'));
         }
-        return $this->render("list", compact('dataListRequest','search'));
     }
     public function actionView() {
         $profile = $this->currentUser->profile;

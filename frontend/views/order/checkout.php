@@ -331,7 +331,6 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
             </div>
         </div>
     </div>
-    <?php Pjax::end() ?>
     <?=
     Modal::widget([
         'id' => 'changeComment',
@@ -345,6 +344,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
     ])
     ?>
 </section>
+<?php Pjax::end() ?>
 <!-- Modal -->
 <div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">

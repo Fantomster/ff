@@ -86,7 +86,6 @@ use yii\web\View;
                   'id' => 'list', 
                   'timeout' => 10000, 
                   'enablePushState' => false,
-                  'clientOptions' => ['method' => 'GET']
                   ]);
               ?> 
               <?=ListView::widget([
@@ -99,7 +98,6 @@ use yii\web\View;
                             'options' => [
                             'class' => 'pagination col-md-12  no-padding'
                         ],
-                        'linkOptions'=>['data-pjax'=>true]
                     ],
                     'options'=>[
                       'class'=>'col-lg-12 list-wrapper inline'

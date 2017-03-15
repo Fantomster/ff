@@ -24,6 +24,15 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 .order-history .info-box {box-shadow: none;}
 .info-box {box-shadow: none;border:1px solid #eee;}
 .info-box-text{margin: 0;padding-top:10px;color:#555}
+.info-box-text{margin: 0;padding-top:10px;color:#555}
+@media (min-width: 768px){.moipost{padding-left:15px;padding-right:15px}}
+.small-box {
+    border-radius: 3px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
 ');
 $this->registerCss('
 @media (max-width: 1320px){
@@ -39,93 +48,126 @@ $this->registerCss('
     </h1>
 </section>
 <section class="content">
-<div class="box box-info">
-    <div class="box-body order-history">
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <div class="info-box bg-total-price">
-                <a href="index.php?r=order/create">
-                    <div class="info-box-content">
-                        <i class="fa fa-opencart" style="font-size: 22px;"></i>
-                        <p class="info-box-text">Разместить заказ</p>
-                    </div>                    
-                </a>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="small-box bg-aqua">
+                                <div class="inner" style="padding-top:15px;padding-bottom:15px">
+                                  <h3>150 Товаров</h3>
+
+                                  <p>для заказа доступно</p>
+                                </div>
+                                <div class="icon">
+                                  <i class="ion ion-bag"></i>
+                                </div>
+                                <?= Html::a('Заказать <i class="fa fa-arrow-circle-right"></i>', ['order/create'],['class'=>'small-box-footer' , 'style' => 'padding:20px 0;font-size:16px']) ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="small-box bg-yellow">
+                                <div class="inner" style="padding-top:15px;padding-bottom:15px">
+                                  <h3>22 Товара</h3>
+
+                                  <p>в карзине</p>
+                                </div>
+                                <div class="icon">
+                                  <i class="ion ion-bag"></i>
+                                </div>
+                                <?= Html::a('Перейти в карзину <i class="fa fa-arrow-circle-right"></i>', ['order/checkout'],['class'=>'small-box-footer', 'style' => 'padding:20px 0;font-size:16px']) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12 hidden-xs">
-            <div class="info-box bg-total-price">
-                <a href="index.php?r=client/suppliers">
-                    <div class="info-box-content">
-                        <i class="fa fa-users" style="font-size: 22px;"></i>
-                        <p class="info-box-text">Управление вашими поставщиками</p>
-                    </div>                    
-                </a>
+            <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="row moipost">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="small-box" style="height:150px;background:url(images/Rectangle1.png) no-repeat center top;background-size:cover;background-color:#fff">
+                                <div class="inner">
+                                  <h3>СКОРО</h3>
+                                  <p>заявки на закупку</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="small-box" style="height:200px;background:url(images/Rectangle2.png) no-repeat center bottom;background-size:cover;background-color:#fff">
+                                <div class="inner">
+                                  <h3>150 Товаров</h3>
+                                  <p>для заказа доступно</p>
+                                </div>
+                                <?= Html::a('Заказать <i class="fa fa-arrow-circle-right"></i>', ['order/create'],['class'=>'btn btn-success']) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12 hidden-xs">
-            <div class="info-box bg-total-price">
-                <a href="index.php?r=client/settings">
-                    <div class="info-box-content">
-                        <i class="fa fa-gears" style="font-size: 22px;"></i>
-                        <p class="info-box-text">Настройки профилей</p>
-                    </div>                    
-                </a>
+            <div class="col-md-4 col-sm-4 col-xs-12 ">
+                <div class="row">
+                    <div class="box box-info">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Мои поставщики</h3>
+                            <div class="box-tools pull-right">
+                            <?= Html::a('Мои поставщики', ['client/suppliers'],['class'=>'btn btn-success btn-sm']) ?>
+                            </div>
+                        </div>
+                        <div class="box-header with-border">
+                    <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
+                        </div>
+                        <div class="box-body">
+                        <?php
+                        $columns1 = [
+                        ['attribute' => 'name','value'=>'name', 'label' => 'Поставщики'],
+                        ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
+                            return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> заказ', ['order/create',
+                                'OrderCatalogSearch[searchString]'=>"",
+                                'OrderCatalogSearch[selectedCategory]'=>"",
+                                'OrderCatalogSearch[selectedVendor]'=>$data['supp_org_id'],
+                                ],['class'=>'btn btn-outline-success btn-sm pull-right','data-pjax'=>0]);           
+                        }]
+                        ];
+                        ?>
+                        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'suppliers-list',]); ?>
+                            <?=GridView::widget([
+                           'dataProvider' => $suppliers_dataProvider,
+                           'filterPosition' => false,
+                           'columns' => $columns1,
+                           'showHeader' => false,
+                           'tableOptions' => ['class' => 'table no-margin'],
+                           'options' => ['class' => 'table-responsive'],
+                           'bordered' => false,
+                           'striped' => false,
+                           'condensed' => false,
+                           'responsive' => true,
+                           'resizableColumns'=>false,
+                           'hover' => true,
+                           'summary' => false,
+                            'pager' => [
+                                'maxButtonCount'=>5,    // Set maximum number of page buttons that can be displayed
+                            ],
+                           ]);
+                           ?> 
+                        <?php  Pjax::end(); ?>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
         </div>
     </div>
-</div>
 <div class="row hidden-xs">
     <div class="col-md-4">
-      <div class="box box-info">
-        <div class="box-header with-border">
-          <h3 class="box-title">Мои поставщики</h3>
-
-          <div class="box-tools pull-right">
-            <?= Html::a('Мои поставщики', ['client/suppliers'],['class'=>'btn btn-success btn-sm']) ?>
-          </div>
-        </div>
-          <div class="box-header with-border">
-            <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
-          </div>
-            <div class="box-body">
-        <?php
-        $columns1 = [
-        ['attribute' => 'name','value'=>'name', 'label' => 'Поставщики'],
-        ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
-            return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> заказ', ['order/create',
-                'OrderCatalogSearch[searchString]'=>"",
-                'OrderCatalogSearch[selectedCategory]'=>"",
-                'OrderCatalogSearch[selectedVendor]'=>$data['supp_org_id'],
-                ],['class'=>'btn btn-outline-success btn-sm pull-right','data-pjax'=>0]);           
-        }]
-        ];
-        ?>
-        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'suppliers-list',]); ?>
-            <?=GridView::widget([
-           'dataProvider' => $suppliers_dataProvider,
-           'filterPosition' => false,
-           'columns' => $columns1,
-           'showHeader' => false,
-           'tableOptions' => ['class' => 'table no-margin'],
-           'options' => ['class' => 'table-responsive'],
-           'bordered' => false,
-           'striped' => false,
-           'condensed' => false,
-           'responsive' => true,
-           'resizableColumns'=>false,
-           'hover' => true,
-           'summary' => false,
-            'pager' => [
-                'maxButtonCount'=>5,    // Set maximum number of page buttons that can be displayed
-            ],
-           ]);
-           ?> 
-        <?php  Pjax::end(); ?>
-            </div>
-        <!-- /.box-body -->
-      </div>
+      
       <!-- /.box -->
     </div>
-    <div class="col-md-8">
+    <!--div class="col-md-8">
       <div class="box box-info">
         <div class="box-header with-border">
           <h3 class="box-title">Аналитика заказов</h3>
@@ -139,10 +181,8 @@ $this->registerCss('
             <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
           </div> 
         </div>
-        <!-- /.box-body -->
       </div>
-      <!-- /.box -->
-    </div>
+    </div-->
 </div>
 <div class="row">
     <div class="col-md-12">
@@ -258,6 +298,7 @@ $this->registerCss('
 </div>
 </section>
 <?php
+/*
 $chart_dates =   json_encode(array_reverse($chart_dates));
 $chart_price =   json_encode(array_reverse($chart_price));
 $customJs = <<< JS
@@ -337,4 +378,5 @@ var areaChartOptions = {
     areaChart.Line(areaChartData, areaChartOptions);       
 JS;
 $this->registerJs($customJs, View::POS_READY);
+ */
 ?>

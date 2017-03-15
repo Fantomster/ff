@@ -303,11 +303,12 @@ class SiteController extends Controller {
                 'query' => [
                     'match' => [
                         'supplier_name' => [
-                            'query' => $search,
-                            'fuzziness' => 'AUTO'
-                           //'analyzer' =>"ru",
-                           //'type' =>'phrase_prefix',
-                        // 'max_expansions' =>6
+                           'query' => $search,
+                           'fuzziness' => 'auto',
+                           /*'type' =>'text_phrase',
+                           'max_expansions' =>20,
+                           'prefix_length' => 0,
+                           'fuzziness' => 0.8,*/
                         ]
                     ]
                 ],
@@ -870,15 +871,21 @@ class SiteController extends Controller {
             $params_suppliers = [
                 'filtered' => [
                     'query' => [
-                        'match' => [
+                        'more_like_this' => [
+                                'fields'=>['supplier_name'],
+                                'like' => $search,
+                                'min_term_freq' => 1,
+                                'min_doc_freq' => 1,
+                                'max_query_terms' => 12,
+                        ],
+                        /*'match' => [
                             'supplier_name' => [
                                 'query' => $search,
-                                'fuzziness' => 'AUTO'
-                                //'analyzer' => 'ru',
-                                //'type' => 'phrase'
+                                'fuzziness' => 'AUTO',
                             ]   
-                        ]
+                        ]*/
                     ],
+                    
                     'filter' => [
                         'bool' => [
                             'must_not' => [
@@ -898,12 +905,12 @@ class SiteController extends Controller {
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();
             $search_products_count = \common\models\ES\Product::find()->query($params_products)
-                            ->limit(10000000)->count();
+                            ->limit(10000)->count();
             $search_suppliers_count = \common\models\ES\Supplier::find()->query($params_suppliers)
-                            ->limit(10000000)->count();
+                            ->limit(10000)->count();
 
             $search_categorys = \common\models\ES\Category::find()->query($params_categorys)
-                            ->limit(1000)->asArray()->all();
+                            ->limit(10000)->asArray()->all();
             $search_products = \common\models\ES\Product::find()->query($params_products)->orderBy(['product_rating'=>SORT_DESC])
                             /* ->highlight([
                               "pre_tags"  => "<em>",

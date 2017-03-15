@@ -1023,12 +1023,13 @@ class ClientController extends DefaultController {
         return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array'));
     }
 
-    public function actionRemoveSupplier($id) {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
-        \Yii::$app->db->createCommand($sql)->execute();
-        $sql = "delete from relation_category where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
-        \Yii::$app->db->createCommand($sql)->execute();
+    public function actionRemoveSupplier() {
+        if (Yii::$app->request->isAjax) {
+            $id = \Yii::$app->request->post('id');
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
+            \Yii::$app->db->createCommand($sql)->execute();
+        }
     }
 
     public function actionMessages() {
@@ -1282,8 +1283,11 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 ]
             ],
         ]);
+        $supp_arr = RelationSuppRest::find()->where(['rest_org_id'=>$currentUser->organization_id,'status'=>1])->all();
+        
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
         // chart АНАЛИТИКА по неделям прошедшим
+        /*
         $curent_monday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '1')); // текущая неделя - понедельник
         $curent_sunday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '7')); // текущая неделя - воскресение
         $i = 0;
@@ -1317,10 +1321,13 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             }
             array_push($chart_dates, $querys['dates']);
         }
+         */
         // var_dump($chart_price);
         return $this->render('dashboard/index', compact(
-                                'dataProvider', 'suppliers_dataProvider', 'chart_dates', 'chart_price'
+                                'dataProvider', 'suppliers_dataProvider' 
+                //'chart_dates', 'chart_price'
         ));
+         
     }
 
     public function actionSuppliers() {

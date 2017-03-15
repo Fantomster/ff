@@ -280,5 +280,4 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function getRatingPercent() {
         return number_format(((($this->rating) / (self::MAX_RATING / 5)) / 5 * 100), 1);
     }
-
 }

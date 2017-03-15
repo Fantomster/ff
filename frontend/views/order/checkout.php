@@ -106,7 +106,7 @@ $this->registerJs(
                     {"order_id":$(this).data("order_id"), "delivery_date":$(this).val() }
                 ).done(function(result) {
                     if (result) {
-                        $.notify(result.growl.options, result.growl.settings);
+                        swal(result);
                     }
                 });
             });
@@ -125,9 +125,52 @@ $this->registerJs(
                 )
                 .done(function (result) {
                     if (result) {
-                        $.notify(result.growl.options, result.growl.settings);
+                        swal(result);
                     }
                     $("#loader-show").hideLoading();
+                });
+            });
+            $(document).on("click", ".comment, .add-note", function(e) {
+                e.preventDefault();
+                clicked = $(this);
+                if (clicked.hasClass("comment")) {
+                    title = "Комментарий к заказу";
+                } else {
+                    title = "Комментарий к товару";
+                }
+                swal({
+                    title: title,
+                    input: "textarea",
+                    showCancelButton: true,
+                    cancelButtonText: "Закрыть",
+                    confirmButtonText: "Сохранить",
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false,
+                    inputValue: clicked.data("original-title"),
+                    preConfirm: function (text) {
+                        return new Promise(function (resolve, reject) {
+                            $.post(
+                                clicked.data("url"),
+                                {comment: text}
+                            ).done(function (result) {
+                                if (result) {
+                                    resolve(result);
+                                } else {
+                                    resolve(false);
+                                }
+                            });
+                        })
+                    },
+                }).then(function (result) {
+                    if (result.type == "success") {
+                    clicked.tooltip("hide")
+                        .attr("data-original-title", result.comment)
+                        .tooltip("fixTitle")
+                        .blur();
+                        swal(result);
+                    } else {
+                        swal({title: "Ошибка!", text: "Попробуйте еще раз", type: error});
+                    }
                 });
             });
             $("#changeNote").on("click", ".saveNote", function() {
@@ -265,11 +308,11 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                                 <div class="col-md-8 col-sm-6 col-xs-6">
                                                     <button class="btn btn-success create pull-right" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
                                                     <a class="btn btn-gray comment pull-right"
-                                                       data-target="#changeComment"
-                                                       data-toggle="modal"
-                                                       data-backdrop="static"
-                                                       data-internal="1"
-                                                       href="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>">
+                                                       data-url="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>"
+                                                       data-toggle="tooltip" 
+                                                       data-placement="bottom" 
+                                                       data-original-title="<?= $order->comment ?>"
+                                                       href="#">
                                                         <i class="fa fa-comment" style="margin-top:-3px;"></i><span class="hidden-fk"> Комментарий к заказу</span>
                                                     </a>
                                                 </div>

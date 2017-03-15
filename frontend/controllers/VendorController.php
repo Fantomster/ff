@@ -455,7 +455,14 @@ class VendorController extends DefaultController {
         ]);
         return $this->render('clients', compact('searchModel', 'dataProvider', 'arr_catalog', 'arr_restaurant'));
     }
-
+    public function actionRemoveClient() {
+        if (Yii::$app->request->isAjax) {
+            $id = \Yii::$app->request->post('id');
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $sql = "delete from relation_supp_rest where supp_org_id =$currentUser->organization_id and rest_org_id = $id";
+            \Yii::$app->db->createCommand($sql)->execute();
+        }
+    }
     public function actionBasecatalog() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString = "";

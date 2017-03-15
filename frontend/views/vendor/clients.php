@@ -89,6 +89,19 @@ $gridColumnsClients = [
                             return $link;
                         },
                             ],
+                            [
+                        'label' => '',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:30px;text-align:center'],
+                        'value' => function ($data) {
+                            $result = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                                    'class' => 'btn btn-danger btn-sm del',
+                                    'data' => ['id' => $data["rest_org_id"]],
+                            ]);
+                            return $result;
+                        }
+                            ],
+                            
                         ];
                         ?>
                         <section class="content-header">
@@ -308,6 +321,40 @@ $("#view-client").on("click", ".save-form", function() {
         });
         return false;
     });
+$(document).on("click",".del", function(e){
+    var id = $(this).attr('data-id');
+        bootbox.confirm({
+            title: "Удалить клиента?",
+            message: "Клиент будет удален из Вашего списка клиентов", 
+            buttons: {
+                confirm: {
+                    label: 'Удалить',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
+            },
+            className: "danger-fk",
+            callback: function(result) {
+		if(result){
+		$.ajax({
+	        url: "index.php?r=vendor/remove-client",
+	        type: "POST",
+	        dataType: "json",
+	        data: {'id' : id},
+	        cache: false,
+	        success: function(response) { 
+			         
+		        }	
+		    });
+                $.pjax.reload({container: "#cl-list"});
+		}else{
+		console.log('cancel');	
+		}
+	}});      
+})
 JS;
                         $this->registerJs($customJs, View::POS_READY);
                         ?>

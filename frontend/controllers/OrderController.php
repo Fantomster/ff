@@ -104,9 +104,9 @@ class OrderController extends DefaultController {
         $selectedVendor = null;
 
         if (isset($params['OrderCatalogSearch'])) {
-            $selectedVendor = $params['OrderCatalogSearch']['selectedVendor'];
+            $selectedVendor = $params['OrderCatalogSearch']['selectedVendor'] ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
             //$selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
-            $selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
+            //$selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }
 
         $vendors = $client->getSuppliers($selectedCategory);

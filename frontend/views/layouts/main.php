@@ -102,6 +102,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             .header-nav .nav_menu >li.active a {
                 border-bottom: 1px solid #fff;
             }
+            .modal{
+                top: 100px;
+                z-index: 99999;
+            }
         </style>
     </head>
     <body>	

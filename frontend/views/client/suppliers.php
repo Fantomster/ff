@@ -402,17 +402,17 @@ $gridColumnsCatalog = [
                         ->textInput()
                     ?>
                     <?= $form->field($organization, 'name')->label('Организация') ?>
-                    <?=
-                    $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
-                        'data' => Category::allCategory(),
-                        'theme' => 'krajee',
-                        //'language' => 'ru',
-                        'hideSearch' => true,
-                        'options' => ['multiple' => true, 'placeholder' => 'Выберите категорию'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                        ],
-                    ]);
+                    <?= ''
+//                    $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
+//                        'data' => Category::allCategory(),
+//                        'theme' => 'krajee',
+//                        //'language' => 'ru',
+//                        'hideSearch' => true,
+//                        'options' => ['multiple' => true, 'placeholder' => 'Выберите категорию'],
+//                        'pluginOptions' => [
+//                            'allowClear' => true,
+//                        ],
+//                    ]);
                     ?>
                 </div> 
                 <div class="box-footer">

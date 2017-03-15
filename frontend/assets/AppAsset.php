@@ -27,7 +27,6 @@ class AppAsset extends AssetBundle {
         'yii\bootstrap\BootstrapAsset',
         'frontend\assets\BootboxAsset',
         '\rmrevin\yii\fontawesome\AssetBundle',
-        'kartik\growl\GrowlAsset',
-        'kartik\base\AnimateAsset',
+        'frontend\assets\SweetAlertAsset',
     ];
 }

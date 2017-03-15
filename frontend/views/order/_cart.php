@@ -40,7 +40,7 @@ foreach ($orders as $order) {
 
         </div>
         <div class="box-footer clearfix">
-    <?= Html::a('<i class="fa fa-shopping-cart m-r-xs" style="margin-top:-3px;"></i>&nbsp;&nbsp;Оформить', ['order/checkout'], ['class' => 'btn btn-success pull-right']) ?>
+    <?= Html::a('<i class="fa fa-shopping-cart m-r-xs" style="margin-top:-3px;"></i>&nbsp;&nbsp;Оформить', ['order/checkout'], ['class' => 'btn btn-success pull-right', 'data-pjax' => 0]) ?>
         </div>
     </div>
     <?php

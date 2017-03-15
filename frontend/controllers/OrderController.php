@@ -280,25 +280,26 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSetComment($order_id = null) {
+    public function actionAjaxSetComment($order_id) {
 
         $client = $this->currentUser->organization;
 
         if (Yii::$app->request->post()) {
-            $order_id = Yii::$app->request->post('order_id');
+//            $order_id = Yii::$app->request->post('order_id');
             $order = Order::find()->where(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
-            if ($order && $order->load(Yii::$app->request->post())) {
+            if ($order) {
+                $order->comment = Yii::$app->request->post('comment');
                 $order->save();
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return $this->successNotify("Комментарий добавлен");
+                return ["title" => "Комментарий добавлен", "comment" => $order->comment, "type" => "success"];//$this->successNotify("Комментарий добавлен");
             }
             return false;
         }
 
-        if (Yii::$app->request->get()) {
-            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-            return $this->renderAjax('_add-comment', compact('order'));
-        }
+//        if (Yii::$app->request->get()) {
+//            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+//            return $this->renderAjax('_add-comment', compact('order'));
+//        }
     }
 
     public function actionAjaxCancelOrder($order_id = null) {
@@ -343,32 +344,34 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionAjaxSetNote($product_id = null) {
+    public function actionAjaxSetNote($product_id) {
 
         $client = $this->currentUser->organization;
 
         if (Yii::$app->request->post()) {
-            $post = Yii::$app->request->post('GoodsNotes');
-            $product_id = $post['catalog_base_goods_id'];
+//            $post = Yii::$app->request->post('GoodsNotes');
+//            $product_id = $post['catalog_base_goods_id'];
             $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
-            if ($note && $note->load(Yii::$app->request->post())) {
+            if ($note) {
+                $note->note = Yii::$app->request->post("comment");
                 $note->save();
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return $this->successNotify("Комментарий к товару добавлен");
+                $result = ["title" => "Комментарий к товару добавлен", "comment" => $note->note, "type" => "success"];
+                return $result;
             }
             return false;
         }
 
-        if (Yii::$app->request->get()) {
-            $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
-            if (!$note) {
-                $note = new GoodsNotes();
-                $note->rest_org_id = $client->id;
-                $note->catalog_base_goods_id = $product_id;
-                $note->save();
-            }
-            return $this->renderAjax('_add-note', compact('note'));
-        }
+//        if (Yii::$app->request->get()) {
+//            $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
+//            if (!$note) {
+//                $note = new GoodsNotes();
+//                $note->rest_org_id = $client->id;
+//                $note->catalog_base_goods_id = $product_id;
+//                $note->save();
+//            }
+//            return $this->renderAjax('_add-note', compact('note'));
+//        }
     }
 
     public function actionAjaxMakeOrder() {
@@ -456,9 +459,11 @@ class OrderController extends DefaultController {
             }
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             if ($oldDateSet) {
-                return $this->successNotify('Дата доставки изменена');
+                $result = ["title" => "Дата доставки изменена", "type" => "success"];
+                return $result;
             } else {
-                return $this->successNotify('Дата доставки установлена');
+                $result = ["title" => "Дата доставки установлена", "type" => "success"];
+                return $$result;
             }
         }
     }
@@ -631,7 +636,7 @@ class OrderController extends DefaultController {
         }
 
         if (Yii::$app->request->isPjax) {
-            return treu;//$this->renderPartial('checkout', compact('orders', 'totalCart'));
+            return $this->renderPartial('checkout', compact('orders', 'totalCart'));
         } else {
             return $this->render('checkout', compact('orders', 'totalCart'));
         }

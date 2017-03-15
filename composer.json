@@ -45,7 +45,8 @@
         "kartik-v/yii2-widget-depdrop": "@dev",
         "yiisoft/yii2-elasticsearch": "^2.0",
         "kartik-v/yii2-widget-typeahead": "*",
-        "2amigos/yii2-chartjs-widget": "~2.0"
+        "2amigos/yii2-chartjs-widget": "~2.0",
+        "bower-asset/sweetalert2": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

@@ -34,6 +34,9 @@ class RequestController extends DefaultController {
                 'pageSize' => 5,
             ],
         ]);
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial("lists", compact('dataListRequest','search'));
+        }
         return $this->render("list", compact('dataListRequest','search'));
     }
     public function actionView() {

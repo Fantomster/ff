@@ -893,6 +893,7 @@ class ClientController extends DefaultController {
                         
                         $CatalogBaseGoods = new CatalogBaseGoods();
                         $CatalogBaseGoods->cat_id = $base_catalog->id;
+                        $CatalogBaseGoods->supp_org_id = $supp_org_id;
                         $CatalogBaseGoods->article = $article;
                         $CatalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                         $CatalogBaseGoods->product = $product;

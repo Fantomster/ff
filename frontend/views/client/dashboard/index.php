@@ -148,6 +148,7 @@ $this->registerCss('
                     <div class="col-md-12">
                         <div class="row">
                             <div class="dash-small-box" data-target="fmarket">
+                                <div class="dash-title-border"></div>
                                 <div class="inner" style="position:relative;z-index:2">
                                   <h3>Товаров <?=$count_products_from_mp ?></h3>
                                   <p>доступно на F-MARKET</p>
@@ -169,7 +170,7 @@ $this->registerCss('
                             <?= Html::a('<span style="color:#3F3E3E">Мои</span> поставщики <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['client/suppliers'],['class'=>'' , 'style' => 'font-size: 18px;']) ?>
     
                         </div>
-                        <div class="box-body" style="height: 262px;overflow-y:scroll">
+                        <div class="box-body" style="height: 268px;overflow-y:scroll">
                         <?php
                         $columns1 = [
                         ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
@@ -192,7 +193,7 @@ $this->registerCss('
                            'filterPosition' => false,
                            'columns' => $columns1,
                            'showHeader' => false,
-                           'tableOptions' => ['class' => 'table no-margin tb-scroll'],
+                           'tableOptions' => ['class' => 'table no-margin'],
                            'options' => ['class' => 'table-responsive'],
                            'bordered' => false,
                            'striped' => false,

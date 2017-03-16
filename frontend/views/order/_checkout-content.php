@@ -87,9 +87,7 @@ echo GridView::widget([
                         ]);
                         $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> <span class="hidden-fk">Удалить</span>', '#', [
                                     'class' => 'btn btn-outline-danger remove',
-                                    'data-product_id' => $data['product_id'],
-                                    'data-vendor_id' => $vendor_id,
-                                    'data-internal' => '1',
+                                    'data-url' => Url::to(['/order/ajax-remove-position', 'vendor_id' => $vendor_id, 'product_id' => $data['product_id']]),
                         ]);
                         return '<div class="pull-right">' . $btnNote . $btnDelete . '</div>';
                     },

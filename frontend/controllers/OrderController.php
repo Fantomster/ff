@@ -104,7 +104,7 @@ class OrderController extends DefaultController {
         $selectedVendor = null;
 
         if (isset($params['OrderCatalogSearch'])) {
-            $selectedVendor = $params['OrderCatalogSearch']['selectedVendor'] ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
+            $selectedVendor = $params['OrderCatalogSearch']['selectedVendor'] ? (int) $params['OrderCatalogSearch']['selectedVendor'] : null;
             //$selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
             //$selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }
@@ -219,32 +219,27 @@ class OrderController extends DefaultController {
         return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId'));
     }
 
-    public function actionAjaxRemovePosition() {
+    public function actionAjaxRemovePosition($vendor_id, $product_id) {
 
         $client = $this->currentUser->organization;
-        $post = Yii::$app->request->post();
 
-        if ($post && $post['vendor_id'] && $post['product_id']) {
-            $orderDeleted = false;
-            $order = Order::find()->where(['vendor_id' => $post['vendor_id'], 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
-            foreach ($order->orderContent as $position) {
-                if ($position->product_id == $post['product_id']) {
-                    $position->delete();
-                }
-                if (!($order->positionCount)) {
-                    $orderDeleted = $order->delete();
-                }
+        $orderDeleted = false;
+        $order = Order::find()->where(['vendor_id' => $vendor_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING])->one();
+        foreach ($order->orderContent as $position) {
+            if ($position->product_id == $product_id) {
+                $position->delete();
             }
-            if (!$orderDeleted) {
-                $order->calculateTotalPrice();
+            if (!($order->positionCount)) {
+                $orderDeleted = $order->delete();
             }
-            $cartCount = $client->getCartCount();
-            $this->sendCartChange($client, $cartCount);
         }
+        if (!$orderDeleted) {
+            $order->calculateTotalPrice();
+        }
+        $cartCount = $client->getCartCount();
+        $this->sendCartChange($client, $cartCount);
 
-        //$orders = $client->getCart();
-
-        return true; //$this->renderPartial('_orders', compact('orders'));
+        return true;
     }
 
     public function actionAjaxChangeQuantity($vendor_id = null, $product_id = null) {
@@ -291,7 +286,7 @@ class OrderController extends DefaultController {
                 $order->comment = Yii::$app->request->post('comment');
                 $order->save();
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return ["title" => "Комментарий добавлен", "comment" => $order->comment, "type" => "success"];//$this->successNotify("Комментарий добавлен");
+                return ["title" => "Комментарий добавлен", "comment" => $order->comment, "type" => "success"]; //$this->successNotify("Комментарий добавлен");
             }
             return false;
         }
@@ -349,29 +344,20 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
 
         if (Yii::$app->request->post()) {
-//            $post = Yii::$app->request->post('GoodsNotes');
-//            $product_id = $post['catalog_base_goods_id'];
             $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
-            if ($note) {
-                $note->note = Yii::$app->request->post("comment");
-                $note->save();
-                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                $result = ["title" => "Комментарий к товару добавлен", "comment" => $note->note, "type" => "success"];
-                return $result;
+            if (!$note) {
+                $note = new GoodsNotes();
+                $note->rest_org_id = $client->id;
+                $note->catalog_base_goods_id = $product_id;
             }
-            return false;
+            $note->note = Yii::$app->request->post("comment");
+            $note->save();
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            $result = ["title" => "Комментарий к товару добавлен", "comment" => $note->note, "type" => "success"];
+            return $result;
         }
-
-//        if (Yii::$app->request->get()) {
-//            $note = GoodsNotes::findOne(['catalog_base_goods_id' => $product_id, 'rest_org_id' => $client->id]);
-//            if (!$note) {
-//                $note = new GoodsNotes();
-//                $note->rest_org_id = $client->id;
-//                $note->catalog_base_goods_id = $product_id;
-//                $note->save();
-//            }
-//            return $this->renderAjax('_add-note', compact('note'));
-//        }
+        
+        return false;
     }
 
     public function actionAjaxMakeOrder() {
@@ -405,42 +391,36 @@ class OrderController extends DefaultController {
                     $order->save();
                     $this->sendNewOrder($order->vendor);
                     $this->sendOrderCreated($this->currentUser, $order->vendor, $order->id);
-                    
                 }
             }
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            return $this->successNotify("Заказ успешно оформлен");
+            //Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return true;//$this->successNotify("Заказ успешно оформлен");
         }
 
         return false;
     }
 
-    public function actionAjaxDeleteOrder() {
+    public function actionAjaxDeleteOrder($all, $order_id = null) {
         $client = $this->currentUser->organization;
 
-        if (Yii::$app->request->post()) {
-            if (!Yii::$app->request->post('all')) {
-                $order_id = Yii::$app->request->post('id');
-                $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-                if ($order) {
-                    OrderContent::deleteAll(['order_id' => $order->id]);
-                    $order->delete();
-                }
-            } else {
-                $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-                foreach ($orders as $order) {
-                    OrderContent::deleteAll(['order_id' => $order->id]);
-                    $order->delete();
-                }
+        if (!$all) {
+            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            if ($order) {
+                OrderContent::deleteAll(['order_id' => $order->id]);
+                $order->delete();
             }
-            $cartCount = $client->getCartCount();
-            $this->sendCartChange($client, $cartCount);
-            return true;
+        } else {
+            $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
+            foreach ($orders as $order) {
+                OrderContent::deleteAll(['order_id' => $order->id]);
+                $order->delete();
+            }
         }
-
-        return false;
+        $cartCount = $client->getCartCount();
+        $this->sendCartChange($client, $cartCount);
+        return true;
     }
 
     public function actionAjaxSetDelivery() {
@@ -451,7 +431,6 @@ class OrderController extends DefaultController {
             $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             $oldDateSet = isset($order->requested_delivery);
             if ($order) {
-                //$timestamp = \DateTime::createFromFormat('d.m.Y H:i:s', $delivery_date. ' 23:59:59');
                 $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 19:00:00'));
 
                 $order->requested_delivery = $timestamp;
@@ -463,7 +442,7 @@ class OrderController extends DefaultController {
                 return $result;
             } else {
                 $result = ["title" => "Дата доставки установлена", "type" => "success"];
-                return $$result;
+                return $result;
             }
         }
     }
@@ -624,9 +603,11 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $totalCart = 0;
 
-        if (Yii::$app->request->post('action')) {
+        if (Yii::$app->request->post('action') && Yii::$app->request->post('action') == "save") {
             $content = Yii::$app->request->post('OrderContent');
             $this->saveCartChanges($content);
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ["title" => "Изменения сохранены!", "type" => "success"];
         }
 
         $orders = $client->getCart();
@@ -1051,7 +1032,7 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
 
         foreach ($recipientOrg->users as $recipient) {
-            $email = $recipient->email;  
+            $email = $recipient->email;
 //            Yii::$app->mailqueue->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
 //                ->setTo($email)
 //                ->setSubject($subject)
@@ -1060,11 +1041,11 @@ class OrderController extends DefaultController {
                     ->setTo($email)
                     ->setSubject($subject)
                     ->send();
-            if($recipient->profile->phone && $recipient->profile->sms_allow){
-                    $text = "f-keeper: Создан новый заказ №" . $order_id;
-                    $target = $recipient->profile->phone;
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target); 
+            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                $text = "f-keeper: Создан новый заказ №" . $order_id;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
             }
         }
     }

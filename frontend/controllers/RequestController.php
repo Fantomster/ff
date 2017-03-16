@@ -36,7 +36,7 @@ class RequestController extends DefaultController {
         ]);
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial("list", compact('dataListRequest','search'));
-        } else {
+        }else{
             return $this->render("list", compact('dataListRequest','search'));
         }
     }

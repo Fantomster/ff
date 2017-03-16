@@ -330,12 +330,17 @@ $gridColumnsCatalog = [
             $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
                         'class' => 'btn btn-default btn-sm',
                         'disabled' => 'disabled']);
+            
         }
     }
-
+    
+        $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                    'class' => 'btn btn-danger btn-sm del',
+                    'data' => ['id' => $data["supp_org_id"]],
+            ]);
     return "<div class='btn-group'>" . $result . "</div>";
 }
-    ],
+    ]        
 ];
 ?>
 <section class="content">
@@ -397,17 +402,17 @@ $gridColumnsCatalog = [
                         ->textInput()
                     ?>
                     <?= $form->field($organization, 'name')->label('Организация') ?>
-                    <?=
-                    $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
-                        'data' => Category::allCategory(),
-                        'theme' => 'krajee',
-                        //'language' => 'ru',
-                        'hideSearch' => true,
-                        'options' => ['multiple' => true, 'placeholder' => 'Выберите категорию'],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                        ],
-                    ]);
+                    <?= ''
+//                    $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
+//                        'data' => Category::allCategory(),
+//                        'theme' => 'krajee',
+//                        //'language' => 'ru',
+//                        'hideSearch' => true,
+//                        'options' => ['multiple' => true, 'placeholder' => 'Выберите категорию'],
+//                        'pluginOptions' => [
+//                            'allowClear' => true,
+//                        ],
+//                    ]);
                     ?>
                 </div> 
                 <div class="box-footer">
@@ -793,32 +798,40 @@ $(document).on("click", ".resend-invite", function(e) {
         }
     });
 });
-$(document).on("click", ".remove-supplier", function(e) {     
-    e.preventDefault();
-    var url = $(this).attr('href');
-    console.log(url);
-    bootbox.confirm({
-        title:"Удаление поставщика",
-        message: "Удалить поставщика из вашего списка?",
-        buttons: {
-            cancel: {
-                label: 'Отмена',
-                className: 'btn-gray'
+$(document).on("click",".del", function(e){
+    var id = $(this).attr('data-id');
+        bootbox.confirm({
+            title: "Удалить поставщика?",
+            message: "Поставщик будет удален из Вашего списка поставщиков", 
+            buttons: {
+                confirm: {
+                    label: 'Удалить',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Отмена',
+                    className: 'btn-default'
+                }
             },
-            confirm: {
-                label: 'Удалить',
-                className: 'btn-success'
-            }
-            
-        },
-        callback: function (result) {
-         if(result){ 
-             $.post(url, function( data ) { $.pjax.reload({container: "#sp-list"}); });
-                
-            }
-        }
-    });
-});        
+            className: "danger-fk",
+            callback: function(result) {
+		if(result){
+		$.ajax({
+	        url: "index.php?r=client/remove-supplier",
+	        type: "POST",
+	        dataType: "json",
+	        data: {'id' : id},
+	        cache: false,
+	        success: function(response) { 
+			         
+		        }	
+		    });
+        $.pjax.reload({container: "#sp-list"});
+		}else{
+		console.log('cancel');	
+		}
+	}});      
+})
 $("body").on("hidden.bs.modal", "#view-supplier", function() {
     $(this).data("bs.modal", null);
 })

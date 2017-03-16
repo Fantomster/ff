@@ -10,154 +10,209 @@ use kartik\form\ActiveForm;
 
 $this->registerJs(
         '$("document").ready(function(){
-            $("#checkout").on("click", ".remove", function(e) {
-                $("#loader-show").showLoading();
-                $.post(
-                    "' . Url::to(['/order/ajax-remove-position']) . '",
-                    {vendor_id: $(this).data("vendor_id"), product_id: $(this).data("product_id")}
-                ).done(function(result) {
-                    if (result) {
-                        //$.pjax.reload({container: "#checkout"});
-                    }
-                    $("#loader-show").hideLoading();
-                });
-            });
-            $("#checkout").on("click", ".delete", function(e) {
-                $("#loader-show").showLoading();
-                $.post(
-                    "' . Url::to(['/order/ajax-delete-order']) . '",
-                    {"id": $(this).data("id"), "all":0 }
-                ).done(function(result) {
-                    if (result) {
-                        //$.pjax.reload({container: "#checkout"});
-                    }
-                    $("#loader-show").hideLoading();
-                });
-            });
-            $("#checkout").on("click", "#deleteAll", function(e) {
-                $("#loader-show").showLoading();
-                $.post(
-                    "' . Url::to(['/order/ajax-delete-order']) . '",
-                    {"all":1 }
-                ).done(function(result) {
-                    if (result) {
-                        //$.pjax.reload({container: "#checkout"});
-                    }
-                    $("#loader-show").hideLoading();
+            $(document).on("click", ".remove, .delete, .deleteAll", function(e) {
+                e.preventDefault();
+                clicked = $(this);
+                if (clicked.hasClass("remove")) {
+                    title = "Удаление товара из корзины";
+                    text = "Вы уверены, что хотите удалить товар из заказа?";
+                    success = "Товар удален!";
+                } else if (clicked.hasClass("delete")){
+                    title = "Удаление заказа";
+                    text = "Вы уверены, что хотите удалить заказ из корзины?";
+                    success = "Заказ удален!";
+                } else if (clicked.hasClass("deleteAll")){
+                    title = "Очистка корзины";
+                    text = "Вы уверены, что хотите удалить все заказы из корзины?";
+                    success = "Корзина очищена!";
+                }
+                swal({
+                    title: title,
+                    text: text,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Да, удалить",
+                    cancelButtonText: "Отмена",
+                    showLoaderOnConfirm: true,
+                    preConfirm: function () {
+                        return new Promise(function (resolve, reject) {
+                            $.post(
+                                clicked.data("url")
+                            ).done(function (result) {
+                                if (result) {
+                                    resolve(result);
+                                } else {
+                                    resolve(false);
+                                }
+                            });
+                        })
+                    },
+                }).then(function() {
+                    swal({title: success, type: "success"});
                 });
             });
 
-            $("#checkout").on("click", ".create", function(e) {
+            $(document).on("click", ".create, .createAll", function(e) {
                 e.preventDefault();
-                $("#loader-show").showLoading();
+                var clicked = $(this);
                 var form = $("#cartForm");
-                extData = "&all=0&id=" + $(this).data("id"); 
-                $.post(
-                    "' . Url::to(['/order/ajax-make-order']) . '",
-                    form.serialize() + extData
-                ).done(function(result) {
-                    if (result) {
-                        dataEdited = 0;
-                        $("#saveChanges").hide();
-                        $.notify(result.growl.options, result.growl.settings);
-                    }
-                    $("#loader-show").hideLoading();
+                var extData = "&all=" + clicked.data("all") + "&id=" + clicked.data("id"); 
+                if (clicked.hasClass("create")) {
+                    title = "Создание заказа";
+                    text = "Заказ будет оформлен и направлен поставщику. Продолжить?";
+                    success = "Заказ оформлен!";
+                } else if (clicked.hasClass("createAll")){
+                    title = "Создание заказов";
+                    text = "Все заказы из корзины будут оформлены и направлены соответствующим поставщикам. Продолжить?";
+                    success = "Все заказы оформлены!";
+                }
+                swal({
+                    title: title,
+                    text: text,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Да",
+                    cancelButtonText: "Отмена",
+                    showLoaderOnConfirm: true,
+                    preConfirm: function () {
+                        return new Promise(function (resolve, reject) {
+                            $.post(
+                                clicked.data("url"),
+                                form.serialize() + extData
+                            ).done(function (result) {
+                                if (result) {
+                                    resolve(result);
+                                } else {
+                                    resolve(false);
+                                }
+                            });
+                        })
+                    },
+                }).then(function() {
+                    swal({title: success, type: "success"});
                 });
             });
 
-            $("#checkout").on("click", "#createAll", function(e) {
+            $(document).on("click", "#saveChanges", function(e) {
                 e.preventDefault();
-                $("#loader-show").showLoading();
+                var clicked = $(this);
                 var form = $("#cartForm");
-                extData = "&all=1"; 
-                $.post(
-                    "' . Url::to(['/order/ajax-make-order']) . '",
-                    form.serialize() + extData
-                ).done(function(result) {
-                    dataEdited = 0;
-                    $("#saveChanges").hide();
-                    $("#loader-show").hideLoading();
-                    if (result) {
-                        $.notify(result.growl.options, result.growl.settings);
-                    }
+                var extData = "&action=save"; 
+                swal({
+                    title: "Сохранение изменений",
+                    text: "Сохранить изменения в заказах?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Да",
+                    cancelButtonText: "Отмена",
+                    showLoaderOnConfirm: true,
+                    preConfirm: function () {
+                        return new Promise(function (resolve, reject) {
+                            $.post(
+                                form.attr("action"),
+                                form.serialize() + extData
+                            ).done(function (result) {
+                                if (result) {
+                                    $.pjax.reload({container: "#checkout"});
+                                    dataEdited = 0;
+                                    resolve(result);
+                                } else {
+                                    resolve(false);
+                                }
+                            });
+                        })
+                    },
+                }).then(function(result) {
+                    swal(result);
                 });
             });
-            $("#checkout").on("click", "#saveChanges", function(e) {
-                e.preventDefault();
-                $("#loader-show").showLoading();
-                var form = $("#cartForm");
-                extData = "&action=save"; 
-                $.post(
-                    form.attr("action"),
-                    form.serialize() + extData
-                ).done(function(result) {
-                    $.pjax.reload({container: "#checkout"});
-                    dataEdited = 0;
-                    $("#saveChanges").hide();
-                    $("#loader-show").hideLoading();
-                    if (result) {
-                        $.notify(result.growl.options, result.growl.settings);
-                    }
-                });
-            });
+
             $("#checkout").on("change", ".delivery-date", function(e) {
                 $.post(
                     "' . Url::to(['/order/ajax-set-delivery']) . '",
                     {"order_id":$(this).data("order_id"), "delivery_date":$(this).val() }
                 ).done(function(result) {
                     if (result) {
-                        $.notify(result.growl.options, result.growl.settings);
+                        swal(result);
                     }
                 });
             });
-            $("body").on("hidden.bs.modal", "#changeComment, #changeNote", function() {
-                $(this).data("bs.modal", null);
-            });
-            $("body").on("submit", "#commentForm", function() {
-                return false;
-            });
-            $("#changeComment").on("click", ".saveComment", function() {
-                $("#loader-show").showLoading();
-                var form = $("#commentForm");
-                $.post(
-                    form.attr("action"),
-                    form.serialize()
-                )
-                .done(function (result) {
-                    if (result) {
-                        $.notify(result.growl.options, result.growl.settings);
+
+            $(document).on("click", ".comment, .add-note", function(e) {
+                e.preventDefault();
+                var clicked = $(this);
+                if (clicked.hasClass("comment")) {
+                    title = "Комментарий к заказу";
+                } else {
+                    title = "Комментарий к товару";
+                }
+                swal({
+                    title: title,
+                    input: "textarea",
+                    showCancelButton: true,
+                    cancelButtonText: "Закрыть",
+                    confirmButtonText: "Сохранить",
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false,
+                    showLoaderOnConfirm: true,
+                    inputValue: clicked.data("original-title"),
+                    onClose: function() {
+                        clicked.blur();
+                        swal.resetDefaults()
+                    },
+                    preConfirm: function (text) {
+                        return new Promise(function (resolve, reject) {
+                            $.post(
+                                clicked.data("url"),
+                                {comment: text}
+                            ).done(function (result) {
+                                if (result) {
+                                    resolve(result);
+                                } else {
+                                    resolve(false);
+                                }
+                            });
+                        })
+                    },
+                }).then(function (result) {
+                    if (result.type == "success") {
+                        clicked.tooltip("hide")
+                            .attr("data-original-title", result.comment)
+                            .tooltip("fixTitle")
+                            .blur();
+                        clicked.data("original-title", result.comment);
+                        swal(result);
+                    } else {
+                        swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
                     }
-                    $("#loader-show").hideLoading();
                 });
             });
-            $("#changeNote").on("click", ".saveNote", function() {
-                $("#loader-show").showLoading();
-                var form = $("#noteForm");
-                $.post(
-                    form.attr("action"),
-                    form.serialize()
-                )
-                .done(function (result) {
-                    if (result) {
-                        $.notify(result.growl.options, result.growl.settings);
-                    }
-                    $("#loader-show").hideLoading();
-                });
-            });
+            
             $(".content").on("change keyup paste cut", ".quantity", function() {
                 dataEdited = 1;
                 $("#saveChanges").show();
             });
+            
             $(document).on("click", ".changed", function() {
                 document.location = link;
             });
+            
             $(document).on("click", "a", function(e) {
                 if (dataEdited) {
                     e.preventDefault();
-                    link = $(this).attr("href");
+                    var link = $(this).attr("href");
                     if ($(this).data("internal") != 1) {
                         if (link != "#") {
-                            $("#dataChanged").modal("show")       
+                            swal({
+                                title: "Несохраненные изменения!",
+                                text: "Вы изменили заказ, но не сохранили изменения!",
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonText: "Уйти",
+                                cancelButtonText: "Остаться",
+                            }).then(function() {
+                                document.location = link;
+                            });
                         }
                     }
                 }
@@ -166,9 +221,6 @@ $this->registerJs(
         });'
 );
 $this->title = "Корзина";
-?>
-<?php
-Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000]);
 ?>
 <section class="content-header">
     <h1>
@@ -190,18 +242,45 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
     ])
     ?>
 </section>
+<?php
+Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000]);
+?>
 <section class="content">
     <div class="box box-info">
         <div class="box-header checkout-header">
             <div class="row">
                 <div class="col-md-6 col-sm-8 col-xs-6">
                     <div class="btn-group" role="group" id="createAll">
-                        <button class="btn btn-success" type="button"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span></button>
-                        <button type="button" class="btn btn-success  btn-outline total-cart">&nbsp;<span><?= $totalCart ?></span> <i class="fa fa-fw fa-rub"></i>&nbsp;</button>
+                    <?= 
+                        Html::button('<i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-xs"> Оформить все заказы</span>', [
+                            'class' => 'btn btn-success createAll',
+                            'data' => [
+                                'url' => Url::to(['/order/ajax-make-order']),
+                                'all' => true,
+                                'id' => null,
+                                ]
+                        ]);
+                    ?>
+                    <?= 
+                        Html::button("&nbsp;<span>$totalCart</span> <i class='fa fa-fw fa-rub'></i>&nbsp;", [
+                            'class' => 'btn btn-success createAll btn-outline total-cart',
+                            'data' => [
+                                'url' => Url::to(['/order/ajax-make-order']),
+                                'all' => true,
+                                'id' => null,
+                                ]
+                        ]);
+                    ?>
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-4 col-xs-6">
-                    <button class="btn btn-danger pull-right" type="button" id="deleteAll" style="margin-right: 10px; margin-left: 3px;"><i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Очистить корзину</span></button>    
+                    <?= 
+                        Html::a('<i class="fa fa-ban" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Очистить корзину</span>', '#', [
+                            'class' => 'btn btn-danger pull-right deleteAll',
+                            'style' => 'margin-right: 10px; margin-left: 3px;',
+                            'data-url' => Url::to(['/order/ajax-delete-order', 'all' => true]),
+                        ]);
+                    ?>
                     <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Сохранить</span></button>
                 </div>
             </div>
@@ -228,7 +307,13 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                 </div>
                                 <div class="col-md-4 col-sm-4 col-xs-4">
                                     <div class="pull-right">
-                                        <a class="btn btn-outline btn-xs btn-outline-danger delete" style="margin-right:10px;" data-id="<?= $order->id ?>" data-internal="1"><i class="fa fa-close m-r-xxs" style="margin-top:-2px;"></i></a>
+                                        <?= 
+                                            Html::a('<i class="fa fa-close m-r-xxs" style="margin-top:-2px;"></i>', '#', [
+                                                'class' => 'btn btn-outline btn-xs btn-outline-danger delete',
+                                                'style' => 'margin-right:10px;',
+                                                'data-url' => Url::to(['/order/ajax-delete-order', 'all' => false, 'order_id' => $order->id]),
+                                            ]);
+                                        ?>
                                     </div>
                                 </div>
                             </div>
@@ -263,13 +348,22 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
                                                     ?>
                                                 </div>
                                                 <div class="col-md-8 col-sm-6 col-xs-6">
-                                                    <button class="btn btn-success create pull-right" data-id="<?= $order->id ?>"><i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span></button>
+                                                    <?= 
+                                                        Html::a('<i class="fa fa-paper-plane" style="margin-top:-3px;"></i><span class="hidden-fk"> Оформить заказ</span>', '#', [
+                                                            'class' => 'btn btn-success create pull-right',
+                                                            'data' => [
+                                                                'url' => Url::to(['/order/ajax-make-order']),
+                                                                'id' => $order->id,
+                                                                'all' => false,
+                                                            ]
+                                                        ]);
+                                                    ?>
                                                     <a class="btn btn-gray comment pull-right"
-                                                       data-target="#changeComment"
-                                                       data-toggle="modal"
-                                                       data-backdrop="static"
-                                                       data-internal="1"
-                                                       href="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>">
+                                                       data-url="<?= Url::to(['order/ajax-set-comment', 'order_id' => $order->id]) ?>"
+                                                       data-toggle="tooltip" 
+                                                       data-placement="bottom" 
+                                                       data-original-title="<?= $order->comment ?>"
+                                                       href="#">
                                                         <i class="fa fa-comment" style="margin-top:-3px;"></i><span class="hidden-fk"> Комментарий к заказу</span>
                                                     </a>
                                                 </div>
@@ -288,35 +382,5 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000])
             </div>
         </div>
     </div>
-    <?php Pjax::end() ?>
-    <?=
-    Modal::widget([
-        'id' => 'changeComment',
-        'clientOptions' => false,
-    ])
-    ?>
-    <?=
-    Modal::widget([
-        'id' => 'changeNote',
-        'clientOptions' => false,
-    ])
-    ?>
 </section>
-<!-- Modal -->
-<div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
-            </div>
-            <div class="modal-body">
-                Вы изменили заказ, но не сохранили изменения!
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
-                <button type="button" class="btn btn-danger changed">Уйти</button>
-            </div>
-        </div>
-    </div>
-</div>
+<?php Pjax::end() ?>

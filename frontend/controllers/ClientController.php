@@ -893,6 +893,7 @@ class ClientController extends DefaultController {
                         
                         $CatalogBaseGoods = new CatalogBaseGoods();
                         $CatalogBaseGoods->cat_id = $base_catalog->id;
+                        $CatalogBaseGoods->supp_org_id = $supp_org_id;
                         $CatalogBaseGoods->article = $article;
                         $CatalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                         $CatalogBaseGoods->product = $product;
@@ -1023,12 +1024,13 @@ class ClientController extends DefaultController {
         return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array'));
     }
 
-    public function actionRemoveSupplier($id) {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
-        \Yii::$app->db->createCommand($sql)->execute();
-        $sql = "delete from relation_category where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
-        \Yii::$app->db->createCommand($sql)->execute();
+    public function actionRemoveSupplier() {
+        if (Yii::$app->request->isAjax) {
+            $id = \Yii::$app->request->post('id');
+            $currentUser = User::findIdentity(Yii::$app->user->id);
+            $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
+            \Yii::$app->db->createCommand($sql)->execute();
+        }
     }
 
     public function actionMessages() {
@@ -1229,20 +1231,19 @@ class ClientController extends DefaultController {
 
             empty($searchString) ? "" : $where .= " and name LIKE :name";
         }
-        $sql = "SELECT supp_org_id, name FROM `relation_supp_rest` join `organization`
+        $sql = "SELECT picture,supp_org_id, name FROM `relation_supp_rest` join `organization`
 on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where";
         $query = \Yii::$app->db->createCommand($sql);
         $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM `relation_supp_rest` join `organization`
 on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                         . "rest_org_id = $currentUser->organization_id and invite = " . RelationSuppRest::INVITE_ON . "$where", [':name' => $searchString])->queryScalar();
-
         $suppliers_dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
             'params' => [':name' => $searchString],
             'pagination' => [
-                'pageSize' => 4,
+                'pageSize' => 0,
             ],
         ]);
 
@@ -1251,15 +1252,27 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
          * Поставщики END
          * 
          */
-
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $orders = $currentUser->organization->getCart();
+        $totalCart = count($orders);
+        
+        $count_products_from_mp = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+                    'market_place'=>CatalogBaseGoods::MARKETPLACE_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere('category_id is not null')
+                ->count();
+        
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = date("d-m-Y");
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
         $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                . "client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING);
+                . "client_id = " . $currentUser->organization_id . " and status<>" . Order::STATUS_FORMING);
         $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                        . "client_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
+                        . "client_id = " . $currentUser->organization_id . " and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
             'totalCount' => $totalCount,
@@ -1282,8 +1295,11 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 ]
             ],
         ]);
+        //$supp_arr = RelationSuppRest::find()->where(['rest_org_id'=>$currentUser->organization_id,'status'=>1])->all();
+        
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
         // chart АНАЛИТИКА по неделям прошедшим
+        /*
         $curent_monday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '1')); // текущая неделя - понедельник
         $curent_sunday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '7')); // текущая неделя - воскресение
         $i = 0;
@@ -1317,10 +1333,13 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             }
             array_push($chart_dates, $querys['dates']);
         }
+         */
         // var_dump($chart_price);
         return $this->render('dashboard/index', compact(
-                                'dataProvider', 'suppliers_dataProvider', 'chart_dates', 'chart_price'
+                                'dataProvider', 'suppliers_dataProvider','totalCart','count_products_from_mp'
+                //'chart_dates', 'chart_price'
         ));
+         
     }
 
     public function actionSuppliers() {

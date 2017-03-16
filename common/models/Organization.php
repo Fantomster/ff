@@ -243,26 +243,20 @@ class Organization extends \yii\db\ActiveRecord {
      *  
      *  @return string
      */
-    public function getCatalogs($vendor_id = '', $category_id = '') {
+    public function getCatalogs($vendor_id) {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return '0';
         }
+        //$vendor_id = (int)$vendor_id;
         $query = RelationSuppRest::find()
-                ->select(['relation_supp_rest.cat_id'])
+                ->select(['relation_supp_rest.cat_id as cat_id'])
                 ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
                 ->where(['relation_supp_rest.rest_org_id' => $this->id])
                 ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
-        if ($category_id) {
-            $query = $query
-                    ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id AND relation_category.rest_org_id = relation_supp_rest.rest_org_id')
-                    ->andWhere(['relation_category.category_id' => $category_id]);
-        }
-        if ($vendor_id) {
-            $query = $query->andWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
-        }
+        $query->andFilterWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
         $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
         if (empty($catalogs)) {
-            return '0';
+            return '-1';
         }
         return implode(",", $catalogs);
     }

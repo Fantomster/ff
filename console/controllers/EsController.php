@@ -40,7 +40,7 @@ class EsController extends Controller
                         "category_name" : { 
                             "type" : "string", 
                             "analyzer" : "ru",
-                            "term_vector" : "with_positions_offsets"
+                            "term_vector" : "yes"
                         },
                         "category_sub_id" : {"type" : "long"}
                 }
@@ -76,8 +76,8 @@ class EsController extends Controller
                         "product_id"  :{"type" : "long"},
                         "product_name" : { 
                             "type" : "string", 
-                            "analyzer" : "ru",
-                            "term_vector" : "with_positions_offsets"
+                            "analyzer" : "keyword",
+                            "term_vector" : "yes"
                         },
                         "product_supp_id" : {"type" : "long"},
                         "product_supp_name" : {"type" : "string"},
@@ -126,7 +126,7 @@ class EsController extends Controller
                         "supplier_name" : { 
                             "type" : "string", 
                             "analyzer" : "ru",
-                            "term_vector" : "with_positions_offsets"
+                            "term_vector" : "yes"
                         },
                         "supplier_image" : {"type" : "string"},
                         "supplier_rating" : {"type" : "long"},

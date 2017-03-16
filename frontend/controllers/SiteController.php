@@ -28,7 +28,7 @@ class SiteController extends Controller {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['logout', 'signup', 'index', 'about'],
+                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration'],
                 'rules' => [
                     [
                         'actions' => ['signup', 'index', 'about'],
@@ -36,7 +36,7 @@ class SiteController extends Controller {
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout'],
+                        'actions' => ['logout', 'complete-registration'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -50,7 +50,11 @@ class SiteController extends Controller {
                             Role::ROLE_ADMIN,
                         ],
                         'denyCallback' => function($rule, $action) {
-                            $this->redirect(Url::to(['/client/index']));
+                            if ($this->isRegistrationComplete()) {
+                                $this->redirect(['/client/index']);
+                            } else {
+                                $this->redirect(['/site/complete-registration']);
+                            }
                         }
                     ],
                     [
@@ -62,7 +66,11 @@ class SiteController extends Controller {
                             Role::ROLE_ADMIN,
                         ],
                         'denyCallback' => function($rule, $action) {
-                            $this->redirect(Url::to(['/vendor/index']));
+                            if ($this->isRegistrationComplete()) {
+                                $this->redirect(['/vendor/index']);
+                            } else {
+                                $this->redirect(['/site/complete-registration']);
+                            }
                         }
                     ],
                 ],
@@ -116,9 +124,11 @@ class SiteController extends Controller {
     public function actionContacts() {
         return $this->render('contacts');
     }
+    
     public function actionFaq() {
         return $this->render('faq');
     }
+    
     public function actionRestaurant() {
         $user = new User();
         $user->scenario = 'register';
@@ -128,6 +138,7 @@ class SiteController extends Controller {
         $organization->scenario = 'register';
         return $this->render('restaurant', compact("user", "profile", "organization"));
     }
+    
     public function actionSupplier() {
         $user = new User();
         $user->scenario = 'register';
@@ -136,5 +147,23 @@ class SiteController extends Controller {
         $organization = new Organization();
         $organization->scenario = 'register';
         return $this->render('supplier', compact("user", "profile", "organization"));
+    }
+    
+    public function actionCompleteRegistration() {
+        $this->layout = "main-user";
+        
+        $user = Yii::$app->user->identity;
+        $profile = $user->profile;
+        $organization = $user->organization;
+        
+        return $this->render("complete-registration", compact("profile", "organization"));
+    }
+    
+    private function isRegistrationComplete() {
+        $user = Yii::$app->user->identity;
+        if (isset($user->organization)) {
+            return ($user->organization->step != Organization::STEP_SET_INFO);
+        }
+        return false;
     }
 }

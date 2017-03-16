@@ -24,6 +24,59 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 .order-history .info-box {box-shadow: none;}
 .info-box {box-shadow: none;border:1px solid #eee;}
 .info-box-text{margin: 0;padding-top:10px;color:#555}
+.info-box-text{margin: 0;padding-top:10px;color:#555}
+@media (min-width: 992px){.moipost{padding-left:15px;padding-right:15px}}
+.dash-small-box {
+    border-radius: 3px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    padding:20px;
+    padding-top:1px;
+    background:#fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow:hidden
+}
+.dash-small-box:hover{box-shadow: 0 1px 10px rgba(0,0,0,0.3);cursor:pointer}
+.dash-small-box h3{font-size:28px;color:#3F3E3E}
+.dash-small-box p{font-size:14px;color:#95989A}
+.dash-small-box .btn{border-width:2px}
+.dash-small-box .bg{
+position: absolute;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+}
+.dash-small-box .bg {
+ -moz-transition: all 1s ease-out;
+ -o-transition: all 1s ease-out;
+ -webkit-transition: all 1s ease-out;
+ }
+ 
+.dash-small-box:hover .bg{
+ -webkit-transform: scale(1.1);
+ -moz-transform: scale(1.1);
+ -o-transform: scale(1.1);
+ }
+ .dash-box{
+ border-radius: 3px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    background:#fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow:hidden
+}
+ .tb-scroll{
+overflow-y:scroll 
+}
+.table>tbody>tr>td {
+    border-top: 1px solid #f4f4f4;
+}
+.table>tbody>tr:first-child>td {
+    border-top: 1px solid #fff;
+}
 ');
 $this->registerCss('
 @media (max-width: 1320px){
@@ -39,93 +92,135 @@ $this->registerCss('
     </h1>
 </section>
 <section class="content">
-<div class="box box-info">
-    <div class="box-body order-history">
-        <div class="col-md-4 col-sm-4 col-xs-12">
-            <div class="info-box bg-total-price">
-                <a href="index.php?r=order/create">
-                    <div class="info-box-content">
-                        <i class="fa fa-opencart" style="font-size: 22px;"></i>
-                        <p class="info-box-text">Разместить заказ</p>
-                    </div>                    
-                </a>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12 col-lg-4 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="dash-small-box" data-target="order">
+                                <div class="inner" style="position:relative;z-index:2">
+                                  <h3>Создать заказ</h3>
+                                  <p>у своих поставщиков</p>
+                                </div>
+                                <?= Html::a('Создать', ['order/create'],['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+    <div class="bg" style="
+    background: url(images/dash.png) no-repeat bottom right;
+    background-size: 140px;">
+    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="dash-small-box" data-target="checkout">
+                                <div class="inner" style="position:relative;z-index:2">
+                                  <h3>Заказов <?=$totalCart?></h3>
+                                  <p>в корзине</p>
+                                </div>
+                                <?= Html::a('Корзина', ['order/checkout'],['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+    <div class="bg" style="
+    background: url(images/dash3.png) no-repeat center right;
+    background-size: 150px;">
+    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12 hidden-xs">
-            <div class="info-box bg-total-price">
-                <a href="index.php?r=client/suppliers">
-                    <div class="info-box-content">
-                        <i class="fa fa-users" style="font-size: 22px;"></i>
-                        <p class="info-box-text">Управление вашими поставщиками</p>
-                    </div>                    
-                </a>
+            <div class="col-md-12 col-lg-4 col-sm-12 col-xs-12">
+                <div class="row moipost">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="dash-small-box" data-target="request">
+                                <div class="inner" style="position:relative;z-index:2">
+                                  <h3>Скоро</h3>
+                                  <p>заявки на закупку</p>
+                                </div>
+                                <?= Html::a('Заявки', null,['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+    <div class="bg" style="
+    background: url(images/dash1.png) no-repeat top right;
+    background-size: 170px;">
+    </div>                        
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="dash-small-box" data-target="fmarket">
+                                <div class="dash-title-border"></div>
+                                <div class="inner" style="position:relative;z-index:2">
+                                  <h3>Товаров <?=$count_products_from_mp ?></h3>
+                                  <p>доступно на F-MARKET</p>
+                                </div>
+                                <?= Html::a('F-Market', 'https://market.f-keeper.ru',['target'=>'_blank','class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+    <div class="bg" style="
+    background: url(images/dash2.png) no-repeat bottom right;
+    background-size: 120px;">
+    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4 col-sm-4 col-xs-12 hidden-xs">
-            <div class="info-box bg-total-price">
-                <a href="index.php?r=client/settings">
-                    <div class="info-box-content">
-                        <i class="fa fa-gears" style="font-size: 22px;"></i>
-                        <p class="info-box-text">Настройки профилей</p>
-                    </div>                    
-                </a>
+            <div class="col-md-12 col-lg-4 col-sm-12 col-xs-12 ">
+                <div class="row">
+                    <div class="dash-box">
+                        <div class="box-header with-border">
+                            <?= Html::a('<span style="color:#3F3E3E">Мои</span> поставщики <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['client/suppliers'],['class'=>'' , 'style' => 'font-size: 18px;']) ?>
+    
+                        </div>
+                        <div class="box-body" style="height: 268px;overflow-y:scroll">
+                        <?php
+                        $columns1 = [
+                        ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
+                            $url = empty($data->picture) ? Yii::getAlias('@web') . \common\models\Organization::DEFAULT_VENDOR_AVATAR : $data->pictureUrl;
+                            return Html::img( $url, ['style' => 'width:70px'] );
+                        }],
+                        ['attribute' => 'name','value'=>'name', 'label' => 'Поставщики'],
+                        ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
+                            return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказать', ['order/create',
+                                'OrderCatalogSearch[searchString]'=>"",
+                                'OrderCatalogSearch[selectedCategory]'=>"",
+                                'OrderCatalogSearch[selectedVendor]'=>$data['supp_org_id'],
+                                ],['class'=>'btn btn-outline-default btn-sm pull-right','data-pjax'=>0,'style'=>'border-width:2px;border-color:#3F3E3E']);           
+                        }]
+                        ];
+                        ?>
+                        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'suppliers-list',]); ?>
+                            <?=GridView::widget([
+                           'dataProvider' => $suppliers_dataProvider,
+                           'filterPosition' => false,
+                           'columns' => $columns1,
+                           'showHeader' => false,
+                           'tableOptions' => ['class' => 'table no-margin'],
+                           'options' => ['class' => 'table-responsive'],
+                           'bordered' => false,
+                           'striped' => false,
+                           'condensed' => false,
+                           'responsive' => true,
+                           'resizableColumns'=>false,
+                           'hover' => true,
+                           'summary' => false,
+                            /*'pager' => [
+                                'maxButtonCount'=>5,    // Set maximum number of page buttons that can be displayed
+                            ],*/
+                           ]);
+                           ?> 
+                        <?php  Pjax::end(); ?>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
         </div>
     </div>
-</div>
 <div class="row hidden-xs">
     <div class="col-md-4">
-      <div class="box box-info">
-        <div class="box-header with-border">
-          <h3 class="box-title">Мои поставщики</h3>
-
-          <div class="box-tools pull-right">
-            <?= Html::a('Мои поставщики', ['client/suppliers'],['class'=>'btn btn-success btn-sm']) ?>
-          </div>
-        </div>
-          <div class="box-header with-border">
-            <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search']) ?>
-          </div>
-            <div class="box-body">
-        <?php
-        $columns1 = [
-        ['attribute' => 'name','value'=>'name', 'label' => 'Поставщики'],
-        ['attribute' => '','format'=>'raw','header' => false,'value'=>function($data) {
-            return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> заказ', ['order/create',
-                'OrderCatalogSearch[searchString]'=>"",
-                'OrderCatalogSearch[selectedCategory]'=>"",
-                'OrderCatalogSearch[selectedVendor]'=>$data['supp_org_id'],
-                ],['class'=>'btn btn-outline-success btn-sm pull-right','data-pjax'=>0]);           
-        }]
-        ];
-        ?>
-        <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'suppliers-list',]); ?>
-            <?=GridView::widget([
-           'dataProvider' => $suppliers_dataProvider,
-           'filterPosition' => false,
-           'columns' => $columns1,
-           'showHeader' => false,
-           'tableOptions' => ['class' => 'table no-margin'],
-           'options' => ['class' => 'table-responsive'],
-           'bordered' => false,
-           'striped' => false,
-           'condensed' => false,
-           'responsive' => true,
-           'resizableColumns'=>false,
-           'hover' => true,
-           'summary' => false,
-            'pager' => [
-                'maxButtonCount'=>5,    // Set maximum number of page buttons that can be displayed
-            ],
-           ]);
-           ?> 
-        <?php  Pjax::end(); ?>
-            </div>
-        <!-- /.box-body -->
-      </div>
+      
       <!-- /.box -->
     </div>
-    <div class="col-md-8">
+    <!--div class="col-md-8">
       <div class="box box-info">
         <div class="box-header with-border">
           <h3 class="box-title">Аналитика заказов</h3>
@@ -139,19 +234,15 @@ $this->registerCss('
             <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
           </div> 
         </div>
-        <!-- /.box-body -->
       </div>
-      <!-- /.box -->
-    </div>
+    </div-->
 </div>
 <div class="row">
     <div class="col-md-12">
-      <div class="box box-info">
+      <div class="box box-info" style="border: none;">
         <div class="box-header with-border">
-          <h3 class="box-title">История заказов</h3>
-          <div class="box-tools pull-right">
-            <?= Html::a('История заказов', ['order/index'],['class'=>'btn btn-success btn-sm']) ?>
-          </div>
+          <?= Html::a('<span style="color:#3F3E3E">История</span> заказов <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['order/index'],['class'=>'' , 'style' => 'font-size: 18px;']) ?>
+    
         </div>
         <div class="box-body" style="display: block;">
           <?php 
@@ -258,9 +349,12 @@ $this->registerCss('
 </div>
 </section>
 <?php
-$chart_dates =   json_encode(array_reverse($chart_dates));
-$chart_price =   json_encode(array_reverse($chart_price));
+/*
+//$chart_dates =   json_encode(array_reverse($chart_dates));
+//$chart_price =   json_encode(array_reverse($chart_price));
+
 $customJs = <<< JS
+
 var timer;
 $('#search').on("keyup put paste change", function () {
 window.clearTimeout(timer);
@@ -335,6 +429,15 @@ var areaChartOptions = {
     };
   //Create the line chart
     areaChart.Line(areaChartData, areaChartOptions);       
+
+ */
+$customJs = <<< JS
+$(document).on('click','.dash-small-box', function(){
+var targetUrl = $(this).attr('data-target');
+    if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
+    if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+    if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+})        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

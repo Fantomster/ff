@@ -122,8 +122,11 @@ $this->registerJs(
                     <?=
                             $form->field($searchModel, 'searchString', [
                                 'addon' => [
-                                    'prepend' => [
-                                        'content' => '<i class="fa fa-search"></i>',
+                                    'append' => [
+                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                        'options' => [
+                                            'class' => 'append',
+                                        ],
                                     ],
                                 ],
                                 'options' => [
@@ -136,12 +139,12 @@ $this->registerJs(
                                 'placeholder' => 'Поиск'])
                             ->label(false)
                     ?>
-                    <?=
-                            $form->field($searchModel, 'selectedCategory')
-                            ->dropDownList($client->getRestaurantCategories(), [
-                                'id' => 'selectedCategory',
-                                'class' => 'form-control margin-right-15'])
-                            ->label(false)
+                    <?= ''
+//                            $form->field($searchModel, 'selectedCategory')
+//                            ->dropDownList($client->getRestaurantCategories(), [
+//                                'id' => 'selectedCategory',
+//                                'class' => 'form-control margin-right-15'])
+//                            ->label(false)
                     ?>
                     <?=
                             $form->field($searchModel, 'selectedVendor')

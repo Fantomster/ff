@@ -53,6 +53,7 @@ class Organization extends \yii\db\ActiveRecord {
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only
     const STEP_ADD_CATALOG = 3; //vendors only
+    const STEP_TUTORIAL = 4;
     
     const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
     
@@ -81,7 +82,7 @@ class Organization extends \yii\db\ActiveRecord {
         return [
             ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
             ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
-            [['type_id', 'name'], 'required'],
+            [['type_id'], 'required'],
             [['id','type_id', 'step','es_status','rating'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],

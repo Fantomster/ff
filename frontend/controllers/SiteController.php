@@ -156,6 +156,16 @@ class SiteController extends Controller {
         $profile = $user->profile;
         $organization = $user->organization;
         
+        $post = Yii::$app->request->post();
+        if ($profile->load($post) && $organization->load($post)) {
+            if ($profile->validate() && $organization->validate()) {
+                $profile->save();
+                $organization->step = Organization::STEP_TUTORIAL;
+                $organization->save();
+                $this->redirect(['/site/index']);
+            }
+        }
+        
         return $this->render("complete-registration", compact("profile", "organization"));
     }
     

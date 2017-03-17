@@ -23,7 +23,7 @@ use yii\helpers\Html;
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">
     <?php $this->beginBody() ?>
-    <div class="wrapper">
+    <div class="wrapper" style="margin-bottom: -20px;">
     
         <?= $this->render(
             'header.php',

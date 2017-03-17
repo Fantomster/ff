@@ -154,7 +154,9 @@ class SiteController extends Controller {
         
         $user = Yii::$app->user->identity;
         $profile = $user->profile;
+        $profile->scenario = "complete";
         $organization = $user->organization;
+        $organization->scenario = "complete";
         
         $post = Yii::$app->request->post();
         if ($profile->load($post) && $organization->load($post)) {

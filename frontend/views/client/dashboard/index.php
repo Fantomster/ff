@@ -437,10 +437,20 @@ var areaChartOptions = {
 $user = Yii::$app->user->identity;
 $organization = $user->organization;
 $vendorsText = strpos($user->email, '@delivery-club.ru') ? "Список ваших поставщиков. Специально для Вас мы добавили несколько рекомендованных нами поставщиков" : "Список ваших поставщиков.";
-if ($organization->step == Organization::STEP_TUTORIAL) {
-    $turnoffTutorial = Url::to(['/site/ajax-tutorial-off']);
     $customJs = <<< JS
     $(document).on('click','.dash-small-box', function(){
+    var targetUrl = $(this).attr('data-target');
+        if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
+        if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+        if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+    }) 
+JS;
+$this->registerJs($customJs, View::POS_READY);
+
+if ($organization->step == Organization::STEP_TUTORIAL) {
+    $turnoffTutorial = Url::to(['/site/ajax-tutorial-off']);
+    $customJs2 = <<< JS
+    $(document).on('click','.dash-small-box', function(){ alert(1);
     var targetUrl = $(this).attr('data-target');
         if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
         if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
@@ -530,6 +540,6 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
                     $.tutorialize.start();
 
 JS;
-    $this->registerJs($customJs, View::POS_READY);
+    $this->registerJs($customJs2, View::POS_READY);
 }
 ?>

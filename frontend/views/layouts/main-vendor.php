@@ -7,7 +7,6 @@ use yii\helpers\Html;
 
     dmstr\web\AdminLteAsset::register($this);
     frontend\assets\AppAsset::register($this);
-
     $directoryAsset = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed2010/adminlte/dist');
     ?>
     <?php $this->beginPage() ?>
@@ -48,7 +47,7 @@ echo $this->render('_yandex_vendor');
 $js = <<<JS
 $('.sidebar-toggle').on('click', function(e){
     $.post("index.php?r=vendor/sidebar", {"sidebar-collapse": true})
-});       
+}); 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>

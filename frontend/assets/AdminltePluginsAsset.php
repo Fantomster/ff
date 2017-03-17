@@ -7,5 +7,6 @@ class AdminltePluginsAsset extends AssetBundle {
     public $sourcePath = '@vendor/almasaeed2010/adminlte/plugins'; 
     public $js = [
         "chartjs/Chart.min.js",
+        //"slimScroll/jquery.slimscroll.min.js",
     ];
 }

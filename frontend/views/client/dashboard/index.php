@@ -154,7 +154,7 @@ $this->registerCss('
                                 <div class="dash-title-border"></div>
                                 <div class="inner" style="position:relative;z-index:2">
                                   <h3>F-Market</h3>
-                                  <p>доступно для заказа товаров <?=$count_products_from_mp ?></p>
+                                  <p>доступно для заказа товаров <b><?=$count_products_from_mp ?></b></p>
                                 </div>
                                 <?= Html::a('F-Market', 'https://market.f-keeper.ru',['target'=>'_blank','class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="

@@ -9,7 +9,7 @@ use kartik\checkbox\CheckboxX;
  * @var yii\widgets\ActiveForm $form
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
-$this->title = Yii::t('user', 'Login');
+$this->title = "Завершение регистрации";
 ?>
 <div class="login__block">
     <div class="login__inside">

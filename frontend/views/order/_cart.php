@@ -31,7 +31,12 @@ foreach ($orders as $order) {
                        data-toggle="modal"
                        data-backdrop="static"
                        href="<?= Url::to(['order/ajax-change-quantity', 'vendor_id' => $order->vendor_id, 'product_id' => $position->product_id]) ?>">
-                        <button class="btn btn-outline-danger delete-position pull-right"><i class="fa fa-trash" style="margin-top:-2px;"></i></button>
+                        <?=
+                            Html::button('<i class="fa fa-trash" style="margin-top:-2px;"></i>', [
+                                    'class' => 'btn btn-outline-danger delete-position pull-right',
+                                    'data-url' => Url::to(['/order/ajax-remove-position', 'vendor_id' => $order->vendor_id, 'product_id' => $position->product_id]),
+                                ])
+                        ?>
                         <h5 class="list-group-item-heading text-info"><?= $position->product_name ?> (<?= $position->price ?> <i class="fa fa-fw fa-rub"></i><?= $unit ?>)</h5>
                         <p class="list-group-item-text text-left">Кол-во: <?= $position->quantity + 0 ?></p>
                     </a>

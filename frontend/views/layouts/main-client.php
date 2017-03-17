@@ -9,6 +9,7 @@ use yii\helpers\Html;
     frontend\assets\AppAsset::register($this);
 
     $directoryAsset = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed2010/adminlte/dist');
+    
     ?>
     <?php $this->beginPage() ?>
     <!DOCTYPE html>
@@ -35,14 +36,14 @@ use yii\helpers\Html;
             ['directoryAsset' => $directoryAsset]
         ) : ''
         ?>
-
         <?= $this->render(
             'content.php',
             ['content' => $content, 'directoryAsset' => $directoryAsset]
         ) ?>
-
+        
     </div>
 <?php
+
 echo $this->render('_yandex');
 echo $this->render('_yandex_client');
         $js = <<<JS

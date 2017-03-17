@@ -106,6 +106,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 top: 100px;
                 z-index: 99999;
             }
+            .modal{
+                top: 100px;
+                z-index: 99999;
+            }
         </style>
     </head>
     <body>	

@@ -48,7 +48,7 @@ echo $this->render('_yandex_vendor');
 $js = <<<JS
 $('.sidebar-toggle').on('click', function(e){
     $.post("index.php?r=vendor/sidebar", {"sidebar-collapse": true})
-});       
+}); 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);
 ?>

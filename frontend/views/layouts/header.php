@@ -15,6 +15,8 @@ if (!Yii::$app->user->isGuest) {
     $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
     //Yii::$app->urlManager->baseUrl;
     $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
+    $tutorialOn = Url::to(['/site/ajax-tutorial-on']);
+    $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
     $js = <<<JS
@@ -134,6 +136,17 @@ if (!Yii::$app->user->isGuest) {
             refreshMenu(result);
         });
     });
+            
+    $(document).on("click", ".repeat-tutorial", function(e) {
+            e.preventDefault();
+            $.get(
+                '$tutorialOn'
+            ).done(function(result) {
+                if (result) {
+                    document.location = "$dashboard";
+                }
+            });
+    });
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
@@ -223,6 +236,11 @@ JS;
                                 <a href="#" class="setRead" data-msg="0" data-ntf="1">Пометить как прочитанные</a>
                             </li>
                         </ul>
+                    </li>
+                    <li data-toggle="tooltip" data-placement="bottom" data-original-title="Повторить обучение">
+                        <a href="#" class="repeat-tutorial">
+                            <i class="fa fa-question-circle"></i>
+                        </a>
                     </li>
                     <?php //} ?>
                     <!-- Tasks: style can be found in dropdown.less -->

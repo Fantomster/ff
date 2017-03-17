@@ -28,7 +28,7 @@ class SiteController extends Controller {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration'],
+                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on'],
                 'rules' => [
                     [
                         'actions' => ['signup', 'index', 'about'],
@@ -36,7 +36,7 @@ class SiteController extends Controller {
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout', 'complete-registration'],
+                        'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -167,6 +167,26 @@ class SiteController extends Controller {
         }
         
         return $this->render("complete-registration", compact("profile", "organization"));
+    }
+    
+    public function actionAjaxTutorialOff() {
+        $user = Yii::$app->user->identity;
+        if (isset($user->organization)) {
+            $organization = $user->organization;
+            $organization->step = Organization::STEP_OK;
+            return $organization->save();
+        }
+        return false;
+    }
+    
+    public function actionAjaxTutorialOn() {
+        $user = Yii::$app->user->identity;
+        if (isset($user->organization)) {
+            $organization = $user->organization;
+            $organization->step = Organization::STEP_TUTORIAL;
+            return $organization->save();
+        }
+        return false;
     }
     
     private function isRegistrationComplete() {

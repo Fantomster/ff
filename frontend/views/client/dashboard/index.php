@@ -101,7 +101,7 @@ $this->registerCss('
                 <div class="row">
                     <div class="col-md-12">
                         <div class="row">
-                            <div class="dash-small-box step_order" data-target="order">
+                            <div class="dash-small-box step-order" data-target="order">
                                 <div class="inner" style="position:relative;z-index:2">
                                   <h3>Создать заказ</h3>
                                   <p>у своих поставщиков</p>
@@ -116,7 +116,7 @@ $this->registerCss('
                     </div>
                     <div class="col-md-12">
                         <div class="row">
-                            <div class="dash-small-box step_cart" data-target="checkout">
+                            <div class="dash-small-box step-cart" data-target="checkout">
                                 <div class="inner" style="position:relative;z-index:2">
                                   <h3>Заказов <?=$totalCart?></h3>
                                   <p>в корзине</p>
@@ -150,7 +150,7 @@ $this->registerCss('
                     </div>
                     <div class="col-md-12">
                         <div class="row">
-                            <div class="dash-small-box step_f-market" data-target="fmarket">
+                            <div class="dash-small-box step-f-market" data-target="fmarket">
                                 <div class="dash-title-border"></div>
                                 <div class="inner" style="position:relative;z-index:2">
                                   <h3>Товаров <?=$count_products_from_mp ?></h3>
@@ -168,9 +168,9 @@ $this->registerCss('
             </div>
             <div class="col-md-12 col-lg-4 col-sm-12 col-xs-12 ">
                 <div class="row">
-                    <div class="dash-box step_vendors_list">
+                    <div class="dash-box step-vendors-list">
                         <div class="box-header with-border">
-                            <?= Html::a('<span style="color:#3F3E3E">Мои</span> поставщики <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['client/suppliers'],['class'=>'step_manage_vendors' , 'style' => 'font-size: 18px;']) ?>
+                            <?= Html::a('<span style="color:#3F3E3E">Мои</span> поставщики <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i>', ['client/suppliers'],['class'=>'step-manage-vendors' , 'style' => 'font-size: 18px;']) ?>
     
                         </div>
                         <div class="box-body" style="height: 268px;overflow-y:scroll">
@@ -434,91 +434,102 @@ var areaChartOptions = {
     areaChart.Line(areaChartData, areaChartOptions);       
 
  */
-$customJs = <<< JS
-$(document).on('click','.dash-small-box', function(){
-var targetUrl = $(this).attr('data-target');
-    if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
-    if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
-    if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
-}) 
-    
-		var _slides = [{
-                        title: '<img src="images/welcome-client-bg.png" class="welcome-header-image" />',
-			content: '{$this->render("welcome")}',
-			position: 'center',
-			overlayMode: 'all',
-			selector: 'html',
-                        width: '450px',
-                        height: '460px',
-		},
-		{
-                        title: '&nbsp;',
-			content: 'Создание заказа из прайс-листов ваших поставщиков.',
-			position: 'bottom-center',
-			overlayMode: 'focus',
-			selector: '.step_order',
-		},
-		{
-                        title: '&nbsp;',
-			content: 'Ваша корзина. Здесь хранятся заказы, готовые для отправки поставщику.',
-			position: 'bottom-center',
-			overlayMode: 'focus',
-			selector: '.step_cart',
-		},
-		{
-                        title: '&nbsp;',
-			content: 'Список ваших поставщиков.',
-			position: 'bottom-center',
-			overlayMode: 'focus',
-			selector: '.step_vendors_list',
-		},
-		{
-                        title: '&nbsp;',
-			content: 'Вы всегда можете добавить поставщиков, с которыми уже работаете.',
-			position: 'bottom-center',
-			overlayMode: 'focus',
-			selector: '.step_manage_vendors',
-		},
-		{
-                        title: '&nbsp;',
-			content: 'Или найти новых с помощью сервиса F-Market.',
-			position: 'bottom-center',
-			overlayMode: 'focus',
-			selector: '.step_f-market',
-		},
-		{
-                        title: '&nbsp;',
-			content: 'Навигация по системе.',
-			position: 'right-center',
-			overlayMode: 'focus',
-			selector: '.sidebar',
-		},
-		{
-                        title: '&nbsp;',
-			content: 'Вы всегда можете пройти обучение заново.',
-			position: 'bottom-center',
-			overlayMode: 'focus',
-			selector: '.user-menu',
-		}
-                    ];
+$user = Yii::$app->user->identity;
+$organization = $user->organization;
+$vendorsText = strpos($user->email, '@delivery-club.ru') ? "Список ваших поставщиков. Специально для Вас мы добавили несколько рекомендованных нами поставщиков" : "Список ваших поставщиков.";
+if ($organization->step == Organization::STEP_TUTORIAL) {
+    $turnoffTutorial = Url::to(['/site/ajax-tutorial-off']);
+    $customJs = <<< JS
+    $(document).on('click','.dash-small-box', function(){
+    var targetUrl = $(this).attr('data-target');
+        if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
+        if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+        if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+    }) 
 
-		$.tutorialize({
-			slides: _slides,
-			bgColor: '#fff',
-		 	buttonBgColor: '#84bf76',
-		 	buttonFontColor: '#fff',
-		 	fontColor: '#3f3e3e',
-		 	showClose: true,
-                        labelEnd: 'Завершить',
-			labelNext: 'Вперед',
-			labelPrevious: 'Назад',
-			labelStart: 'Начать работу',
-                        arrowPath: './arrows/arrow-green.png',
-                        fontSize: '14px',
-		});
+                    var _slides = [{
+                            title: '<img src="images/welcome-client-bg.png" class="welcome-header-image" />',
+                            content: '{$this->render("welcome")}',
+                            position: 'center',
+                            overlayMode: 'all',
+                            selector: 'html',
+                            width: '450px',
+                            height: '460px',
+                    },
+                    {
+                            title: '&nbsp;',
+                            content: 'Создание заказа из прайс-листов ваших поставщиков.',
+                            position: 'bottom-center',
+                            overlayMode: 'focus',
+                            selector: '.step-order',
+                    },
+                    {
+                            title: '&nbsp;',
+                            content: 'Ваша корзина. Здесь хранятся заказы, готовые для отправки поставщику.',
+                            position: 'bottom-center',
+                            overlayMode: 'focus',
+                            selector: '.step-cart',
+                    },
+                    {
+                            title: '&nbsp;',
+                            content: '$vendorsText',
+                            position: 'bottom-center',
+                            overlayMode: 'focus',
+                            selector: '.step-vendors-list',
+                    },
+                    {
+                            title: '&nbsp;',
+                            content: 'Вы всегда можете добавить поставщиков, с которыми уже работаете.',
+                            position: 'bottom-center',
+                            overlayMode: 'focus',
+                            selector: '.step-manage-vendors',
+                    },
+                    {
+                            title: '&nbsp;',
+                            content: 'Или найти новых с помощью сервиса F-Market.',
+                            position: 'bottom-center',
+                            overlayMode: 'focus',
+                            selector: '.step-f-market',
+                    },
+                    {
+                            title: '&nbsp;',
+                            content: 'Навигация по системе.',
+                            position: 'right-center',
+                            overlayMode: 'focus',
+                            selector: '.sidebar',
+                    },
+                    {
+                            title: '&nbsp;',
+                            content: 'Вы всегда можете пройти обучение заново.',
+                            position: 'bottom-center',
+                            overlayMode: 'focus',
+                            selector: '.repeat-tutorial',
+                    }
+                        ];
 
-		$.tutorialize.start();
-        
+                    $.tutorialize({
+                            slides: _slides,
+                            bgColor: '#fff',
+                            buttonBgColor: '#84bf76',
+                            buttonFontColor: '#fff',
+                            fontColor: '#3f3e3e',
+                            showClose: true,
+                            labelEnd: 'Завершить',
+                            labelNext: 'Вперед',
+                            labelPrevious: 'Назад',
+                            labelStart: 'Начать работу',
+                            arrowPath: './arrows/arrow-green.png',
+                            fontSize: '14px',
+                            onStop: function(currentSlideIndex, slideData, slideDom){
+                                    $.get(
+                                        '{$turnoffTutorial}'
+                                    );
+                                },
+                    });
+
+                    $.tutorialize.start();
+
 JS;
-$this->registerJs($customJs, View::POS_READY);
+    $this->registerJs($customJs, View::POS_READY);
+}
 ?>

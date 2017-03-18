@@ -24,13 +24,13 @@ $cartCount = $user->organization->getCartCount();
                             'label' => 'Разместить заказ',
                             'icon' => 'fa fa-opencart',
                             'url' => ['order/create'],
-                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label label-primary pull-right cartCount">'.$cartCount.'</span></span></a>',
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label label-primary pull-right cartCount">' . $cartCount . '</span></span></a>',
                         ],
                         [
                             'label' => 'Заказы',
                             'icon' => 'fa fa-history',
                             'url' => ['order/index'],
-                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">'.($newOrdersCount ? $newOrdersCount : '').'</span></span></a>',
+                            'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
                         ],
                         ['label' => 'Поставщики', 'icon' => 'fa fa-users', 'url' => ['client/suppliers'], 'options' => ['class' => 'hidden-xs']],
 //                        [
@@ -39,9 +39,8 @@ $cartCount = $user->organization->getCartCount();
 //                            'url' => ['client/messages'],
 //                            ],
                         ['label' => 'F-MARKET<sub class="sub-new">NEW</sub>', 'icon' => 'fa fa-shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
-                        
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['client/analytics'], 'options' => ['class' => 'hidden-xs']],
-                         ['label' => 'Обучающие видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['client/tutorial', 'video' => 'video']],
+                        ['label' => 'Обучающие видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
                         ['label' => 'Новости', 'icon' => 'fa fa-newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
                         [
@@ -70,13 +69,21 @@ $cartCount = $user->organization->getCartCount();
                 </span>
             </div>
         </form>
+        <ul class="sidebar-menu personal-manager">
+            <li class="header"><span style="text-transform: uppercase;">Личный менеджер</span></li>
+            <div style="text-align: center; color: #d8d7d7;">
+                <img src="images/welcome-zalina.png" class="welcome-manager">
+                <p style="font-size: 14px;"><strong>Залина</strong></p><p></p>
+                <p>+7 929 611 79 00</p>
+            </div>
+        </ul>
     </section>
 </aside>
 <?php
-/*$sidebar_js = <<< JS
-$(window).resize(function(){
-$('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');    
-}); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');   
-JS;
-$this->registerJs($sidebar_js, View::POS_READY);*/
+/* $sidebar_js = <<< JS
+  $(window).resize(function(){
+  $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');
+  }); $('#inviteForm').css('position','absolute').css('top',$(window).height()-60).removeClass('hide');
+  JS;
+  $this->registerJs($sidebar_js, View::POS_READY); */
 ?>        

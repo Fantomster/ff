@@ -243,7 +243,7 @@ $this->title = "Корзина";
     ?>
 </section>
 <?php
-Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 5000]);
+Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]);
 ?>
 <section class="content">
     <div class="box box-info">

@@ -148,7 +148,7 @@ class QTSMS {
 		$len=strlen($PostData);
 		$nn="\r\n";
 		$send="POST ".$this->path." HTTP/1.0".$nn."Host: ".$this->hostname."".$nn."Content-Type: application/x-www-form-urlencoded".$nn."Content-Length: $len".$nn."User-Agent: AISMS PHP class".$nn.$nn.$PostData;
-		flush();
+		//flush();
 		if(($fp = @fsockopen(($this->on_ssl?'ssl://':'').$this->hostname, ($this->on_ssl?'443':'80'), $errno, $errstr, 30))!==false) {
 			fputs($fp,$send);
 			$header='';

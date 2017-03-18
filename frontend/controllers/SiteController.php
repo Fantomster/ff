@@ -167,8 +167,8 @@ class SiteController extends Controller {
                 //Временный скрипт оповещания входа клиентов delivery-club
                 $getEmailDomen = explode('@', $user->email);
                 if($getEmailDomen[1] == 'delivery-club.ru'){
-                    $text = "[ " . $organization->name . " ] вошел в систему f-keeper";
-                    $target = '89296117900';
+                    $text = "[ " . $organization->name . " ] [ " . $profile->phone . " ] вошел в систему f-keeper";
+                    $target = '89296117900,89099056888';
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target); 
                 }

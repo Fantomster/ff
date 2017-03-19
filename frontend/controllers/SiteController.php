@@ -164,9 +164,9 @@ class SiteController extends Controller {
                 $profile->save();
                 $organization->step = Organization::STEP_TUTORIAL;
                 $organization->save();
+                
                 //Временный скрипт оповещания входа клиентов delivery-club
-                $getEmailDomen = explode('@', $user->email);
-                if($getEmailDomen[1] == 'delivery-club.ru'){
+                if(strpos($user->email, '@delivery-club.ru')){
                     $text = "[ " . $organization->name . " ] [ " . $profile->phone . " ] вошел в систему f-keeper";
                     $target = '89296117900,89099056888';
                     $sms = new \common\components\QTSMS();

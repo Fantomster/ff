@@ -11,6 +11,7 @@ use yii\widgets\ActiveForm;
 use yii\web\View;
 use common\models\Users;
 use kartik\checkbox\CheckboxX;
+$this->title = 'Мои клиенты';
 ?>
 <?=
 Modal::widget([

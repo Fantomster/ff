@@ -9,7 +9,7 @@ use yii\bootstrap\Modal;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\Breadcrumbs;
-
+$this->title = 'Настройки';
 $user = new User();
 $role = new Role();
 

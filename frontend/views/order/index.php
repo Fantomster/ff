@@ -9,7 +9,7 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
-
+$this->title = 'Заказы';
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;

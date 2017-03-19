@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
-
+$this->title = 'Разместить заказ';
 $this->registerJs(
         '$("document").ready(function(){
             $("#createP").on("change", "#selectedCategory", function(e) {

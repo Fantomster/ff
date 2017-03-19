@@ -10,6 +10,9 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 frontend\assets\AdminltePluginsAsset::register($this);
+
+$this->title = 'Рабочий стол';
+
 $this->registerCss('
 @media (max-width: 1320px){
        th{

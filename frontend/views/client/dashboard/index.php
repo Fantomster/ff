@@ -9,7 +9,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
-
+$this->title = 'Рабочий стол';
 frontend\assets\AdminltePluginsAsset::register($this);
 frontend\assets\TutorializeAsset::register($this);
 

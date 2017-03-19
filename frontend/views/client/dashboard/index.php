@@ -450,7 +450,7 @@ $this->registerJs($customJs, View::POS_READY);
 if ($organization->step == Organization::STEP_TUTORIAL) {
     $turnoffTutorial = Url::to(['/site/ajax-tutorial-off']);
     $customJs2 = <<< JS
-    $(document).on('click','.dash-small-box', function(){ alert(1);
+    $(document).on('click','.dash-small-box', function(){
     var targetUrl = $(this).attr('data-target');
         if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
         if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}

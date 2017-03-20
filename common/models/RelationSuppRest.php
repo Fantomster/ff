@@ -189,6 +189,6 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getLastOrder() {
-        return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(['updated_at' => SORT_DESC])->limit(1);
+        return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(['`order`.updated_at' => SORT_DESC])->limit(1);
     }
 }

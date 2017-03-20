@@ -225,14 +225,14 @@ class Organization extends \yii\db\ActiveRecord {
         if ($this->type_id !== Organization::TYPE_SUPPLIER) {
             return [];
         }
-        $query = RelationCategory::find()
-                ->select(['organization.id', 'organization.name'])
-                ->distinct()
-                ->leftJoin('relation_supp_rest', 'relation_category.rest_org_id = relation_supp_rest.rest_org_id')
+        
+        $query = RelationSuppRest::find()
+                ->select(['organization.id as id', 'organization.name as name'])
                 ->joinWith('client', false)
-                ->where(['relation_category.supp_org_id' => $this->id]);
+                ->where(['relation_supp_rest.supp_org_id' => $this->id])
+                ->orderBy(['organization.name' => SORT_ASC]);
 
-        $clients = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
+        $clients = ArrayHelper::map($query
                                 ->asArray()
                                 ->all(), 'id', 'name');
         $clients[''] = 'Все рестораны';

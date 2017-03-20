@@ -9,7 +9,7 @@ class m170320_084634_client_management_for_vendors extends Migration
     {
         $this->update('{{%role}}', ["name" => 'Руководитель'], ['id' => 5]);
         $this->update('{{%role}}', ["name" => 'Менеджер'], ['id' => 6]);
-        $this->addColumn('{{%relation_supp_rest}}', 'vendor_manager_id', $this->integer()->null);
+        $this->addColumn('{{%relation_supp_rest}}', 'vendor_manager_id', $this->integer()->null());
     }
 
     public function safeDown()

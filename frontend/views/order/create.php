@@ -8,7 +8,7 @@ use yii\grid\GridView;
 use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
-
+$this->title = 'Разместить заказ';
 $this->registerJs(
         '$("document").ready(function(){
             $("#createP").on("change", "#selectedCategory", function(e) {
@@ -50,9 +50,9 @@ $this->registerJs(
             });
             $("#orders").on("click", ".delete-position", function(e) {
                 $("#loader-show").showLoading();
+                clicked = $(this);
                 $.post(
-                    "' . Url::to(['/order/ajax-remove-position']) . '",
-                    {vendor_id: $(this).parent().data("vendor_id"), product_id: $(this).parent().data("product_id")}
+                    clicked.data("url")
                 )
                 .done(function (result) {
                     if (result) {

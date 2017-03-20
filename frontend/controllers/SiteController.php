@@ -151,7 +151,6 @@ class SiteController extends Controller {
     
     public function actionCompleteRegistration() {
         $this->layout = "main-user";
-        
         $user = Yii::$app->user->identity;
         $profile = $user->profile;
         $profile->scenario = "complete";
@@ -161,10 +160,19 @@ class SiteController extends Controller {
         $post = Yii::$app->request->post();
         if ($profile->load($post) && $organization->load($post)) {
             if ($profile->validate() && $organization->validate()) {
+                
                 $profile->save();
                 $organization->step = Organization::STEP_TUTORIAL;
                 $organization->save();
-                $this->redirect(['/site/index']);
+                
+                //Временный скрипт оповещания входа клиентов delivery-club
+                if(strpos($user->email, '@delivery-club.ru')){
+                    $text = "[ " . $organization->name . " ] [ " . $profile->phone . " ] вошел в систему f-keeper";
+                    $target = '89296117900,89099056888';
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target); 
+                }
+                return $this->redirect(['/site/index']);  
             }
         }
         

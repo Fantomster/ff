@@ -116,7 +116,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <?php $this->beginBody() ?>
         <div id="loader-show"></div>
 
-        <div class="wrapper">
+        <div class="wrapper" style="margin-bottom: -20px;">
             <header class="header-nav default <?= $isIndex ? '' : ' dark-bg' ?>" id="menu-fk">
                 <div class="inside__block">
                     <div class="container-fluid">

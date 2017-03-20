@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 use common\assets\CroppieAsset;
 
 CroppieAsset::register($this);
-
+$this->title = 'Настройки';
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {

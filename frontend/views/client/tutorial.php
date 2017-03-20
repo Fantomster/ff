@@ -1,6 +1,7 @@
 <?php
 
 use yii\widgets\Breadcrumbs;
+$this->title = 'Обучающие видео';
 ?>
 
 <section class="content-header">

@@ -19,7 +19,7 @@ $this->registerCss('#loader-show {position:absolute;width:100%;display:none;}');
 </footer>
 <?php
 $customJs = <<< JS
-$('#loader-show').css('height',$(window).height());
+$('#loader-show').css('height',$(window).height());       
 $(window).on('resize',function() {
     $('#loader-show').css('height',$(window).height());
 });

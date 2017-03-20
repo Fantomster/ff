@@ -9,7 +9,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
-
+$this->title = 'Рабочий стол';
 frontend\assets\AdminltePluginsAsset::register($this);
 frontend\assets\TutorializeAsset::register($this);
 
@@ -28,7 +28,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
 .info-box {box-shadow: none;border:1px solid #eee;}
 .info-box-text{margin: 0;padding-top:10px;color:#555}
 .info-box-text{margin: 0;padding-top:10px;color:#555}
-@media (min-width: 992px){.moipost{padding-left:15px;padding-right:15px}}
+@media (min-width: 1200px){.moipost{padding-left:15px;padding-right:15px}}
 .dash-small-box {
     border-radius: 3px;
     position: relative;
@@ -118,8 +118,8 @@ $this->registerCss('
                         <div class="row">
                             <div class="dash-small-box step-cart" data-target="checkout">
                                 <div class="inner" style="position:relative;z-index:2">
-                                  <h3>Заказов <?=$totalCart?></h3>
-                                  <p>в корзине</p>
+                                  <h3>Корзина </h3>
+                                  <p>заказов <b><?=$totalCart?></b></p>
                                 </div>
                                 <?= Html::a('Корзина', ['order/checkout'],['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
@@ -137,10 +137,10 @@ $this->registerCss('
                         <div class="row">
                             <div class="dash-small-box" data-target="request">
                                 <div class="inner" style="position:relative;z-index:2">
-                                  <h3>Скоро</h3>
-                                  <p>заявки на закупку</p>
+                                  <h3>Создать заявку</h3>
+                                  <p>скоро</p>
                                 </div>
-                                <?= Html::a('Заявки', null,['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= Html::a('Заявки', null,['class'=>'btn btn-outline-success' ,'disabled' => 'true', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
     background: url(images/dash1.png) no-repeat top right;
     background-size: 170px;">
@@ -153,8 +153,8 @@ $this->registerCss('
                             <div class="dash-small-box step-f-market" data-target="fmarket">
                                 <div class="dash-title-border"></div>
                                 <div class="inner" style="position:relative;z-index:2">
-                                  <h3>Товаров <?=$count_products_from_mp ?></h3>
-                                  <p>доступно на F-MARKET</p>
+                                  <h3>F-Market</h3>
+                                  <p>доступно для заказа товаров <b><?=$count_products_from_mp ?></b></p>
                                 </div>
                                 <?= Html::a('F-Market', 'https://market.f-keeper.ru',['target'=>'_blank','class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
@@ -437,8 +437,6 @@ var areaChartOptions = {
 $user = Yii::$app->user->identity;
 $organization = $user->organization;
 $vendorsText = strpos($user->email, '@delivery-club.ru') ? "Список ваших поставщиков. Специально для Вас мы добавили несколько рекомендованных нами поставщиков" : "Список ваших поставщиков.";
-if ($organization->step == Organization::STEP_TUTORIAL) {
-    $turnoffTutorial = Url::to(['/site/ajax-tutorial-off']);
     $customJs = <<< JS
     $(document).on('click','.dash-small-box', function(){
     var targetUrl = $(this).attr('data-target');
@@ -446,6 +444,18 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
         if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
         if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
     }) 
+JS;
+$this->registerJs($customJs, View::POS_READY);
+
+if ($organization->step == Organization::STEP_TUTORIAL) {
+    $turnoffTutorial = Url::to(['/site/ajax-tutorial-off']);
+    $customJs2 = <<< JS
+    $(document).on('click','.dash-small-box', function(){
+    var targetUrl = $(this).attr('data-target');
+        if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
+        if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+        if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+    }); 
 
                     var _slides = [{
                             title: '<img src="images/welcome-client-bg.png" class="welcome-header-image" />',
@@ -530,6 +540,6 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
                     $.tutorialize.start();
 
 JS;
-    $this->registerJs($customJs, View::POS_READY);
+    $this->registerJs($customJs2, View::POS_READY);
 }
 ?>

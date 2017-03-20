@@ -302,7 +302,6 @@ class OrderController extends DefaultController {
         $initiator = $this->currentUser->organization;
 
         if (Yii::$app->request->post()) {
-            $order_id = Yii::$app->request->post('order_id');
             switch ($initiator->type_id) {
                 case Organization::TYPE_RESTAURANT:
                     $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
@@ -311,7 +310,10 @@ class OrderController extends DefaultController {
                     $order = Order::find()->where(['id' => $order_id, 'vendor_id' => $initiator->id])->one();
                     break;
             }
-            if ($order && $order->load(Yii::$app->request->post())) {
+            if ($order) {
+                if (Yii::$app->request->post("comment")) {
+                    $order->comment = Yii::$app->request->post("comment");
+                }
                 $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
                 $systemMessage = $initiator->name . ' отменил заказ!';
                 $danger = true;
@@ -321,21 +323,9 @@ class OrderController extends DefaultController {
                 }
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-                return $this->successNotify("Заказ отменен!");
+                return ["title" => "Заказ успешно отменен!", "type" => "success"];
             }
             return false;
-        }
-
-        if (Yii::$app->request->get()) {
-            switch ($initiator->type_id) {
-                case Organization::TYPE_RESTAURANT:
-                    $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
-                    break;
-                case Organization::TYPE_SUPPLIER:
-                    $order = Order::find()->where(['id' => $order_id, 'vendor_id' => $initiator->id])->one();
-                    break;
-            }
-            return $this->renderAjax('_cancel-order', compact('order'));
         }
     }
 

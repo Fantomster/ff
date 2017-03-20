@@ -68,5 +68,13 @@ $cartCount = $user->organization->getCartCount();
                 </span>
             </div>
         </form>
+        <ul class="sidebar-menu personal-manager">
+            <li class="header"><span style="text-transform: uppercase;">Личный менеджер</span></li>
+            <div style="text-align: center; color: #d8d7d7;">
+                <img src="images/welcome-zalina.png" class="welcome-manager">
+                <p style="font-size: 14px;"><strong>Залина</strong></p><p></p>
+                <p>+7 929 611 79 00</p>
+            </div>
+        </ul>
     </section>
 </aside>

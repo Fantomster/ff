@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use kartik\checkbox\CheckboxX;
 use yii\widgets\Pjax;
-
+$this->title = 'Настройки';
 $this->registerJs(
         '$("document").ready(function(){
             $(".delivery").on("click", "#cancelDlv", function() {

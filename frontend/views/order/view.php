@@ -6,7 +6,6 @@ use common\models\Organization;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
-use yii\bootstrap\Modal;
 
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
@@ -91,37 +90,70 @@ $js = <<<JS
             target = $(this).data("target");
             $(target).val(0);
             var form = $("#editOrder");
-            $("#loader-show").showLoading();
-            $.post(
-                form.attr("action"),
-                form.serialize()
-            ).done(function(result) {
-                dataEdited = 0;
-                $("#loader-show").hideLoading();
-            });
+            swal({
+                title: "Удаление позиции из заказа",
+                text: "Товар будет удален из заказа. Продолжить?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Да, удалить",
+                cancelButtonText: "Отмена",
+                showLoaderOnConfirm: true,
+                preConfirm: function () {
+                    return new Promise(function (resolve, reject) {
+                        $.post(
+                            form.attr("action"),
+                            form.serialize()
+                        ).done(function (result) {
+                            if (result) {
+                                dataEdited = 0;
+                                resolve(result);
+                            } else {
+                                resolve(false);
+                            }
+                        });
+                    })
+                },
+            }).then(function() {
+                swal({title: "Товар удален из заказа!", type: "success"});
+            });        
         });
 
-        $("#cancelOrder").on("click", ".saveComment", function() {
-            $("#loader-show").showLoading();
-            var form = $("#commentForm");
-            $.post(
-                form.attr("action"),
-                form.serialize()
-            )
-            .done(function (result) {
-                if (result) {
-                    $.notify(result.growl.options, result.growl.settings);
+        $(document).on("click", ".cancel-order", function(e) {
+            e.preventDefault();
+            var clicked = $(this);
+            swal({
+                title: "Действительно отменить заказ?",
+                input: "textarea",
+                inputPlaceholder: "Комментарий",
+                type: "warning",
+                showCancelButton: true,
+                cancelButtonText: "Нет",
+                confirmButtonText: "Да",
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
+                showLoaderOnConfirm: true,
+                preConfirm: function (text) {
+                    return new Promise(function (resolve, reject) {
+                        $.post(
+                            clicked.data("url"),
+                            {comment: text}
+                        ).done(function (result) {
+                            if (result) {
+                                resolve(result);
+                            } else {
+                                resolve(false);
+                            }
+                        });
+                    })
+                },
+            }).then(function (result) {
+                if (result.type == "success") {
+                    swal(result);
+                } else {
+                    swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
                 }
-                $("#loader-show").hideLoading();
             });
         });
-        
-        $("body").on("hidden.bs.modal", "#changeComment", function() {
-            $(this).data("bs.modal", null);
-        });
-        $("body").on("submit", "#commentForm", function() {
-            return false;
-        });        
         $(document).on('pjax:complete', function() {
             dataEdited = 0;
         })
@@ -164,7 +196,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     <div class="row">
         <div class="col-md-8" id="toPrint">
             <div class="box box-info">
-                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 5000]); ?>
+                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
                 <div class="box-header with-border">
                     <h4 class="font-bold">Заказ №<?= $order->id ?></h4><hr>
                     <div class="row m-b-xl" style="line-height: 1.8;">
@@ -313,9 +345,3 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
         </div>
     </div>
 </div>
-<?=
-Modal::widget([
-    'id' => 'cancelOrder',
-    'clientOptions' => false,
-])
-?>

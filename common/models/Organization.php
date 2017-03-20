@@ -536,4 +536,31 @@ class Organization extends \yii\db\ActiveRecord {
     public function getRatingPercent() {
         return (($this->rating / (self::MAX_RATING/5))/5*100);
     }
+    
+    public function getCatalogsList() {
+        if ($this->type_id !== Organization::TYPE_SUPPLIER) {
+            return [];
+        }
+        $catalogs = ArrayHelper::map(Catalog::find()
+                                ->select(['id', 'name'])
+                                ->where(['supp_org_id' => $this->id, 'status' => 1])
+                                ->orderBy(['name' => SORT_ASC])
+                                ->asArray()
+                                ->all(), 'id', 'name');
+        return $catalogs;
+    }
+    
+    public function getManagersList() {
+        $usrTable = User::tableName();
+        $profTable = Profile::tableName();
+        
+        $managers = ArrayHelper::map(User::find()
+                                ->joinWith('profile')
+                                ->select(["$usrTable.id as id", "$profTable.full_name as name"])
+                                ->where(["$usrTable.organization_id" => $this->id])
+                                ->orderBy(['name' => SORT_ASC])
+                                ->asArray()
+                                ->all(), 'id', 'name');
+        return $managers;
+    }
 }

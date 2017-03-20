@@ -390,71 +390,21 @@ class VendorController extends DefaultController {
     }
 
     public function actionClients() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $currentOrganization = $this->currentUser->organization;
 
-        $arr_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
-                                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                                    select('rest_org_id')->
-                                    where(['supp_org_id' => $currentUser->organization_id])])->all(), 'id', 'name');
+        $searchModel = new \common\models\search\RelationSuppRestSearch();
 
-        $arr_catalog = yii\helpers\ArrayHelper::map(\common\models\Catalog::find()->
-                                where(['supp_org_id' => $currentUser->organization_id])->all(), 'id', 'name');
+        $params['RelationSuppRestSearch'] = Yii::$app->request->post("RelationSuppRestSearch");
 
-        $filter_restaurant = "";
-        $filter_catalog = "";
-        $filter_invite = "";
-        $searchModel = new RelationSuppRest;
-        if (
-                !empty(\Yii::$app->request->get('filter_restaurant')) ||
-                !empty(\Yii::$app->request->get('filter_catalog')) ||
-                \Yii::$app->request->get('filter_invite') != "") {
+        $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
-            $filter_restaurant = trim(\Yii::$app->request->get('filter_restaurant'));
-            $filter_catalog = trim(\Yii::$app->request->get('filter_catalog'));
-            $filter_invite = trim(\Yii::$app->request->get('filter_invite'));
-
-            $query = (new \yii\db\Query());
-            $query->select("id,rest_org_id,cat_id,status,invite");
-            $query->from("relation_supp_rest");
-            $query->where(["supp_org_id" => $currentUser->organization_id]);
-            if (!empty($filter_restaurant))
-                $query->andWhere(["rest_org_id" => $filter_restaurant]);
-            if (!empty($filter_catalog))
-                $query->andWhere(["cat_id" => $filter_catalog]);
-            if ($filter_invite != "")
-                $query->andWhere(["invite" => $filter_invite]);
-            /* $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
-              . "WHERE supp_org_id = $currentUser->organization_id "
-              //. "and id in (select id from organization where name like '" . $search . "%')"
-              . "")->queryScalar(); */
-        }else {
-            $query = (new \yii\db\Query());
-            $query->select("id,rest_org_id,cat_id,status,invite");
-            $query->from("relation_supp_rest");
-            $query->where(["supp_org_id" => $currentUser->organization_id]);
-            /* $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
-              . "WHERE supp_org_id = $currentUser->organization_id "
-              . "")->queryScalar(); */
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('clients', compact('searchModel', 'dataProvider', 'currentOrganization'));
+        } else {
+            return $this->render('clients', compact('searchModel', 'dataProvider', 'currentOrganization'));
         }
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => $query,
-            //'totalCount' => $totalCount,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'article',
-                    'product',
-                    'units',
-                    'category_id',
-                    'price',
-                    'status',
-                ],
-            ],
-        ]);
-        return $this->render('clients', compact('searchModel', 'dataProvider', 'arr_catalog', 'arr_restaurant'));
     }
+    
     public function actionRemoveClient() {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');

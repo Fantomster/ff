@@ -174,7 +174,7 @@ $this->registerJs(
                                     'attribute' => 'product',
                                     'value' => function($data) {
                                         $note = ""; //empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
-                                        $productUrl = Html::a(Yii::$app->formatter->asNtext($data['product']), Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
+                                        $productUrl = Html::a($data['product'], Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
                                                     'data' => [
                                                         'target' => '#showDetails',
                                                         'toggle' => 'modal',

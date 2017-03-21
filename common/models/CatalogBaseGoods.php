@@ -109,6 +109,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             [['article'], 'string', 'max' => 50],
             [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
+            [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
             [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => 'Размер файла не должен превышать 2 Мб'], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'

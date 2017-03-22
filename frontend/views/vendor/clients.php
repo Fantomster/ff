@@ -90,12 +90,6 @@ $gridColumnsClients = [
                 },
                     ],
                     [
-                        'label' => 'Назначенный менеджер',
-                        'format' => 'raw',
-                        'attribute' => 'manager_name',
-                        'value' => 'managerProfile.full_name'
-                    ],
-                    [
                         'label' => '',
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:30px;text-align:center'],

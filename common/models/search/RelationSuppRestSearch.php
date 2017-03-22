@@ -61,15 +61,13 @@ class RelationSuppRestSearch extends RelationSuppRest {
     {
         $rspTable = RelationSuppRest::tableName();
         $orgTable = Organization::tableName();
-        $profTable = Profile::tableName();
         $orderTable = Order::tableName();
         $catTable = Catalog::tableName();
 
         $query = RelationSuppRest::find()
-                ->select("$rspTable.*, $orgTable.name as client_name, $catTable.name as catalog_name, `$orderTable`.updated_at as last_order_date, $profTable.full_name as manager_name")
+                ->select("$rspTable.*, $orgTable.name as client_name, $catTable.name as catalog_name, `$orderTable`.updated_at as last_order_date")
                 ->joinWith('client')
                 ->joinWith('catalog')
-                ->joinWith('managerProfile')
                 ->joinWith('lastOrder')
                 ->where(["$rspTable.supp_org_id" => $vendor_id])
                 ->groupBy("$rspTable.rest_org_id");
@@ -97,10 +95,6 @@ class RelationSuppRestSearch extends RelationSuppRest {
             'asc' => ["$catTable.name" => SORT_ASC],
             'desc' => ["$catTable.name" => SORT_DESC],
         ];
-        $dataProvider->sort->attributes['manager_name'] = [
-            'asc' => ["$profTable.full_name" => SORT_ASC],
-            'desc' => ["$profTable.full_name" => SORT_DESC],
-        ];
         $dataProvider->sort->attributes['last_order_date'] = [
             'asc' => ["$orderTable.updated_at" => SORT_ASC],
             'desc' => ["$orderTable.updated_at" => SORT_DESC],
@@ -110,13 +104,11 @@ class RelationSuppRestSearch extends RelationSuppRest {
         $query->andFilterWhere([
             "$rspTable.invite" => $this->invite,
             "$catTable.id" => $this->cat_id,
-            "$profTable.vendor_manager_id" => $this->vendor_manager_id,
         ]);
         
         $query->andFilterWhere(['or', 
             ['like', "$orgTable.name", $this->search_string],
             ['like', "$catTable.name", $this->search_string],
-            ['like', "$profTable.full_name", $this->search_string],
             ]);
 
         return $dataProvider;

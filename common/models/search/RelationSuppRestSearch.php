@@ -28,7 +28,7 @@ class RelationSuppRestSearch extends RelationSuppRest {
     public function rules()
     {
         return [
-            [['id', 'status', 'vendor_manager_id', 'cat_id', 'rest_org_id', 'invite'], 'integer'],
+            [['id', 'status', 'cat_id', 'rest_org_id', 'invite'], 'integer'],
             [['client_name', 'catalog_name', 'manager_name', 'last_order_date', 'search_string'], 'safe'],
         ];
     }

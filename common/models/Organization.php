@@ -6,6 +6,7 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
+
 /**
  * This is the model class for table "organization".
  *
@@ -45,28 +46,23 @@ class Organization extends \yii\db\ActiveRecord {
     const TYPE_RESTAURANT = 1;
     const TYPE_SUPPLIER = 2;
     const TYPE_FRANCHISEE = 3;
-    
     const WHITE_LIST_OFF = 0;
     const WHITE_LIST_ON = 1;
-    
     const STEP_OK = 0;
     const STEP_SET_INFO = 1;
     const STEP_ADD_VENDOR = 2; //restaurants only
     const STEP_ADD_CATALOG = 3; //vendors only
     const STEP_TUTORIAL = 4;
-    
     const DEFAULT_AVATAR = '/images/rest-noavatar.gif';
-    
-    const DEFAULT_VENDOR_AVATAR = '/images/vendor-noavatar.gif' ;
+    const DEFAULT_VENDOR_AVATAR = '/images/vendor-noavatar.gif';
     const DEFAULT_RESTAURANT_AVATAR = '/images/restaurant-noavatar.gif';
-    
     const ES_INACTIVE = 0;
     const ES_UPDATED = 1;
     const ES_DELETED = 2;
-    
     const MAX_RATING = 31;
-    
+
     public $resourceCategory = 'org-picture';
+    public $manager_ids;
 
     /**
      * @inheritdoc
@@ -84,7 +80,7 @@ class Organization extends \yii\db\ActiveRecord {
             ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
             [['type_id'], 'required'],
             [['name', 'city', 'address'], 'required', 'on' => 'complete'],
-            [['id','type_id', 'step','es_status','rating'], 'integer'],
+            [['id', 'type_id', 'step', 'es_status', 'rating'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -142,15 +138,16 @@ class Organization extends \yii\db\ActiveRecord {
             'partnership' => 'Партнерство',
         ];
     }
-    public function beforeSave($insert)
-    {
-    if (parent::beforeSave($insert)) { 
-        $this->es_status = Organization::ES_UPDATED;
-            
+
+    public function beforeSave($insert) {
+        if (parent::beforeSave($insert)) {
+            $this->es_status = Organization::ES_UPDATED;
+
             return true;
         }
         return false;
     }
+
     public static function getOrganization($id) {
         $getOrganization = Organization::find()
                         ->where(['id' => $id])->one();
@@ -225,7 +222,7 @@ class Organization extends \yii\db\ActiveRecord {
         if ($this->type_id !== Organization::TYPE_SUPPLIER) {
             return [];
         }
-        
+
         $query = RelationSuppRest::find()
                 ->select(['organization.id as id', 'organization.name as name'])
                 ->joinWith('client', false)
@@ -364,6 +361,13 @@ class Organization extends \yii\db\ActiveRecord {
         return $this->hasMany(User::className(), ['organization_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssociatedManagers() {
+        return $this->hasMany(User::className(), ['id' => 'manager_id'])->viaTable(ManagerAssociate::tableName(), ['organization_id' => 'id']);
+    }
+
     /*
      * @return \yii\db\ActiveQuery
      */
@@ -467,17 +471,15 @@ class Organization extends \yii\db\ActiveRecord {
     public function markViewed($orderId) {
         return OrderChat::updateAll(['viewed' => 1], ['order_id' => $orderId, 'recipient_id' => $this->id]);
     }
-    
-    public function getBuisinessInfo()
-    {
+
+    public function getBuisinessInfo() {
         return $this->hasOne(BuisinessInfo::className(), ['organization_id' => 'id']);
     }
-    
-    public function getFranchiseeAssociate()
-    {
+
+    public function getFranchiseeAssociate() {
         return $this->hasOne(FranchiseeAssociate::className(), ['organization_id' => 'id']);
     }
-    
+
     /**
      * @return string url to avatar image
      */
@@ -528,15 +530,15 @@ class Organization extends \yii\db\ActiveRecord {
                         ->groupBy(['category_id'])
                         ->count();
     }
-    
+
     public function getRatingStars() {
-        return number_format($this->rating / (self::MAX_RATING/5),1);
+        return number_format($this->rating / (self::MAX_RATING / 5), 1);
     }
-    
+
     public function getRatingPercent() {
-        return (($this->rating / (self::MAX_RATING/5))/5*100);
+        return (($this->rating / (self::MAX_RATING / 5)) / 5 * 100);
     }
-    
+
     public function getCatalogsList() {
         if ($this->type_id !== Organization::TYPE_SUPPLIER) {
             return [];
@@ -549,11 +551,11 @@ class Organization extends \yii\db\ActiveRecord {
                                 ->all(), 'id', 'name');
         return $catalogs;
     }
-    
+
     public function getManagersList() {
         $usrTable = User::tableName();
         $profTable = Profile::tableName();
-        
+
         $managers = ArrayHelper::map(User::find()
                                 ->joinWith('profile')
                                 ->select(["$usrTable.id as id", "$profTable.full_name as name"])
@@ -562,5 +564,22 @@ class Organization extends \yii\db\ActiveRecord {
                                 ->asArray()
                                 ->all(), 'id', 'name');
         return $managers;
+    }
+
+    public function getAssociatedManagersList($vendor_id) {
+        $usrTable = User::tableName();
+        $profTable = Profile::tableName();
+        $assocTable = ManagerAssociate::tableName();
+
+        $managers = ArrayHelper::map(User::find()
+                                ->joinWith('profile')
+                                ->joinWith('associated')
+                                ->select(["$usrTable.id as id", "$profTable.full_name as name"])
+                                ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
+                                ->orderBy(['name' => SORT_ASC])
+                                ->asArray()
+                                ->all(), 'id', 'name');
+        return $managers;
+        
     }
 }

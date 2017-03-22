@@ -14,6 +14,7 @@ use common\models\RelationSuppRest;
 use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
+use common\models\ManagerAssociate;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -147,8 +148,8 @@ class VendorController extends DefaultController {
                 $profile->load($post);
 
                 //if ($user->validate() && $profile->validate()) {
-                    Yii::$app->response->format = Response::FORMAT_JSON;
-                    return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
                 //} 
             }
         }
@@ -313,7 +314,7 @@ class VendorController extends DefaultController {
                     return $result;
                     exit;
                 }
-                if(!in_array($ed, $arrEd)){
+                if (!in_array($ed, $arrEd)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверная <strong>Единица измерения</strong> товара']];
                     return $result;
                     exit;
@@ -404,7 +405,7 @@ class VendorController extends DefaultController {
             return $this->render('clients', compact('searchModel', 'dataProvider', 'currentOrganization'));
         }
     }
-    
+
     public function actionRemoveClient() {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
@@ -413,6 +414,7 @@ class VendorController extends DefaultController {
             \Yii::$app->db->createCommand($sql)->execute();
         }
     }
+
     public function actionBasecatalog() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString = "";
@@ -516,7 +518,7 @@ class VendorController extends DefaultController {
                             $row_units = 0;
                         }
                         if (in_array($row_article, $arr)) {
-                           $sql = "update {{%catalog_base_goods}} set "
+                            $sql = "update {{%catalog_base_goods}} set "
                                     . "article=:article,"
                                     . "product=:product,"
                                     . "units=:units,"
@@ -732,8 +734,8 @@ class VendorController extends DefaultController {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             $product_id = \Yii::$app->request->post('id');
-            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1,'es_status' => 2], ['id' => $product_id]);
-            
+            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1, 'es_status' => 2], ['id' => $product_id]);
+
             $result = ['success' => true];
             return $result;
             exit;
@@ -847,7 +849,7 @@ class VendorController extends DefaultController {
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
             $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
         }
-        
+
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
@@ -860,7 +862,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
-                        
+
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
@@ -868,7 +870,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
-                        
+
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
@@ -927,7 +929,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
-           // $CatalogBaseGoods = new CatalogBaseGoods;
+            // $CatalogBaseGoods = new CatalogBaseGoods;
             $id = \Yii::$app->request->post('id');
             $elem = \Yii::$app->request->post('elem');
 
@@ -952,8 +954,8 @@ class VendorController extends DefaultController {
                     $set = CatalogBaseGoods::STATUS_OFF;
                 }
                 //CatalogBaseGoods::updateAll(['status' =>$set], ['id' => $id]);
-               $CatalogBaseGoods->status = $set;
-               $CatalogBaseGoods->update();
+                $CatalogBaseGoods->status = $set;
+                $CatalogBaseGoods->update();
 
                 $result = ['success' => true, 'status' => $set];
                 return $result;
@@ -977,12 +979,12 @@ class VendorController extends DefaultController {
                 $relation_supp_rest->status = 1;
                 $relation_supp_rest->update();
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
-                foreach($rows as $row){
-                    if($row->profile->phone && $row->profile->sms_allow){
+                foreach ($rows as $row) {
+                    if ($row->profile->phone && $row->profile->sms_allow) {
                         $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
                         $target = $row->profile->phone;
                         $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target); 
+                        $sms->post_message($text, $target);
                     }
                 }
                 return (['success' => true, 'Подписан']);
@@ -1042,7 +1044,6 @@ class VendorController extends DefaultController {
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
-                
             }
         }
         $message = 'Не удалось удалить пользователя!';
@@ -1126,14 +1127,16 @@ class VendorController extends DefaultController {
 
         return $this->redirect(['vendor/step-1-update', 'id' => $cat_id]);
     }
-    public function actionStep2AddProduct(){
+
+    public function actionStep2AddProduct() {
         if (Yii::$app->request->isAjax) {
-        Yii::$app->response->format = Response::FORMAT_JSON;
+            Yii::$app->response->format = Response::FORMAT_JSON;
             if (Yii::$app->request->post('state') == 'true') {
                 $product_id = Yii::$app->request->post('baseProductId');
                 $catalogGoods = new CatalogGoods;
                 $catalogGoods->base_goods_id = $product_id;
-                $catalogGoods->cat_id = Yii::$app->request->post('cat_id');;
+                $catalogGoods->cat_id = Yii::$app->request->post('cat_id');
+                ;
                 $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
                 $catalogGoods->save();
                 return (['success' => true, 'Добавлен']);
@@ -1146,6 +1149,7 @@ class VendorController extends DefaultController {
             }
         }
     }
+
     public function actionStep2($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1333,12 +1337,12 @@ class VendorController extends DefaultController {
                     $relation_supp_rest->status = 1;
                     $relation_supp_rest->update();
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
-                    foreach($rows as $row){
-                        if($row->profile->phone && $row->profile->sms_allow){
+                    foreach ($rows as $row) {
+                        if ($row->profile->phone && $row->profile->sms_allow) {
                             $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target); 
+                            $sms->post_message($text, $target);
                         }
                     }
                     return (['success' => true, 'Подписан']);
@@ -1393,6 +1397,7 @@ class VendorController extends DefaultController {
     public function actionViewClient($id) {
         $client_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $vendor_id = $currentUser->organization->id;
         $organization = Organization::find()->where(['id' => $client_id])->one();
         $relation_supp_rest = RelationSuppRest::find()->where([
                     'rest_org_id' => $client_id,
@@ -1405,24 +1410,26 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($relation_supp_rest->load($post)) {
                 if ($relation_supp_rest->validate()) {
-                    if($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)){
-                    foreach ($organization->users as $recipient) { 
-                        if($recipient->profile->phone && $recipient->profile->sms_allow){
-                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
-                            $target = $recipient->profile->phone;
-                            $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target); 
+                    if ($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)) {
+                        foreach ($organization->users as $recipient) {
+                            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                                $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                                $target = $recipient->profile->phone;
+                                $sms = new \common\components\QTSMS();
+                                $sms->post_message($text, $target);
+                            }
                         }
-                    }    
                     }
+                    $associated_ids = Yii::$app->request->post("associatedManagers");
+                    $current_associated = $organization->getAssociatedManagersList($vendor_id);
                     $relation_supp_rest->update();
                     $message = 'Сохранено';
-                    
+
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
             }
         }
-        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id'));
+        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor_id'));
     }
 
     public function actionViewCatalog($id) {

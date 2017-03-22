@@ -1,7 +1,9 @@
 <?php
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use kartik\select2\Select2;
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -21,54 +23,71 @@ $form = ActiveForm::begin([
     <div class="row">
         <div class="col-md-6">
             <?=
-                $form->field($organization, 'name')->textInput(['readonly' => true]);
+            $form->field($organization, 'name')->textInput(['readonly' => true]);
             ?>
         </div>
         <div class="col-md-6">
             <?=
-                $form->field($organization, 'city')->textInput(['readonly' => true]);
+            $form->field($organization, 'city')->textInput(['readonly' => true]);
             ?>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
             <?=
-                $form->field($organization, 'address')->textInput(['readonly' => true]);
+            $form->field($organization, 'address')->textInput(['readonly' => true]);
             ?>
         </div>
         <div class="col-md-6">
             <?=
-                $form->field($organization, 'zip_code')->textInput(['readonly' => true]);
+            $form->field($organization, 'zip_code')->textInput(['readonly' => true]);
             ?>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
             <?=
-                $form->field($organization, 'phone')->textInput(['readonly' => true]);
+            $form->field($organization, 'phone')->textInput(['readonly' => true]);
             ?>
         </div>
         <div class="col-md-6">
             <?=
-                $form->field($organization, 'email')->textInput(['readonly' => true]);
+            $form->field($organization, 'email')->textInput(['readonly' => true]);
             ?>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
             <?=
-                $form->field($organization, 'website')->textInput(['readonly' => true]);
+            $form->field($organization, 'website')->textInput(['readonly' => true]);
             ?>
         </div>
         <div class="col-md-6">
-            <?= 
-            $form->field($relation_supp_rest, 'cat_id')->dropDownList($catalogs,['prompt' => '']); 
+            <?=
+            $form->field($relation_supp_rest, 'cat_id')->dropDownList($catalogs, ['prompt' => '']);
+            ?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <?=
+            Select2::widget([
+                'data' => $organization->getManagersList(),
+                'name' => 'associatedManagers',
+                'value' => $organization->getAssociatedManagersList($vendor_id),
+                'theme' => 'krajee',
+                'hideSearch' => true,
+                'options' => ['multiple' => true, 'placeholder' => 'Выберите менеджера'],
+                'pluginOptions' => [
+                    'allowClear' => true,
+                ],
+            ]);
             ?>
         </div>
     </div>
 </div>
 <div class="modal-footer">
-    <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success save-form']) ?>
+<?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success save-form']) ?>
     <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
 </div>
 <?php ActiveForm::end(); ?>

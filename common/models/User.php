@@ -19,6 +19,7 @@ use Yii;
  * 
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
+ * @property ManagerAssociate $associated
  */
 class User extends \amnah\yii2\user\models\User {
 
@@ -86,6 +87,13 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function getFranchiseeUser() {
         return $this->hasOne(FranchiseeUser::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAssociated() {
+        return $this->hasMany(ManagerAssociate::className(), ['manager_id' => 'id']);
     }
 
     /**

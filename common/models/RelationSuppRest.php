@@ -19,13 +19,10 @@ use yii\helpers\ArrayHelper;
  * @property string $updated_at
  * @property string $uploaded_catalog
  * @property booolean $uploaded_processed
- * @property integer $vendor_manager_id
  * 
  * @property Catalog $catalog
  * @property Organization $client
  * @property Organization $vendor
- * @property User $vendorManager
- * @property Profile $managerProfile
  * @property Order $lastOrder
  */
 class RelationSuppRest extends \yii\db\ActiveRecord {
@@ -169,20 +166,6 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
      */
     public function getClient() {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getVendorManager() {
-        return $this->hasOne(User::className(), ['id' => 'vendor_manager_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getManagerProfile() {
-        return $this->hasOne(Profile::className(), ['user_id' => 'vendor_manager_id']);
     }
 
     /**

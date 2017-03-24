@@ -397,7 +397,7 @@ class VendorController extends DefaultController {
 
         $params['RelationSuppRestSearch'] = Yii::$app->request->post("RelationSuppRestSearch");
 
-        $dataProvider = $searchModel->search($params, $currentOrganization->id);
+        $dataProvider = $searchModel->search($params, $currentOrganization->id, Yii::$app->user->can('manage') ? null : $this->currentUser->id);
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('clients', compact('searchModel', 'dataProvider', 'currentOrganization'));
@@ -1397,7 +1397,8 @@ class VendorController extends DefaultController {
     public function actionViewClient($id) {
         $client_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $vendor_id = $currentUser->organization->id;
+        $canManage = Yii::$app->user->can('manage');
+        $vendor = $currentUser->organization;
         $organization = Organization::find()->where(['id' => $client_id])->one();
         $relation_supp_rest = RelationSuppRest::find()->where([
                     'rest_org_id' => $client_id,
@@ -1420,16 +1421,36 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
-                    $associated_ids = Yii::$app->request->post("associatedManagers");
-                    $current_associated = $organization->getAssociatedManagersList($vendor_id);
-                    $relation_supp_rest->update();
-                    $message = 'Сохранено';
-
+                    $postedAssociatedIds = Yii::$app->request->post("associatedManagers");
+                    $currentAssociatedIds = array_keys($organization->getAssociatedManagersList($vendor->id));
+                    $newAssociatedIds = array_diff($postedAssociatedIds, $currentAssociatedIds);
+                    $obsoleteAssociatedIds = array_diff($currentAssociatedIds, $postedAssociatedIds);
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        foreach ($newAssociatedIds as $newId) {
+                            $new = new ManagerAssociate();
+                            $new->manager_id = $newId;
+                            $new->organization_id = $client_id;
+                            $new->save();
+                        }
+                        foreach ($obsoleteAssociatedIds as $obsoleteId) {
+                            $obsolete = ManagerAssociate::findOne(['manager_id' => $obsoleteId, 'organization_id' => $client_id]);
+                            if ($obsolete) {
+                                $obsolete->delete();
+                            }
+                        }
+                        $relation_supp_rest->update();
+                        $transaction->commit();
+                        $message = 'Сохранено';
+                    } catch (Exception $e) {
+                        $transaction->rollBack();
+                        $message = 'Ошибка!';
+                    }
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
             }
         }
-        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor_id'));
+        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor', 'canManage'));
     }
 
     public function actionViewCatalog($id) {

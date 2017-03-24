@@ -68,6 +68,18 @@ $gridColumnsClients = [
                 }
                     ],
                     [
+                        'label' => 'Назначенные менеджеры',
+                        'format' => 'raw',
+                        'value' => function ($data) {
+                            $result = '';
+                            $managers = $data->client->getAssociatedManagersList($data->vendor->id);
+                            foreach ($managers as $manager) {
+                                $result .= "<div>$manager</div>";
+                            }
+                            return $result;
+                        },
+                    ],
+                    [
                         'label' => 'Статус сотрудничества',
                         'attribute' => 'status',
                         'format' => 'raw',

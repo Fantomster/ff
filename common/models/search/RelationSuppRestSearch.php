@@ -3,7 +3,7 @@
 namespace common\models\search;
 
 use common\models\RelationSuppRest;
-use common\models\Profile;
+use common\models\ManagerAssociate;
 use common\models\Organization;
 use common\models\Order;
 use common\models\Catalog;
@@ -57,20 +57,26 @@ class RelationSuppRestSearch extends RelationSuppRest {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $vendor_id)
+    public function search($params, $vendor_id, $manager_id = null)
     {
         $rspTable = RelationSuppRest::tableName();
         $orgTable = Organization::tableName();
         $orderTable = Order::tableName();
         $catTable = Catalog::tableName();
+        $maTable = ManagerAssociate::tableName();
 
         $query = RelationSuppRest::find()
                 ->select("$rspTable.*, $orgTable.name as client_name, $catTable.name as catalog_name, `$orderTable`.updated_at as last_order_date")
                 ->joinWith('client')
                 ->joinWith('catalog')
-                ->joinWith('lastOrder')
-                ->where(["$rspTable.supp_org_id" => $vendor_id])
-                ->groupBy("$rspTable.rest_org_id");
+                ->joinWith('lastOrder');
+        if ($manager_id) {
+            $query->leftJoin("$maTable", "$maTable.organization_id = $rspTable.rest_org_id");
+            $query->where(["$rspTable.supp_org_id" => $vendor_id, "$maTable.manager_id" => $manager_id]);
+        } else {
+            $query->where(["$rspTable.supp_org_id" => $vendor_id]);
+        }
+        $query->groupBy("$rspTable.rest_org_id");
         
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

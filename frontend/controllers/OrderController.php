@@ -13,6 +13,7 @@ use common\models\Organization;
 use common\models\GoodsNotes;
 use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
+use common\models\ManagerAssociate;
 use yii\helpers\Json;
 use common\models\OrderChat;
 use common\components\AccessRule;
@@ -346,7 +347,7 @@ class OrderController extends DefaultController {
             $result = ["title" => "Комментарий к товару добавлен", "comment" => $note->note, "type" => "success"];
             return $result;
         }
-        
+
         return false;
     }
 
@@ -386,7 +387,7 @@ class OrderController extends DefaultController {
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
             //Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            return true;//$this->successNotify("Заказ успешно оформлен");
+            return true; //$this->successNotify("Заказ успешно оформлен");
         }
 
         return false;
@@ -462,11 +463,41 @@ class OrderController extends DefaultController {
         } else {
             $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
-            $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
-            $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
-            $fulfilledCount = Order::find([])->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and vendor_id=' . $organization->id . ';')->queryOne();
-            $totalPrice = $query['total'];
+            $canManage = Yii::$app->user->can('manage');
+            if ($canManage) {
+                $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
+                $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
+                $fulfilledCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
+                $totalPrice = Order::find()->where(['status' => Order::STATUS_DONE, 'vendor_id' => $organization->id])->sum("total_price");
+            } else {
+                $params['OrderSearch']['manager_id'] = $this->currentUser->id;
+                $orderTable = Order::tableName();
+                $maTable = ManagerAssociate::tableName();
+                $newCount = Order::find()
+                        ->rightJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->currentUser->id)
+                        ->where([
+                            'vendor_id' => $organization->id, 
+                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                        ->count();
+                $processingCount = Order::find()
+                        ->rightJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->currentUser->id)
+                        ->where([
+                            'vendor_id' => $organization->id, 
+                            'status' => Order::STATUS_PROCESSING])
+                        ->count();
+                $fulfilledCount = Order::find()
+                        ->rightJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->currentUser->id)
+                        ->where([
+                            'vendor_id' => $organization->id, 
+                            'status' => Order::STATUS_DONE])
+                        ->count();
+                $totalPrice = Order::find()
+                        ->rightJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->currentUser->id)
+                        ->where([
+                            'status' => Order::STATUS_DONE, 
+                            'vendor_id' => $organization->id])
+                        ->sum("total_price");
+            }
         }
         $dataProvider = $searchModel->search($params);
 

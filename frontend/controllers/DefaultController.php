@@ -38,7 +38,7 @@ class DefaultController extends Controller {
                 case Organization::TYPE_SUPPLIER:
                     $this->layout = 'main-vendor';
                     if ($organization->step != Organization::STEP_OK) {
-                        return $this->redirect(Yii::$app->params['demoUrl']);
+                        //return $this->redirect(Yii::$app->params['demoUrl']);
                     }
                     break;
             }

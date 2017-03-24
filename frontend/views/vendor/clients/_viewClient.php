@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use kartik\select2\Select2;
+
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -68,13 +69,14 @@ $form = ActiveForm::begin([
             ?>
         </div>
     </div>
+    <?php if ($canManage) { ?>
     <div class="row">
         <div class="col-md-12">
             <?=
             Select2::widget([
-                'data' => $organization->getManagersList(),
+                'data' => $vendor->getManagersList(),
                 'name' => 'associatedManagers',
-                'value' => $organization->getAssociatedManagersList($vendor_id),
+                'value' => array_keys($organization->getAssociatedManagersList($vendor->id)),
                 'theme' => 'krajee',
                 'hideSearch' => true,
                 'options' => ['multiple' => true, 'placeholder' => 'Выберите менеджера'],
@@ -85,6 +87,7 @@ $form = ActiveForm::begin([
             ?>
         </div>
     </div>
+    <?php } ?>
 </div>
 <div class="modal-footer">
 <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success save-form']) ?>

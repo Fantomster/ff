@@ -48,5 +48,4 @@ class DefaultController extends Controller {
         }
         return true;
     }
-
 }

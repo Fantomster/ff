@@ -124,58 +124,68 @@ $this->registerCss('
             <div>
          <?php 
         $columns = [
-    ['attribute' => 'id','label'=>'№','value'=>'id'],
-    ['attribute' => 'client_id','label'=>'Ресторан','value'=>function($data) {
-        return Organization::find()->where(['id'=>$data['client_id']])->one()->name;           
-    }],
-    ['attribute' => 'created_by_id','label'=>'Заказ создал','value'=>function($data) {
-        return $data['created_by_id']?
-             Profile::find()->where(['id'=>$data['created_by_id']])->one()->full_name :
-             "";
-    }],
-    ['attribute' => 'accepted_by_id','label'=>'Заказ принял','value'=>function($data) {
-        return $data['accepted_by_id']?
-             Profile::find()->where(['id'=>$data['accepted_by_id']])->one()->full_name :
-             "";
-    }],
-    [
-        'format' => 'raw',
-        'attribute' => 'total_price',
-        'value' => function($data) {
-            return (float)$data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
-        },
-        'label' => 'Сумма',
-        'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],        
-    ],
-    [
-        'format' => 'raw',
-        'attribute' => 'created_at',
-        'value' => function($data) {
-            $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
-            return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
-        },
-        'label' => 'Дата создания',
-    ],
-    ['attribute' => 'status','label'=>'Статус','format' => 'raw','value' => function($data) {
-                        switch ($data['status']) {
-                            case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                            case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                $statusClass = 'new';
-                                break;
-                            case Order::STATUS_PROCESSING:
-                                $statusClass = 'processing';
-                                break;
-                            case Order::STATUS_DONE:
-                                $statusClass = 'done';
-                                break;
-                            case Order::STATUS_REJECTED:
-                            case Order::STATUS_CANCELLED:
-                                $statusClass = 'cancelled';
-                                break;
-                        }
-                        return '<span class="status ' . $statusClass . '"><i class="fa fa-circle-thin"></i> ' . Order::statusText($data['status']) . '</span>';//fa fa-circle-thin
-                    },]
-	];
+            [
+                'attribute' => 'id',
+                'value' => 'id',
+                'label' => '№',
+            ],
+            [
+                'attribute' => 'client.name',
+                'value' => 'client.name',
+                'label' => 'Ресторан',
+            ],
+            [
+                'attribute' => 'createdByProfile.full_name',
+                'value' => 'createdByProfile.full_name',
+                'label' => 'Заказ создал',
+            ],
+            [
+                'attribute' => 'acceptedByProfile.full_name',
+                'value' => 'acceptedByProfile.full_name',
+                'label' => 'Заказ принял',
+            ],
+            [
+                'format' => 'raw',
+                'attribute' => 'total_price',
+                'value' => function($data) {
+                    return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
+                },
+                'label' => 'Сумма',
+            ],
+            [
+                'format' => 'raw',
+                'attribute' => 'created_at',
+                'value' => function($data) {
+                    $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
+                    return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                },
+                'label' => 'Дата создания',
+            ],
+            [
+                'format' => 'raw',
+                'attribute' => 'status',
+                'value' => function($data) {
+                    switch ($data->status) {
+                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                            $statusClass = 'new';
+                            break;
+                        case Order::STATUS_PROCESSING:
+                            $statusClass = 'processing';
+                            break;
+                        case Order::STATUS_DONE:
+                            $statusClass = 'done';
+                            break;
+                        case Order::STATUS_REJECTED:
+                        case Order::STATUS_CANCELLED:
+                            $statusClass = 'cancelled';
+                            break;
+                    }
+                    return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
+                },
+                'label' => 'Статус',
+            ],
+        ];
         ?>
          <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'order-analytic-list',]); ?>
             <?=GridView::widget([

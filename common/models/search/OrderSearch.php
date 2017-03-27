@@ -121,7 +121,7 @@ class OrderSearch extends Order {
             $orderTable = Order::tableName();
             $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
-        $query->where(Order::tableName() . '.status!= :status', ['status' => Order::STATUS_FORMING]);
+        $query->where(Order::tableName() . '.status != :status', ['status' => Order::STATUS_FORMING]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

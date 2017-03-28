@@ -2,11 +2,9 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
-use kartik\select2\Select2;
 use common\models\Category;
 use yii\helpers\ArrayHelper;
 use kartik\checkbox\CheckboxX;
-kartik\select2\Select2Asset::register($this);
 ?>
 <?php
 $form = ActiveForm::begin([
@@ -72,24 +70,6 @@ $form = ActiveForm::begin([
                 $form->field($organization, 'website')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-website']):
                 $form->field($organization, 'website')->textInput(['id' => 'organization-view-supplirs-website']);
             ?>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-    <?php 
-    echo '<label class="control-label">Категория</label>';
-    echo Select2::widget([
-        'name'=>'relationCategory',
-        'value' => $load_data,
-        'theme' => Select2::THEME_BOOTSTRAP,
-        'language' => 'ru',
-        'data' => ArrayHelper::map(Category::find()->all(),'id','name'),
-        'options' => ['placeholder' => 'Выбрать категорию...', 'multiple' => true],
-        'pluginOptions' => [
-            'allowClear' => false
-        ],
-    ]);
-    ?>
         </div>
     </div>
 </div>

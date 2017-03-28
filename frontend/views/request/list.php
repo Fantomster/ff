@@ -8,6 +8,7 @@ use yii\widgets\ListView;
 use yii\data\ActiveDataProvider;
 use yii\widgets\ActiveForm;
 use yii\web\View;
+use yii2assets\fullscreenmodal\FullscreenModal;
 ?>
 <style>
     .req-items{
@@ -18,6 +19,11 @@ use yii\web\View;
     padding: 10px;
     margin-top:10px;
     }
+    .req-items:hover{
+-webkit-box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
+-moz-box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
+box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
+    }
 .req-name{color:#84bf76;font-size:22px;margin-top:20px}
 .req-fire{margin-left:10px;color:#d9534f;font-size:18px;}
 .req-nal-besnal{margin-left:10px}
@@ -26,6 +32,27 @@ use yii\web\View;
 .req-created{font-size:12px;color:#757575}
 .req-visits{font-size:12px;color:#757575}
 .req-comments{font-size:12px;color:#757575}
+.modal.fade .modal-dialog {
+    -webkit-transform: scale(0.1);
+    -moz-transform: scale(0.1);
+    -ms-transform: scale(0.1);
+    transform: scale(0.1);
+    top: 300px;
+    opacity: 0;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+.modal.fade.in .modal-dialog {
+    -webkit-transform: scale(1);
+    -moz-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+    -webkit-transform: translate3d(0, -300px, 0);
+    transform: translate3d(0, -300px, 0);
+    opacity: 1;
+}
 </style>
 <section class="content-header">
     <h1>
@@ -46,19 +73,19 @@ use yii\web\View;
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
-            <?=
-            Modal::widget([
-                'id' => 'create',
-                'clientOptions' => false,
+            <?php FullscreenModal::begin([
+            'id' => 'create',
+            'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1'],
+            'clientOptions' => false,
                 'toggleButton' => [
                     'label' => '<i class="fa fa-paper-plane"></i> Разместить заявку',
                     'tag' => 'a',
                     'data-target' => '#create',
-                    'class' => 'btn btn-sm btn-fk-success pull-right',
+                    'class'=>'btn btn-sm btn-fk-success pull-right',
                     'href' => Url::to(['/request/create']),
                 ],
-            ])
-            ?>
+         ]);?>
+         <?php FullscreenModal::end();?> 
         </div>
         <!-- /.box-header -->
         <div class="box-body">
@@ -100,7 +127,7 @@ use yii\web\View;
                         ],
                     ],
                     'options'=>[
-                      'class'=>'col-lg-12 list-wrapper inline'
+                      'class'=>'col-lg-12 list-wrapper inline no-padding'
                     ],
                     'layout' => "{summary}\n{pager}\n{items}\n{pager}",
                     'summary' => 'Показано {count} из {totalCount}',
@@ -123,9 +150,12 @@ window.clearTimeout(timer);
         url: 'index.php?r=request/list',
         container: '#list',
         data: { search: $('#search').val()}
-      }).done(function() { console.log('Success works!') });
+      });
    }, 700);
 });
+$("body").on("hidden.bs.modal", "#create", function() {
+    $(this).data("bs.modal", null);       
+});   
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

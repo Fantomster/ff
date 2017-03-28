@@ -90,8 +90,7 @@ class Request extends \yii\db\ActiveRecord
     {
         if(empty($this->created_at)){return '';}
         
-          $date = $this->created_at;
-          $date = Yii::$app->formatter->asDatetime($date,'php:Y-m-d H:i:s');
+          $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at),'php:Y-m-d H:i:s');
           
           $ypd = Yii::$app->formatter->asDatetime($date,'php:yy');
           $mpd = Yii::$app->formatter->asDatetime($date,'php:m.y');
@@ -101,7 +100,8 @@ class Request extends \yii\db\ActiveRecord
           $md =  Yii::$app->formatter->asDatetime('now','php:m.y');
           $dd =  Yii::$app->formatter->asDatetime('now','php:j');
           
-          
+          //return Yii::$app->formatter->asTimestamp($date,'php:H:i:s');
+          //return Yii::$app->formatter->asTimestamp('now','php:H:i:s');
           
           $today = false;
           $yesterday = false;
@@ -119,21 +119,21 @@ class Request extends \yii\db\ActiveRecord
             $sArray = array("секунду", "секунды", "секунд");   
             $iArray = array("минуту", "минуты", "минут");
             $hArray = array("час", "часа", "часов");
-            $ns = Yii::$app->formatter->asDatetime($date,'php:s');
-            $ni = Yii::$app->formatter->asDatetime($date,'php:i');
-            $nh = Yii::$app->formatter->asDatetime($date,'php:H');
             
-            if($dif<59 && $dif>=0){
-                $word = self::getTimeFormatWord($ns, $sArray);
-                return "$ns $word назад";
+            if($dif<60 && $dif>=0){
+                $ns = floor($dif);
+                $text = self::getTimeFormatWord($ns, $sArray);
+                return "$ns $text назад";
             }
-            elseif($dif/60>1 and $dif/60<59){   
-                $word = self::getTimeFormatWord($ni, $iArray);
-                return "$ni $word назад";
+            elseif($dif/60>0 and $dif/60<59){  
+                $ni = floor($dif/60);
+                $text = self::getTimeFormatWord($ni, $iArray);
+                return "$ni $text назад";
             }
-            elseif($dif/3600>1 and $dif/3600<6){
-                $word = self::getTimeFormatWord($nh, $hArray);
-                return "$nh $word назад";
+            elseif($dif/3600>0 and $dif/3600<6){
+                $nh = floor($dif/3600);
+                $text = self::getTimeFormatWord($nh, $hArray);
+                return "$nh $text назад";
             }else{
                 return 'Сегодня, в '. $tpd;
             }

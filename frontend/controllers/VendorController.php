@@ -14,6 +14,7 @@ use common\models\RelationSuppRest;
 use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
+use common\models\ManagerAssociate;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -147,8 +148,8 @@ class VendorController extends DefaultController {
                 $profile->load($post);
 
                 //if ($user->validate() && $profile->validate()) {
-                    Yii::$app->response->format = Response::FORMAT_JSON;
-                    return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return json_encode(\yii\widgets\ActiveForm::validateMultiple([$user, $profile]));
                 //} 
             }
         }
@@ -313,7 +314,7 @@ class VendorController extends DefaultController {
                     return $result;
                     exit;
                 }
-                if(!in_array($ed, $arrEd)){
+                if (!in_array($ed, $arrEd)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверная <strong>Единица измерения</strong> товара']];
                     return $result;
                     exit;
@@ -390,71 +391,21 @@ class VendorController extends DefaultController {
     }
 
     public function actionClients() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $currentOrganization = $this->currentUser->organization;
 
-        $arr_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
-                                where(['in', 'id', \common\models\RelationSuppRest::find()->
-                                    select('rest_org_id')->
-                                    where(['supp_org_id' => $currentUser->organization_id])])->all(), 'id', 'name');
+        $searchModel = new \common\models\search\RelationSuppRestSearch();
 
-        $arr_catalog = yii\helpers\ArrayHelper::map(\common\models\Catalog::find()->
-                                where(['supp_org_id' => $currentUser->organization_id])->all(), 'id', 'name');
+        $params['RelationSuppRestSearch'] = Yii::$app->request->post("RelationSuppRestSearch");
 
-        $filter_restaurant = "";
-        $filter_catalog = "";
-        $filter_invite = "";
-        $searchModel = new RelationSuppRest;
-        if (
-                !empty(\Yii::$app->request->get('filter_restaurant')) ||
-                !empty(\Yii::$app->request->get('filter_catalog')) ||
-                \Yii::$app->request->get('filter_invite') != "") {
+        $dataProvider = $searchModel->search($params, $currentOrganization->id, Yii::$app->user->can('manage') ? null : $this->currentUser->id);
 
-            $filter_restaurant = trim(\Yii::$app->request->get('filter_restaurant'));
-            $filter_catalog = trim(\Yii::$app->request->get('filter_catalog'));
-            $filter_invite = trim(\Yii::$app->request->get('filter_invite'));
-
-            $query = (new \yii\db\Query());
-            $query->select("id,rest_org_id,cat_id,status,invite");
-            $query->from("relation_supp_rest");
-            $query->where(["supp_org_id" => $currentUser->organization_id]);
-            if (!empty($filter_restaurant))
-                $query->andWhere(["rest_org_id" => $filter_restaurant]);
-            if (!empty($filter_catalog))
-                $query->andWhere(["cat_id" => $filter_catalog]);
-            if ($filter_invite != "")
-                $query->andWhere(["invite" => $filter_invite]);
-            /* $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
-              . "WHERE supp_org_id = $currentUser->organization_id "
-              //. "and id in (select id from organization where name like '" . $search . "%')"
-              . "")->queryScalar(); */
-        }else {
-            $query = (new \yii\db\Query());
-            $query->select("id,rest_org_id,cat_id,status,invite");
-            $query->from("relation_supp_rest");
-            $query->where(["supp_org_id" => $currentUser->organization_id]);
-            /* $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM relation_supp_rest "
-              . "WHERE supp_org_id = $currentUser->organization_id "
-              . "")->queryScalar(); */
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('clients', compact('searchModel', 'dataProvider', 'currentOrganization'));
+        } else {
+            return $this->render('clients', compact('searchModel', 'dataProvider', 'currentOrganization'));
         }
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => $query,
-            //'totalCount' => $totalCount,
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'article',
-                    'product',
-                    'units',
-                    'category_id',
-                    'price',
-                    'status',
-                ],
-            ],
-        ]);
-        return $this->render('clients', compact('searchModel', 'dataProvider', 'arr_catalog', 'arr_restaurant'));
     }
+
     public function actionRemoveClient() {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
@@ -463,6 +414,7 @@ class VendorController extends DefaultController {
             \Yii::$app->db->createCommand($sql)->execute();
         }
     }
+
     public function actionBasecatalog() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString = "";
@@ -566,7 +518,7 @@ class VendorController extends DefaultController {
                             $row_units = 0;
                         }
                         if (in_array($row_article, $arr)) {
-                           $sql = "update {{%catalog_base_goods}} set "
+                            $sql = "update {{%catalog_base_goods}} set "
                                     . "article=:article,"
                                     . "product=:product,"
                                     . "units=:units,"
@@ -782,8 +734,8 @@ class VendorController extends DefaultController {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             $product_id = \Yii::$app->request->post('id');
-            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1,'es_status' => 2], ['id' => $product_id]);
-            
+            $catalogBaseGoods = CatalogBaseGoods::updateAll(['deleted' => 1, 'es_status' => 2], ['id' => $product_id]);
+
             $result = ['success' => true];
             return $result;
             exit;
@@ -897,7 +849,7 @@ class VendorController extends DefaultController {
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
             $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
         }
-        
+
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
@@ -910,7 +862,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
                         $message = 'Продукт обновлен!';
-                        
+
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
@@ -918,7 +870,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
-                        
+
                         $message = 'Продукт обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
@@ -977,7 +929,7 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isAjax) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
-           // $CatalogBaseGoods = new CatalogBaseGoods;
+            // $CatalogBaseGoods = new CatalogBaseGoods;
             $id = \Yii::$app->request->post('id');
             $elem = \Yii::$app->request->post('elem');
 
@@ -1002,8 +954,8 @@ class VendorController extends DefaultController {
                     $set = CatalogBaseGoods::STATUS_OFF;
                 }
                 //CatalogBaseGoods::updateAll(['status' =>$set], ['id' => $id]);
-               $CatalogBaseGoods->status = $set;
-               $CatalogBaseGoods->update();
+                $CatalogBaseGoods->status = $set;
+                $CatalogBaseGoods->update();
 
                 $result = ['success' => true, 'status' => $set];
                 return $result;
@@ -1027,12 +979,12 @@ class VendorController extends DefaultController {
                 $relation_supp_rest->status = 1;
                 $relation_supp_rest->update();
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
-                foreach($rows as $row){
-                    if($row->profile->phone && $row->profile->sms_allow){
+                foreach ($rows as $row) {
+                    if ($row->profile->phone && $row->profile->sms_allow) {
                         $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
                         $target = $row->profile->phone;
                         $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target); 
+                        $sms->post_message($text, $target);
                     }
                 }
                 return (['success' => true, 'Подписан']);
@@ -1092,7 +1044,6 @@ class VendorController extends DefaultController {
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
-                
             }
         }
         $message = 'Не удалось удалить пользователя!';
@@ -1176,14 +1127,16 @@ class VendorController extends DefaultController {
 
         return $this->redirect(['vendor/step-1-update', 'id' => $cat_id]);
     }
-    public function actionStep2AddProduct(){
+
+    public function actionStep2AddProduct() {
         if (Yii::$app->request->isAjax) {
-        Yii::$app->response->format = Response::FORMAT_JSON;
+            Yii::$app->response->format = Response::FORMAT_JSON;
             if (Yii::$app->request->post('state') == 'true') {
                 $product_id = Yii::$app->request->post('baseProductId');
                 $catalogGoods = new CatalogGoods;
                 $catalogGoods->base_goods_id = $product_id;
-                $catalogGoods->cat_id = Yii::$app->request->post('cat_id');;
+                $catalogGoods->cat_id = Yii::$app->request->post('cat_id');
+                ;
                 $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
                 $catalogGoods->save();
                 return (['success' => true, 'Добавлен']);
@@ -1196,6 +1149,7 @@ class VendorController extends DefaultController {
             }
         }
     }
+
     public function actionStep2($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -1383,12 +1337,12 @@ class VendorController extends DefaultController {
                     $relation_supp_rest->status = 1;
                     $relation_supp_rest->update();
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
-                    foreach($rows as $row){
-                        if($row->profile->phone && $row->profile->sms_allow){
+                    foreach ($rows as $row) {
+                        if ($row->profile->phone && $row->profile->sms_allow) {
                             $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target); 
+                            $sms->post_message($text, $target);
                         }
                     }
                     return (['success' => true, 'Подписан']);
@@ -1443,6 +1397,8 @@ class VendorController extends DefaultController {
     public function actionViewClient($id) {
         $client_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $canManage = Yii::$app->user->can('manage');
+        $vendor = $currentUser->organization;
         $organization = Organization::find()->where(['id' => $client_id])->one();
         $relation_supp_rest = RelationSuppRest::find()->where([
                     'rest_org_id' => $client_id,
@@ -1455,24 +1411,46 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             if ($relation_supp_rest->load($post)) {
                 if ($relation_supp_rest->validate()) {
-                    if($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)){
-                    foreach ($organization->users as $recipient) { 
-                        if($recipient->profile->phone && $recipient->profile->sms_allow){
-                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
-                            $target = $recipient->profile->phone;
-                            $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target); 
+                    if ($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)) {
+                        foreach ($organization->users as $recipient) {
+                            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                                $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                                $target = $recipient->profile->phone;
+                                $sms = new \common\components\QTSMS();
+                                $sms->post_message($text, $target);
+                            }
                         }
-                    }    
                     }
-                    $relation_supp_rest->update();
-                    $message = 'Сохранено';
-                    
+                    $postedAssociatedIds = Yii::$app->request->post("associatedManagers");
+                    $currentAssociatedIds = array_keys($organization->getAssociatedManagersList($vendor->id));
+                    $newAssociatedIds = array_diff($postedAssociatedIds, $currentAssociatedIds);
+                    $obsoleteAssociatedIds = array_diff($currentAssociatedIds, $postedAssociatedIds);
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        foreach ($newAssociatedIds as $newId) {
+                            $new = new ManagerAssociate();
+                            $new->manager_id = $newId;
+                            $new->organization_id = $client_id;
+                            $new->save();
+                        }
+                        foreach ($obsoleteAssociatedIds as $obsoleteId) {
+                            $obsolete = ManagerAssociate::findOne(['manager_id' => $obsoleteId, 'organization_id' => $client_id]);
+                            if ($obsolete) {
+                                $obsolete->delete();
+                            }
+                        }
+                        $relation_supp_rest->update();
+                        $transaction->commit();
+                        $message = 'Сохранено';
+                    } catch (Exception $e) {
+                        $transaction->rollBack();
+                        $message = 'Ошибка!';
+                    }
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
             }
         }
-        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id'));
+        return $this->renderAjax('clients/_viewClient', compact('organization', 'relation_supp_rest', 'catalogs', 'client_id', 'vendor', 'canManage'));
     }
 
     public function actionViewCatalog($id) {
@@ -1507,19 +1485,46 @@ class VendorController extends DefaultController {
     }
 
     public function actionAnalytics() {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $header_info_zakaz = \common\models\Order::find()->
-                        where(['vendor_id' => $currentUser->organization_id])->count();
-        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int) $header_info_zakaz;
-        $header_info_clients = \common\models\RelationSuppRest::find()->
-                        where(['supp_org_id' => $currentUser->organization_id])->count();
-        empty($header_info_clients) ? $header_info_clients = 0 : $header_info_clients = (int) $header_info_clients;
-        $header_info_prodaji = \common\models\Order::find()->
-                        where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
-        empty($header_info_prodaji) ? $header_info_prodaji = 0 : $header_info_prodaji = (int) $header_info_prodaji;
-        $header_info_poziciy = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
-                        where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['vendor_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-        empty($header_info_poziciy) ? $header_info_poziciy = 0 : $header_info_poziciy = (int) $header_info_poziciy;
+
+        $currentUser = $this->currentUser;
+        $vendor = $currentUser->organization;
+
+        $orderTable = Order::tableName();
+        $maTable = ManagerAssociate::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+        $rspTable = RelationSuppRest::tableName();
+
+        //---header stats start
+        $headerStats["goodsCount"] = CatalogBaseGoods::find()
+                ->where(["supp_org_id" => $vendor->id, "status" => CatalogBaseGoods::STATUS_ON, "deleted" => CatalogBaseGoods::DELETED_OFF])
+                ->count();
+
+        if (Yii::$app->user->can('manage')) {
+            $headerStats["ordersCount"] = Order::find()
+                    ->where(["vendor_id" => $vendor->id])
+                    ->count();
+            $headerStats["clientsCount"] = RelationSuppRest::find()
+                    ->where(["supp_org_id" => $vendor->id])
+                    ->count();
+            $headerStats["totalTurnover"] = Order::find()
+                    ->where(['vendor_id' => $vendor->id, 'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
+                    ->sum('total_price');
+        } else {
+            $headerStats["ordersCount"] = Order::find()
+                    ->leftJoin($maTable, "$maTable.organization_id = $orderTable.client_id")
+                    ->where(["vendor_id" => $vendor->id, "$maTable.manager_id" => $currentUser->id])
+                    ->count();
+            $headerStats["clientsCount"] = RelationSuppRest::find()
+                    ->leftJoin($maTable, "$maTable.organization_id = $rspTable.rest_org_id")
+                    ->where(["supp_org_id" => $vendor->id, "$maTable.manager_id" => $currentUser->id])
+                    ->count();
+            $headerStats["totalTurnover"] = Order::find()
+                    ->leftJoin($maTable, "$maTable.organization_id = $orderTable.client_id")
+                    ->where(['vendor_id' => $vendor->id, "$maTable.manager_id" => $currentUser->id, 'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
+                    ->sum('total_price');
+        }
+        //---header stats end
+
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('rest_org_id')->
@@ -1559,21 +1564,39 @@ class VendorController extends DefaultController {
             empty($filter_client) ? "" : $where .= " and client_id='" . $filter_client . "'";
         }
         // Объем продаж чарт
-        $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
-                (select sum(total_price) FROM `order` 
+        if (Yii::$app->user->can('manage')) {
+            $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
+                (select sum(total_price) FROM `$orderTable` 
                 where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
                 vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
-                        . "DATE(created_at) between '" .
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                        date('Y-m-d', strtotime($filter_to_date)) . "')" .
-                        $where .
-                        ") AS `total_price`  
+                            . "DATE(created_at) between '" .
+                            date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                            date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                            $where .
+                            ") AS `total_price`  
                 FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
-                FROM `order` where 
+                FROM `$orderTable` where 
                 vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
-                        . "DATE(created_at) between '" .
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                        date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
+                            . "DATE(created_at) between '" .
+                            date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                            date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
+        } else {
+            $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
+                (select sum(total_price) FROM `$orderTable` LEFT JOIN `$maTable` ON `$orderTable`.client_id = `$maTable`.organization_id 
+                where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at AND `$maTable`.manager_id = $currentUser->id AND
+                vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
+                            . "DATE(created_at) between '" .
+                            date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                            date('Y-m-d', strtotime($filter_to_date)) . "')" .
+                            $where .
+                            ") AS `total_price`  
+                FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
+                FROM `$orderTable` LEFT JOIN `$maTable` ON `$orderTable`.client_id = `$maTable`.organization_id WHERE 
+                vendor_id = $currentUser->organization_id AND `$maTable`.manager_id = $currentUser->id and status<>" . Order::STATUS_FORMING . " and("
+                            . "DATE(created_at) between '" .
+                            date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
+                            date('Y-m-d', strtotime($filter_to_date)) . "')" . $where . ")`tb`")->queryAll();
+        }
         $arr_create_at = [];
         $arr_price = [];
         if (count($area_chart) == 1) {
@@ -1643,7 +1666,7 @@ class VendorController extends DefaultController {
         }
         $arr_clients_price = json_encode($arr_clients_price);
 
-        return $this->render('analytics/index', compact('filter_restaurant', 'header_info_zakaz', 'header_info_clients', 'header_info_prodaji', 'header_info_poziciy', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price'
+        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price'
         ));
     }
 
@@ -1656,17 +1679,21 @@ class VendorController extends DefaultController {
         //ГРАФИК ПРОДАЖ -----> 
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = date("d-m-Y");
+
+        $managerCondition = Yii::$app->user->can('manage') ? '' : "AND `manager_associate`.manager_id = $currentUser->id";
+        $managerJoin = "LEFT JOIN `manager_associate` ON `order`.client_id = `manager_associate`.organization_id ";
+
         $area_chart = Yii::$app->db->createCommand("SELECT DATE_FORMAT(created_at,'%d-%m-%Y') as created_at,
-            (select sum(total_price) FROM `order` 
+            (select sum(total_price) FROM `order` $managerJoin
             where DATE_FORMAT(created_at,'%Y-%m-%d') = tb.created_at and 
-            vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and ("
+            vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and ("
                         . "DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "')" .
                         ") AS `total_price`  
             FROM (SELECT distinct(DATE_FORMAT(created_at,'%Y-%m-%d')) AS `created_at` 
-            FROM `order` where 
-            vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and("
+            FROM `order` $managerJoin where 
+            vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and("
                         . "DATE(created_at) between '" .
                         date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
                         date('Y-m-d', strtotime($filter_to_date)) . "'))`tb`")->queryAll();
@@ -1684,54 +1711,33 @@ class VendorController extends DefaultController {
         // <------ГРАФИК ПРОДАЖ
         //------>Статистика 
         $stats = Yii::$app->db->createCommand("SELECT
-            (SELECT sum(total_price) FROM `order`
-            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
-            (SELECT sum(total_price) FROM `order` 
-             WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
+            (SELECT sum(total_price) FROM `order` $managerJoin 
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and DATE_FORMAT(created_at, '%Y-%m-%d') = CURDATE()) as 'curDay',
+            (SELECT sum(total_price) FROM `order` $managerJoin 
+             WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and (MONTH(`created_at`) = MONTH(NOW()) AND YEAR(`created_at`) = YEAR(NOW()))) 
             as 'curMonth',
-            (SELECT sum(total_price) FROM `order` 
-            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
+            (SELECT sum(total_price) FROM `order` $managerJoin 
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and YEAR(`created_at`) = YEAR(NOW()) AND WEEK(`created_at`, 1) = WEEK(NOW(), 1))
              as 'curWeek',
-            (SELECT sum(total_price) FROM `order` 
-            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            (SELECT sum(total_price) FROM `order` $managerJoin 
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -1 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
             as 'lastMonth',
-            (SELECT sum(total_price) FROM `order` 
-            WHERE vendor_id = $currentUser->organization_id and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
+            (SELECT sum(total_price) FROM `order` $managerJoin 
+            WHERE vendor_id = $currentUser->organization_id $managerCondition and status<>" . Order::STATUS_FORMING . " and MONTH(`created_at`) = MONTH(DATE_ADD(NOW(), INTERVAL -2 MONTH)) AND YEAR(`created_at`) = YEAR(NOW()))
             as 'TwoLastMonth'")->queryOne();
         // <-------Статистика 
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
-        $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                . "vendor_id = $currentUser->organization_id and ("
-                . "DATE(created_at) between '" .
-                date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING);
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                        . "vendor_id = $currentUser->organization_id and ("
-                        . "DATE(created_at) between '" .
-                        date('Y-m-d', strtotime($filter_from_date)) . "' and '" .
-                        date('Y-m-d', strtotime($filter_to_date)) . "') and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'pagination' => [
-                'pageSize' => 10,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'id',
-                    'client_id',
-                    'vendor_id',
-                    'created_by_id',
-                    'accepted_by_id',
-                    'status',
-                    'total_price',
-                    'created_at'
-                ],
-                'defaultOrder' => [
-                    'created_at' => SORT_DESC
-                ]
-            ],
-        ]);
+        $searchModel = new \common\models\search\OrderSearch();
+        $today = new \DateTime();
+        $searchModel->date_from = date("d.m.Y", strtotime(" -1 months"));
+        $searchModel->vendor_id = $currentUser->organization_id;
+        $searchModel->vendor_search_id = $currentUser->organization_id;
+        if (!Yii::$app->user->can('manage')) {
+            $searchModel->manager_id = $currentUser->id;
+        }
+
+        $dataProvider = $searchModel->search(null);
+        $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
         return $this->render('dashboard/index', compact(

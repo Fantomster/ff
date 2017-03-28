@@ -7,7 +7,7 @@ use yii\helpers\Html;
 $statusInfo = '';
 $actionButtons = '';
 $btnCancel = Html::a('<i class="icon fa fa-ban"></i> Отменить', '#', [
-            'class' => "btn btn-outline-danger cancel-order",
+            'class' => "btn btn-outline-danger cancel-order btnOrderAction",
             'data' => [
                 'url' => \yii\helpers\Url::to(['order/ajax-cancel-order', 'order_id' => $order->id]),
             ],

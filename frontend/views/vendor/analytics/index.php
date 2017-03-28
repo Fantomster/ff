@@ -52,32 +52,32 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_zakaz;?></span>
-                    <span class="info-box-text">Заказы</span>
+                    <span class="info-box-number"><?=$headerStats["ordersCount"];?></span>
+                    <span class="info-box-text">Всего заказов</span>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_clients;?></span>
-                    <span class="info-box-text">Клиенты</span>
+                    <span class="info-box-number"><?=$headerStats["goodsCount"];?></span>
+                    <span class="info-box-text">Всего товаров</span>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_prodaji;?></span>
-                    <span class="info-box-text">Продажи</span>
+                    <span class="info-box-number"><?=$headerStats["clientsCount"];?></span>
+                    <span class="info-box-text">Всего клиентов</span>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 col-xs-12">
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_poziciy;?></span>
-                    <span class="info-box-text">Позиций</span>
+                    <span class="info-box-number"><?=$headerStats["totalTurnover"];?></span>
+                    <span class="info-box-text">Оборот</span>
                 </div>
             </div>
         </div>

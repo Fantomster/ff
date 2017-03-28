@@ -3,14 +3,13 @@
 use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
-use dosamigos\switchinput\SwitchBox;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
+use kartik\form\ActiveForm;
 use yii\web\View;
-use common\models\Users;
 use kartik\checkbox\CheckboxX;
+
 $this->title = 'Мои клиенты';
 ?>
 <?=
@@ -32,9 +31,9 @@ $gridColumnsClients = [
     [
         'label' => 'Ресторан',
         'format' => 'raw',
+        'attribute' => 'client_name',
         'value' => function ($data) {
-            $res = common\models\Organization::find()->where(['id' => $data['rest_org_id']])->one()->name;
-            return Html::a("<b>" . Html::encode($res) . "</b>", ['vendor/view-client', 'id' => $data['rest_org_id']], [
+            return Html::a("<b>" . $data->client->name . "</b>", ['vendor/view-client', 'id' => $data->rest_org_id], [
                         'data' => [
                             'target' => '#view-client',
                             'toggle' => 'modal',
@@ -46,210 +45,202 @@ $gridColumnsClients = [
             [
                 'label' => 'Последний заказ',
                 'format' => 'raw',
-                'value' =>
-                function($data) {
-                    $res = common\models\Order::find()->select('MAX(CAST(created_at AS CHAR)) as created_at')->where(['client_id' => $data['rest_org_id'], 'vendor_id' => common\models\User::findIdentity(Yii::$app->user->id)->organization_id])->one()->created_at;
-                    $date = Yii::$app->formatter->asDatetime($res, "php:j M Y");
+                'attribute' => 'last_order_date',
+                'value' => function($data) {
+                    $date = isset($data->lastOrder) ? Yii::$app->formatter->asDatetime($data->lastOrder->updated_at, "php:j M Y") : 'Никогда';
                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                },
+            ],
+            [
+                'label' => 'Текущий каталог',
+                'format' => 'raw',
+                'attribute' => 'catalog_name',
+                'value' => function ($data) {
+                    return empty($data->cat_id) ? '' :
+                            Html::a($data->catalog->name, ['vendor/view-catalog', 'id' => $data->cat_id], [
+                                'data' => [
+                                    'target' => '#view-catalog',
+                                    'toggle' => 'modal',
+                                    'backdrop' => 'static',
+                                ],
+                                'class' => 'current-catalog',
+                    ]);
+                }
+                    ],
+                    [
+                        'label' => 'Назначенные менеджеры',
+                        'format' => 'raw',
+                        'value' => function ($data) {
+                            $result = '';
+                            $managers = $data->client->getAssociatedManagersList($data->vendor->id);
+                            foreach ($managers as $manager) {
+                                $result .= "<div>$manager</div>";
+                            }
+                            return $result;
+                        },
+                    ],
+                    [
+                        'label' => 'Статус сотрудничества',
+                        'attribute' => 'status',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:190px;text-align:center'],
+                        'value' => function ($data) {
+                    $link = CheckboxX::widget([
+                                'name' => 'restOrgId_' . $data->rest_org_id,
+                                'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                'value' => $data->invite == 0 ? 0 : 1,
+                                'autoLabel' => true,
+                                'options' => ['id' => 'restOrgId_' . $data->rest_org_id, 'data-id' => $data->rest_org_id],
+                                'pluginOptions' => [
+                                    'threeState' => false,
+                                    'theme' => 'krajee-flatblue',
+                                    'enclosedLabel' => true,
+                                    'size' => 'lg',
+                                ]
+                    ]);
+                    return $link;
                 },
                     ],
                     [
-                        'label' => 'Текущий каталог',
-                        'format' => 'raw',
-                        'value' => function ($data) {
-                            $cat = common\models\Catalog::find()->where(['id' => $data['cat_id']])->one();
-                            return $data['cat_id'] == 0 ? '' :
-                                    Html::a(Html::encode($cat->name), ['vendor/view-catalog', 'id' => $data['cat_id']], [
-                                        'data' => [
-                                            'target' => '#view-catalog',
-                                            'toggle' => 'modal',
-                                            'backdrop' => 'static',
-                                        ],
-                                        'class' => 'current-catalog',
-                            ]);
-                        }
-                            ],
-                            [
-                                'attribute' => 'Статус сотрудничества',
-                                'format' => 'raw',
-                                'contentOptions' => ['style' => 'width:190px;text-align:center'],
-                                'value' => function ($data) {
-                            $link = CheckboxX::widget([
-                                        'name' => 'restOrgId_' . $data['rest_org_id'],
-                                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                        'value' => $data['invite'] == 0 ? 0 : 1,
-                                        'autoLabel' => true,
-                                        'options' => ['id' => 'restOrgId_' . $data['rest_org_id'], 'data-id' => $data['rest_org_id']],
-                                        'pluginOptions' => [
-                                            'threeState' => false,
-                                            'theme' => 'krajee-flatblue',
-                                            'enclosedLabel' => true,
-                                            'size' => 'lg',
-                                        ]
-                            ]);
-                            return $link;
-                        },
-                            ],
-                            [
                         'label' => '',
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:30px;text-align:center'],
                         'value' => function ($data) {
-                            $result = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
-                                    'class' => 'btn btn-danger btn-sm del',
-                                    'data' => ['id' => $data["rest_org_id"]],
-                            ]);
-                            return $result;
-                        }
-                            ],
-                            
-                        ];
-                        ?>
-                        <section class="content-header">
-                            <h1>
-                                <i class="fa fa-list-alt"></i> Мои клиенты
-                                <small></small>
-                            </h1>
+                    $result = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                                'class' => 'btn btn-danger btn-sm del',
+                                'data' => ['id' => $data->rest_org_id],
+                    ]);
+                    return $result;
+                }
+                    ],
+                ];
+                ?>
+                <section class="content-header">
+                    <h1>
+                        <i class="fa fa-list-alt"></i> Мои клиенты
+                        <small></small>
+                    </h1>
+                    <?=
+                    Breadcrumbs::widget([
+                        'options' => [
+                            'class' => 'breadcrumb',
+                        ],
+                        'links' => [
+                            'Мои клиенты'
+                        ],
+                    ])
+                    ?>
+                </section>
+                <section class="content">
+                    <div class="box box-info">
+                        <div class="box-header with-border">
                             <?=
-                            Breadcrumbs::widget([
-                                'options' => [
-                                    'class' => 'breadcrumb',
-                                ],
-                                'links' => [
-                                    'Мои клиенты'
+                            Modal::widget([
+                                'id' => 'add-client',
+                                'clientOptions' => false,
+                                'toggleButton' => [
+                                    'label' => 'Пригласить клиента',
+                                    'tag' => 'a',
+                                    'data-target' => '#add-client',
+                                    'class' => 'btn btn-md btn-fk-success',
+                                    'href' => Url::to(['/vendor/ajax-add-client']),
                                 ],
                             ])
                             ?>
-                        </section>
-                        <section class="content">
-                            <div class="box box-info">
-                                <div class="box-header with-border">
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <div class="panel-body" style="padding-left: 0;">
+                                <?php
+                                $form = ActiveForm::begin([
+                                            'options' => [
+                                                'id' => 'search_form',
+                                                'role' => 'search',
+                                            ],
+                                ]);
+                                ?>
+                                <div class="col-sm-3">
                                     <?=
-                                    Modal::widget([
-                                        'id' => 'add-client',
-                                        'clientOptions' => false,
-                                        'toggleButton' => [
-                                            'label' => 'Пригласить клиента',
-                                            'tag' => 'a',
-                                            'data-target' => '#add-client',
-                                            'class' => 'btn btn-md btn-fk-success',
-                                            'href' => Url::to(['/vendor/ajax-add-client']),
-                                        ],
-                                    ])
+                                            $form->field($searchModel, "search_string", [
+                                                'addon' => [
+                                                    'append' => [
+                                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                        'options' => [
+                                                            'class' => 'append',
+                                                        ],
+                                                    ],
+                                                ],
+                                            ])
+                                            ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'search_string'])
+                                            ->label('Поиск', ['class' => 'label search_string', 'style' => 'color:#555'])
                                     ?>
                                 </div>
-                                <!-- /.box-header -->
-                                <div class="box-body">
-                                    <div class="panel-body" style="padding-left: 0;">
-                                        <div class="col-sm-3">
-                                            <?= Html::label('Ресторан', 'filter_restaurant', ['class' => 'label filter_catalog', 'style' => 'color:#555']) ?>
-                                            <?= Html::dropDownList('filter_restaurant', null, $arr_restaurant, ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_restaurant'])
-                                            ?> 
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <?= Html::label('Каталог', 'filter_catalog', ['class' => 'label filter_catalog', 'style' => 'color:#555']) ?>
-                                            <?= Html::dropDownList('filter_catalog', null, $arr_catalog, ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_catalog'])
-                                            ?>  
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <?= Html::label('Статус', 'filter_invite', ['class' => 'label filter_invite', 'style' => 'color:#555']) ?>
-                                            <?=
-                                            Html::dropDownList('filter_invite', null, [
+                                <div class="col-sm-3">
+                                    <?=
+                                            $form->field($searchModel, "cat_id")
+                                            ->dropDownList($currentOrganization->getCatalogsList(), ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_catalog'])
+                                            ->label("Каталог", ['class' => 'label filter_catalog', 'style' => 'color:#555'])
+                                    ?>
+                                </div>
+                                <div class="col-sm-3">
+                                    <?=
+                                            $form->field($searchModel, "invite")
+                                            ->dropDownList([
                                                 '0' => 'Не подтвержден',
                                                 '1' => 'Подтвержден',
                                                     ], ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_invite'])
-                                            ?> 
-                                        </div>
-                                        <div class="col-sm-3 col-md-2 col-lg-1">
-                                            <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-                                            <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
-                                        </div>
-                                    </div>
-                                    <div class="panel-body">
-                                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'cl-list',]); ?>
-                                        <?=
-                                        GridView::widget([
-                                            'dataProvider' => $dataProvider,
-                                            'filterPosition' => false,
-                                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
-                                            'columns' => $gridColumnsClients,
-                                            'options' => ['class' => 'table-responsive'],
-                                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                                            'bordered' => false,
-                                            'striped' => true,
-                                            'condensed' => false,
-                                            'responsive' => false,
-                                            'hover' => false,
-                                        ]);
-                                        ?> 
-                        <?php Pjax::end(); ?> 
-                                    </div>
+                                            ->label("Статус", ['class' => 'label filter_invite', 'style' => 'color:#555'])
+                                    ?>
                                 </div>
+                                <div class="col-sm-3 col-md-2 col-lg-1">
+                                    <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                                    <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>
+                                </div>
+                                <?php ActiveForm::end(); ?>
                             </div>
-                        </section>
-                        <?php
-                        $customJs = <<< JS
-$('#filter_restaurant').on("change", function () {
-       $('#filter_catalog').val(''), 
-       $('#filter_invite').val('')
-       $.pjax({
-        type: 'GET',
-        url: 'index.php?r=vendor/clients',
-        container: '#cl-list',
-        push: false,
-        data: { 
-            filter_restaurant: $('#filter_restaurant').val(), 
-            filter_catalog: $('#filter_catalog').val(), 
-            filter_invite: $('#filter_invite').val() 
-              }
-      })
-});
-$('#filter_catalog').on("change", function () {
-        $('#filter_restaurant').val(''), 
-       $('#filter_invite').val('')
-       $.pjax({
-        type: 'GET',
-        push: false,
-        url: 'index.php?r=vendor/clients',
-        container: '#cl-list',
-        data: { 
-            filter_restaurant: $('#filter_restaurant').val(), 
-            filter_catalog: $('#filter_catalog').val(), 
-            filter_invite: $('#filter_invite').val() 
-              }
-      })
-});
-$('#filter_invite').on("change", function () {
-       $('#filter_restaurant').val(''), 
-       $('#filter_catalog').val('')
-       $.pjax({
-        type: 'GET',
-        push: false,
-        url: 'index.php?r=vendor/clients',
-        container: '#cl-list',
-        data: { 
-            filter_restaurant: $('#filter_restaurant').val(), 
-            filter_catalog: $('#filter_catalog').val(), 
-            filter_invite: $('#filter_invite').val()
-              }
-      })
-});
-$('.clear_filters').on("click", function () {
-       $('#filter_restaurant').val(''), 
-       $('#filter_catalog').val(''), 
-       $('#filter_invite').val('')
-       $.pjax({
-        type: 'GET',
-        push: false,
-        url: 'index.php?r=vendor/clients',
-        container: '#cl-list',
-        data: { 
-            filter_restaurant: $('#filter_restaurant').val(), 
-            filter_catalog: $('#filter_catalog').val(), 
-            filter_invite: $('#filter_invite').val()
-              }
-      })
-});
+                            <div class="panel-body">
+                                <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'cl-list', 'timeout' => 5000]); ?>
+                                <?=
+                                GridView::widget([
+                                    'dataProvider' => $dataProvider,
+                                    'filterPosition' => false,
+                                    'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                                    'columns' => $gridColumnsClients,
+                                    'options' => ['class' => 'table-responsive'],
+                                    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                    'bordered' => false,
+                                    'striped' => true,
+                                    'condensed' => false,
+                                    'responsive' => false,
+                                    'hover' => false,
+                                ]);
+                                ?> 
+                                <?php Pjax::end(); ?> 
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <?php
+                $customJs = <<< JS
+    $(document).on("change keyup paste cut", "#search_string", function() {
+        if (timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(function() {
+            $("#search_form").submit();
+        }, 700);
+    });
+                        
+    $(document).on("change", "#filter_invite, #filter_catalog", function() {
+        $("#search_form").submit();
+    });
+                        
+    $('.clear_filters').on("click", function () {
+           $('#search_string').val(''); 
+           $('#filter_catalog').val(''); 
+           $('#filter_invite').val('');
+           $("#search_form").submit();
+    });
 /** 
  * Forward port jQuery.live()
  * Wrapper for newer jQuery.on()
@@ -357,5 +348,5 @@ $(document).on("click",".del", function(e){
 	}});      
 })
 JS;
-                        $this->registerJs($customJs, View::POS_READY);
-                        ?>
+                $this->registerJs($customJs, View::POS_READY);
+                ?>

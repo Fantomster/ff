@@ -23,6 +23,7 @@ use yii\helpers\ArrayHelper;
  * @property Catalog $catalog
  * @property Organization $client
  * @property Organization $vendor
+ * @property Order $lastOrder
  */
 class RelationSuppRest extends \yii\db\ActiveRecord {
 
@@ -74,7 +75,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
             [['rest_org_id', 'supp_org_id'], 'required'],
             [['rest_org_id', 'supp_org_id', 'cat_id'], 'integer'],
             [['uploaded_catalog'], 'file'],
-            [['uploaded_processed'], 'safe'],
+            [['uploaded_processed', 'vendor_manager_id'], 'safe'],
         ];
     }
 
@@ -167,4 +168,10 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLastOrder() {
+        return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(["`order`.updated_at" => SORT_DESC]);
+    }
 }

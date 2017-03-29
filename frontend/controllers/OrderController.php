@@ -86,8 +86,8 @@ class OrderController extends DefaultController {
                     ],
                 ],
 //                'denyCallback' => function($rule, $action) {
-//            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-//        }
+//                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+//                }
             ],
         ];
     }
@@ -448,6 +448,7 @@ class OrderController extends DefaultController {
         $params = Yii::$app->request->getQueryParams();
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
             $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
+            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
             $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
             $fulfilledCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
@@ -455,6 +456,7 @@ class OrderController extends DefaultController {
             $totalPrice = $query['total'];
         } else {
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
+            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
             $canManage = Yii::$app->user->can('manage');
             if ($canManage) {
                 $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();

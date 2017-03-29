@@ -159,13 +159,8 @@ class OrderSearch extends Order {
             $query->andFilterWhere(['<=', Order::tableName() . '.created_at', $t2_f]);
         }
 
-        if ($this->vendor_id) {
-            $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
-        }
-
-        if ($this->client_id) {
-            $query->andFilterWhere(['client_id' => $this->client_id]);
-        }
+        $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
+        $query->andFilterWhere(['client_id' => $this->client_id]);
 
         return $dataProvider;
     }

@@ -36,13 +36,16 @@ use yii\web\View;
 <section class="content">
     <div class="box box-info">
         <!-- /.box-header -->
-        <div class="box-body">
-            <div class="col-md-12 no-padding">
+        <div class="box-body no-padding">
+            <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="req-name">
                             <?=$request->product?>
                         </div> 
+                    </div>
+                    <div class="col-md-12 no-padding">
+                        <hr>
                     </div>
                     <div class="col-md-12">
                         <div class="row">
@@ -61,12 +64,16 @@ use yii\web\View;
                             <div class="col-md-4">
                                 <div class="">Объем закупки <span class=""><?=$request->amount?></span></div>
                                 <div class="">Периодичность заказа <span class=""><?=$request->regular?></span></div>
-                                <div class="">Способ оплаты <span class=""><?=$request->payment_method?></span></div>
+                                <div class="">Способ оплаты <span class="">
+                                    <?=$request->payment_method == \common\models\Request::NAL ? 
+                                    'Наличный расчет':
+                                    'Безналичный расчет';?></span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <div style="width:100%;border:1px solid #555"></div>
+                    <div class="col-md-12 no-padding">
+                        <hr>
                     </div>
                     <div class="col-md-12">
                         <div class="">Подробное описание:</div>

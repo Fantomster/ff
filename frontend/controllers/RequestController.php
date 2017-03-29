@@ -81,7 +81,12 @@ class RequestController extends DefaultController {
         $request = Request::find()->where(['id' => $id])->one();
         $author = Organization::findOne(['id'=>$request->rest_org_id]);
         $countComments = RequestCallback::find()->where(['request_id' => $id])->count();
-        
+        $dataCallback = new ActiveDataProvider([
+                'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
+                'pagination' => [
+                    'pageSize' => 5,
+                ],
+            ]);
         if($user->organization->type_id == Organization::TYPE_SUPPLIER){
             if(!RequestCounters::find()->where(['request_id' => $id, 'user_id'=>$user->id])->exists()){
                 $requestCounters = new RequestCounters();
@@ -90,6 +95,46 @@ class RequestController extends DefaultController {
                 $requestCounters->save();
             }  
         }
-        return $this->render("view", compact('request','countComments','author'));
+        return $this->render("view", compact('request','countComments','author','dataCallback'));
+    }
+    public function actionSetResponsible(){
+        $userOrg = $this->currentUser->organization_id;
+        
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON; 
+        
+        $id = Yii::$app->request->post('id');
+        $responsible_id = Yii::$app->request->post('responsible_id');
+        
+        if(!Request::find()->where(['rest_org_id' => $userOrg,'id'=>$id])->exists()){
+            return ['success'=>false];
+        }
+        if(!RequestCallback::find()->where([
+            'request_id' => $id, 
+            'supp_org_id'=>$responsible_id
+            ])->exists()){
+            return ['success'=>false];
+        }
+        $request = Request::find()->where(['id' => $id])->one();
+        $request->responsible_supp_org_id = $responsible_id;
+        $request->save();
+        return ['success'=>true];
+        }
+    }
+    public function actionCloseRequest(){
+        $user = $this->currentUser;
+        
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON; 
+        
+        $id = Yii::$app->request->post('id');
+        if(!Request::find()->where(['rest_org_id' => $user->organization_id,'id'=>$id])->exists()){
+            return ['success'=>false];
+        }
+        $request = Request::find()->where(['id' => $id])->one();
+        $request->active_status = Request::INACTIVE;
+        $request->save();
+        return ['success'=>true];
+        }
     }
 }

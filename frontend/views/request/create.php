@@ -7,11 +7,17 @@ use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii\helpers\ArrayHelper;
 use kartik\select2\Select2;
+use yii\widgets\Pjax;
 kartik\select2\Select2Asset::register($this);
 use kartik\checkbox\CheckboxX;
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <style>
+.modal-body {background: none;}
+.modal-content .modal-header {display:none;}
+.modal-fs .modal-body {
+    top: 0;
+}
 .modal-content{background: url(images/request-background.png) no-repeat center center;background-size: cover;}
 #msform {width: 100%;margin: 11px auto;text-align: center;position: relative;}
 #msform fieldset {padding: 20px 30px;min-height: 300px;box-sizing: border-box;border-radius: 4px;background: #fff;border: 5px solid #86be79;position: absolute;}
@@ -136,10 +142,16 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 }
 .field-request-rush_order{margin-top:20px}
 </style>
+<?php 
+Pjax::begin([
+  'id' => 'pjax-create', 
+  'timeout' => 10000, 
+  'enablePushState' => false,
+  ]);
+?>
 <?php $form = ActiveForm::begin([
         'id' => 'msform',
         'enableAjaxValidation' => true,
-        //'action' => Url::toRoute('user/ajaxregistration'),
         'validationUrl' => Url::toRoute('request/save-request')
 
 ]); ?>
@@ -246,119 +258,5 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
         <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>        
         </fieldset>       
 <?php ActiveForm::end(); ?>
-<?php
-$customJs = <<< JS
-var current_fs, next_fs, previous_fs;
-var left, opacity, scale;
-var animating;
-var errorStep = true;
-var form = $("#msform" );
-$(".next").click(function(e){
-    var cur = $(this);
-        cur.prop('disabled',true);
-    var step = $(this).attr('data-step');
-    $.ajax({
-    url: 'index.php?r=request/save-request',
-    type: 'POST',
-    dataType: "json",
-    data: form.serialize() + "&step=" + step,
-    cache: false,
-    success: function (response) {
-       if(step == 1){
-            if((typeof(response["request-category"]) != "undefined" && 
-              response["request-category"] !== null) || 
-               (typeof(response["request-product"]) != "undefined" && 
-              response["request-product"] !== null)){
-              form.yiiActiveForm('submitForm')
-              cancel();
-            }else{
-              form.yiiActiveForm("resetForm");
-              next(cur); 
-            }
-       }
-       if(step == 2){ 
-            if(typeof(response["request-amount"]) != "undefined" && 
-              response["request-amount"] !== null){
-              form.yiiActiveForm('submitForm')
-              cancel();  
-            }else{
-              form.yiiActiveForm("resetForm");
-              next(cur);  
-            }
-       } 
-       if(step == 3){ 
-        console.log(response)
-           if(response["saved"]){
-               $.pjax.reload({container:"#list"});
-               $('#create').modal('hide');
-           }
-       }
-       cur.removeAttr('disabled'); 
-    }
-    });
-});
-function cancel(){
-return false;    
-}        
-function next(e) {
-if(animating) return false;
-    animating = true;
-    current_fs = e.parent();
-    next_fs = e.parent().next();
 
-    $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
-
-    next_fs.show(); 
-    current_fs.animate({opacity: 0}, {
-        step: function(now, mx) {
-                scale = 1 - (1 - now) * 0.2;
-                left = (now * 50)+"%";
-                opacity = 1 - now;
-                current_fs.css({'transform': 'scale('+scale+')'});
-                next_fs.css({'right': left, 'opacity': opacity});
-        }, 
-        duration: 800, 
-        complete: function(){
-                current_fs.hide();
-                animating = false;
-        }, 
-        easing: 'easeInOutBack'
-    });    
-}
-        
-        
-        
-function previous(e) {
-if(animating) return false;
-animating = true;
-
-current_fs = e.parent();
-previous_fs = e.parent().prev();
-
-$("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
-
-previous_fs.show(); 
-current_fs.animate({opacity: 0}, {
-        step: function(now, mx) {
-                scale = 0.8 + (1 - now) * 0.2;
-                left = ((1-now) * 50)+"%";
-                opacity = 1 - now;
-                current_fs.css({'right': left});
-                previous_fs.css({'transform': 'scale('+scale+')', 'opacity': opacity});
-        }, 
-        duration: 800, 
-        complete: function(){
-                current_fs.hide();
-                animating = false;
-        }, 
-        easing: 'easeInOutBack'
-});    
-}        
-$(".previous").click(function(){
-    previous($(this));
-});
-
-
-JS;
-$this->registerJs($customJs, View::POS_READY);
-?>
+<?php Pjax::end(); ?>

@@ -20,18 +20,7 @@ use yii\widgets\ActiveForm;
 
 class RequestController extends DefaultController {
     
-    public function actionCreate() {
-        if (Yii::$app->request->isAjax) {
-            $currentUser = $this->currentUser;
-            if($currentUser->organization->type_id != Organization::TYPE_RESTAURANT){
-               return false; 
-            }
-            $request = new \common\models\Request();
-            return $this->renderAjax("create", compact('profile','request'));
-            }else{
-                return $this->redirect(['list']);
-            }
-    }
+    
     public function actionSaveRequest() {
         $currentUser = $this->currentUser;
         if($currentUser->organization->type_id != Organization::TYPE_RESTAURANT){

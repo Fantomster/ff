@@ -9,6 +9,8 @@ use yii\data\ActiveDataProvider;
 use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii2assets\fullscreenmodal\FullscreenModal;
+yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
+$request = new \common\models\Request();
 ?>
 <style>
     .req-items{
@@ -73,19 +75,22 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
 <section class="content">
     <div class="box box-info">
         <div class="box-header with-border">
-            <?php FullscreenModal::begin([
+            <?php Modal::begin([
             'id' => 'create',
+            'toggleButton' => ['label' => '<i class="fa fa-paper-plane"></i> Разместить заявку','class'=>'btn btn-sm btn-fk-success pull-right'],
             'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1'],
-            'clientOptions' => false,
+            /*'clientOptions' => false,
                 'toggleButton' => [
                     'label' => '<i class="fa fa-paper-plane"></i> Разместить заявку',
                     'tag' => 'a',
                     'data-target' => '#create',
                     'class'=>'btn btn-sm btn-fk-success pull-right',
-                    'href' => Url::to(['/request/create']),
-                ],
-         ]);?>
-         <?php FullscreenModal::end();?> 
+                ],*/
+         ]);
+            ?>
+            <?php
+            echo $this->render("create", compact('request'));
+            Modal::end();?>     
         </div>
         <!-- /.box-header -->
         <div class="box-body">
@@ -139,23 +144,140 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
     </div>
 </section>
 <?php
-$customJs = <<< JS
+
+$this->registerJs('
 var timer;
-$('#search').on("keyup put paste change", function () {
+$("#search").on("keyup put paste change", function () {
 window.clearTimeout(timer);
    timer = setTimeout(function () {
        $.pjax({
-        type: 'GET',
+        type: "GET",
         push: true,
-        url: 'index.php?r=request/list',
-        container: '#list',
-        data: { search: $('#search').val()}
+        url: "' . Url::to(["request/list"]) . '",
+        container: "#list",
+        data: { search: $("#search").val()}
       });
    }, 700);
 });
+ 
 $("body").on("hidden.bs.modal", "#create", function() {
-    $(this).data("bs.modal", null);       
-});   
-JS;
-$this->registerJs($customJs, View::POS_READY);
+    $.pjax.reload({container:"#pjax-create", async:false});
+    
+});
+$(document).on("click", ".req-items", function() {
+    var id = $(this).attr("data-id");
+    var url = "' . Url::to(["request/view"]) . '&id=" + id;
+    window.location.href = url;
+})  
+
+var current_fs, next_fs, previous_fs;
+var left, opacity, scale;
+var animating;
+var errorStep = true;
+
+$(document).on("click",".next",function(e){
+    var form = $("#msform");
+    var data = form.data("yiiActiveForm");
+    var cur = $(this);
+        cur.prop("disabled",true);
+    var step = $(this).attr("data-step");
+    $.ajax({
+    url: "' . Url::to(["request/save-request"]) . '",
+    type: "POST",
+    dataType: "json",
+    data: form.serialize() + "&step=" + step,
+    cache: false,
+    success: function (response) {
+       if(step == 1){
+            if((typeof(response["request-category"]) != "undefined" && 
+              response["request-category"] !== null) || 
+               (typeof(response["request-product"]) != "undefined" && 
+              response["request-product"] !== null)){
+              form.yiiActiveForm("submitForm")
+              cancel();
+            }else{
+                form.yiiActiveForm("resetForm");
+                next(cur); 
+            }
+       }
+       if(step == 2){ 
+            if(typeof(response["request-amount"]) != "undefined" && 
+              response["request-amount"] !== null){
+              form.yiiActiveForm("submitForm")
+              cancel();  
+            }else{
+              form.yiiActiveForm("resetForm");
+              next(cur);  
+            }
+       } 
+       if(step == 3){ 
+           if(response["saved"]){ 
+            $("#create").modal("hide");  
+            $.pjax.reload({container:"#list", async:false});
+           }
+       }
+       cur.removeAttr("disabled"); 
+    }
+    });
+});
+
+function cancel(){
+return false;    
+}        
+function next(e) {
+if(animating) return false;
+    animating = true;
+    current_fs = e.parent();
+    next_fs = e.parent().next();
+
+    $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+
+    next_fs.show(); 
+    current_fs.animate({opacity: 0}, {
+        step: function(now, mx) {
+                scale = 1 - (1 - now) * 0.2;
+                left = (now * 50)+"%";
+                opacity = 1 - now;
+                current_fs.css({"transform": "scale("+scale+")"});
+                next_fs.css({"right": left, "opacity": opacity});
+        }, 
+        duration: 800, 
+        complete: function(){
+                current_fs.hide();
+                animating = false;
+        }, 
+        easing: "easeInOutBack"
+    });    
+}
+      
+function previous(e) {
+if(animating) return false;
+animating = true;
+
+current_fs = e.parent();
+previous_fs = e.parent().prev();
+
+$("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+
+previous_fs.show(); 
+current_fs.animate({opacity: 0}, {
+        step: function(now, mx) {
+                scale = 0.8 + (1 - now) * 0.2;
+                left = ((1-now) * 50)+"%";
+                opacity = 1 - now;
+                current_fs.css({"right": left});
+                previous_fs.css({"transform": "scale("+scale+")", "opacity": opacity});
+        }, 
+        duration: 800, 
+        complete: function(){
+                current_fs.hide();
+                animating = false;
+        }, 
+        easing: "easeInOutBack"
+});    
+}    
+$(document).on("click",".previous",function(){
+    previous($(this));
+})
+');
 ?>

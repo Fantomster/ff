@@ -70,15 +70,15 @@ class Request extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'category' => 'Category',
-            'product' => 'Product',
-            'comment' => 'Comment',
-            'regular' => 'Regular',
-            'amount' => 'Amount',
-            'rush_order' => 'Rush Order',
-            'payment_method' => 'Payment Method',
-            'deferment_payment' => 'Deferment Payment',
-            'responsible_supp_org_id' => 'Responsible Supp Org ID',
+            'category' => 'Категория товара',
+            'product' => 'Товар',
+            'comment' => 'Комментарий',
+            'regular' => 'Регулярность заказа',
+            'amount' => 'Объем',
+            'rush_order' => 'Срочность',
+            'payment_method' => 'Способ оплаты',
+            'deferment_payment' => 'Отложенный платеж',
+            'responsible_supp_org_id' => 'Ответственный',
             'count_views' => 'Count Views',
             'created_at' => 'Created At',
             'end' => 'End',
@@ -88,8 +88,6 @@ class Request extends \yii\db\ActiveRecord
     }
     public function getModifyDate()
     {
-        if(empty($this->created_at)){return '';}
-        
           $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at),'php:Y-m-d H:i:s');
           
           $ypd = Yii::$app->formatter->asDatetime($date,'php:yy');
@@ -99,9 +97,6 @@ class Request extends \yii\db\ActiveRecord
           $yy =  Yii::$app->formatter->asDatetime('now','php:yy');
           $md =  Yii::$app->formatter->asDatetime('now','php:m.y');
           $dd =  Yii::$app->formatter->asDatetime('now','php:j');
-          
-          //return Yii::$app->formatter->asTimestamp($date,'php:H:i:s');
-          //return Yii::$app->formatter->asTimestamp('now','php:H:i:s');
           
           $today = false;
           $yesterday = false;
@@ -120,12 +115,12 @@ class Request extends \yii\db\ActiveRecord
             $iArray = array("минуту", "минуты", "минут");
             $hArray = array("час", "часа", "часов");
             
-            if($dif<60 && $dif>=0){
+            if($dif<60 and $dif>=0){
                 $ns = floor($dif);
                 $text = self::getTimeFormatWord($ns, $sArray);
                 return "$ns $text назад";
             }
-            elseif($dif/60>0 and $dif/60<59){  
+            elseif($dif/60>0 and $dif/60<60){  
                 $ni = floor($dif/60);
                 $text = self::getTimeFormatWord($ni, $iArray);
                 return "$ni $text назад";

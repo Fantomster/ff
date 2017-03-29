@@ -22,7 +22,7 @@ use yii\db\ActiveRecord;
  * @property integer $rest_org_id
  * @property integer $active_status
  *
- * 
+ * @property CategoryName $categoryName
  * @property CountCallback $countCallback
  * @property RequestCallback[] $requestCallbacks
  */

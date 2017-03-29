@@ -32,7 +32,6 @@ $menuItems = [
     //['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['vendor/events']],
     ['label' => 'Новости', 'icon' => 'fa fa-newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
     //['label' => 'Поддержка', 'icon' => 'fa fa-support', 'url' => ['vendor/support']],
-    ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options' => ['class' => 'header']],
 ];
 if (Yii::$app->user->can('manage')) {
     $menuItems[] = [
@@ -47,6 +46,7 @@ if (Yii::$app->user->can('manage')) {
         ]
     ];
 }
+$menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options' => ['class' => 'header']];
 ?>
 
 <aside class="main-sidebar">

@@ -15,6 +15,7 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  *
+ * @property Organization $organization
  * @property Request $request
  */
 class RequestCallback extends \yii\db\ActiveRecord
@@ -63,5 +64,9 @@ class RequestCallback extends \yii\db\ActiveRecord
     public function getRequest()
     {
         return $this->hasOne(Request::className(), ['id' => 'request_id']);
+    }
+    public function getOrganization()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
 }

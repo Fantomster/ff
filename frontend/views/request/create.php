@@ -1,6 +1,5 @@
 <?php
-//use delocker\animate\AnimateAssetBundle;
-//AnimateAssetBundle::register($this); 
+ 
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;

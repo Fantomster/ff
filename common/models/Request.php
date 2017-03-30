@@ -28,8 +28,12 @@ use yii\db\ActiveRecord;
  */
 class Request extends \yii\db\ActiveRecord
 {
+    const ACTIVE = 1;
+    const INACTIVE = 0;
+    
     const NAL = 1;
     const BEZNAL = 2;
+    
     /**
      * @inheritdoc
      */

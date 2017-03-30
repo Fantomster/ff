@@ -9,6 +9,8 @@ use yii\data\ActiveDataProvider;
 use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii2assets\fullscreenmodal\FullscreenModal;
+use delocker\animate\AnimateAssetBundle;
+AnimateAssetBundle::register($this);
 yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
 $request = new \common\models\Request();
 ?>
@@ -174,13 +176,15 @@ var current_fs, next_fs, previous_fs;
 var left, opacity, scale;
 var animating;
 var errorStep = true;
-
+var animationName = "animated shake";
+var animationend = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
 $(document).on("click",".next",function(e){
     var form = $("#msform");
     var data = form.data("yiiActiveForm");
     var cur = $(this);
         cur.prop("disabled",true);
     var step = $(this).attr("data-step");
+    
     $.ajax({
     url: "' . Url::to(["request/save-request"]) . '",
     type: "POST",
@@ -194,6 +198,10 @@ $(document).on("click",".next",function(e){
                (typeof(response["request-product"]) != "undefined" && 
               response["request-product"] !== null)){
               form.yiiActiveForm("submitForm")
+              
+              $("fieldset").addClass(animationName).one(animationend,function() {
+                $(this).removeClass(animationName);
+              });
               cancel();
             }else{
                 form.yiiActiveForm("resetForm");
@@ -204,6 +212,9 @@ $(document).on("click",".next",function(e){
             if(typeof(response["request-amount"]) != "undefined" && 
               response["request-amount"] !== null){
               form.yiiActiveForm("submitForm")
+              $("fieldset").addClass(animationName).one(animationend,function() {
+                $(this).removeClass(animationName);
+              });
               cancel();  
             }else{
               form.yiiActiveForm("resetForm");
@@ -211,9 +222,9 @@ $(document).on("click",".next",function(e){
             }
        } 
        if(step == 3){ 
+       $.pjax.reload({container:"#list", async:false});
            if(response["saved"]){ 
-            $("#create").modal("hide");  
-            $.pjax.reload({container:"#list", async:false});
+            $("#create").modal("hide"); 
            }
        }
        cur.removeAttr("disabled"); 

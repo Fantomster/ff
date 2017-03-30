@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use yii\web\View;
+use yii\widgets\ListView;
 ?>
 <style>
  
@@ -40,13 +41,13 @@ use yii\web\View;
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="req-name">
-                            <?=$request->product?>
-                        </div> 
+                        <h3 class="req-name pull-left"><?=$request->product?></h3>
+                        <?= Html::button('Закрыть заявку', ['class' => 'r-close btn btn-sm btn-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
+                        
                     </div>
-                    <div class="col-md-12 no-padding">
-                        <hr>
-                    </div>
+                </div>
+                <div class="row">
+                    <hr>
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-8">
@@ -72,22 +73,105 @@ use yii\web\View;
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12 no-padding">
-                        <hr>
-                    </div>
+                </div>
+                <div class="row">
+                    <hr>
                     <div class="col-md-12">
                         <div class="">Подробное описание:</div>
                         <div class="">
-                        <?=$request->comment?$request->comment:'<span style="color:#ccc">Нет подробного описания о товаре</span>' ?>
+                        <?=$request->comment?$request->comment:'<span style="color:#ccc">Нет информации</span>' ?>
                         </div> 
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-12">
                         <div class="">
                             <div class="">Категория: <span class=""><?=$request->categoryName->name ?></span></div>
                         </div> 
                     </div>
                 </div>
+                <div class="row">
+                    <hr>
+                    <div class="col-md-12">
+                        <div class="row">
+                        <?=ListView::widget([
+                            'dataProvider' => $dataCallback,
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                return $this->render('view/_clientCBView', ['model' => $model]);
+                                },
+                            'pager' => [
+                                'maxButtonCount' => 5,
+                                    'options' => [
+                                    'class' => 'pagination col-md-12'
+                                ],
+                            ],
+                            'options'=>[
+                              'class'=>'col-lg-12 list-wrapper inline'
+                            ],
+                            'layout' => "{summary}\n{pager}\n{items}\n{pager}",
+                            'summary' => 'Показано {count} из {totalCount}',
+                            'emptyText' => 'Откликов по заявке 0',
+                        ])?>    
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
+<?=$this->registerJs('
+$(document).on("click",".change", function(e){
+id = $(this).attr("data-req-id");
+suppId = $(this).attr("data-supp-id");
+swal({
+  title: "Назначить исполнителем?",
+  text: false,
+  type: "warning",
+  showCancelButton: true,
+  cancelButtonText: "Отмена",
+  confirmButtonText: "Назначить!",
+  showLoaderOnConfirm: true,
+  preConfirm: function () {
+    return new Promise(function (resolve) {
+        $.ajax({
+            url: "' . Url::to(["request/set-responsible"]) . '",
+            type: "POST",
+            dataType: "json",
+            data: "responsible_id=" + suppId + "&id=" + id,
+            cache: false,
+            success: function (response) {
+            resolve()
+            }
+        });
+    })
+  }
+}).then(function (e){swal("Готово!","Назначен исполнитель","success")})
+});
+$(document).on("click",".r-close", function(e){
+id = $(this).attr("data-id");
+swal({
+  title: "Закрыть заявку?",
+  text: "Заявка будет будет удалена из списка заявок",
+  type: "warning",
+  showCancelButton: true,
+  cancelButtonText: "Отмена",
+  confirmButtonText: "Закрыть!",
+  showLoaderOnConfirm: true,
+  preConfirm: function () {
+    return new Promise(function (resolve) {
+        $.ajax({
+            url: "' . Url::to(["request/close-request"]) . '",
+            type: "POST",
+            dataType: "json",
+            data: "id=" + id,
+            cache: false,
+            success: function (response) {
+            resolve()
+            }
+        });
+    })
+  }
+}).then(function () {swal("Готово!","Заявка закрыта","success")
+})
+});
+');?>

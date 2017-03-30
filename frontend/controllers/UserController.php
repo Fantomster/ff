@@ -214,9 +214,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $test = $model->errors;
             $confirmError = "Учетная запись не активирована!";
             if (isset($test['email'][0]) && ($test['email'][0] !== $confirmError)) {
-//                $model->clearErrors();
-//                $model->addError('password', "Аккаунт не подтвержден. $confirmError");
-//            } else {
                 $model->clearErrors();
                 $model->addError('password', 'Вы указали неверную почту или пароль');
             }
@@ -234,33 +231,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             if ($validator->validate($email) && $currentUser->sendInviteToFriend($email)) {
                 return [
                     'success' => true,
-                    'growl' => [
-                        'options' => [
-//                            'title' => 'test',
-                        ],
-                        'settings' => [
-                            'element' => 'body',
-                            'type' => 'Приглашение выслано!',
-                            'allow_dismiss' => true,
-                            'placement' => [
-                                'from' => 'top',
-                                'align' => 'center',
-                            ],
-                            'delay' => 1500,
-                            'animate' => [
-                                'enter' => 'animated fadeInDown',
-                                'exit' => 'animated fadeOutUp',
-                            ],
-                            'offset' => 75,
-                            'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
-                            . '<div class="modal-content">'
-                            . '<div class="modal-header">'
-                            . '<h4 class="modal-title">{0}</h4></div>'
-                            . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
-                            . '<span class="glyphicon glyphicon-thumbs-up"></span>'
-                            . '</div></div></div>',
-                        ]
-                    ]
                 ];
             }
         }

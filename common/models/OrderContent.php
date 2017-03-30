@@ -136,7 +136,7 @@ class OrderContent extends \yii\db\ActiveRecord
         return [];
     }
     
-    public function getNote($client_id) {
-        return GoodsNotes::findOne(['catalog_base_goods_id' => $this->product_id, 'rest_org_id' => $client_id]);
+    public function getNote() {
+        return GoodsNotes::findOne(['catalog_base_goods_id' => $this->product_id, 'rest_org_id' => $this->order->client_id]);
     }
 }

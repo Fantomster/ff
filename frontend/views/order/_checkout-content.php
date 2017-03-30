@@ -82,7 +82,7 @@ echo GridView::widget([
                                         'url' => Url::to(['order/ajax-set-note', 'product_id' => $data->product_id]),
                                         'toggle' => "tooltip",
                                         'placement' => "bottom",
-                                        'original-title' => $data->getNote($vendor_id),
+                                        'original-title' => $data->getNote()->note,
                                     ],
                         ]);
                         $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> <span class="hidden-fk">Удалить</span>', '#', [

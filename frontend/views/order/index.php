@@ -36,10 +36,21 @@ $this->registerJs('
             if (url !== undefined) {
                 location.href = url;
             }
-//            var id = $(this).parent("tr").data("id");
-//            if (id !== undefined) {
-//                location.href = "' . Url::to(['order/view']) . '&id=" + id;
-//            }
+        });
+
+        $(document).on("click", ".reorder", function(e) {
+            e.preventDefault();
+            clicked = $(this);
+            swal({
+                title: "Повторить заказ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Да",
+                cancelButtonText: "Отмена",
+                showLoaderOnConfirm: true,
+            }).then(function() {
+                document.location = clicked.data("url")
+            });
         });
     });
         ');
@@ -251,11 +262,12 @@ $this->registerCss("
                                         case Order::STATUS_DONE:
                                         case Order::STATUS_REJECTED:
                                         case Order::STATUS_CANCELLED:
-                                            return Html::a('<i class="fa fa-refresh"></i>', ['order/repeat', 'id' => $data->id], [
+                                            return Html::a('<i class="fa fa-refresh"></i>', '#' , [
                                                         'class' => 'reorder',
                                                         'data' => [
                                                             'toggle' => 'tooltip',
                                                             'original-title' => 'Повторить заказ',
+                                                            'url' => Url::to(['order/repeat', 'id' => $data->id])
                                                         ],
                                             ]);
                                             break;

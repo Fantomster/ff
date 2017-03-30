@@ -4,8 +4,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Organization;
 
-kartik\growl\GrowlAsset::register($this);
-
 /* @var $this \yii\web\View */
 /* @var $content string */
 if (!Yii::$app->user->isGuest) {

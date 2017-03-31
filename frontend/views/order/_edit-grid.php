@@ -179,7 +179,7 @@ echo GridView::widget([
                     </div>
                     <?php
                 }
-                echo Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right']);
+                echo Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right', 'id' => 'btnSave']);
                 echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
                             'class' => 'btn btn-default pull-right',
                             'style' => 'margin-right: 7px;'

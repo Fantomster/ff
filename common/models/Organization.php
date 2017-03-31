@@ -477,6 +477,12 @@ class Organization extends \yii\db\ActiveRecord {
      * @return string url to avatar image
      */
     public function getPictureUrl() {
+        if($this->type_id == self::TYPE_SUPPLIER){
+         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_VENDOR_AVATAR;   
+        }
+        if($this->type_id == self::TYPE_RESTAURANT){
+         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_RESTAURANT_AVATAR;   
+        }
         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
     }
 

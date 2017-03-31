@@ -8,7 +8,7 @@ $delivery = $model->organization->delivery;
         <div class="col-md-8">
           <div class="media">
             <div class="media-left">
-              <img src="<?=$model->supp_org_id?>" class="media-object" style="width:100px">
+              <img src="<?=$model->organization->pictureUrl?>" class="media-object" style="width:100px">
             </div>
             <div class="media-body">
               <h5 class="media-heading"><?=$model->organization->name?></h5>

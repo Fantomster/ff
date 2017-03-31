@@ -12,6 +12,7 @@ $delivery = $model->organization->delivery;
             </div>
             <div class="media-body">
               <h5 class="media-heading"><?=$model->organization->name?></h5>
+              <p><?=$model->price?></p>
               <p><?=$model->comment?></p>
             </div>
           </div>  
@@ -24,7 +25,8 @@ $delivery = $model->organization->delivery;
     </div>
     <div class="row">
         <div class="col-md-12">
-        <?= Html::button('Назначить исполнителем', ['class' => 'change btn btn-sm btn-success','data-supp-id'=>$model->supp_org_id,'data-req-id'=>$model->request_id]) ?>
+            <?php $model->request->responsible_supp_org_id == $model->supp_org_id? $n = ['value'=>'Убрать исполнителя','class'=>'btn-danger','event'=>'exclude']: $n =['value'=>'Назначить исполнителем','class'=>'btn-success','event'=>'appoint'];?>
+            <?=Html::button($n['value'], ['class' => 'change btn btn-sm ' . $n['class'],'data-supp-id'=>$model->supp_org_id,'data-req-id'=>$model->request_id,'data-event'=>$n['event']]) ?>
         </div>
     </div>
 </div>

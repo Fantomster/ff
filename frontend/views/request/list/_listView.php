@@ -2,6 +2,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 ?>
+
 <div class="col-md-12 req-items" data-id="<?=$model->id;?>">
   <div class="row">
     <div class="col-md-6">
@@ -41,7 +42,7 @@ use yii\helpers\Url;
       </span>
         <span class="req-created">
           <b>
-            <?=$model->responsible_supp_org_id ? $model->organization->name : 'не назначен';?>
+            <?=$model->responsible_supp_org_id ? $model->organization->name : '<span style="color:#ccc">не назначен</span>';?>
           </b>
         </span>
     </div>

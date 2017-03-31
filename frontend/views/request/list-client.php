@@ -122,6 +122,7 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
                   'enablePushState' => false,
                   ]);
               ?> 
+              
               <?=ListView::widget([
                     'dataProvider' => $dataListRequest,
                     'itemView' => function ($model, $key, $index, $widget) {
@@ -148,6 +149,7 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
 <?php
 
 $this->registerJs('
+$("#create").removeAttr("tabindex");
 var timer;
 $("#search").on("keyup put paste change", function () {
 window.clearTimeout(timer);

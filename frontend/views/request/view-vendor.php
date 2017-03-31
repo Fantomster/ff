@@ -38,12 +38,20 @@ use yii\widgets\ListView;
     <div class="box box-info">
         <!-- /.box-header -->
         <div class="box-body no-padding">
+            <?php 
+                Pjax::begin([
+                  'id' => 'pjax-callback', 
+                  'timeout' => 10000, 
+                  'enablePushState' => false,
+                  ]);
+                ?>
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-12">
                         <h3 class="req-name pull-left"><?=$request->product?></h3>
-                        <?= Html::button('Закрыть заявку', ['class' => 'r-close btn btn-sm btn-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
-                        
+                        <?php if(!$trueFalseCallback){?>
+                        <?= Html::button('Предложить свои услуги', ['class' => 'callback btn btn-sm btn-success pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
+                        <?php } ?>
                     </div>
                 </div>
                 <div class="row">
@@ -91,13 +99,25 @@ use yii\widgets\ListView;
                     </div>
                 </div>
                 <div class="row">
+                    <div class="col-md-12">
+                        <div class="">
+                            <h5 class="">Исполнитель: 
+                              <?=$request->responsible_supp_org_id ? 
+                                    '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
+                                    '<span style="color:#ccc;">не назначен</span>';
+                              ?>
+                            </h5>
+                        </div> 
+                    </div>
+                </div>
+                <div class="row">
                     <hr>
                     <div class="col-md-12">
                         <div class="row">
                         <?=ListView::widget([
                             'dataProvider' => $dataCallback,
                             'itemView' => function ($model, $key, $index, $widget) {
-                                return $this->render('view/_clientCBView', ['model' => $model]);
+                                return $this->render('view/_vendorCBView', ['model' => $model]);
                                 },
                             'pager' => [
                                 'maxButtonCount' => 5,
@@ -111,67 +131,86 @@ use yii\widgets\ListView;
                             'layout' => "{summary}\n{pager}\n{items}\n{pager}",
                             'summary' => 'Показано {count} из {totalCount}',
                             'emptyText' => 'Откликов по заявке 0',
-                        ])?>    
+                        ])?> 
                         </div>
                     </div>
                 </div>
             </div>
+            <?php Pjax::end(); ?>
         </div>
     </div>
 </section>
 <?=$this->registerJs('
-$(document).on("click",".change", function(e){
-id = $(this).attr("data-req-id");
-suppId = $(this).attr("data-supp-id");
-swal({
-  title: "Назначить исполнителем?",
-  text: false,
-  type: "warning",
-  showCancelButton: true,
-  cancelButtonText: "Отмена",
-  confirmButtonText: "Назначить!",
-  showLoaderOnConfirm: true,
-  preConfirm: function () {
-    return new Promise(function (resolve) {
-        $.ajax({
-            url: "' . Url::to(["request/set-responsible"]) . '",
-            type: "POST",
-            dataType: "json",
-            data: "responsible_id=" + suppId + "&id=" + id,
-            cache: false,
-            success: function (response) {
-            resolve()
-            }
-        });
-    })
-  }
-}).then(function (e){swal("Готово!","Назначен исполнитель","success")})
-});
-$(document).on("click",".r-close", function(e){
+$(document).on("click",".callback", function(e){
 id = $(this).attr("data-id");
-swal({
-  title: "Закрыть заявку?",
-  text: "Заявка будет будет удалена из списка заявок",
-  type: "warning",
+swal.setDefaults({
   showCancelButton: true,
-  cancelButtonText: "Отмена",
-  confirmButtonText: "Закрыть!",
-  showLoaderOnConfirm: true,
-  preConfirm: function () {
-    return new Promise(function (resolve) {
-        $.ajax({
-            url: "' . Url::to(["request/close-request"]) . '",
-            type: "POST",
-            dataType: "json",
-            data: "id=" + id,
-            cache: false,
-            success: function (response) {
-            resolve()
-            }
-        });
-    })
-  }
-}).then(function () {swal("Готово!","Заявка закрыта","success")
+  progressSteps: ["1", "2"]
 })
-});
+var steps = [
+  {
+    title: "Цена",
+    text: "Установите цену услуги по данной заявке",
+    input: "text",
+    animation: true,
+    confirmButtonText: "Далее",
+    cancelButtonText: "Отмена",
+    showLoaderOnConfirm: true,
+    preConfirm: function (price) {
+    return new Promise(function (resolve, reject) {  
+        if (!price.match(/^\s*-?[1-9]\d*(\.\d{1,2})?\s*$/)) {
+            reject("Не верный формат! Пример: 1220 , 1220.30");
+        }
+        resolve()  
+      })
+    }
+  },
+  {
+    title: "Комментарий",
+    text: "Оставьте комментарий по заявке",
+    input: "textarea",
+    animation: false,
+    confirmButtonText: "Отправить",
+    cancelButtonText: "Отмена",
+    showLoaderOnConfirm: true,
+    preConfirm: function (comment) {
+    return new Promise(function (resolve, reject) {
+      resolve() 
+      })
+    }
+  },
+]
+swal.queue(steps).then(function (result) {
+    $.ajax({
+    url: "' . Url::to(["request/add-callback"]) . '",
+    type: "POST",
+    dataType: "json",
+    data: "id=" + id +"&price=" + result[0] + "&comment=" + result[1],
+    cache: false,
+    success: function (response) {
+        $.pjax.reload({container:"#pjax-callback", async:false});
+        if(response["success"]){
+            swal({
+            title: "Отправлено!",
+            type: "success",
+            progressSteps: false,
+            confirmButtonText: "Закрыть",
+            showCancelButton: false
+          })
+          }else{
+            swal({
+            title: "Ошибка!",
+            text: "Свяжитесь с нами для скорейшего устранения данной ошибки!",
+            type: "error",
+            progressSteps: false,
+            confirmButtonText: "Закрыть",
+            showCancelButton: false
+          })
+          }
+        }
+    });
+}, function () {
+  swal.resetDefaults()
+})
+})
 ');?>

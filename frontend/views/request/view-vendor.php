@@ -33,6 +33,20 @@ use yii\widgets\ListView;
 <style>
 .req-name{color:#84bf76;font-size:22px;}
 .req-fire{color:#d9534f;font-size:18px;}    
+.media{line-height: 2.4;}
+.media-heading{font-size:16px;font-weight:bold;letter-spacing:0.02em;}
+.req-fire{font-size:14px;font-weight:normal}
+.req-client-reg{font-size:12px;color:#828384;font-weight:normal}
+.req-client-info{font-size:12px;color:#828384;font-weight:normal}
+.req-discription{font-size:14px;font-weight:normal;color:#95989a;margin-bottom:10px}
+.req-respons{font-size:12px;color:#828384;font-weight:bold}
+.req-vendor-info{font-size: 14px;
+    color: #828384;
+    font-weight: normal;
+    margin-top: 25px;}
+.req-vendor-price{font-size:21px;color:#828384;font-weight:normal}
+.req-vendor-name{font-size:14px;font-weight:bold;color:#3f3f3e;}
+.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:5px;padding-bottom:5px}  
 </style>
 <section class="content">
     <div class="box box-info">

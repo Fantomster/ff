@@ -46,7 +46,7 @@ use yii\widgets\ListView;
     margin-top: 25px;}
 .req-vendor-price{font-size:21px;color:#828384;font-weight:normal}
 .req-vendor-name{font-size:14px;font-weight:bold;color:#3f3f3e;}
-.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:5px;}
+.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:5px;padding-bottom:5px}
 </style>
 <section class="content">
     <div class="box box-info">
@@ -56,7 +56,7 @@ use yii\widgets\ListView;
                 <div class="row">
                     <div class="col-md-12">
                         <h3 class="req-name pull-left"><?=$request->product?></h3>
-                        <?= Html::button('Закрыть заявку', ['class' => 'r-close btn btn-sm btn-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
+                        <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;Закрыть заявку', ['class' => 'r-close btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
                         
                     </div>
                 </div>

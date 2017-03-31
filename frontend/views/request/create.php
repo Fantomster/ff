@@ -20,15 +20,15 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 .modal-content{background: url(images/request-background.png) no-repeat center center;background-size: cover;}
 #msform {width: 100%;margin: 11px auto;text-align: center;position: relative;}
 #msform fieldset {padding: 20px 30px;min-height: 300px;box-sizing: border-box;border-radius: 4px;background: #fff;border: 5px solid #86be79;position: absolute;}
-@media (min-width: 768px) {#msform fieldset {width: 80%;margin: 0 10%;}}
+@media (min-width: 768px) {#msform fieldset {width: 60%;margin: 0 20%;}}
 @media (max-width: 769px) {#msform fieldset {width: 95%;margin: 0 2.5%;}}
 
 #msform fieldset:not(:first-of-type) {display: none;}
 #progressbar {padding-left: 0;position: relative; z-index:1;margin-bottom: 30px;overflow: hidden;counter-reset: step;}
 #progressbar li {list-style-type: none;color: #555;text-transform: uppercase;font-size: 11px;font-weight: 500;width: 33.33%;float: left;position: relative;}
-#progressbar li:before {content: counter(step); counter-increment: step; width: 62px; line-height: 62px; display: block; font-size: 0px; color: #fff; background: #3f3e3e; border-radius: 50%; margin: 0 auto 5px auto;}
+#progressbar li:before {content: counter(step); counter-increment: step; width: 75px; line-height: 75px; display: block; font-size: 0px; color: #fff; background: #3f3e3e; border-radius: 50%; margin: 0 auto 5px auto;}
 #progressbar li.active{color:#86be79;}
-#progressbar li:after {content: ''; width: 100%; height: 5px; background: #3f3e3e; position: absolute; left: -50%; top: 29px; z-index: -1;}
+#progressbar li:after {content: ''; width: 100%; height: 5px; background: #3f3e3e; position: absolute; left: -50%; top: 35px; z-index: -1;}
 #progressbar li:first-child:after {content: none; }
 #progressbar li.active:before, #progressbar li.active:after{background: #84bf76;color: white;}
 .btn{border-radius:3px;}
@@ -80,7 +80,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 #msform .tooltip {border-radius: 3px;font:400 12px;}
 #msform .tooltip > .tooltip-inner {background-color: #fefefe;border: 1px solid #555;color:#555;padding: 15px 18px;text-align: left;max-width: 600px;width: 400px}
 #msform .form-close{position: absolute;top:0px;right: 0px;cursor: pointer;width:55px;z-index: 99}
-#msform li .li-text{position: absolute;top:24px;left:0;right:0;color:white}
+#msform li .li-text{position: absolute;top:30px;left:0;right:0;color:white}
 .mswrapper{width: 80%;margin: 0 10%;}
 .close-h{margin-top: 56px;font-size: 18px;color: #ccc;}
 .select2-container--krajee.select2-container--open .select2-selection, .select2-container--krajee .select2-selection:focus {box-shadow: none;}

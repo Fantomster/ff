@@ -22,16 +22,14 @@ $request = new \common\models\Request();
 <style>
     .req-items{
     background: #fff;
-    border: 1px solid #e4e5e7;
-    border-radius: 2px;
+    border-bottom: 1px solid #f4f4f4;
     position: relative;
     padding: 10px;
     margin-top:10px;
     }
-    .req-items:hover{
--webkit-box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
--moz-box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
-box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
+    .req-items:hover, .req-name:hover{
+    border-bottom:1px solid #84bf76;
+    cursor:pointer
     }
 .req-name{color:#84bf76;font-size:22px;margin-top:20px}
 .req-fire{margin-left:10px;color:#d9534f;font-size:18px;}
@@ -75,6 +73,14 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
     border: none;
     border-left: none;
 }
+.req-name{font-size:16px;font-weight:bold;letter-spacing:0.02em;}
+.req-fire{font-size:14px;font-weight:normal}
+.req-cat{font-size:12px;font-weight:normal;color:#828384}
+.req-cat-name{font-size:12px;font-weight:bold;color:#828384}
+.req-nal-besnal{font-size:12px;font-weight:bold;color:#828384}
+.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:27px}
+.req-discription{font-size:14px;font-weight:normal;color:#95989a}
+.req-created{font-size:12px;font-weight:normal;color:#828384;}
 </style>
 <section class="content-header">
     <h1>
@@ -111,42 +117,56 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
                         </div>
                   </div>
                   <div class="col-md-4">
-                        <?php 
-                        echo Select2::widget([
-                            'name' => 'category',
-                            'value' => '',
-                            'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
-                            'options' => ['id'=>'category','multiple' => false, 'placeholder' => 'Категория товара'],
-                            'pluginOptions' => [
-                                'allowClear' => true
-                            ],
-                        ]);
-                        ?>
-                  </div>
-                  <div class="col-md-4">
-                        <?=CheckboxX::widget([
-                            'name' => 'my-only',
-                            'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                            'autoLabel' => true,
-                            'options' => ['id' => 'my-only'],
-                            'pluginOptions' => [
-                                'threeState' => false,
-                                'theme' => 'krajee-flatblue',
-                                'enclosedLabel' => true,
-                                'size' => 'lg',
-                            ],
-                            'labelSettings' => [
-                                'label' => 'Только мои',
-                                'position' => CheckboxX::LABEL_RIGHT,
-                                'options' =>['style'=>'font-size: 16px;color: #3f3e3e;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 500;']
-                                ]
-                        ]);?>
-                  </div>
-                  
+                    <?php 
+                    echo Select2::widget([
+                        'name' => 'category',
+                        'value' => '',
+                        'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
+                        'options' => ['id'=>'category','multiple' => false, 'placeholder' => 'Категория товара'],
+                        'pluginOptions' => [
+                            'allowClear' => true
+                        ],
+                    ]);
+                    ?>
+                </div>
+                <div class="col-md-2">
+                    <?php 
+                    echo Select2::widget([
+                        'name' => 'my-only',
+                        'value' => '',
+                        'data' => [1=>'Все',2=>'Только мои'],
+                        'options' => ['id'=>'my-only','multiple' => false, 'placeholder' => false],
+                        'hideSearch' => true,
+                        'pluginOptions' => [
+                            'allowClear' => false
+                        ],
+                    ]);
+                    ?>
+                </div>
+                <div class="col-md-2">
+                    <?php 
+                    echo Select2::widget([
+                        'name' => 'rush',
+                        'value' => '',
+                        'data' => [1=>'Все',2=>'Срочные'],
+                        'options' => ['id'=>'rush','multiple' => false, 'placeholder' => false],
+                        'hideSearch' => true,
+                        'pluginOptions' => [
+                            'allowClear' => false
+                        ],
+                    ]);
+                    ?>
+                </div>
                 </div>
             </div>
-            <div class="col-md-12 no-padding">
-              <h3 class="box-title">Заявки</h3> 
+        </div>
+    </div>
+    <div class="box box-info">
+        <div class="box-header with-border">
+            <h3 class="box-title">Заявки</h3> 
+        </div>
+        <div class="box-body">
+            <div class="col-md-12 no-padding"> 
               <?php 
               Pjax::begin([
                   'id' => 'list', 
@@ -168,7 +188,7 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
                     'options'=>[
                       'class'=>'col-lg-12 list-wrapper inline no-padding'
                     ],
-                    'layout' => "{summary}\n{pager}\n{items}\n{pager}",
+                    'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
                     'summary' => 'Показано {count} из {totalCount}',
                     'emptyText' => 'Список пуст',
                 ])?>
@@ -181,7 +201,7 @@ box-shadow: 0px 2px 21px -8px rgba(0,0,0,0.75);
 
 $this->registerJs('
 var timer;
-$("#search,#my-only,#category").on("keyup put paste change", function () {
+$("#search,#my-only,#category,#rush").on("keyup put paste change", function () {
 window.clearTimeout(timer);
    timer = setTimeout(function () {
        $.pjax({
@@ -189,7 +209,7 @@ window.clearTimeout(timer);
         push: true,
         url: "' . Url::to(["request/list"]) . '",
         container: "#list",
-        data: { search: $("#search").val(), myOnly: $("#my-only").prop("checked"), category: $("#category").val()}
+        data: { search: $("#search").val(), myOnly: $("#my-only").val(), category: $("#category").val(), rush: $("#rush").val()}
       });
    }, 700);
 });

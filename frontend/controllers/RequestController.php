@@ -58,6 +58,7 @@ class RequestController extends DefaultController {
         $organization = $this->currentUser->organization;
         $search = ['like','product',\Yii::$app->request->get('search')?:''];
         $category = \Yii::$app->request->get('category')?['category' => \Yii::$app->request->get('category')]:[];
+        
         if($organization->type_id == Organization::TYPE_RESTAURANT){
             $dataListRequest = new ActiveDataProvider([
                 'query' => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
@@ -72,15 +73,14 @@ class RequestController extends DefaultController {
             }    
         }
         if($organization->type_id == Organization::TYPE_SUPPLIER){
-            $myOnly = [];
-            if(\Yii::$app->request->get('myOnly')=='true'){
-            $myOnly = ['responsible_supp_org_id' => $organization->id];
-            }
+            $my = \Yii::$app->request->get('myOnly')==2?['responsible_supp_org_id' => $organization->id]:[];
+            $rush = \Yii::$app->request->get('rush')==2?['rush_order' => 1]:[];
             $dataListRequest = new ActiveDataProvider([
                 'query' => Request::find()->where(['active_status' => Request::ACTIVE])
                     ->andWhere($search)
-                    ->andWhere($myOnly)
                     ->andWhere($category)
+                    ->andWhere($my)
+                    ->andWhere($rush)
                     ->orderBy('id DESC'),
                 'pagination' => [
                     'pageSize' => 15,

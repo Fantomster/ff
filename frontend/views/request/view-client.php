@@ -33,6 +33,20 @@ use yii\widgets\ListView;
 <style>
 .req-name{color:#84bf76;font-size:22px;}
 .req-fire{color:#d9534f;font-size:18px;}    
+.media{line-height: 2.4;}
+.media-heading{font-size:16px;font-weight:bold;letter-spacing:0.02em;}
+.req-fire{font-size:14px;font-weight:normal}
+.req-client-reg{font-size:12px;color:#828384;font-weight:normal}
+.req-client-info{font-size:12px;color:#828384;font-weight:normal}
+.req-discription{font-size:14px;font-weight:normal;color:#95989a;margin-bottom:10px}
+.req-respons{font-size:12px;color:#828384;font-weight:bold}
+.req-vendor-info{font-size: 14px;
+    color: #828384;
+    font-weight: normal;
+    margin-top: 25px;}
+.req-vendor-price{font-size:21px;color:#828384;font-weight:normal}
+.req-vendor-name{font-size:14px;font-weight:bold;color:#3f3f3e;}
+.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:5px;}
 </style>
 <section class="content">
     <div class="box box-info">
@@ -58,14 +72,19 @@ use yii\widgets\ListView;
                                     <div class="media-body">
                                       <h4 class="media-heading"><?=$author->name?></h4>
                                       <div class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</div>
-                                      <div class=""><?=$author->created_at?></div>
+                                      <div class="req-respons">Исполнитель: 
+                                        <?=$request->responsible_supp_org_id ? 
+                                              '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
+                                              '<span style="color:#ccc;">не назначен</span>';
+                                        ?>
+                                      </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="">Объем закупки <span class=""><?=$request->amount?></span></div>
-                                <div class="">Периодичность заказа <span class=""><?=$request->regular?></span></div>
-                                <div class="">Способ оплаты <span class="">
+                            <div class="col-md-4 text-right" style='line-height: 2.4;'>
+                                <div class="req-client-info">Объем закупки: <span class="text-bold"><?=$request->amount?></span></div>
+                                <div class="req-client-info">Периодичность заказа: <span class="text-bold"><?=$request->regular?></span></div>
+                                <div class="req-client-info">Способ оплаты: <span class="text-bold">
                                     <?=$request->payment_method == \common\models\Request::NAL ? 
                                     'Наличный расчет':
                                     'Безналичный расчет';?></span>
@@ -77,17 +96,14 @@ use yii\widgets\ListView;
                 <div class="row">
                     <hr>
                     <div class="col-md-12">
-                        <div class="">Подробное описание:</div>
-                        <div class="">
-                        <?=$request->comment?$request->comment:'<span style="color:#ccc">Нет информации</span>' ?>
+                        <div class="req-discription">
+                        <?=$request->comment?$request->comment:'<b>Нет информации</b>' ?>
                         </div> 
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="">
-                            <div class="">Категория: <span class=""><?=$request->categoryName->name ?></span></div>
-                        </div> 
+                        <div class="req-client-reg">Категория: <b><?=$request->categoryName->name ?></b></div>
                     </div>
                 </div>
                 <?php 
@@ -97,18 +113,6 @@ use yii\widgets\ListView;
                   'enablePushState' => false,
                   ]);
                 ?>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="">
-                            <h5 class="">Исполнитель: 
-                              <?=$request->responsible_supp_org_id ? 
-                                    '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
-                                    '<span style="color:#ccc;">не назначен</span>';
-                              ?>
-                            </h5>
-                        </div> 
-                    </div>
-                </div>
                 <div class="row">
                     <hr>
                     <div class="col-md-12">
@@ -127,7 +131,7 @@ use yii\widgets\ListView;
                             'options'=>[
                               'class'=>'col-lg-12 list-wrapper inline'
                             ],
-                            'layout' => "{summary}\n{pager}\n{items}\n{pager}",
+                            'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
                             'summary' => 'Показано {count} из {totalCount}',
                             'emptyText' => 'Откликов по заявке 0',
                         ])?> 

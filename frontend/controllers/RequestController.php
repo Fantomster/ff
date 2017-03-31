@@ -62,7 +62,7 @@ class RequestController extends DefaultController {
             $dataListRequest = new ActiveDataProvider([
                 'query' => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
                 'pagination' => [
-                    'pageSize' => 5,
+                    'pageSize' => 15,
                 ],
             ]);
             if (Yii::$app->request->isPjax) {
@@ -83,7 +83,7 @@ class RequestController extends DefaultController {
                     ->andWhere($category)
                     ->orderBy('id DESC'),
                 'pagination' => [
-                    'pageSize' => 5,
+                    'pageSize' => 15,
                 ],
             ]);
             if (Yii::$app->request->isPjax) {
@@ -109,7 +109,7 @@ class RequestController extends DefaultController {
             $dataCallback = new ActiveDataProvider([
                 'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
                 'pagination' => [
-                    'pageSize' => 5,
+                    'pageSize' => 15,
                 ],
             ]);
             return $this->render("view-client", compact('request','countComments','author','dataCallback'));
@@ -125,7 +125,7 @@ class RequestController extends DefaultController {
             $dataCallback = new ActiveDataProvider([
                 'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
                 'pagination' => [
-                    'pageSize' => 5,
+                    'pageSize' => 15,
                 ],
             ]);
             return $this->render("view-vendor", compact('request','countComments','author','dataCallback','trueFalseCallback'));

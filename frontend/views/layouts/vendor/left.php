@@ -20,7 +20,8 @@ $menuItems = [
     ],
     ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
-    ['label' => 'F-MARKET<sub class="sub-new">NEW</sub>', 'icon' => 'fa fa-shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'F-MARKET', 'icon' => 'fa fa-shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'Заявки<sub class="sub-new">NEW</sub>', 'icon' => 'fa fa-paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
     [
         'label' => 'Мои клиенты',
         'icon' => 'fa fa-users',

@@ -56,8 +56,9 @@ class RequestController extends DefaultController {
     }
     public function actionList() {
         $organization = $this->currentUser->organization;
+        $search = ['like','product',\Yii::$app->request->get('search')?:''];
+        $category = \Yii::$app->request->get('category')?['category' => \Yii::$app->request->get('category')]:[];
         if($organization->type_id == Organization::TYPE_RESTAURANT){
-            $search = ['like','product',\Yii::$app->request->get('search')?:''];
             $dataListRequest = new ActiveDataProvider([
                 'query' => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
                 'pagination' => [
@@ -65,10 +66,31 @@ class RequestController extends DefaultController {
                 ],
             ]);
             if (Yii::$app->request->isPjax) {
-                return $this->renderPartial("list", compact('dataListRequest','search','countComments'));
+                return $this->renderPartial("list-client", compact('dataListRequest','organization'));
             }else{
-                return $this->render("list", compact('dataListRequest','search','countComments'));
+                return $this->render("list-client", compact('dataListRequest','organization'));
             }    
+        }
+        if($organization->type_id == Organization::TYPE_SUPPLIER){
+            $myOnly = [];
+            if(\Yii::$app->request->get('myOnly')=='true'){
+            $myOnly = ['responsible_supp_org_id' => $organization->id];
+            }
+            $dataListRequest = new ActiveDataProvider([
+                'query' => Request::find()->where(['active_status' => Request::ACTIVE])
+                    ->andWhere($search)
+                    ->andWhere($myOnly)
+                    ->andWhere($category)
+                    ->orderBy('id DESC'),
+                'pagination' => [
+                    'pageSize' => 5,
+                ],
+            ]);
+            if (Yii::$app->request->isPjax) {
+                return $this->renderPartial("list-vendor", compact('dataListRequest','organization'));
+            }else{
+                return $this->render("list-vendor", compact('dataListRequest','organization'));
+            }
         }
     }
     
@@ -80,13 +102,18 @@ class RequestController extends DefaultController {
         
         $request = Request::find()->where(['id' => $id])->one();
         $author = Organization::findOne(['id'=>$request->rest_org_id]);
-        $countComments = RequestCallback::find()->where(['request_id' => $id])->count();
-        $dataCallback = new ActiveDataProvider([
+        
+        
+        if($user->organization->type_id == Organization::TYPE_RESTAURANT){
+            $countComments = RequestCallback::find()->where(['request_id' => $id])->count();
+            $dataCallback = new ActiveDataProvider([
                 'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
                 'pagination' => [
                     'pageSize' => 5,
                 ],
             ]);
+            return $this->render("view-client", compact('request','countComments','author','dataCallback'));
+        }
         if($user->organization->type_id == Organization::TYPE_SUPPLIER){
             if(!RequestCounters::find()->where(['request_id' => $id, 'user_id'=>$user->id])->exists()){
                 $requestCounters = new RequestCounters();
@@ -94,8 +121,15 @@ class RequestController extends DefaultController {
                 $requestCounters->user_id = $user->id;
                 $requestCounters->save();
             }  
+            $trueFalseCallback = RequestCallback::find()->where(['request_id' => $id,'supp_org_id'=>$user->organization_id])->exists();
+            $dataCallback = new ActiveDataProvider([
+                'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
+                'pagination' => [
+                    'pageSize' => 5,
+                ],
+            ]);
+            return $this->render("view-vendor", compact('request','countComments','author','dataCallback','trueFalseCallback'));
         }
-        return $this->render("view", compact('request','countComments','author','dataCallback'));
     }
     public function actionSetResponsible(){
         $userOrg = $this->currentUser->organization_id;
@@ -116,7 +150,11 @@ class RequestController extends DefaultController {
             return ['success'=>false];
         }
         $request = Request::find()->where(['id' => $id])->one();
-        $request->responsible_supp_org_id = $responsible_id;
+        if($request->responsible_supp_org_id == $responsible_id){
+           $request->responsible_supp_org_id = null; 
+        }else{
+            $request->responsible_supp_org_id = $responsible_id;
+        }
         $request->save();
         return ['success'=>true];
         }
@@ -134,6 +172,22 @@ class RequestController extends DefaultController {
         $request = Request::find()->where(['id' => $id])->one();
         $request->active_status = Request::INACTIVE;
         $request->save();
+        return ['success'=>true];
+        }
+    }
+    public function actionAddCallback(){
+        $user = $this->currentUser;
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON; 
+        $id = Yii::$app->request->post('id');
+        $price = Yii::$app->request->post('price');
+        $comment = Yii::$app->request->post('comment');
+        $requestCallback = new RequestCallback();
+        $requestCallback->request_id = $id;
+        $requestCallback->supp_org_id = $user->organization_id;
+        $requestCallback->price = $price;
+        $requestCallback->comment = $comment;
+        $requestCallback->save();
         return ['success'=>true];
         }
     }

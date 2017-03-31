@@ -11,6 +11,7 @@ use common\models\Profile;
 use common\models\Organization;
 use common\models\Role;
 use common\components\AccessRule;
+use yii\web\HttpException;
 use yii\helpers\Url;
 
 /**

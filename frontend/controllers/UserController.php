@@ -104,7 +104,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     $transaction->rollBack();
                 }
                 if ($organization->type_id == Organization::TYPE_SUPPLIER) {
-                    $this->initDemoData($user, $profile, $organization);
+                    //$this->initDemoData($user, $profile, $organization);
                 }
                 $this->afterRegister($user);
 

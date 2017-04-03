@@ -586,6 +586,13 @@ class OrderController extends DefaultController {
             if (isset($discount['discount_type']) && isset($discount['discount'])) {
                 $order->discount_type = $discount['discount_type'];
                 $order->discount = $order->discount_type ? $discount['discount'] : null;
+                if ($order->discount_type == Order::DISCOUNT_FIXED) {
+                    $message = $order->discount." руб";
+                } else {
+                    $message = $order->discount."%";
+                }
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ ' . $order->id . " в размере:$message");
+                //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;

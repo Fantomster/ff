@@ -32,7 +32,7 @@ class SiteController extends Controller {
                 'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'faq', 'restaurant', 'supplier'],
                 'rules' => [
                     [
-                        'actions' => ['signup', 'index', 'about'],
+                        'actions' => ['signup', 'index', 'about', 'faq', 'restaurant', 'supplier'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],

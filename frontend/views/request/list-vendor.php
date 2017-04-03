@@ -104,6 +104,7 @@ $request = new \common\models\Request();
             <div class="col-md-12 no-padding">
                 <div class="row">
                   <div class="col-md-4">
+                      <?= Html::label('&nbsp;', null, ['class' => 'label','style'=>'color:#555']) ?>
                         <div class="input-group">
                             <span class="input-group-addon">
                               <i class="fa fa-search"></i>
@@ -117,8 +118,8 @@ $request = new \common\models\Request();
                         </div>
                   </div>
                   <div class="col-md-4">
-                    <?php 
-                    echo Select2::widget([
+                    <?= Html::label('Категория', null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?=Select2::widget([
                         'name' => 'category',
                         'value' => '',
                         'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
@@ -130,8 +131,8 @@ $request = new \common\models\Request();
                     ?>
                 </div>
                 <div class="col-md-2">
-                    <?php 
-                    echo Select2::widget([
+                    <?= Html::label('Все заявки/мои', null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?=Select2::widget([
                         'name' => 'my-only',
                         'value' => '',
                         'data' => [1=>'Все',2=>'Только мои'],
@@ -144,8 +145,8 @@ $request = new \common\models\Request();
                     ?>
                 </div>
                 <div class="col-md-2">
-                    <?php 
-                    echo Select2::widget([
+                    <?= Html::label('Все заявки/срочные', null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?=Select2::widget([
                         'name' => 'rush',
                         'value' => '',
                         'data' => [1=>'Все',2=>'Срочные'],

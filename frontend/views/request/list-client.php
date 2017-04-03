@@ -157,7 +157,7 @@ $request = new \common\models\Request();
     </div>
 </section>
 <?php
-
+$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/jquery-ui.min.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 $this->registerJs('
 $("#create").removeAttr("tabindex");
 var timer;

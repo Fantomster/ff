@@ -5,9 +5,9 @@ use yii\web\View;
 use yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
-$newOrdersCount = $user->organization->getNewOrdersCount();
-$newClientCount = $user->organization->getNewClientCount();
-$cartCount = $user->organization->getCartCount();
+$manager_id = Yii::$app->user->can('manage') ? null : $user->id;
+$newOrdersCount = $user->organization->getNewOrdersCount($manager_id);
+$newClientCount = Yii::$app->user->can('manage') ? $user->organization->getNewClientCount() : 0;
 
 $menuItems = [
     ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],

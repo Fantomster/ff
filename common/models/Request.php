@@ -22,6 +22,8 @@ use yii\db\ActiveRecord;
  * @property integer $rest_org_id
  * @property integer $active_status
  *
+ * @property RegularName $regularName
+ * @property PaymentMethodName $paymentMethodName
  * @property CategoryName $categoryName
  * @property CountCallback $countCallback
  * @property RequestCallback[] $requestCallbacks
@@ -31,8 +33,6 @@ class Request extends \yii\db\ActiveRecord
     const ACTIVE = 1;
     const INACTIVE = 0;
     
-    const NAL = 1;
-    const BEZNAL = 2;
     
     /**
      * @inheritdoc
@@ -171,7 +171,34 @@ class Request extends \yii\db\ActiveRecord
     {
         return $this->hasOne(MpCategory::className(), ['id' => 'category']);
     }
-    
+    public function getRegularName()
+    {
+        switch ($this->regular) {
+            case 1:
+                return 'Разово';
+                break;
+            case 2:
+                return 'Ежедневно';
+                break;
+            case 3:
+                return 'Каждую неделю';
+                break;
+            case 4:
+                return 'Каждый месяц';
+                break;
+        }
+    }
+    public function getPaymentMethodName()
+    {
+        switch ($this->payment_method) {
+            case 1:
+                return 'Наличный расчет';
+                break;
+            case 2:
+                return 'Безналичный расчет';
+                break;
+        }
+    }
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);

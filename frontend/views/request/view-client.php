@@ -71,7 +71,9 @@ use yii\widgets\ListView;
                                     </div>
                                     <div class="media-body">
                                       <h4 class="media-heading"><?=$author->name?></h4>
+                                      <?php if ($request->rush_order){?>
                                       <div class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</div>
+                                      <?php } ?>
                                       <div class="req-respons">Исполнитель: 
                                         <?=$request->responsible_supp_org_id ? 
                                               '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
@@ -83,11 +85,9 @@ use yii\widgets\ListView;
                             </div>
                             <div class="col-md-4 text-right" style='line-height: 2.4;'>
                                 <div class="req-client-info">Объем закупки: <span class="text-bold"><?=$request->amount?></span></div>
-                                <div class="req-client-info">Периодичность заказа: <span class="text-bold"><?=$request->regular?></span></div>
+                                <div class="req-client-info">Периодичность заказа: <span class="text-bold"><?=$request->regularName?></span></div>
                                 <div class="req-client-info">Способ оплаты: <span class="text-bold">
-                                    <?=$request->payment_method == \common\models\Request::NAL ? 
-                                    'Наличный расчет':
-                                    'Безналичный расчет';?></span>
+                                    <?=$request->paymentMethodName ?></span>
                                 </div>
                             </div>
                         </div>

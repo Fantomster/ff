@@ -15,9 +15,7 @@ use yii\helpers\Url;
           <span class="req-cat">Категория:</span><span class="req-cat-name"> <b><?=$model->categoryName->name ?></b></span>
           <span class="req-nal-besnal"><i class="fa fa-money" aria-hidden="true"></i> 
               <b>
-              <?=$model->payment_method == \common\models\Request::NAL ? 
-              'Наличный расчет':
-              'Безналичный расчет';?>
+              <?=$model->paymentMethodName ?>
               </b>
           </span>
       </div>

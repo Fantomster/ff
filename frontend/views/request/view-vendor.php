@@ -86,10 +86,10 @@ use yii\widgets\ListView;
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="">Объем закупки <span class=""><?=$request->amount?></span></div>
-                                <div class="">Периодичность заказа <span class=""><?=$request->regularName?></span></div>
-                                <div class="">Способ оплаты <span class="">
+                            <div class="col-md-4 text-right">
+                                <div class="">Объем закупки: <span class="text-bold"><?=$request->amount?></span></div>
+                                <div class="">Периодичность заказа: <span class="text-bold"><?=$request->regularName?></span></div>
+                                <div class="">Способ оплаты: <span class="text-bold">
                                     <?=$request->paymentMethodName?></span>
                                 </div>
                             </div>

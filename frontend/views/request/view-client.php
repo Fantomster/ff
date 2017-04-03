@@ -60,6 +60,13 @@ use yii\widgets\ListView;
                         
                     </div>
                 </div>
+                <?php 
+                Pjax::begin([
+                  'id' => 'pjax-callback', 
+                  'timeout' => 10000, 
+                  'enablePushState' => false,
+                  ]);
+                ?>
                 <div class="row">
                     <hr>
                     <div class="col-md-12">
@@ -106,13 +113,7 @@ use yii\widgets\ListView;
                         <div class="req-client-reg">Категория: <b><?=$request->categoryName->name ?></b></div>
                     </div>
                 </div>
-                <?php 
-                Pjax::begin([
-                  'id' => 'pjax-callback', 
-                  'timeout' => 10000, 
-                  'enablePushState' => false,
-                  ]);
-                ?>
+                
                 <div class="row">
                     <hr>
                     <div class="col-md-12">

@@ -46,7 +46,7 @@ use yii\widgets\ListView;
     margin-top: 25px;}
 .req-vendor-price{font-size:21px;color:#828384;font-weight:normal}
 .req-vendor-name{font-size:14px;font-weight:bold;color:#3f3f3e;}
-.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:5px;padding-bottom:5px}  
+.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:5px;padding-bottom:5px}
 </style>
 <section class="content">
     <div class="box box-info">
@@ -82,14 +82,19 @@ use yii\widgets\ListView;
                                       <?php if ($request->rush_order){?>
                                       <div class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</div>
                                       <?php } ?>
-                                      <div class=""><?=$author->created_at?></div>
+                                      <div class="req-respons">Исполнитель: 
+                                        <?=$request->responsible_supp_org_id ? 
+                                              '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
+                                              '<span style="color:#ccc;">не назначен</span>';
+                                        ?>
+                                      </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4 text-right">
-                                <div class="">Объем закупки: <span class="text-bold"><?=$request->amount?></span></div>
-                                <div class="">Периодичность заказа: <span class="text-bold"><?=$request->regularName?></span></div>
-                                <div class="">Способ оплаты: <span class="text-bold">
+                                <div class="req-client-info">Объем закупки: <span class="text-bold"><?=$request->amount?></span></div>
+                                <div class="req-client-info">Периодичность заказа: <span class="text-bold"><?=$request->regularName?></span></div>
+                                <div class="req-client-info">Способ оплаты: <span class="text-bold">
                                     <?=$request->paymentMethodName?></span>
                                 </div>
                             </div>
@@ -99,29 +104,14 @@ use yii\widgets\ListView;
                 <div class="row">
                     <hr>
                     <div class="col-md-12">
-                        <div class="">Подробное описание:</div>
-                        <div class="">
-                        <?=$request->comment?$request->comment:'<span style="color:#ccc">Нет информации</span>' ?>
+                        <div class="req-discription">
+                        <?=$request->comment?$request->comment:'<b>Нет информации</b>' ?>
                         </div> 
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="">
-                            <div class="">Категория: <span class=""><?=$request->categoryName->name ?></span></div>
-                        </div> 
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="">
-                            <h5 class="">Исполнитель: 
-                              <?=$request->responsible_supp_org_id ? 
-                                    '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
-                                    '<span style="color:#ccc;">не назначен</span>';
-                              ?>
-                            </h5>
-                        </div> 
+                        <div class="req-client-reg">Категория: <b><?=$request->categoryName->name ?></b></div>
                     </div>
                 </div>
                 <div class="row">

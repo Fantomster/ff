@@ -79,18 +79,18 @@ use yii\widgets\ListView;
                                     </div>
                                     <div class="media-body">
                                       <h4 class="media-heading"><?=$author->name?></h4>
+                                      <?php if ($request->rush_order){?>
                                       <div class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</div>
+                                      <?php } ?>
                                       <div class=""><?=$author->created_at?></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="">Объем закупки <span class=""><?=$request->amount?></span></div>
-                                <div class="">Периодичность заказа <span class=""><?=$request->regular?></span></div>
+                                <div class="">Периодичность заказа <span class=""><?=$request->regularName?></span></div>
                                 <div class="">Способ оплаты <span class="">
-                                    <?=$request->payment_method == \common\models\Request::NAL ? 
-                                    'Наличный расчет':
-                                    'Безналичный расчет';?></span>
+                                    <?=$request->paymentMethodName?></span>
                                 </div>
                             </div>
                         </div>
@@ -173,7 +173,7 @@ var steps = [
     preConfirm: function (price) {
     return new Promise(function (resolve, reject) {  
         if (!price.match(/^\s*-?[1-9]\d*(\.\d{1,2})?\s*$/)) {
-            reject("Не верный формат! Пример: 1220 , 1220.30");
+            reject("Неверный формат! Пример: 1220 , 1220.30");
         }
         resolve()  
       })

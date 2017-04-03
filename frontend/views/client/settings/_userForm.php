@@ -51,7 +51,7 @@ $form = ActiveForm::begin([
                                 ]
                             ])->label(false);?>
 
-    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType)) ?>
+    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType))->label("Роль") ?>
 
 </div>
 <div class="modal-footer">

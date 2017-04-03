@@ -294,7 +294,7 @@ class Organization extends \yii\db\ActiveRecord {
      * @return integer
      */
 
-    public function getNewOrdersCount() {
+    public function getNewOrdersCount($manager_id = null) {
         $result = 0;
         switch ($this->type_id) {
             case self::TYPE_RESTAURANT:
@@ -304,16 +304,28 @@ class Organization extends \yii\db\ActiveRecord {
                         )->count();
                 break;
             case self::TYPE_SUPPLIER:
-                $result = Order::find()->where([
-                            'vendor_id' => $this->id,
-                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
-                        )->count();
+                if (isset($manager_id)) {
+                    $maTable = ManagerAssociate::tableName();
+                    $orderTable = Order::tableName();
+                    $result = Order::find()
+                            ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                            ->where([
+                                'vendor_id' => $this->id,
+                                "$maTable.manager_id" => $manager_id,
+                                'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                            ->count();
+                } else {
+                    $result = Order::find()->where([
+                                'vendor_id' => $this->id,
+                                'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]]
+                            )->count();
+                }
                 break;
         }
         return $result;
     }
 
-    public function getNewClientCount() {
+    public function getNewClientCount($manager_id = null) {
         $result = 0;
         switch ($this->type_id) {
             case self::TYPE_RESTAURANT:
@@ -477,11 +489,11 @@ class Organization extends \yii\db\ActiveRecord {
      * @return string url to avatar image
      */
     public function getPictureUrl() {
-        if($this->type_id == self::TYPE_SUPPLIER){
-         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_VENDOR_AVATAR;   
+        if ($this->type_id == self::TYPE_SUPPLIER) {
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_VENDOR_AVATAR;
         }
-        if($this->type_id == self::TYPE_RESTAURANT){
-         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_RESTAURANT_AVATAR;   
+        if ($this->type_id == self::TYPE_RESTAURANT) {
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_RESTAURANT_AVATAR;
         }
         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
     }
@@ -579,6 +591,6 @@ class Organization extends \yii\db\ActiveRecord {
                                 ->asArray()
                                 ->all(), 'id', 'name');
         return $managers;
-        
     }
+
 }

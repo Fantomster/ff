@@ -160,6 +160,7 @@ $request = new \common\models\Request();
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/jquery-ui.min.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 $this->registerJs('
 $("#create").removeAttr("tabindex");
+$("#create .modal-content").css("overflow-y","auto")
 var timer;
 $("#search").on("keyup put paste change", function () {
 window.clearTimeout(timer);

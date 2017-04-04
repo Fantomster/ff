@@ -435,7 +435,26 @@ class SiteController extends Controller {
         if ($products) {
             return $this->render('/site/supplier-products', compact('products', 'id', 'vendor', 'productsCount'));
         } else {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            $breadcrumbs = [
+                'options' => [
+                    'class' => 'breadcrumb',
+                ],
+                'homeLink' => false,
+                'links' => [
+                    [
+                        'label' => 'Все поставщики',
+                        'url' => ['/site/suppliers'],
+                    ],
+                    [
+                        'label' => $vendor->name,
+                        'url' => ['/site/supplier', 'id' => $vendor->id],
+                    ],
+                    'Каталог',
+                ],
+            ];
+            $title = 'F-MARKET Продукты поставщика';
+            $message = 'Поставщик еще не добавил свои товары на торговую площадку F-MARKET';
+            return $this->render('/site/empty', compact('breadcrumbs','title', 'message'));
         }
     }
 

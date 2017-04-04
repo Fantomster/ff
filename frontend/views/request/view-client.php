@@ -7,9 +7,6 @@ use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii\widgets\ListView;
 ?>
-<style>
- 
-</style>
 <section class="content-header">
     <h1>
         <i class="fa fa-paper-plane"></i> Заявка №<?=$request->id?>

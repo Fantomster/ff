@@ -5,7 +5,7 @@ use kartik\date\DatePicker;
 use dosamigos\chartjs\ChartJs;
 
 $this->registerJs('
-    $("document").ready(function(){
+    $(document).ready(function(){
         var justSubmitted = false;
         $(document).on("change", "#dateFrom, #dateTo", function() {
             if (!justSubmitted) {
@@ -13,7 +13,7 @@ $this->registerJs('
                 justSubmitted = true;
                 setTimeout(function() {
                     justSubmitted = false;
-                }, 500);
+                }, 1000);
             }
         });
     });

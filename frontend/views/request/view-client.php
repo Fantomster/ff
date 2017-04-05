@@ -50,13 +50,6 @@ use yii\widgets\ListView;
         <!-- /.box-header -->
         <div class="box-body no-padding">
             <div class="col-md-12">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h3 class="req-name pull-left"><?=$request->product?></h3>
-                        <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;Закрыть заявку', ['class' => 'r-close btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
-                        
-                    </div>
-                </div>
                 <?php 
                 Pjax::begin([
                   'id' => 'pjax-callback', 
@@ -64,6 +57,17 @@ use yii\widgets\ListView;
                   'enablePushState' => false,
                   ]);
                 ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="req-name pull-left"><?=$request->product?></h3>
+                        <?php if ($request->active_status){
+                        echo Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;Закрыть заявку', ['class' => 'r-close btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']);
+                        }else{
+                        echo Html::button('Закрыта', ['disabled'=>true,'class' => 'btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']);
+                        }
+                        ?>
+                    </div>
+                </div>
                 <div class="row">
                     <hr>
                     <div class="col-md-12">

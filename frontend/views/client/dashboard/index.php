@@ -138,9 +138,9 @@ $this->registerCss('
                             <div class="dash-small-box" data-target="request">
                                 <div class="inner" style="position:relative;z-index:2">
                                   <h3>Создать заявку</h3>
-                                  <p>скоро</p>
+                                  <p>для поставщиков</p>
                                 </div>
-                                <?= Html::a('Заявки', null,['class'=>'btn btn-outline-success' ,'disabled' => 'true', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
     background: url(images/dash1.png) no-repeat top right;
     background-size: 170px;">

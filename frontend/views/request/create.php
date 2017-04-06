@@ -25,7 +25,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
 #msform fieldset:not(:first-of-type) {display: none;}
 #progressbar {padding-left: 0;position: relative; z-index:1;margin-bottom: 30px;overflow: hidden;counter-reset: step;}
-#progressbar li {list-style-type: none;color: #555;text-transform: uppercase;font-size: 11px;font-weight: 500;width: 33.33%;float: left;position: relative;}
+#progressbar li {list-style-type: none;color: #555;text-transform: uppercase;font-size: 11px;font-weight: 500;width: 25%;float: left;position: relative;}
 #progressbar li:before {content: counter(step); counter-increment: step; width: 75px; line-height: 75px; display: block; font-size: 0px; color: #fff; background: #3f3e3e; border-radius: 50%; margin: 0 auto 5px auto;}
 #progressbar li.active{color:#86be79;}
 #progressbar li:after {content: ''; width: 100%; height: 5px; background: #3f3e3e; position: absolute; left: -50%; top: 35px; z-index: -1;}
@@ -140,6 +140,9 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
     color: #86be79;
 }
 .field-request-rush_order{margin-top:20px}
+.field-profile-sms_allow {
+    margin-top: 20px;
+}
 </style>
 <?php 
 Pjax::begin([
@@ -166,6 +169,7 @@ Pjax::begin([
 		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
 		<li><span class="li-text">Оплата</span></li>
+                <li><span class="li-text">Контакты</span></li>
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
@@ -253,9 +257,38 @@ Pjax::begin([
                     * Заявка будет существовать в системе f-keeper один месяц, или пока вы ее не закроете
                 </div>
                 <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
-                <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
+                <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
         <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>        
-        </fieldset>       
+        </fieldset> 
+        <fieldset class="text-left">
+            <h5>Адрес доставки</h5>
+            <?= $form->field($organization, 'address', 
+    ['template'=>'{input}{error}'])->
+    textInput(['placeholder' => 'Москва, пр-кт Андропова, 19']) ?>
+            <h5>Ваш контактный телефон</h5>
+            <?= $form->field($profile, 'phone', 
+    ['template'=>'{input}{error}'])->
+    textInput(['placeholder' => '']) ?>
+            <?=$form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
+            'autoLabel' => true,
+            'model' => $profile,
+            'attribute' => 'sms_allow',
+            'pluginOptions'=>[
+                'threeState'=>false,
+                'theme' => 'krajee-flatblue',
+                'enclosedLabel' => false,
+                'size'=>'lg',
+                ],
+            'labelSettings' => [
+                'label' => 'смс информирование <span style="font-size:14px;color:#ccc;margin-left:5px">Получайте смс о новых откликах по заявке</span>',
+                'position' => CheckboxX::LABEL_RIGHT,
+                'options' =>['style'=>'font-size: 20px;color: #3f3e3e;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 500;']
+                ]
+            ])->label(false);?>
+            <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
+            <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>4]) ?>
+            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
+        </fieldset>
 <?php ActiveForm::end(); ?>
 
 <?php Pjax::end(); ?>

@@ -112,7 +112,7 @@ $request = new \common\models\Request();
             ?>
             </div>
             <?php
-            echo $this->render("create", compact('request'));
+            echo $this->render("create", compact('request','organization','profile'));
             Modal::end();?>     
         </div>
     </div>
@@ -235,6 +235,10 @@ $(document).on("click",".next",function(e){
             }
        } 
        if(step == 3){ 
+       form.yiiActiveForm("resetForm");
+       next(cur); 
+       }
+       if(step == 4){ 
        $.pjax.reload({container:"#list", async:false});
            if(response["saved"]){ 
             $("#create").modal("hide"); 

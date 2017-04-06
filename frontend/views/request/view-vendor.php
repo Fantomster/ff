@@ -6,6 +6,20 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii\widgets\ListView;
+
+use dosamigos\google\maps\LatLng;
+use dosamigos\google\maps\services\DirectionsWayPoint;
+use dosamigos\google\maps\services\TravelMode;
+use dosamigos\google\maps\services\GeocodingClient;
+use dosamigos\google\maps\overlays\PolylineOptions;
+use dosamigos\google\maps\services\DirectionsRenderer;
+use dosamigos\google\maps\services\DirectionsService;
+use dosamigos\google\maps\overlays\InfoWindow;
+use dosamigos\google\maps\overlays\Marker;
+use dosamigos\google\maps\Map;
+use dosamigos\google\maps\services\DirectionsRequest;
+use dosamigos\google\maps\overlays\Polygon;
+use dosamigos\google\maps\layers\BicyclingLayer;
 ?>
 <style>
  
@@ -53,12 +67,12 @@ use yii\widgets\ListView;
         <!-- /.box-header -->
         <div class="box-body no-padding">
             <?php 
-                Pjax::begin([
-                  'id' => 'pjax-callback', 
-                  'timeout' => 10000, 
-                  'enablePushState' => false,
-                  ]);
-                ?>
+            Pjax::begin([
+              'id' => 'pjax-callback', 
+              'timeout' => 10000, 
+              'enablePushState' => false,
+              ]);
+            ?>
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-12">
@@ -66,6 +80,41 @@ use yii\widgets\ListView;
                         <?php if(!$trueFalseCallback){?>
                         <?= Html::button('Предложить свои услуги', ['class' => 'callback btn btn-sm btn-success pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
                         <?php } ?>
+                    </div>
+                </div>
+                <div class="row">
+                    <hr>
+                    <div class="col-md-12">
+                     <?php 
+                    $gc = new GeocodingClient();
+                    $result = $gc->lookup(array('address'=>$author->address,'components'=>1));
+                    $location = $result->results[0]->geometry->location;
+                    if (!is_null($location)) {
+                        $lat = $location->lat;
+                        $lng = $location->lng;
+                        $coord = new LatLng(['lat' => $lat, 'lng' => $lng]);
+                        $map = new Map(['center' => $coord,
+                                        'zoom' => 15,
+                                        'scrollwheel'=> false ,
+                                        'width' => 'auto',
+                                        'height' => 200,]);
+
+                        $marker = new Marker([
+                            'position' => $coord,
+                            'title' => $author->name,
+                        ]);
+                        $marker->attachInfoWindow(
+                            new InfoWindow([
+                                'content' => 
+                                '<h5>' . $author->name . '</h5>' .
+                                '<p>' . $author->address . '</p>'
+                            ])
+                        );
+                        $map->addOverlay($marker);
+                        echo '<div class="req-client-reg">Адрес: <b>' . $author->address . '</b></div> ';
+                        echo $map->display();
+                    }
+                     ?>   
                     </div>
                 </div>
                 <div class="row">

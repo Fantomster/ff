@@ -101,7 +101,7 @@ use dosamigos\google\maps\layers\BicyclingLayer;
 
                         $marker = new Marker([
                             'position' => $coord,
-                            'title' => 'My Home Town',
+                            'title' => $author->name,
                         ]);
                         $marker->attachInfoWindow(
                             new InfoWindow([

@@ -51,12 +51,12 @@ class RequestController extends DefaultController {
             if($validForm){
                 return $validForm;
             }else{
-             if(Yii::$app->request->post('step')==4 && 
-                     $profile->load(Yii::$app->request->post()) &&
-                     $organization->load(Yii::$app->request->post())){
+             if(Yii::$app->request->post('step')==3){ //&& 
+                     //$profile->load(Yii::$app->request->post()) &&
+                     //$organization->load(Yii::$app->request->post())
                     $request->save();  
-                    $profile->save();
-                    $organization->save();
+                    //$profile->save();
+                    //$organization->save();
                     return ['saved'=>true];   
                 }else{
                     return $validForm;

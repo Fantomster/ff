@@ -235,10 +235,6 @@ $(document).on("click",".next",function(e){
             }
        } 
        if(step == 3){ 
-       form.yiiActiveForm("resetForm");
-       next(cur); 
-       }
-       if(step == 4){ 
        $.pjax.reload({container:"#list", async:false});
            if(response["saved"]){ 
             $("#create").modal("hide"); 

@@ -25,7 +25,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
 #msform fieldset:not(:first-of-type) {display: none;}
 #progressbar {padding-left: 0;position: relative; z-index:1;margin-bottom: 30px;overflow: hidden;counter-reset: step;}
-#progressbar li {list-style-type: none;color: #555;text-transform: uppercase;font-size: 11px;font-weight: 500;width: 25%;float: left;position: relative;}
+#progressbar li {list-style-type: none;color: #555;text-transform: uppercase;font-size: 11px;font-weight: 500;width: 33.3333%;float: left;position: relative;}
 #progressbar li:before {content: counter(step); counter-increment: step; width: 75px; line-height: 75px; display: block; font-size: 0px; color: #fff; background: #3f3e3e; border-radius: 50%; margin: 0 auto 5px auto;}
 #progressbar li.active{color:#86be79;}
 #progressbar li:after {content: ''; width: 100%; height: 5px; background: #3f3e3e; position: absolute; left: -50%; top: 35px; z-index: -1;}
@@ -169,7 +169,7 @@ Pjax::begin([
 		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
 		<li><span class="li-text">Оплата</span></li>
-                <li><span class="li-text">Контакты</span></li>
+                <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
@@ -260,7 +260,7 @@ Pjax::begin([
                 <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
         <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>        
         </fieldset> 
-        <fieldset class="text-left">
+<!--        <fieldset class="text-left">
             <h5>Адрес доставки</h5>
             <?= $form->field($organization, 'address', 
     ['template'=>'{input}{error}'])->
@@ -288,7 +288,7 @@ Pjax::begin([
             <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
             <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>4]) ?>
             <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
-        </fieldset>
+        </fieldset>-->
 <?php ActiveForm::end(); ?>
 
 <?php Pjax::end(); ?>

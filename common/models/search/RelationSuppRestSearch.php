@@ -72,9 +72,9 @@ class RelationSuppRestSearch extends RelationSuppRest {
                 ->joinWith('lastOrder');
         if ($manager_id) {
             $query->leftJoin("$maTable", "$maTable.organization_id = $rspTable.rest_org_id");
-            $query->where(["$rspTable.supp_org_id" => $vendor_id, "$maTable.manager_id" => $manager_id]);
+            $query->where(["$rspTable.supp_org_id" => $vendor_id, "$rspTable.deleted" => false, "$maTable.manager_id" => $manager_id]);
         } else {
-            $query->where(["$rspTable.supp_org_id" => $vendor_id]);
+            $query->where(["$rspTable.supp_org_id" => $vendor_id, "$rspTable.deleted" => false]);
         }
         $query->groupBy("$rspTable.rest_org_id");
         

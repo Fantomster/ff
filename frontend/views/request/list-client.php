@@ -112,7 +112,7 @@ $request = new \common\models\Request();
             ?>
             </div>
             <?php
-            echo $this->render("create", compact('request'));
+            echo $this->render("create", compact('request','organization','profile'));
             Modal::end();?>     
         </div>
     </div>

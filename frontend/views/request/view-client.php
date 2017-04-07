@@ -6,6 +6,20 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii\widgets\ListView;
+
+use dosamigos\google\maps\LatLng;
+use dosamigos\google\maps\services\DirectionsWayPoint;
+use dosamigos\google\maps\services\TravelMode;
+use dosamigos\google\maps\services\GeocodingClient;
+use dosamigos\google\maps\overlays\PolylineOptions;
+use dosamigos\google\maps\services\DirectionsRenderer;
+use dosamigos\google\maps\services\DirectionsService;
+use dosamigos\google\maps\overlays\InfoWindow;
+use dosamigos\google\maps\overlays\Marker;
+use dosamigos\google\maps\Map;
+use dosamigos\google\maps\services\DirectionsRequest;
+use dosamigos\google\maps\overlays\Polygon;
+use dosamigos\google\maps\layers\BicyclingLayer;
 ?>
 <section class="content-header">
     <h1>
@@ -50,13 +64,6 @@ use yii\widgets\ListView;
         <!-- /.box-header -->
         <div class="box-body no-padding">
             <div class="col-md-12">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h3 class="req-name pull-left"><?=$request->product?></h3>
-                        <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;Закрыть заявку', ['class' => 'r-close btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']) ?>
-                        
-                    </div>
-                </div>
                 <?php 
                 Pjax::begin([
                   'id' => 'pjax-callback', 
@@ -64,6 +71,52 @@ use yii\widgets\ListView;
                   'enablePushState' => false,
                   ]);
                 ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="req-name pull-left"><?=$request->product?></h3>
+                        <?php if ($request->active_status){
+                        echo Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;Закрыть заявку', ['class' => 'r-close btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']);
+                        }else{
+                        echo Html::button('Закрыта', ['disabled'=>true,'class' => 'btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']);
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div class="row">
+                    <hr>
+                    <div class="col-md-12">
+                     <?php 
+                    $gc = new GeocodingClient();
+                    $result = $gc->lookup(array('address'=>$author->address,'components'=>1));
+                    $location = $result->results[0]->geometry->location;
+                    if (!is_null($location)) {
+                        $lat = $location->lat;
+                        $lng = $location->lng;
+                        $coord = new LatLng(['lat' => $lat, 'lng' => $lng]);
+                        $map = new Map(['center' => $coord,
+                                        'zoom' => 15,
+                                        'scrollwheel'=> false ,
+                                        'width' => 'auto',
+                                        'height' => 200,]);
+
+                        $marker = new Marker([
+                            'position' => $coord,
+                            'title' => $author->name,
+                        ]);
+                        $marker->attachInfoWindow(
+                            new InfoWindow([
+                                'content' => 
+                                '<h5>' . $author->name . '</h5>' .
+                                '<p>' . $author->address . '</p>'
+                            ])
+                        );
+                        $map->addOverlay($marker);
+                        echo '<div class="req-client-reg">Адрес: <b>' . $author->address . '</b></div> ';
+                        echo $map->display();
+                    }
+                     ?>   
+                    </div>
+                </div>
                 <div class="row">
                     <hr>
                     <div class="col-md-12">

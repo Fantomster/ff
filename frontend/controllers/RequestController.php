@@ -20,14 +20,18 @@ use yii\widgets\ActiveForm;
 
 class RequestController extends DefaultController {
     
+    public function actionTest() {
+        return $this->render('test');
+    }
     public function actionCreate() {
         if (Yii::$app->request->isAjax) {
             $currentUser = $this->currentUser;
-            if($currentUser->organization->type_id != Organization::TYPE_RESTAURANT){
+            $organization = $currentUser->organization;
+            if($organization->type_id != Organization::TYPE_RESTAURANT){
                return false; 
             }
             $request = new \common\models\Request();
-            return $this->renderAjax("create", compact('request'));
+            return $this->renderAjax("create", compact('request','organization'));
             }else{
                 return $this->redirect(['list']);
             }
@@ -37,7 +41,9 @@ class RequestController extends DefaultController {
         if($currentUser->organization->type_id != Organization::TYPE_RESTAURANT){
            return false; 
         }
-        $request = new \common\models\Request();
+        $request = new Request();
+        $organization = $currentUser->organization;
+        $profile = $currentUser->profile;
         $request->rest_org_id = $currentUser->organization_id;
         if (Yii::$app->request->isAjax && $request->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -45,8 +51,12 @@ class RequestController extends DefaultController {
             if($validForm){
                 return $validForm;
             }else{
-             if(Yii::$app->request->post('step')==3){
+             if(Yii::$app->request->post('step')==3){ //&& 
+                     //$profile->load(Yii::$app->request->post()) &&
+                     //$organization->load(Yii::$app->request->post())
                     $request->save();  
+                    //$profile->save();
+                    //$organization->save();
                     return ['saved'=>true];   
                 }else{
                     return $validForm;
@@ -56,6 +66,7 @@ class RequestController extends DefaultController {
     }
     public function actionList() {
         $organization = $this->currentUser->organization;
+        $profile = $this->currentUser->profile;
         $search = ['like','product',\Yii::$app->request->get('search')?:''];
         $category = \Yii::$app->request->get('category')?['category' => \Yii::$app->request->get('category')]:[];
         
@@ -67,9 +78,9 @@ class RequestController extends DefaultController {
                 ],
             ]);
             if (Yii::$app->request->isPjax) {
-                return $this->renderPartial("list-client", compact('dataListRequest','organization'));
+                return $this->renderPartial("list-client", compact('dataListRequest','organization','profile'));
             }else{
-                return $this->render("list-client", compact('dataListRequest','organization'));
+                return $this->render("list-client", compact('dataListRequest','organization','profile'));
             }    
         }
         if($organization->type_id == Organization::TYPE_SUPPLIER){
@@ -102,7 +113,6 @@ class RequestController extends DefaultController {
         
         $request = Request::find()->where(['id' => $id])->one();
         $author = Organization::findOne(['id'=>$request->rest_org_id]);
-        
         
         if($user->organization->type_id == Organization::TYPE_RESTAURANT){
             $countComments = RequestCallback::find()->where(['request_id' => $id])->count();

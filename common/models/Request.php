@@ -41,6 +41,17 @@ class Request extends \yii\db\ActiveRecord
     {
         return 'request';
     }
+    public function beforeSave($insert) {
+        if (parent::beforeSave($insert)) {
+            if($this->rush_order){
+            $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 24*3600,'php:Y-m-d H:i:s');
+            }else{
+            $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 30*24*3600,'php:Y-m-d H:i:s');   
+            }
+            return true;
+        }
+        return false;
+    }
     public function behaviors() {
         return [
             'timestamp' => [
@@ -66,7 +77,7 @@ class Request extends \yii\db\ActiveRecord
             [['product', 'comment', 'regular', 'amount', 'deferment_payment'], 'string', 'max' => 255],
         ];
     }
-
+    
     /**
      * @inheritdoc
      */
@@ -90,6 +101,7 @@ class Request extends \yii\db\ActiveRecord
             'active_status' => 'Active Status',
         ];
     }
+    
     public function getModifyDate()
     {
           $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at),'php:Y-m-d H:i:s');

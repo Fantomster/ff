@@ -12,7 +12,11 @@ use yii\helpers\Url;
     </div>
     <div class="col-md-6">
       <div class="pull-right">
-          <span class="req-cat">Категория:</span><span class="req-cat-name"> <b><?=$model->categoryName->name ?></b></span>
+          <?php if (!$model->active_status){?>
+          <span class="btn btn-danger btn-sm" style="font-size: 11px;padding: 0px 4px;margin-right:5px">Закрыта</span>
+          <?php }?>
+          <span class="req-cat">Категория:</span>
+          <span class="req-cat-name"> <b><?=$model->categoryName->name ?></b></span>
           <span class="req-nal-besnal"><i class="fa fa-money" aria-hidden="true"></i> 
               <b>
               <?=$model->paymentMethodName ?>
@@ -34,6 +38,7 @@ use yii\helpers\Url;
           Создан: 
       </span>
         <span class="req-created"><b><?=$model->modifyDate ?></b></span>
+      
       <span class="req-created" style="margin-left:20px">  
           Исполнитель: 
       </span>

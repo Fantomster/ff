@@ -19,6 +19,8 @@ use yii\helpers\ArrayHelper;
  * @property string $updated_at
  * @property string $uploaded_catalog
  * @property booolean $uploaded_processed
+ * @property booolean $is_from_market
+ * @property booolean $deleted
  * 
  * @property Catalog $catalog
  * @property Organization $client
@@ -90,7 +92,30 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
             'cat_id' => 'Каталог',
         ];
     }
+    
+    public function delete() {
+        $this->deleted = true;
+        return $this->save();
+    }
+    
+    public static function deleteAll($condition = '', $params = array()) {
+        $command = static::getDb()->createCommand();
+        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
 
+        return $command->execute();
+    }
+    
+    public function beforeSave($insert) {
+        if ($this->isNewRecord) {
+            $deleted = self::findOne(['rest_org_id' => $this->rest_org_id, 'supp_org_id' => $this->supp_org_id]);
+            $deleted->load($this->attributes);
+            $this->id = $deleted->id;
+            $this->isNewRecord = false;
+            return true;
+        }
+        parent::beforeSave($insert);
+    }
+    
     public static function GetRelationCatalogs() {
         $catalog = RelationSuppRest::
                 find()

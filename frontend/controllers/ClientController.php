@@ -1028,8 +1028,7 @@ class ClientController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $id = \Yii::$app->request->post('id');
             $currentUser = User::findIdentity(Yii::$app->user->id);
-            $sql = "delete from relation_supp_rest where rest_org_id =$currentUser->organization_id and supp_org_id = $id";
-            \Yii::$app->db->createCommand($sql)->execute();
+            RelationSuppRest::deleteAll(['rest_org_id' => $currentUser->organization_id, 'supp_org_id' => $id]);
         }
     }
 

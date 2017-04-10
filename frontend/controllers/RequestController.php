@@ -23,19 +23,19 @@ class RequestController extends DefaultController {
     public function actionTest() {
         return $this->render('test');
     }
-    public function actionCreate() {
-        if (Yii::$app->request->isAjax) {
-            $currentUser = $this->currentUser;
-            $organization = $currentUser->organization;
-            if($organization->type_id != Organization::TYPE_RESTAURANT){
-               return false; 
-            }
-            $request = new \common\models\Request();
-            return $this->renderAjax("create", compact('request','organization'));
-            }else{
-                return $this->redirect(['list']);
-            }
-    }
+//    public function actionCreate() {
+//        if (Yii::$app->request->isAjax) {
+//            $currentUser = $this->currentUser;
+//            $organization = $currentUser->organization;
+//            if($organization->type_id != Organization::TYPE_RESTAURANT){
+//               return false; 
+//            }
+//            $request = new \common\models\Request();
+//            return $this->renderAjax("create", compact('request','organization'));
+//            }else{
+//                return $this->redirect(['list']);
+//            }
+//    }
     public function actionSaveRequest() {
         $currentUser = $this->currentUser;
         if($currentUser->organization->type_id != Organization::TYPE_RESTAURANT){

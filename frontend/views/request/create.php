@@ -1,6 +1,7 @@
 <?php
  
 use yii\helpers\Html;
+use yii\helpers\BaseHtml;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\web\View;
@@ -173,6 +174,35 @@ Pjax::begin([
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
+<?php 
+
+?>            
+            <h5>Адрес</h5>
+                <?= $form->field($organization, 'address')->textInput(['maxlength' => 255])->label(false) ?>
+            <div class="input-group">
+	      <span class="input-group-addon" id="addon_search">Поиск</span>
+	      <input type="text" class="form-control" id="autocomplete" placeholder="введите свой адрес" onFocus="geolocate()" aria-describedby="addon_search">
+	    </div>
+            <div class="input-group">
+	      <span class="input-group-addon" id="addon_country">Страна</span>
+	      <input type="text" class="form-control" id="country" aria-describedby="addon_country">
+	    </div>
+	    <div class="input-group">
+	      <span class="input-group-addon" id="addon_locality">Город</span>
+	      <input type="text" class="form-control" id="locality" aria-describedby="addon_locality">
+	    </div>
+	    <div class="input-group">
+	      <span class="input-group-addon" id="addon_route">Улица</span>
+	      <input type="text" class="form-control" id="route" aria-describedby="addon_route">
+	    </div>
+            <?php 
+            /* 
+                <?= BaseHtml::activeHiddenInput($organization, 'name'); ?>
+                <?= BaseHtml::activeHiddenInput($organization, 'google_place_id'); ?>
+                <?= BaseHtml::activeHiddenInput($organization, 'location'); ?>
+                <?= BaseHtml::activeHiddenInput($organization, 'full_address'); ?>
+            */ ?>
+             
             <h5>Выберите категорию товара<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
             <?php 
             echo $form->field($request, 'category',['template'=>'{input}{error}'])->widget(Select2::classname(), [
@@ -252,19 +282,16 @@ Pjax::begin([
                 <?= $form->field($request, 'deferment_payment', 
     ['template'=>'{input}{error}'])->
     textInput(['placeholder' => '7 дней']) ?>
+            
 		<!--h5>Поделиться заявкой в группах f-keeper</h5-->
                 <div style="color:#ccc;font-size:13px;margin-top: 32px;margin-bottom: -32px;">
                     * Заявка будет существовать в системе f-keeper один месяц, или пока вы ее не закроете
                 </div>
                 <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
-                <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
+                <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
         <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>        
         </fieldset> 
 <!--        <fieldset class="text-left">
-            <h5>Адрес доставки</h5>
-            <?= $form->field($organization, 'address', 
-    ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => 'Москва, пр-кт Андропова, 19']) ?>
             <h5>Ваш контактный телефон</h5>
             <?= $form->field($profile, 'phone', 
     ['template'=>'{input}{error}'])->

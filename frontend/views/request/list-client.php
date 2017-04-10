@@ -157,8 +157,58 @@ $request = new \common\models\Request();
     </div>
 </section>
 <?php
+
+$gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+    'libraries' => 'places',
+    'key'=>'AIzaSyCBVFLS9LMiR5CYyONNCi7A5vh2p7l9r8M',
+    'callback'=>'initAutocomplete'
+));
+$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
+
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/jquery-ui.min.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 $this->registerJs('
+var placeSearch, autocomplete;
+var componentForm = {
+    country: "long_name",
+    locality: "long_name",
+    route: "long_name"
+};
+function initAutocomplete() {
+    autocomplete = new google.maps.places.Autocomplete(
+    (document.getElementById("autocomplete")),
+    {types: ["geocode"]});
+    autocomplete.addListener("place_changed", fillInAddress);
+}
+
+function fillInAddress() {
+  var place = autocomplete.getPlace();
+  for (var component in componentForm) {
+    document.getElementById(component).value = "";
+    document.getElementById(component).disabled = false;
+  }
+  for (var i = 0; i < place.address_components.length; i++) {
+    var addressType = place.address_components[i].types[0];
+    if (componentForm[addressType]) {
+        var val = place.address_components[i][componentForm[addressType]];
+        document.getElementById(addressType).value = val;
+    }
+  }
+}
+function geolocate() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var geolocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      var circle = new google.maps.Circle({
+        center: geolocation,
+        radius: position.coords.accuracy
+      });
+      autocomplete.setBounds(circle.getBounds());
+    });
+  }
+}
 $("#create").removeAttr("tabindex");
 $("#create .modal-content").css("overflow-y","auto")
 var timer;
@@ -303,5 +353,5 @@ current_fs.animate({opacity: 0}, {
 $(document).on("click",".previous",function(){
     previous($(this));
 })
-');
+',yii\web\View::POS_END);
 ?>

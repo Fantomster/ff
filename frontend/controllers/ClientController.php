@@ -558,14 +558,12 @@ class ClientController extends DefaultController {
             $organization = new Organization;
             $profile = new Profile();
 
-            $relationSuppRest = new RelationSuppRest;
-
             $post = Yii::$app->request->post();
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
-            $relationCategory->load($post); //array category
+//            $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
@@ -573,23 +571,36 @@ class ClientController extends DefaultController {
                     $email = $user->email;
                     $fio = $profile->full_name;
                     $org = $organization->name;
-                    $categorys = $relationCategory['category_id'];
+//                    $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
+                    
+                    //check deleted relation
+                    $relationSuppRest = RelationSuppRest::findOne([
+                        'rest_org_id' => $currentUser->organization_id, 
+                        'supp_org_id' => $get_supp_org_id, 
+                        'deleted' => true
+                        ]);
+                    
+                    if (empty($relationSuppRest)) {
+                        $relationSuppRest = new RelationSuppRest;
+                    } else {
+                        $relationSuppRest->deleted = false;
+                    }
                     
                     if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
                         $supp_base_cat_id = Catalog::find()->where(['supp_org_id'=>$get_supp_org_id, 'type'=>1])->one()->id;
-                        $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`,`cat_id`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1,$supp_base_cat_id)";
-                        \Yii::$app->db->createCommand($sql)->execute();
-                    }else{
-                        $sql = "insert into " . RelationSuppRest::tableName() . "(`rest_org_id`,`supp_org_id`,`created_at`,`invite`,`status`) VALUES ($currentUser->organization_id,$get_supp_org_id,NOW(),1,1)";
-                        \Yii::$app->db->createCommand($sql)->execute();    
+                        $relationSuppRest->cat_id = $supp_base_cat_id;
                     }
-                    if(!empty($categorys)){
-                        foreach ($categorys as $arrCategorys) {
-                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                            \Yii::$app->db->createCommand($sql)->execute();
-                        }
-                    }
+                    $relationSuppRest->rest_org_id = $currentUser->organization_id;
+                    $relationSuppRest->supp_org_id = $get_supp_org_id;
+                    $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
+                    $test = $relationSuppRest->save();
+//                    if (!empty($categorys)) {
+//                        foreach ($categorys as $arrCategorys) {
+//                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+//                            \Yii::$app->db->createCommand($sql)->execute();
+//                        }
+//                    }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
                     $currentOrganization = $currentUser->organization;
                     
@@ -1343,74 +1354,87 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 
     public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $step = $currentUser->organization->step;
+        //$step = $currentUser->organization->step;
         $user = new User();
         $profile = new Profile();
         $relationCategory = new RelationCategory();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
-        $searchString = "";
-        $where = "";
+        //$searchString = "";
+        //$where = "";
         
-        if (Yii::$app->request->isAjax) {
-            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-            empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";
-        }
-        $query = Yii::$app->db->createCommand("SELECT 
-            relation_supp_rest.id,
-            organization.name as 'organization_name',
-            relation_supp_rest.cat_id,
-            catalog.name as 'catalog_name',
-            catalog.status as 'catalog_status',
-            relation_supp_rest.created_at,
-            relation_supp_rest.supp_org_id,
-            invite,
-            case 
-                when invite=0 then 1 else 
-                    case 
-                        when
-                        (SELECT count(*) from user where organization_id = relation_supp_rest.supp_org_id and status = 1)=0
-                        then
-                        2
-                        else
-                        3 
-                        end
-                    end as status_invite,
-           `relation_supp_rest`.`status` 
-            FROM {{%relation_supp_rest}}"
-                . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
-                . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where");
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM "
-                        . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
-                        . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
-                        . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-                        . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`", [':name' => $searchString])->queryScalar();
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'params' => [':name' => $searchString],
-            'pagination' => [
-                'pageSize' => 10,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'id',
-                    'supp_org_id',
-                    'cat_id',
-                    'invite',
-                    'status',
-                    'created_at',
-                    'organization_name',
-                    'catalog_name',
-                    'status_invite'
-                ],
-                'defaultOrder' => [
-                    'created_at' => SORT_DESC
-                ]
-            ],
-        ]);
-        return $this->render("suppliers", compact("user", "organization", "relationCategory", "relationSuppRest", "profile", "searchModel", "searchString", "dataProvider", "step"));
+//        if (Yii::$app->request->isAjax) {
+//            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+//            empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";
+//        }
+//        $query = Yii::$app->db->createCommand("SELECT 
+//            relation_supp_rest.id,
+//            organization.name as 'organization_name',
+//            relation_supp_rest.cat_id,
+//            catalog.name as 'catalog_name',
+//            catalog.status as 'catalog_status',
+//            relation_supp_rest.created_at,
+//            relation_supp_rest.supp_org_id,
+//            invite,
+//            case 
+//                when invite=0 then 1 else 
+//                    case 
+//                        when
+//                        (SELECT count(*) from user where organization_id = relation_supp_rest.supp_org_id and status = 1)=0
+//                        then
+//                        2
+//                        else
+//                        3 
+//                        end
+//                    end as status_invite,
+//           `relation_supp_rest`.`status` 
+//            FROM {{%relation_supp_rest}}"
+//                . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
+//                . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
+//                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where");
+//        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM "
+//                        . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
+//                        . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
+//                        . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
+//                        . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`", [':name' => $searchString])->queryScalar();
+//        $dataProvider = new \yii\data\SqlDataProvider([
+//            'sql' => $query->sql,
+//            'totalCount' => $totalCount,
+//            'params' => [':name' => $searchString],
+//            'pagination' => [
+//                'pageSize' => 10,
+//            ],
+//            'sort' => [
+//                'attributes' => [
+//                    'id',
+//                    'supp_org_id',
+//                    'cat_id',
+//                    'invite',
+//                    'status',
+//                    'created_at',
+//                    'organization_name',
+//                    'catalog_name',
+//                    'status_invite'
+//                ],
+//                'defaultOrder' => [
+//                    'created_at' => SORT_DESC
+//                ]
+//            ],
+//        ]);
+        $currentOrganization = $this->currentUser->organization;
+
+        $searchModel = new \common\models\search\VendorSearch();
+
+        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
+
+        $dataProvider = $searchModel->search($params, $currentOrganization->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+        } else {
+            return $this->render('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+        }        
+        //return $this->render("suppliers", compact("user", "organization", "relationCategory", "relationSuppRest", "profile", "searchModel", "searchString", "dataProvider", "step"));
     }
 
     public function actionSidebar() {

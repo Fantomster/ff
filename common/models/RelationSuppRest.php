@@ -105,17 +105,6 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         return $command->execute();
     }
     
-    public function beforeSave($insert) {
-        if ($this->isNewRecord) {
-            $deleted = self::findOne(['rest_org_id' => $this->rest_org_id, 'supp_org_id' => $this->supp_org_id]);
-            $deleted->load($this->attributes);
-            $this->id = $deleted->id;
-            $this->isNewRecord = false;
-            return true;
-        }
-        parent::beforeSave($insert);
-    }
-    
     public static function GetRelationCatalogs() {
         $catalog = RelationSuppRest::
                 find()

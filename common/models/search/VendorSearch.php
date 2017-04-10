@@ -10,17 +10,14 @@ use common\models\Catalog;
 use yii\data\ActiveDataProvider;
 
 /**
- * Description of RelationSuppRest
  *
  * @author sharaf
  */
-class RelationSuppRestSearch extends RelationSuppRest {
+class VendorSearch extends RelationSuppRest {
     
-    public $client_name;
-    public $catalog_name;
-    public $manager_name;
-    public $last_order_date;
+    public $vendor_name;
     public $search_string;
+    public $catalog_status;
     
     /**
      * @inheritdoc
@@ -28,8 +25,8 @@ class RelationSuppRestSearch extends RelationSuppRest {
     public function rules()
     {
         return [
-            [['id', 'status', 'cat_id', 'rest_org_id', 'invite'], 'integer'],
-            [['client_name', 'catalog_name', 'manager_name', 'last_order_date', 'search_string'], 'safe'],
+            [['id', 'rest_org_id', 'invite', 'catalog_status'], 'integer'],
+            [['vendor_name', 'search_string'], 'safe'],
         ];
     }
 
@@ -38,7 +35,7 @@ class RelationSuppRestSearch extends RelationSuppRest {
      */
     public function attributes()
     {
-        return array_merge(parent::attributes(), ['client_name', 'catalog_name', 'manager_name', 'last_order_date', 'search_string']);
+        return array_merge(parent::attributes(), ['vendor_name', 'search_string', 'catalog_status']);
     }
     
     /**
@@ -57,31 +54,23 @@ class RelationSuppRestSearch extends RelationSuppRest {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $vendor_id, $manager_id = null)
+    public function search($params, $client_id)
     {
         $rspTable = RelationSuppRest::tableName();
         $orgTable = Organization::tableName();
-        $orderTable = Order::tableName();
         $catTable = Catalog::tableName();
-        $maTable = ManagerAssociate::tableName();
 
         $query = RelationSuppRest::find()
-                ->select("$rspTable.*, $orgTable.name as client_name, $catTable.name as catalog_name, `$orderTable`.updated_at as last_order_date")
-                ->joinWith('client')
+                ->select("$rspTable.*, $orgTable.name as vendor_name, $catTable.status as catalog_status")
                 ->joinWith('catalog')
-                ->joinWith('lastOrder');
-        if ($manager_id) {
-            $query->leftJoin("$maTable", "$maTable.organization_id = $rspTable.rest_org_id");
-            $query->where(["$rspTable.supp_org_id" => $vendor_id, "$rspTable.deleted" => false, "$maTable.manager_id" => $manager_id]);
-        } else {
-            $query->where(["$rspTable.supp_org_id" => $vendor_id, "$rspTable.deleted" => false]);
-        }
-        $query->groupBy("$rspTable.rest_org_id");
+                ->joinWith('vendor');
+        $query->where(["$rspTable.rest_org_id" => $client_id, "$rspTable.deleted" => false]);
+//        $query->groupBy("$rspTable.supp_org_id");
         
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
-                'pageSize' => 20,
+                'pageSize' => 10,
             ],
         ]);
 
@@ -93,17 +82,13 @@ class RelationSuppRestSearch extends RelationSuppRest {
             return $dataProvider;
         }
 
-        $dataProvider->sort->attributes['client_name'] = [
+        $dataProvider->sort->attributes['vendor_name'] = [
             'asc' => ["$orgTable.name" => SORT_ASC],
             'desc' => ["$orgTable.name" => SORT_DESC],
         ];
-        $dataProvider->sort->attributes['catalog_name'] = [
-            'asc' => ["$catTable.name" => SORT_ASC],
-            'desc' => ["$catTable.name" => SORT_DESC],
-        ];
-        $dataProvider->sort->attributes['last_order_date'] = [
-            'asc' => ["$orderTable.updated_at" => SORT_ASC],
-            'desc' => ["$orderTable.updated_at" => SORT_DESC],
+        $dataProvider->sort->attributes['catalog_status'] = [
+            'asc' => ["$catTable.catalog_status" => SORT_ASC],
+            'desc' => ["$catTable.catalog_status" => SORT_DESC],
         ];
         
         // grid filtering conditions
@@ -114,7 +99,6 @@ class RelationSuppRestSearch extends RelationSuppRest {
         
         $query->andFilterWhere(['or', 
             ['like', "$orgTable.name", $this->search_string],
-            ['like', "$catTable.name", $this->search_string],
             ]);
 
         return $dataProvider;

@@ -19,10 +19,19 @@ use common\models\Organization;
                             $form->field($organization, 'phone', [
 //                                'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
                             ])
-                            ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+                            ->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ])
                             ->label('Телефон контактного лица')
-                            ->textInput()
-                    ?>                    
+                    ?>   
+
                     <?= $form->field($organization, 'email')->textInput()->label("Email контактного лица") ?>
                     <?= $form->field($organization, 'website')->textInput() ?>
                     <?= $form->field($organization, 'about')->textarea(['rows' => 6, 'style' => 'height: 96px;']) ?>
@@ -38,7 +47,16 @@ use common\models\Organization;
                                     $form->field($profile, 'phone', [
 //                    'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
                                     ])
-                                    ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+                                    ->widget(\common\widgets\PhoneInput::className(), [
+                                        'jsOptions' => [
+                                            'preferredCountries' => ['ru'],
+                                            'nationalMode' => false,
+                                            'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                        ],
+                                        'options' => [
+                                            'class' => 'form-control',
+                                        ],
+                                    ])
                                     ->label('Телефон')
                                     ->textInput()
                             ?>
@@ -62,7 +80,16 @@ use common\models\Organization;
                     <?= $form->field($buisinessInfo, 'ogrn')->textInput() ?>
                     <?= $form->field($buisinessInfo, 'bank_name')->textInput() ?>
                     <?= $form->field($buisinessInfo, 'bik')->textInput() ?>
-                    <?= $form->field($buisinessInfo, 'phone')->textInput() ?>
+                    <?= $form->field($buisinessInfo, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ])->textInput() ?>
                     <?= $form->field($buisinessInfo, 'correspondent_account')->textInput() ?>
                     <?= $form->field($buisinessInfo, 'checking_account')->textInput() ?>
                     <?= $form->field($buisinessInfo, 'info')->textarea(['rows' => 6]) ?>

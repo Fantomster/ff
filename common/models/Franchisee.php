@@ -61,7 +61,7 @@ class Franchisee extends \yii\db\ActiveRecord {
             [['type_id'], 'integer'],
             [['type_id'], 'required'],
             [['info'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'deleted'], 'safe'],
             [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'phone', 'correspondent_account', 'checking_account'], 'string', 'max' => 255],
         ];
     }

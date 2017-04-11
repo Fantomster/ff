@@ -18,7 +18,7 @@ class FranchiseeSearch extends Franchisee
     public function rules()
     {
         return [
-            [['id'], 'integer'],
+            [['id', 'type_id'], 'integer'],
             [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'phone', 'correspondent_account', 'checking_account', 'info', 'created_at', 'updated_at'], 'safe'],
         ];
     }
@@ -60,6 +60,7 @@ class FranchiseeSearch extends Franchisee
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
+            'type_id' => $this->type_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);

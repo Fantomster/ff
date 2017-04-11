@@ -23,9 +23,11 @@ use Yii;
  * @property string $info
  * @property string $created_at
  * @property string $updated_at
+ * @property integer $type_id
  *
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
+ * @property FracnchiseeType type
  */
 class Franchisee extends \yii\db\ActiveRecord {
 
@@ -55,6 +57,8 @@ class Franchisee extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
+            [['type_id'], 'integer'],
+            [['type_id'], 'required'],
             [['info'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'phone', 'correspondent_account', 'checking_account'], 'string', 'max' => 255],
@@ -104,6 +108,13 @@ class Franchisee extends \yii\db\ActiveRecord {
      */
     public function getUsers() {
         return $this->hasMany(User::className(), ['id' => 'user_id'])->via('franchiseeUsers');
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getType() {
+        return $this->hasOne(FranchiseType::className(), ['id' => 'type_id']);
     }
 
     public function getFirstOrganizationDate() {

@@ -41,9 +41,7 @@ class FranchiseeSearch extends Franchisee
      */
     public function search($params)
     {
-        $query = Franchisee::find();
-
-        // add conditions that should always apply here
+        $query = Franchisee::find()->where(['deleted' => false]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

@@ -24,7 +24,8 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  * @property integer $type_id
- *
+ * @property boolean $deleted
+ * 
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
  * @property FracnchiseeType type
@@ -89,6 +90,18 @@ class Franchisee extends \yii\db\ActiveRecord {
         ];
     }
 
+    public function delete() {
+        $this->deleted = true;
+        return $this->save();
+    }
+    
+    public static function deleteAll($condition = '', $params = array()) {
+        $command = static::getDb()->createCommand();
+        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
+
+        return $command->execute();
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */

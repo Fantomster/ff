@@ -499,7 +499,7 @@ class Organization extends \yii\db\ActiveRecord {
         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
     }
 
-    public function inviteVendor($vendor, $invite, $status, $includeBaseCatalog = false, $fromMarket = false) {
+    public function inviteVendor($vendor, $invite, $includeBaseCatalog = false, $fromMarket = false) {
         if ($this->type_id !== self::TYPE_RESTAURANT) {
             return false;
         }
@@ -508,7 +508,6 @@ class Organization extends \yii\db\ActiveRecord {
         $relation->supp_org_id = $vendor->id;
         $relation->rest_org_id = $this->id;
         $relation->invite = $invite;
-        $relation->status = $status;
         $relation->is_from_market = $fromMarket;
         $baseCatalog = Catalog::findOne(['supp_org_id' => $vendor->id, 'type' => Catalog::BASE_CATALOG]);
         if ($includeBaseCatalog && $baseCatalog) {

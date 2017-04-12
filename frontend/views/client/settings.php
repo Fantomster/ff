@@ -277,9 +277,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                     <div class="col-md-4">
                         <div class="form-group">
                             <?=
-                                    $form->field($organization, 'phone', [
-                                        'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
-                                    ])
+                                    $form->field($organization, 'phone')
                                     ->widget(\common\widgets\PhoneInput::className(), [
                                 'jsOptions' => [
                                     'preferredCountries' => ['ru'],
@@ -291,7 +289,6 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                 ],
                             ])
                                     ->label('Телефон')
-                                    ->textInput()
                             ?>
                         </div>
                     </div>

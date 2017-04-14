@@ -50,7 +50,7 @@
         "yii2assets/yii2-fullscreen-modal": "*",
         "delocker/yii2-animate.css": "dev-master",
         "2amigos/yii2-google-maps-library" : "*",
-        "borales/yii2-phone-input": "*"
+        "borales/yii2-phone-input": "*",
         "mongosoft/yii2-soap-server": "*"
     },
     "require-dev": {

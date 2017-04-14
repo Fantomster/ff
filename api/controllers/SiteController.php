@@ -84,16 +84,17 @@ class SiteController extends Controller {
         
     // $identity = new UserIdentity($this->username, $this->password);    
    
-     //   if ()
+        if (($this->username != 'cyborg') || ($this->password != 'mypass')) 
+        {
+            return 'Auth error. Login or password is not correct.';
+        } else {
     
-         $sessionId = Yii::$app->getSecurity()->generateRandomString();
-        
-        // $sessionId = md5(uniqid(rand(),1));
+            $sessionId = Yii::$app->getSecurity()->generateRandomString();
+            // $sessionId = md5(uniqid(rand(),1));
           
-        return 'OK_SOPENED:'.$sessionId.'::'.Yii::$app->user->isGuest;
-    
-   // return $_SERVER['PHP_AUTH_USER'].'/'.$_SERVER['PHP_AUTH_PW']; 
-    
+            return 'OK_SOPENED:'.$sessionId;
+        }
+       
     }  
     
   }

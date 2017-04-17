@@ -12,7 +12,7 @@ use yii\mongosoft\soapserver\Action;
  * Author: R.Smirnov
  */
 
-class SiteController extends Controller {
+class SuppController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -25,12 +25,7 @@ class SiteController extends Controller {
         
     public function actionIndex() {
      
-        echo "Welcome to F-Keeper API gateway. Please use SOAP client to connect this service.";
-        
-        $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-            ->queryAll();
-        
-        var_dump($langs);
+        echo "Welcome to F-Keeper API gateway for Suppliers. Please use SOAP client to connect this service.";
         
     }
     
@@ -44,7 +39,7 @@ class SiteController extends Controller {
     public function actions()
 {
     return [
-        'hello' => [
+        'wsdl' => [
             'class' => 'mongosoft\soapserver\Action',
             'serviceOptions' => [
                 'disableWsdlMode' => false,

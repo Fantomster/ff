@@ -81,7 +81,7 @@ $gridColumnsClients = [
                     ],
                     [
                         'label' => 'Статус сотрудничества',
-                        'attribute' => 'status',
+                        'attribute' => 'invite',
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:190px;text-align:center'],
                         'value' => function ($data) {

@@ -132,7 +132,7 @@ use dosamigos\chartjs\ChartJs;
                                 </tr>
                                 <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
                                     <td style="text-align: left; font-weight: bold;">Итого заработано:</td>
-                                    <td style="text-align: right; font-size: 22px; font-weight: bold;">328 462 389 руб.</td>
+                                    <td style="text-align: right; font-size: 22px; font-weight: bold;">66 000 руб.</td>
                                 </tr>
                                 <tr>
                                     <td></td>

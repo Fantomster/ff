@@ -52,8 +52,29 @@ $form = ActiveForm::begin([
     <div class="row">
         <div class="col-md-6">
             <?=$userStatus==0?
-                $form->field($organization, 'phone')->textInput(['readonly' => true, 'id'=>'organization-view-supplirs-phone']):
-                $form->field($organization, 'phone')->textInput(['id' => 'organization-view-supplirs-phone']);
+                $form->field($organization, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'readonly' => true, 
+                                    'id'=>'organization-view-supplirs-phone'
+                                ],
+                            ]):
+                $form->field($organization, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'id' => 'organization-view-supplirs-phone'
+                                ],
+                            ]);
             ?>
         </div>
         <div class="col-md-6">

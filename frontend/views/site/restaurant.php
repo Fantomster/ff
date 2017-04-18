@@ -133,13 +133,6 @@ $this->title = 'Ресторанам';
             </div>
         </div>
     </div>
-    <div class="logo__block_outside">
-        <span><img src="images/logo-1.png" alt=""/></span>
-        <span><img src="images/logo-2.png" alt=""/></span>
-        <span><img src="images/logo-3.png" alt=""/></span>
-        <span><img src="images/logo-4.png" alt=""/></span>
-    </div>
-
     <div class="contact__block">
 
         <h4>Автоматизируйте свой бизнес сейчас</h4>

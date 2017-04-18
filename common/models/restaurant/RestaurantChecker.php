@@ -31,10 +31,10 @@ class RestaurantChecker
                     $userOrgName = $vendor->organization->name;
 			if($userOrgTypeId==Organization::TYPE_SUPPLIER)
 			{
-				if(RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userOrgId])->exists())
+				if(RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userOrgId,'deleted'=>false])->exists())
 				{
 				$userRelationSuppRest = RelationSuppRest::find()
-                                        ->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userOrgId])
+                                        ->where(['rest_org_id' => $currentUser->organization_id,'supp_org_id'=>$userOrgId,'deleted'=>false])
                                         ->one();
 					if($userRelationSuppRest->invite==RelationSuppRest::INVITE_ON)
 					{

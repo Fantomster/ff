@@ -393,9 +393,9 @@ class VendorController extends DefaultController {
     public function actionClients() {
         $currentOrganization = $this->currentUser->organization;
 
-        $searchModel = new \common\models\search\RelationSuppRestSearch();
+        $searchModel = new \common\models\search\ClientSearch();
 
-        $params['RelationSuppRestSearch'] = Yii::$app->request->post("RelationSuppRestSearch");
+        $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
 
         $dataProvider = $searchModel->search($params, $currentOrganization->id, Yii::$app->user->can('manage') ? null : $this->currentUser->id);
 
@@ -693,15 +693,15 @@ class VendorController extends DefaultController {
                 if ($state == 'true') {
                     $relationSuppRest = RelationSuppRest::findOne(['rest_org_id' => $id, 'supp_org_id' => $currentUser->organization_id]);
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
-                    $relationSuppRest->update();
+                    $relationSuppRest->save();
 
                     $result = ['success' => true, 'status' => 'update invite'];
                     return $result;
                 } else {
                     $relationSuppRest = RelationSuppRest::findOne(['rest_org_id' => $id, 'supp_org_id' => $currentUser->organization_id]);
                     $relationSuppRest->invite = RelationSuppRest::INVITE_OFF;
-                    $relationSuppRest->cat_id = RelationSuppRest::INVITE_OFF;
-                    $relationSuppRest->update();
+                    $relationSuppRest->cat_id = RelationSuppRest::CATALOG_STATUS_OFF;
+                    $relationSuppRest->save();
 
                     $result = ['success' => true, 'status' => 'no update invite'];
                     return $result;

@@ -983,6 +983,7 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
 
 //        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
 //                ->setTo($email)
@@ -1006,6 +1007,7 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
 
 //        Yii::$app->mailqueue->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
 //                ->setTo($email)
@@ -1028,6 +1030,7 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
 
         foreach ($recipientOrg->users as $recipient) {
             $email = $recipient->email;
@@ -1060,6 +1063,7 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
 
 //        Yii::$app->mailqueue->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
 //                ->setTo($email)
@@ -1083,6 +1087,7 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order_id;
         $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
 
 //        Yii::$app->mailqueue->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
 //                ->setTo($email)

@@ -4,12 +4,10 @@ use yii\widgets\Breadcrumbs;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\web\View;
-use yii\bootstrap\ActiveForm;
+use kartik\form\ActiveForm;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
-use kartik\select2\Select2;
 use kartik\widgets\FileInput;
-use common\models\Category;
 
 kartik\select2\Select2Asset::register($this);
 ?>
@@ -151,12 +149,12 @@ if (false) {//$step == common\models\Organization::STEP_ADD_VENDOR
 <?php
 $gridColumnsCatalog = [
     [
-        'attribute' => 'organization_name',
+        'attribute' => 'vendor_name',
         'label' => 'Организация',
         'format' => 'raw',
         'contentOptions' => ['class' => 'text-bold', 'style' => 'vertical-align:middle;width:45%;font-size:14px'],
         'value' => function ($data) {
-    return Html::a(Html::encode($data["organization_name"]), ['client/view-supplier', 'id' => $data["supp_org_id"]], [
+    return Html::a(Html::encode($data->vendor->name), ['client/view-supplier', 'id' => $data->supp_org_id], [
                 'data' => [
                     'target' => '#view-supplier',
                     'toggle' => 'modal',
@@ -166,24 +164,17 @@ $gridColumnsCatalog = [
 }
     ],
     [
-        'attribute' => 'status_invite',
+        'attribute' => 'status',
         'label' => 'Статус сотрудничества',
         'contentOptions' => ['style' => 'vertical-align:middle;min-width:180px;'],
         'format' => 'raw',
         'value' => function ($data) {
-    if ($data["invite"] == 0) {
+    if ($data->invite == 0) {
         return '<span class="text-danger">Ожидается<br>подтверждение</span>';
+    } elseif ($data->catalog->status == 1) {
+        return '<span class="text-success">Подтвержден</span>';
     } else {
-        if ($data["status_invite"] == 2) {
-            return '<span class="text-yellow">Подтвержден /<br> Не авторизован</span>';
-        }
-        if ($data["status_invite"] == 3) {
-            if ($data["catalog_status"] == 1) {
-                return '<span class="text-success">Подтвержден</span>';
-            } else {
-                return '<span class="text-success">Подтвержден<br>Обновление каталога</span>';
-            }
-        }
+        return '<span class="text-yellow">Подтвержден<br>Каталог не назначен</span>';
     }
 }
     ],
@@ -259,7 +250,7 @@ $gridColumnsCatalog = [
       ], [
       'class' => 'btn btn-danger btn-sm remove-supplier',
       'data-pjax' => 0,]); */
-    if ($data["invite"] == 0 || $data["cat_id"] == 0 || $data["catalog_status"] == 0) {
+    if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
         //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
         $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
                     'class' => 'btn btn-success btn-sm',
@@ -271,18 +262,7 @@ $gridColumnsCatalog = [
                     'class' => 'btn btn-default btn-sm',
                     'disabled' => 'disabled']);
     } else {
-        /* if($data["status_invite"] == 1){
-          $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-          'class' => 'btn btn-success btn-sm',
-          'disabled' => 'disabled']);
-          $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-          'class' => 'btn btn-default btn-sm',
-          'disabled' => 'disabled']);
-          $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-          'class' => 'btn btn-default btn-sm',
-          'disabled' => 'disabled']);
-          } */
-        if ($data["status_invite"] == 2) {
+        if (!$data->vendor->hasActiveUsers()) {
             $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                         'OrderCatalogSearch[searchString]' => "",
                         'OrderCatalogSearch[selectedCategory]' => "",
@@ -307,8 +287,7 @@ $gridColumnsCatalog = [
                             ], [
                         'class' => 'btn btn-default btn-sm resend-invite',
                         'data-pjax' => 0,]);
-        }
-        if ($data["status_invite"] == 3) {
+        } else {
             $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
                         'OrderCatalogSearch[searchString]' => "",
                         'OrderCatalogSearch[selectedCategory]' => "",
@@ -330,17 +309,16 @@ $gridColumnsCatalog = [
             $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
                         'class' => 'btn btn-default btn-sm',
                         'disabled' => 'disabled']);
-            
         }
     }
-    
-        $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
-                    'class' => 'btn btn-danger btn-sm del',
-                    'data' => ['id' => $data["supp_org_id"]],
-            ]);
+
+    $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                'class' => 'btn btn-danger btn-sm del',
+                'data' => ['id' => $data["supp_org_id"]],
+    ]);
     return "<div class='btn-group'>" . $result . "</div>";
 }
-    ]        
+    ]
 ];
 ?>
 <section class="content">
@@ -353,12 +331,35 @@ $gridColumnsCatalog = [
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-addon">
-                                    <i class="fa fa-search"></i>
-                                </span>
-                                <?= Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
-                            </div>
+                            <?php
+                            $form = ActiveForm::begin([
+                                        'options' => [
+                                            'id' => 'search_form',
+                                            'role' => 'search',
+                                        ],
+                            ]);
+                            ?>
+                            <?php ActiveForm::end(); ?>
+                            <?=
+                                    $form->field($searchModel, "search_string", [
+                                        'addon' => [
+                                            'append' => [
+                                                'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                'options' => [
+                                                    'class' => 'append',
+                                                ],
+                                            ],
+                                        ],
+                                    ])
+                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'search_string'])
+                                    ->label(false)
+                            ?>
+                            <!--                            <div class="input-group">
+                                                            <span class="input-group-addon">
+                                                                <i class="fa fa-search"></i>
+                                                            </span>
+                            <?= ''//Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search'])  ?>
+                                                        </div>-->
                         </div>
                     </div>
                     <div class="row">
@@ -396,13 +397,24 @@ $gridColumnsCatalog = [
                 <div class="box-body">
                     <?= $form->field($user, 'email') ?>
                     <?= $form->field($profile, 'full_name')->label('ФИО') ?>
-                    <?= $form->field($profile, 'phone')
-                        ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
-                        ->label('Телефон')
-                        ->textInput()
+                    <?=
+                            $form->field($profile, 'phone')
+                            ->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ])
+                            ->label('Телефон')
+                            ->textInput()
                     ?>
                     <?= $form->field($organization, 'name')->label('Организация') ?>
-                    <?= ''
+                    <?=
+                    ''
 //                    $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
 //                        'data' => Category::allCategory(),
 //                        'theme' => 'krajee',

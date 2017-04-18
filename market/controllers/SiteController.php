@@ -1017,7 +1017,7 @@ class SiteController extends Controller {
         $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
         if (!$relation) {
-            $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
+            $client->inviteVendor($product->vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF, true);
            // $this->sendInvite($client,$product->vendor);
         }
         $this->sendCartChange($client, $cartCount);
@@ -1054,7 +1054,7 @@ class SiteController extends Controller {
             return $this->successNotify("Неизвестная ошибка!");
         }
 
-        $client->inviteVendor($vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF);
+        $client->inviteVendor($vendor, RelationSuppRest::INVITE_OFF, RelationSuppRest::CATALOG_STATUS_OFF, true);
         $this->sendInvite($client,$vendor);
         return $this->successNotify("Запрос поставщику отправлен!");
     }

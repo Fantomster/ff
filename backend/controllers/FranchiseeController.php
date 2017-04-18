@@ -40,7 +40,7 @@ class FranchiseeController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'create', 'users', 'update-user', 'create-user', 'delete-user'],
+                        'actions' => ['index', 'update', 'view', 'create', 'delete', 'users', 'update-user', 'create-user', 'delete-user'],
                         'allow' => true,
                         'roles' => [Role::ROLE_ADMIN],
                     ],
@@ -113,18 +113,18 @@ class FranchiseeController extends Controller
         }
     }
 
-//    /**
-//     * Deletes an existing Franchisee model.
-//     * If deletion is successful, the browser will be redirected to the 'index' page.
-//     * @param integer $id
-//     * @return mixed
-//     */
-//    public function actionDelete($id)
-//    {
-//        $this->findModel($id)->delete();
-//
-//        return $this->redirect(['index']);
-//    }
+    /**
+     * Deletes an existing Franchisee model.
+     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * @param integer $id
+     * @return mixed
+     */
+    public function actionDelete($id)
+    {
+        $this->findModel($id)->delete();
+
+        return $this->redirect(['index']);
+    }
 
     public function actionUsers($id) {
         $franchisee = $this->findModel($id);

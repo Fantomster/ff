@@ -28,6 +28,14 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $es_status
  * @property boolean $partnership
  * @property integer $rating
+ * @property double $lat
+ * @property double $lng
+ * @property string $country
+ * @property string $locality
+ * @property string $route
+ * @property string $street_number
+ * @property string $place_id
+ * @property string $formatted_address
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
@@ -82,9 +90,10 @@ class Organization extends \yii\db\ActiveRecord {
             [['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['id', 'type_id', 'step', 'es_status', 'rating'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['email'], 'email'],
+            [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
         ];
@@ -136,6 +145,14 @@ class Organization extends \yii\db\ActiveRecord {
             'picture' => 'Аватар',
             'white_list' => 'Одобрено для f-market',
             'partnership' => 'Партнерство',
+            'lat' => 'Lat',
+            'lng' => 'Lng',
+            'country' => 'Country',
+            'locality' => 'Locality',
+            'route' => 'Route',
+            'street_number' => 'Street Number',
+            'place_id' => 'Place ID',
+            'formatted_address' => 'Formatted Address',
         ];
     }
 
@@ -334,7 +351,7 @@ class Organization extends \yii\db\ActiveRecord {
             case self::TYPE_SUPPLIER:
                 $result = RelationSuppRest::find()->where([
                             'supp_org_id' => $this->id,
-                            'invite' => [RelationSuppRest::INVITE_OFF]]
+                            'invite' => [RelationSuppRest::INVITE_ON]]
                         )->count();
                 break;
         }

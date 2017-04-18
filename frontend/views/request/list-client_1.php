@@ -101,7 +101,14 @@ $request = new \common\models\Request();
             <?php Modal::begin([
             'id' => 'create',
             'toggleButton' => ['label' => '<i class="fa fa-paper-plane"></i> Разместить заявку','class'=>'btn btn-sm btn-fk-success pull-right'],
-            'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1']
+            'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1'],
+            /*'clientOptions' => false,
+                'toggleButton' => [
+                    'label' => '<i class="fa fa-paper-plane"></i> Разместить заявку',
+                    'tag' => 'a',
+                    'data-target' => '#create',
+                    'class'=>'btn btn-sm btn-fk-success pull-right',
+                ],*/
          ]);
             ?>
             </div>
@@ -109,7 +116,91 @@ $request = new \common\models\Request();
             echo $this->render("create", compact('request','organization','profile'));
             Modal::end();
             ?> 
+<?php 
+$gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+    'libraries' => 'places',
+    'key'=>'AIzaSyA22MpauLyKupUUyzbn9_e6USwpOeSjD8g',
+    'callback'=>'initMap'
+));
+$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
+$this->registerJs("
+var placeSearch, autocomplete, map, marker;
+function initMap() {  
+    map = new google.maps.Map(document.getElementById('map'), {
+     center: new google.maps.LatLng(55.751244, 37.618423),
+     zoom: 10,
+     mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+    marker = new google.maps.Marker({
+            map: map,
+            position: map.getCenter(),
+            draggable:true
+    });
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) { 
+        
+            var pos = {lat: parseFloat(position.coords.latitude), lng: parseFloat(position.coords.longitude)};
+            marker.setPosition(pos);
+            map.setZoom(9);
+            map.setCenter(pos);
+            latLngToAddr(pos);
+            },
+            function(failure) {
+                $.getJSON('https://ipinfo.io/geo', function(response) { 
+                    var loc = response.loc.split(',');
+                    var pos = {lat: parseFloat(loc[0]),lng: parseFloat(loc[1])};
+                    marker.setPosition(pos);
+                    map.setZoom(9);
+                    map.setCenter(pos);
+                    latLngToAddr(pos);
+                });  
+            });
+        } else {
+          /////
+    }
+    marker.addListener('dragend', function(marker){
+            latLngToAddr(marker.latLng);      
+        })
+    autocomplete = new google.maps.places.Autocomplete(
+      (document.getElementById('organization-address')),
+      {types: ['geocode']});  
+      
 
+    autocomplete.addListener('place_changed', function() {
+        var place = autocomplete.getPlace();
+        
+        if (place.length == 0) {
+            return;
+          }
+          
+        if (place.geometry) {
+        marker.setPosition(place.geometry.location);
+        map.setCenter(place.geometry.location);
+        map.setZoom(16);
+        }else{console.log('не найдено')}
+        
+    })
+} 
+
+function latLngToAddr(position){
+    var geocoder = new google.maps.Geocoder(), res;
+    geocoder.geocode({'latLng': position}, function(results, status) {
+        if(status == google.maps.GeocoderStatus.OK) {
+            if(results[0]) {
+                document.getElementById('organization-address').value=results[0].formatted_address;
+            } else {
+                document.getElementById('organization-address').value='';
+            }
+        } else {
+            var error = {error : 'no result'}
+        }
+    });
+}
+",yii\web\View::POS_END);
+?> 
+            <script>
+            
+            </script>
         </div>
     </div>
     
@@ -157,6 +248,7 @@ $request = new \common\models\Request();
 
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/jquery-ui.min.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 $this->registerJs('
+
 $("#create").removeAttr("tabindex");
 $("#create .modal-content").css("overflow-y","auto")
 var timer;
@@ -203,28 +295,33 @@ $(document).on("click",".next",function(e){
     data: form.serialize() + "&step=" + step,
     cache: false,
     success: function (response) {
-        if(step == 1){
+       if(step == 1){
             if((typeof(response["request-category"]) != "undefined" && 
               response["request-category"] !== null) || 
                (typeof(response["request-product"]) != "undefined" && 
               response["request-product"] !== null)){
               form.yiiActiveForm("submitForm")
               
+              $("fieldset").addClass(animationName).one(animationend,function() {
+                $(this).removeClass(animationName);
+              });
               cancel();
             }else{
                 form.yiiActiveForm("resetForm");
                 next(cur); 
             }
-        }
-        if(step == 2){ 
+       }
+       if(step == 2){ 
             if(typeof(response["request-amount"]) != "undefined" && 
               response["request-amount"] !== null){
               form.yiiActiveForm("submitForm")
-              
+              $("fieldset").addClass(animationName).one(animationend,function() {
+                $(this).removeClass(animationName);
+              });
               cancel();  
             }else{
               form.yiiActiveForm("resetForm");
-              next(cur);
+              next(cur);  
             }
        } 
        if(step == 3){ 
@@ -239,9 +336,6 @@ $(document).on("click",".next",function(e){
 });
 
 function cancel(){
-$("fieldset").addClass(animationName).one(animationend,function() {
-    $(this).removeClass(animationName);
-});
 return false;    
 }        
 function next(e) {
@@ -299,10 +393,9 @@ current_fs.animate({opacity: 0}, {
 $(document).on("click",".previous",function(){
     previous($(this));
 })
-$("#create").on("shown.bs.modal", function () {
-    if (typeof initMap == "function") {
-        initMap();
-    }
+$("body").on("shown.bs.modal", "#create", function() {
+initMap();
 });
-',yii\web\View::POS_END);
 
+',yii\web\View::POS_END);
+?>

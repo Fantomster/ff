@@ -151,10 +151,7 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                 <div class="col-md-6"> 
                     <h5><span class="title-param">Клиентов:</span>
                     <?= $vendor->getClientsCount() ?>
-                    </h5>   
-                    <h5><span class="title-param">Заказов:</span> 
-                    <?= $vendor->getOrdersCount() ?>
-                    </h5>  
+                    </h5> 
                     <h5><span class="title-param">Категории:</span> 
                     <?= $vendor->getMarketGoodsCount() ?>
                     </h5> 

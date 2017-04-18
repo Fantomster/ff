@@ -45,18 +45,16 @@ class RequestController extends DefaultController {
         $organization = $currentUser->organization;
         $profile = $currentUser->profile;
         $request->rest_org_id = $currentUser->organization_id;
-        if (Yii::$app->request->isAjax && $request->load(Yii::$app->request->post())) {
+        if (Yii::$app->request->isAjax && $request->load(Yii::$app->request->post()) && 
+                $organization->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $validForm = ActiveForm::validate($request);
             if($validForm){
                 return $validForm;
             }else{
-             if(Yii::$app->request->post('step')==3){ //&& 
-                     //$profile->load(Yii::$app->request->post()) &&
-                     //$organization->load(Yii::$app->request->post())
-                    $request->save();  
-                    //$profile->save();
-                    //$organization->save();
+             if(Yii::$app->request->post('step')==3){
+                    $organization->save();
+                    $request->save(); 
                     return ['saved'=>true];   
                 }else{
                     return $validForm;
@@ -122,6 +120,7 @@ class RequestController extends DefaultController {
                     'pageSize' => 15,
                 ],
             ]);
+            //var_dump($author);
             return $this->render("view-client", compact('request','countComments','author','dataCallback'));
         }
         if($user->organization->type_id == Organization::TYPE_SUPPLIER){

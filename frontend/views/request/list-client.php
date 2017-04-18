@@ -204,12 +204,16 @@ $(document).on("click",".next",function(e){
     cache: false,
     success: function (response) {
         if(step == 1){
+        console.log(response)
+            if(response["organization-address"] == false){
+            $(".field-organization-address input").css("border-bottom","2px solid red");
+            setTimeout(function() {$(".field-organization-address input").css("border-bottom","2px solid #ccc");}, 1500)
+            }
             if((typeof(response["request-category"]) != "undefined" && 
               response["request-category"] !== null) || 
                (typeof(response["request-product"]) != "undefined" && 
-              response["request-product"] !== null)){
+              response["request-product"] !== null) || response["organization-address"] == false){
               form.yiiActiveForm("submitForm")
-              
               cancel();
             }else{
                 form.yiiActiveForm("resetForm");

@@ -23,19 +23,6 @@ class RequestController extends DefaultController {
     public function actionTest() {
         return $this->render('test');
     }
-//    public function actionCreate() {
-//        if (Yii::$app->request->isAjax) {
-//            $currentUser = $this->currentUser;
-//            $organization = $currentUser->organization;
-//            if($organization->type_id != Organization::TYPE_RESTAURANT){
-//               return false; 
-//            }
-//            $request = new \common\models\Request();
-//            return $this->renderAjax("create", compact('request','organization'));
-//            }else{
-//                return $this->redirect(['list']);
-//            }
-//    }
     public function actionSaveRequest() {
         $currentUser = $this->currentUser;
         if($currentUser->organization->type_id != Organization::TYPE_RESTAURANT){
@@ -49,6 +36,12 @@ class RequestController extends DefaultController {
                 $organization->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $validForm = ActiveForm::validate($request);
+            if(empty($organization->lat) || 
+                empty($organization->lng) || 
+                empty($organization->place_id) || 
+                empty($organization->country)){
+                    return ['organization-address' => false]; 
+            }
             if($validForm){
                 return $validForm;
             }else{

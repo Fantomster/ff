@@ -146,17 +146,18 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 }
 .pac-container { z-index: 9999 !important; }
 #map{width:100%;height:250px;}
-.searchclear {
-    position:absolute;
-    right:5px;
-    top:0;
-    bottom:0;
-    height:14px;
-    margin:auto;
-    font-size:14px;
-    cursor:pointer;
-    color:#ccc;
-}
+.clear-input{
+    top: 9px;
+    float: right;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.7;
+    filter: alpha(opacity=40);
+    position: absolute;
+    right: 0;
+    margin-right: 5px;}
 </style>
 <?php 
 Pjax::begin([
@@ -180,18 +181,19 @@ Pjax::begin([
 	</div>
 	<!-- progressbar -->
 	<ul id="progressbar">
-		<li class="active"><span class="li-text">Продукт</span></li>
+		<li class="active"><span class="li-text">Продукт<i class="flaticon-cross-out"></i></span></li>
 		<li><span class="li-text">Условия</span></li>
 		<li><span class="li-text">Оплата</span></li>
                 <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
-            <span <?php // if($organization->place_id){ echo "style='display:none'"; }?>>
+            <span <?php if($organization->place_id){ echo "style='display:none'"; }?>>
                 <h5>Адрес организации<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
-                <?= $form->field($organization, 'address',['template'=>'{input}<span id="searchclear" class="searchclear glyphicon glyphicon-remove-circle"></span>{error}'])->textInput(['maxlength' => 255])->label(false) ?>
+                <?= $form->field($organization, 'address',['template'=>'<div style="position:relative">{input}<span class="clear-input">×</span></div>{error}'])->textInput(['maxlength' => 255,'style'=>'padding-right:22px'])->label(false) ?>
                 <div id="map"></div>
             </span>
+            
 <?= Html::activeHiddenInput($organization, 'lat'); //широта ?>
 <?= Html::activeHiddenInput($organization, 'lng'); //долгота ?>
 <?= Html::activeHiddenInput($organization, 'country'); //страна ?> 
@@ -273,6 +275,14 @@ $gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
 ));
 $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
 $this->registerJs("
+$(document).on('keyup change', '#organization-address', function(){
+$(this).next().toggle(Boolean($(this).val()));
+    });
+    $('.clear-input').toggle(Boolean($('#organization-address').val()));
+    $('.clear-input').click(function () {
+        $(this).prev().val('').focus();
+        $(this).hide();
+})
 function initMap() {
     var fields = {
             sField : document.getElementById('organization-address'),
@@ -460,10 +470,6 @@ function changeFields(fields, results){
                 'model'=>$request->payment_method,
                 'hideSearch' => true,
                 'data' => [1=>'Наличный расчет',2=>'Безналичный расчет'],
-                //'options' => ['placeholder' => 'Наличный расчет'],
-//                'pluginOptions' => [
-//                    'allowClear' => true
-//                ],
             ])->label(false);
             ?>
             
@@ -479,32 +485,7 @@ function changeFields(fields, results){
                 <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
                 <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
         <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>        
-        </fieldset> 
-<!--        <fieldset class="text-left">
-            <h5>Ваш контактный телефон</h5>
-            <?= $form->field($profile, 'phone', 
-    ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => '']) ?>
-            <?=$form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
-            'autoLabel' => true,
-            'model' => $profile,
-            'attribute' => 'sms_allow',
-            'pluginOptions'=>[
-                'threeState'=>false,
-                'theme' => 'krajee-flatblue',
-                'enclosedLabel' => false,
-                'size'=>'lg',
-                ],
-            'labelSettings' => [
-                'label' => 'смс информирование <span style="font-size:14px;color:#ccc;margin-left:5px">Получайте смс о новых откликах по заявке</span>',
-                'position' => CheckboxX::LABEL_RIGHT,
-                'options' =>['style'=>'font-size: 20px;color: #3f3e3e;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 500;']
-                ]
-            ])->label(false);?>
-            <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
-            <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>4]) ?>
-            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
-        </fieldset>-->
+        </fieldset>
 <?php ActiveForm::end(); ?>
 
 <?php Pjax::end(); ?>

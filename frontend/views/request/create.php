@@ -80,7 +80,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 #msform fieldset > .btn {font-size: 18px; font:bold;border-width: 3px; border-radius:4px;}
 #msform .tooltip {border-radius: 3px;font:400 12px;}
 #msform .tooltip > .tooltip-inner {background-color: #fefefe;border: 1px solid #555;color:#555;padding: 15px 18px;text-align: left;max-width: 600px;width: 400px}
-#msform .form-close{position: absolute;top:0px;right: 0px;cursor: pointer;width:55px;z-index: 99}
+#msform .form-close{position: absolute;top:0px;right: 0px;cursor: pointer;z-index: 99}
 #msform li .li-text{position: absolute;top:30px;left:0;right:0;color:white}
 .mswrapper{width: 80%;margin: 0 10%;}
 .close-h{margin-top: 56px;font-size: 18px;color: #ccc;}
@@ -158,6 +158,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
     position: absolute;
     right: 0;
     margin-right: 5px;}
+[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{font-size:40px}
 </style>
 <?php 
 Pjax::begin([
@@ -173,7 +174,8 @@ Pjax::begin([
 
 ]); ?>
         <div class="mswrapper" style="position: relative;height: 80px">
-		<img class="form-close" data-dismiss="modal" src="images/request-btn-close.png">
+                
+                <i class="flaticon-cross-out form-close" data-dismiss="modal" style="top: 10px;"></i>
 		<div style="display: inline-block;position: absolute;left:0">
 		<h4 class="f-title">Разместить заявку</h4>
 		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы F-keeper! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!">Что такое разместить заявку?</h4>
@@ -181,7 +183,7 @@ Pjax::begin([
 	</div>
 	<!-- progressbar -->
 	<ul id="progressbar">
-		<li class="active"><span class="li-text">Продукт<i class="flaticon-cross-out"></i></span></li>
+		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
 		<li><span class="li-text">Оплата</span></li>
                 <!--li><span class="li-text">Контакты</span></li-->
@@ -202,72 +204,7 @@ Pjax::begin([
 <?= Html::activeHiddenInput($organization, 'street_number'); //дом ?>
 <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
 <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
-
-            <h5>Выберите категорию товара<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
-            <?php 
-            echo $form->field($request, 'category',['template'=>'{input}{error}'])->widget(Select2::classname(), [
-                'model'=>$request->category,
-                'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
-                'options' => ['placeholder' => 'Мясо'],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ])->label(false);
-            ?>
-            <h5>Что вы хотите купить?<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
-            <?= $form->field($request, 'product', 
-    ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => 'Помидоры Азербайджанские']) ?>
-            <h5>Комментарий к заказу</h5>
-            <?= $form->field($request, 'comment', 
-    ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => '']) ?>
-            <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>1]) ?>
-            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
-        </fieldset>
-        <!-- fieldsets 2 -->
-	<fieldset class="text-left">
-            
-            <h5>Как часто?</h5>
-            <?php 
-            echo $form->field($request, 'regular',['template'=>'{input}{error}'])->widget(Select2::classname(), [
-                'model'=>$request->regular,
-                'hideSearch' => true,
-                'data' => [1=>'Разово',2=>'Ежедневно',3=>'Каждую неделю',4=>'Каждый месяц'],
-                //'options' => ['placeholder' => 'Разово'],
-//                'pluginOptions' => [
-//                    'allowClear' => true
-//                ],
-            ])->label(false);
-            ?>
-            <h5>Объем закупки?<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
-            <?= $form->field($request, 'amount', 
-    ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => '15 кг']) ?>
-            <?=$form->field($request, 'rush_order')->widget(CheckboxX::classname(), [
-                            'autoLabel' => true,
-                            'model' => $request,
-                            'attribute' => 'rush_order',
-                            'pluginOptions'=>[
-                                'threeState'=>false,
-                                'theme' => 'krajee-flatblue',
-                                'enclosedLabel' => false,
-                                'size'=>'lg',
-                                ],
-                            'labelSettings' => [
-                                'label' => 'Срочный заказ <span style="font-size:14px;color:#ccc;margin-left:5px">доставить в течении 24 часов</span>',
-                                'position' => CheckboxX::LABEL_RIGHT,
-                                'options' =>['style'=>'font-size: 20px;color: #3f3e3e;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 500;']
-                                ]
-                            ])->label(false);?>
-            <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
-            <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>2]) ?>
-            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
-        </fieldset>
-        <!-- fieldsets 3 -->
-	<fieldset class="text-left">
-            
-                <?php
+<?php
 $gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
     'libraries' => 'places',
     'key'=>'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
@@ -464,6 +401,69 @@ function changeFields(fields, results){
 }
 ",yii\web\View::POS_END);
 ?>
+            <h5>Выберите категорию товара<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+            <?php 
+            echo $form->field($request, 'category',['template'=>'{input}{error}'])->widget(Select2::classname(), [
+                'model'=>$request->category,
+                'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
+                'options' => ['placeholder' => 'Мясо'],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ])->label(false);
+            ?>
+            <h5>Что вы хотите купить?<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+            <?= $form->field($request, 'product', 
+    ['template'=>'{input}{error}'])->
+    textInput(['placeholder' => 'Помидоры Азербайджанские']) ?>
+            <h5>Комментарий к заказу</h5>
+            <?= $form->field($request, 'comment', 
+    ['template'=>'{input}{error}'])->
+    textInput(['placeholder' => '']) ?>
+            <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>1]) ?>
+            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
+        </fieldset>
+        <!-- fieldsets 2 -->
+	<fieldset class="text-left">
+            
+            <h5>Как часто?</h5>
+            <?php 
+            echo $form->field($request, 'regular',['template'=>'{input}{error}'])->widget(Select2::classname(), [
+                'model'=>$request->regular,
+                'hideSearch' => true,
+                'data' => [1=>'Разово',2=>'Ежедневно',3=>'Каждую неделю',4=>'Каждый месяц'],
+                //'options' => ['placeholder' => 'Разово'],
+//                'pluginOptions' => [
+//                    'allowClear' => true
+//                ],
+            ])->label(false);
+            ?>
+            <h5>Объем закупки?<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+            <?= $form->field($request, 'amount', 
+    ['template'=>'{input}{error}'])->
+    textInput(['placeholder' => '15 кг']) ?>
+            <?=$form->field($request, 'rush_order')->widget(CheckboxX::classname(), [
+                            'autoLabel' => true,
+                            'model' => $request,
+                            'attribute' => 'rush_order',
+                            'pluginOptions'=>[
+                                'threeState'=>false,
+                                'theme' => 'krajee-flatblue',
+                                'enclosedLabel' => false,
+                                'size'=>'lg',
+                                ],
+                            'labelSettings' => [
+                                'label' => 'Срочный заказ <span style="font-size:14px;color:#ccc;margin-left:5px">доставить в течении 24 часов</span>',
+                                'position' => CheckboxX::LABEL_RIGHT,
+                                'options' =>['style'=>'font-size: 20px;color: #3f3e3e;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 500;']
+                                ]
+                            ])->label(false);?>
+            <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
+            <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>2]) ?>
+            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
+        </fieldset>
+        <!-- fieldsets 3 -->
+	<fieldset class="text-left">
             <h5>Способ оплаты?</h5>
             <?php 
             echo $form->field($request, 'payment_method',['template'=>'{input}{error}'])->widget(Select2::classname(), [

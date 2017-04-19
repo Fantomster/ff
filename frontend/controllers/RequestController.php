@@ -36,22 +36,28 @@ class RequestController extends DefaultController {
                 $organization->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $validForm = ActiveForm::validate($request);
+            $validFormOrg = ActiveForm::validate($organization);
             if(empty($organization->lat) || 
                 empty($organization->lng) || 
                 empty($organization->place_id) || 
                 empty($organization->country)){
-                    return ['organization-address' => false]; 
+                return ['organization-address' => false];     
             }
+            
             if($validForm){
                 return $validForm;
             }else{
              if(Yii::$app->request->post('step')==3){
+                if ($request->validate() && $organization->validate()) {
                     $organization->save();
                     $request->save(); 
-                    return ['saved'=>true];   
-                }else{
-                    return $validForm;
-                }
+                    return ['saved'=>true];
+                } else {
+                    return ['error'=>['organization'=>$organization->errors,'request'=>$request->errors]];
+                } 
+              }else{
+                return $validForm;
+              }
             }
         }
     }

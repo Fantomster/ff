@@ -54,7 +54,7 @@ class VendorSearch extends RelationSuppRest {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $client_id)
+    public function search($params, $client_id, $tmp = false)
     {
         $rspTable = RelationSuppRest::tableName();
         $orgTable = Organization::tableName();

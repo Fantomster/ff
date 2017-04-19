@@ -89,11 +89,10 @@ use dosamigos\google\maps\layers\BicyclingLayer;
                      <?php 
                     $gc = new GeocodingClient();
                     $result = $gc->lookup(array('address'=>$author->address,'components'=>1));
-                    $location = $result['results'][0]['geometry']['location'];
-                    
+                    $location = $result->results[0]->geometry->location;
                     if (!is_null($location)) {
-                        $lat = $location['lat'];
-                        $lng = $location['lng'];
+                        $lat = $location->lat;
+                        $lng = $location->lng;
                         $coord = new LatLng(['lat' => $lat, 'lng' => $lng]);
                         $map = new Map(['center' => $coord,
                                         'zoom' => 15,
@@ -165,7 +164,6 @@ use dosamigos\google\maps\layers\BicyclingLayer;
                         <div class="req-client-reg">Категория: <b><?=$request->categoryName->name ?></b></div>
                     </div>
                 </div>
-                
                 <div class="row">
                     <hr>
                     <div class="col-md-12">

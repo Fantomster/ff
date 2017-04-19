@@ -49,6 +49,7 @@ class RequestController extends DefaultController {
             }else{
              if(Yii::$app->request->post('step')==3){
                 if ($request->validate() && $organization->validate()) {
+                    $organization->city = $organization->locality;
                     $organization->save();
                     $request->save(); 
                     return ['saved'=>true];

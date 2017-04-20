@@ -106,11 +106,13 @@ class SiteController extends DefaultController {
                 ->count();
         $totalCount = $clientsCount + $vendorsCount;
         
+        $vendorsStats = $this->currentFranchisee->getMyVendorsStats();
+        
         $params = Yii::$app->request->getQueryParams();
         $searchModel = new \franchise\models\OrderSearch();
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
 
-        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'totalCount', 'clientsCount', 'vendorsCount'));
+        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats'));
     }
 
     /**

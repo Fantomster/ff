@@ -147,4 +147,19 @@ class Franchisee extends \yii\db\ActiveRecord {
         return $result;
     }
 
+    /*
+     * @return array
+     * 
+     * ['orderCount' => 1, 'turnover' => 1]
+     */
+    public function getMyVendorsStats() {
+        $ordTable = Order::tableName();
+        $faTable = FranchiseeAssociate::tableName();
+        $orders = Order::find()
+                ->leftJoin($faTable, "$ordTable.vendor_id = $faTable.organization_id")
+                ->where(["$faTable.franchisee_id" => $this->id]);
+        $orderCount = $orders->count();
+        $turnover = $orders->sum("$ordTable.total_price");
+        return ['orderCount' => $orderCount, 'turnover' => $turnover];
+    }
 }

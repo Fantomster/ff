@@ -352,7 +352,7 @@ class Organization extends \yii\db\ActiveRecord {
             case self::TYPE_SUPPLIER:
                 $result = RelationSuppRest::find()->where([
                             'supp_org_id' => $this->id,
-                            'invite' => [RelationSuppRest::INVITE_ON]]
+                            'invite' => [RelationSuppRest::INVITE_OFF]]
                         )->count();
                 break;
         }

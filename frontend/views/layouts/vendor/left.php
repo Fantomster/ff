@@ -18,10 +18,10 @@ $menuItems = [
         'url' => ['order/index'],
         'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
     ],
-    ['label' => 'Мои каталоги', 'icon' => 'fa fa-list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
+    ['label' => 'Мои каталоги', 'icon' => 'list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
-    ['label' => 'F-MARKET', 'icon' => 'fa fa-shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
-    ['label' => 'Заявки<sub class="sub-new">NEW</sub>', 'icon' => 'fa fa-paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'Заявки<sub class="sub-new">NEW</sub>', 'icon' => 'paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
     [
         'label' => 'Мои клиенты',
         'icon' => 'users',

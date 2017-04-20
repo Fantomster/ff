@@ -304,6 +304,9 @@ $this->registerCss('
                                 'format' => 'raw',
                                 'value' => function($data) {
                                     switch ($data['status']) {
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                                        case Order::STATUS_PROCESSING:
                                         case Order::STATUS_DONE:
                                         case Order::STATUS_REJECTED:
                                         case Order::STATUS_CANCELLED:

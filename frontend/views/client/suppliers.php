@@ -169,9 +169,6 @@ $gridColumnsCatalog = [
         'contentOptions' => ['style' => 'vertical-align:middle;min-width:180px;'],
         'format' => 'raw',
         'value' => function ($data) {
-        if (!isset($data->catalog)) {
-            return var_dump($data);
-        }
     if ($data->invite == 0) {
         return '<span class="text-danger">Ожидается<br>подтверждение</span>';
     } elseif ($data->catalog->status == 1) {

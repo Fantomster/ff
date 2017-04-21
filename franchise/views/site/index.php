@@ -23,7 +23,7 @@ use dosamigos\chartjs\ChartJs;
         <div class="col-md-8">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Объем продаж ваших клиентов</h3>
+                    <h3 class="box-title">Объем продаж ваших клиентов за последние 30 дней</h3>
                     <div class="box-tools pull-right">
                         <?= Html::a("Аналитика", ["analytics/index"], ["class" => "btn btn-success btn-sm"]) ?>
                     </div>
@@ -65,8 +65,8 @@ use dosamigos\chartjs\ChartJs;
                     <div class="row">
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
-                                <span class="description-percentage text-green"><i class="fa fa-caret-up"></i> 17%</span>
-                                <h5 class="description-header">35,210.43 руб.</h5>
+                                <span class="description-percentage text-green"><?= $franchiseeType->share ?>%</span>
+                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * $franchiseeType->share / 100, 2, '.', ' ') ?> руб.</h5>
                                 <span class="description-text">Ваша прибыль</span>
                             </div>
                             <!-- /.description-block -->
@@ -74,8 +74,8 @@ use dosamigos\chartjs\ChartJs;
                         <!-- /.col -->
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
-                                <span class="description-percentage text-yellow"><i class="fa fa-caret-left"></i> 0%</span>
-                                <h5 class="description-header">10,390.90 руб.</h5>
+                                <span class="description-percentage text-yellow"><?= 100 - $franchiseeType->share ?>%</span>
+                                <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> руб.</h5>
                                 <span class="description-text">Роялти f-keeper</span>
                             </div>
                             <!-- /.description-block -->
@@ -83,8 +83,10 @@ use dosamigos\chartjs\ChartJs;
                         <!-- /.col -->
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
-                                <span class="description-percentage text-green"><i class="fa fa-caret-up"></i> 20%</span>
-                                <h5 class="description-header"><?= $vendorsStats['orderCount'] ?></h5>
+                                <span class="description-percentage text-green">&nbsp;
+                                    <!--<i class="fa fa-caret-up"></i> 20%-->
+                                </span>
+                                <h5 class="description-header"><?= $vendorsStats30['orderCount'] ?></h5>
                                 <span class="description-text">Общее кол-во заказов</span>
                             </div>
                             <!-- /.description-block -->
@@ -92,8 +94,10 @@ use dosamigos\chartjs\ChartJs;
                         <!-- /.col -->
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block">
-                                <span class="description-percentage text-red"><i class="fa fa-caret-down"></i> 18%</span>
-                                <h5 class="description-header"><?= $totalCount ?></h5>
+                                <span class="description-percentage text-red">&nbsp;
+                                    <!--<i class="fa fa-caret-down"></i> 18%-->
+                                </span>
+                                <h5 class="description-header"><?= $total30Count ?></h5>
                                 <span class="description-text">Клиентов</span>
                             </div>
                             <!-- /.description-block -->
@@ -120,19 +124,19 @@ use dosamigos\chartjs\ChartJs;
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">Поставщики Мне:</td>
-                                    <td style="text-align: right; font-size: 18px; color: rgba(51, 54, 59, 0.8); font-weight: bold;">123 000 руб.</td>
+                                    <td style="text-align: right; font-size: 18px; color: rgba(51, 54, 59, 0.8); font-weight: bold;"><?= number_format($vendorsStats['turnoverCut'], 2, '.', ' ') ?> руб.</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">F-keeper Мне:</td>
-                                    <td style="text-align: right; font-size: 18px; color: #7EBC59; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-plus"></i></span> 123 000 руб.</td>
+                                    <td style="text-align: right; font-size: 18px; color: #7EBC59; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-plus"></i></span> 0 руб.</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">Я F-keeper'у:</td>
-                                    <td style="text-align: right; font-size: 18px; color: #FB3640; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-minus"></i></span> 180 000 руб.</td>
+                                    <td style="text-align: right; font-size: 18px; color: #FB3640; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-minus"></i></span> <?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> руб.</td>
                                 </tr>
                                 <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
                                     <td style="text-align: left; font-weight: bold;">Итого заработано:</td>
-                                    <td style="text-align: right; font-size: 22px; font-weight: bold;">66 000 руб.</td>
+                                    <td style="text-align: right; font-size: 22px; font-weight: bold;"><?= number_format($vendorsStats['turnoverCut'] - ($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100), 2, '.', ' ') ?> руб.</td>
                                 </tr>
                                 <tr>
                                     <td></td>
@@ -158,7 +162,7 @@ use dosamigos\chartjs\ChartJs;
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">Оборот:</td>
-                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= $vendorsStats['turnover'] ?> руб.</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= number_format($vendorsStats['turnover'], 2, '.', ' ') ?> руб.</td>
                                 </tr>
                             </tbody></table>
                     </div>         

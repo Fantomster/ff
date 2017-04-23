@@ -63,7 +63,7 @@ return [
             'bundles' => [
                 'dosamigos\google\maps\MapAsset' => [
                     'options' => [
-                        'key' => 'AIzaSyA22MpauLyKupUUyzbn9_e6USwpOeSjD8g',
+                        'key' => 'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
                         'language' => 'ru',
                         'version' => '3.1.18'
                     ]

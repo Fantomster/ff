@@ -82,9 +82,13 @@ $request = new \common\models\Request();
     ?>
 </section>
 <section class="content">
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <div class="col-md-6 no-padding">
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-8">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <div class="box box-info">
+            <div class="box-body no-padding" style="padding-bottom:15px !important;padding-top:15px !important;">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <div class="input-group">
                     <span class="input-group-addon">
                       <i class="fa fa-search"></i>
@@ -96,32 +100,40 @@ $request = new \common\models\Request();
                             'id'=>'search'
                         ]);?>
                 </div>
+              </div>
             </div>
-            <div class="col-md-6 no-padding">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="box box-info">
+            <div class="box-body no-padding" style="padding-bottom:15px !important;padding-top:15px !important;">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <?php Modal::begin([
             'id' => 'create',
-            'toggleButton' => ['label' => '<i class="fa fa-paper-plane"></i> Разместить заявку','class'=>'btn btn-sm btn-fk-success pull-right'],
+            'toggleButton' => ['label' => '<i class="fa fa-paper-plane"></i> Разместить заявку','class'=>'btn btn-sm btn-fk-success','style'=>'width:100%'],
             'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1']
          ]);
             ?>
-            </div>
             <?php
             echo $this->render("create", compact('request','organization','profile'));
             Modal::end();
             ?> 
-
+              </div>
+            </div>
         </div>
+      </div>
     </div>
-    
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <h3 class="box-title">Мои заявки</h3> 
-        </div>
-        
-        <!-- /.box-header -->
-        <div class="box-body">
-            <div class="col-md-12 no-padding">
-              
+  </div>
+    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <div class="box box-info">
+            <div class="box-body">
+              <div class="col-md-12 no-padding">
               <?php 
               Pjax::begin([
                   'id' => 'list', 
@@ -149,8 +161,15 @@ $request = new \common\models\Request();
                     'emptyText' => 'Список пуст',
                 ])?>
               <?php Pjax::end(); ?>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 hidden-xs hidden-sm">
+          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive', 'style'=>'margin-bottom:15px']) ?>
+          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive']) ?>
     </div>
 </section>
 <?php

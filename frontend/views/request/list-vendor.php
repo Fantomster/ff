@@ -99,11 +99,13 @@ $request = new \common\models\Request();
     ?>
 </section>
 <section class="content">
-    <div class="box box-info">
-        <div class="box-body">
-            <div class="col-md-12 no-padding">
-                <div class="row">
-                  <div class="col-md-4">
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-2">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <div class="box box-info">
+            <div class="box-body no-padding" style="padding-bottom:15px !important">
+              <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
                       <?= Html::label('&nbsp;', null, ['class' => 'label','style'=>'color:#555']) ?>
                         <div class="input-group">
                             <span class="input-group-addon">
@@ -116,8 +118,8 @@ $request = new \common\models\Request();
                                 'id'=>'search'
                             ]);?> 
                         </div>
-                  </div>
-                  <div class="col-md-4">
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
                     <?= Html::label('Категория', null, ['class' => 'label','style'=>'color:#555']) ?>
                     <?=Select2::widget([
                         'name' => 'category',
@@ -129,8 +131,8 @@ $request = new \common\models\Request();
                         ],
                     ]);
                     ?>
-                </div>
-                <div class="col-md-2">
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
                     <?= Html::label('Все заявки/мои', null, ['class' => 'label','style'=>'color:#555']) ?>
                     <?=Select2::widget([
                         'name' => 'my-only',
@@ -143,8 +145,8 @@ $request = new \common\models\Request();
                         ],
                     ]);
                     ?>
-                </div>
-                <div class="col-md-2">
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
                     <?= Html::label('Все заявки/срочные', null, ['class' => 'label','style'=>'color:#555']) ?>
                     <?=Select2::widget([
                         'name' => 'rush',
@@ -157,17 +159,18 @@ $request = new \common\models\Request();
                         ],
                     ]);
                     ?>
-                </div>
-                </div>
+              </div>
             </div>
+          </div>
+            <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs hidden-sm hidden-md']) ?>
         </div>
+      </div>
     </div>
-    <div class="box box-info">
-        <div class="box-header with-border">
-            <h3 class="box-title">Заявки</h3> 
-        </div>
-        <div class="box-body">
-            <div class="col-md-12 no-padding"> 
+    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+      <div class="row">
+        <div class="col-md-12">   
+          <div class="box box-info">
+            <div class="box-body" style="padding-bottom:15px !important;padding-top:0 !important;">
               <?php 
               Pjax::begin([
                   'id' => 'list', 
@@ -195,8 +198,15 @@ $request = new \common\models\Request();
                 ])?>
               <?php Pjax::end(); ?>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-2">
+          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs', 'style'=>'margin-bottom:15px']) ?>
+          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs']) ?>
+    </div>
+  </div>
 </section>
 <?php
 

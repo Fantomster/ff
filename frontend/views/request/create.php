@@ -263,7 +263,7 @@ function initMap() {
                     marker.setPosition(results[0].geometry.location);
                     changeFields(fields, results)
 	    }else {
-          window.alert('No results found');}
+          window.alert('[autocomplete] No results found');}
         });
     
 	//событие на перемещение маркера
@@ -276,7 +276,7 @@ function initMap() {
                         changeFields(fields, results)
 	        	}     
 	        } else {
-	        window.alert('Geocoder failed due to: ' + status);
+	        console.log('[dragger] Geocoder failed due to: ' + status);
 	        }
 	    });
 	})
@@ -291,7 +291,7 @@ function initMap() {
                         changeFields(fields, results)
                         }     
                 } else {
-                window.alert('Geocoder failed due to: ' + status);
+                console.log('[click] Geocoder failed due to: ' + status);
                 }
             })
         });
@@ -306,10 +306,10 @@ function geocodePlaceId(geocoder, map, marker, placeId, fields) {
             marker.setPosition(results[0].geometry.location);
             changeFields(fields, results)
         } else {
-          window.alert('No results found');
+          console.log('[PlaceId] No results found');
         }
       } else {
-        window.alert('Geocoder failed due to: ' + status);
+        console.log('[geocodePlaceId]  failed due to: ' + status);
       }
     });
 }

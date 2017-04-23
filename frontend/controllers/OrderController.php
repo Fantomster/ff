@@ -550,7 +550,9 @@ class OrderController extends DefaultController {
                         if ($position['quantity'] == 0) {
                             $message .= "<br/>удалил $product->product_name из заказа";
                         } else {
-                            $message .= "<br/>изменил количество $product->product_name с $product->quantity" . $ed . " на $position[quantity]" . $ed;
+                            $oldQuantity = $product->quantity + 0;
+                            $newQuantity = $position["quantity"] + 0;
+                            $message .= "<br/>изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
                         }
                         $product->quantity = $position['quantity'];
                     }

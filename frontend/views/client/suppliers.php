@@ -171,7 +171,7 @@ $gridColumnsCatalog = [
         'value' => function ($data) {
     if ($data->invite == 0) {
         return '<span class="text-danger">Ожидается<br>подтверждение</span>';
-    } elseif ($data->catalog->status == 1) {
+    } elseif (isset($data->catalog) && $data->catalog->status == 1) {
         return '<span class="text-success">Подтвержден</span>';
     } else {
         return '<span class="text-yellow">Подтвержден<br>Каталог не назначен</span>';

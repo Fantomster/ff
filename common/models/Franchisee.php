@@ -147,4 +147,26 @@ class Franchisee extends \yii\db\ActiveRecord {
         return $result;
     }
 
+    /*
+     * @return array
+     * 
+     * ['orderCount' => 1, 'turnover' => 1, 'turnoverCut' => 1]
+     */
+    public function getMyVendorsStats($dateFrom = null, $dateTo = null) {
+        $ordTable = Order::tableName();
+        $faTable = FranchiseeAssociate::tableName();
+        $rsrTable = RelationSuppRest::tableName();
+        $biTable = BuisinessInfo::tableName();
+        $orders = Order::find()
+                ->leftJoin($faTable, "$ordTable.vendor_id = $faTable.organization_id")
+                ->leftJoin($rsrTable, "$ordTable.vendor_id = $rsrTable.supp_org_id")
+                ->leftJoin($biTable, "$ordTable.vendor_id = $biTable.organization_id")
+                ->where(["$faTable.franchisee_id" => $this->id, "$ordTable.status" => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
+                ->andFilterWhere([">", "$ordTable.updated_at", $dateFrom])
+                ->andFilterWhere(["<", "$ordTable.updated_at", $dateTo]);
+        $orderCount = $orders->count();
+        $turnover = $orders->sum("$ordTable.total_price");
+        $turnoverCut = $orders->andWhere(["$rsrTable.is_from_market" => true])->sum("$ordTable.total_price * $biTable.reward / 100");
+        return ['orderCount' => $orderCount, 'turnover' => $turnover, 'turnoverCut' => $turnoverCut];
+    }
 }

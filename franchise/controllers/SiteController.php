@@ -77,11 +77,11 @@ class SiteController extends DefaultController {
      * @return mixed
      */
     public function actionIndex() {
-                
+
         //---graph start
         $query = "SELECT truncate(sum(total_price),1) as spent, year(created_at) as year, month(created_at) as month, day(created_at) as day "
                 . "FROM `order` LEFT JOIN `franchisee_associate` ON `order`.vendor_id = `franchisee_associate`.organization_id "
-                . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") "
+                . "where status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
                 . "and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " "
                 . "group by year(created_at), month(created_at), day(created_at)";
         $command = Yii::$app->db->createCommand($query);
@@ -105,12 +105,25 @@ class SiteController extends DefaultController {
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->count();
         $totalCount = $clientsCount + $vendorsCount;
-        
+
+        $last30days = date("Y-m-d", strtotime(" -1 months"));
+
+        $total30Count = $client = Organization::find()
+                ->joinWith("franchiseeAssociate")
+                ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id])
+                ->andWhere([">", "organization.updated_at", $last30days])
+                ->count();
+
+        $vendorsStats30 = $this->currentFranchisee->getMyVendorsStats($last30days);
+        $vendorsStats = $this->currentFranchisee->getMyVendorsStats();
+
         $params = Yii::$app->request->getQueryParams();
         $searchModel = new \franchise\models\OrderSearch();
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
 
-        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'totalCount', 'clientsCount', 'vendorsCount'));
+        $franchiseeType = $this->currentFranchisee->type;
+
+        return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType'));
     }
 
     /**
@@ -130,7 +143,7 @@ class SiteController extends DefaultController {
             $params['OrderSearch'] = Yii::$app->request->post("OrderSearch");
         }
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
-        
+
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('orders', compact('searchModel', 'dataProvider'));
         } else {
@@ -294,6 +307,7 @@ class SiteController extends DefaultController {
     public function actionPromotion() {
         return $this->render('promotion');
     }
+
     public function actionCatalog($id) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $searchString = "";
@@ -314,16 +328,15 @@ class SiteController extends DefaultController {
             $query = \Yii::$app->db->createCommand($sql);
             $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
                             . "WHERE cat_id = $id AND "
-                            . "deleted=".CatalogBaseGoods::DELETED_OFF." AND (product LIKE :product or article LIKE :article)", 
-                    [':article' => $searchString, ':product' => $searchString])->queryScalar();
+                            . "deleted=" . CatalogBaseGoods::DELETED_OFF . " AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
         } else {
             $sql = "SELECT id,article,cat_id,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
                     . "WHERE cat_id = $id AND "
-                    . "deleted=".CatalogBaseGoods::DELETED_OFF;
+                    . "deleted=" . CatalogBaseGoods::DELETED_OFF;
             $query = \Yii::$app->db->createCommand($sql);
             $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
                             . "WHERE cat_id = $id AND "
-                            . "deleted=".CatalogBaseGoods::DELETED_OFF, [':article' => $searchString, ':product' => $searchString])->queryScalar();
+                            . "deleted=" . CatalogBaseGoods::DELETED_OFF, [':article' => $searchString, ':product' => $searchString])->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
@@ -348,26 +361,29 @@ class SiteController extends DefaultController {
         ]);
         return $this->render('catalog', compact('searchString', 'dataProvider', 'id'));
     }
-    public function actionAjaxEditCatalogForm() {
+
+    public function actionAjaxEditCatalogForm($catalog = null) {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $catalog = isset(Yii::$app->request->get()['catalog']) ? 
-                Yii::$app->request->get()['catalog'] : 
+        $catalog = isset(Yii::$app->request->get()['catalog']) ?
+                Yii::$app->request->get()['catalog'] :
                 Yii::$app->request->post()['catalog'];
-        $product_id = isset(Yii::$app->request->get()['product_id'])?
-            Yii::$app->request->get()['product_id']:
-            $product_id = null;
-        
-        if(!empty(isset($product_id))){
-         $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $product_id])->one(); 
-         $catalogBaseGoods->scenario = 'marketPlace';
-         if (!empty($catalogBaseGoods->category_id)) {
-            $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
-            $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
+        $product_id = isset(Yii::$app->request->get()['product_id']) ?
+                Yii::$app->request->get()['product_id'] :
+                $product_id = null;
+
+        if (!empty(isset($product_id))) {
+            $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $product_id])->one();
+            $catalogBaseGoods->scenario = 'marketPlace';
+            if (!empty($catalogBaseGoods->category_id)) {
+                $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
+                $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
+            }
+        } else {
+            $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);
+            $cat = \common\models\Catalog::findOne(['id' => $catalog]);
+            $catalogBaseGoods->supp_org_id = $cat->supp_org_id;
         }
-        }else{
-         $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);  
-        }
-        
+
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
@@ -378,17 +394,17 @@ class SiteController extends DefaultController {
                 $catalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 if ($post && $catalogBaseGoods->validate()) {
-                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
-                        $catalogBaseGoods->save();
-                        
-                        $message = 'Продукт обновлен!';
-                        return $this->renderAjax('catalog/_success', ['message' => $message]);
+                    $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                    $catalogBaseGoods->save();
+
+                    $message = 'Продукт обновлен!';
+                    return $this->renderAjax('catalog/_success', ['message' => $message]);
                 }
             }
         }
         return $this->renderAjax('catalog/_ajaxEditCatalogForm', compact('catalogBaseGoods', 'countrys', 'catalog'));
     }
-    
+
     public function actionGetSubCat() {
         $out = [];
         if (isset($_POST['depdrop_parents'])) {
@@ -420,35 +436,36 @@ class SiteController extends DefaultController {
         }
         echo Json::encode(['output' => '', 'selected' => '']);
     }
-    
+
     public function actionAjaxDeleteProduct() {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
             $product_id = \Yii::$app->request->post('id');
             $catalogBaseGoods = CatalogBaseGoods::updateAll([
-                'deleted' => CatalogBaseGoods::DELETED_ON,
-                'es_status' => CatalogBaseGoods::ES_DELETED
-                ], ['id' => $product_id]);
-            
+                        'deleted' => CatalogBaseGoods::DELETED_ON,
+                        'es_status' => CatalogBaseGoods::ES_DELETED
+                            ], ['id' => $product_id]);
+
             $result = ['success' => true];
             return $result;
             exit;
         }
     }
+
     public function actionImportFromXls($id) {
         $vendor = \common\models\Catalog::find()->where([
-            'id'=>$id,
-            'type'=>\common\models\Catalog::BASE_CATALOG
-                ])
-                ->one()
+                            'id' => $id,
+                            'type' => \common\models\Catalog::BASE_CATALOG
+                        ])
+                        ->one()
                 ->vendor;
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
             $unique = 'article'; //уникальное поле
             $sql_array_products = CatalogBaseGoods::find()->select($unique)->where([
-                'cat_id' => $id, 
-                'deleted' => CatalogBaseGoods::DELETED_OFF
+                        'cat_id' => $id,
+                        'deleted' => CatalogBaseGoods::DELETED_OFF
                     ])->asArray()->all();
             $count_array = count($sql_array_products);
             $arr = [];
@@ -481,7 +498,7 @@ class SiteController extends DefaultController {
             }
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше '.CatalogBaseGoods::MAX_INSERT_FROM_XLS.' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -500,9 +517,9 @@ class SiteController extends DefaultController {
                         }
                         if (in_array($row_article, $arr)) {
                             $CatalogBaseGoods = CatalogBaseGoods::find()->where([
-                            'cat_id' => $id,
-                            'article' => $row_article 
-                            ])->one();
+                                        'cat_id' => $id,
+                                        'article' => $row_article
+                                    ])->one();
                             $CatalogBaseGoods->product = $row_product;
                             $CatalogBaseGoods->units = $row_units;
                             $CatalogBaseGoods->price = $row_price;
@@ -510,7 +527,6 @@ class SiteController extends DefaultController {
                             $CatalogBaseGoods->note = $row_note;
                             $CatalogBaseGoods->es_status = CatalogBaseGoods::ES_UPDATE;
                             $CatalogBaseGoods->save();
-                           
                         } else {
                             $CatalogBaseGoods = new CatalogBaseGoods();
                             $CatalogBaseGoods->cat_id = $id;
@@ -539,4 +555,5 @@ class SiteController extends DefaultController {
 
         return $this->renderAjax('catalog/_importCatalog', compact('importModel'));
     }
+
 }

@@ -1,5 +1,11 @@
 <?php 
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+use kartik\form\ActiveForm;
 use kartik\date\DatePicker;
+use yii\widgets\Breadcrumbs;
 ?>
 <section class="content-header">
     <h1>
@@ -34,6 +40,15 @@ use kartik\date\DatePicker;
     <div class="filters">
         <div class="row">
             <div class="col-md-8">
+                <?php
+            $form = ActiveForm::begin([
+                        'options' => [
+                            'id' => 'searchForm',
+                            //'class' => "navbar-form",
+                            'role' => 'search',
+                        ],
+            ]);
+            ?>
                 <div class="col-md-7 no-padding">
                     <?=
                         DatePicker::widget([
@@ -43,7 +58,7 @@ use kartik\date\DatePicker;
                             'options' => ['placeholder' => 'Выберите месяц', 'id' => 'month', 'style' => 'max-width: 150px;'],
                             'type' => DatePicker::TYPE_INPUT,
                             'pluginOptions' => [
-                                'format' => 'MM yyyy', //'d M yyyy',//
+                                'format' => 'MM yyyy',
                                 'viewMode' => 'months', 
                                 'minViewMode' => 'months',
                                 'autoclose' => true,
@@ -60,6 +75,7 @@ use kartik\date\DatePicker;
                             </div>
                     </div>
                 </div>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>
@@ -76,51 +92,78 @@ use kartik\date\DatePicker;
                     </div>
                 </div>
                 <!-- /.box-header -->
-                <div class="box-body table-responsive">
-                    <table class="table table-hover table-max">
-                        <tbody>
-                            <tr style="background-color: #fff;">
-                                <th>Поставщик</th>
-                                <th>Месяц</th>
-                                <th>F-keeper Мне</th>
-                                <th>Я F-keeper'у</th>
-                                <th>Итого прибыль</th>
-                                <th></th>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>ООО Marr Russia</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>ООО "Кардис"</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>Фрутти Рум</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>Рус Алко</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                        </tbody></table>
-                </div>
+            <?php
+            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
+            ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <?=
+                    GridView::widget([
+                        'id' => 'vendorsList',
+                        'dataProvider' => $dataProvider,
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                        'filterModel' => $searchModel,
+                        'filterPosition' => false,
+                        'summary' => '',
+                        'options' => ['class' => 'table-responsive'],
+                        'tableOptions' => ['class' => 'table table-hover table-max', 'role' => 'grid'],
+                        'pager' => [
+                            'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
+                        ],
+                        'columns' => [
+                            [
+                                'attribute' => 'id',
+                                'value' => 'id',
+                                'label' => '№',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'name',
+                                'value' => 'name',
+                                'label' => 'Имя поставщика',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'turnoverCut',
+                                'value' => 'turnoverCut',
+                                'label' => 'Поставщик мне',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'fromFkeeper',
+                                'value' => 'fromFkeeper',
+                                'label' => 'F-keeper мне',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'toFkeeper',
+                                'value' => 'toFkeeper',
+                                'label' => 'Я F-keeper\'у',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return $data['turnoverCut'] - $data['toFkeeper'];
+                                },
+                                'label' => 'Итого прибыль',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    $result = '<a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a>';
+                                    return $result;
+                                },
+                                        'contentOptions' => ['class' => 'table-btns'],
+                                    ],
+                                ],
+                                'rowOptions' => function ($model, $key, $index, $grid) {
+                            return ['data-url' => Url::to(['organization/ajax-show-vendor', 'id' => $model["id"]])];
+                        },
+                            ]);
+                            ?>
+                        </div></div>
+                    <?php Pjax::end() ?>
+                    <!-- /.table-responsive -->
                 <!-- /.box-body -->
             </div>
         </div>

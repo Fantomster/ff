@@ -59,6 +59,18 @@ class FinanceController extends DefaultController {
      * @return mixed
      */
     public function actionIndex() {
-        return $this->render("index");
+        $searchModel = new \franchise\models\VendorFinanceSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("VendorFinanceSearch")) {
+            $params['VendorFinanceSearch'] = Yii::$app->request->post("VendorFinanceSearch");
+        }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('index', compact('dataProvider', 'searchModel'));
+        } else {
+            return $this->render('index', compact('dataProvider', 'searchModel'));
+        }
     }
 }

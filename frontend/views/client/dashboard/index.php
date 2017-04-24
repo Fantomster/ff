@@ -260,9 +260,8 @@ $this->registerCss('
              "";
     }],
     ['attribute' => 'accepted_by_id','label'=>'Заказ принял','value'=>function($data) {
-        return $data['accepted_by_id']?
-             Profile::find()->where(['id'=>$data['accepted_by_id']])->one()->full_name :
-             "";
+        $acceptedByProfile = Profile::find()->where(['id'=>$data['accepted_by_id']])->one();
+        return $acceptedByProfile ? $acceptedByProfile->full_name : "";
     }],
     [
         'format' => 'raw',

@@ -61,7 +61,7 @@ $this->registerJs("
         "
 );
 
-$categoryUrl = Url::to(['category']);
+$categoryUrl = Url::to(['category', 'id' => '']);
 
 $customJs = <<< JS
 $("body").on("hidden.bs.modal", "#add-product-market-place", function() {
@@ -89,7 +89,7 @@ $("#add-product-market-place").on("click", ".edit", function() {
         e.preventDefault();
         subcat = $("#subcat").val();
         if (subcat) { 
-            document.location = "$categoryUrl&id=" + $("#subcat").val();
+            document.location = "$categoryUrl" + $("#subcat").val();
         }
   });
 JS;

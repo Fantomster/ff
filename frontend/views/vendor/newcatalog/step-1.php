@@ -114,7 +114,7 @@ $.ajax({
             
             if(response.success){
                 //bootbox.alert("<h3>Сохранено!</h3>");
-                var url = "' . Url::toRoute(['vendor/step-2']) . '"+"&id="+response.cat_id;
+                var url = "' . Url::toRoute(['vendor/step-2', 'id' => '']) . '"+response.cat_id;
                 $(location).attr("href",url);
                 //$.pjax({url: url, container: "#pjax-container"});
                 //$("#loader-show").hideLoading();

@@ -42,11 +42,9 @@ $this->registerJs(
             $("#createP").on("change keyup paste cut", "#searchString", function() {
                 $("#hiddenSearchString").val($("#searchString").val());
                 if (timer) {
-                    console.log("timer canceled");
                     clearTimeout(timer);
                 }
                 timer = setTimeout(function() {
-                    console.log("submit on timer");
                     $("#searchForm").submit();
                 }, 700);
             });
@@ -86,7 +84,6 @@ $this->registerJs(
             });
             $(document).on("click", ".pagination li a", function() {
                 clearTimeout(timer);
-                console.log("timer canceled");
                 return true;
             });
         });'

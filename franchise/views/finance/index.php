@@ -180,7 +180,7 @@ use yii\widgets\Breadcrumbs;
                 <div class="box-body table-responsive">
                     <div class="" id="accordion">
                         <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
-                        <?= $this->render("_general") ?>
+                        <?= $this->render("_general", compact("vendorsStats", "franchiseeType")) ?>
                     </div>
                 </div>
                 <!-- /.box-body -->

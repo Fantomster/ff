@@ -14,21 +14,26 @@
         <div class="box-body">
             <div class="pay-chek">
                 <table class="pay-table" width="100%">
-                    <tbody><tr>
+                    <tbody>
+                        <tr>
+                            <td style="text-align: left;">Поставщики Мне:</td>
+                            <td style="text-align: right; font-size: 18px;"><?= number_format($vendorsStats['turnoverCut'], 2, '.', ' ') ?> руб.</td>
+                        </tr>
+                        <tr>
                             <td style="text-align: left;">F-keeper Мне:</td>
-                            <td style="text-align: right; font-size: 18px;">123000 руб.</td>
+                            <td style="text-align: right; font-size: 18px;"> 0 руб.</td>
                         </tr>
                         <tr>
                             <td style="text-align: left;">Я F-keeper'у:</td>
-                            <td style="text-align: right; font-size: 18px;">180000 руб.</td>
+                            <td style="text-align: right; font-size: 18px;"><?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> руб.</td>
                         </tr>
-                        <tr>
+<!--                        <tr>
                             <td style="text-align: left;">Кол-во месяцев:</td>
                             <td style="text-align: right; font-size: 18px;">6 месяцев</td>
-                        </tr>
+                        </tr>-->
                         <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
                             <td style="text-align: left; font-weight: bold;">Итого заработано:</td>
-                            <td style="text-align: right; font-size: 22px;">328462389 руб.</td>
+                            <td style="text-align: right; font-size: 22px;"><?= number_format($vendorsStats['turnoverCut'] - ($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100), 2, '.', ' ') ?> руб.</td>
                         </tr>
                     </tbody></table>
             </div>

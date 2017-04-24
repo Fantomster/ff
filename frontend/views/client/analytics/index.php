@@ -366,6 +366,9 @@ $this->registerJs($customJs, View::POS_READY);
 <?php
 $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
+
+$analyticsUrl = Url::to(['client/analytics']);
+
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").on("change", function () {
 $("#filter_status,#filter-date,#filter-date-2,#filter_supplier,#filter_employee").attr('disabled','disabled')      
@@ -378,7 +381,7 @@ var filter_employee =  $("#filter_employee").val();
      type: 'GET',
      push: false,
      timeout: 10000,
-     url: "index.php?r=client/analytics",
+     url: "$analyticsUrl",
      container: "#analytics-list",
      data: {
          filter_status: filter_status,
@@ -399,7 +402,7 @@ $("#reset").on("click", function () {
      type: 'GET',
      push: false,
      timeout: 10000,
-     url: "index.php?r=client/analytics",
+     url: "$analyticsUrl",
      container: "#analytics-list",
      data: {
          filter_status: '',

@@ -8,6 +8,9 @@ use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Modal;
 use kartik\select2\Select2;
 use common\models\Category;
+
+\frontend\assets\HandsOnTableAsset::register($this);
+
 /* 
  * 
  */
@@ -16,18 +19,18 @@ $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;overflow: hidden;}
 .hide{dosplay:none}
 ');
-$this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
-$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
-$this->registerCssFile('modules/handsontable/dist/chosen.css');
-$this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
-$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
-$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
-$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
-$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
-$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
-$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
+//$this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
+//$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
+//$this->registerCssFile('modules/handsontable/dist/chosen.css');
+//$this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
+//$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
+//$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
+//$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
+//$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
+//$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
+//$this->registerJsFile('modules/handsontable/dist/handsontable.js');
+//$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
+//$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <?php
 Modal::begin([
@@ -170,6 +173,8 @@ $mped = \yii\helpers\ArrayHelper::getColumn(common\models\MpEd::find()->all(), '
 array_unshift($mped,"");
 $mped = json_encode($mped, JSON_UNESCAPED_UNICODE);
 
+$supplierStartCatalogCreateUrl = \yii\helpers\Url::to(['vendor/supplier-start-catalog-create']);
+
 $customJs = <<< JS
 var ed = $mped;
 var arr = [];
@@ -242,7 +247,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
     //console.log(JSON.stringify(data));
     //return false;
     $.ajax({
-          url: 'index.php?r=vendor/supplier-start-catalog-create',
+          url: '$supplierStartCatalogCreateUrl',
           type: 'POST',
           dataType: "json",
           data: $.param({'catalog':JSON.stringify(data)}),

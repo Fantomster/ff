@@ -316,6 +316,9 @@ $grid = [
     </div>  
 </section>
 <?php
+$catalogUrl = Url::to(['site/catalog', 'id' => $id]);
+$deleteProductUrl = Url::to(['site/ajax-delete-product']);
+
 $customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
@@ -325,7 +328,7 @@ window.clearTimeout(timer);
         type: 'GET',
         push: true,
         timeout: 10000,
-        url: 'index.php?r=site/catalog&id=$id',
+        url: '$catalogUrl',
         container: '#kv-unique-id-1',
         data: {searchString: $('#search').val()}
       })
@@ -351,7 +354,7 @@ $(document).on("click",".del-product", function(e){
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: "index.php?r=site/ajax-delete-product",
+	        url: "$deleteProductUrl",
 	        type: "POST",
 	        dataType: "json",
 	        data: {'id' : id},

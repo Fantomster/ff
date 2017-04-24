@@ -14,7 +14,7 @@ $this->title = 'F-keeper';
             </div>
         </div>
     </div>
-<header class="header" style="background-image: url(images/header-banner.jpg)">
+<header class="header" style="background-image: url(/images/header-banner.jpg)">
     <div class="inside__block">
         <div class="site__title"> 
             <h1>Онлайн-сервис 
@@ -47,7 +47,7 @@ $this->title = 'F-keeper';
                     </div>
                 </div>	
                 <div class="col-md-7">
-                    <img class="hows__banner" src="images/image-1.png" alt=""/>
+                    <img class="hows__banner" src="/images/image-1.png" alt=""/>
                 </div>	
             </div>
         </div>
@@ -82,7 +82,7 @@ $this->title = 'F-keeper';
                        <div class="item active">
                         <div class="col-md-6">
                                 <div class="rew__inside">
-                                        <img src="images/rew2.jpg" alt=""/>
+                                        <img src="/images/rew2.jpg" alt=""/>
                                         <div class="rew__descript">
                                                 <h3>Павел Кравченко</h3>
                                                 <span>Управляющий: Винотека.</span>
@@ -92,7 +92,7 @@ $this->title = 'F-keeper';
                         </div>
                         <div class="col-md-6">
                                 <div class="rew__inside">
-                                        <img src="images/rew3.jpg" alt=""/>
+                                        <img src="/images/rew3.jpg" alt=""/>
                                         <div class="rew__descript">
                                                 <h3>Христо Дечев</h3>
                                                 <span>Совладелец: Black Smith, Гараж, Шайка Лейка, Азия клуб</span>
@@ -104,7 +104,7 @@ $this->title = 'F-keeper';
                         <div class="item">
                         <div class="col-md-6">
                                 <div class="rew__inside">
-                                        <img src="images/rew4.jpg" alt=""/>
+                                        <img src="/images/rew4.jpg" alt=""/>
                                         <div class="rew__descript">
                                                 <h3>Роман Кудрицкий</h3>
                                                 <span>Управляющий: Сорока, МОС.</span>
@@ -114,7 +114,7 @@ $this->title = 'F-keeper';
                         </div>
                         <div class="col-md-6">
                                 <div class="rew__inside">
-                                        <img src="images/rew5.jpg" alt=""/>
+                                        <img src="/images/rew5.jpg" alt=""/>
                                         <div class="rew__descript">
                                                 <h3>Роман Куча</h3>
                                                 <span>Основатель: Brookwin.</span>
@@ -140,9 +140,9 @@ $this->title = 'F-keeper';
             </div>
         </div>
 
-        <span><img style="filter: none; -webkit-filter:none;" src="images/1c-logo.png" alt=""/></span>
-        <span><img style="filter: none; -webkit-filter:none;" src="images/iiko.png" alt=""/></span>
-        <span><img style="filter: none; -webkit-filter:none;" src="images/r-keepr-logo.png" alt=""/></span>
+        <span><img style="filter: none; -webkit-filter:none;" src="/images/1c-logo.png" alt=""/></span>
+        <span><img style="filter: none; -webkit-filter:none;" src="/images/iiko.png" alt=""/></span>
+        <span><img style="filter: none; -webkit-filter:none;" src="/images/r-keepr-logo.png" alt=""/></span>
     </div>
     <div class="contact__block">
 

@@ -86,14 +86,17 @@ $this->title = 'F-MARKET фильтр поиска';
     </div>
   </div>
 </div>
-<?php $customJs = <<< JS
+<?php 
+$productCatLoaderUrl = Url::to(['site/ajax-product-cat-loader']);
+
+$customJs = <<< JS
 var inProgress = false;
 var num = 12;
 $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#product-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-product-cat-loader",
+        url: "$productCatLoaderUrl",
         type: "GET",
         data: {"num": num, "category":$id},
         beforeSend: function() {
@@ -119,7 +122,7 @@ $('#product-more').on("click", function (e) {
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-product-cat-loader",
+      url: "$productCatLoaderUrl",
       type: "GET",
       data: {"num": num, "category":$id},
       cache: false,

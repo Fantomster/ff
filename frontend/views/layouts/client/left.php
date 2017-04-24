@@ -40,11 +40,11 @@ $cartCount = $user->organization->getCartCount();
 //                            ],
                         ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
                         
-//                        ['label' => 'Заявки<sub class="sub-new">NEW</sub>', 'icon' => 'fa fa-paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
-                        ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['client/analytics'], 'options' => ['class' => 'hidden-xs']],
-                        ['label' => 'Обучающие видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['client/tutorial', 'video' => 'video']],
+                        ['label' => 'Заявки<sub class="sub-new">NEW</sub>', 'icon' => 'paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
+                        ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['client/analytics'], 'options' => ['class' => 'hidden-xs']],
+                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
-                        ['label' => 'Новости', 'icon' => 'fa fa-newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
+                        ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
                         [
                             'label' => 'Настройки',
                             'icon' => 'gears',
@@ -74,7 +74,7 @@ $cartCount = $user->organization->getCartCount();
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">Личный менеджер</span></li>
             <div style="text-align: center; color: #d8d7d7;">
-                <img src="images/welcome-zalina.png" class="welcome-manager">
+                <img src="/images/welcome-zalina.png" class="welcome-manager">
                 <p style="font-size: 14px;"><strong>Залина</strong></p><p></p>
                 <p>+7 929 611 79 00</p>
             </div>

@@ -20,6 +20,9 @@ use yii\widgets\Pjax;
 <?php
 $arr= $array;
 $arr_count = count($array);
+
+$editCatalogUrl = Url::to(['client/edit-catalog', 'id' => $id]);
+
 $customJs = <<< JS
 var data = $arr;
 var container = document.getElementById('editCatalogSupplier');
@@ -99,7 +102,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
     });
     $('#loader-show').showLoading();
     $.ajax({
-          url: "index.php?r=client/edit-catalog&id=$id",
+          url: "$editCatalogUrl",
           type: 'POST',
           dataType: "json",
           data: $.param({'catalog':JSON.stringify(datas)}),

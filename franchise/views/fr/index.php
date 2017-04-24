@@ -3,10 +3,10 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 col-sm-4 col-xs-12">
-                <div class="header_num_wrap"><img src="images/sprite/icn-call.png" alt=""><span>+7 (499) 404 24 21 </span>&nbsp;&nbsp;fr@f-keeper.ru</div>
+                <div class="header_num_wrap"><img src="/images/sprite/icn-call.png" alt=""><span>+7 (499) 404 24 21 </span>&nbsp;&nbsp;fr@f-keeper.ru</div>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12">
-                <div class="header_logo_wrap"><img src="images/sprite/logo.png" alt=""></div>
+                <div class="header_logo_wrap"><img src="/images/sprite/logo.png" alt=""></div>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="header_btn_wrap">
@@ -35,7 +35,7 @@
     </div>
     <div class="container screen about_wrap_2">
         <div class="row">
-            <div class="col-md-3 col-sm-3 col-xs-12"><img src="images/content/franshiza/iphone.png" alt="" class="iphone_img"></div>
+            <div class="col-md-3 col-sm-3 col-xs-12"><img src="/images/content/franshiza/iphone.png" alt="" class="iphone_img"></div>
             <div class="about_text_wrap col-md-9 col-sm-9 col-xs-12">
                 <p>Мы поможем взять старт, ведь компания F-keeper заинтересована в развитии сети партнеров-франчайзинговой сети. Наша франшиза это возможность вести свой полноценный бизнес.</p>
 
@@ -58,7 +58,7 @@
         <div class="goals_bd"></div>
         <div class="goals_row row">
             <div class="title">Цель проекта F-Keeper</div>
-            <div class="col-md-5 col-sm-5 col-xs-12"><img src="images/content/franshiza/apple.png" alt=""></div>
+            <div class="col-md-5 col-sm-5 col-xs-12"><img src="/images/content/franshiza/apple.png" alt=""></div>
             <div class="col-md-7 col-sm-7 col-xs-12">
                 <p>Перед проектом стоит цель – стать безусловным лидером в сфере решений для HoReCe. Мы планируем внедрить продукт автоматизации закупок во все сферы направления HoReCa на территории России и стран СНГ к 2021 году. Сделаем мы это с помощью крупнейшей сети наших представителей во всех регионах и городах. </p>
             </div>
@@ -74,19 +74,19 @@
         <div class="row">
             <div class="col-md-4 col-sm-6 col-xs-12">
                 <div class="work_block_wrap">
-                    <div class="work_block_ico"><img src="images/content/franshiza/pog_man.png" alt=""></div>
+                    <div class="work_block_ico"><img src="/images/content/franshiza/pog_man.png" alt=""></div>
                     <div class="work_block_text">Поставщики для HoReCa</div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-6 col-xs-12">
                 <div class="work_block_wrap">
-                    <div class="work_block_ico"><img src="images/content/franshiza/food.png" alt=""></div>
+                    <div class="work_block_ico"><img src="/images/content/franshiza/food.png" alt=""></div>
                     <div class="work_block_text">Рестораны, бары, отели, кафе, кейтеринг </div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12 col-xs-12">
                 <div class="work_block_wrap">
-                    <div class="work_block_ico"><img src="images/content/franshiza/pog.png" alt=""></div>
+                    <div class="work_block_ico"><img src="/images/content/franshiza/pog.png" alt=""></div>
                     <div class="work_block_text">Логистические компании</div>
                 </div>
             </div>
@@ -172,7 +172,7 @@
             <div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="team_block">
                     <div class="team_block_wrap">
-                        <div class="team_block_img"><img src="images/content/franshiza/pers_1.png" alt=""></div>
+                        <div class="team_block_img"><img src="/images/content/franshiza/pers_1.png" alt=""></div>
                         <div class="team_block_title">Артур<span>Шамалов</span></div>
                         <div class="team_block_text">CEO, Product Manager, IT Director & Founder Богатый опыт в предпринимательстве, 10 лет в разработке CRM, ERP систем, автоматизации бизнес-процессов.</div>
                         <button href="#feedback" data-title="Задать вопрос Артуру" data-text-btn="Отправить вопрос" class="btn gray popup-with-form">Задать вопрос</button>
@@ -182,7 +182,7 @@
             <div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="team_block">
                     <div class="team_block_wrap">
-                        <div class="team_block_img"><img src="images/content/franshiza/pers_2.png" alt=""></div>
+                        <div class="team_block_img"><img src="/images/content/franshiza/pers_2.png" alt=""></div>
                         <div class="team_block_title">Ильдар<span>Хасанов</span></div>
                         <div class="team_block_text">Sales & Marketing Director & Founder Построение больших команд sales-менеджеров (> 100 чел.) 11 лет в продажах и маркетинге: прямые, агрессивные, MLM продажи.</div>
                         <button href="#feedback" data-title="Задать вопрос Ильдару" data-text-btn="Отправить вопрос" class="btn gray popup-with-form">Задать вопрос</button>
@@ -192,7 +192,7 @@
             <div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="team_block">
                     <div class="team_block_wrap">
-                        <div class="team_block_img"><img src="images/content/franshiza/pers_3.png" alt=""></div>
+                        <div class="team_block_img"><img src="/images/content/franshiza/pers_3.png" alt=""></div>
                         <div class="team_block_title">Евгений<span>Гаврилин</span></div>
                         <div class="team_block_text">Strategy Advisor & Founder Богатый опыт в предпринимательстве, 10 лет стратегического консультирования и продаж.</div>
                         <button href="#feedback" data-title="Задать вопрос Евгению" data-text-btn="Отправить вопрос" class="btn gray popup-with-form">Задать вопрос</button>
@@ -202,7 +202,7 @@
             <div class="col-md-6 col-sm-12 col-xs-12">
                 <div class="team_block">
                     <div class="team_block_wrap">
-                        <div class="team_block_img"><img src="images/content/franshiza/pers_4.png" alt=""></div>
+                        <div class="team_block_img"><img src="/images/content/franshiza/pers_4.png" alt=""></div>
                         <div class="team_block_title">Руслан<span>Тугушев</span></div>
                         <div class="team_block_text">Operations Advisor & Founder Богатый опыт в предпринимательстве и запуске стартап-проектов (> 10 лет). </div>
                         <button href="#feedback" data-title="Задать вопрос Руслану" data-text-btn="Отправить вопрос" class="btn gray popup-with-form">Задать вопрос</button>
@@ -272,7 +272,7 @@
 <div class="partner_screen screen">
     <div class="container">
         <div class="row">
-            <div class="partner_wrap col-md-5 col-sm-5 col-xs-12"><img src="images/content/franshiza/team.png" alt=""></div>
+            <div class="partner_wrap col-md-5 col-sm-5 col-xs-12"><img src="/images/content/franshiza/team.png" alt=""></div>
             <div class="col-md-7 col-sm-7 col-xs-12">
                 <div class="partner_text_wrap">
                     <p>Мы считаем развитие партнерских взаимоотношений одним из ключевых направлений нашей деятельности.</p>
@@ -313,10 +313,10 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 col-sm-4 col-xs-12">
-                <div class="footer_logo_wrap"><img src="images/sprite/logo.png" alt=""></div>
+                <div class="footer_logo_wrap"><img src="/images/sprite/logo.png" alt=""></div>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12">
-                <div class="footer_num_wrap"><img src="images/sprite/icn-call.png" alt=""><span>+7 (499) 404 24 21</span> &nbsp;&nbsp;fr@f-keeper.ru</div>
+                <div class="footer_num_wrap"><img src="/images/sprite/icn-call.png" alt=""><span>+7 (499) 404 24 21</span> &nbsp;&nbsp;fr@f-keeper.ru</div>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="footer_btn_wrap">

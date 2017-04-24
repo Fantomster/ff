@@ -83,7 +83,7 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
 </div> 
 </section>
 <?php
-if($catalog->isNewRecord){$router = 'index.php?r=vendor/step-1';}else{$router = 'index.php?r=vendor/step-1-update&id='.$cat_id;}
+if($catalog->isNewRecord){$router = Url::to(['vendor/step-1']);}else{$router = Url::to(['vendor/step-1-update', 'id' => $cat_id]);}
 $this->registerJs('
 /** 
  * Forward port jQuery.live()

@@ -25,7 +25,10 @@ use yii\web\View;
         </div>
     </div>
 </section>
-<?php $customJs = <<< JS
+<?php 
+$viewUrl = \yii\helpers\Url::to(['site/view']);
+
+$customJs = <<< JS
 $('#backTop').backTop({
     'position' : 400,
     'speed' : 500,
@@ -38,7 +41,7 @@ var searchText = $(this).val();
 clearTimeout(timeOutVar);
     timeOutVar= setTimeout(function(){ 
     $.ajax({
-        url: "index.php?r=site/view",
+        url: "$viewUrl",
         type: "POST",
         data: {'searchText' : searchText},
         cache: false,

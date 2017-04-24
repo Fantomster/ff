@@ -108,7 +108,7 @@ $this->registerCss('
                                 </div>
                                 <?= Html::a('Создать', ['order/create'],['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash.png) no-repeat bottom right;
+    background: url(/images/dash.png) no-repeat bottom right;
     background-size: 140px;">
     </div>
                             </div>
@@ -123,7 +123,7 @@ $this->registerCss('
                                 </div>
                                 <?= Html::a('Корзина', ['order/checkout'],['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash3.png) no-repeat center right;
+    background: url(/images/dash3.png) no-repeat center right;
     background-size: 150px;">
     </div>
                             </div>
@@ -142,7 +142,7 @@ $this->registerCss('
                                 </div>
                                 <?= Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash1.png) no-repeat top right;
+    background: url(/images/dash1.png) no-repeat top right;
     background-size: 170px;">
     </div>                        
                             </div>
@@ -158,7 +158,7 @@ $this->registerCss('
                                 </div>
                                 <?= Html::a('F-Market', 'https://market.f-keeper.ru',['target'=>'_blank','class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash2.png) no-repeat bottom right;
+    background: url(/images/dash2.png) no-repeat bottom right;
     background-size: 120px;">
     </div>
                             </div>
@@ -341,7 +341,7 @@ $this->registerCss('
                 
            'resizableColumns'=>false,
            'rowOptions' => function ($model, $key, $index, $grid) {
-                return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
+                return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("'.Url::to(['order/view', 'id' => $model['id']]).'");'];
             },
            ]);
            ?> 
@@ -439,11 +439,15 @@ var areaChartOptions = {
 $user = Yii::$app->user->identity;
 $organization = $user->organization;
 $vendorsText = strpos($user->email, '@delivery-club.ru') ? "Список ваших поставщиков. Специально для Вас мы добавили несколько рекомендованных нами поставщиков" : "Список ваших поставщиков.";
+
+$checkoutUrl = Url::to(['order/checkout']);
+$createUrl = Url::to(['order/create']);
+
     $customJs = <<< JS
     $(document).on('click','.dash-small-box', function(){
     var targetUrl = $(this).attr('data-target');
-        if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
-        if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+        if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
+        if(targetUrl == 'order'){location.href = '$createUrl';}
         if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
     }) 
 JS;
@@ -454,13 +458,13 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
     $customJs2 = <<< JS
     $(document).on('click','.dash-small-box', function(){
     var targetUrl = $(this).attr('data-target');
-        if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
-        if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+        if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
+        if(targetUrl == 'order'){location.href = '$createUrl';}
         if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
     }); 
 
                     var _slides = [{
-                            title: '<img src="images/welcome-client-bg.png" class="welcome-header-image" />',
+                            title: '<img src="/images/welcome-client-bg.png" class="welcome-header-image" />',
                             content: '{$this->render("welcome")}',
                             position: 'center',
                             overlayMode: 'all',

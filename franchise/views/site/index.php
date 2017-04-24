@@ -113,7 +113,7 @@ use dosamigos\chartjs\ChartJs;
                 <div class="box-header with-border">
                     <h3 class="box-title">Статистика</h3>
                     <div class="box-tools pull-right">
-                        <a class="btn btn-success btn-sm" href="/index.php?r=client%2Fsuppliers">Финансовая аналитика</a>          </div>
+                        <a class="btn btn-success btn-sm" href="<?= Url::to(['client/suppliers']) ?>">Финансовая аналитика</a>          </div>
                 </div>
 
                 <div class="box-body">

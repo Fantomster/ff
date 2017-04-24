@@ -58,6 +58,22 @@ return [
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ],
+            //'enableStrictParsing' => true,
+            'rules' => [
+                '/' => 'site/index',
+                'client' => 'client/index',
+                'vendor' => 'vendor/index',
+                'about' => 'site/about',
+                'faq' => 'site/faq',
+                'contacts' => 'site/contacts',
+                'supplier' => 'site/supplier',
+                'restaurant' => 'site/restaurant',
+                'login' => 'user/login',
+                'logout' => 'user/logout',
+                'register' => 'user/register',
+                'forgot' => 'user/forgot',
+                'resend' => 'user/resend',
+            ],
         ],
         'assetManager' => [
             'bundles' => [

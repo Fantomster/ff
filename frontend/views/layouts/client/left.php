@@ -40,7 +40,7 @@ $cartCount = $user->organization->getCartCount();
 //                            ],
                         ['label' => 'F-MARKET', 'icon' => 'fa fa-shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
                         
-                        ['label' => 'Заявки<sub class="sub-new">NEW</sub>', 'icon' => 'fa fa-paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
+//                        ['label' => 'Заявки<sub class="sub-new">NEW</sub>', 'icon' => 'fa fa-paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => 'Аналитика', 'icon' => 'fa fa-signal', 'url' => ['client/analytics'], 'options' => ['class' => 'hidden-xs']],
                         ['label' => 'Обучающие видео', 'icon' => 'fa fa-play-circle-o', 'url' => ['client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],

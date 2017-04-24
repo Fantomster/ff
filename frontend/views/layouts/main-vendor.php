@@ -18,7 +18,6 @@ use yii\helpers\Html;
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
-        <?= $this->render('_yandex_vendor') ?>
         <?php $this->head() ?>
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">
@@ -44,7 +43,7 @@ use yii\helpers\Html;
     </div>
 <?php
 //echo $this->render('_yandex');
-//echo $this->render('_yandex_vendor');
+echo $this->render('_yandex_vendor');
 $js = <<<JS
 $('.sidebar-toggle').on('click', function(e){
     $.post("index.php?r=vendor/sidebar", {"sidebar-collapse": true})

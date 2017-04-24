@@ -82,6 +82,10 @@ $this->registerJs(
                     $("#loader-show").hideLoading();
                 });
             });
+            $(document).on("click", ".pagination li a", function() {
+                clearTimeout(timer);
+                return true;
+            });
         });'
 );
 ?>

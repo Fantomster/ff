@@ -42,6 +42,7 @@ $this->registerJs(
             $("#createP").on("change keyup paste cut", "#searchString", function() {
                 $("#hiddenSearchString").val($("#searchString").val());
                 if (timer) {
+                    console.log("timer canceled");
                     clearTimeout(timer);
                 }
                 timer = setTimeout(function() {

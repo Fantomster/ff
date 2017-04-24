@@ -138,9 +138,9 @@ $this->registerCss('
                             <div class="dash-small-box" data-target="request">
                                 <div class="inner" style="position:relative;z-index:2">
                                   <h3>Создать заявку</h3>
-                                  <p>скоро</p>
+                                  <p>для поставщиков</p>
                                 </div>
-                                <?= Html::a('Заявки', null,['class'=>'btn btn-outline-success' ,'disabled' => 'true', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
     background: url(images/dash1.png) no-repeat top right;
     background-size: 170px;">
@@ -303,6 +303,9 @@ $this->registerCss('
                                 'format' => 'raw',
                                 'value' => function($data) {
                                     switch ($data['status']) {
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                                        case Order::STATUS_PROCESSING:
                                         case Order::STATUS_DONE:
                                         case Order::STATUS_REJECTED:
                                         case Order::STATUS_CANCELLED:

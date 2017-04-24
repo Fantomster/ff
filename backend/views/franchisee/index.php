@@ -1,7 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\FranchiseeSearch */
@@ -22,9 +22,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'id',
+            [
+                'attribute' => 'type_id',
+                'value' => 'type.name',
+                'label' => 'Тип',
+                'filter' => common\models\FranchiseType::getList(),
+            ],
             'signed',
             'legal_entity',
             'legal_address',

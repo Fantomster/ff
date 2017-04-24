@@ -4,8 +4,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use common\models\Organization;
 
-kartik\growl\GrowlAsset::register($this);
-
 /* @var $this \yii\web\View */
 /* @var $content string */
 if (!Yii::$app->user->isGuest) {
@@ -117,15 +115,48 @@ if (!Yii::$app->user->isGuest) {
     $(document).on("submit", "#inviteForm", function(e) {
         e.preventDefault();
         form = $("#inviteForm");
-        $.post(
-            form.attr("action"),
-            form.serialize()
-        ).done(function(result) {
-            $("#email").val('');
+        swal({
+            title: "Приглашение на f-keeper",
+            input: "text",
+            showCancelButton: true,
+            cancelButtonText: "Отмена",
+            confirmButtonText: "Отправить",
+            showLoaderOnConfirm: true,
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            inputValue: $("#email").val(),
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    var emailRegex = /^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+                    if (emailRegex.test(email)) {
+                        resolve();
+                    } else {
+                        reject('Некорректный email!');
+                    }
+                })
+            },
+            preConfirm: function (email) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        form.attr("action"),
+                        {email: email}
+                    ).done(function(result) {
+                        $("#email").val('');
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
             if (result.success) {
-                $.notify(result.growl.options, result.growl.settings);
+                swal({title: "Приглашение отправлено!", type: "success"});
+            } else {
+                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
             }
-        });
+        });            
     });
             
     $(document).on("click", ".setRead", function(e) {

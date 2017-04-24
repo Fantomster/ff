@@ -1,9 +1,17 @@
-<?php ?>
+<?php 
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+use kartik\form\ActiveForm;
+use kartik\date\DatePicker;
+use yii\widgets\Breadcrumbs;
+?>
 <section class="content-header">
     <h1>
         <i class="fa fa-home"></i> Ваши финансы
         <small>Узнайте ваши денежные потоки</small>
-    </h1> 
+    </h1> <?php /*
     <div class="nav-tabs-custom" style="cursor: move; margin-top:15px;">
         <!-- Tabs within a box -->
         <!-- <ul class="nav nav-tabs pull-right ui-sortable-handle">
@@ -28,29 +36,46 @@
                     </div></div></div>
             <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;"><svg height="342" version="1.1" width="512" xmlns="http://www.w3.org/2000/svg" style="overflow: hidden; position: relative;"><desc style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Created with Raphaël 2.1.0</desc><defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></defs><path fill="none" stroke="#3c8dbc" d="M473.5,243.33333333333331A93.33333333333333,93.33333333333333,0,0,0,561.727755194977,180.44625304313007" stroke-width="2" opacity="0" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); opacity: 0;"></path><path fill="#3c8dbc" stroke="#ffffff" d="M473.5,246.33333333333331A96.33333333333333,96.33333333333333,0,0,0,564.5636473262442,181.4248826052307L601.1151459070204,194.03833029452744A135,135,0,0,1,473.5,285Z" stroke-width="3" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><path fill="none" stroke="#f56954" d="M561.727755194977,180.44625304313007A93.33333333333333,93.33333333333333,0,0,0,389.78484627831415,108.73398312817662" stroke-width="2" opacity="1" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); opacity: 1;"></path><path fill="#f56954" stroke="#ffffff" d="M564.5636473262442,181.4248826052307A96.33333333333333,96.33333333333333,0,0,0,387.09400205154566,107.40757544301087L347.92726941747117,88.10097469226493A140,140,0,0,1,605.8416327924656,195.6693795646951Z" stroke-width="3" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><path fill="none" stroke="#00a65a" d="M389.78484627831415,108.73398312817662A93.33333333333333,93.33333333333333,0,0,0,473.47067846904883,243.333328727518" stroke-width="2" opacity="0" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); opacity: 0;"></path><path fill="#00a65a" stroke="#ffffff" d="M387.09400205154566,107.40757544301087A96.33333333333333,96.33333333333333,0,0,0,473.46973599126824,246.3333285794739L473.4575884998742,284.9999933380171A135,135,0,0,1,352.4120097954186,90.31165416754118Z" stroke-width="3" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path><text x="473.5" y="140" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none" fill="#000000" font-size="15px" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: 800; font-stretch: normal; font-size: 15px; line-height: normal; font-family: Arial;" font-weight="800" transform="matrix(1,0,0,1,0,0)"><tspan dy="140" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">In-Store Sales</tspan></text><text x="473.5" y="160" text-anchor="middle" font="10px &quot;Arial&quot;" stroke="none" fill="#000000" font-size="14px" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 14px; line-height: normal; font-family: Arial;" transform="matrix(1,0,0,1,0,0)"><tspan dy="160" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">30</tspan></text></svg></div>
         </div>
-    </div>
+    </div> */ ?>
     <div class="filters">
         <div class="row">
             <div class="col-md-8">
+                <?php
+            $form = ActiveForm::begin([
+                        'options' => [
+                            'id' => 'searchForm',
+                            //'class' => "navbar-form",
+                            'role' => 'search',
+                        ],
+            ]);
+            ?>
                 <div class="col-md-7 no-padding">
-                    <div class="input-group input-group-sm" style="width: 200px;">
-                        <select class="form-control">
-                            <option>Выберите месяц</option>
-                            <option>Март</option>
-                            <option>Апрель</option>
-                            <option>Май</option>
-                            <option>Июнь</option>
-                        </select>
-                    </div>
+                    <?=
+                        DatePicker::widget([
+                           // 'model' => $searchModel,
+                            'name' => 'month',
+                            'attribute' => 'month',
+                            'options' => ['placeholder' => 'Выберите месяц', 'id' => 'month', 'style' => 'max-width: 150px;'],
+                            'type' => DatePicker::TYPE_INPUT,
+                            'pluginOptions' => [
+                                'format' => 'MM yyyy',
+                                'viewMode' => 'months', 
+                                'minViewMode' => 'months',
+                                'autoclose' => true,
+                                'endDate' => "0d",
+                            ]
+                        ])
+                        ?>
                 </div>
                 <div class="col-md-5 no-padding">
-                    <div class="input-group input-group-sm pull-right" style="width: 150px;">
+                    <div class="input-group pull-right" style="width: 150px;">
                         <input type="text" name="table_search" class="form-control" placeholder="Поиск">
                             <div class="input-group-btn">
                                 <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                             </div>
                     </div>
                 </div>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>
@@ -67,51 +92,78 @@
                     </div>
                 </div>
                 <!-- /.box-header -->
-                <div class="box-body table-responsive">
-                    <table class="table table-hover table-max">
-                        <tbody>
-                            <tr style="background-color: #fff;">
-                                <th>Поставщик</th>
-                                <th>Месяц</th>
-                                <th>F-keeper Мне</th>
-                                <th>Я F-keeper'у</th>
-                                <th>Итого прибыль</th>
-                                <th></th>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>ООО Marr Russia</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>ООО "Кардис"</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>Фрутти Рум</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>Рус Алко</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                        </tbody></table>
-                </div>
+            <?php
+            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
+            ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <?=
+                    GridView::widget([
+                        'id' => 'vendorsList',
+                        'dataProvider' => $dataProvider,
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                        'filterModel' => $searchModel,
+                        'filterPosition' => false,
+                        'summary' => '',
+                        'options' => ['class' => 'table-responsive'],
+                        'tableOptions' => ['class' => 'table table-hover table-max', 'role' => 'grid'],
+                        'pager' => [
+                            'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
+                        ],
+                        'columns' => [
+                            [
+                                'attribute' => 'id',
+                                'value' => 'id',
+                                'label' => '№',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'name',
+                                'value' => 'name',
+                                'label' => 'Имя поставщика',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'turnoverCut',
+                                'value' => 'turnoverCut',
+                                'label' => 'Поставщик мне',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'fromFkeeper',
+                                'value' => 'fromFkeeper',
+                                'label' => 'F-keeper мне',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'toFkeeper',
+                                'value' => 'toFkeeper',
+                                'label' => 'Я F-keeper\'у',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return $data['turnoverCut'] - $data['toFkeeper'];
+                                },
+                                'label' => 'Итого прибыль',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    $result = '<a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a>';
+                                    return $result;
+                                },
+                                        'contentOptions' => ['class' => 'table-btns'],
+                                    ],
+                                ],
+                                'rowOptions' => function ($model, $key, $index, $grid) {
+                            return ['data-url' => Url::to(['organization/ajax-show-vendor', 'id' => $model["id"]])];
+                        },
+                            ]);
+                            ?>
+                        </div></div>
+                    <?php Pjax::end() ?>
+                    <!-- /.table-responsive -->
                 <!-- /.box-body -->
             </div>
         </div>
@@ -126,7 +178,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body table-responsive">
-                    <div class="" id="accordion">
+                    <div class="" id="accordion"><?php /*
                         <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
                         <div class="">
                             <div class="box-header with-border">
@@ -300,7 +352,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */ ?>
                     </div>
                 </div>
                 <!-- /.box-body -->

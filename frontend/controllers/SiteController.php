@@ -11,6 +11,7 @@ use common\models\Profile;
 use common\models\Organization;
 use common\models\Role;
 use common\components\AccessRule;
+use yii\web\HttpException;
 use yii\helpers\Url;
 
 /**
@@ -28,10 +29,10 @@ class SiteController extends Controller {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on'],
+                'only' => ['logout', 'signup', 'index', 'about', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'faq', 'restaurant', 'supplier'],
                 'rules' => [
                     [
-                        'actions' => ['signup', 'index', 'about'],
+                        'actions' => ['signup', 'index', 'about', 'faq', 'restaurant', 'supplier'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
@@ -41,33 +42,24 @@ class SiteController extends Controller {
                         'roles' => ['@'],
                     ],
                     [
-                        'actions' => ['index', 'about'],
+                        'actions' => ['index', 'about', 'faq', 'restaurant', 'supplier'],
                         'allow' => false,
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
                         ],
                         'denyCallback' => function($rule, $action) {
-                            if ($this->isRegistrationComplete()) {
-                                $this->redirect(['/client/index']);
-                            } else {
-                                $this->redirect(['/site/complete-registration']);
+                            $user = Yii::$app->user->identity;
+                            if (empty($user->organization)) {
+                                throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
                             }
-                        }
-                    ],
-                    [
-                        'actions' => ['index', 'about'],
-                        'allow' => false,
-                        'roles' => [
-                            Role::ROLE_SUPPLIER_MANAGER,
-                            Role::ROLE_SUPPLIER_EMPLOYEE,
-                            Role::ROLE_ADMIN,
-                        ],
-                        'denyCallback' => function($rule, $action) {
-                            if ($this->isRegistrationComplete()) {
-                                $this->redirect(['/vendor/index']);
+            
+                            if ($this->isRegistrationComplete($user->organization)) {
+                                $this->redirectOrganizationIndex($user->organization);
                             } else {
                                 $this->redirect(['/site/complete-registration']);
                             }
@@ -199,11 +191,16 @@ class SiteController extends Controller {
         return false;
     }
     
-    private function isRegistrationComplete() {
-        $user = Yii::$app->user->identity;
-        if (isset($user->organization)) {
-            return ($user->organization->step != Organization::STEP_SET_INFO);
+    private function isRegistrationComplete($organization) {
+        return ($organization->step != Organization::STEP_SET_INFO);
+    }
+    
+    private function redirectOrganizationIndex($organization) {
+        if ($organization->type_id === Organization::TYPE_RESTAURANT) {
+            $this->redirect(['/client/index']);
         }
-        return false;
+        if ($organization->type_id === Organization::TYPE_SUPPLIER) {
+            $this->redirect(['/vendor/index']);
+        }
     }
 }

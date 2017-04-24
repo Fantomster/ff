@@ -8,6 +8,7 @@ $statusInfo = '';
 $actionButtons = '';
 $btnCancel = Html::a('<i class="icon fa fa-ban"></i> Отменить', '#', [
             'class' => "btn btn-outline-danger cancel-order",
+            'style' => "margin-right: 7px;",
             'data' => [
                 'url' => \yii\helpers\Url::to(['order/ajax-cancel-order', 'order_id' => $order->id]),
             ],

@@ -75,6 +75,7 @@ echo GridView::widget([
                 [
                     'format' => 'raw',
                     'value' => function($data) use ($vendor_id) {
+                        $note = $data->getNote();
                         $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i> <span class="hidden-fk">Комментарий к товару</span>', '#', [
                                     'class' => 'add-note btn btn-default margin-right-5',
                                     'data' => [
@@ -82,7 +83,7 @@ echo GridView::widget([
                                         'url' => Url::to(['order/ajax-set-note', 'product_id' => $data->product_id]),
                                         'toggle' => "tooltip",
                                         'placement' => "bottom",
-                                        'original-title' => $data->getNote($vendor_id),
+                                        'original-title' => isset($note) ? $note->note : '',
                                     ],
                         ]);
                         $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> <span class="hidden-fk">Удалить</span>', '#', [

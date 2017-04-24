@@ -188,7 +188,7 @@ $this->registerJs(
                 });
             });
             
-            $(".content").on("change keyup paste cut", ".quantity", function() {
+            $(document).on("change keyup paste cut", ".quantity", function() {
                 dataEdited = 1;
                 $("#saveChanges").show();
             });

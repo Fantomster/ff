@@ -4,8 +4,8 @@ namespace console\controllers;
 
 use yii\console\Controller;
 
-class UtilsController extends Controller
-{
+class UtilsController extends Controller {
+
     public function actionAddDeliveries() {
         $vendors = \common\models\Organization::find()
                 ->leftJoin('delivery', 'organization.id = delivery.vendor_id')
@@ -19,7 +19,7 @@ class UtilsController extends Controller
             echo "Delivery info for '$vendor->name' (id:$vendor->id) created \n";
         }
     }
-    
+
     public function actionFillChatRecipient() {
         $emptyRecipientMessages = \common\models\OrderChat::find()
                 ->where(['recipient_id' => 0])
@@ -37,4 +37,35 @@ class UtilsController extends Controller
             }
         }
     }
+
+    public function actionCheckProductPictures() {
+        $products = \common\models\CatalogBaseGoods::find()->where("image is not null")->andWhere("deleted = 0")->all();
+        foreach ($products as $product) {
+            if ($product->image) {
+                $headers = get_headers($product->imageUrl);
+                if ($headers[0] == 'HTTP/1.1 403 Forbidden') {
+                    echo $product->id;
+                    $product->image = "delete";
+                    $product->save();
+                    echo " - fixed\n";
+                }
+            }
+        }
+    }
+
+    public function actionCheckOrganizationPictures() {
+        $organizations = \common\models\Organization::find()->all();
+        foreach ($organizations as $organization) {
+            if ($organization->picture) {
+                $headers = get_headers($organization->pictureUrl);
+                if ($headers[0] == 'HTTP/1.1 403 Forbidden') {
+                    echo $organization->id;
+                    $organization->picture = "delete";
+                    $organization->save();
+                    echo " - fixed\n";
+                }
+            }
+        }
+    }
+
 }

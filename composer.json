@@ -48,8 +48,10 @@
         "2amigos/yii2-chartjs-widget": "~2.0",
         "bower-asset/sweetalert2": "*",
         "yii2assets/yii2-fullscreen-modal": "*",
-        "yiisoft/yii2-jui": "~2.0.0",
-        "delocker/yii2-animate.css": "dev-master"
+        "delocker/yii2-animate.css": "dev-master",
+        "2amigos/yii2-google-maps-library" : "*",
+        "borales/yii2-phone-input": "*",
+        "mongosoft/yii2-soap-server": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

@@ -31,7 +31,16 @@ $form = ActiveForm::begin([
 
     <?= $form->field($profile, 'full_name') ?>
 
-    <?= $form->field($profile, 'phone')->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',]) ?>
+    <?= $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ]) ?>
     
     <?=$form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
         //'initInputType' => CheckboxX::INPUT_CHECKBOX,
@@ -51,7 +60,7 @@ $form = ActiveForm::begin([
             ]
         ])->label(false);?>
     
-    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType)) ?>
+    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType))->label("Роль") ?>
 
 </div>
 <div class="modal-footer">

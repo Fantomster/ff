@@ -22,20 +22,35 @@ use yii\db\ActiveRecord;
  * @property integer $rest_org_id
  * @property integer $active_status
  *
- * 
+ * @property RegularName $regularName
+ * @property PaymentMethodName $paymentMethodName
+ * @property CategoryName $categoryName
  * @property CountCallback $countCallback
  * @property RequestCallback[] $requestCallbacks
  */
 class Request extends \yii\db\ActiveRecord
 {
-    const NAL = 1;
-    const BEZNAL = 2;
+    const ACTIVE = 1;
+    const INACTIVE = 0;
+    
+    
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
         return 'request';
+    }
+    public function beforeSave($insert) {
+        if (parent::beforeSave($insert)) {
+            if($this->rush_order){
+            $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 24*3600,'php:Y-m-d H:i:s');
+            }else{
+            $this->end = Yii::$app->formatter->asDatetime(strtotime($this->created_at) + 30*24*3600,'php:Y-m-d H:i:s');   
+            }
+            return true;
+        }
+        return false;
     }
     public function behaviors() {
         return [
@@ -62,7 +77,7 @@ class Request extends \yii\db\ActiveRecord
             [['product', 'comment', 'regular', 'amount', 'deferment_payment'], 'string', 'max' => 255],
         ];
     }
-
+    
     /**
      * @inheritdoc
      */
@@ -70,15 +85,15 @@ class Request extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'category' => 'Category',
-            'product' => 'Product',
-            'comment' => 'Comment',
-            'regular' => 'Regular',
-            'amount' => 'Amount',
-            'rush_order' => 'Rush Order',
-            'payment_method' => 'Payment Method',
-            'deferment_payment' => 'Deferment Payment',
-            'responsible_supp_org_id' => 'Responsible Supp Org ID',
+            'category' => 'Категория товара',
+            'product' => 'Товар',
+            'comment' => 'Комментарий',
+            'regular' => 'Регулярность заказа',
+            'amount' => 'Объем',
+            'rush_order' => 'Срочность',
+            'payment_method' => 'Способ оплаты',
+            'deferment_payment' => 'Отложенный платеж',
+            'responsible_supp_org_id' => 'Ответственный',
             'count_views' => 'Count Views',
             'created_at' => 'Created At',
             'end' => 'End',
@@ -86,12 +101,10 @@ class Request extends \yii\db\ActiveRecord
             'active_status' => 'Active Status',
         ];
     }
+    
     public function getModifyDate()
     {
-        if(empty($this->created_at)){return '';}
-        
-          $date = $this->created_at;
-          $date = Yii::$app->formatter->asDatetime($date,'php:Y-m-d H:i:s');
+          $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at),'php:Y-m-d H:i:s');
           
           $ypd = Yii::$app->formatter->asDatetime($date,'php:yy');
           $mpd = Yii::$app->formatter->asDatetime($date,'php:m.y');
@@ -100,8 +113,6 @@ class Request extends \yii\db\ActiveRecord
           $yy =  Yii::$app->formatter->asDatetime('now','php:yy');
           $md =  Yii::$app->formatter->asDatetime('now','php:m.y');
           $dd =  Yii::$app->formatter->asDatetime('now','php:j');
-          
-          
           
           $today = false;
           $yesterday = false;
@@ -119,21 +130,21 @@ class Request extends \yii\db\ActiveRecord
             $sArray = array("секунду", "секунды", "секунд");   
             $iArray = array("минуту", "минуты", "минут");
             $hArray = array("час", "часа", "часов");
-            $ns = Yii::$app->formatter->asDatetime($date,'php:s');
-            $ni = Yii::$app->formatter->asDatetime($date,'php:i');
-            $nh = Yii::$app->formatter->asDatetime($date,'php:H');
             
-            if($dif<59 && $dif>=0){
-                $word = self::getTimeFormatWord($ns, $sArray);
-                return "$ns $word назад";
+            if($dif<60 and $dif>=0){
+                $ns = floor($dif);
+                $text = self::getTimeFormatWord($ns, $sArray);
+                return "$ns $text назад";
             }
-            elseif($dif/60>1 and $dif/60<59){   
-                $word = self::getTimeFormatWord($ni, $iArray);
-                return "$ni $word назад";
+            elseif($dif/60>0 and $dif/60<60){  
+                $ni = floor($dif/60);
+                $text = self::getTimeFormatWord($ni, $iArray);
+                return "$ni $text назад";
             }
-            elseif($dif/3600>1 and $dif/3600<6){
-                $word = self::getTimeFormatWord($nh, $hArray);
-                return "$nh $word назад";
+            elseif($dif/3600>0 and $dif/3600<6){
+                $nh = floor($dif/3600);
+                $text = self::getTimeFormatWord($nh, $hArray);
+                return "$nh $text назад";
             }else{
                 return 'Сегодня, в '. $tpd;
             }
@@ -172,7 +183,34 @@ class Request extends \yii\db\ActiveRecord
     {
         return $this->hasOne(MpCategory::className(), ['id' => 'category']);
     }
-    
+    public function getRegularName()
+    {
+        switch ($this->regular) {
+            case 1:
+                return 'Разово';
+                break;
+            case 2:
+                return 'Ежедневно';
+                break;
+            case 3:
+                return 'Каждую неделю';
+                break;
+            case 4:
+                return 'Каждый месяц';
+                break;
+        }
+    }
+    public function getPaymentMethodName()
+    {
+        switch ($this->payment_method) {
+            case 1:
+                return 'Наличный расчет';
+                break;
+            case 2:
+                return 'Безналичный расчет';
+                break;
+        }
+    }
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);

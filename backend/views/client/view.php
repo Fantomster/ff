@@ -42,6 +42,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'email:email',
             'logged_in_ip',
             'logged_in_at',
+            [
+                'attribute' => 'logged_in_at',
+                'label' => 'IP при авторизации',
+                'value' => function ($data) {
+                    return Yii::$app->formatter->asTime($data->logged_in_at, "php:j M Y, H:i:s");
+                }
+            ],
             'created_ip',
             [
                 'attribute' => 'created_at',

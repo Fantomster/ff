@@ -13,6 +13,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
+use common\models\CatalogBaseGoods;
 
 /**
  * Description of StatisticsController
@@ -21,7 +22,7 @@ use common\components\AccessRule;
  */
 class StatisticsController extends Controller {
     
-    private $blacklist = '(1,2,5,16,63,88,99,100,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037)'; //1,2,5,16,63,88,99,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037
+    private $blacklist = '(1,2,3,5,16,63,88,99,100,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037)'; //1,2,5,16,63,88,99,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037
 
     public function behaviors() {
         return [
@@ -32,7 +33,7 @@ class StatisticsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'registered', 'orders', 'turnover'],
+                        'actions' => ['index', 'registered', 'orders', 'turnover', 'misc'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -357,5 +358,113 @@ class StatisticsController extends Controller {
                     'dayCheque'
                     ));
         }
+    }
+    
+    public function actionMisc() {
+        $orderTable = Order::tableName();
+        $userTable = User::tableName();
+        $orgTable = Organization::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+
+        $today = new \DateTime();
+        $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
+        $dateFilterTo = !empty(Yii::$app->request->post("date2")) ? Yii::$app->request->post("date2") : $today->format('d.m.Y');
+        
+        $dt = \DateTime::createFromFormat('d.m.Y H:i:s', $dateFilterFrom . " 00:00:00");
+        $dtEnd = \DateTimeImmutable::createFromFormat('d.m.Y H:i:s', $dateFilterTo . " 00:00:00");
+        $end = $dtEnd->add(new \DateInterval('P1D'));
+        $date = $dt->format('Y-m-d');     
+        
+        $totalClients = Organization::find()
+                ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT])
+                ->andWhere(['between', "$orgTable.created_at", $dt->format('Y-m-d'), $end->format('Y-m-d')])
+                ->groupBy(["$orgTable.id"])
+                ->count();
+        
+        $query = "select $orgTable.id as id, count(`$orderTable`.id) as ordersCount from $orgTable "
+                . "left join $userTable on $orgTable.id=$userTable.organization_id "
+                . "left join `$orderTable` on `$orderTable`.client_id = $orgTable.id "
+                . "where type_id=1 and $userTable.status=1 and `$orderTable`.status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") "
+                    . "and $orgTable.id not in $this->blacklist and $orgTable.created_at between :dateFrom and :dateTo group by $orgTable.id";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $clientsWithOrders = $command->queryAll();
+        $clientsWithOrdersCount = count($clientsWithOrders);
+        $clientsWithoutOrdersCount = $totalClients - $clientsWithOrdersCount;
+        $clientsStats = [
+            'c0' => $clientsWithoutOrdersCount, 
+            'c1' => 0,
+            'c2' => 0,
+            'c3' => 0,
+            'c4' => 0,
+            'c5' => 0,
+            'cn' => 0,
+            ];
+        foreach ($clientsWithOrders as $client) {
+            switch ($client["ordersCount"]) {
+                case 1:
+                    $clientsStats["c1"]++;
+                    break;
+                case 2:
+                    $clientsStats["c2"]++;
+                    break;
+                case 3:
+                    $clientsStats["c3"]++;
+                    break;
+                case 4:
+                    $clientsStats["c4"]++;
+                    break;
+                case 5:
+                    $clientsStats["c5"]++;
+                    break;
+                default:
+                    $clientsStats["cn"]++;
+                    break;
+            }
+        }
+        
+        $query = "select count(org_id) from (select $orgTable.id as org_id from $orgTable left join $cbgTable on $orgTable.id = $cbgTable.supp_org_id "
+                . "where $cbgTable.deleted = 0 and $orgTable.created_at between :dateFrom and :dateTo group by $orgTable.id) as tmp";
+        $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $vendorsWithGoodsCount = $command->queryScalar();
+        
+        $productsCount = CatalogBaseGoods::find()
+                ->where(['deleted' => CatalogBaseGoods::DELETED_OFF])
+                ->andWhere(['between', "$cbgTable.created_at", $dt->format('Y-m-d'), $end->format('Y-m-d')])
+                ->count();
+        $productsOnMarketCount = CatalogBaseGoods::find()
+                ->joinWith("vendor")
+                ->where([
+                    'deleted' => CatalogBaseGoods::DELETED_OFF, 
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON, 
+                    'white_list' => Organization::WHITE_LIST_ON,
+                    'status' => CatalogBaseGoods::STATUS_ON,
+                        ])
+                ->andWhere('category_id is not null')
+                ->andWhere(['between', "$cbgTable.created_at", $dt->format('Y-m-d'), $end->format('Y-m-d')])
+                ->count();
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('misc', compact(
+                    'totalClients',
+                    'clientsStats',
+                    'vendorsWithGoodsCount',
+                    'productsCount',
+                    'productsOnMarketCount',
+                    'dateFilterFrom', 
+                    'dateFilterTo'
+                    ));
+        } else {
+            return $this->render('misc', compact(
+                    'totalClients',
+                    'clientsStats',
+                    'vendorsWithGoodsCount',
+                    'productsCount',
+                    'productsOnMarketCount',
+                    'dateFilterFrom', 
+                    'dateFilterTo'
+                    ));
+        }
+        
     }
 }

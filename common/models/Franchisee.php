@@ -23,9 +23,12 @@ use Yii;
  * @property string $info
  * @property string $created_at
  * @property string $updated_at
- *
+ * @property integer $type_id
+ * @property boolean $deleted
+ * 
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
+ * @property FracnchiseeType type
  */
 class Franchisee extends \yii\db\ActiveRecord {
 
@@ -55,8 +58,10 @@ class Franchisee extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
+            [['type_id'], 'integer'],
+            [['type_id'], 'required'],
             [['info'], 'string'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'deleted'], 'safe'],
             [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'phone', 'correspondent_account', 'checking_account'], 'string', 'max' => 255],
         ];
     }
@@ -85,6 +90,18 @@ class Franchisee extends \yii\db\ActiveRecord {
         ];
     }
 
+    public function delete() {
+        $this->deleted = true;
+        return $this->save();
+    }
+    
+    public static function deleteAll($condition = '', $params = array()) {
+        $command = static::getDb()->createCommand();
+        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
+
+        return $command->execute();
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -106,6 +123,13 @@ class Franchisee extends \yii\db\ActiveRecord {
         return $this->hasMany(User::className(), ['id' => 'user_id'])->via('franchiseeUsers');
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getType() {
+        return $this->hasOne(FranchiseType::className(), ['id' => 'type_id']);
+    }
+
     public function getFirstOrganizationDate() {
         $today = new \DateTime();
         $result = $today->format('d.m.Y');
@@ -123,4 +147,26 @@ class Franchisee extends \yii\db\ActiveRecord {
         return $result;
     }
 
+    /*
+     * @return array
+     * 
+     * ['orderCount' => 1, 'turnover' => 1, 'turnoverCut' => 1]
+     */
+    public function getMyVendorsStats($dateFrom = null, $dateTo = null) {
+        $ordTable = Order::tableName();
+        $faTable = FranchiseeAssociate::tableName();
+        $rsrTable = RelationSuppRest::tableName();
+        $biTable = BuisinessInfo::tableName();
+        $orders = Order::find()
+                ->leftJoin($faTable, "$ordTable.vendor_id = $faTable.organization_id")
+                ->leftJoin($rsrTable, "$ordTable.vendor_id = $rsrTable.supp_org_id")
+                ->leftJoin($biTable, "$ordTable.vendor_id = $biTable.organization_id")
+                ->where(["$faTable.franchisee_id" => $this->id, "$ordTable.status" => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_PROCESSING, Order::STATUS_DONE]])
+                ->andFilterWhere([">", "$ordTable.updated_at", $dateFrom])
+                ->andFilterWhere(["<", "$ordTable.updated_at", $dateTo]);
+        $orderCount = $orders->count();
+        $turnover = $orders->sum("$ordTable.total_price");
+        $turnoverCut = $orders->andWhere(["$rsrTable.is_from_market" => true])->sum("$ordTable.total_price * $biTable.reward / 100");
+        return ['orderCount' => $orderCount, 'turnover' => $turnover, 'turnoverCut' => $turnoverCut];
+    }
 }

@@ -31,26 +31,73 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Логотипы</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                  <td>Баннер Roll-up</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/roll-up2.psd.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td>Цвета</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-blue-light" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                  <td>Баннер для сайтов</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/banner.psd.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td>Презентация</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-yellow" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
+                  <td>Бейджи</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/badge.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td>Видео</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-yellow-light" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
+                  <td>Бланк</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/blank_sheet_1.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
                 <tr>
-                  <td>Документация</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-green" class="btn btn-success btn-xs"><i class="fa fa-download"></i></a></td>
+                  <td>Блокнот</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/notebook.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
-                
+                <tr>
+                  <td>Визитки</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/business_card_partners_front_back.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Воздушные шары</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/baloons.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Логотип</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/logo.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Наклейка</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/sticker.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Оформление выставок</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/exhibition_banner_4x2.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Оформление машины</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/car.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Папка</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/folder.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Флаг</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/flag.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Флешка</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/flash_drive.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Футболка</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/t-shirt.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Чашка</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/cup.ai.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
+                <tr>
+                  <td>Шаблон email для рассылок</td>
+                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/mail_template.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
+                </tr>
               </tbody>
             </table>
             </div><!-- /.box-body -->
@@ -70,27 +117,6 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Логотипы</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Цвета</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-blue-light" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Презентация</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-yellow" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Видео</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-yellow-light" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Документация</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-green" class="btn btn-success btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                
               </tbody>
             </table>
             </div><!-- /.box-body -->
@@ -110,27 +136,6 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Логотипы</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Цвета</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-blue-light" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Презентация</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-yellow" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Видео</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-yellow-light" class="btn btn-warning btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                  <td>Документация</td>
-                  <td style="text-align: center;"><a href="#" data-skin="skin-green" class="btn btn-success btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                
               </tbody>
             </table>
             </div><!-- /.box-body -->

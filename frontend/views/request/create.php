@@ -1,29 +1,35 @@
 <?php
-//use delocker\animate\AnimateAssetBundle;
-//AnimateAssetBundle::register($this); 
+ 
 use yii\helpers\Html;
+use yii\helpers\BaseHtml;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii\helpers\ArrayHelper;
+use yii\widgets\Pjax;
 use kartik\select2\Select2;
 kartik\select2\Select2Asset::register($this);
 use kartik\checkbox\CheckboxX;
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <style>
+.modal-body {background: none;}
+.modal-content .modal-header {display:none;}
+.modal-fs .modal-body {
+    top: 0;
+}
 .modal-content{background: url(images/request-background.png) no-repeat center center;background-size: cover;}
 #msform {width: 100%;margin: 11px auto;text-align: center;position: relative;}
 #msform fieldset {padding: 20px 30px;min-height: 300px;box-sizing: border-box;border-radius: 4px;background: #fff;border: 5px solid #86be79;position: absolute;}
-@media (min-width: 768px) {#msform fieldset {width: 80%;margin: 0 10%;}}
+@media (min-width: 768px) {#msform fieldset {width: 60%;margin: 0 20%;}}
 @media (max-width: 769px) {#msform fieldset {width: 95%;margin: 0 2.5%;}}
 
 #msform fieldset:not(:first-of-type) {display: none;}
 #progressbar {padding-left: 0;position: relative; z-index:1;margin-bottom: 30px;overflow: hidden;counter-reset: step;}
-#progressbar li {list-style-type: none;color: #555;text-transform: uppercase;font-size: 11px;font-weight: 500;width: 33.33%;float: left;position: relative;}
-#progressbar li:before {content: counter(step); counter-increment: step; width: 62px; line-height: 62px; display: block; font-size: 0px; color: #fff; background: #3f3e3e; border-radius: 50%; margin: 0 auto 5px auto;}
+#progressbar li {list-style-type: none;color: #555;text-transform: uppercase;font-size: 11px;font-weight: 500;width: 33.3333%;float: left;position: relative;}
+#progressbar li:before {content: counter(step); counter-increment: step; width: 75px; line-height: 75px; display: block; font-size: 0px; color: #fff; background: #3f3e3e; border-radius: 50%; margin: 0 auto 5px auto;}
 #progressbar li.active{color:#86be79;}
-#progressbar li:after {content: ''; width: 100%; height: 5px; background: #3f3e3e; position: absolute; left: -50%; top: 29px; z-index: -1;}
+#progressbar li:after {content: ''; width: 100%; height: 5px; background: #3f3e3e; position: absolute; left: -50%; top: 35px; z-index: -1;}
 #progressbar li:first-child:after {content: none; }
 #progressbar li.active:before, #progressbar li.active:after{background: #84bf76;color: white;}
 .btn{border-radius:3px;}
@@ -74,8 +80,8 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 #msform fieldset > .btn {font-size: 18px; font:bold;border-width: 3px; border-radius:4px;}
 #msform .tooltip {border-radius: 3px;font:400 12px;}
 #msform .tooltip > .tooltip-inner {background-color: #fefefe;border: 1px solid #555;color:#555;padding: 15px 18px;text-align: left;max-width: 600px;width: 400px}
-#msform .form-close{position: absolute;top:0px;right: 0px;cursor: pointer;width:55px;z-index: 99}
-#msform li .li-text{position: absolute;top:24px;left:0;right:0;color:white}
+#msform .form-close{position: absolute;top:0px;right: 0px;cursor: pointer;z-index: 99}
+#msform li .li-text{position: absolute;top:30px;left:0;right:0;color:white}
 .mswrapper{width: 80%;margin: 0 10%;}
 .close-h{margin-top: 56px;font-size: 18px;color: #ccc;}
 .select2-container--krajee.select2-container--open .select2-selection, .select2-container--krajee .select2-selection:focus {box-shadow: none;}
@@ -135,16 +141,41 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
     color: #86be79;
 }
 .field-request-rush_order{margin-top:20px}
+.field-profile-sms_allow {
+    margin-top: 20px;
+}
+.pac-container { z-index: 9999 !important; }
+#map{width:100%;height:250px;}
+.clear-input{
+    top: 9px;
+    float: right;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.7;
+    filter: alpha(opacity=40);
+    position: absolute;
+    right: 0;
+    margin-right: 5px;}
+[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{font-size:40px}
 </style>
+<?php 
+Pjax::begin([
+  'id' => 'pjax-create', 
+  'timeout' => 10000, 
+  'enablePushState' => false,
+  ]);
+?>
 <?php $form = ActiveForm::begin([
         'id' => 'msform',
         'enableAjaxValidation' => true,
-        //'action' => Url::toRoute('user/ajaxregistration'),
         'validationUrl' => Url::toRoute('request/save-request')
 
 ]); ?>
         <div class="mswrapper" style="position: relative;height: 80px">
-		<img class="form-close" data-dismiss="modal" src="images/request-btn-close.png">
+                
+                <i class="flaticon-cross-out form-close" data-dismiss="modal" style="top: 10px;"></i>
 		<div style="display: inline-block;position: absolute;left:0">
 		<h4 class="f-title">Разместить заявку</h4>
 		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы F-keeper! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!">Что такое разместить заявку?</h4>
@@ -155,9 +186,221 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
 		<li><span class="li-text">Оплата</span></li>
+                <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
+            <span <?php if($organization->place_id){ echo "style='display:none'"; }?>>
+                <h5>Адрес организации<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+                <?= $form->field($organization, 'address',['template'=>'<div style="position:relative">{input}<span class="clear-input">×</span></div>{error}'])->textInput(['maxlength' => 255,'style'=>'padding-right:22px'])->label(false) ?>
+                <div id="map"></div>
+            </span>
+            
+<?= Html::activeHiddenInput($organization, 'lat'); //широта ?>
+<?= Html::activeHiddenInput($organization, 'lng'); //долгота ?>
+<?= Html::activeHiddenInput($organization, 'country'); //страна ?> 
+<?= Html::activeHiddenInput($organization, 'locality'); //Город ?>
+<?= Html::activeHiddenInput($organization, 'route'); //улица ?>
+<?= Html::activeHiddenInput($organization, 'street_number'); //дом ?>
+<?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
+<?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
+<?php
+$gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+    'libraries' => 'places',
+    'key'=>'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
+    'callback'=>'initMap'
+));
+$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
+$this->registerJs("
+$(document).on('keyup change', '#organization-address', function(){
+$(this).next().toggle(Boolean($(this).val()));
+    });
+    $('.clear-input').toggle(Boolean($('#organization-address').val()));
+    $('.clear-input').click(function () {
+        $(this).prev().val('').focus();
+        $(this).hide();
+})
+function initMap() {
+    var fields = {
+            sField : document.getElementById('organization-address'),
+            hLat : document.getElementById('organization-lat'),
+            hLng : document.getElementById('organization-lng'),
+            hCountry : document.getElementById('organization-country'),
+            hLocality : document.getElementById('organization-locality'),
+            hPlaceId : document.getElementById('organization-place_id'),
+            hRoute : document.getElementById('organization-route'),
+            hStreetNumber : document.getElementById('organization-street_number'),
+            hFormattedAddress : document.getElementById('organization-formatted_address')
+            };
+	//инит карты
+	var map = new google.maps.Map(document.getElementById('map'), {
+	    mapTypeId: google.maps.MapTypeId.ROADMAP
+	});
+	//инит маркера
+	var marker = new google.maps.Marker({
+	            map: map,
+	            draggable:true
+	});	
+	var geocoder = new google.maps.Geocoder;
+	
+	//Проверяем PlaceId и если он пустой, тогда проверить геолокацию
+	if(typeof fields.hPlaceId.value == 'undefined' || fields.hPlaceId.value == ''){
+            geolocation(map, marker, fields)
+	}else{
+            geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value),fields)
+        }
+	
+	//событие на забивание текста в поисковую строку
+        var autocomplete = new google.maps.places.Autocomplete(
+            (document.getElementById('organization-address')),
+            {types: ['geocode']});
+	autocomplete.addListener('place_changed', function(){
+	    var place = autocomplete.getPlace();    
+	    if (place.geometry) {
+		    var results = {0 : place};
+                    map.setZoom(17);
+                    map.panTo(results[0].geometry.location);
+                    marker.setPosition(results[0].geometry.location);
+                    changeFields(fields, results)
+	    }else {
+          window.alert('[autocomplete] No results found');}
+        });
+    
+	//событие на перемещение маркера
+	marker.addListener('dragend', function(e){
+	    geocoder.geocode({'latLng': e.latLng}, function(results, status) {
+	        if(status == 'OK') {
+	        	if (results[0]) {
+                        map.panTo(results[0].geometry.location);
+                        marker.setPosition(results[0].geometry.location);
+                        changeFields(fields, results)
+	        	}     
+	        } else {
+	        console.log('[dragger] Geocoder failed due to: ' + status);
+	        }
+	    });
+	})
+        
+        //Событие на клик по карте
+        map.addListener('click', function(e) {
+            geocoder.geocode({'latLng': e.latLng}, function(results, status) {
+                if(status == 'OK') {
+                        if (results[0]) {
+                        map.panTo(e.latLng);
+                        marker.setPosition(e.latLng);
+                        changeFields(fields, results)
+                        }     
+                } else {
+                console.log('[click] Geocoder failed due to: ' + status);
+                }
+            })
+        });
+}
+//Если нам известин placeId тогда выводим все данные
+function geocodePlaceId(geocoder, map, marker, placeId, fields) {
+    geocoder.geocode({'placeId': placeId}, function(results, status) {
+      if (status === 'OK') {
+        if (results[0]) {
+            map.setZoom(17);
+            map.panTo(results[0].geometry.location);
+            marker.setPosition(results[0].geometry.location);
+            changeFields(fields, results)
+        } else {
+          console.log('[PlaceId] No results found');
+        }
+      } else {
+        console.log('[geocodePlaceId]  failed due to: ' + status);
+      }
+    });
+}
+//геолокация по ip или геолокации из браузера
+function geolocation(map, marker, fields){
+    fields.sField.value = '';
+    fields.hLat.value = '';
+    fields.hLng.value = '';
+    fields.hCountry.value = '';
+    fields.hLocality.value = '';
+    fields.hRoute.value = '';
+    fields.hStreetNumber.value = '';
+    fields.hPlaceId.value = '';
+    fields.hFormattedAddress.value = '';
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) { 
+          var pos = {lat: parseFloat(position.coords.latitude), 
+                     lng: parseFloat(position.coords.longitude)};
+          map.setZoom(9);
+          map.panTo(pos);
+          marker.setPosition(pos);
+          },
+          function(failure) {
+              $.getJSON('https://ipinfo.io/geo', function(response) { 
+                  var loc = response.loc.split(',');
+                  var pos = {lat: parseFloat(loc[0]),
+                             lng: parseFloat(loc[1])};
+                  map.setZoom(9);
+                  map.panTo(pos);
+                  marker.setPosition(pos);
+              });  
+      });
+    }else{
+	 window.alert('Geolocation failed');   
+    }
+}
+//Сохранение полученных данных в хидден поля
+function changeFields(fields, results){
+    for (var i = 0; i < results[0].address_components.length; i++)
+        {
+          var addr = results[0].address_components[i];
+          var getCountry;
+          var getLocality;
+          var getRoute;
+          var getStreetNumber;
+          var getAdministrative_area_level_2;
+          var getFormattedAddress = results[0].formatted_address;
+          var getLat = results[0].geometry.location.lat();
+          var getLng = results[0].geometry.location.lng();
+          var getPlaceId = results[0].place_id;
+
+          if (addr.types[0] == 'country') 
+            getCountry = addr.long_name;
+          if (addr.types[0] == 'locality') 
+            getLocality = addr.long_name;
+          if (addr.types[0] == 'route') 
+            getRoute = addr.long_name;
+          if (addr.types[0] == 'street_number') 
+            getStreetNumber = addr.long_name;
+
+          if (addr.types[0] == 'administrative_area_level_2') 
+            getAdministrative_area_level_2 = addr.long_name; 
+
+        }
+        if(results[0]) {
+        var res = '';
+        typeof getRoute == 'undefined' ?'':
+            res = getRoute;
+        typeof getStreetNumber == 'undefined' ?'':
+            res = res+', '+getStreetNumber;
+        typeof getLocality == 'undefined' ?'':
+            res = res+', '+getLocality;
+        typeof getAdministrative_area_level_2 == 'undefined' ?'':
+            res = res+', '+getAdministrative_area_level_2;
+        typeof getCountry == 'undefined' ?'':
+            res = res+', '+getCountry;   
+        fields.sField.value = res;
+        fields.hLat.value = getLat;
+        fields.hLng.value = getLng;
+        fields.hCountry.value = getCountry;
+        fields.hLocality.value = getLocality;
+        fields.hRoute.value = getRoute;
+        fields.hStreetNumber.value = getStreetNumber;
+        fields.hPlaceId.value = getPlaceId;
+        fields.hFormattedAddress.value = getFormattedAddress;
+        } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+        }    
+}
+",yii\web\View::POS_END);
+?>
             <h5>Выберите категорию товара<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
             <?php 
             echo $form->field($request, 'category',['template'=>'{input}{error}'])->widget(Select2::classname(), [
@@ -182,6 +425,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
         </fieldset>
         <!-- fieldsets 2 -->
 	<fieldset class="text-left">
+            
             <h5>Как часто?</h5>
             <?php 
             echo $form->field($request, 'regular',['template'=>'{input}{error}'])->widget(Select2::classname(), [
@@ -226,10 +470,6 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                 'model'=>$request->payment_method,
                 'hideSearch' => true,
                 'data' => [1=>'Наличный расчет',2=>'Безналичный расчет'],
-                //'options' => ['placeholder' => 'Наличный расчет'],
-//                'pluginOptions' => [
-//                    'allowClear' => true
-//                ],
             ])->label(false);
             ?>
             
@@ -237,6 +477,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                 <?= $form->field($request, 'deferment_payment', 
     ['template'=>'{input}{error}'])->
     textInput(['placeholder' => '7 дней']) ?>
+            
 		<!--h5>Поделиться заявкой в группах f-keeper</h5-->
                 <div style="color:#ccc;font-size:13px;margin-top: 32px;margin-bottom: -32px;">
                     * Заявка будет существовать в системе f-keeper один месяц, или пока вы ее не закроете
@@ -244,121 +485,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                 <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
                 <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
         <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>        
-        </fieldset>       
+        </fieldset>
 <?php ActiveForm::end(); ?>
-<?php
-$customJs = <<< JS
-var current_fs, next_fs, previous_fs;
-var left, opacity, scale;
-var animating;
-var errorStep = true;
-var form = $("#msform" );
-$(".next").click(function(e){
-    var cur = $(this);
-        cur.prop('disabled',true);
-    var step = $(this).attr('data-step');
-    $.ajax({
-    url: 'index.php?r=request/save-request',
-    type: 'POST',
-    dataType: "json",
-    data: form.serialize() + "&step=" + step,
-    cache: false,
-    success: function (response) {
-       if(step == 1){
-            if((typeof(response["request-category"]) != "undefined" && 
-              response["request-category"] !== null) || 
-               (typeof(response["request-product"]) != "undefined" && 
-              response["request-product"] !== null)){
-              form.yiiActiveForm('submitForm')
-              cancel();
-            }else{
-              form.yiiActiveForm("resetForm");
-              next(cur); 
-            }
-       }
-       if(step == 2){ 
-            if(typeof(response["request-amount"]) != "undefined" && 
-              response["request-amount"] !== null){
-              form.yiiActiveForm('submitForm')
-              cancel();  
-            }else{
-              form.yiiActiveForm("resetForm");
-              next(cur);  
-            }
-       } 
-       if(step == 3){ 
-        console.log(response)
-           if(response["saved"]){
-               $.pjax.reload({container:"#list"});
-               $('#create').modal('hide');
-           }
-       }
-       cur.removeAttr('disabled'); 
-    }
-    });
-});
-function cancel(){
-return false;    
-}        
-function next(e) {
-if(animating) return false;
-    animating = true;
-    current_fs = e.parent();
-    next_fs = e.parent().next();
 
-    $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
-
-    next_fs.show(); 
-    current_fs.animate({opacity: 0}, {
-        step: function(now, mx) {
-                scale = 1 - (1 - now) * 0.2;
-                left = (now * 50)+"%";
-                opacity = 1 - now;
-                current_fs.css({'transform': 'scale('+scale+')'});
-                next_fs.css({'right': left, 'opacity': opacity});
-        }, 
-        duration: 800, 
-        complete: function(){
-                current_fs.hide();
-                animating = false;
-        }, 
-        easing: 'easeInOutBack'
-    });    
-}
-        
-        
-        
-function previous(e) {
-if(animating) return false;
-animating = true;
-
-current_fs = e.parent();
-previous_fs = e.parent().prev();
-
-$("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
-
-previous_fs.show(); 
-current_fs.animate({opacity: 0}, {
-        step: function(now, mx) {
-                scale = 0.8 + (1 - now) * 0.2;
-                left = ((1-now) * 50)+"%";
-                opacity = 1 - now;
-                current_fs.css({'right': left});
-                previous_fs.css({'transform': 'scale('+scale+')', 'opacity': opacity});
-        }, 
-        duration: 800, 
-        complete: function(){
-                current_fs.hide();
-                animating = false;
-        }, 
-        easing: 'easeInOutBack'
-});    
-}        
-$(".previous").click(function(){
-    previous($(this));
-});
-
-
-JS;
-$this->registerJs($customJs, View::POS_READY);
-?>
+<?php Pjax::end(); ?>

@@ -32,10 +32,25 @@ $this->registerJs('
             if ($(this).find("a").hasClass("reorder")) {
                 return true;
             }
-            var id = $(this).parent("tr").data("id");
-            if (id !== undefined) {
-                location.href = "' . Url::to(['order/view']) . '&id=" + id;
+            var url = $(this).parent("tr").data("url");
+            if (url !== undefined) {
+                location.href = url;
             }
+        });
+
+        $(document).on("click", ".reorder", function(e) {
+            e.preventDefault();
+            clicked = $(this);
+            swal({
+                title: "Повторить заказ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Да",
+                cancelButtonText: "Отмена",
+                showLoaderOnConfirm: true,
+            }).then(function() {
+                document.location = clicked.data("url")
+            });
         });
     });
         ');
@@ -244,14 +259,18 @@ $this->registerCss("
                                 'visible' => ($organization->type_id == Organization::TYPE_RESTAURANT),
                                 'value' => function($data) {
                                     switch ($data->status) {
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                                        case Order::STATUS_PROCESSING:
                                         case Order::STATUS_DONE:
                                         case Order::STATUS_REJECTED:
                                         case Order::STATUS_CANCELLED:
-                                            return Html::a('<i class="fa fa-refresh"></i>', ['order/repeat', 'id' => $data->id], [
+                                            return Html::a('<i class="fa fa-refresh"></i>', '#' , [
                                                         'class' => 'reorder',
                                                         'data' => [
                                                             'toggle' => 'tooltip',
                                                             'original-title' => 'Повторить заказ',
+                                                            'url' => Url::to(['order/repeat', 'id' => $data->id])
                                                         ],
                                             ]);
                                             break;
@@ -263,7 +282,7 @@ $this->registerCss("
                                     ],
                                 ],
                                 'rowOptions' => function ($model, $key, $index, $grid) {
-                            return ['data-id' => $model->id];
+                            return ['data-url' => Url::to(['order/view', 'id' => $model->id])];
                         },
                             ]);
                             ?>

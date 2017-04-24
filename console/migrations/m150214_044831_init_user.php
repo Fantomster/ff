@@ -88,7 +88,7 @@ class m150214_044831_init_user extends Migration
         $columns = ['role_id', 'email', 'username', 'password', 'status', 'created_at', 'access_token', 'auth_key'];
         $this->batchInsert('{{%user}}', $columns, [
             [
-                1, // Role::ROLE_ADMIN
+                2, // Role::ROLE_USER
                 'neo@neo.com',
                 'neo',
                 '$2y$13$dyVw4WkZGkABf2UrGWrhHO4ZmVBv.K4puhOL59Y9jQhIdj63TlV.O', // neo

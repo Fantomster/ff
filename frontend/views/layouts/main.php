@@ -88,7 +88,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
-        <link href="css/style.css" rel="stylesheet">
+        <link href="<?= yii\helpers\Url::base() ?>/css/style.css" rel="stylesheet">
         <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
         <?php $this->head() ?>
         <!--[if lt IE 9]>
@@ -101,6 +101,10 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             }
             .header-nav .nav_menu >li.active a {
                 border-bottom: 1px solid #fff;
+            }
+            .modal{
+                top: 100px;
+                z-index: 99999;
             }
             .modal{
                 top: 100px;
@@ -126,7 +130,13 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="registr-block">
                             <div class="registr__block">
-                                <?= Html::a('вход / регистрация', ["/user/login"]) ?>
+                                <?php
+                                if (Yii::$app->user->isGuest) {
+                                    echo Html::a('вход / регистрация', ["/user/login"]);
+                                } else {
+                                    echo Html::a(Yii::$app->user->identity->profile->full_name . ' [выход]', ["/user/logout"], ["data-method" => "post"]);
+                                }
+                                ?>
                             </div>
                         </div>
                         <div class="nav__block">
@@ -150,7 +160,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 </div>
             </header><!-- .header-nav-->
 
-            <?= $content ?>
+<?= $content ?>
             <footer class="footer">
                 <div class="inside__block">
                     <div class="container-fluid">
@@ -178,15 +188,15 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             </div>	
                         </div>
                         <?php /*
-                        <div class="col-md-3 col-sm-3">
-                            <div class="footer__menu_block">
-                                <span class="title__menu">ФОТО / видео</span>
-                                <ul class="links">
-                                    <li><a href="#">Фото архив</a></li>
-                                    <li><a href="#">Видео архив</a></li>
-                                </ul>
-                            </div>	
-                        </div> */ ?>
+                          <div class="col-md-3 col-sm-3">
+                          <div class="footer__menu_block">
+                          <span class="title__menu">ФОТО / видео</span>
+                          <ul class="links">
+                          <li><a href="#">Фото архив</a></li>
+                          <li><a href="#">Видео архив</a></li>
+                          </ul>
+                          </div>
+                          </div> */ ?>
                         <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
                                 <span class="title__menu">Вход / регистрация</span>

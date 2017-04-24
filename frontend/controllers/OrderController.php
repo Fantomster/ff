@@ -13,6 +13,7 @@ use common\models\Organization;
 use common\models\GoodsNotes;
 use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
+use common\models\ManagerAssociate;
 use yii\helpers\Json;
 use common\models\OrderChat;
 use common\components\AccessRule;
@@ -85,17 +86,17 @@ class OrderController extends DefaultController {
                     ],
                 ],
 //                'denyCallback' => function($rule, $action) {
-//            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-//        }
+//                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+//                }
             ],
         ];
     }
 
     public function actionCreate() {
-
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
+
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
@@ -290,11 +291,6 @@ class OrderController extends DefaultController {
             }
             return false;
         }
-
-//        if (Yii::$app->request->get()) {
-//            $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-//            return $this->renderAjax('_add-comment', compact('order'));
-//        }
     }
 
     public function actionAjaxCancelOrder($order_id = null) {
@@ -307,7 +303,7 @@ class OrderController extends DefaultController {
                     $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
                     break;
                 case Organization::TYPE_SUPPLIER:
-                    $order = Order::find()->where(['id' => $order_id, 'vendor_id' => $initiator->id])->one();
+                    $order = $this->findOrder([Order::tableName().'.id' => $order_id, 'vendor_id' => $initiator->id], Yii::$app->user->can('manage'));
                     break;
             }
             if ($order) {
@@ -346,7 +342,7 @@ class OrderController extends DefaultController {
             $result = ["title" => "Комментарий к товару добавлен", "comment" => $note->note, "type" => "success"];
             return $result;
         }
-        
+
         return false;
     }
 
@@ -385,8 +381,7 @@ class OrderController extends DefaultController {
             }
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
-            //Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            return true;//$this->successNotify("Заказ успешно оформлен");
+            return true;
         }
 
         return false;
@@ -452,21 +447,55 @@ class OrderController extends DefaultController {
 
         $params = Yii::$app->request->getQueryParams();
         if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
             $params['OrderSearch']['client_search_id'] = $this->currentUser->organization_id;
+            $params['OrderSearch']['client_id'] = $this->currentUser->organization_id;
             $newCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
             $processingCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
             $fulfilledCount = Order::find()->where(['client_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
             $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and client_id=' . $organization->id)->queryOne();
             $totalPrice = $query['total'];
         } else {
-            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
             $params['OrderSearch']['vendor_search_id'] = $this->currentUser->organization_id;
-            $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
-            $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
-            $fulfilledCount = Order::find([])->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
-            $query = Yii::$app->db->createCommand('select sum(total_price) as total from `order` where status=' . Order::STATUS_DONE . ' and vendor_id=' . $organization->id . ';')->queryOne();
-            $totalPrice = $query['total'];
+            $params['OrderSearch']['vendor_id'] = $this->currentUser->organization_id;
+            $canManage = Yii::$app->user->can('manage');
+            if ($canManage) {
+                $newCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])->count();
+                $processingCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_PROCESSING])->count();
+                $fulfilledCount = Order::find()->where(['vendor_id' => $organization->id])->andWhere(['status' => Order::STATUS_DONE])->count();
+                $totalPrice = Order::find()->where(['status' => Order::STATUS_DONE, 'vendor_id' => $organization->id])->sum("total_price");
+            } else {
+                $params['OrderSearch']['manager_id'] = $this->currentUser->id;
+                $orderTable = Order::tableName();
+                $maTable = ManagerAssociate::tableName();
+                $newCount = Order::find()
+                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                        ->where([
+                            'vendor_id' => $organization->id, 
+                            "$maTable.manager_id" => $this->currentUser->id,
+                            'status' => [Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR]])
+                        ->count();
+                $processingCount = Order::find()
+                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                        ->where([
+                            'vendor_id' => $organization->id, 
+                            "$maTable.manager_id" => $this->currentUser->id,
+                            'status' => Order::STATUS_PROCESSING])
+                        ->count();
+                $fulfilledCount = Order::find()
+                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                        ->where([
+                            'vendor_id' => $organization->id, 
+                            "$maTable.manager_id" => $this->currentUser->id,
+                            'status' => Order::STATUS_DONE])
+                        ->count();
+                $totalPrice = Order::find()
+                        ->leftJoin("$maTable", "$maTable.organization_id = `$orderTable`.client_id")
+                        ->where([
+                            'status' => Order::STATUS_DONE, 
+                            "$maTable.manager_id" => $this->currentUser->id,
+                            'vendor_id' => $organization->id])
+                        ->sum("total_price");
+            }
         }
         $dataProvider = $searchModel->search($params);
 
@@ -478,11 +507,16 @@ class OrderController extends DefaultController {
     }
 
     public function actionView($id) {
-        $order = Order::findOne(['id' => $id]);
         $user = $this->currentUser;
         $user->organization->markViewed($id);
+        
+        if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
+            $order = $this->findOrder([Order::tableName().'.id' => $id], Yii::$app->user->can('manage'));
+        } else {
+            $order = Order::findOne(['id' => $id]);;
+        }
 
-        if (!(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+        if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
         if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
@@ -516,7 +550,9 @@ class OrderController extends DefaultController {
                         if ($position['quantity'] == 0) {
                             $message .= "<br/>удалил $product->product_name из заказа";
                         } else {
-                            $message .= "<br/>изменил количество $product->product_name с $product->quantity" . $ed . " на $position[quantity]" . $ed;
+                            $oldQuantity = $product->quantity + 0;
+                            $newQuantity = $position["quantity"] + 0;
+                            $message .= "<br/>изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
                         }
                         $product->quantity = $position['quantity'];
                     }
@@ -552,6 +588,13 @@ class OrderController extends DefaultController {
             if (isset($discount['discount_type']) && isset($discount['discount'])) {
                 $order->discount_type = $discount['discount_type'];
                 $order->discount = $order->discount_type ? $discount['discount'] : null;
+                if ($order->discount_type == Order::DISCOUNT_FIXED) {
+                    $message = $order->discount." руб";
+                } else {
+                    $message = $order->discount."%";
+                }
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ ' . $order->id . " в размере:$message");
+                //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
@@ -930,39 +973,6 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function successNotify($title) {
-        return [
-            'success' => true,
-            'growl' => [
-                'options' => [
-//                            'title' => 'test',
-                ],
-                'settings' => [
-                    'element' => 'body',
-                    'type' => $title, //'Заказ успешно оформлен',
-                    'allow_dismiss' => true,
-                    'placement' => [
-                        'from' => 'top',
-                        'align' => 'center',
-                    ],
-                    'delay' => 1500,
-                    'animate' => [
-                        'enter' => 'animated fadeInDown',
-                        'exit' => 'animated fadeOutUp',
-                    ],
-                    'offset' => 75,
-                    'template' => '<div data-notify="container" class="modal-dialog" style="width: 340px;">'
-                    . '<div class="modal-content">'
-                    . '<div class="modal-header">'
-                    . '<h4 class="modal-title">{0}</h4></div>'
-                    . '<div class="modal-body form-inline" style="text-align: center; font-size: 36px;"> '
-                    . '<span class="glyphicon glyphicon-thumbs-up"></span>'
-                    . '</div></div></div>',
-                ]
-            ]
-        ];
-    }
-
     private function sendOrderChange($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
@@ -1103,4 +1113,18 @@ class OrderController extends DefaultController {
         }
     }
 
+    private function findOrder($condition, $canManage = false) {
+        if ($canManage) {
+            $order = Order::find()->where($condition)->one();
+        } else {
+            $maTable = ManagerAssociate::tableName();
+            $orderTable = Order::tableName();
+            $order = Order::find()
+                    ->leftJoin("$maTable", "$maTable.organization_id = $orderTable.client_id")
+                    ->where($condition)
+                    ->andWhere(["$maTable.manager_id" => $this->currentUser->id])
+                    ->one();
+        }
+        return $order;
+    }
 }

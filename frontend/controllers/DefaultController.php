@@ -37,12 +37,8 @@ class DefaultController extends Controller {
                     break;
                 case Organization::TYPE_SUPPLIER:
                     $this->layout = 'main-vendor';
-
-                    $isSettings = ($this->id === 'vendor') && ($this->action->id === 'settings');
-                    $isTutorial = ($this->id === 'vendor') && ($this->action->id === 'tutorial');
-                    $isCatalogs = ($this->id === 'vendor') && (($this->action->id === 'catalogs') || ($this->action->id === 'supplier-start-catalog-create') || ($this->action->id === 'import-base-catalog-from-xls'));
-                    if (($organization->step == Organization::STEP_SET_INFO) && !$isSettings && !$isTutorial) {
-                        return $this->redirect(['vendor/settings']);
+                    if ($organization->step != Organization::STEP_OK) {
+                        //return $this->redirect(Yii::$app->params['demoUrl']);
                     }
                     break;
             }
@@ -52,5 +48,4 @@ class DefaultController extends Controller {
         }
         return true;
     }
-
 }

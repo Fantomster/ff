@@ -45,7 +45,16 @@ use yii\helpers\Url;
 
     <?=
             $form->field($organization, 'phone')
-            ->widget(\yii\widgets\MaskedInput::className(), ['mask' => '+7 (999) 999 99 99',])
+            ->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ])
             ->textInput(['placeholder' => $organization->getAttributeLabel('phone')])
     ?>
 

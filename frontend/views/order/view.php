@@ -73,7 +73,7 @@ $js = <<<JS
                 $('#toPrint').printThis();
             });
         });
-        $('.content').on('submit', '#editOrder', function(e) {
+        $('.content').on('click', '#btnSave', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
             $("#loader-show").showLoading();

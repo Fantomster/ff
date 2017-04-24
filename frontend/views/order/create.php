@@ -45,6 +45,7 @@ $this->registerJs(
                     clearTimeout(timer);
                 }
                 timer = setTimeout(function() {
+                    console.log("submit on timer");
                     $("#searchForm").submit();
                 }, 700);
             });
@@ -84,6 +85,7 @@ $this->registerJs(
             });
             $(document).on("click", ".pagination li a", function() {
                 clearTimeout(timer);
+                console.log("timer canceled");
                 return true;
             });
         });'

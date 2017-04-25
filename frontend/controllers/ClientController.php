@@ -393,10 +393,14 @@ class ClientController extends DefaultController {
                      *    
                      * */
                     if ($check['eventType'] == 5) {
-                        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) "
-                                . "VALUES ($get_supp_org_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
-                        \Yii::$app->db->createCommand($sql)->execute();
-                        $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
+                        $newBaseCatalog = new Catalog();
+                        $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                        $newBaseCatalog->name = 'Главный каталог';
+                        $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                        $newBaseCatalog->status = Catalog::STATUS_ON;
+                        $newBaseCatalog->save();
+                        $newBaseCatalog->refresh();
+                        $lastInsert_base_cat_id = $newBaseCatalog->id;
                     } else {
                        //Поставщик зарегистрирован, но не авторизован
                        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
@@ -404,17 +408,27 @@ class ClientController extends DefaultController {
                            $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->one();
                            $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
                        }else{
-                        $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) "
-                                . "VALUES ($get_supp_org_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
-                        \Yii::$app->db->createCommand($sql)->execute();
-                        $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID(); 
+                            $newBaseCatalog = new Catalog();
+                            $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                            $newBaseCatalog->name = 'Главный каталог';
+                            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                            $newBaseCatalog->status = Catalog::STATUS_ON;
+                            $newBaseCatalog->save();
+                            $newBaseCatalog->refresh();
+                            $lastInsert_base_cat_id = $newBaseCatalog->id;
                        }
                        
                     }
                     
-                    $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($get_supp_org_id,'" . Organization::getOrganization($currentUser->organization_id)->name . "'," . Catalog::CATALOG . ",NOW(),1)";
-                    \Yii::$app->db->createCommand($sql)->execute();
-                    $lastInsert_cat_id = Yii::$app->db->getLastInsertID();
+                    $newCatalog = new Catalog();
+                    $newCatalog->supp_org_id = $get_supp_org_id;
+                    $newCatalog->name = $currentUser->organization->name;
+                    $newCatalog->type = Catalog::CATALOG;
+                    $newCatalog->status = Catalog::STATUS_ON;
+                    $newCatalog->save();
+                    $newCatalog->refresh();
+                    
+                    $lastInsert_cat_id = $newCatalog->id;
                     /**
                      *
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога

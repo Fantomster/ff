@@ -99,7 +99,7 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * Check if user account is active
      * 
-     * @return boolean
+     * @return bool
      */
     public function isActive() {
         return ($this->status == static::STATUS_ACTIVE);

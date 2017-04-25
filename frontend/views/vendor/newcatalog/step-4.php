@@ -123,6 +123,8 @@ $this->title = 'Назначить каталог';
 </div>
 </section>
 <?php
+$step4Url = Url::to(['vendor/step-4', 'id' => $cat_id]);
+
 $this->registerJs('
 /** 
  * Forward port jQuery.live()
@@ -144,7 +146,7 @@ $("input[type=checkbox]").live("change", function(e) {
 var id = $(this).attr("data-id");
 var state = $(this).prop("checked");
     $.ajax({
-    url: "index.php?r=vendor/step-4&id='. $cat_id .'",
+    url: "'. $step4Url .'",
     type: "POST",
     dataType: "json",
     data: {"add-client":true,"rest_org_id":id,"state":state},

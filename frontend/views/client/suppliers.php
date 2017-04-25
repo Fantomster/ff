@@ -8,8 +8,11 @@ use kartik\form\ActiveForm;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
 use kartik\widgets\FileInput;
+use yii\helpers\Url;
 
 kartik\select2\Select2Asset::register($this);
+\frontend\assets\HandsOnTableAsset::register($this);
+
 ?>
 <?=
 Modal::widget([
@@ -455,19 +458,26 @@ $gridColumnsCatalog = [
 </section>
 
 <?php
-$this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
-$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
-$this->registerCssFile('modules/handsontable/dist/chosen.css');
-$this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
-$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
-$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
-$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
-$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
-$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
-$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
+//$this->registerCssFile('/modules/handsontable/dist/handsontable.full.css');
+//$this->registerCssFile('/modules/handsontable/dist/bootstrap.css');
+//$this->registerCssFile('/modules/handsontable/dist/chosen.css');
+//$this->registerCssFile('/modules/handsontable/dist/pikaday/pikaday.css');
+//$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
+//$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
+//$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
+//$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
+//$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
+//$this->registerJsFile('modules/handsontable/dist/handsontable.js');
+//$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
+//$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 //$this->registerJsFile('modules/alerts.js');
+
+$chkmailUrl = Url::to(['client/chkmail']);
+$inviteUrl = Url::to(['client/invite']);
+$createUrl = Url::to(['client/create']);
+$suppliersUrl = Url::to(['clint/suppliers']);
+$removeSupplierUrl = Url::to(['client/remove-supplier']);
+
 $customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
@@ -477,7 +487,7 @@ window.clearTimeout(timer);
         type: 'GET',
         push: false,
         timeout: 10000,
-        url: 'index.php?r=client/suppliers',
+        url: '$suppliersUrl',
         container: '#sp-list',
         data: {searchString: $('#search').val()}
       })
@@ -570,7 +580,7 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
     if (attribute.name === 'email' && !hasError)
         {
             $.ajax({
-            url: "index.php?r=client/chkmail",
+            url: "$chkmailUrl",
             type: "POST",
             dataType: "json",
             data: {'email' : input.val()},
@@ -679,7 +689,7 @@ $('#profile-full_name,#organization-name').on('keyup paste put', function(e){
 $('#inviteSupplier').click(function(e){
 e.preventDefault();	
     $.ajax({
-      url: 'index.php?r=client/invite',
+      url: '$inviteUrl',
       type: 'POST',
       dataType: "json",
       data: $("#SuppliersFormSend" ).serialize(),
@@ -735,7 +745,7 @@ $('#invite').click(function(e){
 	$.ajax({
                     processData: false,
                     contentType: false,
-		  url: 'index.php?r=client/create',
+		  url: '$createUrl',
 		  type: 'POST',
 		  dataType: "json",
 		  data: formData, //$("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
@@ -829,7 +839,7 @@ $(document).on("click",".del", function(e){
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: "index.php?r=client/remove-supplier",
+	        url: "$removeSupplierUrl",
 	        type: "POST",
 	        dataType: "json",
 	        data: {'id' : id},

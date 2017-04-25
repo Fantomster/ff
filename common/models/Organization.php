@@ -26,7 +26,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $about
  * @property string $picture
  * @property string $es_status
- * @property boolean $partnership
+ * @property bool $partnership
  * @property integer $rating
  * @property double $lat
  * @property double $lng

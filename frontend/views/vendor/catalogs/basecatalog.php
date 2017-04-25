@@ -495,6 +495,12 @@ Modal::end();
                             </div>
                         </section>
                         <?php
+                        
+$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog]);  
+$changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
+$changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
+$deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
+                        
                         $customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
@@ -504,7 +510,7 @@ window.clearTimeout(timer);
         type: 'GET',
         push: true,
         timeout: 10000,
-        url: 'index.php?r=vendor/basecatalog&id=$currentCatalog',
+        url: '$baseCatalogUrl',
         container: '#kv-unique-id-1',
         data: {searchString: $('#search').val()}
       })
@@ -531,7 +537,7 @@ $(document).on('click','input[event-type=set-status]', function(e) {
     var state = $(this).prop("checked");
     var elem = $(this).attr('name').substr(0, 6);   
     $.ajax({
-        url: "index.php?r=vendor/changecatalogprop",
+        url: "$changeCatalogPropUrl",
         type: "POST",
         dataType: "json",
         data: {'elem' : elem,'id' : id,'state' : state},
@@ -551,7 +557,7 @@ $(document).on('change','input[event-type=marketplace]', function(e) {
     var state = $(this).prop("checked");
     var elem = $(this).attr('name').substr(0, 6);   
     $.ajax({
-        url: "index.php?r=vendor/changecatalogprop",
+        url: "$changeCatalogPropUrl",
         type: "POST",
         dataType: "json",
         data: {'elem' : elem,'id' : id,'state' : state},
@@ -570,7 +576,7 @@ $(document).on('change','input[event-type=set-catalog]', function(e) {
     var state = $(this).prop("checked");
     var elem = $(this).attr('name').substr(0, 6);
     $.ajax({
-        url: "index.php?r=vendor/changesetcatalog",
+        url: "$changeSetCatalogUrl",
         type: "POST",
         dataType: "json",
         data: {'id' : id, 'curCat' : $currentCatalog,'state' : state},
@@ -620,7 +626,7 @@ $(".del-product").live("click", function(e){
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: "index.php?r=vendor/ajax-delete-product",
+	        url: "$deleteProductUrl",
 	        type: "POST",
 	        dataType: "json",
 	        data: {'id' : id},

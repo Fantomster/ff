@@ -1,5 +1,11 @@
 <?php 
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\grid\GridView;
+use yii\widgets\Pjax;
+use kartik\form\ActiveForm;
 use kartik\date\DatePicker;
+use yii\widgets\Breadcrumbs;
 ?>
 <section class="content-header">
     <h1>
@@ -34,6 +40,15 @@ use kartik\date\DatePicker;
     <div class="filters">
         <div class="row">
             <div class="col-md-8">
+                <?php
+            $form = ActiveForm::begin([
+                        'options' => [
+                            'id' => 'searchForm',
+                            //'class' => "navbar-form",
+                            'role' => 'search',
+                        ],
+            ]);
+            ?>
                 <div class="col-md-7 no-padding">
                     <?=
                         DatePicker::widget([
@@ -43,7 +58,7 @@ use kartik\date\DatePicker;
                             'options' => ['placeholder' => 'Выберите месяц', 'id' => 'month', 'style' => 'max-width: 150px;'],
                             'type' => DatePicker::TYPE_INPUT,
                             'pluginOptions' => [
-                                'format' => 'MM yyyy', //'d M yyyy',//
+                                'format' => 'MM yyyy',
                                 'viewMode' => 'months', 
                                 'minViewMode' => 'months',
                                 'autoclose' => true,
@@ -60,6 +75,7 @@ use kartik\date\DatePicker;
                             </div>
                     </div>
                 </div>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>
@@ -76,51 +92,78 @@ use kartik\date\DatePicker;
                     </div>
                 </div>
                 <!-- /.box-header -->
-                <div class="box-body table-responsive">
-                    <table class="table table-hover table-max">
-                        <tbody>
-                            <tr style="background-color: #fff;">
-                                <th>Поставщик</th>
-                                <th>Месяц</th>
-                                <th>F-keeper Мне</th>
-                                <th>Я F-keeper'у</th>
-                                <th>Итого прибыль</th>
-                                <th></th>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>ООО Marr Russia</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>ООО "Кардис"</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>Фрутти Рум</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                            <tr class="tr-id">
-                                <td>Рус Алко</td>
-                                <td>Март-2017</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-green"><i class="fa fa-caret-up"></i> </span> 1200 руб.</td>
-                                <td style="font-weight: bold;"><span class="description-percentage text-red"><i class="fa fa-caret-down"></i> </span> 1200 руб.</td>
-                                <td style="font-size: 21px; font-weight: bold;">900 руб</td>
-                                <td class="table-btns"><a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a></td>
-                            </tr>
-                        </tbody></table>
-                </div>
+            <?php
+            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
+            ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <?=
+                    GridView::widget([
+                        'id' => 'vendorsList',
+                        'dataProvider' => $dataProvider,
+                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                        'filterModel' => $searchModel,
+                        'filterPosition' => false,
+                        'summary' => '',
+                        'options' => ['class' => 'table-responsive'],
+                        'tableOptions' => ['class' => 'table table-hover table-max', 'role' => 'grid'],
+                        'pager' => [
+                            'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
+                        ],
+                        'columns' => [
+                            [
+                                'attribute' => 'id',
+                                'value' => 'id',
+                                'label' => '№',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'name',
+                                'value' => 'name',
+                                'label' => 'Имя поставщика',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'turnoverCut',
+                                'value' => 'turnoverCut',
+                                'label' => 'Поставщик мне',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'fromFkeeper',
+                                'value' => 'fromFkeeper',
+                                'label' => 'F-keeper мне',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'toFkeeper',
+                                'value' => 'toFkeeper',
+                                'label' => 'Я F-keeper\'у',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    return $data['turnoverCut'] - $data['toFkeeper'];
+                                },
+                                'label' => 'Итого прибыль',
+                            ],
+                            [
+                                'format' => 'raw',
+                                'value' => function($data) {
+                                    $result = '<a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a>';
+                                    return $result;
+                                },
+                                        'contentOptions' => ['class' => 'table-btns'],
+                                    ],
+                                ],
+                                'rowOptions' => function ($model, $key, $index, $grid) {
+                            return ['data-url' => Url::to(['organization/ajax-show-vendor', 'id' => $model["id"]])];
+                        },
+                            ]);
+                            ?>
+                        </div></div>
+                    <?php Pjax::end() ?>
+                    <!-- /.table-responsive -->
                 <!-- /.box-body -->
             </div>
         </div>
@@ -135,181 +178,9 @@ use kartik\date\DatePicker;
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body table-responsive">
-                    <div class="" id="accordion"><?php /*
+                    <div class="" id="accordion">
                         <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
-                        <div class="">
-                            <div class="box-header with-border">
-                                <h4 class="box-title">
-                                    <a class="collapse-href" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true">
-                                        <span class="line-before"></span>Общий доход <span class="arrow-open"><i class="fa fa-fw fa-sort-desc pull-right"></i></span>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="collapseOne" class="panel-collapse collapse in" aria-expanded="true">
-                                <div class="box-body">
-                                    <div class="pay-chek">
-                                        <table class="pay-table" width="100%">
-                                            <tbody><tr>
-                                                    <td style="text-align: left;">F-keeper Мне:</td>
-                                                    <td style="text-align: right; font-size: 18px;">123000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Я F-keeper'у:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Кол-во месяцев:</td>
-                                                    <td style="text-align: right; font-size: 18px;">6 месяцев</td>
-                                                </tr>
-                                                <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
-                                                    <td style="text-align: left; font-weight: bold;">Итого заработано:</td>
-                                                    <td style="text-align: right; font-size: 22px;">328462389 руб.</td>
-                                                </tr>
-                                            </tbody></table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="">
-                            <div class="box-header with-border">
-                                <h4 class="box-title">
-                                    <a class="collapse-href" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true">
-                                        <span class="line-before"></span>Общий доход по поставщику <span class="arrow-open"><i class="fa fa-fw fa-sort-desc pull-right"></i></span>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="collapseTwo" class="panel-collapse collapse in" aria-expanded="true">
-                                <div class="box-body">
-                                    <div class="pay-chek">
-                                        <table class="pay-table" width="100%">
-                                            <tbody><tr>
-                                                    <td style="text-align: left;">F-keeper Мне:</td>
-                                                    <td style="text-align: right; font-size: 18px;">123000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Я F-keeper'у:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Кол-во месяцев:</td>
-                                                    <td style="text-align: right; font-size: 18px;">3 месяцев</td>
-                                                </tr>
-                                                <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">
-                                                    <td style="text-align: left; font-weight: bold;">Доход за от поставщика:</td>
-                                                    <td style="text-align: right; font-size: 22px;">328462389 руб.</td>
-                                                </tr>
-                                            </tbody></table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="">
-                            <div class="box-header with-border">
-                                <h4 class="box-title">
-                                    <a class="collapse-href collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false">
-                                        <span class="line-before"></span>Детализация <span class="arrow-open"><i class="fa fa-fw fa-sort-desc pull-right"></i></span>
-                                    </a>
-                                </h4>
-                            </div>
-                            <div id="collapseThree" class="panel-collapse collapse" aria-expanded="false">
-                                <div class="box-body">
-                                    <div class="pay-chek">
-                                        <table class="pay-table" width="100%">
-                                            <tbody><tr>
-                                                    <th>Оборот</th>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Оборот поставщика:</td>
-                                                    <td style="text-align: right; font-size: 18px;">123000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Начислено:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">F-keeper'у:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Мой доход с оборота:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Фиксированная часть</th>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Плата за подключение:</td>
-                                                    <td style="text-align: right; font-size: 18px;">123000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Ежемесячный платеж:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Ваш %:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">F-keeper %:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Реклама:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Ваш %:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">F-keeper %:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Заявки:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Ваш %:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">F-keeper %:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Долги</th>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Долг поставщика перед системой:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: left;">Долг за прошлый месяц:</td>
-                                                    <td style="text-align: right; font-size: 18px;">180000 руб.</td>
-                                                </tr>
-                                            </tbody></table>
-                                        <div class="download-by-m">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <button type="button" class="btn btn-block btn-default" id="daterange-btn">
-                                                        <span>
-                                                            <i class="fa fa-calendar"></i> Период для выписки
-                                                        </span>
-                                                        <i class="fa fa-caret-down"></i>
-                                                    </button>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <button type="button" class="btn btn-block btn-primary btn-md"><span>
-                                                            <i class="fa fa-download"></i>
-                                                        </span> Скачать выписку</button> 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */ ?>
+                        <?= $this->render("_general", compact("vendorsStats", "franchiseeType")) ?>
                     </div>
                 </div>
                 <!-- /.box-body -->

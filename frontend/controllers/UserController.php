@@ -246,7 +246,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      * @param Profile $profile
      * @param Organization $organization
      * 
-     * @return boolean
+     * @return bool
      */
 
     private function initDemoData($user, $profile, $organization) {

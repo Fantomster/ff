@@ -11,13 +11,13 @@ use Yii;
  * @property integer $vendor_id
  * @property string $delivery_charge
  * @property string $min_free_delivery_charge
- * @property boolean $mon
- * @property boolean $tue
- * @property boolean $wed
- * @property boolean $thu
- * @property boolean $fri
- * @property boolean $sat
- * @property boolean $sun
+ * @property bool $mon
+ * @property bool $tue
+ * @property bool $wed
+ * @property bool $thu
+ * @property bool $fri
+ * @property bool $sat
+ * @property bool $sun
  * @property string $min_order_price
  * @property string $created_at
  * @property string $updated_at

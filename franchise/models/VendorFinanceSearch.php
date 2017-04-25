@@ -5,6 +5,8 @@ namespace franchise\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use common\models\Order;
+use common\models\Organization;
 
 /**
  * Description of VendorSearch
@@ -49,17 +51,29 @@ class VendorFinanceSearch extends Organization {
         $faTable = \common\models\FranchiseeAssociate::tableName();
         $rsrTable = \common\models\RelationSuppRest::tableName();
         $biTable = \common\models\BuisinessInfo::tableName();
-        $ordTable = \common\models\Order::tableName();
-        $orgTable = \common\models\Organization::tableName();
+        $ordTable = Order::tableName();
+        $orgTable = Organization::tableName();
+        $frTable = \common\models\Franchisee::tableName();
+        $ftypeTable = \common\models\FranchiseType::tableName();
         
-        $query = "SELECT $orgTable.name as name, SUM($ord.total_price * $rsrTable.reward / 100) as turnoverCut, (0) as fromFkeeper, SUM($ord)";
+        $orderStatuses = "(".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.")";
+        $query = "SELECT $orgTable.id as id, $orgTable.name as name, TRUNCATE(SUM(`$ordTable`.total_price * $biTable.reward / 100),2) as turnoverCut, (0) as fromFkeeper, TRUNCATE(SUM(`$ordTable`.total_price * $biTable.reward / 100) * (100 - $ftypeTable.share) / 100,2) as toFkeeper "
+                . "FROM `$ordTable` "
+                    . "LEFT JOIN $faTable ON `$ordTable`.vendor_id = $faTable.organization_id "
+                    . "LEFT JOIN $rsrTable ON `$ordTable`.vendor_id = $rsrTable.supp_org_id "
+                    . "LEFT JOIN $biTable ON `$ordTable`.vendor_id = $biTable.organization_id "
+                    . "LEFT JOIN $frTable ON $faTable.franchisee_id = $frTable.id "
+                    . "LEFT JOIN $ftypeTable ON $frTable.type_id = $ftypeTable.id "
+                    . "LEFT JOIN $orgTable ON $faTable.organization_id = $orgTable.id "
+                . "WHERE $faTable.franchisee_id = :franchisee_id AND `$ordTable`.status IN $orderStatuses "
+                . "GROUP BY `$ordTable`.vendor_id";
         
-
-        $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':month' => $this->month])->queryAll());
+//':searchString' => $searchString, ':month' => $this->month, 
+        $count = count(Yii::$app->db->createCommand($query, [':franchisee_id' =>$franchisee_id])->queryAll());
 
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query,
-            'params' => [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f],
+            'params' => [':franchisee_id' =>$franchisee_id],
             'totalCount' => $count,
             'pagination' => [
                 'pageSize' => 20,
@@ -67,16 +81,7 @@ class VendorFinanceSearch extends Organization {
             'sort' => [
                 'attributes' => [
                     'name',
-                    'clientCount',
-                    'orderCount',
-                    'orderSum',
-                    'created_at',
-                    'contact_name',
-                    'phone'
                 ],
-                'defaultOrder' => [
-                    'created_at' => SORT_ASC
-                ]
             ],
         ]);
 

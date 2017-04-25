@@ -67,14 +67,17 @@ Modal::begin([
 ]);
 Modal::end();
 ?>
-<?php $customJs = <<< JS
+<?php 
+$restaurantsMoreUrl = Url::to(['site/ajax-restaurants-more']);
+
+$customJs = <<< JS
 var inProgress = false;
 var num = 12;
 $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#supplier-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-restaurants-more",
+        url: "$restaurantsMoreUrl",
         type: "GET",
         data: {"num": num},
         beforeSend: function() {
@@ -99,7 +102,7 @@ $('#supplier-more').on("click", function (e) {
     e.preventDefault();
     console.log('supplier click more');
     $.ajax({
-      url: "index.php?r=site/ajax-restaurants-more",
+      url: "$restaurantsMoreUrl",
       type: "GET",
       data: {"num": num},
       cache: false,

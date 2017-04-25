@@ -32,6 +32,7 @@ use Yii;
  * @property OrderChat[] $orderChat
  * @property integer positionCount
  * @property string $statusText
+ * @property bool $isObsolete
  */
 class Order extends \yii\db\ActiveRecord {
 
@@ -42,8 +43,12 @@ class Order extends \yii\db\ActiveRecord {
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
+
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;
+    
+    const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
+    const DELAY_WITHOUT_DELIVERY_DATE = 259200; //sec - 3 days
 
     /**
      * @inheritdoc
@@ -156,6 +161,23 @@ class Order extends \yii\db\ActiveRecord {
         return $this->hasMany(OrderChat::className(), ['order_id' => 'id'])->orderBy(['created_at' => SORT_ASC]);
     }
 
+    //check if order is obsolete i.e. can be set as done from any state by any side
+    public function getIsObsolete() {
+        if (in_array($this->status, [self::STATUS_DONE, self::STATUS_REJECTED, self::STATUS_CANCELLED, self::STATUS_FORMING])) {
+            return false;
+        }
+        $today = time();
+        if (empty($this->requested_delivery)) {
+            $updatedAt = strtotime($this->updated_at);
+            $interval = $today - $updatedAt;
+            return $interval > self::DELAY_WITHOUT_DELIVERY_DATE;
+        } else {
+            $deliveryDate = strtotime($this->requested_delivery);
+            $interval = $today - $deliveryDate;
+            return $interval > self::DELAY_WITH_DELIVERY_DATE;
+        }
+    }
+    
     public static function statusText($status) {
         $text = 'Неопределен';
         switch ($status) {

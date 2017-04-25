@@ -54,14 +54,17 @@ use yii\web\View;
     </div>
 </div>
 
-<?php $customJs = <<< JS
+<?php 
+$supplierMoreUrl = Url::to(['site/ajax-supplier-more']);
+
+$customJs = <<< JS
 var inProgress = false;
 var num = 12;
 $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#supplier-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-supplier-more",
+        url: "$supplierMoreUrl",
         type: "GET",
         data: {"num": num},
         beforeSend: function() {
@@ -86,7 +89,7 @@ $('#supplier-more').on("click", function (e) {
     e.preventDefault();
     console.log('supplier click more');
     $.ajax({
-      url: "index.php?r=site/ajax-supplier-more",
+      url: "$supplierMoreUrl",
       type: "GET",
       data: {"num": num},
       cache: false,

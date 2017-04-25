@@ -323,6 +323,9 @@ $this->registerJs($customJs, View::POS_READY);
 <?php
 $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));
 $filter_clear_to_date = date("d-m-Y");
+
+$analyticsUrl = Url::to(['vendor/analytics']);
+
 $customJs = <<< JS
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").on("change", function () {
 $("#filter_status,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
@@ -335,7 +338,7 @@ var filter_client =  $("#filter_client").val();
      type: 'GET',
      push: false,
      timeout: 10000,
-     url: "index.php?r=vendor/analytics",
+     url: "$analyticsUrl",
      container: "#analytics-list",
      data: {
          filter_status: filter_status,
@@ -354,7 +357,7 @@ $("#reset").on("click", function () {
      type: 'GET',
      push: false,
      timeout: 10000,
-     url: "index.php?r=vendor/analytics",
+     url: "$analyticsUrl",
      container: "#analytics-list",
      data: {
          filter_status: '',
@@ -368,7 +371,7 @@ $.pjax({
      type: 'GET',
      push: false,
      timeout: 10000,
-     url: "index.php?r=vendor/analytics",
+     url: "$analyticsUrl",
      container: "#product-analytic-list",
      data: {
          filter_status: '',

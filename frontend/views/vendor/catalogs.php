@@ -130,7 +130,7 @@ Modal::begin([
                                     <div class="panel-body">
                                         <div class="col-md-4 text-left">
                                         <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
-                                                '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
+                                                '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['data-pjax'=>'0']) ?>
                                         <p class="small m-b-none">Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
                                         </div>
                                         <div class="col-md-8 text-right">

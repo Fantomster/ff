@@ -13,6 +13,8 @@ use kartik\export\ExportMenu;
 use kartik\editable\Editable;
 use nirvana\showloading\ShowLoadingAsset;
 ShowLoadingAsset::register($this);
+\frontend\assets\HandsOnTableAsset::register($this);
+
 $this->registerCss('.handsontable .htCore .htDimmed {
    background-color: #ececec !important;
     cursor: not-allowed;
@@ -20,18 +22,18 @@ $this->registerCss('.handsontable .htCore .htDimmed {
  }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
 $this->title = 'Редактировать продукты';
 
-$this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
-$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
-$this->registerCssFile('modules/handsontable/dist/chosen.css');
-$this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
-$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
-$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
-$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
-$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
-$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable.js');
-$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
-$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
+//$this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
+//$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
+//$this->registerCssFile('modules/handsontable/dist/chosen.css');
+//$this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
+//$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
+//$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
+//$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
+//$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
+//$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
+//$this->registerJsFile('modules/handsontable/dist/handsontable.js');
+//$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
+//$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <section class="content-header">
     <h1>
@@ -112,6 +114,10 @@ $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/
 <?php
 $arr= json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);
+
+$step3CopyUrl = Url::to(['vendor/step-3-copy', 'id' => $cat_id]);
+$step4Url = Url::to(['vendor/step-4', 'id' => $cat_id]);
+
 $customJs = <<< JS
 /** 
  * Forward port jQuery.live()
@@ -252,14 +258,14 @@ Handsontable.Dom.addEvent(save, 'click', function() {
     });
     $('#loader-show').showLoading();
     $.ajax({
-          url: "index.php?r=vendor/step-3-copy&id=$cat_id",
+          url: "$step3CopyUrl",
           type: 'POST',
           dataType: "json",
           data: $.param({'catalog':JSON.stringify(data)}),
           cache: false,
           success: function (response) {
               if(response.success){ 
-                var url = "index.php?r=vendor/step-4&id=$cat_id";
+                var url = "$step4Url";
                 $(location).attr("href",url);
               }else{
                 $('#loader-show').hideLoading();

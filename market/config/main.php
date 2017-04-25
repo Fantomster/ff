@@ -41,6 +41,12 @@ return [
             'datetimeFormat' => 'MM/dd/yyyy HH:mm',
             'timeFormat' => 'HH:mm',
         ],
+        'urlManagerFrontend' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//f-keeper.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+        ],
     ],
     'params' => $params,
 ];

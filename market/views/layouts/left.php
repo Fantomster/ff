@@ -66,7 +66,7 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,pa
                     <table class="table">
                         <tr>
                             <td>
-                              <a href="?r=site/category&id=<?=$row2['id']?>" title="<?=$row2['name']?>">
+                                <a href="<?= \yii\helpers\Url::to(['site/category', 'id' => $row2['id']]) ?>" title="<?=$row2['name']?>">
                                 <span><?=$row2['name']?></span>
                               </a>
                             </td>

@@ -112,6 +112,9 @@ $this->registerCss('
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) use($cat_id){
+                    
+                    $step2AddProductUrl = Url::to(['vendor/step-2-add-product']);
+                    
                 $link = CheckboxX::widget([
                             'name'=>'product_'.$data['id'],
                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
@@ -131,7 +134,7 @@ $this->registerCss('
                                  var cat_id = $(this).attr("cat-id");
                                  console.log(state);
                                  $.ajax({
-                                    url: "index.php?r=vendor/step-2-add-product",
+                                    url: "'.$step2AddProductUrl.'",
                                     type: "POST",
                                     dataType: "json",
                                     data: {"add-product":true,"baseProductId":id,"state":state, "cat_id":cat_id},
@@ -196,6 +199,7 @@ $this->registerCss('
 </div>
 </section>
 <?php
+
 $this->registerJs('
 var timer;
 $("#search").on("keyup", function () {
@@ -205,7 +209,7 @@ window.clearTimeout(timer);
         type: "GET",
         push: false,
         timeout: 10000,
-        url: "index.php?r=vendor/step-2&id=' . $cat_id . '",
+        url: "'.Url::to(['vendor/step-2', 'id' => $cat_id]).'",
         container: "#pjax-container",
         data: {searchString: $("#search").val()}
       })

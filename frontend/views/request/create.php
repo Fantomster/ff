@@ -18,7 +18,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 .modal-fs .modal-body {
     top: 0;
 }
-.modal-content{background: url(images/request-background.png) no-repeat center center;background-size: cover;}
+.modal-content{background: url(/images/request-background.png) no-repeat center center;background-size: cover;}
 #msform {width: 100%;margin: 11px auto;text-align: center;position: relative;}
 #msform fieldset {padding: 20px 30px;min-height: 300px;box-sizing: border-box;border-radius: 4px;background: #fff;border: 5px solid #86be79;position: absolute;}
 @media (min-width: 768px) {#msform fieldset {width: 60%;margin: 0 20%;}}

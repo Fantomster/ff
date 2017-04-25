@@ -61,7 +61,10 @@ foreach($sp as $row){
   </div>
 </div>
 
-<?php $customJs = <<< JS
+<?php 
+$esSupplierMoreUrl = Url::to(['site/ajax-es-supplier-more']);
+
+$customJs = <<< JS
 $('#search').val('$search');        
 var inProgress = false;
 var num = 12;
@@ -69,7 +72,7 @@ $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#product-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-es-supplier-more",
+        url: "$esSupplierMoreUrl",
         type: "GET",
         data: {"num": num, "search":"$search"},
         beforeSend: function() {
@@ -95,7 +98,7 @@ $('#product-more').on("click", function (e) {
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-es-supplier-more",
+      url: "$esSupplierMoreUrl",
       type: "GET",
       data: {"num": num, "search":"$search"},
       cache: false,

@@ -12,7 +12,7 @@ $this->title = Yii::t('user', 'Login');
 ?>
 <div class="login__block">
     <div class="login__inside">
-        <a href="<?= Yii::$app->homeUrl; ?>"><img src="images/logo-fk-white.png" alt=""/></a>
+        <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-fk-white.png" alt=""/></a>
         <div class="contact__form">
             <?php
             $form = ActiveForm::begin([

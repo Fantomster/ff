@@ -89,7 +89,10 @@ $this->title = 'F-MARKET результаты поиска';
     </div>
   </div>
 </div>
-<?php $customJs = <<< JS
+<?php 
+$esProductMoreUrl = Url::to(['site/ajax-es-product-more']);
+
+$customJs = <<< JS
 $('#search').val('$search');        
 var inProgress = false;
 var num = 12;
@@ -97,7 +100,7 @@ $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#product-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-es-product-more",
+        url: "$esProductMoreUrl",
         type: "GET",
         data: {"num": num, "search":"$search"},
         beforeSend: function() {
@@ -123,7 +126,7 @@ $('#product-more').on("click", function (e) {
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-es-product-more",
+      url: "$esProductMoreUrl",
       type: "GET",
       data: {"num": num, "search":"$search"},
       cache: false,

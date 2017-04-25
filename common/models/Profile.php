@@ -58,7 +58,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['phone'], 'string', 'max' => 255];
 //        $rules[] = [['phone'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
 //        $rules[] = [['phone'], 'match', 'pattern' => '/^\+7 \([0-9]{3}\) [0-9]{3} [0-9]{2} [0-9]{2}$/', 'message' => 'Некорректный номер'];
-        $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()];
+//        $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()];
         $rules[] = [['phone'], 'default', 'value' => null];
         $rules[] = [['phone'], 'required', 'on' => ['register', 'complete'], 'message' => 'Пожалуйста, введите свой номер телефона'];
         $rules[] = [['avatar'], 'image', 'extensions' => 'jpg, jpeg, gif, png'];

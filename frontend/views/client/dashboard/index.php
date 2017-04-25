@@ -256,11 +256,11 @@ $this->registerCss('
     }],
     ['attribute' => 'created_by_id','label'=>'Заказ создал','value'=>function($data) {
         return $data['created_by_id']?
-             Profile::find()->where(['id'=>$data['created_by_id']])->one()->full_name :
+             Profile::find()->where(['user_id'=>$data['created_by_id']])->one()->full_name :
              "";
     }],
     ['attribute' => 'accepted_by_id','label'=>'Заказ принял','value'=>function($data) {
-        $acceptedByProfile = Profile::find()->where(['id'=>$data['accepted_by_id']])->one();
+        $acceptedByProfile = Profile::find()->where(['user_id'=>$data['accepted_by_id']])->one();
         return $acceptedByProfile ? $acceptedByProfile->full_name : "";
     }],
     [

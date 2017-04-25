@@ -34,6 +34,13 @@ use yii\widgets\ListView;
 <section  class="content-header">
   <div class="row">
     <div class="col-md-12">
+      <?php 
+        Pjax::begin([
+          'id' => 'pjax-callback', 
+          'timeout' => 10000, 
+          'enablePushState' => false,
+          ]);
+      ?>
       <div class="box box-info">
         <div class="box-body">
 	  <div class="col-md-6">
@@ -76,13 +83,7 @@ use yii\widgets\ListView;
           </div>
 	  <div class="col-md-12">
 	    <hr>
-                <?php 
-                    Pjax::begin([
-                      'id' => 'pjax-callback', 
-                      'timeout' => 10000, 
-                      'enablePushState' => false,
-                      ]);
-                ?>
+                
                 <?=ListView::widget([
                     'dataProvider' => $dataCallback,
                     'itemView' => function ($model, $key, $index, $widget) {
@@ -101,10 +102,10 @@ use yii\widgets\ListView;
                     'summary' => 'Показано {count} из {totalCount}',
                     'emptyText' => 'Откликов по заявке 0',
                 ])?>
-    <?php Pjax::end(); ?>
 	  </div>
         </div>
       </div>
+      <?php Pjax::end(); ?>
     </div>
   </div>
 </section>
@@ -177,6 +178,7 @@ swal.queue(steps).then(function (result) {
     cache: false,
     success: function (response) {
         $.pjax.reload({container:"#pjax-callback", async:false});
+        initMap();
         if(response["success"]){
             swal({
             title: "Отправлено!",

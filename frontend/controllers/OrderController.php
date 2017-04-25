@@ -694,7 +694,12 @@ class OrderController extends DefaultController {
                     }
                     break;
                 case 'confirm':
-                    if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
+                    if ($order->isObsolete) {
+                        $systemMessage = $order->client->name . ' получил заказ!';
+                        $order->status = Order::STATUS_DONE;
+                        $order->actual_delivery = gmdate("Y-m-d H:i:s");
+                        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
+                    } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . ' подтвердил заказ!';
                         $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order->id);
@@ -1000,6 +1005,11 @@ class OrderController extends DefaultController {
     private function sendOrderDone($sender, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
+        
+        if (empty($recipient)) {
+            return;
+        }
+        
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;

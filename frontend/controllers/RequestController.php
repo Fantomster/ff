@@ -132,7 +132,7 @@ class RequestController extends DefaultController {
             }  
             $trueFalseCallback = RequestCallback::find()->where(['request_id' => $id,'supp_org_id'=>$user->organization_id])->exists();
             $dataCallback = new ActiveDataProvider([
-                'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
+                'query' => RequestCallback::find()->where(['request_id' => $id,'supp_org_id'=>$user->organization_id])->orderBy('id DESC'),
                 'pagination' => [
                     'pageSize' => 15,
                 ],

@@ -20,8 +20,10 @@ use yii\widgets\ActiveForm;
 
 class RequestController extends DefaultController {
     
-    public function actionTest() {
-        return $this->render('test');
+    public function actionTest($id) {
+        
+            return $this->render("test");
+       
     }
     public function actionSaveRequest() {
         $currentUser = $this->currentUser;

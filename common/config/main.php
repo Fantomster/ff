@@ -59,17 +59,6 @@ return [
 //                '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
 //            ],
 //        ],
-        'assetManager' => [
-            'bundles' => [
-                'dosamigos\google\maps\MapAsset' => [
-                    'options' => [
-                        'key' => 'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
-                        'language' => 'ru',
-                        'version' => '3.1.18'
-                    ]
-                ]
-            ]
-        ],
     ],
     'modules' => [
         'user' => [

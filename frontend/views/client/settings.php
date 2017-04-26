@@ -17,6 +17,10 @@ $this->registerJs(
                 $("#cancelOrg").prop( "disabled", false );
                 $("#saveOrg").prop( "disabled", false );
             });
+            $(".settings").on("click", ".country", function() {
+                $("#cancelOrg").prop( "disabled", false );
+                $("#saveOrg").prop( "disabled", false );
+            });
             $(document).on("submit", "#generalSettings", function(e) {
                 $("#cancelOrg").prop( "disabled", true );
                 $("#saveOrg").prop( "disabled", true );

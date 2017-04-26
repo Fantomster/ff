@@ -67,14 +67,14 @@ class OrderSearch extends Order {
         $filter_date_from = strtotime($this->date_from);
         $filter_date_to = strtotime($this->date_to);
 
-        $from = \DateTime::createFromFormat('d.m.Y', $this->date_from);
+        $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
         if ($from) {
-            $t1_f = $from->format('Y-m-d');
+            $t1_f = $from->format('Y-m-d H:i:s');
         }
-        $to = \DateTime::createFromFormat('d.m.Y', $this->date_to);
+        $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
         if ($to) {
             $to->add(new \DateInterval('P1D'));
-            $t2_f = $to->format('Y-m-d');
+            $t2_f = $to->format('Y-m-d H:i:s');
         }
 
         switch ($this->status) {

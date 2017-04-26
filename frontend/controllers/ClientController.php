@@ -53,6 +53,7 @@ class ClientController extends DefaultController {
                             'ajax-update-user', 
                             'ajax-validate-user', 
                             'employees',
+                            'remove-supplier',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -1272,7 +1273,7 @@ class ClientController extends DefaultController {
          * 
          */
         $searchString = "";
-        $where = "`relation_supp_rest`.deleted = 0";
+        $where = " AND `relation_supp_rest`.deleted = 0";
         if (Yii::$app->request->isAjax) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
 

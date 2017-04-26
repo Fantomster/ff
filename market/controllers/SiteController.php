@@ -468,6 +468,11 @@ class SiteController extends Controller {
                     'white_list' => Organization::WHITE_LIST_ON
                         ])
                 ->one();
+        
+        if (empty($vendor)) {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        
         if (\Yii::$app->user->isGuest) {
             $relationSupplier = false;
             $addwhere = [];

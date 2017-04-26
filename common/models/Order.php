@@ -48,7 +48,7 @@ class Order extends \yii\db\ActiveRecord {
     const DISCOUNT_PERCENT = 2;
     
     const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
-    const DELAY_WITHOUT_DELIVERY_DATE = 259200; //sec - 3 days
+    const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
 
     /**
      * @inheritdoc

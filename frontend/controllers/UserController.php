@@ -37,7 +37,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 'roles' => ['?', '@'],
             ],
             [
-                'actions' => ['login', 'register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite'],
+                'actions' => ['login', 'register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite', 'ajax-register'],
                 'allow' => true,
                 'roles' => ['?'],
             ],
@@ -58,6 +58,56 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         return $behaviors;
     }
 
+    
+    public function actionAjaxRegister() {
+        if (!Yii::$app->request->isAjax) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        $user = $this->module->model("User", ["scenario" => "register"]);
+        $profile = $this->module->model("Profile", ["scenario" => "register"]);
+        $organization = $this->module->model("Organization");
+
+        $organization->step = Organization::STEP_SET_INFO;
+        
+        // load post data
+        $post = Yii::$app->request->post();
+        if ($user->load($post)) {
+
+            // ensure profile data gets loaded
+            $profile->load($post);
+
+            // validate for existing email
+            if (User::findOne(['email' => $user->email])) {
+                return ['result' => 'fail', 'message' => 'Email занят'];
+            }
+
+            // validate for normal request
+            if ($user->validate() && $profile->validate()) {
+
+                // perform registration
+                $role = $this->module->model("Role");
+
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    $user->setRegisterAttributes($role::getManagerRole($organization->type_id))->save();
+                    if ($profile->setUser($user->id)->save() && $organization->save() && $user->setOrganization($organization, true)->save()) {
+                        $transaction->commit();
+                        $this->afterRegister($user);
+                        return ['result' => 'success', 'message' => 'Регистрация прошла успешно'];
+                    } else {
+                        $transaction->rollBack();
+                        return ['result' => 'fail', 'message' => 'Неизвестная ошибка'];
+                    }
+                } catch (Exception $ex) {
+                    $transaction->rollBack();
+                    return ['result' => 'fail', 'message' => 'Неизвестная ошибка'];
+                }
+            }
+        }
+    }
+    
     /**
      * Display registration page
      */

@@ -43,10 +43,17 @@ class ClientController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial'],
+//                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial', 'employees'],
                 'rules' => [
                     [
-                        'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                        'actions' => [
+                            'settings', 
+                            'ajax-create-user', 
+                            'ajax-delete-user', 
+                            'ajax-update-user', 
+                            'ajax-validate-user', 
+                            'employees',
+                        ],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [
@@ -56,7 +63,23 @@ class ClientController extends DefaultController {
                         ],
                     ],
                     [
-                        'actions' => ['index', 'suppliers', 'tutorial'],
+                        'actions' => [
+                            'index', 
+                            'suppliers', 
+                            'tutorial', 
+                            'analytics', 
+                            'chkmail', 
+                            'create', 
+                            'edit-catalog', 
+                            'events', 
+                            'invite', 
+                            'messages', 
+                            're-send-email-invite',
+                            'sidebar',
+                            'support',
+                            'view-catalog',
+                            'view-supplier',
+                        ],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [

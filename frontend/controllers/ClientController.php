@@ -1272,7 +1272,7 @@ class ClientController extends DefaultController {
          * 
          */
         $searchString = "";
-        $where = "";
+        $where = "`relation_supp_rest`.deleted = 0";
         if (Yii::$app->request->isAjax) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
 

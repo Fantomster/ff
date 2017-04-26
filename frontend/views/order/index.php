@@ -225,8 +225,7 @@ $this->registerCss("
                                 'format' => 'raw',
                                 'attribute' => 'created_at',
                                 'value' => function($data) {
-                                    //$date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
-                                    $date = Yii::$app->formatter->asTime($data->created_at, "php:j M Y");
+                                    $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
                                 'label' => 'Дата создания',

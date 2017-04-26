@@ -391,8 +391,7 @@ class VendorController extends DefaultController {
     }
 
     public function actionClients() {
-        $currentOrganization = $this->currentUser->organization;
-
+        $currentOrganization = User::findIdentity(Yii::$app->user->id)->organization;
         $searchModel = new \common\models\search\ClientSearch();
 
         $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");

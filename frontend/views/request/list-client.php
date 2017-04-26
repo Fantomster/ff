@@ -83,12 +83,12 @@ $request = new \common\models\Request();
 </section>
 <section class="content">
   <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-8">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
           <div class="box box-info">
             <div class="box-body no-padding" style="padding-bottom:15px !important;padding-top:15px !important;">
-              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
                 <div class="input-group">
                     <span class="input-group-addon">
                       <i class="fa fa-search"></i>
@@ -101,18 +101,8 @@ $request = new \common\models\Request();
                         ]);?>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-4">
-      <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <div class="box box-info">
-            <div class="box-body no-padding" style="padding-bottom:15px !important;padding-top:15px !important;">
-              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <?php Modal::begin([
+              <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                 <?php Modal::begin([
             'id' => 'create',
             'toggleButton' => ['label' => '<i class="fa fa-paper-plane"></i> Разместить заявку','class'=>'btn btn-sm btn-fk-success','style'=>'width:100%'],
             'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1']
@@ -121,13 +111,13 @@ $request = new \common\models\Request();
             <?php
             echo $this->render("create", compact('request','organization','profile'));
             Modal::end();
-            ?> 
+            ?>   
               </div>
             </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
     <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

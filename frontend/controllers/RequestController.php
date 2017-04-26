@@ -88,6 +88,7 @@ class RequestController extends DefaultController {
             $rush = \Yii::$app->request->get('rush')==2?['rush_order' => 1]:[];
             $dataListRequest = new ActiveDataProvider([
                 'query' => Request::find()->where(['active_status' => Request::ACTIVE])
+                    ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
                     ->andWhere($search)
                     ->andWhere($category)
                     ->andWhere($my)

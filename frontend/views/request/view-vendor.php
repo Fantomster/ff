@@ -60,7 +60,7 @@ use yii\widgets\ListView;
             <div class="req-respons">Исполнитель: 
                 <?=$request->responsible_supp_org_id ? 
                       '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
-                      '<span style="color:#ccc;">не назначен</span>';
+                      '';
                 ?>
             </div>
             <p style="margin:0;margin-top:15px"><b>Создана</b> <?=$request->created_at?></p>
@@ -77,7 +77,7 @@ use yii\widgets\ListView;
 	  </div>
           <div class="col-md-6">
               <h3 class="text-success"><?=$author->name?></h3>
-              <h4><?=$author->address?> <small>Адрес можно изменить в разделе "Настройки"</small></h4>
+              <h4><?=$author->address?></h4>
               <div id="map"></div>
               
           </div>

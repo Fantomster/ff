@@ -162,11 +162,12 @@ class RequestController extends DefaultController {
             return ['success'=>false];
         }
         $request = Request::find()->where(['id' => $id])->one();
+        
         if($request->responsible_supp_org_id == $responsible_id){
+            
             $request->responsible_supp_org_id = null; 
             $request->save(); 
-            
-            $rows = \common\models\User::find()->where(['organization_id' => $request->vendor->id])->all();
+            $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
             foreach($rows as $row){
                 if($row->profile->phone && $row->profile->sms_allow){
                     $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе f-keeper.ru';

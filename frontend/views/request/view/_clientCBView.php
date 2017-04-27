@@ -29,7 +29,8 @@ use yii\helpers\Url;
                  if($model->request->responsible_supp_org_id == $model->supp_org_id){
                    if(!common\models\RelationSuppRest::find()->where([
                        'supp_org_id'=>$model->supp_org_id,
-                       'rest_org_id'=>$model->request->rest_org_id])->exists()){
+                       'rest_org_id'=>$model->request->rest_org_id,
+                       'deleted'=>false])->exists()){
                        $n = ['value'=>'Добавить поставщика',
                         'class'=>'btn btn-success pull-right add-supplier',
                         'event'=>'add-supplier'];

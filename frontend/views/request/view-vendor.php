@@ -124,7 +124,8 @@ function initMap() {
 </script>
 <?php
   $gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
-        'key'=>'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
+        'key'=>Yii::$app->params['google-api']['key-id'],
+        'language'=>Yii::$app->params['google-api']['language'],
         'callback'=>'initMap'
     ));
   $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true,'defer'=>true]);

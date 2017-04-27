@@ -631,7 +631,7 @@ class ClientController extends DefaultController {
                     $relationSuppRest->rest_org_id = $currentUser->organization_id;
                     $relationSuppRest->supp_org_id = $get_supp_org_id;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
-                    $test = $relationSuppRest->save();
+                    $relationSuppRest->save();
 //                    if (!empty($categorys)) {
 //                        foreach ($categorys as $arrCategorys) {
 //                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
@@ -644,7 +644,7 @@ class ClientController extends DefaultController {
                     $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
                     foreach($rows as $row){
                         if($row->profile->phone && $row->profile->sms_allow){
-                           $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target); 

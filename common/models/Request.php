@@ -23,6 +23,8 @@ use yii\db\ActiveRecord;
  * @property integer $active_status
  *
  * @property RegularName $regularName
+ * @property Vendor $vendor
+ * @property Client $client
  * @property PaymentMethodName $paymentMethodName
  * @property CategoryName $categoryName
  * @property CountCallback $countCallback
@@ -211,6 +213,17 @@ class Request extends \yii\db\ActiveRecord
                 break;
         }
     }
+    
+    public function getClient()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
+    }
+    
+    public function getVendor()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);
+    }
+    
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);

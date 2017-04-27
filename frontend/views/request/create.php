@@ -206,10 +206,11 @@ Pjax::begin([
 <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
 <?php
 $gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
-    'libraries' => 'places',
-    'key'=>'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
-    'callback'=>'initMap'
-));
+        'libraries' => 'places',
+        'key'=>Yii::$app->params['google-api']['key-id'],
+        'language'=>Yii::$app->params['google-api']['language'],
+        'callback'=>'initMap'
+    ));
 $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
 $this->registerJs("
 $(document).on('keyup change', '#organization-address', function(){

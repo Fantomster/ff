@@ -163,12 +163,72 @@ class RequestController extends DefaultController {
         }
         $request = Request::find()->where(['id' => $id])->one();
         if($request->responsible_supp_org_id == $responsible_id){
-           $request->responsible_supp_org_id = null; 
+            $request->responsible_supp_org_id = null; 
+            $request->save(); 
+            
+            $rows = \common\models\User::find()->where(['organization_id' => $request->vendor->id])->all();
+            foreach($rows as $row){
+                if($row->profile->phone && $row->profile->sms_allow){
+                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе f-keeper.ru';
+                    $target = $row->profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target); 
+                }
+            }
         }else{
             $request->responsible_supp_org_id = $responsible_id;
+            $request->save();
+            
+            $rows = \common\models\User::find()->where(['organization_id' => $request->vendor->id])->all();
+            foreach($rows as $row){
+                if($row->profile->phone && $row->profile->sms_allow){
+                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе f-keeper.ru';
+                    $target = $row->profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target); 
+                }
+            }
         }
-        $request->save();
+        
+        
         return ['success'=>true];
+        }
+    }
+    public function actionAddSupplier(){
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $client = $this->currentUser;
+            $request_id = Yii::$app->request->post('request_id');
+            $vendor = Organization::findOne(['id'=>Yii::$app->request->post('supp_org_id')]);
+            if(RequestCallback::find()->where(['supp_org_id'=>$vendor->id,'request_id'=>$request_id])->exists()){
+                if(\common\models\RelationSuppRest::find()->where([
+                                'rest_org_id' => $client->organization_id, 
+                                'supp_org_id' => $vendor->id
+                                ])->exists()){
+                $relationSuppRest = \common\models\RelationSuppRest::find()->where([
+                                'rest_org_id' => $client->organization_id, 
+                                'supp_org_id' => $vendor->id
+                                ])->one(); 
+                }else{
+                $relationSuppRest = new \common\models\RelationSuppRest();   
+                }
+                $relationSuppRest->deleted = false;
+                $relationSuppRest->rest_org_id = $client->organization_id;
+                $relationSuppRest->supp_org_id = $vendor->id;
+                $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
+                $relationSuppRest->save(); 
+
+                $rows = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
+                foreach($rows as $row){
+                    if($row->profile->phone && $row->profile->sms_allow){
+                        $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                        $target = $row->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target); 
+                    }
+                }
+                return ['success'=>true];
+            }
         }
     }
     public function actionCloseRequest(){

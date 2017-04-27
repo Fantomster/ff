@@ -48,6 +48,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property BuisinessInfo $buisinessInfo
  * @property FranchiseeAssociate $franchiseeAssociate
  * @property RelationSuppRest $associates
+ * @property integer $managersCount
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -613,5 +614,15 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function hasActiveUsers() {
         return User::find()->where(['organization_id' => $this->id, 'status' => User::STATUS_ACTIVE])->count();
+    }
+    
+    public function getManagersCount() {
+        if ($this->type_id === Organization::TYPE_RESTAURANT) {
+            return User::find()->where(['organization_id' => $this->id, 'role_id' => Role::ROLE_RESTAURANT_MANAGER])->count();
+        }
+        if ($this->type_id === Organization::TYPE_SUPPLIER) {
+            return User::find()->where(['organization_id' => $this->id, 'role_id' => Role::ROLE_SUPPLIER_MANAGER])->count();
+        }
+        return 0;
     }
 }

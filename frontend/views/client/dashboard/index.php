@@ -140,7 +140,8 @@ $this->registerCss('
                                   <h3>Создать заявку</h3>
                                   <p>для поставщиков</p>
                                 </div>
-                                <?= Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= Html::a('Заявки', '#',['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
+                                <?= ''//Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
     background: url(images/dash1.png) no-repeat top right;
     background-size: 170px;">

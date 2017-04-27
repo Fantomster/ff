@@ -46,7 +46,7 @@ use yii\helpers\Url;
 //echo $this->render('_yandex');
 echo $this->render('_yandex_vendor');
 
-$sidebarUrl = Url::to(['client/sidebar']);
+$sidebarUrl = Url::to(['vendor/sidebar']);
 
 $js = <<<JS
 $('.sidebar-toggle').on('click', function(e){

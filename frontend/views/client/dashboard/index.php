@@ -80,6 +80,9 @@ overflow-y:scroll
 .table>tbody>tr:first-child>td {
     border-top: 1px solid #fff;
 }
+tr:hover {
+    cursor: pointer;
+}
 ');
 $this->registerCss('
 @media (max-width: 1320px){
@@ -108,7 +111,7 @@ $this->registerCss('
                                 </div>
                                 <?= Html::a('Создать', ['order/create'],['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash.png) no-repeat bottom right;
+    background: url(/images/dash.png) no-repeat bottom right;
     background-size: 140px;">
     </div>
                             </div>
@@ -123,7 +126,7 @@ $this->registerCss('
                                 </div>
                                 <?= Html::a('Корзина', ['order/checkout'],['class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash3.png) no-repeat center right;
+    background: url(/images/dash3.png) no-repeat center right;
     background-size: 150px;">
     </div>
                             </div>
@@ -143,7 +146,7 @@ $this->registerCss('
                                 <?= Html::a('Заявки', '#',['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <?= ''//Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash1.png) no-repeat top right;
+    background: url(/images/dash1.png) no-repeat top right;
     background-size: 170px;">
     </div>                        
                             </div>
@@ -159,7 +162,7 @@ $this->registerCss('
                                 </div>
                                 <?= Html::a('F-Market', 'https://market.f-keeper.ru',['target'=>'_blank','class'=>'btn btn-outline-success' , 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
     <div class="bg" style="
-    background: url(images/dash2.png) no-repeat bottom right;
+    background: url(/images/dash2.png) no-repeat bottom right;
     background-size: 120px;">
     </div>
                             </div>
@@ -221,25 +224,7 @@ $this->registerCss('
     </div>
 <div class="row hidden-xs">
     <div class="col-md-4">
-      
-      <!-- /.box -->
     </div>
-    <!--div class="col-md-8">
-      <div class="box box-info">
-        <div class="box-header with-border">
-          <h3 class="box-title">Аналитика заказов</h3>
-
-          <div class="box-tools pull-right">
-            <?= Html::a('Аналитика', ['client/analytics'],['class'=>'btn btn-success btn-sm']) ?>
-          </div>
-        </div>
-        <div class="box-body" style="display: block;">
-            <div class="chart">
-            <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
-          </div> 
-        </div>
-      </div>
-    </div-->
 </div>
 <div class="row">
     <div class="col-md-12">
@@ -251,99 +236,125 @@ $this->registerCss('
         <div class="box-body" style="display: block;">
           <?php 
         $columns = [
-    ['attribute' => 'id','label'=>'№','value'=>'id'],
-    ['attribute' => 'vendor_id','label'=>'Поставщик','value'=>function($data) {
-        return Organization::find()->where(['id'=>$data['vendor_id']])->one()->name;           
-    }],
-    ['attribute' => 'created_by_id','label'=>'Заказ создал','value'=>function($data) {
-        return $data['created_by_id']?
-             Profile::find()->where(['user_id'=>$data['created_by_id']])->one()->full_name :
-             "";
-    }],
-    ['attribute' => 'accepted_by_id','label'=>'Заказ принял','value'=>function($data) {
-        $acceptedByProfile = Profile::find()->where(['user_id'=>$data['accepted_by_id']])->one();
-        return $acceptedByProfile ? $acceptedByProfile->full_name : "";
-    }],
-    [
-        'format' => 'raw',
-        'attribute' => 'total_price',
-        'value' => function($data) {
-            return "<strong>".$data['total_price'] . '<i class="fa fa-fw fa-rub"></i></strong>';
-        },
-        'label' => 'Сумма',
-    ],
-    [
-        'format' => 'raw',
-        'attribute' => 'created_at',
-        'value' => function($data) {
-            $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
-            return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
-        },
-        'label' => 'Дата создания',
-    ],
-    ['attribute' => 'status','label'=>'Статус','format' => 'raw','value' => function($data) {
-                        switch ($data['status']) {
-                            case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                            case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                $statusClass = 'new';
-                                break;
-                            case Order::STATUS_PROCESSING:
-                                $statusClass = 'processing';
-                                break;
-                            case Order::STATUS_DONE:
-                                $statusClass = 'done';
-                                break;
-                            case Order::STATUS_REJECTED:
-                            case Order::STATUS_CANCELLED:
-                                $statusClass = 'cancelled';
-                                break;
-                        }
-                        return '<span class="status ' . $statusClass . '">' . Order::statusText($data['status']) . '</span>';//<i class="fa fa-circle-thin"></i> 
-                    },],
-                            [
-                                'format' => 'raw',
-                                'value' => function($data) {
-                                    switch ($data['status']) {
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                        case Order::STATUS_PROCESSING:
-                                        case Order::STATUS_DONE:
-                                        case Order::STATUS_REJECTED:
-                                        case Order::STATUS_CANCELLED:
-                                            return Html::a('<i class="fa fa-refresh"></i>', ['order/repeat', 'id' => $data['id']], [
-                                                        'class' => 'reorder',
+            [
+                'attribute' => 'id',
+                'value' => 'id',
+                'label' => '№',
+            ],
+            [
+                'attribute' => 'vendor.name',
+                'value' => 'vendor.name',
+                'label' => 'Поставщик',
+            ],
+            [
+                'attribute' => 'createdByProfile.full_name',
+                'value' => 'createdByProfile.full_name',
+                'label' => 'Заказ создал',
+            ],
+            [
+                'attribute' => 'acceptedByProfile.full_name',
+                'value' => 'acceptedByProfile.full_name',
+                'label' => 'Заказ принял',
+            ],
+            [
+                'format' => 'raw',
+                'attribute' => 'total_price',
+                'value' => function($data) {
+                    return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
+                },
+                'label' => 'Сумма',
+            ],
+            [
+                'format' => 'raw',
+                'attribute' => 'created_at',
+                'value' => function($data) {
+                    $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
+                    return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
+                },
+                'label' => 'Дата создания',
+            ],
+            [
+                'format' => 'raw',
+                'attribute' => 'status',
+                'value' => function($data) {
+                    switch ($data->status) {
+                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                            $statusClass = 'new';
+                            break;
+                        case Order::STATUS_PROCESSING:
+                            $statusClass = 'processing';
+                            break;
+                        case Order::STATUS_DONE:
+                            $statusClass = 'done';
+                            break;
+                        case Order::STATUS_REJECTED:
+                        case Order::STATUS_CANCELLED:
+                            $statusClass = 'cancelled';
+                            break;
+                    }
+                    return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
+                },
+                'label' => 'Статус',
+            ],
+            [
+                'format' => 'raw',
+                'value' => function($data) {
+                    switch ($data['status']) {
+                        case Order::STATUS_DONE:
+                        case Order::STATUS_REJECTED:
+                        case Order::STATUS_CANCELLED:
+                            return Html::a('Повторить', '#' , [
+                                                        'class' => 'reorder btn btn-outline-processing',
                                                         'data' => [
                                                             'toggle' => 'tooltip',
                                                             'original-title' => 'Повторить заказ',
+                                                            'url' => Url::to(['order/repeat', 'id' => $data->id])
                                                         ],
                                             ]);
-                                            break;
-                                    }
-                                    return '';
-                                },
-                                        'contentOptions' => ['class' => 'text-center'],
-                                        'headerOptions' => ['style' => 'width: 20px;']
-                                    ],
-	];
+                            break;
+                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                        case Order::STATUS_PROCESSING:
+                            if ($data->isObsolete) {
+                                return Html::a('Завершить', '#' , [
+                                        'class' => 'complete btn btn-outline-success',
+                                        'data' => [
+                                            'toggle' => 'tooltip',
+                                            'original-title' => 'Завершить заказ',
+                                            'url' => Url::to(['order/complete-obsolete', 'id' => $data->id])
+                                        ],
+                                ]);
+                            }
+                            break;
+                    }
+                    return '';
+                },
+                        'contentOptions' => ['class' => 'text-center'],
+                        'headerOptions' => ['style' => 'width: 20px;']
+                    ],
+        ];
+                                
         ?>
         <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'order-analytic-list',]); ?>
             <?=GridView::widget([
-           'dataProvider' => $dataProvider,
-           'filterPosition' => false,
-           'columns' => $columns,
-           'tableOptions' => ['class' => 'table no-margin'],
-           'options' => ['class' => 'table-responsive'],
-           'bordered' => false,
-           'striped' => false,
-           'condensed' => false,
-           'responsive' => false,
-           'hover' => true,
-           'summary' => false,
-                
-           'resizableColumns'=>false,
-           'rowOptions' => function ($model, $key, $index, $grid) {
-                return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("index.php?r=order/view&id="+this.id);'];
-            },
+                'dataProvider' => $dataProvider,
+                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                'filterPosition' => false,
+                'columns' => $columns,
+                'tableOptions' => ['class' => 'table no-margin table-hover'],
+                'options' => ['class' => 'table-responsive'],
+                'bordered' => false,
+                'striped' => false,
+                'condensed' => false,
+                'responsive' => false,
+                'hover' => true,
+                'summary' => false,
+
+                'resizableColumns'=>false,
+                'rowOptions' => function ($model, $key, $index, $grid) {
+                    return ['data-url' => Url::to(['order/view', 'id' => $model->id])];
+                },
            ]);
            ?> 
         <?php  Pjax::end(); ?>   
@@ -355,98 +366,48 @@ $this->registerCss('
 </div>
 </section>
 <?php
-/*
-//$chart_dates =   json_encode(array_reverse($chart_dates));
-//$chart_price =   json_encode(array_reverse($chart_price));
 
-$customJs = <<< JS
-
-var timer;
-$('#search').on("keyup put paste change", function () {
-window.clearTimeout(timer);
-   timer = setTimeout(function () {
-       $.pjax({
-        type: 'get',
-        push: false,
-        url: 'index.php?r=client/index',
-        container: '#suppliers-list',
-        data: { searchString: $('#search').val()}
-      })
-   }, 700);
-});    
-// Get context with jQuery - using jQuery's .get() method.
-var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
-// This will get the first returned node in the jQuery collection.
-var areaChart = new Chart(areaChartCanvas);
-var areaChartData = {
-      labels: $chart_dates,
-      datasets: [
-        {
-          label: $chart_price,
-          fillColor: "rgba(0,0,0,.05)",
-          strokeColor: "#84bf76",
-          pointColor: "#000",
-          pointStrokeColor: "#000",
-          pointHighlightFill: "#000",
-          pointHighlightStroke: "#000",
-          data: $chart_price
-        }
-      ]
-    };
-
-var areaChartOptions = {
-    tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value%>",
-      //Boolean - If we should show the scale at all
-      showScale: true,
-      //Boolean - Whether grid lines are shown across the chart
-      scaleShowGridLines: true,
-      //String - Colour of the grid lines
-      scaleGridLineColor: "rgba(0,0,0,.05)",
-      //Number - Width of the grid lines
-      scaleGridLineWidth: 1,
-      //Boolean - Whether to show horizontal lines (except X axis)
-      scaleShowHorizontalLines: true,
-      //Boolean - Whether to show vertical lines (except Y axis)
-      scaleShowVerticalLines: true,
-      //Boolean - Whether the line is curved between points
-      bezierCurve: true,
-      //Number - Tension of the bezier curve between points
-      bezierCurveTension: 0.3,
-      //Boolean - Whether to show a dot for each point
-      pointDot: false,
-      //Number - Radius of each point dot in pixels
-      pointDotRadius: 5,
-      //Number - Pixel width of point dot stroke
-      pointDotStrokeWidth: 1,
-      //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-      pointHitDetectionRadius: 20,
-      //Boolean - Whether to show a stroke for datasets
-      datasetStroke: true,
-      //Number - Pixel width of dataset stroke
-      datasetStrokeWidth: 2,
-      //Boolean - Whether to fill the dataset with a color
-      datasetFill: true,
-      //String - A legend template
-      //legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
-      //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
-      maintainAspectRatio: true,
-      //Boolean - whether to make the chart responsive to window resizing
-      responsive: true
-    };
-  //Create the line chart
-    areaChart.Line(areaChartData, areaChartOptions);       
-
- */
 $user = Yii::$app->user->identity;
 $organization = $user->organization;
 $vendorsText = strpos($user->email, '@delivery-club.ru') ? "Список ваших поставщиков. Специально для Вас мы добавили несколько рекомендованных нами поставщиков" : "Список ваших поставщиков.";
+
+$checkoutUrl = Url::to(['order/checkout']);
+$createUrl = Url::to(['order/create']);
+$requestUrl = Url::to(['request/list']);
+
     $customJs = <<< JS
     $(document).on('click','.dash-small-box', function(){
     var targetUrl = $(this).attr('data-target');
-        if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
-        if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+        if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
+        if(targetUrl == 'order'){location.href = '$createUrl';}
+        if(targetUrl == 'request'){location.href = '$requestUrl';}
         if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
     }) 
+            
+    $(document).on("click", "td", function (e) {
+        if ($(this).find("a").hasClass("reorder") || $(this).find("a").hasClass("complete")) {
+            return true;
+        }
+        var url = $(this).parent("tr").data("url");
+        if (url !== undefined) {
+            location.href = url;
+        }
+    });
+            
+    $(document).on("click", ".reorder, .complete", function(e) {
+        e.preventDefault();
+        clicked = $(this);
+        swal({
+            title: clicked.data("original-title") + "?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Да",
+            cancelButtonText: "Отмена",
+            showLoaderOnConfirm: true,
+        }).then(function() {
+            document.location = clicked.data("url")
+        });
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 
@@ -455,13 +416,13 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
     $customJs2 = <<< JS
     $(document).on('click','.dash-small-box', function(){
     var targetUrl = $(this).attr('data-target');
-        if(targetUrl == 'checkout'){location.href = 'index.php?r=order/checkout';}
-        if(targetUrl == 'order'){location.href = 'index.php?r=order/create';}
+        if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
+        if(targetUrl == 'order'){location.href = '$createUrl';}
         if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
     }); 
 
                     var _slides = [{
-                            title: '<img src="images/welcome-client-bg.png" class="welcome-header-image" />',
+                            title: '<img src="/images/welcome-client-bg.png" class="welcome-header-image" />',
                             content: '{$this->render("welcome")}',
                             position: 'center',
                             overlayMode: 'all',

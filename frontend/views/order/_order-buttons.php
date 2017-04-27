@@ -14,6 +14,10 @@ $btnCancel = Html::a('<i class="icon fa fa-ban"></i> Отменить', '#', [
             ],
             'title' => 'Отменить заказ',
         ]);
+if ($order->isObsolete) {
+    $actionButtons .= $btnCancel;
+    $actionButtons .= '<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm"><i class="icon fa fa-check"></i> Завершить</a>';
+} else {
 switch ($order->status) {
     case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
         $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
@@ -48,6 +52,7 @@ switch ($order->status) {
     case Order::STATUS_CANCELLED;
         $statusInfo .= '<a href="#" class="btn btn-danger disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Отменен</a>';
         break;
+}
 }
 //$actionButtons .= '<a href="#" class="btn btn-outline-default" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>';
 ?>

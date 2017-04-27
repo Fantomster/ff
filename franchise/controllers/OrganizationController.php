@@ -299,7 +299,7 @@ class OrganizationController extends DefaultController {
     /**
      * Adds organization to franchisee
      * 
-     * @return boolean
+     * @return bool
      */
     private function addOrganization($organization) {
         $associate = new FranchiseeAssociate();

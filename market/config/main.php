@@ -24,9 +24,20 @@ return [
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
-                [
+                'file' => [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
+                ],
+                'email' => [
+                    'class' => 'yii\log\EmailTarget',
+                    'except' => ['yii\web\HttpException:404'],
+                    'levels' => ['error'],
+                    'message' => [
+                        'from' => 'noreply@f-keeper.ru', 
+                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com'], 
+                        'subject' => 'Error message',
+                    ],
+                    'mailer' => 'mailer',
                 ],
             ],
         ],
@@ -40,6 +51,12 @@ return [
         'formatter' => [
             'datetimeFormat' => 'MM/dd/yyyy HH:mm',
             'timeFormat' => 'HH:mm',
+        ],
+        'urlManagerFrontend' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//f-keeper.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
         ],
     ],
     'params' => $params,

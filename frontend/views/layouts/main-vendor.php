@@ -1,5 +1,6 @@
 <?php
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
@@ -17,7 +18,7 @@ use yii\helpers\Html;
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
-        <link rel="shortcut icon" href="images/favicon/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/images/favicon/favicon.ico" type="image/x-icon">
         <?php $this->head() ?>
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">
@@ -44,9 +45,12 @@ use yii\helpers\Html;
 <?php
 //echo $this->render('_yandex');
 echo $this->render('_yandex_vendor');
+
+$sidebarUrl = Url::to(['client/sidebar']);
+
 $js = <<<JS
 $('.sidebar-toggle').on('click', function(e){
-    $.post("index.php?r=vendor/sidebar", {"sidebar-collapse": true})
+    $.post("$sidebarUrl", {"sidebar-collapse": true})
 }); 
 JS;
 $this->registerJs($js, \yii\web\View::POS_READY);

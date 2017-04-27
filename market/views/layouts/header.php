@@ -76,10 +76,10 @@ if (!Yii::$app->user->isGuest) {
                     <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>
                     <li class="dropdown">
-                        <a href="http://f-keeper.ru/index.php" class="dropdown-toggle">F-KEEPER <span class="caret"></span></a>
+                        <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/index']); ?>" class="dropdown-toggle">F-KEEPER <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="http://f-keeper.ru/index.php?r=site%2Fabout">О&nbsp;нас</a></li>
-                            <li><a href="http://f-keeper.ru/index.php?r=site%2Fcontacts">Контакты</a></li>
+                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/about']) ?>">О&nbsp;нас</a></li>
+                            <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/contacts']) ?>">Контакты</a></li>
                         </ul>
                       </li>
                     
@@ -88,7 +88,7 @@ if (!Yii::$app->user->isGuest) {
                     <?php } else { ?>
                         <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                             <li>
-                                <a href="http://f-keeper.ru/index.php?r=order/checkout">
+                                <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['order/checkout']) ?>">
                                     КОРЗИНА <sup><span class="badge cartCount"><?= $organization->getCartCount() ?></span></sup>
                                 </a>
                             </li>

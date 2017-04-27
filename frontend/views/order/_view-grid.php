@@ -58,6 +58,12 @@ echo GridView::widget([
                             <div class="col-xs-4"><hr></div>
                             <div class="col-xs-8"></div>
                         </div>
+                        <?php if (!empty($order->comment)) { ?>
+                        <div class="row">
+                            <div class="col-xs-4"><span>Комментарий к заказу</span></div>
+                            <div class="col-xs-8"><?= $order->comment ?></div>
+                        </div>
+                        <?php } ?>
                         <div class="row">
                             <div class="col-xs-4">
                                 <span><?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?></span>

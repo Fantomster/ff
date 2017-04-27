@@ -36,13 +36,21 @@ class VendorController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'tutorial', 'employees'],
+//                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'tutorial'],
                 'rules' => [
 //                    [
 //                        
 //                    ],
                     [
-                        'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'employees'],
+                        'actions' => [
+                            'settings', 
+                            'delivery',
+                            'employees',
+                            'ajax-create-user', 
+                            'ajax-delete-user', 
+                            'ajax-update-user', 
+                            'ajax-validate-user'
+                        ],
                         'allow' => true,
                         // Allow suppliers managers
                         'roles' => [
@@ -52,7 +60,48 @@ class VendorController extends DefaultController {
                         ],
                     ],
                     [
-                        'actions' => ['index', 'catalog', 'tutorial'],
+                        'actions' => [
+                            'index', 
+                            'catalog', 
+                            'tutorial',
+                            'ajax-add-client',
+                            'ajax-create-product-market-place',
+                            'ajax-delete-product',
+                            'ajax-invite-rest-org-id',
+                            'ajax-set-percent',
+                            'ajax-update-product-market-place',
+                            'analytics',
+                            'basecatalog',
+                            'catalogs',
+                            'changecatalogprop',
+                            'changecatalogstatus',
+                            'changesetcatalog',
+                            'clients',
+                            'create-catalog',
+                            'events',
+                            'get-sub-cat',
+                            'import-base-catalog-from-xls',
+                            'import-to-xls',
+                            'list-catalog',
+                            'messages',
+                            'mp-country-list',
+                            'mycatalogdelcatalog',
+                            'remove-client',
+                            'sidebar',
+                            'step-1',
+                            'step-1-clone',
+                            'step-1-update',
+                            'step-2',
+                            'step-2-add-product',
+                            'step-3',
+                            'step-3-copy',
+                            'step-3-update-product',
+                            'step-4',
+                            'supplier-start-catalog-create',
+                            'support',
+                            'view-catalog',
+                            'view-client',
+                        ],
                         'allow' => true,
                         // Allow suppliers managers
                         'roles' => [
@@ -391,8 +440,7 @@ class VendorController extends DefaultController {
     }
 
     public function actionClients() {
-        $currentOrganization = $this->currentUser->organization;
-
+        $currentOrganization = User::findIdentity(Yii::$app->user->id)->organization;
         $searchModel = new \common\models\search\ClientSearch();
 
         $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
@@ -1421,7 +1469,7 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
-                    $postedAssociatedIds = Yii::$app->request->post("associatedManagers");
+                    $postedAssociatedIds = Yii::$app->request->post("associatedManagers") ? Yii::$app->request->post("associatedManagers") : [];
                     $currentAssociatedIds = array_keys($organization->getAssociatedManagersList($vendor->id));
                     $newAssociatedIds = array_diff($postedAssociatedIds, $currentAssociatedIds);
                     $obsoleteAssociatedIds = array_diff($currentAssociatedIds, $postedAssociatedIds);

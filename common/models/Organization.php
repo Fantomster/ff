@@ -26,7 +26,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $about
  * @property string $picture
  * @property string $es_status
- * @property boolean $partnership
+ * @property bool $partnership
  * @property integer $rating
  * @property double $lat
  * @property double $lng
@@ -219,7 +219,7 @@ class Organization extends \yii\db\ActiveRecord {
                 ->select(['organization.id', 'organization.name'])
                 ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
                 ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+                ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false]);
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }
@@ -268,7 +268,7 @@ class Organization extends \yii\db\ActiveRecord {
         $query = RelationSuppRest::find()
                 ->select(['relation_supp_rest.cat_id as cat_id'])
                 ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id])
+                ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false])
                 ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
         $query->andFilterWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
         $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');

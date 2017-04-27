@@ -162,7 +162,7 @@ if (!Yii::$app->user->isGuest) {
     $(document).on("click", ".setRead", function(e) {
         e.preventDefault();
         $.get(
-            '$refreshStatsUrl&setMessagesRead=' + $(this).data("msg") + '&setNotificationsRead=' + $(this).data("ntf")
+            $(this).data("url")
         ).done(function(result) {
             refreshMenu(result);
         });
@@ -242,7 +242,7 @@ JS;
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-msg="1" data-ntf="0">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>">Пометить как прочитанные</a>
                             </li>
                         </ul>
                     </li>
@@ -264,7 +264,7 @@ JS;
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-msg="0" data-ntf="1">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>">Пометить как прочитанные</a>
                             </li>
                         </ul>
                     </li>

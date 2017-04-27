@@ -221,6 +221,10 @@ $gridColumnsClients = [
                     </div>
                 </section>
                 <?php
+                
+$inviteRestOrgUrl = Url::to(['vendor/ajax-rest-org-id']);                
+$removeClientUrl = Url::to(['vendor/remove-client']);
+                
                 $customJs = <<< JS
     $(document).on("change keyup paste cut", "#search_string", function() {
         if (timer) {
@@ -264,7 +268,7 @@ $('input[type=checkbox]').live('change', function(e) {
 if(elem=="restOrgId"){invite(elem,state,id);}
 function invite(elem,state,id){
 		$.ajax({
-	        url: "index.php?r=vendor/ajax-invite-rest-org-id",
+	        url: "$inviteRestOrgUrl",
 	        type: "POST",
 	        dataType: "json",
 	        data: {'elem' : elem,'state' : state, 'id' : id},
@@ -332,7 +336,7 @@ $(document).on("click",".del", function(e){
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: "index.php?r=vendor/remove-client",
+	        url: "$removeClientUrl",
 	        type: "POST",
 	        dataType: "json",
 	        data: {'id' : id},

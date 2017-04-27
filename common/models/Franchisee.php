@@ -24,7 +24,7 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  * @property integer $type_id
- * @property boolean $deleted
+ * @property bool $deleted
  * 
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers

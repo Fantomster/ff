@@ -372,12 +372,14 @@ $vendorsText = strpos($user->email, '@delivery-club.ru') ? "Список ваш�
 
 $checkoutUrl = Url::to(['order/checkout']);
 $createUrl = Url::to(['order/create']);
+$requestUrl = Url::to(['request/list']);
 
     $customJs = <<< JS
     $(document).on('click','.dash-small-box', function(){
     var targetUrl = $(this).attr('data-target');
         if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
         if(targetUrl == 'order'){location.href = '$createUrl';}
+        if(targetUrl == 'request'){location.href = '$requestUrl';}
         if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
     }) 
             

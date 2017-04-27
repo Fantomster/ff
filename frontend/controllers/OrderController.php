@@ -89,6 +89,7 @@ class OrderController extends DefaultController {
                             'ajax-set-note',
                             'ajax-set-delivery',
                             'ajax-show-details',
+                            'complete-obsolete',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -741,6 +742,27 @@ class OrderController extends DefaultController {
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
             }
+        }
+    }
+    
+    public function actionCompleteObsolete($id) {
+        $currentOrganization = $this->currentUser->organization;
+        if ($currentOrganization->type_id === Organization::TYPE_RESTAURANT) {
+            $order = Order::findOne(['id' => $id, 'client_id' => $currentOrganization->id]);
+        } else {
+            $order = Order::findOne(['id' => $id, 'vendor_id' => $currentOrganization->id]);
+        }
+        if (!isset($order) || !$order->isObsolete) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        
+        $systemMessage = $order->client->name . ' получил заказ!';
+        $order->status = Order::STATUS_DONE;
+        $order->actual_delivery = gmdate("Y-m-d H:i:s");
+        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
+        if ($order->save()) {
+            $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, false);
+            $this->redirect(['order/view', 'id' => $id]);
         }
     }
 

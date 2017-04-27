@@ -1316,73 +1316,18 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = date("d-m-Y");
+
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
-        $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                . "client_id = " . $currentUser->organization_id . " and status<>" . Order::STATUS_FORMING);
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                        . "client_id = " . $currentUser->organization_id . " and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'pagination' => [
-                'pageSize' => 7,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'id',
-                    'client_id',
-                    'vendor_id',
-                    'created_by_id',
-                    'accepted_by_id',
-                    'status',
-                    'total_price',
-                    'created_at'
-                ],
-                'defaultOrder' => [
-                    'created_at' => SORT_DESC
-                ]
-            ],
-        ]);
-        //$supp_arr = RelationSuppRest::find()->where(['rest_org_id'=>$currentUser->organization_id,'status'=>1])->all();
-        
+        $searchModel = new \common\models\search\OrderSearch();
+        $today = new \DateTime();
+        //$searchModel->date_from = date("d.m.Y", strtotime(" -1 months"));
+        $searchModel->client_id = $currentUser->organization_id;
+        $searchModel->client_search_id = $currentUser->organization_id;
+
+        $dataProvider = $searchModel->search(null);
+        $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
-        // chart АНАЛИТИКА по неделям прошедшим
-        /*
-        $curent_monday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '1')); // текущая неделя - понедельник
-        $curent_sunday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '7')); // текущая неделя - воскресение
-        $i = 0;
-        $max_i = 5; //Сколько недель показывать от текущей
-        $mon = 0;
-        $sun = 6;
-        $query = "";
-        while ($i < $max_i + 1) {
-            $i++;
-            $while_monday = date('Y-m-d', strtotime("$curent_monday $mon day"));
-            $while_sunday = date('Y-m-d', strtotime("$curent_monday $sun day"));
-            $dates = date('m/d', strtotime("$curent_monday $sun day"));
-            ;
-            $query .="SELECT sum(total_price) as price,'$dates' as dates from `order` where "
-                    . "client_id = $currentUser->organization_id and ("
-                    . "DATE(created_at) between '" .
-                    date('Y-m-d', strtotime($while_monday)) . "' and '" .
-                    date('Y-m-d', strtotime($while_sunday)) . "') ";
-            $i > $max_i ? "" : $query .=" UNION ALL \n";
-            $mon = $mon - 7;
-            $sun = $sun - 7;
-        }
-        $query = Yii::$app->db->createCommand($query)->queryAll();
-        $chart_dates = [];
-        $chart_price = [];
-        foreach ($query as $querys) {
-            if (empty($querys['price'])) {
-                array_push($chart_price, 0);
-            } else {
-                array_push($chart_price, $querys['price']);
-            }
-            array_push($chart_dates, $querys['dates']);
-        }
-         */
-        // var_dump($chart_price);
+
         return $this->render('dashboard/index', compact(
                                 'dataProvider', 'suppliers_dataProvider','totalCart','count_products_from_mp'
                 //'chart_dates', 'chart_price'

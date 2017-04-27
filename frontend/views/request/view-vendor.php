@@ -60,7 +60,7 @@ use yii\widgets\ListView;
             <div class="req-respons">Исполнитель: 
                 <?=$request->responsible_supp_org_id ? 
                       '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
-                      '<span style="color:#ccc;">не назначен</span>';
+                      '';
                 ?>
             </div>
             <p style="margin:0;margin-top:15px"><b>Создана</b> <?=$request->created_at?></p>
@@ -77,7 +77,7 @@ use yii\widgets\ListView;
 	  </div>
           <div class="col-md-6">
               <h3 class="text-success"><?=$author->name?></h3>
-              <h4><?=$author->address?> <small>Адрес можно изменить в разделе "Настройки"</small></h4>
+              <h4><?=$author->address?></h4>
               <div id="map"></div>
               
           </div>
@@ -124,7 +124,8 @@ function initMap() {
 </script>
 <?php
   $gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
-        'key'=>'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
+        'key'=>Yii::$app->params['google-api']['key-id'],
+        'language'=>Yii::$app->params['google-api']['language'],
         'callback'=>'initMap'
     ));
   $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true,'defer'=>true]);

@@ -25,6 +25,27 @@ use yii\helpers\Url;
                 'data-supp-id'=>$model->supp_org_id,
                 'data-req-id'=>$model->request_id,
                 'data-event'=>$n['event']]) ?>
+                 <?php 
+                 if($model->request->responsible_supp_org_id == $model->supp_org_id){
+                   if(!common\models\RelationSuppRest::find()->where([
+                       'supp_org_id'=>$model->supp_org_id,
+                       'rest_org_id'=>$model->request->rest_org_id,
+                       'deleted'=>false])->exists()){
+                       $n = ['value'=>'Добавить поставщика',
+                        'class'=>'btn btn-success pull-right add-supplier',
+                        'event'=>'add-supplier'];
+                       }else{
+                       $n = ['value'=>'Поставщик добавлен',
+                        'class'=>'btn btn-gray pull-right disabled',
+                        'event'=>''];    
+                       }
+                       echo Html::button($n['value'], ['class' => $n['class'],
+                'style'=>'font-size:16px;margin-top:-10px;margin-right:10px',
+                'data-supp-id'=>$model->supp_org_id,
+                'data-req-id'=>$model->request_id,
+                'data-event'=>$n['event']]);
+                 }
+                 ?>
                   <a href="#" class="btn btn-gray pull-right disabled" style="font-size:16px;margin-top:-10px;margin-right:10px"><i class="fa fa-comment"></i></a>
               </h4>
               <h5>Стоимость услуги: <span class="text-bold"><?=$model->price?> руб.</span></h5>

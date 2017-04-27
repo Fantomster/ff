@@ -125,7 +125,8 @@ function initMap() {
 </script>
 <?php
   $gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
-        'key'=>'AIzaSyAiQcjJZXRr6xglrEo3yT_fFRn-TbLGj_M',
+        'key'=>Yii::$app->params['google-api']['key-id'],
+        'language'=>Yii::$app->params['google-api']['language'],
         'callback'=>'initMap'
     ));
   $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true,'defer'=>true]);
@@ -175,7 +176,7 @@ swal({
   type: "warning",
   showCancelButton: true,
   cancelButtonText: "Отмена",
-  confirmButtonText: "Закрыть",
+  confirmButtonText: "Да",
   showLoaderOnConfirm: true,
   preConfirm: function () {
     return new Promise(function (resolve) {
@@ -194,6 +195,36 @@ swal({
     })
   }
 }).then(function () {swal("Готово!","Заявка закрыта","success")
+})
+});
+$(document).on("click",".add-supplier", function(e){
+request_id = $(this).attr("data-req-id");
+supp_org_id = $(this).attr("data-supp-id");
+swal({
+  title: "Добавить поставщика?",
+  text: "Поставщику будет отправлено приглашение к сотрудничеству",
+  type: "warning",
+  showCancelButton: true,
+  cancelButtonText: "Отмена",
+  confirmButtonText: "Добавить",
+  showLoaderOnConfirm: true,
+  preConfirm: function () {
+    return new Promise(function (resolve) {
+        $.ajax({
+            url: "' . Url::to(["request/add-supplier"]) . '",
+            type: "POST",
+            dataType: "json",
+            data: "request_id=" + request_id + "&supp_org_id=" + supp_org_id,
+            cache: false,
+            success: function (response) {
+            $.pjax.reload({container:"#pjax-callback", async:false});
+            initMap();
+            resolve()
+            }
+        });
+    })
+  }
+}).then(function () {swal("Готово!","Приглашение отправлено!","success")
 })
 });
 ');?>

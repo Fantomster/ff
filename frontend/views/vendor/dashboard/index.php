@@ -189,20 +189,21 @@ $this->registerCss('
         ?>
          <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'order-analytic-list',]); ?>
             <?=GridView::widget([
-           'dataProvider' => $dataProvider,
-           'filterPosition' => false,
-           'columns' => $columns,
-           'tableOptions' => ['class' => 'table no-margin'],
-           'options' => ['class' => 'table-responsive'],
-           'bordered' => false,
-           'striped' => false,
-           'condensed' => false,
-           'responsive' => false,
-           'hover' => true,
-           'resizableColumns'=>false,
-           'rowOptions' => function ($model, $key, $index, $grid) {
-                return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("'.Url::to(['order/view', 'id' => $model['id']]).'");'];
-            },
+                'dataProvider' => $dataProvider,
+                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                'filterPosition' => false,
+                'columns' => $columns,
+                'tableOptions' => ['class' => 'table no-margin'],
+                'options' => ['class' => 'table-responsive'],
+                'bordered' => false,
+                'striped' => false,
+                'condensed' => false,
+                'responsive' => false,
+                'hover' => true,
+                'resizableColumns'=>false,
+                'rowOptions' => function ($model, $key, $index, $grid) {
+                    return ['id' => $model['id'],'style'=>'cursor:pointer', 'onclick' => 'window.location.replace("'.Url::to(['order/view', 'id' => $model['id']]).'");'];
+                },
            ]);
            ?> 
         <?php  Pjax::end(); ?>

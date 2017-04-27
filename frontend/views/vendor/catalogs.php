@@ -130,7 +130,7 @@ Modal::begin([
                                     <div class="panel-body">
                                         <div class="col-md-4 text-left">
                                         <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
-                                                '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id]) ?>
+                                                '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['data-pjax'=>'0']) ?>
                                         <p class="small m-b-none">Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
                                         </div>
                                         <div class="col-md-8 text-right">
@@ -148,7 +148,7 @@ Modal::begin([
                                                 'class'=>'m-t'
                                             ]);
                                             ?>
-                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t btn-sm','data-pjax'=>'0','data-pjax'=>'0']) ?>
                                             <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дублировать', ['vendor/step-1-clone', 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
                                             <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', ['class' => 'btn btn-outline-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
                                         </div>

@@ -29,7 +29,7 @@ $this->registerJs('
             }
         });
         $(".box-body").on("click", "td", function (e) {
-            if ($(this).find("a").hasClass("reorder")) {
+            if ($(this).find("a").hasClass("reorder") || $(this).find("a").hasClass("complete")) {
                 return true;
             }
             var url = $(this).parent("tr").data("url");
@@ -38,11 +38,11 @@ $this->registerJs('
             }
         });
 
-        $(document).on("click", ".reorder", function(e) {
+        $(document).on("click", ".reorder, .complete", function(e) {
             e.preventDefault();
             clicked = $(this);
             swal({
-                title: "Повторить заказ?",
+                title: clicked.data("original-title") + "?",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonText: "Да",
@@ -259,20 +259,31 @@ $this->registerCss("
                                 'visible' => ($organization->type_id == Organization::TYPE_RESTAURANT),
                                 'value' => function($data) {
                                     switch ($data->status) {
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-                                        case Order::STATUS_PROCESSING:
                                         case Order::STATUS_DONE:
                                         case Order::STATUS_REJECTED:
                                         case Order::STATUS_CANCELLED:
-                                            return Html::a('<i class="fa fa-refresh"></i>', '#' , [
-                                                        'class' => 'reorder',
+                                            return Html::a('Повторить', '#' , [
+                                                        'class' => 'reorder btn btn-outline-processing',
                                                         'data' => [
                                                             'toggle' => 'tooltip',
                                                             'original-title' => 'Повторить заказ',
                                                             'url' => Url::to(['order/repeat', 'id' => $data->id])
                                                         ],
                                             ]);
+                                            break;
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
+                                        case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
+                                        case Order::STATUS_PROCESSING:
+                                            if ($data->isObsolete) {
+                                                return Html::a('Завершить', '#' , [
+                                                        'class' => 'complete btn btn-outline-success',
+                                                        'data' => [
+                                                            'toggle' => 'tooltip',
+                                                            'original-title' => 'Завершить заказ',
+                                                            'url' => Url::to(['order/complete-obsolete', 'id' => $data->id])
+                                                        ],
+                                                ]);
+                                            }
                                             break;
                                     }
                                     return '';

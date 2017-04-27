@@ -89,6 +89,7 @@ class OrderController extends DefaultController {
                             'ajax-set-note',
                             'ajax-set-delivery',
                             'ajax-show-details',
+                            'complete-obsolete',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -329,8 +330,10 @@ class OrderController extends DefaultController {
                 $systemMessage = $initiator->name . ' отменил заказ!';
                 $danger = true;
                 $order->save();
-                if (isset($order->accepted_by_id)) {
-                    $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
+                if ($initiator->type_id == Organization::TYPE_RESTAURANT) {
+                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order->id);
+                } else {
+                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order->id);
                 }
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -596,8 +599,10 @@ class OrderController extends DefaultController {
             if ($orderChanged < 0) {
                 $systemMessage = $initiator . ' отменил заказ!';
                 $this->sendSystemMessage($user, $order->id, $systemMessage, true);
-                if (isset($order->accepted_by_id)) {
-                    $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
+                if ($organizationType == Organization::TYPE_RESTAURANT) {
+                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order->id);
+                } else {
+                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order->id);
                 }
             }
             if (isset($discount['discount_type']) && isset($discount['discount'])) {
@@ -704,8 +709,10 @@ class OrderController extends DefaultController {
                     $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
                     $systemMessage = $initiator . ' отменил заказ!';
                     $danger = true;
-                    if (isset($order->accepted_by_id)) {
-                        $this->sendOrderCanceled($order->createdBy, $order->acceptedBy, $order->id);
+                    if ($organizationType == Organization::TYPE_RESTAURANT) {
+                        $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order->id);
+                    } else {
+                        $this->sendOrderCanceled($order->vendor, $order->createdBy, $order->id);
                     }
                     break;
                 case 'confirm':
@@ -735,6 +742,27 @@ class OrderController extends DefaultController {
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
             }
+        }
+    }
+    
+    public function actionCompleteObsolete($id) {
+        $currentOrganization = $this->currentUser->organization;
+        if ($currentOrganization->type_id === Organization::TYPE_RESTAURANT) {
+            $order = Order::findOne(['id' => $id, 'client_id' => $currentOrganization->id]);
+        } else {
+            $order = Order::findOne(['id' => $id, 'vendor_id' => $currentOrganization->id]);
+        }
+        if (!isset($order) || !$order->isObsolete) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        
+        $systemMessage = $order->client->name . ' получил заказ!';
+        $order->status = Order::STATUS_DONE;
+        $order->actual_delivery = gmdate("Y-m-d H:i:s");
+        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
+        if ($order->save()) {
+            $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, false);
+            $this->redirect(['order/view', 'id' => $id]);
         }
     }
 
@@ -1102,13 +1130,11 @@ class OrderController extends DefaultController {
                 ->send();
     }
 
-    private function sendOrderCanceled($sender, $recipient, $order_id) {
+    private function sendOrderCanceled($senderOrg, $recipient, $order_id) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $senderOrg = $sender->organization;
-        $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order_id . " отменен!";
 
         $searchModel = new OrderContentSearch();
@@ -1120,10 +1146,21 @@ class OrderController extends DefaultController {
 //                ->setTo($email)
 //                ->setSubject($subject)
 //                ->queue();
-        $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+        if ($recipient instanceof Organization) {
+            foreach ($recipient->users as $user) {
+                $email = $user->email;
+                $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+        } else {
+            $email = $recipient->email;
+            $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+            }
     }
 
     private function saveCartChanges($content) {

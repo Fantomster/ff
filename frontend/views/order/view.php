@@ -52,15 +52,28 @@ $js = <<<JS
         $('.content').on('change keyup paste cut', '.view-data', function() {
             dataEdited = 1;
         });
-        $(document).on('click', 'a', function(e) {
-            if (dataEdited && ($(this).data("action") !== undefined)) {
+        
+        $(document).on("click", "a", function(e) {
+            if (dataEdited) {
                 e.preventDefault();
-                link = $(this).attr('href');
-                if (link != '#') {
-                    $('#dataChanged').modal('show')       
+                var link = $(this).attr("href");
+                if ($(this).data("internal") != 1) {
+                    if (link != "#") {
+                        swal({
+                            title: "Несохраненные изменения!",
+                            text: "Вы изменили заказ, но не сохранили изменения!",
+                            type: "warning",
+                            showCancelButton: true,
+                            confirmButtonText: "Уйти",
+                            cancelButtonText: "Остаться",
+                        }).then(function() {
+                            document.location = link;
+                        });
+                    }
                 }
             }
         });
+        
         $(document).on('click', '.changed', function() {
             document.location = link;
         });
@@ -327,21 +340,3 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
         </div>
     </div>
 </section>
-<!-- Modal -->
-<div class="modal fade" id="dataChanged" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">Несохраненные изменения!</h4>
-            </div>
-            <div class="modal-body">
-                Вы изменили заказ, но не сохранили изменения!
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Остаться</button>
-                <button type="button" class="btn btn-danger changed">Уйти</button>
-            </div>
-        </div>
-    </div>
-</div>

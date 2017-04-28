@@ -104,7 +104,13 @@ $request = new \common\models\Request();
               <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
                  <?php Modal::begin([
             'id' => 'create',
-            'toggleButton' => ['label' => '<i class="fa fa-paper-plane"></i> Разместить заявку','class'=>'btn btn-sm btn-fk-success','style'=>'width:100%'],
+            'toggleButton' => [
+                'id' => 'create-button',
+                'label' => '<i class="fa fa-paper-plane"></i> Разместить заявку',
+                'class'=>'btn btn-sm btn-fk-success',
+                'disabled'=>'disabled',
+                'data-loading-text'=>'<i class="fa fa-circle-o-notch fa-spin"></i> Подождите...',
+                'style'=>'width:100%'],
             'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1']
          ]);
             ?>
@@ -163,7 +169,8 @@ $request = new \common\models\Request();
     </div>
 </section>
 <?php
-
+//$this->registerJs('$("#create-button").button("loading");',yii\web\View::POS_LOAD);
+$this->registerJs('$("#create-button").removeAttr("disabled");',yii\web\View::POS_READY);
 $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/jquery-ui.min.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 $this->registerJs('
 $("#create").removeAttr("tabindex");

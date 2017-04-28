@@ -19,7 +19,72 @@ use yii\widgets\ActiveForm;
  */
 
 class RequestController extends DefaultController {
-    
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules' => [
+                    [
+                        'actions' => [
+                            'index', 
+                            'view', 
+                            'send-message', 
+                            'ajax-order-action', 
+                            'ajax-cancel-order',
+                            'ajax-refresh-buttons',
+                            'ajax-order-grid',
+                            'ajax-refresh-stats',
+                            'ajax-set-comment',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'create',
+                            'checkout',
+                            'repeat',
+                            'refresh-cart',
+                            'ajax-add-to-cart',
+                            'ajax-delete-order',
+                            'ajax-make-order',
+                            'ajax-change-quantity',
+                            'ajax-remove-position',
+                            'ajax-show-details',
+                            'ajax-refresh-vendors',
+                            'ajax-set-note',
+                            'ajax-set-delivery',
+                            'ajax-show-details',
+                            'complete-obsolete',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                ],
+//                'denyCallback' => function($rule, $action) {
+//                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+//                }
+            ],
+        ];
+    }
     public function actionTest($id) {
         
             return $this->render("test");
@@ -144,7 +209,7 @@ class RequestController extends DefaultController {
         }
     }
     public function actionSetResponsible(){
-        $userOrg = $this->currentUser->organization_id;
+        $client = $this->currentUser->organization_id;
         
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON; 
@@ -152,7 +217,7 @@ class RequestController extends DefaultController {
         $id = Yii::$app->request->post('id');
         $responsible_id = Yii::$app->request->post('responsible_id');
         
-        if(!Request::find()->where(['rest_org_id' => $userOrg,'id'=>$id])->exists()){
+        if(!Request::find()->where(['rest_org_id' => $client,'id'=>$id])->exists()){
             return ['success'=>false];
         }
         if(!RequestCallback::find()->where([
@@ -164,31 +229,32 @@ class RequestController extends DefaultController {
         $request = Request::find()->where(['id' => $id])->one();
         
         if($request->responsible_supp_org_id == $responsible_id){
-            
             $request->responsible_supp_org_id = null; 
-            $request->save(); 
+            $request->save();
+            //Отправка СМС
             $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
-            foreach($rows as $row){
-                if($row->profile->phone && $row->profile->sms_allow){
-                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе f-keeper.ru';
-                    $target = $row->profile->phone;
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target); 
-                }
-            }
+//            foreach($rows as $row){
+//                if($row->profile->phone && $row->profile->sms_allow){
+//                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе f-keeper.ru';
+//                    $target = $row->profile->phone;
+//                    $sms = new \common\components\QTSMS();
+//                    $sms->post_message($text, $target); 
+//                }
+//            }
         }else{
             $request->responsible_supp_org_id = $responsible_id;
             $request->save();
-            
+            //Отправка почты
+            $this->sendAcceptResponsive($request->client, $request->vendor, $request->id);
             $rows = \common\models\User::find()->where(['organization_id' => $request->vendor->id])->all();
-            foreach($rows as $row){
-                if($row->profile->phone && $row->profile->sms_allow){
-                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе f-keeper.ru';
-                    $target = $row->profile->phone;
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target); 
-                }
-            }
+//            foreach($rows as $row){
+//                if($row->profile->phone && $row->profile->sms_allow){
+//                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе f-keeper.ru';
+//                    $target = $row->profile->phone;
+//                    $sms = new \common\components\QTSMS();
+//                    $sms->post_message($text, $target); 
+//                }
+//            }
         }
         
         
@@ -263,5 +329,29 @@ class RequestController extends DefaultController {
         $requestCallback->save();
         return ['success'=>true];
         }
+    }
+    private function sendAcceptResponsive($client, $vendor, $request_id) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        
+        
+        $subject = "f-keeper.ru - заявка №" . $request_id;
+        $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = 'layouts/request';
+        $senderOrg = $client->id;
+        $recipients = \common\models\User::find()->where(['organization_id'=>$vendor->id])->all();
+        foreach($recipients as $recipient){
+        if (empty($recipient)) {
+            return;
+        }
+        $email = $recipient->email;
+                  
+        $result = $mailer->compose('requestAcceptResponsible', 
+              compact("client", "vendor", "request_id"))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();   
+        }
+        
     }
 }

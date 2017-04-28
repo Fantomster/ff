@@ -8,6 +8,7 @@ use yii\filters\AccessControl;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
 use common\models\Request;
+use common\models\Role;
 use common\models\RequestCallback;
 use common\models\RequestCounters;
 use yii\web\Response;
@@ -30,15 +31,8 @@ class RequestController extends DefaultController {
                 'rules' => [
                     [
                         'actions' => [
-                            'index', 
-                            'view', 
-                            'send-message', 
-                            'ajax-order-action', 
-                            'ajax-cancel-order',
-                            'ajax-refresh-buttons',
-                            'ajax-order-grid',
-                            'ajax-refresh-stats',
-                            'ajax-set-comment',
+                            'list', 
+                            'view',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -53,21 +47,9 @@ class RequestController extends DefaultController {
                     ],
                     [
                         'actions' => [
-                            'create',
-                            'checkout',
-                            'repeat',
-                            'refresh-cart',
-                            'ajax-add-to-cart',
-                            'ajax-delete-order',
-                            'ajax-make-order',
-                            'ajax-change-quantity',
-                            'ajax-remove-position',
-                            'ajax-show-details',
-                            'ajax-refresh-vendors',
-                            'ajax-set-note',
-                            'ajax-set-delivery',
-                            'ajax-show-details',
-                            'complete-obsolete',
+                            'close-request',
+                            'save-request',
+                            'set-responsible',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -78,10 +60,20 @@ class RequestController extends DefaultController {
                             Role::ROLE_ADMIN,
                         ],
                     ],
+                    [
+                        'actions' => [
+                            'add-callback',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
                 ],
-//                'denyCallback' => function($rule, $action) {
-//                    throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-//                }
             ],
         ];
     }
@@ -233,28 +225,29 @@ class RequestController extends DefaultController {
             $request->save();
             //Отправка СМС
             $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
-//            foreach($rows as $row){
-//                if($row->profile->phone && $row->profile->sms_allow){
-//                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе f-keeper.ru';
-//                    $target = $row->profile->phone;
-//                    $sms = new \common\components\QTSMS();
-//                    $sms->post_message($text, $target); 
-//                }
-//            }
+            foreach($rows as $row){
+                if($row->profile->phone && $row->profile->sms_allow){
+                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе f-keeper.ru';
+                    $target = $row->profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target); 
+                }
+            }
         }else{
             $request->responsible_supp_org_id = $responsible_id;
             $request->save();
             //Отправка почты
-            $this->sendAcceptResponsive($request->client, $request->vendor, $request->id);
+            //$this->sendAcceptResponsive($request->client, $request->vendor, $request->id);
+            //Отправка СМС
             $rows = \common\models\User::find()->where(['organization_id' => $request->vendor->id])->all();
-//            foreach($rows as $row){
-//                if($row->profile->phone && $row->profile->sms_allow){
-//                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе f-keeper.ru';
-//                    $target = $row->profile->phone;
-//                    $sms = new \common\components\QTSMS();
-//                    $sms->post_message($text, $target); 
-//                }
-//            }
+            foreach($rows as $row){
+                if($row->profile->phone && $row->profile->sms_allow){
+                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе f-keeper.ru';
+                    $target = $row->profile->phone;
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target); 
+                }
+            }
         }
         
         

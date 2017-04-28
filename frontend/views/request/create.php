@@ -190,7 +190,7 @@ Pjax::begin([
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
-            <span <?php if($organization->place_id){ echo "style='display:none'"; }?>>
+            <span <?php if($organization->place_id && $organization->address){ echo "style='display:none'"; }?>>
                 <h5>Адрес организации<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
                 <?= $form->field($organization, 'address',['template'=>'<div style="position:relative">{input}<span class="clear-input">×</span></div>{error}'])->textInput(['maxlength' => 255,'style'=>'padding-right:22px'])->label(false) ?>
                 <div id="map"></div>

@@ -31,7 +31,6 @@ class RequestController extends DefaultController {
                 'rules' => [
                     [
                         'actions' => [
-                            'test',
                             'list', 
                             'view',
                         ],
@@ -77,9 +76,6 @@ class RequestController extends DefaultController {
                 ],
             ],
         ];
-    }
-    public function actionTest() {
-        return $this->render('test');
     }
     public function actionSaveRequest() {
         $currentUser = $this->currentUser;

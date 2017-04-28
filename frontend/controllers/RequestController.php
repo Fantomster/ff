@@ -10,6 +10,7 @@ use common\models\Organization;
 use common\models\Request;
 use common\models\RequestCallback;
 use common\models\RequestCounters;
+use common\models\Role;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
 /**
@@ -19,7 +20,64 @@ use yii\widgets\ActiveForm;
  */
 
 class RequestController extends DefaultController {
-    
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                // We will override the default rule config with the new AccessRule class
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules' => [
+                    [
+                        'actions' => [
+                            'test',
+                            'list', 
+                            'view',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'close-request',
+                            'save-request',
+                            'set-responsible',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                    [
+                        'actions' => [
+                            'add-callback',
+                        ],
+                        'allow' => true,
+                        // Allow restaurant managers
+                        'roles' => [
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
     public function actionTest() {
         return $this->render('test');
     }

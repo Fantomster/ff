@@ -181,6 +181,10 @@ class ClientController extends DefaultController {
 
                 if ($user->validate() && $profile->validate()) {
 
+                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id))) {
+                        $user->role_id = $this->currentUser->role_id;
+                    }
+
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization)->save();
@@ -202,6 +206,7 @@ class ClientController extends DefaultController {
     public function actionAjaxUpdateUser($id) {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
+        $oldRole = $user->role_id;
         $profile = $user->profile;
         $organizationType = $user->organization->type_id;
 
@@ -212,6 +217,11 @@ class ClientController extends DefaultController {
 
                 if ($user->validate() && $profile->validate()) {
 
+                    if (!in_array($user->role_id, User::getAllowedRoles($oldRole))) {
+                        $user->role_id = $oldRole;
+                    } elseif ($user->role_id == Role::ROLE_RESTAURANT_EMPLOYEE && $oldRole == Role::ROLE_RESTAURANT_MANAGER && $user->organization->managersCount == 1) {
+                        $user->role_id = $oldRole;
+                    }
                     $user->save();
                     $profile->save();
 

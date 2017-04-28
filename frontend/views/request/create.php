@@ -205,7 +205,7 @@ Pjax::begin([
 <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
 <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
 <?php
-$gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+$gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
         'libraries' => 'places',
         'key'=>Yii::$app->params['google-api']['key-id'],
         'language'=>Yii::$app->params['google-api']['language'],

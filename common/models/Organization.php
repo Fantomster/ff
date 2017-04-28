@@ -48,6 +48,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property BuisinessInfo $buisinessInfo
  * @property FranchiseeAssociate $franchiseeAssociate
  * @property RelationSuppRest $associates
+ * @property integer $managersCount
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -219,7 +220,7 @@ class Organization extends \yii\db\ActiveRecord {
                 ->select(['organization.id', 'organization.name'])
                 ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
                 ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id]);
+                ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false]);
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }
@@ -268,7 +269,7 @@ class Organization extends \yii\db\ActiveRecord {
         $query = RelationSuppRest::find()
                 ->select(['relation_supp_rest.cat_id as cat_id'])
                 ->leftJoin('catalog', 'relation_supp_rest.cat_id = catalog.id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id])
+                ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false])
                 ->andWhere(['catalog.status' => Catalog::STATUS_ON]);
         $query->andFilterWhere(['relation_supp_rest.supp_org_id' => $vendor_id]);
         $catalogs = ArrayHelper::getColumn($query->asArray()->all(), 'cat_id');
@@ -613,5 +614,15 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function hasActiveUsers() {
         return User::find()->where(['organization_id' => $this->id, 'status' => User::STATUS_ACTIVE])->count();
+    }
+    
+    public function getManagersCount() {
+        if ($this->type_id === Organization::TYPE_RESTAURANT) {
+            return User::find()->where(['organization_id' => $this->id, 'role_id' => Role::ROLE_RESTAURANT_MANAGER])->count();
+        }
+        if ($this->type_id === Organization::TYPE_SUPPLIER) {
+            return User::find()->where(['organization_id' => $this->id, 'role_id' => Role::ROLE_SUPPLIER_MANAGER])->count();
+        }
+        return 0;
     }
 }

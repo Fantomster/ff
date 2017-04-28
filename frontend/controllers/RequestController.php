@@ -8,9 +8,9 @@ use yii\filters\AccessControl;
 use yii\data\ActiveDataProvider;
 use common\models\Organization;
 use common\models\Request;
+use common\models\Role;
 use common\models\RequestCallback;
 use common\models\RequestCounters;
-use common\models\Role;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
 /**
@@ -196,7 +196,7 @@ class RequestController extends DefaultController {
         }
     }
     public function actionSetResponsible(){
-        $userOrg = $this->currentUser->organization_id;
+        $client = $this->currentUser->organization_id;
         
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON; 
@@ -204,7 +204,7 @@ class RequestController extends DefaultController {
         $id = Yii::$app->request->post('id');
         $responsible_id = Yii::$app->request->post('responsible_id');
         
-        if(!Request::find()->where(['rest_org_id' => $userOrg,'id'=>$id])->exists()){
+        if(!Request::find()->where(['rest_org_id' => $client,'id'=>$id])->exists()){
             return ['success'=>false];
         }
         if(!RequestCallback::find()->where([
@@ -216,9 +216,9 @@ class RequestController extends DefaultController {
         $request = Request::find()->where(['id' => $id])->one();
         
         if($request->responsible_supp_org_id == $responsible_id){
-            
             $request->responsible_supp_org_id = null; 
-            $request->save(); 
+            $request->save();
+            //Отправка СМС
             $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
             foreach($rows as $row){
                 if($row->profile->phone && $row->profile->sms_allow){
@@ -231,7 +231,9 @@ class RequestController extends DefaultController {
         }else{
             $request->responsible_supp_org_id = $responsible_id;
             $request->save();
-            
+            //Отправка почты
+            //$this->sendAcceptResponsive($request->client, $request->vendor, $request->id);
+            //Отправка СМС
             $rows = \common\models\User::find()->where(['organization_id' => $request->vendor->id])->all();
             foreach($rows as $row){
                 if($row->profile->phone && $row->profile->sms_allow){
@@ -315,5 +317,29 @@ class RequestController extends DefaultController {
         $requestCallback->save();
         return ['success'=>true];
         }
+    }
+    private function sendAcceptResponsive($client, $vendor, $request_id) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        
+        
+        $subject = "f-keeper.ru - заявка №" . $request_id;
+        $mailer = Yii::$app->mailer;
+        $mailer->htmlLayout = 'layouts/request';
+        $senderOrg = $client->id;
+        $recipients = \common\models\User::find()->where(['organization_id'=>$vendor->id])->all();
+        foreach($recipients as $recipient){
+        if (empty($recipient)) {
+            return;
+        }
+        $email = $recipient->email;
+                  
+        $result = $mailer->compose('requestAcceptResponsible', 
+              compact("client", "vendor", "request_id"))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();   
+        }
+        
     }
 }

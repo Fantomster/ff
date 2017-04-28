@@ -91,6 +91,7 @@ class OrderContent extends \yii\db\ActiveRecord
                 ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
                 ->where([
                     "$rsrTable.status" => RelationSuppRest::CATALOG_STATUS_ON,
+                    "$rsrTable.deleted" => false,
                     "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
                     "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
                     "$rsrTable.supp_org_id" => $this->order->vendor_id,

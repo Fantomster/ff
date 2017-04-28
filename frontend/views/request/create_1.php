@@ -185,12 +185,12 @@ Pjax::begin([
 	<ul id="progressbar">
 		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
-		<li><span class="li-text">Завершить</span></li>
+		<li><span class="li-text">Оплата</span></li>
                 <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
-            <span <?php if($organization->place_id && $organization->address){ echo "style='display:none'"; }?>>
+            <span <?php if($organization->place_id){ echo "style='display:none'"; }?>>
                 <h5>Адрес организации<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
                 <?= $form->field($organization, 'address',['template'=>'<div style="position:relative">{input}<span class="clear-input">×</span></div>{error}'])->textInput(['maxlength' => 255,'style'=>'padding-right:22px'])->label(false) ?>
                 <div id="map"></div>
@@ -205,7 +205,7 @@ Pjax::begin([
 <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
 <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
 <?php
-$gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+$gpJsLink= 'http://maps.googleapis.com/maps/api/js?' . http_build_query(array(
         'libraries' => 'places',
         'key'=>Yii::$app->params['google-api']['key-id'],
         'language'=>Yii::$app->params['google-api']['language'],
@@ -238,36 +238,7 @@ function initMap() {
 	var map = new google.maps.Map(document.getElementById('map'), {
 	    mapTypeId: google.maps.MapTypeId.ROADMAP
 	});
-        // Create the search box and link it to the UI element.
-        var input = document.getElementById('organization-address');
-        var searchBox = new google.maps.places.SearchBox(input);
-        
-        searchBox.addListener('places_changed', function() {
-          var places = searchBox.getPlaces();
-
-          if (places.length == 0) {
-            return;
-          }
-          // For each place, get the icon, name and location.
-          var bounds = new google.maps.LatLngBounds();
-          places.forEach(function(place) {
-            if (!place.geometry) {
-              console.log('Returned place contains no geometry');
-              return;
-            }
-          if (place.geometry.viewport) {
-              // Only geocodes have viewport.
-              bounds.union(place.geometry.viewport);
-            } else {
-              bounds.extend(place.geometry.location);
-            }
-          })
-          map.fitBounds(bounds);
-          map.setZoom(17);
-        })
-
-
-            
+       
 	//инит маркера
 	var marker = new google.maps.Marker({
 	            map: map,
@@ -275,27 +246,29 @@ function initMap() {
 	});	
 	var geocoder = new google.maps.Geocoder;
 	
+	//Проверяем PlaceId и если он пустой, тогда проверить геолокацию
 	if(typeof fields.hPlaceId.value == 'undefined' || fields.hPlaceId.value == ''){
             geolocation(map, marker, fields)
 	}else{
             geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value),fields)
         }
 	
-//      var autocomplete = new google.maps.places.Autocomplete(
-//          (document.getElementById('organization-address')),
-//          {types: ['geocode']});
-//	autocomplete.addListener('place_changed', function(){
-//	    var place = autocomplete.getPlace();    
-//	    if (place.geometry) {
-//		    var results = {0 : place};
-//                    map.setZoom(17);
-//                    map.panTo(results[0].geometry.location);
-//                    marker.setPosition(results[0].geometry.location);
-//                    changeFields(fields, results)
-//	    }else {
-//          window.alert('[autocomplete] No results found');}
-//        });
-        
+	//событие на забивание текста в поисковую строку
+        var autocomplete = new google.maps.places.Autocomplete(
+            (document.getElementById('organization-address')),
+            {types: ['geocode']});
+	autocomplete.addListener('place_changed', function(){
+	    var place = autocomplete.getPlace();    
+	    if (place.geometry) {
+		    var results = {0 : place};
+                    map.setZoom(17);
+                    map.panTo(results[0].geometry.location);
+                    marker.setPosition(results[0].geometry.location);
+                    changeFields(fields, results)
+	    }else {
+          window.alert('[autocomplete] No results found');}
+        });
+    
 	//событие на перемещение маркера
 	marker.addListener('dragend', function(e){
 	    geocoder.geocode({'latLng': e.latLng}, function(results, status) {

@@ -222,7 +222,7 @@ $gridColumnsClients = [
                 </section>
                 <?php
                 
-$inviteRestOrgUrl = Url::to(['vendor/ajax-rest-org-id']);                
+$inviteRestOrgUrl = Url::to(['vendor/ajax-invite-rest-org-id']);                
 $removeClientUrl = Url::to(['vendor/remove-client']);
                 
                 $customJs = <<< JS

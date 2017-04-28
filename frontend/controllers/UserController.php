@@ -14,6 +14,7 @@ use yii\widgets\ActiveForm;
 use common\models\User;
 use common\models\Profile;
 use common\models\Organization;
+use yii\filters\AccessControl;
 
 /**
  * Custom user controller
@@ -28,49 +29,45 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      * @inheritdoc
      */
     public function behaviors() {
-        $behaviors = parent::behaviors();
-
-        $behaviors['access']['rules'] = [
-            [
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [[
                 'actions' => ['confirm', 'resend', 'logout'],
                 'allow' => true,
                 'roles' => ['?', '@'],
-            ],
-            [
-                'actions' => ['login', 'register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite', 'ajax-register'],
-                'allow' => true,
-                'roles' => ['?'],
-            ],
-            [
-                'actions' => ['index', 'profile', 'account', 'cancel', 'resend-change'],
-                'allow' => false,
-            ],
-            [
-                'actions' => ['ajax-invite-friend'],
-                'allow' => true,
-                'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['login', 'register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite', 'ajax-register'],
+                        'allow' => true,
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'actions' => ['index', 'profile', 'account', 'cancel', 'resend-change'],
+                        'allow' => false,
+                    ],
+                    [
+                        'actions' => ['ajax-invite-friend'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ]
+                ],
             ]
         ];
-
-        $behaviors['access']['denyCallback'] = function($rule, $action) {
-            $this->redirect(['/site/index']);
-        };
-        return $behaviors;
     }
 
-    
     public function actionAjaxRegister() {
         if (!Yii::$app->request->isAjax) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
         Yii::$app->response->format = Response::FORMAT_JSON;
-        
+
         $user = $this->module->model("User", ["scenario" => "register"]);
         $profile = $this->module->model("Profile", ["scenario" => "register"]);
         $organization = $this->module->model("Organization");
 
         $organization->step = Organization::STEP_SET_INFO;
-        
+
         // load post data
         $post = Yii::$app->request->post();
         if ($user->load($post)) {
@@ -107,7 +104,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             }
         }
     }
-    
+
     /**
      * Display registration page
      */

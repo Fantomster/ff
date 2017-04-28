@@ -125,14 +125,18 @@ $this->title = 'F-MARKET главная';
     </div>
   </div> 
 </div> 
-<?php $customJs = <<< JS
+<?php 
+$productMoreUrl = Url::to(['site/ajax-product-more']);
+$supplierMore = Url::to(['site/ajax-supplier-more']);
+
+$customJs = <<< JS
 var num = 6;
 $('#product-more').on("click", function (e) {
     e.preventDefault();
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-product-more",
+      url: "$productMoreUrl",
       type: "GET",
       data: {"num": num},
       cache: false,
@@ -151,7 +155,7 @@ $('#supplier-more').on("click", function (e) {
     e.preventDefault();
     console.log('supplier click more');
     $.ajax({
-      url: "index.php?r=site/ajax-supplier-more",
+      url: "$supplierMore",
       type: "GET",
       data: {"num": num},
       cache: false,

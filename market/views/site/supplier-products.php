@@ -94,14 +94,17 @@ $this->title = 'F-MARKET Продукты поставщика';
   </div>
 </div>
 
-<?php $customJs = <<< JS
+<?php 
+$suppProductMoreUrl = Url::to(['site/ajax-supp-product-more']);
+
+$customJs = <<< JS
 var inProgress = false;
 var num = 12;
 $(window).scroll(function() {
 if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !inProgress) {
       $('#product-more').addClass('disabled');
       $.ajax({
-        url: "index.php?r=site/ajax-supp-product-more",
+        url: "$suppProductMoreUrl",
         type: "GET",
         data: {"num": num, "supp_org_id":$id},
         beforeSend: function() {
@@ -127,7 +130,7 @@ $('#product-more').on("click", function (e) {
     $('#product-more').addClass('disabled');
     console.log('product click more');
     $.ajax({
-      url: "index.php?r=site/ajax-supp-product-more",
+      url: "$suppProductMoreUrl",
       type: "GET",
       data: {"num": num, "supp_org_id":$id},
       cache: false,

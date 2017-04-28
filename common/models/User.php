@@ -99,7 +99,7 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * Check if user account is active
      * 
-     * @return boolean
+     * @return bool
      */
     public function isActive() {
         return ($this->status == static::STATUS_ACTIVE);
@@ -280,4 +280,19 @@ class User extends \amnah\yii2\user\models\User {
         return $result;
     }
     
+    public static function getAllowedRoles($role_id) {
+        $clientRoles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE];
+        $vendorRoles = [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE];
+        $franchiseeRoles = [Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
+        if (in_array($role_id, $clientRoles)) {
+            return $clientRoles;
+        }
+        if (in_array($role_id, $vendorRoles)) {
+            return $vendorRoles;
+        }
+        if (in_array($role_id, $franchiseeRoles)) {
+            return $franchiseeRoles;
+        }
+        return [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
+    }
 }

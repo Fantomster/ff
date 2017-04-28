@@ -166,6 +166,11 @@ Modal::begin([
 </div>
 </section>
 <?php
+
+$catalogsUrl = Url::to(['vendor/catalogs']);
+$myCatalogDelCatalogUrl = Url::to(['vendor/mycatalogdelcatalog']);
+$changeCatalogStatusUrl = Url::to(['vendor/changecatalogstatus']);
+
 $customJs = <<< JS
 var timer;
 $('#search').on("keyup put paste change", function () {
@@ -174,7 +179,7 @@ window.clearTimeout(timer);
        $.pjax({
         type: 'POST',
         push: false,
-        url: 'index.php?r=vendor/catalogs',
+        url: '$catalogsUrl',
         container: '#catalog-list',
         data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }
       })
@@ -184,7 +189,7 @@ $("#restaurant").on("change", function() {
     $.pjax({
         type: 'POST',
         push: false,
-        url: 'index.php?r=vendor/catalogs',
+        url: '$catalogsUrl',
         container: '#catalog-list',
         data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }       
       })
@@ -211,7 +216,7 @@ $("body").on("hidden.bs.modal", function() {
         
 
 $('#viewBaseCatalog').click(function (e){
-$(location).attr('href','index.php?r=vendor/catalogs')
+$(location).attr('href','$catalogsUrl')
 })
 $(document).on('click', '.del', function (e){
 	var id = $(this).attr('id').replace('del_','');
@@ -232,7 +237,7 @@ $(document).on('click', '.del', function (e){
             callback: function(result) {
 		if(result){
 		$.ajax({
-	        url: "index.php?r=vendor/mycatalogdelcatalog",
+	        url: "$myCatalogDelCatalogUrl",
 	        type: "POST",
 	        dataType: "json",
 	        data: {'id' : id},
@@ -244,7 +249,7 @@ $(document).on('click', '.del', function (e){
                                 $.pjax({
                                     type: 'POST',
                                     push: false,
-                                    url: 'index.php?r=vendor/catalogs',
+                                    url: '$catalogsUrl',
                                     container: '#catalog-list',
                                     data: { searchString: $('#search').val(), restaurant: $('#restaurant').val() }       
                                   })
@@ -263,7 +268,7 @@ var e,id,state
 e = $(this).attr('name')
 id = e.replace('status_','')
     $.ajax({
-        url: "index.php?r=vendor/changecatalogstatus",
+        url: "$changeCatalogStatusUrl",
         type: "POST",
         dataType: "json",
         data: {'state' : state, 'id' : id},

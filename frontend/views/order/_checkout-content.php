@@ -59,7 +59,7 @@ echo GridView::widget([
                     'format' => 'raw',
                     'header' => 'Цена',
                     'value' => function ($data) {
-                        $total = $data['price'] * $data['quantity'];
+                        $total = number_format($data['price'] * $data['quantity'], 2);
                         return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i>';
                     },
                     'headerOptions' => ['class' => 'width100']

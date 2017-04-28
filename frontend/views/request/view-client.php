@@ -6,22 +6,11 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii\widgets\ListView;
-
-use dosamigos\google\maps\LatLng;
-use dosamigos\google\maps\services\DirectionsWayPoint;
-use dosamigos\google\maps\services\TravelMode;
-use dosamigos\google\maps\services\GeocodingClient;
-use dosamigos\google\maps\overlays\PolylineOptions;
-use dosamigos\google\maps\services\DirectionsRenderer;
-use dosamigos\google\maps\services\DirectionsService;
-use dosamigos\google\maps\overlays\InfoWindow;
-use dosamigos\google\maps\overlays\Marker;
-use dosamigos\google\maps\Map;
-use dosamigos\google\maps\services\DirectionsRequest;
-use dosamigos\google\maps\overlays\Polygon;
-use dosamigos\google\maps\layers\BicyclingLayer;
-
 ?>
+
+<style>
+.bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
+</style>
 <section class="content-header">
     <h1>
         <i class="fa fa-paper-plane"></i> Заявка №<?=$request->id?>
@@ -42,159 +31,106 @@ use dosamigos\google\maps\layers\BicyclingLayer;
     ])
     ?>
 </section>
-<style>
-.req-name{color:#84bf76;font-size:22px;}
-.req-fire{color:#d9534f;font-size:18px;}    
-.media{line-height: 2.4;}
-.media-heading{font-size:16px;font-weight:bold;letter-spacing:0.02em;}
-.req-fire{font-size:14px;font-weight:normal}
-.req-client-reg{font-size:12px;color:#828384;font-weight:normal}
-.req-client-info{font-size:12px;color:#828384;font-weight:normal}
-.req-discription{font-size:14px;font-weight:normal;color:#95989a;margin-bottom:10px}
-.req-respons{font-size:12px;color:#828384;font-weight:bold}
-.req-vendor-info{font-size: 14px;
-    color: #828384;
-    font-weight: normal;
-    margin-top: 25px;}
-.req-vendor-price{font-size:21px;color:#828384;font-weight:normal}
-.req-vendor-name{font-size:14px;font-weight:bold;color:#3f3f3e;}
-.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:5px;padding-bottom:5px}
-</style>
-<section class="content">
-    <div class="box box-info">
-        <!-- /.box-header -->
-        <div class="box-body no-padding">
-            <div class="col-md-12">
-                <?php 
-                Pjax::begin([
-                  'id' => 'pjax-callback', 
-                  'timeout' => 10000, 
-                  'enablePushState' => false,
-                  ]);
-                ?>
-                <div class="row">
-                    <div class="col-md-12">
-                        <h3 class="req-name pull-left"><?=$request->product?></h3>
-                        <?php if ($request->active_status){
-                        echo Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;Закрыть заявку', ['class' => 'r-close btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']);
-                        }else{
-                        echo Html::button('Закрыта', ['disabled'=>true,'class' => 'btn btn-sm btn-outline-danger pull-right','data-id'=>$request->id,'style'=>'margin-top: 21px;']);
-                        }
-                        ?>
-                    </div>
-                </div>
-                <div class="row">
-                    <hr>
-                    <div class="col-md-12">
-                     <?php 
-                    $gc = new GeocodingClient();
-                    $result = $gc->lookup(array('address'=>$author->address,'components'=>1));
-                    $location = $result->results[0]->geometry->location;
-                    if (!is_null($location)) {
-                        $lat = $location->lat;
-                        $lng = $location->lng;
-                        $coord = new LatLng(['lat' => $lat, 'lng' => $lng]);
-                        $map = new Map(['center' => $coord,
-                                        'zoom' => 15,
-                                        'scrollwheel'=> false ,
-                                        'width' => 'auto',
-                                        'height' => 200,]);
-
-                        $marker = new Marker([
-                            'position' => $coord,
-                            'title' => $author->name,
-                        ]);
-                        $marker->attachInfoWindow(
-                            new InfoWindow([
-                                'content' => 
-                                '<h5>' . $author->name . '</h5>' .
-                                '<p>' . $author->address . '</p>'
-                            ])
-                        );
-                        $map->addOverlay($marker);
-                        echo '<div class="req-client-reg">Адрес: <b>' . $author->address . '</b></div> ';
-                        echo $map->display();
-                    }
-                     ?>   
-                    </div>
-                </div>
-                <div class="row">
-                    <hr>
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="media">
-                                    <div class="media-left">
-                                      <img src="<?=$author->pictureUrl?>" class="media-object" style="width:160px">
-                                    </div>
-                                    <div class="media-body">
-                                      <h4 class="media-heading"><?=$author->name?></h4>
-                                      <?php if ($request->rush_order){?>
-                                      <div class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</div>
-                                      <?php } ?>
-                                      <div class="req-respons">Исполнитель: 
-                                        <?=$request->responsible_supp_org_id ? 
-                                              '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
-                                              '<span style="color:#ccc;">не назначен</span>';
-                                        ?>
-                                      </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-right" style='line-height: 2.4;'>
-                                <div class="req-client-info">Объем закупки: <span class="text-bold"><?=$request->amount?></span></div>
-                                <div class="req-client-info">Периодичность заказа: <span class="text-bold"><?=$request->regularName?></span></div>
-                                <div class="req-client-info">Способ оплаты: <span class="text-bold">
-                                    <?=$request->paymentMethodName ?></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <hr>
-                    <div class="col-md-12">
-                        <div class="req-discription">
-                        <?=$request->comment?$request->comment:'<b>Нет информации</b>' ?>
-                        </div> 
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="req-client-reg">Категория: <b><?=$request->categoryName->name ?></b></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <hr>
-                    <div class="col-md-12">
-                        <div class="row">
-                        <?=ListView::widget([
-                            'dataProvider' => $dataCallback,
-                            'itemView' => function ($model, $key, $index, $widget) {
-                                return $this->render('view/_clientCBView', ['model' => $model]);
-                                },
-                            'pager' => [
-                                'maxButtonCount' => 5,
-                                    'options' => [
-                                    'class' => 'pagination col-md-12'
-                                ],
-                            ],
-                            'options'=>[
-                              'class'=>'col-lg-12 list-wrapper inline'
-                            ],
-                            'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
-                            'summary' => 'Показано {count} из {totalCount}',
-                            'emptyText' => 'Откликов по заявке 0',
-                        ])?> 
-                        
-                        </div>
-                    </div>
-                </div>
-                <?php Pjax::end(); ?>
+<section  class="content-header">
+  <div class="row">
+    <?php 
+        Pjax::begin([
+          'id' => 'pjax-callback', 
+          'timeout' => 10000, 
+          'enablePushState' => false,
+          ]);
+      ?>
+    <div class="col-md-12">
+      <div class="box box-info">
+        <div class="box-body">
+	  <div class="col-md-6">
+            <div class="row">
+              <div class="col-md-12">
+		<h3 class="text-success"><?=$request->product?>
+                <?php if ($request->rush_order){?>
+      <span style="color:#d9534f"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</span>
+      <?php } ?>
+                </h3>
+                <h4><?=$request->comment?$request->comment:'<b>Нет информации</b>' ?></h4>
+              </div>
             </div>
+            <h6><b>Объем закупки:</b> <?=$request->amount?></h6>
+            <h6><b>Периодичность заказа:</b> <?=$request->regularName?></h6>
+            <h6><b>Способ оплаты:</b> <?=$request->paymentMethodName ?></h6>
+            <div class="req-respons">Исполнитель: 
+                <?=$request->responsible_supp_org_id ? 
+                      '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
+                      '<span style="color:#ccc;">не назначен</span>';
+                ?>
+            </div>
+            <p style="margin:0;margin-top:15px"><b>Создана</b> <?=$request->created_at?></p>
+            <p style="margin:0;margin-bottom:15px"><b>Будет снята</b> <?=$request->end?></p>
+            <?php if ($request->active_status){
+                echo Html::button('<i class="fa fa-times" aria-hidden="true"></i>&nbsp;&nbsp;Снять с размещения', ['class' => 'r-close btn btn-outline-danger','data-id'=>$request->id]);
+            }else{
+                echo Html::button('Заявка закрыта', ['disabled'=>true,'class' => 'btn btn-outline-danger','data-id'=>$request->id]);
+            }
+            ?>
+            <div class="pull-right" style="margin-top: 9px">
+                  <i class="fa fa-eye" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->counter?>
+                  <i class="fa fa-handshake-o" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->countCallback?>
+		</div>
+	  </div>
+          <div class="col-md-6">
+              <h3 class="text-success"><?=$author->name?></h3>
+              <h4><?=$author->address?> <small>Адрес можно изменить в разделе "Настройки"</small></h4>
+              <div id="map"></div>
+              
+          </div>
+	  <div class="col-md-12">
+	    <hr>
+	    <h5>Отклики поставщиков</h5>
+                <?=ListView::widget([
+                    'dataProvider' => $dataCallback,
+                    'itemView' => function ($model, $key, $index, $widget) {
+                        return $this->render('view/_clientCBView', ['model' => $model]);
+                        },
+                    'pager' => [
+                        'maxButtonCount' => 5,
+                            'options' => [
+                            'class' => 'pagination col-md-12'
+                        ],
+                    ],
+                    'options'=>[
+                      'class'=>''
+                    ],
+                    'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
+                    'summary' => 'Показано {count} из {totalCount}',
+                    'emptyText' => 'Откликов по заявке 0',
+                ])?>
+	  </div>
         </div>
+      </div>
     </div>
+    <?php Pjax::end(); ?>
+  </div>
 </section>
+<script>
+function initMap() {
+  var position = {lat: <?=$author->lat?>, lng: <?=$author->lng?>};
+  var map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 16,
+    center: position
+  });
+  var marker = new google.maps.Marker({
+    position: position,
+    map: map
+  });
+}
+</script>
+<?php
+  $gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+        'key'=>Yii::$app->params['google-api']['key-id'],
+        'language'=>Yii::$app->params['google-api']['language'],
+        'callback'=>'initMap'
+    ));
+  $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true,'defer'=>true]);
+?>
 <?=$this->registerJs('
 $(document).on("click",".change", function(e){
 var id = $(this).attr("data-req-id");
@@ -224,6 +160,7 @@ swal({
             cache: false,
             success: function (response) {
             $.pjax.reload({container:"#pjax-callback", async:false});
+            initMap();
             resolve()
             }
         });
@@ -239,7 +176,7 @@ swal({
   type: "warning",
   showCancelButton: true,
   cancelButtonText: "Отмена",
-  confirmButtonText: "Закрыть",
+  confirmButtonText: "Да",
   showLoaderOnConfirm: true,
   preConfirm: function () {
     return new Promise(function (resolve) {
@@ -251,12 +188,43 @@ swal({
             cache: false,
             success: function (response) {
             $.pjax.reload({container:"#pjax-callback", async:false});
+            initMap();
             resolve()
             }
         });
     })
   }
 }).then(function () {swal("Готово!","Заявка закрыта","success")
+})
+});
+$(document).on("click",".add-supplier", function(e){
+request_id = $(this).attr("data-req-id");
+supp_org_id = $(this).attr("data-supp-id");
+swal({
+  title: "Добавить поставщика?",
+  text: "Поставщику будет отправлено приглашение к сотрудничеству",
+  type: "warning",
+  showCancelButton: true,
+  cancelButtonText: "Отмена",
+  confirmButtonText: "Добавить",
+  showLoaderOnConfirm: true,
+  preConfirm: function () {
+    return new Promise(function (resolve) {
+        $.ajax({
+            url: "' . Url::to(["request/add-supplier"]) . '",
+            type: "POST",
+            dataType: "json",
+            data: "request_id=" + request_id + "&supp_org_id=" + supp_org_id,
+            cache: false,
+            success: function (response) {
+            $.pjax.reload({container:"#pjax-callback", async:false});
+            initMap();
+            resolve()
+            }
+        });
+    })
+  }
+}).then(function () {swal("Готово!","Приглашение отправлено!","success")
 })
 });
 ');?>

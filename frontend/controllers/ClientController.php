@@ -43,10 +43,18 @@ class ClientController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial'],
+//                'only' => ['index', 'settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user', 'suppliers', 'tutorial', 'employees'],
                 'rules' => [
                     [
-                        'actions' => ['settings', 'ajax-create-user', 'ajax-delete-user', 'ajax-update-user', 'ajax-validate-user'],
+                        'actions' => [
+                            'settings', 
+                            'ajax-create-user', 
+                            'ajax-delete-user', 
+                            'ajax-update-user', 
+                            'ajax-validate-user', 
+                            'employees',
+                            'remove-supplier',
+                        ],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [
@@ -56,7 +64,23 @@ class ClientController extends DefaultController {
                         ],
                     ],
                     [
-                        'actions' => ['index', 'suppliers', 'tutorial'],
+                        'actions' => [
+                            'index', 
+                            'suppliers', 
+                            'tutorial', 
+                            'analytics', 
+                            'chkmail', 
+                            'create', 
+                            'edit-catalog', 
+                            'events', 
+                            'invite', 
+                            'messages', 
+                            're-send-email-invite',
+                            'sidebar',
+                            'support',
+                            'view-catalog',
+                            'view-supplier',
+                        ],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [
@@ -157,6 +181,10 @@ class ClientController extends DefaultController {
 
                 if ($user->validate() && $profile->validate()) {
 
+                    if (!in_array($user->role_id, User::getAllowedRoles($this->currentUser->role_id))) {
+                        $user->role_id = $this->currentUser->role_id;
+                    }
+
                     $user->setRegisterAttributes($user->role_id)->save();
                     $profile->setUser($user->id)->save();
                     $user->setOrganization($this->currentUser->organization)->save();
@@ -178,6 +206,7 @@ class ClientController extends DefaultController {
     public function actionAjaxUpdateUser($id) {
         $user = User::findIdentity($id);
         $user->setScenario("manage");
+        $oldRole = $user->role_id;
         $profile = $user->profile;
         $organizationType = $user->organization->type_id;
 
@@ -188,6 +217,11 @@ class ClientController extends DefaultController {
 
                 if ($user->validate() && $profile->validate()) {
 
+                    if (!in_array($user->role_id, User::getAllowedRoles($oldRole))) {
+                        $user->role_id = $oldRole;
+                    } elseif ($user->role_id == Role::ROLE_RESTAURANT_EMPLOYEE && $oldRole == Role::ROLE_RESTAURANT_MANAGER && $user->organization->managersCount == 1) {
+                        $user->role_id = $oldRole;
+                    }
                     $user->save();
                     $profile->save();
 
@@ -608,7 +642,7 @@ class ClientController extends DefaultController {
                     $relationSuppRest->rest_org_id = $currentUser->organization_id;
                     $relationSuppRest->supp_org_id = $get_supp_org_id;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
-                    $test = $relationSuppRest->save();
+                    $relationSuppRest->save();
 //                    if (!empty($categorys)) {
 //                        foreach ($categorys as $arrCategorys) {
 //                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
@@ -621,7 +655,7 @@ class ClientController extends DefaultController {
                     $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
                     foreach($rows as $row){
                         if($row->profile->phone && $row->profile->sms_allow){
-                           $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target); 
@@ -1249,7 +1283,7 @@ class ClientController extends DefaultController {
          * 
          */
         $searchString = "";
-        $where = "";
+        $where = " AND `relation_supp_rest`.deleted = 0";
         if (Yii::$app->request->isAjax) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
 
@@ -1292,73 +1326,18 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = date("d-m-Y");
+
         //GRIDVIEW ИСТОРИЯ ЗАКАЗОВ ----->
-        $query = Yii::$app->db->createCommand("SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                . "client_id = " . $currentUser->organization_id . " and status<>" . Order::STATUS_FORMING);
-        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM (SELECT id,client_id,vendor_id,created_by_id,accepted_by_id,status,total_price,created_at FROM `order` WHERE "
-                        . "client_id = " . $currentUser->organization_id . " and status<>" . Order::STATUS_FORMING . ")`tb`")->queryScalar();
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'pagination' => [
-                'pageSize' => 7,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'id',
-                    'client_id',
-                    'vendor_id',
-                    'created_by_id',
-                    'accepted_by_id',
-                    'status',
-                    'total_price',
-                    'created_at'
-                ],
-                'defaultOrder' => [
-                    'created_at' => SORT_DESC
-                ]
-            ],
-        ]);
-        //$supp_arr = RelationSuppRest::find()->where(['rest_org_id'=>$currentUser->organization_id,'status'=>1])->all();
-        
+        $searchModel = new \common\models\search\OrderSearch();
+        $today = new \DateTime();
+        //$searchModel->date_from = date("d.m.Y", strtotime(" -1 months"));
+        $searchModel->client_id = $currentUser->organization_id;
+        $searchModel->client_search_id = $currentUser->organization_id;
+
+        $dataProvider = $searchModel->search(null);
+        $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
-        // chart АНАЛИТИКА по неделям прошедшим
-        /*
-        $curent_monday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '1')); // текущая неделя - понедельник
-        $curent_sunday = date('Y-m-d', strtotime(date('Y') . 'W' . date('W') . '7')); // текущая неделя - воскресение
-        $i = 0;
-        $max_i = 5; //Сколько недель показывать от текущей
-        $mon = 0;
-        $sun = 6;
-        $query = "";
-        while ($i < $max_i + 1) {
-            $i++;
-            $while_monday = date('Y-m-d', strtotime("$curent_monday $mon day"));
-            $while_sunday = date('Y-m-d', strtotime("$curent_monday $sun day"));
-            $dates = date('m/d', strtotime("$curent_monday $sun day"));
-            ;
-            $query .="SELECT sum(total_price) as price,'$dates' as dates from `order` where "
-                    . "client_id = $currentUser->organization_id and ("
-                    . "DATE(created_at) between '" .
-                    date('Y-m-d', strtotime($while_monday)) . "' and '" .
-                    date('Y-m-d', strtotime($while_sunday)) . "') ";
-            $i > $max_i ? "" : $query .=" UNION ALL \n";
-            $mon = $mon - 7;
-            $sun = $sun - 7;
-        }
-        $query = Yii::$app->db->createCommand($query)->queryAll();
-        $chart_dates = [];
-        $chart_price = [];
-        foreach ($query as $querys) {
-            if (empty($querys['price'])) {
-                array_push($chart_price, 0);
-            } else {
-                array_push($chart_price, $querys['price']);
-            }
-            array_push($chart_dates, $querys['dates']);
-        }
-         */
-        // var_dump($chart_price);
+
         return $this->render('dashboard/index', compact(
                                 'dataProvider', 'suppliers_dataProvider','totalCart','count_products_from_mp'
                 //'chart_dates', 'chart_price'

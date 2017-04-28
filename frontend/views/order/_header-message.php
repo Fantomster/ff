@@ -1,7 +1,7 @@
 <li><!-- start message -->
     <a href="<?= yii\helpers\Url::to(['order/view', 'id' => $message->order_id]) ?>">
         <div class="pull-left">
-            <img src="images/no-avatar.jpg" class="img-circle"
+            <img src="/images/no-avatar.jpg" class="img-circle"
                  alt="User Image"/>
         </div>
         <h4>

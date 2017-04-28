@@ -83,7 +83,7 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
 </div> 
 </section>
 <?php
-if($catalog->isNewRecord){$router = 'index.php?r=vendor/step-1';}else{$router = 'index.php?r=vendor/step-1-update&id='.$cat_id;}
+if($catalog->isNewRecord){$router = Url::to(['vendor/step-1']);}else{$router = Url::to(['vendor/step-1-update', 'id' => $cat_id]);}
 $this->registerJs('
 /** 
  * Forward port jQuery.live()
@@ -114,7 +114,7 @@ $.ajax({
             
             if(response.success){
                 //bootbox.alert("<h3>Сохранено!</h3>");
-                var url = "' . Url::toRoute(['vendor/step-2']) . '"+"&id="+response.cat_id;
+                var url = "' . Url::toRoute(['vendor/step-2', 'id' => '']) . '"+response.cat_id;
                 $(location).attr("href",url);
                 //$.pjax({url: url, container: "#pjax-container"});
                 //$("#loader-show").hideLoading();

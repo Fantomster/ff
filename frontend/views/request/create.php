@@ -185,7 +185,7 @@ Pjax::begin([
 	<ul id="progressbar">
 		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
-		<li><span class="li-text">Оплата</span></li>
+		<li><span class="li-text">Завершить</span></li>
                 <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->

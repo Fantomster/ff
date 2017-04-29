@@ -254,17 +254,17 @@ function initMap() {
               console.log('Returned place contains no geometry');
               return;
             }
-          if (place.geometry.viewport) {
-              // Only geocodes have viewport.
+            if (place.geometry.viewport) {
               bounds.union(place.geometry.viewport);
             } else {
               bounds.extend(place.geometry.location);
             }
-            var results = places;
-            marker.setPosition(results[0].geometry.location);
-            changeFields(fields, results)
+            
           })
-          
+          if (places[0].address_components) {
+            marker.setPosition(places[0].geometry.location);
+            changeFields(fields, places)
+          }
           map.fitBounds(bounds);
           map.setZoom(17);
         })

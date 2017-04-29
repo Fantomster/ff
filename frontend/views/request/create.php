@@ -186,7 +186,6 @@ Pjax::begin([
 		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
 		<li><span class="li-text">Завершить</span></li>
-                <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">

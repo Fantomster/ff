@@ -243,7 +243,7 @@ function initMap() {
         
         searchBox.addListener('places_changed', function() {
           var places = searchBox.getPlaces();
-
+          
           if (places.length == 0) {
             return;
           }
@@ -260,7 +260,11 @@ function initMap() {
             } else {
               bounds.extend(place.geometry.location);
             }
+            var results = places;
+            marker.setPosition(results[0].geometry.location);
+            changeFields(fields, results)
           })
+          
           map.fitBounds(bounds);
           map.setZoom(17);
         })

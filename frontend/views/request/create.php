@@ -185,7 +185,7 @@ Pjax::begin([
 	<ul id="progressbar">
 		<li class="active"><span class="li-text">Продукт</span></li>
 		<li><span class="li-text">Условия</span></li>
-		<li><span class="li-text">Оплата</span></li>
+		<li><span class="li-text">Завершить</span></li>
                 <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->
@@ -255,8 +255,8 @@ function initMap() {
               console.log('Returned place contains no geometry');
               return;
             }
+            
           if (place.geometry.viewport) {
-              // Only geocodes have viewport.
               bounds.union(place.geometry.viewport);
             } else {
               bounds.extend(place.geometry.location);
@@ -281,21 +281,6 @@ function initMap() {
             geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value),fields)
         }
 	
-//      var autocomplete = new google.maps.places.Autocomplete(
-//          (document.getElementById('organization-address')),
-//          {types: ['geocode']});
-//	autocomplete.addListener('place_changed', function(){
-//	    var place = autocomplete.getPlace();    
-//	    if (place.geometry) {
-//		    var results = {0 : place};
-//                    map.setZoom(17);
-//                    map.panTo(results[0].geometry.location);
-//                    marker.setPosition(results[0].geometry.location);
-//                    changeFields(fields, results)
-//	    }else {
-//          window.alert('[autocomplete] No results found');}
-//        });
-        
 	//событие на перемещение маркера
 	marker.addListener('dragend', function(e){
 	    geocoder.geocode({'latLng': e.latLng}, function(results, status) {

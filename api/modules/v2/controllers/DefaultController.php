@@ -1,6 +1,6 @@
 <?php
 
-namespace api\controllers;
+namespace api\modules\v2\controllers;
 
 use Yii;
 use yii\web\Controller;
@@ -12,7 +12,7 @@ use yii\mongosoft\soapserver\Action;
  * Author: R.Smirnov
  */
 
-class SiteController extends Controller {
+class DefaultController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -25,12 +25,12 @@ class SiteController extends Controller {
         
     public function actionIndex() {
      
-        echo "Welcome to F-Keeper API gateway. Please use SOAP client to connect this service.";
+        echo "Welcome to F-Keeper API gateway. <b> (Version 2! )</b>Please use SOAP client to connect this service.";
         
-        $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-            ->queryAll();
+      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
+      //      ->queryAll();
         
-        var_dump($langs);
+      //  var_dump($langs);
         
     }
     
@@ -55,13 +55,14 @@ class SiteController extends Controller {
             ],
     ];
 }
-    
+   
 /**
 * @param string $login
 * @param string $pass
 * @return string 
 * @soap
 */
+ 
     
     public function getHello($login,$pass) 
     {
@@ -75,7 +76,7 @@ class SiteController extends Controller {
    * @return mixed result of auth
    * @soap
    */
-    
+   
   public function OpenSession() {
       
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
@@ -128,4 +129,5 @@ class SiteController extends Controller {
 
   }  
   
+   
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace api\controllers;
+namespace api\modules\v1\controllers;
 
 use Yii;
 use yii\web\Controller;
@@ -12,7 +12,7 @@ use yii\mongosoft\soapserver\Action;
  * Author: R.Smirnov
  */
 
-class SuppController extends Controller {
+class TestController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -25,7 +25,12 @@ class SuppController extends Controller {
         
     public function actionIndex() {
      
-        echo "Welcome to F-Keeper API gateway for Suppliers. Please use SOAP client to connect this service.";
+        echo "Welcome to F-Keeper API gateway. <b> (Version 1! Test controller)</b>Please use SOAP client to connect this service.";
+        
+      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
+      //      ->queryAll();
+        
+      //  var_dump($langs);
         
     }
     
@@ -34,12 +39,20 @@ class SuppController extends Controller {
         echo "hello";
         
     }
+    
+    public function actionTabson() {
+     
+        echo "tabson";
+        
+    }
+    
+    
 
-
+/*
     public function actions()
 {
     return [
-        'wsdl' => [
+        'hello' => [
             'class' => 'mongosoft\soapserver\Action',
             'serviceOptions' => [
                 'disableWsdlMode' => false,
@@ -50,6 +63,7 @@ class SuppController extends Controller {
             ],
     ];
 }
+*/
     
 /**
 * @param string $login
@@ -57,6 +71,7 @@ class SuppController extends Controller {
 * @return string 
 * @soap
 */
+ 
     
     public function getHello($login,$pass) 
     {
@@ -70,7 +85,7 @@ class SuppController extends Controller {
    * @return mixed result of auth
    * @soap
    */
-    
+   
   public function OpenSession() {
       
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
@@ -123,4 +138,5 @@ class SuppController extends Controller {
 
   }  
   
+   
 }

@@ -174,7 +174,7 @@ class SuppController extends Controller {
             
            $sessionId = Yii::$app->getSecurity()->generateRandomString();
            
-           $oldsess = ApiSession::find()->orderBy('fid DESC')->one();  
+           $oldsess = ApiSession::find()->orderBy('fid DESC')->one() ? ApiSession::find()->orderBy('fid DESC')->one() : 1;  
            
            $sess = new ApiSession();
            $sess->fid = $oldsess->fid+1;

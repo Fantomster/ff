@@ -1,0 +1,268 @@
+<?php
+
+namespace api\modules\v1\controllers;
+
+use Yii;
+use yii\web\Controller;
+use yii\mongosoft\soapserver\Action;
+
+use \api\common\models\ApiAccess;
+use \api\common\models\ApiSession;
+
+/**
+ * Description of SiteController
+ * F-Keeper SOAP server based on mongosoft\soapserver
+ * Author: R.Smirnov
+ */
+
+class SuppController extends Controller {
+    
+    public $enableCsrfValidation = false;
+    
+    protected $authenticated = false;
+    
+    private $sessionId = '';
+    private $username;
+    private $password;
+    private $nonce;
+    private $extimefrom;
+    private $ip;
+    
+        
+    public function actionIndex() {
+     
+        echo "Welcome to F-Keeper API gateway. <b> (Version 1! SOAP )</b>Please use SOAP client to connect this service.";
+        
+      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
+      //      ->queryAll();
+        
+      //  var_dump($langs);
+        
+    }
+
+    public function actions()
+{
+    return [
+        'wsdl' => [
+            'class' => 'mongosoft\soapserver\Action',
+            'serviceOptions' => [
+                'disableWsdlMode' => false,
+            ]
+        ],
+        'error' => [
+                'class' => 'yii\web\ErrorAction',
+            ],
+    ];
+}
+
+    
+/**
+* @param string $name
+* @return string 
+* @soap
+*/
+ 
+    
+    public function getHello($name) 
+    {
+        return 'Hello ' . $name.'! Server Date:'.date("Y-m-d H:i:s") ;
+    }
+    
+
+/**
+* Get Categories
+* @param string $sessionId 
+* @param string $nonce 
+* @param string $lang
+* @return mixed 
+* @soap
+*/
+    
+    public function getCategory($sessionId, $nonce, $lang) 
+    {
+
+      if (($sess = $this->check_session($sessionId,$nonce)) != 0) {
+          
+      if ($lang == 'ENG') {
+          
+          $catview = 'api_category_eng_v';
+          
+      } else {
+          
+          $catview = 'api_category_rus_v';      
+      }
+      
+      $cats = Yii::$app->db_api->createCommand('SELECT fid, denom, ifnull(up,0) as up FROM '.$catview)
+      ->queryAll();
+        
+      return $cats;
+      exit;
+      
+      } else {
+      
+      return 'Session error. Active session is not found.';
+      exit;   
+      }
+        
+      
+    }
+   
+    /**
+* Get Units
+* @param string $sessionId 
+* @param string $nonce 
+* @param string $lang
+* @return mixed 
+* @soap
+*/
+    
+    public function getUnits($sessionId, $nonce, $lang) 
+    {
+
+      if (($sess = $this->check_session($sessionId,$nonce)) != 0) {
+          
+      if ($lang == 'ENG') {
+          
+          $catview = 'api_units_eng_v';
+          
+      } else {
+          
+          $catview = 'api_units_rus_v';      
+      }
+      
+      $cats = Yii::$app->db_api->createCommand('SELECT fid, denom FROM '.$catview)
+      ->queryAll();
+        
+      return $cats;
+      exit;
+      
+      } else {
+      
+      return 'Session error. Active session is not found.';
+      exit;   
+      }
+        
+      
+    }
+   
+   
+/**
+   * Soap authorization
+   * @return mixed result of auth
+   * @soap
+   */
+   
+  public function OpenSession() {
+      
+    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
+    {
+    header('WWW-Authenticate: Basic realm="f-keeper.ru"');
+    header('HTTP/1.0 401 Unauthorized');
+    header('Warning: WSS security in not provided in SOAP header');
+    exit;
+   
+    } else { 
+        
+               
+        if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td',[':username' => $this->username])->one())
+        {
+            return 'Auth error. Login is not found.';
+            exit;
+        };
+        
+        if (Yii::$app->getSecurity()->validatePassword($this->password, $acc->password)) {
+            
+           $sessionId = Yii::$app->getSecurity()->generateRandomString();
+           
+           $oldsess = ApiSession::find()->orderBy('fid DESC')->one();  
+           
+           $sess = new ApiSession();
+           $sess->fid = $oldsess->fid+1;
+           $sess->token = $sessionId;
+           $sess->acc = $acc->fid;
+           $sess->nonce = $this->nonce;
+           $sess->fd = date('Y-m-d H:i:s');
+           $sess->td = date('Y-m-d H:i:s',strtotime('+1 day'));
+           $sess->ver = 1;
+           $sess->status = 1;           
+           $sess->ip = $this->ip;
+           $sess->extimefrom = $this->extimefrom;
+           
+           if(!$sess->save())
+           {
+                return $sess->errors;
+                exit;  
+           } else 
+                      
+           return 'OK_SOPENED:'.$sess->token;
+           
+        } else {
+        
+            return 'Auth error. Password is not correct.';    
+            exit;
+        }
+        
+        
+    // $identity = new UserIdentity($this->username, $this->password);    
+   
+    /*    if (($this->username != 'cyborg') || ($this->password != 'mypass')) 
+        {
+            return 'Auth error. Login or password is not correct.';
+        } else {
+    
+            $sessionId = Yii::$app->getSecurity()->generateRandomString();
+            // $sessionId = md5(uniqid(rand(),1));
+          
+            return 'OK_SOPENED:'.$sessionId;
+        }
+       */
+    }  
+    
+  }
+  
+    public function security($header) {
+    
+       
+        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($header->UsernameToken->Username)) // Проверяем послали ли нам данные авторизации (BASIC)
+        {
+            header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
+            header('HTTP/1.0 401 Unauthorized');
+            exit;
+   
+        } else {
+            
+        $this->username = $header->UsernameToken->Username;
+        $this->password = $header->UsernameToken->Password;
+        $this->nonce = $header->UsernameToken->Nonce; 
+        $this->extimefrom = $header->UsernameToken->Created; 
+        
+        if (isset($_SERVER['REMOTE_ADDR']))            
+            $this->ip = $_SERVER['REMOTE_ADDR'];
+         
+    //     $this->username =  Yii::$app->request->getAuthUser();
+    //     $this->password =  Yii::$app->request->getAuthPassword();
+         
+         return $header;
+         
+                     
+        }
+
+  }  
+  
+  public function check_session($session, $nonce) {
+  
+        if (!$sess = ApiSession::find()->where('token = :token and nonce = :nonce and now() between fd and td',
+                [':token' => $session,'nonce' => $nonce])->one()) {
+            
+        return 0;
+        
+        } else {
+            
+        return $sess;
+        
+        }
+      
+  }
+  
+   
+}

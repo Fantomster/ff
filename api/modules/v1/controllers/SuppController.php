@@ -178,7 +178,7 @@ class SuppController extends Controller {
            
            $sess = new ApiSession();
            
-           if ($oldsess->fid) {
+           if ($oldsess) {
            $sess->fid = $oldsess->fid+1;    
            } else {
            $sess->fid = 1;    

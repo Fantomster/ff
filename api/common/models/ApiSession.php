@@ -26,7 +26,7 @@ class ApiSession extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'api-keeper.api_session';
+        return 'api.api_session';
     }
 
     /**

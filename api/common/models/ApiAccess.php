@@ -24,7 +24,7 @@ class ApiAccess extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'api-keeper.api_access';
+        return 'api.api_access';
     }
 
     /**

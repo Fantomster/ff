@@ -24,7 +24,7 @@ class ApiAccess extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'api.api_access';
+        return 'api_access';
     }
 
     /**
@@ -59,6 +59,11 @@ class ApiAccess extends \yii\db\ActiveRecord
   //  public static function getCategory($id) {
   //      return MpCategory::find()->where(["id" => $id])->one()->name;
   //  }
+    
+            public static function getDb()
+    {
+       return \Yii::$app->db_api;
+    }
 
 
 }

@@ -174,7 +174,6 @@ Pjax::begin([
 
 ]); ?>
         <div class="mswrapper" style="position: relative;height: 80px">
-                
                 <i class="flaticon-cross-out form-close" data-dismiss="modal" style="top: 10px;"></i>
 		<div style="display: inline-block;position: absolute;left:0">
 		<h4 class="f-title">Разместить заявку</h4>

@@ -119,7 +119,7 @@ class SuppController extends Controller {
     public function getUnits($sessionId, $nonce, $lang) 
     {
 
-      if (($sess = $this->check_session($sessionId,$nonce)) != 0) {
+      if ($this->check_session($sessionId,$nonce)) {
           
       if ($lang == 'ENG') {
           
@@ -177,7 +177,14 @@ class SuppController extends Controller {
            $oldsess = ApiSession::find()->orderBy('fid DESC')->one();  
            
            $sess = new ApiSession();
-           $sess->fid = $oldsess->fid+1;
+           
+           if ($oldsess) {
+           $sess->fid = $oldsess->fid+1;    
+           } else {
+           $sess->fid = 1;    
+           }
+           
+           
            $sess->token = $sessionId;
            $sess->acc = $acc->fid;
            $sess->nonce = $this->nonce;
@@ -254,11 +261,11 @@ class SuppController extends Controller {
         if (!$sess = ApiSession::find()->where('token = :token and nonce = :nonce and now() between fd and td',
                 [':token' => $session,'nonce' => $nonce])->one()) {
             
-        return 0;
+        return false;
         
         } else {
             
-        return $sess;
+        return true;
         
         }
       

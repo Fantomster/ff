@@ -26,7 +26,7 @@ class ApiSession extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'api-keeper.api_session';
+        return 'api_session';
     }
 
     /**
@@ -61,4 +61,11 @@ class ApiSession extends \yii\db\ActiveRecord
   //  public static function getCategory($id) {
   //      return MpCategory::find()->where(["id" => $id])->one()->name;
   //  }
+    
+        public static function getDb()
+    {
+       return \Yii::$app->db_api;
+    }
+
+
 }

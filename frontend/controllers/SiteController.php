@@ -144,16 +144,16 @@ class SiteController extends Controller {
     public function actionCompleteRegistration() {
         $this->layout = "main-user";
         $user = Yii::$app->user->identity;
-        $profile = $user->profile;
-        $profile->scenario = "complete";
+//        $profile = $user->profile;
+//        $profile->scenario = "complete";
         $organization = $user->organization;
         $organization->scenario = "complete";
         
         $post = Yii::$app->request->post();
-        if ($profile->load($post) && $organization->load($post)) {
-            if ($profile->validate() && $organization->validate()) {
+        if ($organization->load($post)) {
+            if ($organization->validate()) {
                 
-                $profile->save();
+                //$profile->save();
                 $organization->step = Organization::STEP_TUTORIAL;
                 $organization->save();
                 
@@ -168,7 +168,8 @@ class SiteController extends Controller {
             }
         }
         
-        return $this->render("complete-registration", compact("profile", "organization"));
+        //return $this->render("complete-registration", compact("profile", "organization"));
+        return $this->render("complete-registration", compact("organization"));
     }
     
     public function actionAjaxTutorialOff() {

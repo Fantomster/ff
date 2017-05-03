@@ -119,7 +119,7 @@ class SuppController extends Controller {
     public function getUnits($sessionId, $nonce, $lang) 
     {
 
-      if (($sess = $this->check_session($sessionId,$nonce)) != 0) {
+      if ($this->check_session($sessionId,$nonce)) {
           
       if ($lang == 'ENG') {
           
@@ -261,11 +261,11 @@ class SuppController extends Controller {
         if (!$sess = ApiSession::find()->where('token = :token and nonce = :nonce and now() between fd and td',
                 [':token' => $session,'nonce' => $nonce])->one()) {
             
-        return 0;
+        return false;
         
         } else {
             
-        return $sess;
+        return true;
         
         }
       

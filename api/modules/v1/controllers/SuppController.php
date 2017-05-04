@@ -147,7 +147,7 @@ class SuppController extends Controller {
    
    
 /**
-   * Soap authorization
+   * Soap authorization open session
    * @return mixed result of auth
    * @soap
    */
@@ -188,8 +188,8 @@ class SuppController extends Controller {
            $sess->token = $sessionId;
            $sess->acc = $acc->fid;
            $sess->nonce = $this->nonce;
-           $sess->fd = date('Y-m-d H:i:s');
-           $sess->td = date('Y-m-d H:i:s',strtotime('+1 day'));
+           $sess->fd = gmdate('Y-m-d H:i:s');
+           $sess->td = gmdate('Y-m-d H:i:s',strtotime('+1 day'));
            $sess->ver = 1;
            $sess->status = 1;           
            $sess->ip = $this->ip;
@@ -226,6 +226,107 @@ class SuppController extends Controller {
     }  
     
   }
+  
+  /**
+   * Soap authorization close session
+   * @param string $sessionId 
+   * @param string $nonce 
+   * @return mixed result of auth
+   * @soap
+   */
+   
+  public function CloseSession($sessionId,$nonce) {
+      
+    if ($this->check_session($sessionId,$nonce)) {
+          
+        $sess = ApiSession::find()->where('token = :token and now() between fd and td',
+                [':token' => $sessionId])->one();   
+        
+        $sess->td = gmdate('Y-m-d H:i:s');
+           $sess->status = 2;           
+                      
+           if(!$sess->save())
+           {
+                return $sess->errors;
+                exit;  
+           } else {
+                      
+           return 'OK_CLOSED :'.$sess->token; 
+            }
+
+      
+      } else {
+      
+      return 'Session error. Active session is not found.';
+      exit;   
+      }
+      
+    /*  
+    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
+    {
+    header('WWW-Authenticate: Basic realm="f-keeper.ru"');
+    header('HTTP/1.0 401 Unauthorized');
+    header('Warning: WSS security in not provided in SOAP header');
+    exit;
+   
+    } else { 
+        
+               
+        if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td',[':username' => $this->username])->one())
+        {
+            return 'Auth error. Login is not found.';
+            exit;
+        };
+        
+        if (Yii::$app->getSecurity()->validatePassword($this->password, $acc->password)) {
+            
+          
+            $sess = ApiSession::find()->where('token = :token and now() between fd and td',
+                [':token' => $sessionId])->one(); 
+            
+            if (!$sess) {
+                    
+                    return 'Session error. Active session is not found.';
+                    exit; 
+                
+            } else {
+            
+           $sess->td = date('Y-m-d H:i:s');
+           $sess->status = 2;           
+                      
+           if(!$sess->save())
+           {
+                return $sess->errors;
+                exit;  
+           } else 
+                      
+           return 'OK_CLOSED :'.$sess->token; 
+            }
+           
+        } else {
+        
+            return 'Auth error. Password is not correct.';    
+            exit;
+        }
+        
+        
+    // $identity = new UserIdentity($this->username, $this->password);    
+   
+    /*    if (($this->username != 'cyborg') || ($this->password != 'mypass')) 
+        {
+            return 'Auth error. Login or password is not correct.';
+        } else {
+    
+            $sessionId = Yii::$app->getSecurity()->generateRandomString();
+            // $sessionId = md5(uniqid(rand(),1));
+          
+            return 'OK_SOPENED:'.$sessionId;
+        }
+       
+    }  
+    */
+  }
+  
   
     public function security($header) {
     

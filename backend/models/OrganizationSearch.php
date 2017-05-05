@@ -18,7 +18,7 @@ class OrganizationSearch extends Organization {
     public function rules() {
         return [
             [['id', 'type_id', 'step'], 'integer'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'created_at', 'updated_at', 'white_list', 'partnership', 'locality'], 'safe'],
         ];
     }
 
@@ -66,6 +66,7 @@ class OrganizationSearch extends Organization {
 
         $query->andFilterWhere(['like', 'name', $this->name])
                 ->andFilterWhere(['like', 'city', $this->city])
+                ->andFilterWhere(['like', 'locality', $this->locality])
                 ->andFilterWhere(['like', 'address', $this->address])
                 ->andFilterWhere(['like', 'zip_code', $this->zip_code])
                 ->andFilterWhere(['like', 'phone', $this->phone])

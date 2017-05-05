@@ -11,4 +11,7 @@ class SweetAlertAsset extends \yii\web\AssetBundle
     public $js = [
         'sweetalert2.min.js'
     ];
+    public $depends = [
+        'frontend\assets\CoreJsAsset',
+    ];
 }

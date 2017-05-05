@@ -66,7 +66,10 @@ class SuppController extends Controller {
     
     public function getHello($name) 
     {
-            
+        if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];  
+        
+        $this->save_action(__FUNCTION__,0, 1,'OK',$this->ip);  
+         
         return 'Hello ' . $name.'! Server Date:'.gmdate("Y-m-d H:i:s") ;
             }
     
@@ -83,7 +86,9 @@ class SuppController extends Controller {
     public function getCategory($sessionId, $nonce, $lang) 
     {
 
-      if ($sess = $this->check_session($sessionId,$nonce)) {
+        if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];  
+        
+        if ($sess = $this->check_session($sessionId,$nonce)) {
           
       // return $sess;    
           
@@ -127,7 +132,9 @@ class SuppController extends Controller {
     
     public function getUnits($sessionId, $nonce, $lang) 
     {
-
+      
+      if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];  
+      
       if ($this->check_session($sessionId,$nonce)) {
           
       if ($lang == 'ENG') {
@@ -256,6 +263,8 @@ class SuppController extends Controller {
    
   public function CloseSession($sessionId,$nonce) {
       
+    if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];  
+      
     if ($this->check_session($sessionId,$nonce)) {
           
         $sess = ApiSession::find()->where('token = :token and now() between fd and td',
@@ -277,7 +286,6 @@ class SuppController extends Controller {
       
       } else {
       
-          if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];
           
       $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip); 
       return 'Session error. Active session is not found.';

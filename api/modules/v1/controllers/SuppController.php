@@ -104,7 +104,7 @@ class SuppController extends Controller {
       $cats = Yii::$app->db_api->createCommand('SELECT fid, denom, ifnull(up,0) as up FROM '.$catview)
       ->queryAll();
      
-      $this->save_action(__FUNCTION__, $sessionId, 1,'OK','');     
+      $this->save_action(__FUNCTION__, $sessionId, 1,'OK',$this->ip);     
       return $cats;
     
       exit;
@@ -112,7 +112,7 @@ class SuppController extends Controller {
           
       } else {
           
-        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session','');       
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip);       
         return 'Session error. Active session is not found.';
 
       exit;   
@@ -149,13 +149,13 @@ class SuppController extends Controller {
       $cats = Yii::$app->db_api->createCommand('SELECT fid, denom FROM '.$catview)
       ->queryAll();
      
-      $this->save_action(__FUNCTION__, $sessionId, 1,'OK',''); 
+      $this->save_action(__FUNCTION__, $sessionId, 1,'OK',$this->ip); 
       return $cats;
       exit;
       
       } else {
       
-      $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',''); 
+      $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip); 
       //return $res;
       return 'Session error. Active session is not found.';
       exit;   

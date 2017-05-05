@@ -681,7 +681,7 @@ class ClientController extends DefaultController {
         $supplier_org_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $organization = Organization::find()->where(['id' => $supplier_org_id])->one();
-        $user = User::find()->where(['email' => $organization->email])->one();
+        $user = User::find()->where(['organization_id' => $organization->id])->one();
         !empty($user) ? $user->status == 0 ? $userStatus = 1 : $userStatus = 0 : $userStatus = '';
         $load_data = ArrayHelper::getColumn(Category::find()->where(['in', 'id', \common\models\RelationCategory::find()->
                                     select('category_id')->

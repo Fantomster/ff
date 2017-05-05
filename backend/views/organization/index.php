@@ -27,14 +27,26 @@ $gridColumns = [
         'value' => function ($data) {
             return Html::a($data['name'], ['organization/view', 'id' => $data['id']]);
         },
-            ],
-            'white_list',
-            'partnership',
-            'city',
+    ],
+    'white_list',
+    'partnership',
+    'locality',
 //    'address',
 //    'zip_code',
-            'phone',
-            'email:email',
+    'phone',
+    'email:email',
+    [
+        'attribute' => 'place_id',
+        'label' => 'GEO',
+        'format' => 'raw',
+        'value' => function ($data) {
+            if(empty($data->place_id)){
+            return  Html::a('<span class="text-danger">Добавить адрес</span>', ['update', 'id' => $data->id]);
+            }else{
+            return  '<span class="text-success">Актуализирован</span>'; 
+            }
+        }
+    ],
 //    'website',
                 // 'created_at',
                 // 'updated_at',

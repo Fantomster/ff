@@ -77,11 +77,6 @@ class RequestController extends DefaultController {
             ],
         ];
     }
-    public function actionTest($id) {
-        
-            return $this->render("test");
-       
-    }
     public function actionSaveRequest() {
         $currentUser = $this->currentUser;
         if($currentUser->organization->type_id != Organization::TYPE_RESTAURANT){

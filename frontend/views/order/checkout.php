@@ -25,6 +25,7 @@ $this->registerJs(
                     title = "Очистка корзины";
                     text = "Вы уверены, что хотите удалить все заказы из корзины?";
                     success = "Корзина очищена!";
+                    dataEdited = 0;
                 }
                 swal({
                     title: title,

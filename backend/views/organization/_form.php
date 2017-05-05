@@ -22,6 +22,17 @@ use yii\widgets\ActiveForm;
     <style>#map{width:100%;height:250px;}</style>
     <?= $form->field($model, 'address')->textInput(['maxlength' => true]) ?>
     <div id="map"></div>
+    <script type="text/javascript"> 
+
+function stopRKey(evt) { 
+var evt = (evt) ? evt : ((event) ? event : null); 
+var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null); 
+if ((evt.keyCode == 13) && (node.type=="text")) {return false;} 
+} 
+
+document.onkeypress = stopRKey; 
+
+</script> 
     <?= Html::activeHiddenInput($model, 'lat'); //широта ?>
     <?= Html::activeHiddenInput($model, 'lng'); //долгота ?>
     <?= Html::activeHiddenInput($model, 'country'); //страна ?> 

@@ -282,7 +282,7 @@ class SuppController extends Controller {
                 exit;  
            } else {
            
-           $res = $this->save_action(__FUNCTION__, $sesionId, 1,'OK',$sess->ip);    
+           $res = $this->save_action(__FUNCTION__, $sessionId, 1,'OK',$sess->ip);    
            return 'OK_CLOSED :'.$sess->token; 
             }
 

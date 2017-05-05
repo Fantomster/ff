@@ -178,6 +178,8 @@ class SuppController extends Controller {
     header('WWW-Authenticate: Basic realm="f-keeper.ru"');
     header('HTTP/1.0 401 Unauthorized');
     header('Warning: WSS security in not provided in SOAP header');
+    
+    $this->save_action(__FUNCTION__,0, 0,'Auth error HTTP/1.0 401 Unauthorized',$this->ip);
     exit;
    
     } else { 
@@ -301,6 +303,8 @@ class SuppController extends Controller {
         {
             header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
             header('HTTP/1.0 401 Unauthorized');
+            
+            $this->save_action(__FUNCTION__,0, 0,'Auth error HTTP/1.0 401 Unauthorized',$this->ip);
             exit;
    
         } else {

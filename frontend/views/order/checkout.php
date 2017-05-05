@@ -224,7 +224,7 @@ $this->title = "Корзина";
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-shopping-cart"></i></i> Корзина
+        <i class="fa fa-shopping-cart"></i> Корзина
         <small>Список готовящихся заказов</small>
     </h1>
     <?=

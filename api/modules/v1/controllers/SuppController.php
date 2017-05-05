@@ -231,7 +231,7 @@ class SuppController extends Controller {
            
         } else {
         
-           $res = $this->save_action(__FUNCTION__, $sess->token, 0,'Wrong password',$this->ip); 
+           $res = $this->save_action(__FUNCTION__, 0, 0,'Wrong password',$this->ip); 
            
            return 'Auth error. Password is not correct.';   
            

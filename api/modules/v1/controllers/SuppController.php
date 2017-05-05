@@ -277,7 +277,7 @@ class SuppController extends Controller {
       
       } else {
       
-      $res = $this->save_action(__FUNCTION__, $sess->token, 0,'No active session',$this->ip); 
+      $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip); 
       return 'Session error. Active session is not found.';
       exit;   
       }

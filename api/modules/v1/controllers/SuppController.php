@@ -189,7 +189,7 @@ class SuppController extends Controller {
         if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td',[':username' => $this->username])->one())
         {
             
-            $this->save_action(__FUNCTION__, $sessionId, 0,'Wrong login',$this->ip); 
+            $this->save_action(__FUNCTION__, 0, 0,'Wrong login',$this->ip); 
             return 'Auth error. Login is not found.';
             exit;
         };

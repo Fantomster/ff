@@ -8,6 +8,7 @@ use yii\mongosoft\soapserver\Action;
 
 use \api\common\models\ApiAccess;
 use \api\common\models\ApiSession;
+use \api\common\models\ApiActions;
 
 /**
  * Description of SiteController
@@ -65,8 +66,9 @@ class SuppController extends Controller {
     
     public function getHello($name) 
     {
-        return 'Hello ' . $name.'! Server Date:'.date("Y-m-d H:i:s") ;
-    }
+            
+        return 'Hello ' . $name.'! Server Date:'.gmdate("Y-m-d H:i:s") ;
+            }
     
 
 /**
@@ -81,7 +83,9 @@ class SuppController extends Controller {
     public function getCategory($sessionId, $nonce, $lang) 
     {
 
-      if (($sess = $this->check_session($sessionId,$nonce)) != 0) {
+      if ($sess = $this->check_session($sessionId,$nonce)) {
+          
+      // return $sess;    
           
       if ($lang == 'ENG') {
           
@@ -94,20 +98,25 @@ class SuppController extends Controller {
       
       $cats = Yii::$app->db_api->createCommand('SELECT fid, denom, ifnull(up,0) as up FROM '.$catview)
       ->queryAll();
-        
+     
+      $this->save_action(__FUNCTION__, $sessionId, 1,'OK','');     
       return $cats;
+    
       exit;
-      
+            
+          
       } else {
-      
-      return 'Session error. Active session is not found.';
+          
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session','');       
+        return 'Session error. Active session is not found.';
+
       exit;   
       }
         
       
     }
    
-    /**
+/**
 * Get Units
 * @param string $sessionId 
 * @param string $nonce 
@@ -132,12 +141,15 @@ class SuppController extends Controller {
       
       $cats = Yii::$app->db_api->createCommand('SELECT fid, denom FROM '.$catview)
       ->queryAll();
-        
+     
+      $this->save_action(__FUNCTION__, $sessionId, 1,'OK',''); 
       return $cats;
       exit;
       
       } else {
       
+      $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',''); 
+      //return $res;
       return 'Session error. Active session is not found.';
       exit;   
       }
@@ -166,6 +178,8 @@ class SuppController extends Controller {
                
         if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td',[':username' => $this->username])->one())
         {
+            
+            $this->save_action(__FUNCTION__, $sessionId, 0,'Wrong login',$this->ip); 
             return 'Auth error. Login is not found.';
             exit;
         };
@@ -183,8 +197,7 @@ class SuppController extends Controller {
            } else {
            $sess->fid = 1;    
            }
-           
-           
+                     
            $sess->token = $sessionId;
            $sess->acc = $acc->fid;
            $sess->nonce = $this->nonce;
@@ -201,12 +214,18 @@ class SuppController extends Controller {
                 exit;  
            } else 
                       
+           $res = $this->save_action(__FUNCTION__, $sess->token, 1,'OK',$this->ip);
+           
            return 'OK_SOPENED:'.$sess->token;
+           
            
         } else {
         
-            return 'Auth error. Password is not correct.';    
-            exit;
+           $res = $this->save_action(__FUNCTION__, $sess->token, 0,'Wrong password',$this->ip); 
+           
+           return 'Auth error. Password is not correct.';   
+           
+           exit;
         }
         
         
@@ -228,10 +247,10 @@ class SuppController extends Controller {
   }
   
   /**
-   * Soap authorization close session
+   * Close session
    * @param string $sessionId 
    * @param string $nonce 
-   * @return mixed result of auth
+   * @return mixed result
    * @soap
    */
    
@@ -250,81 +269,18 @@ class SuppController extends Controller {
                 return $sess->errors;
                 exit;  
            } else {
-                      
+           
+           $res = $this->save_action(__FUNCTION__, $sesionId, 1,'OK',$sess->ip);    
            return 'OK_CLOSED :'.$sess->token; 
             }
 
       
       } else {
       
+      $res = $this->save_action(__FUNCTION__, $sess->token, 0,'No active session',$this->ip); 
       return 'Session error. Active session is not found.';
       exit;   
       }
-      
-    /*  
-    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
-    {
-    header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-    header('HTTP/1.0 401 Unauthorized');
-    header('Warning: WSS security in not provided in SOAP header');
-    exit;
-   
-    } else { 
-        
-               
-        if (!$acc = ApiAccess::find()->where('login = :username and now() between fd and td',[':username' => $this->username])->one())
-        {
-            return 'Auth error. Login is not found.';
-            exit;
-        };
-        
-        if (Yii::$app->getSecurity()->validatePassword($this->password, $acc->password)) {
-            
-          
-            $sess = ApiSession::find()->where('token = :token and now() between fd and td',
-                [':token' => $sessionId])->one(); 
-            
-            if (!$sess) {
-                    
-                    return 'Session error. Active session is not found.';
-                    exit; 
-                
-            } else {
-            
-           $sess->td = date('Y-m-d H:i:s');
-           $sess->status = 2;           
-                      
-           if(!$sess->save())
-           {
-                return $sess->errors;
-                exit;  
-           } else 
-                      
-           return 'OK_CLOSED :'.$sess->token; 
-            }
-           
-        } else {
-        
-            return 'Auth error. Password is not correct.';    
-            exit;
-        }
-        
-        
-    // $identity = new UserIdentity($this->username, $this->password);    
-   
-    /*    if (($this->username != 'cyborg') || ($this->password != 'mypass')) 
-        {
-            return 'Auth error. Login or password is not correct.';
-        } else {
-    
-            $sessionId = Yii::$app->getSecurity()->generateRandomString();
-            // $sessionId = md5(uniqid(rand(),1));
-          
-            return 'OK_SOPENED:'.$sessionId;
-        }
-       
-    }  
-    */
   }
   
   
@@ -359,16 +315,49 @@ class SuppController extends Controller {
   
   public function check_session($session, $nonce) {
   
-        if (!$sess = ApiSession::find()->where('token = :token and nonce = :nonce and now() between fd and td',
+      if ($sess = ApiSession::find()->where('token = :token and nonce = :nonce and now() between fd and td',
                 [':token' => $session,'nonce' => $nonce])->one()) {
-            
-        return false;
-        
-        } else {
             
         return true;
         
+        } else {
+            
+        return false;
+        
         }
+      
+      
+  }
+  
+  public function save_action ($func, $sess, $result, $comment,$ip)   {
+      
+     $act = new ApiActions;
+     
+     $currSess = ApiSession::find()->where('token = :token',[':token' => $sess])->one();
+     
+     if ($currSess) {
+         $act->session = $currSess->fid;
+         $act->ip = $currSess->ip;
+     } else {
+         $act->session=0;
+         $act->ip=$ip;
+     }
+         
+     $act->action = $func;
+     $act->created = gmdate('Y-m-d H:i:s');
+     $act->result = $result;
+     $act->comment = $comment;
+           
+     if(!$act->save())
+           {
+                return $act->errors;
+                exit;  
+           } else {
+                      
+           return true; 
+            }  
+    
+            return $act->session;
       
   }
   

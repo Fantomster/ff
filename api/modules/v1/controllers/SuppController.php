@@ -277,6 +277,8 @@ class SuppController extends Controller {
       
       } else {
       
+          if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];
+          
       $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip); 
       return 'Session error. Active session is not found.';
       exit;   

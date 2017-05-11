@@ -1,5 +1,12 @@
 <?php
 
+        echo "<b>Welcome to R-Keeper integration gateway</b>";
+        echo "<hr>";
+        echo "Local date:".date('Y-m-d H:i:s',time());
+        echo "<hr>";
+        echo "GMT time:".gmdate("Y-m-d H:i:s");
+        echo "<hr>";
+
 /*
 
 use yii\helpers\Html;
@@ -18,7 +25,13 @@ use yii\widgets\Pjax;
 $this->title = 'API test';
 $this->params['breadcrumbs'][] = $this->title;
 
-echo "This is API index view";
+        echo "<b>Welcome to R-Keeper integration gateway</b>";
+        echo "<hr>";
+        echo "Local date:".date('Y-m-d H:i:s',time());
+        echo "<hr>";
+        echo "GMT time:".gmdate("Y-m-d H:i:s");
+        echo "<hr>";
+
 
 /*
 

@@ -73,6 +73,21 @@ class SuppController extends Controller {
         return 'Hello ' . $name.'! Server Date:'.gmdate("Y-m-d H:i:s") ;
             }
     
+            
+/**
+* @param array $arr
+* @return array
+* @soap
+*/
+ 
+    
+    public function getArray($arr) 
+    {
+        
+        return $arr;
+        
+    }
+             
 
 /**
 * Get Categories

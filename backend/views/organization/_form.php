@@ -48,7 +48,7 @@ document.onkeypress = stopRKey;
             'language'=>Yii::$app->params['google-api']['language'],
             'callback'=>'initMap'
         ));
-    $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
+    $this->registerJsFile($gpJsLink, ['async'=>true, 'defer'=>true]);
     $this->registerJs("
     $(document).on('keyup change', '#organization-address', function(){
     $(this).next().toggle(Boolean($(this).val()));

@@ -51,7 +51,9 @@
         "yii2assets/yii2-fullscreen-modal": "*",
         "delocker/yii2-animate.css": "dev-master",
         "borales/yii2-phone-input": "*",
-        "mongosoft/yii2-soap-server": "*"
+        "mongosoft/yii2-soap-server": "*",
+        "asimlqt/php-google-spreadsheet-client": "3.0.*",
+        "machour/yii2-google-apiclient": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

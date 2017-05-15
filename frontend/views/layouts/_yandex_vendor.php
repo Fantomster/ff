@@ -8,7 +8,9 @@
                     clickmap:true,
                     trackLinks:true,
                     accurateTrackBounce:true,
-                    webvisor:true
+                    webvisor:true,
+                    trackHash:true,
+                    ut:"noindex"
                 });
             } catch(e) { }
         });
@@ -25,5 +27,5 @@
         } else { f(); }
     })(document, window, "yandex_metrika_callbacks");
 </script>
-<noscript><div><img src="https://mc.yandex.ru/watch/44637583" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<noscript><div><img src="https://mc.yandex.ru/watch/44637583?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->

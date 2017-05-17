@@ -1093,7 +1093,7 @@ class OrderController extends DefaultController {
 //                ->setTo($email)
 //                ->setSubject($subject)
 //                ->queue();
-            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
+            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider", "recipient"))
                     ->setTo($email)
                     ->setSubject($subject)
                     ->send();

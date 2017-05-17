@@ -105,6 +105,12 @@ class Order extends \yii\db\ActiveRecord {
         ];
     }
 
+    public function beforeSave($insert) {
+        $result = parent::beforeSave($insert);
+        $this->discount = abs((int)$this->discount);
+        return $result;
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */

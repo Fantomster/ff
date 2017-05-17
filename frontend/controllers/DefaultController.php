@@ -42,6 +42,12 @@ class DefaultController extends Controller {
                     }
                     break;
             }
+            if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
+                throw new \yii\web\HttpException(403, 'Хуй тебе, Челиос!');
+            }
+        } elseif (isset(Yii::$app->request->get("token"))) {
+            $token = Yii::$app->request->get("token");
+            $user = \common\models\User::findOne(['access_token' => $token]);
         }
         if (!parent::beforeAction($action)) {
             return false;

@@ -18,7 +18,7 @@ use Google\Spreadsheet\ServiceRequestFactory;
 use Google\Spreadsheet\SpreadsheetService;
 
 
-
+define('CLIENT_APP_NAME', 'sonorous-dragon-167308');
 define('SERVICE_ACCOUNT_CLIENT_ID', '114798227950751078238');
 define('SERVICE_ACCOUNT_EMAIL', 'f-keeper@sonorous-dragon-167308.iam.gserviceaccount.com');
 define('SERVICE_ACCOUNT_PKCS12_FILE_PATH', Yii::getAlias('@common') . '/google/GoogleApiDocs-356b554846a5.p12');
@@ -28,11 +28,11 @@ define('CLIENT_KEY_PW', 'notasecret');
  * OrganizationController implements the CRUD actions for Organization model.
  */
 class ServiceDeskController extends Controller {
-
+    
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    /*public function behaviors() {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -56,7 +56,7 @@ class ServiceDeskController extends Controller {
                 ],
             ],
         ];
-    }
+    }*/
 
     /**
      * Lists all Organization models.
@@ -65,62 +65,54 @@ class ServiceDeskController extends Controller {
     public function actionIndex() {
         $model = new ServiceDesk();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $accessToken = self::getGoogleTokenFromKeyFile(SERVICE_ACCOUNT_CLIENT_ID, SERVICE_ACCOUNT_EMAIL, SERVICE_ACCOUNT_PKCS12_FILE_PATH);
-$serviceRequest = new DefaultServiceRequest($accessToken);
-            //$serviceRequest->setSslVerifyPeer(false);
-            ServiceRequestFactory::setInstance($serviceRequest);
+            $objClientAuth  = new \Google_Client ();
+            $objClientAuth -> setApplicationName (CLIENT_APP_NAME);
+            $objClientAuth -> setClientId (SERVICE_ACCOUNT_CLIENT_ID);
+            $objClientAuth -> setAssertionCredentials (new \Google_Auth_AssertionCredentials (
+                SERVICE_ACCOUNT_EMAIL, 
+                array('https://spreadsheets.google.com/feeds','https://docs.google.com/feeds'), 
+                file_get_contents (SERVICE_ACCOUNT_PKCS12_FILE_PATH), 
+                CLIENT_KEY_PW
+            ));
+            $objClientAuth->getAuth()->refreshTokenWithAssertion();
+            $objToken  = json_decode($objClientAuth->getAccessToken());
+            $accessToken = $objToken->access_token;
             
-            $spreadsheetService = new \Google\Spreadsheet\SpreadsheetService();
-            $worksheetFeed = $spreadsheetService->getPublicSpreadsheet("19vqYJCAQBGPNLuyJpd4jL6O7MT4CxHUhzC2tCvfUtPQ");
-            $worksheet = $worksheetFeed->getByTitle('list1');
-            $listFeed = $worksheet->getListFeed();
+            /**
+            * Initialize the service request factory
+            */ 
+
             $serviceRequest = new DefaultServiceRequest($accessToken);
-            //$serviceRequest->setSslVerifyPeer(false);
             ServiceRequestFactory::setInstance($serviceRequest);
             
-            $spreadsheetService = new \Google\Spreadsheet\SpreadsheetService();
-            $worksheetFeed = $spreadsheetService->getPublicSpreadsheet("19vqYJCAQBGPNLuyJpd4jL6O7MT4CxHUhzC2tCvfUtPQ");
-            $worksheet = $worksheetFeed->getByTitle('list1');
+            /**
+            * Get spreadsheet by title 
+            */
+            
+            $spreadsheetTitle = 'f-keeper';
+            $spreadsheetService = new SpreadsheetService();
+            $spreadsheetFeed = $spreadsheetService->getSpreadsheetFeed();
+            $spreadsheet = $spreadsheetFeed->getByTitle($spreadsheetTitle);
+            /**
+            * Get particular worksheet of the selected spreadsheet
+            */
+            $worksheetTitle = 'list1';
+            $worksheetFeed = $spreadsheet->getWorksheetFeed();
+            $worksheet = $worksheetFeed->getByTitle($worksheetTitle);
             $listFeed = $worksheet->getListFeed();
             
-            foreach ($listFeed->getEntries() as $entries) {
-                var_dump($entries->getValues()); 
-            }
-//            var_dump($listFeed);
-//            $data = ['фио' => 'john_doe'];
-            $listFeed->insert(['fio' => 'aaaaaaa']);
-            /*$spreadsheetService = new \Google\Spreadsheet\SpreadsheetService();
-            $spreadsheetFeed = $spreadsheetService->getSpreadsheets();
-
-            $spreadsheet = $spreadsheetFeed->getByTitle('19vqYJCAQBGPNLuyJpd4jL6O7MT4CxHUhzC2tCvfUtPQ');
-
-            $worksheetFeed = $spreadsheet->getWorksheets();
-            $worksheet = $worksheetFeed->getByTitle('list1');
-            $listFeed = $worksheet->getListFeed();
-            var_dump($listFeed);*/
+            $listFeed->insert([
+                'author' => 'ServiceDesk',
+                'region' => $model->region,
+                'fio' => $model->fio,
+                'phone' => $model->phone,
+                'message' => $model->body,
+                'startdatetime' => date("Y-m-d H:i:s")
+            ]);
+            
         }
             return $this->render('index', [
                 'model' => $model,
             ]);
     }
-    protected function getGoogleTokenFromKeyFile($clientId, $clientEmail, $pathToP12File) {
-    
-    $client = new \Google_Client();
-    $client->setClientId($clientId);
-
-    $cred = new \Google_Auth_AssertionCredentials(
-        $clientEmail,
-        array('https://spreadsheets.google.com/feeds','https://docs.google.com/feeds'),
-        file_get_contents($pathToP12File),
-        CLIENT_KEY_PW
-    );
-    
-    $client->setAssertionCredentials($cred);
-    if ($client->getAuth()->isAccessTokenExpired()) {
-        $client->getAuth()->refreshTokenWithAssertion($cred);
-    }
-
-    $service_token = json_decode($client->getAccessToken());
-    return $service_token->access_token;
-}
 }

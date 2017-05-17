@@ -42,5 +42,6 @@ $this->title = 'ServiceDesk';
     </div>
       <?php ActiveForm::end(); ?>  
     </div>
+      <a target="_blank" href="https://docs.google.com/spreadsheets/d/19vqYJCAQBGPNLuyJpd4jL6O7MT4CxHUhzC2tCvfUtPQ/edit?usp=sharing">Постоянная ссылка docs.google.com</a>
   </div>
 </section>

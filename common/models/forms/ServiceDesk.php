@@ -7,6 +7,7 @@ class ServiceDesk extends \yii\base\Model
     public $fio;
     public $phone;
     public $body;
+    public $created_at;
     
     public function rules()
     {
@@ -17,6 +18,7 @@ class ServiceDesk extends \yii\base\Model
             [['phone'], 'string'],
             [['body'], 'string'],
             [['body'], 'required'],
+            [['created_at'], 'safe'],
         ];
     }
     public function attributeLabels()

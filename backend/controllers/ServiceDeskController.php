@@ -22,6 +22,7 @@ define('CLIENT_APP_NAME', 'sonorous-dragon-167308');
 define('SERVICE_ACCOUNT_CLIENT_ID', '114798227950751078238');
 define('SERVICE_ACCOUNT_EMAIL', 'f-keeper@sonorous-dragon-167308.iam.gserviceaccount.com');
 define('SERVICE_ACCOUNT_PKCS12_FILE_PATH', Yii::getAlias('@common') . '/google/GoogleApiDocs-356b554846a5.p12');
+define('SERVICE_ACCOUNT_JSON_FILE_PATH', Yii::getAlias('@common') . '/google/client_secret_114798227950751078238.json');
 define('CLIENT_KEY_PW', 'notasecret');
 
 /**
@@ -57,7 +58,6 @@ class ServiceDeskController extends Controller {
             ],
         ];
     }*/
-
     /**
      * Lists all Organization models.
      * @return mixed
@@ -74,8 +74,14 @@ class ServiceDeskController extends Controller {
                 file_get_contents (SERVICE_ACCOUNT_PKCS12_FILE_PATH), 
                 CLIENT_KEY_PW
             ));
+            /*putenv('GOOGLE_APPLICATION_CREDENTIALS='. SERVICE_ACCOUNT_JSON_FILE_PATH);
+            $objClientAuth->useApplicationDefaultCredentials();
+            $objClientAuth->addScope(Google_Service_Drive::DRIVE);
+            var_dump($objClientAuth);*/
+            
             $objClientAuth->getAuth()->refreshTokenWithAssertion();
             $objToken  = json_decode($objClientAuth->getAccessToken());
+            
             $accessToken = $objToken->access_token;
             
             /**
@@ -109,6 +115,11 @@ class ServiceDeskController extends Controller {
                 'message' => $model->body,
                 'startdatetime' => date("Y-m-d H:i:s")
             ]);
+            if (Yii::$app->request->isPjax) {
+                return $this->renderAjax('index', [
+                'model' => $model,
+                ]);
+            }
             
         }
             return $this->render('index', [

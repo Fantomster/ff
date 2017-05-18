@@ -115,6 +115,11 @@ class ServiceDeskController extends Controller {
                 'message' => $model->body,
                 'startdatetime' => date("Y-m-d H:i:s")
             ]);
+            if (Yii::$app->request->isPjax) {
+                return $this->renderAjax('index', [
+                'model' => $model,
+                ]);
+            }
             
         }
             return $this->render('index', [

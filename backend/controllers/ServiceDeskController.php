@@ -22,7 +22,6 @@ define('CLIENT_APP_NAME', 'sonorous-dragon-167308');
 define('SERVICE_ACCOUNT_CLIENT_ID', '114798227950751078238');
 define('SERVICE_ACCOUNT_EMAIL', 'f-keeper@sonorous-dragon-167308.iam.gserviceaccount.com');
 define('SERVICE_ACCOUNT_PKCS12_FILE_PATH', Yii::getAlias('@common') . '/google/GoogleApiDocs-356b554846a5.p12');
-define('SERVICE_ACCOUNT_JSON_FILE_PATH', Yii::getAlias('@common') . '/google/client_secret_114798227950751078238.json');
 define('CLIENT_KEY_PW', 'notasecret');
 
 /**
@@ -102,13 +101,13 @@ class ServiceDeskController extends Controller {
             /**
             * Get particular worksheet of the selected spreadsheet
             */
-            $worksheetTitle = 'list1';
+            $worksheetTitle = 'ServiceDesk';
             $worksheetFeed = $spreadsheet->getWorksheetFeed();
             $worksheet = $worksheetFeed->getByTitle($worksheetTitle);
             $listFeed = $worksheet->getListFeed();
             
             $listFeed->insert([
-                'author' => 'ServiceDesk',
+                'author' => 'Менеджер',
                 'region' => $model->region,
                 'fio' => $model->fio,
                 'phone' => $model->phone,

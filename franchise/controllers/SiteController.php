@@ -167,7 +167,7 @@ class SiteController extends DefaultController {
         $franchise_user = $this->currentUser->profile;
         if ($model->load(Yii::$app->request->post())) {
 
-            $model->region = 'test';
+            $model->region = '';
             $model->phone = str_replace("+", "", $franchise_user->phone);
             $model->fio = $franchise_user->full_name;
             

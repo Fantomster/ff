@@ -163,13 +163,13 @@ class SiteController extends DefaultController {
     }
     public function actionServiceDesk() {
         $model = new ServiceDesk();
-        $franchise_id = $this->currentFranchisee->id;
-        $franchise_user_id = $this->currentUser->profile;
-
+        $franchise = $this->currentFranchisee;
+        $franchise_user = $this->currentUser->profile;
         if ($model->load(Yii::$app->request->post())) {
+
             $model->region = 'test';
-            $model->phone = $franchiseManager->phone;
-            $model->fio = $franchiseManager->full_name;
+            $model->phone = str_replace("+", "", $franchise_user->phone);
+            $model->fio = $franchise_user->full_name;
             
           if($model->validate()){
             $objClientAuth  = new \Google_Client();
@@ -203,17 +203,19 @@ class SiteController extends DefaultController {
             $spreadsheetService = new SpreadsheetService();
             $spreadsheetFeed = $spreadsheetService->getSpreadsheetFeed();
             $spreadsheet = $spreadsheetFeed->getByTitle($spreadsheetTitle);
+            
             /**
             * Get particular worksheet of the selected spreadsheet
             */
+            
             $worksheetTitle = 'Franchise';
             $worksheetFeed = $spreadsheet->getWorksheetFeed();
             $worksheet = $worksheetFeed->getByTitle($worksheetTitle);
             $listFeed = $worksheet->getListFeed();
             
             $listFeed->insert([
-                'franchise_id' => 'test',
-                'franchise_user_id' => 'test',
+                'fid' => $franchise->id,
+                'fuid' => $franchise_user->user_id,
                 'region' => $model->region,
                 'fio' => $model->fio,
                 'phone' => $model->phone,

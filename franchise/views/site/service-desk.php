@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 $this->title = 'ServiceDesk';
 ?>
 <section class="content-header">
-    <h1>Запрос техническому отделу<small> Ваш запрос будет обработан в порядке очереди!</small>
+    <h1>Запрос техническому отделу<small> Ваш запрос будет обработан в порядке очереди и приоритета</small>
     </h1>
 </section>
 <section class="content">
@@ -26,11 +26,11 @@ $this->title = 'ServiceDesk';
             <div id="collapseOne" class="panel-collapse collapse in" aria-expanded="true">
                 <div class="box-body">
                     <?= $form->field($model, 'priority')->dropDownList([
-                        '1'=>'Низкий',
-                        '2'=>'Ниже среднего',
-                        '3'=>'Средний',
-                        '4'=>'Выше среднего',
-                        '5'=>'Высокий',
+                        '1'=>'Низкий (пожелание, просьба)',
+                        '2'=>'Ниже среднего (замечание)',
+                        '3'=>'Средний (функционал работает, но не в штатном режиме)',
+                        '4'=>'Выше среднего (Не работает не критичный бизнес процесс)',
+                        '5'=>'Высокий (Система не работает)',
                         ]);?>
                     <?= $form->field($model, 'body')->textInput() ?> 
                     <div class="form-group">

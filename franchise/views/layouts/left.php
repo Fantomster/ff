@@ -16,7 +16,7 @@
                             ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['analytics/index'], 'options' => ['class' => 'hidden-xs']],
                             ['label' => 'Финансы', 'icon' => 'money', 'url' => ['finance/index'], 'options' => ['class' => 'hidden-xs']],
                             ['label' => 'Промо', 'icon' => 'gift', 'url' => ['site/promotion'], 'options' => ['class' => 'hidden-xs']],
-                            ['label' => 'Тех. поддержка', 'icon' => 'life-buoy', 'url' => ['site/service-desk'], 'options' => ['class' => 'hidden-xs']],
+                            //['label' => 'Тех. поддержка', 'icon' => 'life-buoy', 'url' => ['site/service-desk'], 'options' => ['class' => 'hidden-xs']],
                             [
                                 'label' => 'Настройки',
                                 'icon' => 'gears',

@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\Franchisee;
+use common\models\FranchiseeGeo;
 use common\models\User;
 use common\models\Profile;
 use common\models\Role;
@@ -40,7 +41,7 @@ class FranchiseeController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'create', 'delete', 'users', 'update-user', 'create-user', 'delete-user'],
+                        'actions' => ['index', 'geo', 'update', 'view', 'create', 'delete', 'users', 'update-user', 'create-user', 'delete-user'],
                         'allow' => true,
                         'roles' => [Role::ROLE_ADMIN],
                     ],
@@ -63,7 +64,7 @@ class FranchiseeController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-
+    
     /**
      * Displays a single Franchisee model.
      * @param integer $id
@@ -161,7 +162,13 @@ class FranchiseeController extends Controller
 
         return $this->render('create-user', compact('user', 'profile', 'fr_id'));
     }
-    
+    public function actionGeo($id)
+    {
+        return $this->render('geo', [
+            'franchisee' => $this->findModel($id),
+            'franchiseeGeo' => new FranchiseeGeo(),
+        ]);
+    }
     /**
      * Finds the Franchisee model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

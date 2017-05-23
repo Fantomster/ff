@@ -182,7 +182,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 <span class="title__menu">связаться с нами</span>
                                 <ul class="contacts">
                                     <li><span class="phone"><span class="glyphicon glyphicon-phone"></span> 8-499-404-10-18</span></li>
-                                    <li><a href="mailto:info@f-keeper.ru"><span class="email"><span class="glyphicon glyphicon-envelope"></span>info@f-keeper.ru</span></a></li>
+                                    <li><a href="mailto:info@mixcart.ru"><span class="email"><span class="glyphicon glyphicon-envelope"></span>info@mixcart.ru</span></a></li>
                                     <li><span class="address"><span class="glyphicon glyphicon-map-marker"></span>Москва, ул.Привольная, 70</li>
                                 </ul>
                             </div>	
@@ -216,7 +216,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="copy">
-                                        <span>© <?= date('Y') ?> F-Keeper — ООО «Онлайн Маркет» </span>
+                                        <span>© <?= date('Y') ?> mixcart — ООО «Онлайн Маркет» </span>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-sm-4">

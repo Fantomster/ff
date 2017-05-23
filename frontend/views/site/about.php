@@ -33,6 +33,6 @@ $this->title = 'О компании';
 				
 			</div>
 			<div class="error__block">
-				<p>Хотите работать у нас? <a href="#">hr@f-keeper.ru</a></p>
+				<p>Хотите работать у нас? <a href="#">hr@mixcart.ru</a></p>
 			</div>
 		</main><!-- .content -->

@@ -309,7 +309,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                                 'isSystem' => $chat->is_system,
                                 'ajax' => 0,
                                 'danger' => $chat->danger,
-                                'organizationType' => $chat->sentBy->organization->type_id]);
+                                'organizationType' => (isset($chat->sentBy->organization) ? $chat->sentBy->organization->type_id : 1)]);
                         }
                         ?>
                     </div>

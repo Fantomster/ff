@@ -44,6 +44,7 @@ class Order extends \yii\db\ActiveRecord {
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
 
+    const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;
     

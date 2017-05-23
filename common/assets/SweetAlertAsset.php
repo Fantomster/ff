@@ -1,6 +1,6 @@
 <?php
  
-namespace frontend\assets;
+namespace common\assets;
  
 class SweetAlertAsset extends \yii\web\AssetBundle
 {
@@ -12,6 +12,6 @@ class SweetAlertAsset extends \yii\web\AssetBundle
         'sweetalert2.min.js'
     ];
     public $depends = [
-        'frontend\assets\CoreJsAsset',
+        'common\assets\CoreJsAsset',
     ];
 }

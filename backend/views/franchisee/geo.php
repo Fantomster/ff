@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 $this->title = "Create GEO Franchisee";
 $this->params['breadcrumbs'][] = ['label' => 'Franchisees', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $franchisee->id, 'url' => ['view', 'id' => $franchisee->id]];
-$this->params['breadcrumbs'][] = 'GEO CREATE';
+$this->params['breadcrumbs'][] = 'Регионы франшизы';
 ?>
 <div class="franchisee-create">
 

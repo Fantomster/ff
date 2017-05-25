@@ -224,35 +224,23 @@ class CronController extends Controller {
         }
     }
     public function actionMappingOrganizationFromGoogleApiMaps() {
-        $model = Organization::find()->where('lng is not null and lat is not null and administrative_area_level_1 is null')->limit(100)->all();
+        $model = Organization::find()->where('lng is not null and lat is not null and country is not null administrative_area_level_1 is null')->limit(100)->all();
         foreach($model as $s){
             $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.Yii::$app->params['google-api']['key-id'].'&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
             $address_json = json_decode(file_get_contents($address_url));
             if(!empty($address_json->results[0]->address_components)){
             $address_data = $address_json->results[0]->address_components;
             $location = array();
+            $location['locality'] = '';
+            $location['admin_1'] = '';
+            $location['country'] = '';
             foreach ($address_data as $component) {
               switch ($component->types) {
-                case in_array('street_number', $component->types):
-                  $location['street_number'] = $component->long_name;
-                  break;
-                case in_array('route', $component->types):
-                  $location['street'] = $component->long_name;
-                  break;
-                case in_array('sublocality', $component->types):
-                  $location['sublocality'] = $component->long_name;
-                  break;
                 case in_array('locality', $component->types):
                   $location['locality'] = $component->long_name;
                   break;
-                case in_array('administrative_area_level_2', $component->types):
-                  $location['admin_2'] = $component->long_name;
-                  break;
                 case in_array('administrative_area_level_1', $component->types):
                   $location['admin_1'] = $component->long_name;
-                  break;
-                case in_array('postal_code', $component->types):
-                  $location['postal_code'] = $component->long_name;
                   break;
                 case in_array('country', $component->types):
                   $location['country'] = $component->long_name;

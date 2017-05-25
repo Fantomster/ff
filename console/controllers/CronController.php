@@ -226,7 +226,7 @@ class CronController extends Controller {
     public function actionMappingOrganizationFromGoogleApiMaps() {
         $model = Organization::find()->where('lng is not null and lat is not null')->limit(100)->all();
         foreach($model as $s){
-            $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
+            $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.Yii::$app->params['google-api']['key-id'].'&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
             $address_json = json_decode(file_get_contents($address_url));
             //$address_data = $address_json->results[0]->address_components;
             if(empty($address_json->results)){

@@ -195,6 +195,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $newEmail = $userToken->data;
             if ($user->confirm($newEmail)) {
                 $success = true;
+                Yii::$app->user->login($user, 1);
             }
             if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome

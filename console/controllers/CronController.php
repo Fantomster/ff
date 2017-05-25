@@ -228,7 +228,7 @@ class CronController extends Controller {
         foreach($model as $s){
             $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.Yii::$app->params['google-api']['key-id'].'&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
             $address_json = json_decode(file_get_contents($address_url));
-            if(!empty($address_json->results)){
+            if(!empty($address_json->results[0]->address_components)){
             $address_data = $address_json->results[0]->address_components;
             $location = array();
             foreach ($address_data as $component) {

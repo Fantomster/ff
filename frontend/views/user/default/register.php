@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var yii\web\View $this
  * @var yii\widgets\ActiveForm $form
@@ -17,7 +18,7 @@ $this->title = Yii::t('user', 'Register');
     <div class="login__inside">
         <a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/logo-inner.png" alt=""/></a>
         <div class="contact__form">
-            <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
+<?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
 
                 <div class="alert alert-success">
                     <p><?= $flash ?></p>
@@ -25,12 +26,14 @@ $this->title = Yii::t('user', 'Register');
 
                 <?php
             else:
-                echo $this->render('_register-form', compact("user", "profile", "organization"));
+                ?>
+                    <?= $this->render('_register-form', compact("user", "profile", "organization")) ?>
+                <div class="regist">
+                <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
+                </div>
+            <?php
             endif;
             ?>
-            <div class="regist">
-                <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
-            </div>
         </div>
     </div>
 

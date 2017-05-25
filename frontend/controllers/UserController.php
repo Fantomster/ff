@@ -197,10 +197,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $success = true;
                 Yii::$app->user->login($user, 1);
             }
-            if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
+            //if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome
-                $user->sendWelcome();
-            }
+                //$user->sendWelcome();
+            //}
             // set email and delete token
             $email = $newEmail ? : $user->email;
             $userToken->delete();
@@ -239,7 +239,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // delete userToken and set success = true
             $userToken->delete();
             $success = true;
-            return $this->redirect(['/user/login']);
+            Yii::$app->user->login($user, 1);
+            return $this->redirect(['/site/index']);
         }
 
         return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));

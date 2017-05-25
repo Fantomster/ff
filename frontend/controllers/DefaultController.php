@@ -40,7 +40,7 @@ class DefaultController extends Controller {
             $this->loadCurrentUser();
             $organization = $this->currentUser->organization;
             $this->setLayout($organization->type_id);
-            if (($organization->type_id === Organization::TYPE_RESTAURANT) && ($organization->step == Organization::STEP_SET_INFO)) {
+            if (($organization->step == Organization::STEP_SET_INFO) && ($this->currentUser->status == \common\models\User::STATUS_ACTIVE)) {
                 return $this->redirect(['/site/complete-registration']);
             }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {

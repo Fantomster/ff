@@ -50,6 +50,7 @@ class RequestController extends DefaultController {
                             'close-request',
                             'save-request',
                             'set-responsible',
+                            'add-supplier',
                         ],
                         'allow' => true,
                         // Allow restaurant managers

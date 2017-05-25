@@ -41,7 +41,7 @@ class FranchiseeController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'geo', 'update', 'view', 'create', 'delete', 'users', 'update-user', 'create-user', 'delete-user'],
+                        'actions' => ['index', 'geo', 'geo-delete', 'update', 'view', 'create', 'delete', 'users', 'update-user', 'create-user', 'delete-user'],
                         'allow' => true,
                         'roles' => [Role::ROLE_ADMIN],
                     ],
@@ -64,7 +64,6 @@ class FranchiseeController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-    
     /**
      * Displays a single Franchisee model.
      * @param integer $id
@@ -164,10 +163,35 @@ class FranchiseeController extends Controller
     }
     public function actionGeo($id)
     {
-        return $this->render('geo', [
-            'franchisee' => $this->findModel($id),
-            'franchiseeGeo' => new FranchiseeGeo(),
-        ]);
+        $franchisee = $this->findModel($id);
+        $franchiseeGeoList = FranchiseeGeo::find()->where(['franchisee_id' => $id])->all();
+        $franchiseeGeo = new FranchiseeGeo();
+        $franchiseeGeo->franchisee_id = $id;
+        if ($franchiseeGeo->load(Yii::$app->request->post()) && $franchiseeGeo->validate()) {
+            $franchiseeGeo->save();
+        }
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderAjax('geo', [
+                'franchiseeGeoList' => $franchiseeGeoList,
+                'franchisee' => $franchisee,
+                'franchiseeGeo' => $franchiseeGeo,
+            ]);
+        }else{
+            return $this->render('geo', [
+                'franchiseeGeoList' => $franchiseeGeoList,
+                'franchisee' => $franchisee,
+                'franchiseeGeo' => $franchiseeGeo,
+            ]);
+        }
+    }
+    public function actionGeoDelete($id)
+    {
+     $franchiseeGeo = FranchiseeGeo::findOne($id);
+     if($franchiseeGeo)
+        {
+            $franchiseeGeo->delete();
+        }
     }
     /**
      * Finds the Franchisee model based on its primary key value.

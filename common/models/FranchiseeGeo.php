@@ -9,13 +9,14 @@ use Yii;
  *
  * @property integer $id
  * @property integer $franchisee_id
+ * @property string $exception
  * @property string $country
- * @property string $city
- * @property string $belongs_to
+ * @property string $locality
+ * @property string $administrative_area_level_1
  * @property string $created_at
  * @property string $updated_at
  * 
- * @property Franchisee[] $franchisee
+ * @property Franchisee $franchisee
  */
 class FranchiseeGeo extends \yii\db\ActiveRecord {
 
@@ -45,9 +46,9 @@ class FranchiseeGeo extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['franchisee_id','belongs_to'], 'integer'],
-            [['franchisee_id','country','city'], 'required'],
-            [['country','city'], 'string'],
+            [['franchisee_id','exception'], 'integer'],
+            [['franchisee_id','country'], 'required'],
+            [['country','locality','administrative_area_level_1'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
         ];
     }
@@ -60,8 +61,9 @@ class FranchiseeGeo extends \yii\db\ActiveRecord {
             'id' => 'ID',
             'franchisee_id' => 'ID франши',
             'country' => 'Страна',
-            'city' => 'Город',
-            'belongs_to' => 'Исключение',
+            'locality' => 'Город',
+            'exception' => 'Исключение',
+            'administrative_area_level_1' => 'Область',
             'created_at' => 'Создано',
             'updated_at' => 'Обновлено',
         ];
@@ -70,7 +72,8 @@ class FranchiseeGeo extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFranchisee() {
-        return $this->hasMany(Franchisee::className(), ['franchisee_id' => 'id']);
+    public function getFranchisee()
+    {
+        return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id']);
     }
 }

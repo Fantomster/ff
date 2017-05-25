@@ -229,7 +229,9 @@ class CronController extends Controller {
             $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
             $address_json = json_decode(file_get_contents($address_url));
             //$address_data = $address_json->results[0]->address_components;
+            if(empty($address_json->results)){
             var_dump($address_json);
+            }
 //            $location = array();
 //            foreach ($address_data as $component) {
 //              switch ($component->types) {
@@ -261,13 +263,13 @@ class CronController extends Controller {
 //
 //            }
         
-        $country = $location['country'];
-        $locality = $location['locality'];
-        $administrative_area_level_1 = $location['admin_1'];
-        
-        $organization = Organization::findOne($s->id);
-        $organization->administrative_area_level_1 = $administrative_area_level_1;
-        $organization->save();
+//        $country = $location['country'];
+//        $locality = $location['locality'];
+//        $administrative_area_level_1 = $location['admin_1'];
+//        
+//        $organization = Organization::findOne($s->id);
+//        $organization->administrative_area_level_1 = $administrative_area_level_1;
+//        $organization->save();
         }
     }
     public function actionSendMailNewRequests() {

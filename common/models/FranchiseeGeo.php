@@ -16,7 +16,7 @@ use Yii;
  * @property string $created_at
  * @property string $updated_at
  * 
- * @property Franchisee[] $franchisee
+ * @property Franchisee $franchisee
  */
 class FranchiseeGeo extends \yii\db\ActiveRecord {
 
@@ -72,7 +72,8 @@ class FranchiseeGeo extends \yii\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getFranchisee() {
-        return $this->hasMany(Franchisee::className(), ['franchisee_id' => 'id']);
+    public function getFranchisee()
+    {
+        return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id']);
     }
 }

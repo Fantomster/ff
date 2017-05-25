@@ -35,6 +35,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $route
  * @property string $street_number
  * @property string $place_id
+ * @property string $administrative_area_level_1
  * @property string $formatted_address
  *
  * @property OrganizationType $type
@@ -92,7 +93,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['address','place_id','lat','lng'], 'required', 'on' => 'complete','message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],
             [['id', 'type_id', 'step', 'es_status', 'rating'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address','administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             //[['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],
@@ -151,6 +152,7 @@ class Organization extends \yii\db\ActiveRecord {
             'lat' => 'Lat',
             'lng' => 'Lng',
             'country' => 'Страна',
+            'administrative_area_level_1' => 'Область',
             'locality' => 'Город',
             'route' => 'Улица',
             'street_number' => 'Дом',

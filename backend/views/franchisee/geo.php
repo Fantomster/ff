@@ -182,7 +182,7 @@ $gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
 ));
 $this->registerJsFile($gpJsLink, ['async'=>true, 'defer'=>true]);
 $this->registerJs("
-function initAutocomplete() {
+  function initAutocomplete() {
     
     var acInputs = document.getElementsByClassName('autocomplete');
     var options = {
@@ -231,7 +231,7 @@ function initAutocomplete() {
             }
         });
     }
-}
+  }
 ",yii\web\View::POS_END);
 ?>
 <?php

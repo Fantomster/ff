@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use Yii;
+use yii\web\View;
 use yii\console\Controller;
 use common\models\WhiteList;
 use common\models\CatalogBaseGoods;
@@ -193,6 +194,83 @@ class CronController extends Controller {
     }
     
     public function actionUpdateProductRating() {
+        
+        
+    }
+    
+    public function actionGeoFranchiseeAndOrganization() {
+        //FranchiseeGeo 
+        //Franchisee
+        //organization
+        //Спонсор
+        //Предприниматель
+        //Стартап
+        
+        //Берем пул организации из Organization (500) у кого есть country(Страна) administrative_area_level_1(Область) locality(Город)
+        //
+        $organizations = Organization::find()->where('country is not null and (administrative_area_level_1 is not null or locality is not null)');
+        
+        //создаем связь франшизы с ресторанами и поставщиками новопришедшими
+        foreach($organizations as $organization){
+            if(!\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$organization->id])->exists()){
+                
+                $franchiseeAssociate = new \common\models\FranchiseeAssociate();
+                $franchiseeAssociate->franchisee_id = '';
+                $franchiseeAssociate->organization_id = '';
+                $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
+                $franchiseeAssociate->save();
+                
+            }
+        }
+    }
+    public function actionMappingOrganizationFromGoogleApiMaps() {
+        $model = Organization::find()->where('lng is not null and lat is not null and administrative_area_level_1 is null')->limit(100)->all();
+        foreach($model as $s){
+            $address_url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
+            $address_json = json_decode(file_get_contents($address_url));
+            $address_data = $address_json->results[0]->address_components;
+            $location = array();
+            foreach ($address_data as $component) {
+              switch ($component->types) {
+                case in_array('street_number', $component->types):
+                  $location['street_number'] = $component->long_name;
+                  break;
+                case in_array('route', $component->types):
+                  $location['street'] = $component->long_name;
+                  break;
+                case in_array('sublocality', $component->types):
+                  $location['sublocality'] = $component->long_name;
+                  break;
+                case in_array('locality', $component->types):
+                  $location['locality'] = $component->long_name;
+                  break;
+                case in_array('administrative_area_level_2', $component->types):
+                  $location['admin_2'] = $component->long_name;
+                  break;
+                case in_array('administrative_area_level_1', $component->types):
+                  $location['admin_1'] = $component->long_name;
+                  break;
+                case in_array('postal_code', $component->types):
+                  $location['postal_code'] = $component->long_name;
+                  break;
+                case in_array('country', $component->types):
+                  $location['country'] = $component->long_name;
+                  break;
+              }
+
+            }
+        
+        $country = $location['country'];
+        $locality = $location['locality'];
+        $administrative_area_level_1 = $location['admin_1'];
+        
+        $organization = Organization::findOne($s->id);
+        $organization->administrative_area_level_1 = $administrative_area_level_1;
+        $organization->save();
+        }
+    }
+    public function actionSendMailNewRequests() {
+      
         
         
     }

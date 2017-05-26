@@ -220,7 +220,7 @@ class CronController extends Controller {
                     //Если есть, тогда дать список всех франшиз с этой городом
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
-                    where country = '" . $organization->country . "' and 
+                    where LENGTH(locality)>2 and country = '" . $organization->country . "' and 
                           locality = '" . $organization->locality . "' order by type_id")->queryAll();
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
@@ -237,7 +237,7 @@ class CronController extends Controller {
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
-                    where country = '" . $organization->country . "' and 
+                    where LENGTH(administrative_area_level_1)>2 and country = '" . $organization->country . "' and 
       administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' and  
       (locality <> '" . $organization->locality . "') order by type_id")->queryAll();
                     

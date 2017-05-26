@@ -231,15 +231,13 @@ class CronController extends Controller {
                         ->where([
                         'country'=>$organization->country,
                         'administrative_area_level_1'=>$organization->administrative_area_level_1,
-                            ])
-                        ->andWhere(['<>','locality',$organization->locality])    
+                            ]) 
                         ->exists()){
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
-                    where LENGTH(administrative_area_level_1)>2 and country = '" . $organization->country . "' and 
-      administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' and  
-      (locality <> '" . $organization->locality . "') order by type_id")->queryAll();
+                    where LENGTH(administrative_area_level_1)>2 and (locality ='' or locality is null) and country = '" . $organization->country . "' and 
+      administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' and order by type_id")->queryAll();
                     
                     //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
@@ -250,15 +248,12 @@ class CronController extends Controller {
                     if($flag == 0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country
                             ])
-                    ->andWhere(['<>','locality',$organization->locality])
-                    ->andWhere(['<>','administrative_area_level_1',$organization->administrative_area_level_1])
                     ->exists()){
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where country = '" . $organization->country . "' and 
-    (locality <> '" . $organization->locality . "' and 
-     administrative_area_level_1 <> '" . $organization->administrative_area_level_1 . "') order by type_id")->queryAll();
+    (locality ='' or locality is null) and (administrative_area_level_1 ='' or administrative_area_level_1 is null) order by type_id")->queryAll();
                     //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     

@@ -210,7 +210,7 @@ class CronController extends Controller {
 
 	//берем в массив все актуальные организации но 50 штук
 
-	$organizations = Organization::find()->where('franchisee_sorted in(0,3) and country is not null')->limit(1000)->all();
+	$organizations = Organization::find()->where('franchisee_sorted = 0 and country is not null')->limit(1000)->all();
 
             foreach($organizations as $organization)
             {
@@ -247,7 +247,7 @@ class CronController extends Controller {
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
-                        $flag = 2;
+                        $flag = 1;
                     }//А есть ли франшиза с этой страной? 
                     if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country
@@ -265,7 +265,7 @@ class CronController extends Controller {
                 }else{
                 // нет подходящего франча / в не отсортированные
                 $organization_model = Organization::findOne($organization->id);
-                $organization_model->franchisee_sorted = 3;
+                $organization_model->franchisee_sorted = 0;
                 $organization_model->save();
                 }
             }
@@ -281,7 +281,6 @@ class CronController extends Controller {
             }
             //Здесь же проверка на уже существующую связь
             if(!\common\models\FranchiseeAssociate::find()->where([
-                'franchisee_id'=>$f['franchisee_id'],
                 'organization_id'=>$organization->id])->exists()){
                 //Проверяем исключения
                 

@@ -210,7 +210,7 @@ class CronController extends Controller {
 
 	//берем в массив все актуальные организации но 50 штук
 
-	$organizations = Organization::find()->where('franchisee_sorted in(0,1) and country is not null')->limit(500)->all();
+	$organizations = Organization::find()->where('franchisee_sorted in(0,1) and country is not null')->limit(1000)->all();
 
             foreach($organizations as $organization)
             {
@@ -218,6 +218,7 @@ class CronController extends Controller {
                 if(\common\models\FranchiseeGeo::find()->where(['country'=>$organization->country])->exists()){
                     //если есть
                     //есть ли франшиза с этим городом?
+                    $flag = 0;
                     if(\common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country,
                         'administrative_area_level_1'=>$organization->locality
@@ -229,10 +230,11 @@ class CronController extends Controller {
                           locality = '" . $organization->locality . "' order by type_id")->queryAll();
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
+                        $flag = 1;
                         
                     }
                     //А есть ли франшиза с этой областью? 
-                    if(\common\models\FranchiseeGeo::find()->where([
+                    if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country,
                         'administrative_area_level_1'=>$organization->administrative_area_level_1
                             ])->exists()){
@@ -245,9 +247,9 @@ class CronController extends Controller {
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
-                        
+                        $flag = 2;
                     }//А есть ли франшиза с этой страной? 
-                    if(\common\models\FranchiseeGeo::find()->where([
+                    if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country
                             ])->exists()){
                     //Если есть, тогда дать список всех франшиз с этой областью

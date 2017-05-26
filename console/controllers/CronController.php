@@ -210,7 +210,7 @@ class CronController extends Controller {
 
 	//берем в массив все актуальные организации но 50 штук
 
-	$organizations = Organization::find()->where('franchisee_sorted in(0,1) and country is not null')->limit(1000)->all();
+	$organizations = Organization::find()->where('franchisee_sorted in(0,3) and country is not null')->limit(1000)->all();
 
             foreach($organizations as $organization)
             {

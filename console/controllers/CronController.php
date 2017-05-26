@@ -210,7 +210,7 @@ class CronController extends Controller {
 
 	//берем в массив все актуальные организации но 50 штук
 
-	$organizations = Organization::find()->where('franchisee_sorted = 0 and country is not null')->limit(1000)->all();
+	$organizations = Organization::find()->where('franchisee_sorted = 0 and country is not null')->limit(20)->all();
 
             foreach($organizations as $organization)
             {
@@ -231,7 +231,6 @@ class CronController extends Controller {
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
-                        return;
                     }
                     //А есть ли франшиза с этой областью? 
                     if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
@@ -248,7 +247,6 @@ class CronController extends Controller {
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
-                        return;
                     }//А есть ли франшиза с этой страной? 
                     if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country
@@ -261,7 +259,7 @@ class CronController extends Controller {
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
-                        return;
+                        
                     }
                 }else{
                 // нет подходящего франча / в не отсортированные
@@ -278,7 +276,7 @@ class CronController extends Controller {
         //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
         foreach($pullFranchisees as $f){
             
-            echo 'Ф: '.$f['id'].' | ' . $f['locality'] .' | ' . $f['country'] .' | ' . $f['administrative_area_level_1'] .'\n';
+            echo 'Ф: '.$f['id'].' | ' . $f['locality'] .' | ' . $f['country'] .' | ' . $f['administrative_area_level_1'] .'\r\n';
             echo 'О: ' .$organization->id . ' | ' . $organization->locality. ' | ' . $organization->country. ' | ' . $organization->administrative_area_level_1;
             
             if(($f['locality'] == $organization->locality && $f['exception'] == 1) || 
@@ -298,16 +296,14 @@ class CronController extends Controller {
                 if(!$franchiseeAssociate->save()){
                     var_dump($franchiseeAssociate);
                 }
-                
-                $organization = \common\models\Organization::findOne($organization->id);
-                $organization->franchisee_sorted = 1;
-                $organization->save();
-
                 //Если спонсор, тогда никто больше не претендует на эту организацию 
                 //во всех дальнейших итераций
                 break;
             }
         }
+        $organization = \common\models\Organization::findOne($organization->id);
+        $organization->franchisee_sorted = 1;
+        $organization->save();
     }
     protected function saveAssocFranchiseeAndOrganization($franchisee_id,$organization_id){
         

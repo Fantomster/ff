@@ -235,10 +235,11 @@ class CronController extends Controller {
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where country = '" . $organization->country . "' and 
-                          administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' order by type_id")->queryAll();
+      administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' and (locality <> '" . $organization->locality . "') order by type_id")->queryAll();
+                    
                     //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
-                    
+                        
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
                     }//А есть ли франшиза с этой страной? 
@@ -248,7 +249,7 @@ class CronController extends Controller {
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
-                    where country = '" . $organization->country . "' order by type_id")->queryAll();
+                    where country = '" . $organization->country . "' and (locality <> '" . $organization->administrative_area_level_1 . "' and locality <> '" . $organization->administrative_area_level_1 . "') order by type_id")->queryAll();
                     //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     
@@ -274,6 +275,7 @@ class CronController extends Controller {
                     ($f['administrative_area_level_1'] == $organization->administrative_area_level_1 && $f['exception'] == 1)){
                 continue;
             }
+            
             //Здесь же проверка на уже существующую связь
             if(!\common\models\FranchiseeAssociate::find()->where([
                 'organization_id'=>$organization->id])->exists()){

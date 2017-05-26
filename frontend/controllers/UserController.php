@@ -52,6 +52,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         'roles' => ['@'],
                     ]
                 ],
+                'denyCallback' => function($rule, $action) {
+                    $this->redirect('\site\index');
+                }                
             ]
         ];
     }
@@ -192,11 +195,12 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $newEmail = $userToken->data;
             if ($user->confirm($newEmail)) {
                 $success = true;
+                Yii::$app->user->login($user, 1);
             }
-            if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
+            //if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome
-                $user->sendWelcome();
-            }
+                //$user->sendWelcome();
+            //}
             // set email and delete token
             $email = $newEmail ? : $user->email;
             $userToken->delete();
@@ -237,7 +241,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // delete userToken and set success = true
             $userToken->delete();
             $success = true;
-            return $this->redirect(['/user/login']);
+            Yii::$app->user->login($user, 1);
+            return $this->redirect(['/site/index']);
         }
 
         return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));
@@ -269,6 +274,40 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         }
 
         return $this->render('login', compact("model"));
+    }
+    
+    /**
+     * Reset password
+     */
+    public function actionReset($token)
+    {
+        /** @var \amnah\yii2\user\models\User $user */
+        /** @var \amnah\yii2\user\models\UserToken $userToken */
+
+        // get user token and check expiration
+        $userToken = $this->module->model("UserToken");
+        $userToken = $userToken::findByToken($token, $userToken::TYPE_PASSWORD_RESET);
+        if (!$userToken) {
+            return $this->render('reset', ["invalidToken" => true]);
+        }
+
+        // get user and set "reset" scenario
+        $success = false;
+        $user = $this->module->model("User");
+        $user = $user::findOne($userToken->user_id);
+        $user->setScenario("reset");
+
+        // load post data and reset user password
+        if ($user->load(Yii::$app->request->post()) && $user->save()) {
+
+            // delete userToken and set success = true
+            $userToken->delete();
+            $user->status = \common\models\User::STATUS_ACTIVE;
+            $user->save();
+            $success = true;
+        }
+
+        return $this->render('reset', compact("user", "success"));
     }
 
     public function actionAjaxInviteFriend() {

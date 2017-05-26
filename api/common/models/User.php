@@ -199,7 +199,7 @@ class User extends \amnah\yii2\user\models\User {
 		// send email
         $type = $this->organization->type_id;
         $name = $this->profile->full_name;
-        $subject = "Добро пожаловать на  f-keeper";
+        $subject = "Добро пожаловать на f-keeper";
         $result = $mailer->compose('welcome', compact("subject", "type", "name"))
                 ->setTo($this->email)
                 ->setSubject($subject)

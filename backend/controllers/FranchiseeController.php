@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\Franchisee;
+use common\models\FranchiseeGeo;
 use common\models\User;
 use common\models\Profile;
 use common\models\Role;
@@ -40,7 +41,7 @@ class FranchiseeController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'update', 'view', 'create', 'delete', 'users', 'update-user', 'create-user', 'delete-user'],
+                        'actions' => ['index', 'geo', 'geo-delete', 'update', 'view', 'create', 'delete', 'users', 'update-user', 'create-user', 'delete-user'],
                         'allow' => true,
                         'roles' => [Role::ROLE_ADMIN],
                     ],
@@ -63,7 +64,6 @@ class FranchiseeController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
-
     /**
      * Displays a single Franchisee model.
      * @param integer $id
@@ -161,7 +161,38 @@ class FranchiseeController extends Controller
 
         return $this->render('create-user', compact('user', 'profile', 'fr_id'));
     }
-    
+    public function actionGeo($id)
+    {
+        $franchisee = $this->findModel($id);
+        $franchiseeGeoList = FranchiseeGeo::find()->where(['franchisee_id' => $id])->all();
+        $franchiseeGeo = new FranchiseeGeo();
+        $franchiseeGeo->franchisee_id = $id;
+        if ($franchiseeGeo->load(Yii::$app->request->post()) && $franchiseeGeo->validate()) {
+            $franchiseeGeo->save();
+        }
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderAjax('geo', [
+                'franchiseeGeoList' => $franchiseeGeoList,
+                'franchisee' => $franchisee,
+                'franchiseeGeo' => $franchiseeGeo,
+            ]);
+        }else{
+            return $this->render('geo', [
+                'franchiseeGeoList' => $franchiseeGeoList,
+                'franchisee' => $franchisee,
+                'franchiseeGeo' => $franchiseeGeo,
+            ]);
+        }
+    }
+    public function actionGeoDelete($id)
+    {
+     $franchiseeGeo = FranchiseeGeo::findOne($id);
+     if($franchiseeGeo)
+        {
+            $franchiseeGeo->delete();
+        }
+    }
     /**
      * Finds the Franchisee model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

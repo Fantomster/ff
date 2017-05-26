@@ -19,10 +19,17 @@ $this->title = Yii::t('user', $success ? 'Confirmed' : 'Error');
 
                     <p><?= Yii::t("user", "Your email [ {email} ] has been confirmed", ["email" => $email]) ?></p>
 
+                    <?php if (Yii::$app->user->isLoggedIn): ?>
 
-                </div>
-                <div class="regist">
-                <?= Html::a('Продолжить', ["/site/index"]) ?>
+                        <p><?= Html::a(Yii::t("user", "Go to my account"), ["/user/login"]) ?></p>
+                        <p><?= Html::a(Yii::t("user", "Go home"), Yii::$app->getHomeUrl()) ?></p>
+
+                    <?php else: ?>
+
+                        <p><?= Html::a(Yii::t("user", "Log in here"), ["/user/login"]) ?></p>
+
+                    <?php endif; ?>
+
                 </div>
 
             <?php elseif ($email): ?>

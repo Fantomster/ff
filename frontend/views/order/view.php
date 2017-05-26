@@ -268,7 +268,15 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
             <div class="box box-info">
                 <div class="box-header">
                     <h3 class="box-title">Итого</h3>
-                    <a href="#" class="btn btn-outline-default pull-right btn-xs" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>
+                    <?php //<a href="#" class="btn btn-outline-default pull-right btn-xs" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a> ?>
+                    <?=
+                    Html::a('<i class="icon fa fa-print"></i> Открыть в виде PDF', ['order/pdf', 'id' => $order->id], [
+                        'class' => 'btn btn-outline-default pull-right btn-xs',
+                        'target' => '_blank',
+                        'data-toggle' => 'tooltip',
+                        'title' => 'Открыть PDF с заказом в новом окне'
+                    ])
+                    ?>
                 </div>
                 <div class="box-body" id="actionButtons">
                     <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   
@@ -301,7 +309,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                                 'isSystem' => $chat->is_system,
                                 'ajax' => 0,
                                 'danger' => $chat->danger,
-                                'organizationType' => $chat->sentBy->organization->type_id]);
+                                'organizationType' => (isset($chat->sentBy->organization) ? $chat->sentBy->organization->type_id : 1)]);
                         }
                         ?>
                     </div>

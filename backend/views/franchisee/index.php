@@ -29,6 +29,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Тип',
                 'filter' => common\models\FranchiseType::getList(),
             ],
+            [
+                'format' => 'raw',
+                'attribute' => 'Регионы франшизы (GEO)',
+                'value' => function ($data) {
+                    if(\common\models\FranchiseeGeo::find()->where(['franchisee_id'=>$data['id']])->exists()){
+                    return Html::a('Изменить', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-success']);
+                    }else{
+                    return Html::a('Указать', ['franchisee/geo', 'id' => $data['id']],['data-pjax'=>0, 'class'=>'text-danger']);   
+                    }
+                },
+            ],
             'signed',
             'legal_entity',
             'legal_address',
@@ -44,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'info:ntext',
             // 'created_at',
             // 'updated_at',
-
+            
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

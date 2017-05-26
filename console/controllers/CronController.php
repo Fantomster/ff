@@ -262,7 +262,7 @@ class CronController extends Controller {
                     }
                 }else{
                 // нет подходящего франча / в не отсортированные
-                $organization_model = findOne($organization->id);
+                $organization_model = Organization::findOne($organization->id);
                 $organization_model->franchisee_sorted = 3;
                 $organization_model->save();
                 }

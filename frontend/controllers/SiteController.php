@@ -156,6 +156,7 @@ class SiteController extends Controller {
                 //$profile->save();
                 $organization->step = Organization::STEP_TUTORIAL;
                 $organization->save();
+                $user->sendWelcome();
                 
                 //Временный скрипт оповещания входа клиентов delivery-club
                 if(strpos($user->email, '@delivery-club.ru')){

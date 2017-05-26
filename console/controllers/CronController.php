@@ -237,7 +237,7 @@ class CronController extends Controller {
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where LENGTH(administrative_area_level_1)>2 and (locality ='' or locality is null) and country = '" . $organization->country . "' and 
-      administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' and order by type_id")->queryAll();
+      administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' order by type_id")->queryAll();
                     
                     //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup

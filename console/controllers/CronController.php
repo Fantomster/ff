@@ -199,7 +199,7 @@ class CronController extends Controller {
     }
     
     public function actionGeoFranchiseeAndOrganization() {
-        
+      
         if(Organization::find()->where(['franchisee_sorted'=>0])->exists()){
 
 	//берем в массив все актуальные организации но 50 штук
@@ -227,7 +227,7 @@ class CronController extends Controller {
                         $flag = 1;
                     }
                     //А есть ли франшиза с этой областью? 
-                    if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
+                    if($flag == 0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country,
                         'administrative_area_level_1'=>$organization->administrative_area_level_1
                             ])->exists()){
@@ -242,7 +242,7 @@ class CronController extends Controller {
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
                     }//А есть ли франшиза с этой страной? 
-                    if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
+                    if($flag == 0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country
                             ])->exists()){
                     //Если есть, тогда дать список всех франшиз с этой областью

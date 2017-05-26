@@ -289,7 +289,7 @@ class CronController extends Controller {
             if(!\common\models\FranchiseeAssociate::find()->where([
                 'organization_id'=>$organization->id])->exists()){
                 //Проверяем исключения
-                
+                echo 'ok';
                 
                 $franchiseeAssociate = new \common\models\FranchiseeAssociate();
                 $franchiseeAssociate->franchisee_id = $f['id'];

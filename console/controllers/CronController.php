@@ -273,10 +273,14 @@ class CronController extends Controller {
         }
     }
     static function setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization){
-        var_dump($pullFranchisees , $organization);
+        
         //проходим по всему пулу франшиз,
         //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
         foreach($pullFranchisees as $f){
+            
+            echo 'Ф: '.$f['id'].' | ' . $f['locality'] .' | ' . $f['country'] .' | ' . $f['administrative_area_level_1'] .'\n';
+            echo 'О: ' .$organization->id . ' | ' . $organization->locality. ' | ' . $organization->country. ' | ' . $organization->administrative_area_level_1;
+            
             if(($f['locality'] == $organization->locality && $f['exception'] == 1) || 
                     ($f['administrative_area_level_1'] == $organization->administrative_area_level_1 && $f['exception'] == 1)){
                 continue;

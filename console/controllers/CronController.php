@@ -231,7 +231,7 @@ class CronController extends Controller {
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
-                        
+                        return;
                     }
                     //А есть ли франшиза с этой областью? 
                     if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
@@ -248,6 +248,7 @@ class CronController extends Controller {
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
+                        return;
                     }//А есть ли франшиза с этой страной? 
                     if($flag ==0 && \common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country
@@ -260,7 +261,7 @@ class CronController extends Controller {
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
-                        
+                        return;
                     }
                 }else{
                 // нет подходящего франча / в не отсортированные
@@ -272,6 +273,7 @@ class CronController extends Controller {
         }
     }
     static function setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization){
+        var_dump($pullFranchisees , $organization);
         //проходим по всему пулу франшиз,
         //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
         foreach($pullFranchisees as $f){
@@ -289,9 +291,9 @@ class CronController extends Controller {
                 $franchiseeAssociate->franchisee_id = $f['id'];
                 $franchiseeAssociate->organization_id = $organization->id;
                 $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
-                if(!$franchiseeAssociate->save()){
-                    var_dump($franchiseeAssociate);
-                }
+                //if(!$franchiseeAssociate->save()){
+                   // var_dump($franchiseeAssociate);
+                //}
                 
                 $organization = \common\models\Organization::findOne($organization->id);
                 $organization->franchisee_sorted = 1;

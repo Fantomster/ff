@@ -206,25 +206,105 @@ class CronController extends Controller {
         //Предприниматель
         //Стартап
         
-        //Берем пул организации из Organization (500) у кого есть country(Страна) administrative_area_level_1(Область) locality(Город)
-        //
-        $organizations = Organization::find()->where('country is not null and (administrative_area_level_1 is not null or locality is not null)');
-        
-        //создаем связь франшизы с ресторанами и поставщиками новопришедшими
-        foreach($organizations as $organization){
-            if(!\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$organization->id])->exists()){
-                
-                $franchiseeAssociate = new \common\models\FranchiseeAssociate();
-                $franchiseeAssociate->franchisee_id = '';
-                $franchiseeAssociate->organization_id = '';
-                $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
-                $franchiseeAssociate->save();
-                
+        if(Organization::find()->where(['franchisee_sorted'=>0])->exists()){
+
+	//берем в массив все актуальные организации но 50 штук
+
+	$organizations = Organization::find()->where('franchisee_sorted in(0,1) and country is not null')->limit(50)->all();
+
+            foreach($organizations as $organization)
+            {
+                //Есть ли франшиза с этой страной?
+                if(\common\models\FranchiseeGeo::find()->where(['country'=>$organization->country])->exists()){
+                    //если есть
+                    //есть ли франшиза с этим городом?
+                    if(\common\models\FranchiseeGeo::find()->where([
+                        'country'=>$organization->country,
+                        'administrative_area_level_1'=>$organization->locality
+                            ])->exists()){
+                    //Если есть, тогда дать список всех франшиз с этой городом
+                    $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
+                    join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
+                    where country = '" . $organization->country . "' and 
+                          locality = '" . $organization->locality . "' order by type_id")->queryAll();
+                    
+                        self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
+                        
+                    }
+                    //А есть ли франшиза с этой областью? 
+                    if(\common\models\FranchiseeGeo::find()->where([
+                        'country'=>$organization->country,
+                        'administrative_area_level_1'=>$organization->administrative_area_level_1
+                            ])->exists()){
+                    //Если есть, тогда дать список всех франшиз с этой областью
+                    $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
+                    join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
+                    where country = '" . $organization->country . "' and 
+                          administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' order by type_id")->queryAll();
+                    //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
+                    //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
+                    
+                        self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
+                        
+                    }//А есть ли франшиза с этой страной? 
+                    if(\common\models\FranchiseeGeo::find()->where([
+                        'country'=>$organization->country
+                            ])->exists()){
+                    //Если есть, тогда дать список всех франшиз с этой областью
+                    $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
+                    join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
+                    where country = '" . $organization->country . "' order by type_id")->queryAll();
+                    //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
+                    //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
+                    
+                        self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
+                        
+                    }
+                }else{
+                // нет подходящего франча / в не отсортированные
+                $organization_model = findOne($organization->id);
+                $organization_model->franchisee_sorted = 3;
+                $organization_model->save();
+                }
             }
         }
     }
+    static function setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization){
+        //проходим по всему пулу франшиз,
+        //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
+        foreach($pullFranchisees as $f){
+            if(($f['locality'] == $organization->locality && $f['exception'] == 1) || 
+                    ($f['administrative_area_level_1'] == $organization->administrative_area_level_1 && $f['exception'] == 1)){
+                continue;
+            }
+            //Здесь же проверка на уже существующую связь
+            if(!\common\models\FranchiseeAssociate::find()->where([
+                'franchisee_id'=>$f['franchisee_id'],
+                'organization_id'=>$organization->id])->exists()){
+                //Проверяем исключения
+                
+                
+                $franchiseeAssociate = new \common\models\FranchiseeAssociate();
+                $franchiseeAssociate->franchisee_id = $f['id'];
+                $franchiseeAssociate->organization_id = $organization->id;
+                $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
+                $franchiseeAssociate->save();
+
+                $organization = \common\models\Organization::findOne($organization->id);
+                $organization->franchisee_sorted = 1;
+                $organization->save();
+
+                //Если спонсор, тогда никто больше не претендует на эту организацию 
+                //во всех дальнейших итераций
+                break;
+            }
+        }
+    }
+    protected function saveAssocFranchiseeAndOrganization($franchisee_id,$organization_id){
+        
+    }
     public function actionMappingOrganizationFromGoogleApiMaps() {
-        $model = Organization::find()->where('lng is not null and lat is not null and country is not null and administrative_area_level_1 is null')->limit(100)->all();
+        $model = Organization::find()->where('lng is not null and lat is not null and country is not null and administrative_area_level_1 is null')->limit(500)->all();
         foreach($model as $s){
             $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.Yii::$app->params['google-api']['key-id'].'&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
             $address_json = json_decode(file_get_contents($address_url));

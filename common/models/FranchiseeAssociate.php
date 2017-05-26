@@ -17,8 +17,8 @@ use Yii;
  */
 class FranchiseeAssociate extends \yii\db\ActiveRecord
 {
-    const SELF_REGISTERED = 0;
-    const REGISTERED = 1;
+    const SELF_REGISTERED = 1;
+    const REGISTERED = 2;
     /**
      * @inheritdoc
      */

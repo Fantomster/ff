@@ -276,7 +276,7 @@ class CronController extends Controller {
         //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
         foreach($pullFranchisees as $f){
             
-            echo 'Ф: '.$f['id'].' | ' . $f['locality'] .' | ' . $f['country'] .' | ' . $f['administrative_area_level_1'] .'\r\n';
+            echo 'Ф: '.$f['id'].' | ' . $f['locality'] .' | ' . $f['country'] .' | ' . $f['administrative_area_level_1'] .' \n';
             echo 'О: ' .$organization->id . ' | ' . $organization->locality. ' | ' . $organization->country. ' | ' . $organization->administrative_area_level_1;
             
             if(($f['locality'] == $organization->locality && $f['exception'] == 1) || 
@@ -287,7 +287,7 @@ class CronController extends Controller {
             if(!\common\models\FranchiseeAssociate::find()->where([
                 'organization_id'=>$organization->id])->exists()){
                 //Проверяем исключения
-                echo 'ok';
+                echo '###################################\n';
                 
                 $franchiseeAssociate = new \common\models\FranchiseeAssociate();
                 $franchiseeAssociate->franchisee_id = $f['id'];

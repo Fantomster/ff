@@ -289,8 +289,10 @@ class CronController extends Controller {
                 $franchiseeAssociate->franchisee_id = $f['id'];
                 $franchiseeAssociate->organization_id = $organization->id;
                 $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
-                $franchiseeAssociate->save();
-
+                if(!$franchiseeAssociate->save()){
+                    var_dump($franchiseeAssociate);
+                }
+                
                 $organization = \common\models\Organization::findOne($organization->id);
                 $organization->franchisee_sorted = 1;
                 $organization->save();

@@ -199,18 +199,12 @@ class CronController extends Controller {
     }
     
     public function actionGeoFranchiseeAndOrganization() {
-        //FranchiseeGeo 
-        //Franchisee
-        //organization
-        //Спонсор
-        //Предприниматель
-        //Стартап
         
         if(Organization::find()->where(['franchisee_sorted'=>0])->exists()){
 
 	//берем в массив все актуальные организации но 50 штук
 
-	$organizations = Organization::find()->where('franchisee_sorted = 0 and country is not null')->limit(20)->all();
+	$organizations = Organization::find()->where('franchisee_sorted = 0 and country is not null')->limit(50)->all();
 
             foreach($organizations as $organization)
             {
@@ -276,9 +270,6 @@ class CronController extends Controller {
         //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
         foreach($pullFranchisees as $f){
             
-            echo 'Ф: '.$f['id'].' | ' . $f['locality'] .' | ' . $f['country'] .' | ' . $f['administrative_area_level_1'] .' \n';
-            echo 'О: ' .$organization->id . ' | ' . $organization->locality. ' | ' . $organization->country. ' | ' . $organization->administrative_area_level_1;
-            
             if(($f['locality'] == $organization->locality && $f['exception'] == 1) || 
                     ($f['administrative_area_level_1'] == $organization->administrative_area_level_1 && $f['exception'] == 1)){
                 continue;
@@ -286,16 +277,12 @@ class CronController extends Controller {
             //Здесь же проверка на уже существующую связь
             if(!\common\models\FranchiseeAssociate::find()->where([
                 'organization_id'=>$organization->id])->exists()){
-                //Проверяем исключения
-                echo '###################################\n';
                 
                 $franchiseeAssociate = new \common\models\FranchiseeAssociate();
-                $franchiseeAssociate->franchisee_id = $f['id'];
+                $franchiseeAssociate->franchisee_id = $f['franchisee_id'];
                 $franchiseeAssociate->organization_id = $organization->id;
                 $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
-                if(!$franchiseeAssociate->save()){
-                    var_dump($franchiseeAssociate);
-                }
+                $franchiseeAssociate->save();
                 //Если спонсор, тогда никто больше не претендует на эту организацию 
                 //во всех дальнейших итераций
                 break;

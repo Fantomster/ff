@@ -34,6 +34,7 @@ class FranchiseeAssociate extends \yii\db\ActiveRecord
     {
         return [
             [['franchisee_id', 'organization_id'], 'required'],
+            [['organization_id'], 'unique'],
             [['franchisee_id', 'organization_id', 'self_registered'], 'integer'],
             [['franchisee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Franchisee::className(), 'targetAttribute' => ['franchisee_id' => 'id']],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],

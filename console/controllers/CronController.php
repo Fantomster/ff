@@ -269,6 +269,7 @@ class CronController extends Controller {
             }
         }
     }
+    
     static function setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization){
         
         //проходим по всему пулу франшиз,
@@ -298,9 +299,8 @@ class CronController extends Controller {
         $organization->franchisee_sorted = 1;
         $organization->save();
     }
-    protected function saveAssocFranchiseeAndOrganization($franchisee_id,$organization_id){
-        
-    }
+    
+    
     public function actionMappingOrganizationFromGoogleApiMaps() {
         $model = Organization::find()->where('lng is not null and lat is not null and country is not null and administrative_area_level_1 is null')->limit(500)->all();
         foreach($model as $s){

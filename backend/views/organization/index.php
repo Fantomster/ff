@@ -43,8 +43,19 @@ $gridColumns = [
             if(empty($data->place_id)){
             return  Html::a('<span class="text-danger">Добавить адрес</span>', ['update', 'id' => $data->id]);
             }else{
-            return  '<span class="text-success">Актуализирован</span>'; 
+            return  Html::a('<span class="text-success">Актуализирован</span>', ['update', 'id' => $data->id]);
             }
+        }
+    ],
+    [
+        'attribute' => 'place_id',
+        'label' => 'У франшизы',
+        'format' => 'raw',
+        'value' => function ($data) {
+            if(\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$data->id])->exists()){
+              return '<span class="text-success">Да</span>';   
+            }
+            return '';
         }
     ],
 //    'website',
@@ -57,6 +68,7 @@ $gridColumns = [
 
             <h1><?= Html::encode($this->title) ?></h1>
             <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+            
             <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>    
             <?php
             echo ExportMenu::widget([

@@ -27,8 +27,6 @@ use Yii;
  * @property bool $deleted
  *  
  * @property FranchiseeAssociate[] $franchiseeAssociates
- * @property FranchiseeAssocClients[] $franchiseeAssocClients
- * @property FranchiseeAssocVendors[] $franchiseeAssocVendors
  * @property FranchiseeUser[] $franchiseeUsers
  * @property FracnchiseeType type
  */
@@ -111,13 +109,6 @@ class Franchisee extends \yii\db\ActiveRecord {
         return $this->hasMany(FranchiseeAssociate::className(), ['franchisee_id' => 'id']);
     }
     
-    public function getFranchiseeAssocClients() {
-        return $this->hasMany(FranchiseeAssociate::className(), ['franchisee_id' => 'id']);
-    }
-    
-    public function getFranchiseeAssocVendors() {
-        return $this->hasMany(FranchiseeAssociate::className(), ['franchisee_id' => 'id']);
-    }
     /**
      * @return \yii\db\ActiveQuery
      */

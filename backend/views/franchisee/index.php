@@ -40,7 +40,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 },
             ],
-            'signed',
+            'signed',         
+            [
+                'format' => 'raw',
+                'attribute' => 'Клиентов',
+                'value' => function($data) {
+                       return $data->getFranchiseeAssociates()->count();
+              }
+            ],
             'legal_entity',
             'legal_address',
             'legal_email:email',

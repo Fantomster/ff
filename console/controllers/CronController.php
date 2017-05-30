@@ -222,7 +222,7 @@ class CronController extends Controller {
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where LENGTH(locality)>2 and country = '" . $organization->country . "' and 
                           locality = '" . $organization->locality . "' order by type_id")->queryAll();
-                    
+                          
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
                     }
@@ -236,7 +236,7 @@ class CronController extends Controller {
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
-                    where LENGTH(administrative_area_level_1)>2 and (locality ='' or locality is null) and country = '" . $organization->country . "' and 
+                    where LENGTH(administrative_area_level_1)>2 and country = '" . $organization->country . "' and 
       administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' order by type_id")->queryAll();
                     
                     //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
@@ -269,6 +269,7 @@ class CronController extends Controller {
             }
         }
     }
+    
     static function setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization){
         
         //проходим по всему пулу франшиз,
@@ -298,9 +299,8 @@ class CronController extends Controller {
         $organization->franchisee_sorted = 1;
         $organization->save();
     }
-    protected function saveAssocFranchiseeAndOrganization($franchisee_id,$organization_id){
-        
-    }
+    
+    
     public function actionMappingOrganizationFromGoogleApiMaps() {
         $model = Organization::find()->where('lng is not null and lat is not null and country is not null and administrative_area_level_1 is null')->limit(500)->all();
         foreach($model as $s){

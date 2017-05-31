@@ -23,7 +23,7 @@ use yii\filters\AccessControl;
  */
 class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
-    public $layout = "@frontend/views/layouts/main-user";
+    public $layout = "@frontend/views/layouts/main-auth";
 
     /**
      * @inheritdoc
@@ -197,10 +197,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 $success = true;
                 Yii::$app->user->login($user, 1);
             }
-            //if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
+            if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome
-                //$user->sendWelcome();
-            //}
+                $user->sendWelcome();
+            }
             // set email and delete token
             $email = $newEmail ? : $user->email;
             $userToken->delete();
@@ -238,6 +238,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $organization->save();
             // delete userToken and set success = true
             $userToken->delete();
+            $user->sendWelcome();
             $success = true;
             Yii::$app->user->login($user, 1);
             return $this->redirect(['/site/index']);

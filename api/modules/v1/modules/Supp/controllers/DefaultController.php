@@ -1,6 +1,6 @@
 <?php
 
-namespace api\common\controllers;
+namespace api\modules\v1\controllers;
 
 use Yii;
 use yii\web\Controller;
@@ -12,7 +12,7 @@ use yii\mongosoft\soapserver\Action;
  * Author: R.Smirnov
  */
 
-class SuppController extends Controller {
+class DefaultController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -25,7 +25,17 @@ class SuppController extends Controller {
         
     public function actionIndex() {
      
-        echo "Welcome to F-Keeper API gateway for Suppliers. Please use SOAP client to connect this service.";
+        echo date('Y-m-d H:i:s',time());
+        echo "<hr>";
+        echo gmdate("Y-m-d H:i:s");
+        echo "<hr>";
+        echo "Welcome to F-Keeper API gateway. <b> (Version 1)</b>. HTTP-client should be here.";
+        echo "<hr>";
+        
+      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
+      //      ->queryAll();
+        
+      //  var_dump($langs);
         
     }
     
@@ -34,12 +44,20 @@ class SuppController extends Controller {
         echo "hello";
         
     }
+    
+    public function actionTabson() {
+     
+        echo "tabson";
+        
+    }
+    
+    
 
-
+/*
     public function actions()
 {
     return [
-        'wsdl' => [
+        'hello' => [
             'class' => 'mongosoft\soapserver\Action',
             'serviceOptions' => [
                 'disableWsdlMode' => false,
@@ -50,49 +68,29 @@ class SuppController extends Controller {
             ],
     ];
 }
-    
-/**
-* Get Languages dictionary 
-* @return array 
-* @soap
 */
     
-    public function getlang() 
+/**
+* @param string $login
+* @param string $pass
+* @return string 
+* @soap
+*/
+ 
+    
+    public function getHello($login,$pass) 
     {
-        // $ar = array('1'=>'Шт', '2' =>'Литр', '3' =>'Упаковка');
-      $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-              ->queryAll();
-        
-        // return 'Hello ' . $login.'/'.$pass.'/ Date:'.date("Y-m-d H:i:s") ;
-        
-        return $langs;
+        return 'Hello ' . $login.'/'.$pass.'/ Date:'.date("Y-m-d H:i:s") ;
     }
 
-/**
-* Get Categories 
-* @return array 
-* @soap
-*/
-    
-    
-    
-    public function getCategory() 
-    {
-        // $ar = array('1'=>'Шт', '2' =>'Литр', '3' =>'Упаковка');
-      $cats = Yii::$app->db_api->createCommand('SELECT id, name, ifnull(parent,0) as up FROM api_category_rus_v')
-              ->queryAll();
-        
-        // return 'Hello ' . $login.'/'.$pass.'/ Date:'.date("Y-m-d H:i:s") ;
-        
-        return $cats;
-    }
+
    
 /**
    * Soap authorization
    * @return mixed result of auth
    * @soap
    */
-    
+   
   public function OpenSession() {
       
     if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
@@ -145,4 +143,5 @@ class SuppController extends Controller {
 
   }  
   
+   
 }

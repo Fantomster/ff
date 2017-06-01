@@ -25,7 +25,7 @@ use Yii;
  * @property string $updated_at
  * @property integer $type_id
  * @property bool $deleted
- * 
+ *  
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
  * @property FracnchiseeType type
@@ -108,14 +108,14 @@ class Franchisee extends \yii\db\ActiveRecord {
     public function getFranchiseeAssociates() {
         return $this->hasMany(FranchiseeAssociate::className(), ['franchisee_id' => 'id']);
     }
-
+    
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getFranchiseeUsers() {
         return $this->hasMany(FranchiseeUser::className(), ['franchisee_id' => 'id']);
     }
-
+    
     /**
      * @return \yii\db\ActiveQuery
      */

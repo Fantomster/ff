@@ -152,7 +152,12 @@ $this->registerCss("
                             [
                                 'format' => 'raw',
                                 'attribute' => 'name',
-                                'value' => 'name',
+                                'value' => function($data) {
+                                    if($data['self_registered']==\common\models\FranchiseeAssociate::SELF_REGISTERED){
+                                        return "<i title='Клиент самостоятельно зарегистрировался' class='fa fa-bolt text-success' aria-hidden='true'></i>" . $data['name'];
+                                    }
+                                    return $data['name'];
+                                },
                                 'label' => 'Имя поставщика',
                             ],
                             [

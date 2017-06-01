@@ -16,8 +16,8 @@ $this->title = "Вход / регистрация";
         <div class="auth-sidebar__logo"><img src="images/tmp_file/logo.png" alt=""></div>
         <div class="auth-sidebar__annotation">Заполните поля<br>для входа в систему</div>
         <div class="form-slider">
-            <?= $this->render('_login-form') ?>
-            <?= $this->render('_register-form') ?>
+            <?= $this->render('_login-form', compact('model')) ?>
+            <?= $this->render('_register-form', compact('user', 'profile', 'organization')) ?>
         </div>
         <div class="auth-sidebar__contacts">
             <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>

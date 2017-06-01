@@ -40,7 +40,47 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 },
             ],
-            'signed',
+            'signed',         
+            [
+                'format' => 'raw',
+                'attribute' => 'Клиентов',
+                'value' => function($data) {
+                       $c_all = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
+                               'franchisee_id'=>$data->id])->count();
+                       
+                       $c_client = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
+                               'franchisee_id'=>$data->id,
+                               'organization.type_id'=>1,
+                               ])->count();
+                       $c_client_reg = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
+                               'franchisee_id'=>$data->id,
+                               'self_registered'=>0,
+                               'organization.type_id'=>1,
+                               ])->count();
+                       $c_client_self_reg = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
+                               'franchisee_id'=>$data->id,
+                               'self_registered'=>\common\models\FranchiseeAssociate::SELF_REGISTERED,
+                               'organization.type_id'=>1,
+                               ])->count();
+                       $c_vendor = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
+                               'franchisee_id'=>$data->id,
+                               'organization.type_id'=>2,
+                               ])->count();
+                       $c_vendor_reg = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
+                               'franchisee_id'=>$data->id,
+                               'self_registered'=>0,
+                               'organization.type_id'=>2,
+                               ])->count();
+                       $c_vendor_self_reg = \common\models\FranchiseeAssociate::find()->joinWith('organization')->where([
+                               'franchisee_id'=>$data->id,
+                               'self_registered'=>\common\models\FranchiseeAssociate::SELF_REGISTERED,
+                               'organization.type_id'=>2,
+                               ])->count();
+                        return "<b>$c_all</b> <br>"
+                                . "Рестораны: <b>$c_client</b> ($c_client_reg/$c_client_self_reg) <br>"
+                                . "Поставщики: <b>$c_vendor</b> ($c_vendor_reg/$c_vendor_self_reg)";
+              }
+            ],
             'legal_entity',
             'legal_address',
             'legal_email:email',

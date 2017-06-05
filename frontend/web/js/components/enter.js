@@ -1,4 +1,4 @@
-$(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:!0});
+$(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:true});
 $(".go-to-reg").on("click",function(e){
     e.preventDefault(),$(".form-slider").slick("slickNext")
 });

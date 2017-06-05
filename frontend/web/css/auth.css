@@ -6209,7 +6209,7 @@ label.error {
   font-size: 20px;
 }
 .auth-sidebar__form-brims label span {
-  position: absolute;
+  /*position: absolute;*/
   left: 0;
   top: 0;
 }

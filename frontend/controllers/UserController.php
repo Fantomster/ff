@@ -258,6 +258,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         /** @var \amnah\yii2\user\models\forms\LoginForm $model */
         $model = $this->module->model("LoginForm");
 
+        $user = $this->module->model("User", ["scenario" => "register"]);
+        $profile = $this->module->model("Profile", ["scenario" => "register"]);
+        $organization = $this->module->model("Organization", ["scenario" => "register"]);
+
         // load post data and login
         $post = Yii::$app->request->post();
         if ($model->load($post) && $model->validate()) {
@@ -274,7 +278,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             }
         }
 
-        return $this->render('login', compact("model"));
+        return $this->render('login', compact("model", "user", "profile", "organization"));
     }
     
     /**

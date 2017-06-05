@@ -207,7 +207,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         }
 
         $this->performLogin($user, true);
-        return $this->redirect(['/site/index']);
+        return $this->redirect(['/site/index', 'new' => true]);
         //return $this->render("confirm", compact("userToken", "success", "email"));
     }
 

@@ -24,18 +24,18 @@ class DefaultController extends Controller {
     
         
     public function actionIndex() {
-     
-        echo date('Y-m-d H:i:s',time());
-        echo "<hr>";
-        echo gmdate("Y-m-d H:i:s");
-        echo "<hr>";
-        echo "Welcome to F-Keeper API gateway. <b> (Version 1)</b>. HTTP-client should be here.";
-        echo "<hr>";
         
+    return $this->render('index' // ,[
+              //      'searchModel' => $searchModel,
+              //      'dataProvider' => $dataProvider,
+              // ]
+                );
       //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
       //      ->queryAll();
         
       //  var_dump($langs);
+        
+    
         
     }
     

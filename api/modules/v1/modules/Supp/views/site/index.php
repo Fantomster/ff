@@ -18,13 +18,11 @@ use yii\widgets\Pjax;
 $this->title = 'API test';
 // $this->params['breadcrumbs'][] = $this->title;
 
-        echo "<b>Welcome to R-Keeper integration gateway</b>";
+        echo date('Y-m-d H:i:s',time());
         echo "<hr>";
-        echo "Local date:   ".date('Y-m-d H:i:s',time());
+        echo gmdate("Y-m-d H:i:s");
         echo "<hr>";
-        echo "GMT time:   ".gmdate("Y-m-d H:i:s");
-        echo "<hr>";
-        echo "Version: 1";
+        echo "Welcome to F-Keeper API gateway. <b> (Version 1)</b>. HTTP-client should be here.";
         echo "<hr>";
 
 

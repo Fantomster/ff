@@ -1,5 +1,7 @@
 <?php
 
+use yii\helpers\Html;
+
 /*
 
 use yii\helpers\Html;
@@ -15,19 +17,20 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\UserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'API test';
+$this->title = '1C suppliers API (version 1)';
 // $this->params['breadcrumbs'][] = $this->title;
 
-        echo "<b>Welcome to R-Keeper integration gateway</b>";
-        echo "<hr>";
-        echo "Local date:   ".date('Y-m-d H:i:s',time());
-        echo "<hr>";
-        echo "GMT time:   ".gmdate("Y-m-d H:i:s");
-        echo "<hr>";
-        echo "Version: 1";
-        echo "<hr>";
+        echo "Local time:<strong> ".date('Y-m-d H:i:s',time())."</strong><br>";
+        echo "GMT time: <strong>".gmdate("Y-m-d H:i:s")."</strong><br><br>";
+        
+echo Html::a('Auth', ['/v1/restor/sendlogin'], ['class'=>'btn btn-primary', 'target'=>'_blank']);
+echo Html::a('Auth', ['/v1/restor/getgoods'], ['class'=>'btn btn-primary', 'target'=>'_blank']);
+
 
 
 
 ?>
+
+
+
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace api\modules\v1;
+namespace api\modules\v1\modules\restor;
 
 class Module extends \yii\base\Module
 {
@@ -8,7 +8,6 @@ class Module extends \yii\base\Module
     {
         parent::init();
 
-    //    $this->params['foo'] = 'bar';
-    //      ... остальной инициализирующий код ...
+    
     }
 }

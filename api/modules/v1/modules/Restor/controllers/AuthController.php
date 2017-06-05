@@ -1,10 +1,13 @@
 <?php
 
-namespace api\modules\v1\controllers;
+namespace api\modules\v1\modules\restor\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\mongosoft\soapserver\Action;
+// use yii\mongosoft\soapserver\Action;
+use yii\httpclient\Client;
+use api\common\models\RkSessionSearch;
+use api\common\models\RkSession;
 
 /**
  * Description of SiteController
@@ -12,7 +15,7 @@ use yii\mongosoft\soapserver\Action;
  * Author: R.Smirnov
  */
 
-class RestorController extends Controller {
+class AuthController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -25,31 +28,138 @@ class RestorController extends Controller {
         
     public function actionIndex() {
         
-      
-        return $this->render('index' // ,[
-              //      'searchModel' => $searchModel,
-              //      'dataProvider' => $dataProvider,
-              // ]
-                );
-      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-      //      ->queryAll();
-        
-      //  var_dump($langs);
+        $searchModel = new RkSessionSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]); 
         
     }
     
-    public function actionHello() {
-     
-        echo "hello";
+
+
+public function actionSendlogin() {
         
+    $licReq = "TaS1MFk5aRk=tuKE2zLI2eqnCJnATjuErPNyIFl/vTQ1+IgJj7Rhx+nnoNq+k1K90kqofh4qDg+g4Lo4mlIg2tCQfxnDmitpzKkIyUIDFy4J6tud0pZf9nahgfFcwiGtZNFUM1I3h/J+Vu78vxp9wHkWRQ3sI9yy7A/o1QKKOyGi03S5/9TMA1v92TdYURdb8jdUcQJgui1dQIgHzE56O9OqV/DGVT5DhqjSfsvZIOmaj0+0FHJSrQZt7cO628h6UrA916dDTECb9fDWjprydt+oYPudzcwx02m7CmEDBSEn7CJcY+OE0y3+Q3vBUZNuEQ=="; 
+    $rlogin = '5889';
+    $rpass = 'uqbihcj';
+    $rtoken = '48eabe9e-fc50-4b12-833c-ccc41480852d';
+                  
+    $usrReq = base64_encode($rlogin.';'.strtolower(md5($rlogin.$rpass)).';'.strtolower(md5($rtoken)));
+    
+    echo $usrReq."<br>";
+    
+    
+    
+    // usr : Base64(userName + “;” + lowercase(hPassword) + “;” + lowercase(md5(token))).
+    // hPassword – вычисляется как MD5(userName+password)
+    
+    
+    $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Login";
+    // $xml =  mb_convert_encoding('<?xml version="1.0" encoding="utf-8"  ><AUTHCMD key="test" usr="test2"/>','utf-8');
+    
+    //$xml = New \DOMDocument();
+    //$xml->loadXML('<AUTHCMD key="test" usr="test2"/>');
+    //$xml = array('AUTHCMD'=>array('key'=>'test1','usr'=>'test2'));
+    $xml ='<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="'.$licReq.'" usr="'.$usrReq.'"/>';
+    
+    echo "<hr>";
+    var_dump($xml);
+    echo "<hr>";
+   
+    $headers = array(
+        "Content-type: application/xml; charset=utf-8",
+        "Content-length: " . strlen($xml),
+        "Connection: close", 
+    );
+
+    $fp = fopen('runtime/logs/http-request.log', 'w');
+    
+    $ch = curl_init(); 
+    curl_setopt($ch, CURLOPT_URL,$url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_HEADER, 1);
+    
+    curl_setopt($ch, CURLOPT_VERBOSE, true);
+    curl_setopt($ch, CURLOPT_STDERR,$fp);
+
+    $data = curl_exec($ch); 
+    
+    $info = curl_getinfo($ch);
+    
+    echo "Request result:<br>"; 
+    var_dump($info);
+    echo "<hr>";
+    echo "Response:<br>";
+    echo $data;
+    var_dump ($data);
+    
+    echo "<hr><hr><hr>";
+    
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $data, $matches);
+    $cookies = array();
+    
+    foreach($matches[1] as $item) {
+    parse_str($item, $cookie);
+    $cookies = array_merge($cookies, $cookie);
     }
     
-    public function actionTabson() {
-     
-        echo "tabson";
-        
-    }
+    echo "Cookies:<br>";
+    var_dump($cookies);
+
+if(curl_errno($ch))
+    print curl_error($ch);
+else
+    curl_close($ch);
+
+
+
+
     
+    /*
+    
+    $sData = New \DOMDocument();
+   // $sData->encoding = "utf-8";
+   
+        
+    $sData->loadXML("<AUTHCMD key='тест' usr='test2'/>");
+        
+    if (!$sData) {
+    echo 'Ошибка при разборе документа';
+    exit;
+}
+    
+        echo "Sending auth request..<br>";
+        $client = new Client([
+                                'transport' => 'yii\httpclient\CurlTransport'
+                            ]);
+        $response = $client->createRequest()
+        ->setMethod('post')
+        ->setUrl('http://ws-w01m.ucs.ru/WSClient/api/Client/Login')
+        ->setFormat(Client::FORMAT_XML)
+       // ->charset('utf-8')        
+          ->setData($sData)      
+              
+        ->send();
+
+   //     if ($response->isOk) {
+      //  $newUserId = $response->data['id'];
+      // var_dump($response);    
+      //   echo $response->content;
+      //   echo "<hr";
+         echo "<hr>";  
+         var_dump($response->content);
+         echo "<hr>";
+         var_dump($response);
+   // }
+    */
+}    
     
 
 /*
@@ -76,10 +186,155 @@ class RestorController extends Controller {
 * @soap
 */
  
+    public function actionGetgoods() {
+        
+    $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Cmd";
     
-    public function getHello($login,$pass) 
+    $restr = "199990046";
+    
+    $cook =    '8887253E07B9E41B2FC7AF60FF335370A9841B7F27ADEC48E7BB'
+              .'3878C7F80F98205840B4A65A803876CD8A4665DC58E37AFA93A24'
+              .'BED8AD92BA6B66E238A957E56F263A1033B65F67F3C3079DB42EA7'
+              .'243D192DCE86E922A4588A0D86E706244D9B40742720BC95F5031'
+              .'3D37F04D988D8969E6C73F3BD3BF6941B4DE686FCB0E8D0B25AFD6'
+              .'2F1EE5F418C6C5ECEEA9542159968D267CBF85EDD8D58861372590'
+              .'625ABB12406DB53910BC6B04C93BCFB7EDB54D48869707FA57EE69'
+              .'E450D096AE37B6F1C33F004A8A7A7EA7D4217A477B7120F2AD9A381'
+              .'7D4E040CB68973CBE747A63E7BF5C86A89E4B0A3B891C2022FBADC'
+              .'F847B0F874D4FFACE7F893CF0971662F52C1215F8F9C4B7AAE529B'
+              .'229A424063E0A68359A64408945A7CC3E89D48494614E39FE7ACDF9'
+              .'D18EE0DF9A953CC061CDF1032017E2B9CA580EF9159BA868DEC01AB'
+              .'93B8923C0C060E550D86741963ECBDE9B9DAD0E99C6393147097CC766';
+    
+    
+
+    $xml = '<?xml version="1.0" encoding="utf-8" ?>
+        <RQ cmd="get_objectinfo">
+        <PARAM name="object_id" val="'.$restr.'"/>
+        </RQ>';    
+       
+    // setcookie('_ASPXAUTH',$cook);
+    
+    $headers = array(
+        "Content-type: application/xml; charset=utf-8",
+        "Content-length: " . strlen($xml),
+        "Connection: close", 
+    );
+
+    echo "<hr>";
+    var_dump($xml);
+    echo "<hr>";
+    
+    $fp = fopen('runtime/logs/http-request1.log', 'w');
+    
+    $ch = curl_init(); 
+    curl_setopt($ch, CURLOPT_URL,$url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    // curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt ($ch, CURLOPT_COOKIE, ".ASPXAUTH=".$cook.";"); 
+    
+    curl_setopt($ch, CURLOPT_VERBOSE, true);
+    curl_setopt($ch, CURLOPT_STDERR,$fp);
+
+    $data = curl_exec($ch); 
+    
+    
+    $info = curl_getinfo($ch);
+    echo "Request result:<br>"; 
+    var_dump($info);
+    echo "<hr>";
+    echo "Response:<br>";
+    echo $data;
+    echo "<hr><hr><hr>";
+    var_dump ($data);
+    
+    
+   // $myXML = new \SimpleXMLElement($data);
+    $myXML   = simplexml_load_string($data);
+   // $array = $this->XML2Array($myXML);
+    $array = json_decode(json_encode((array) $myXML), 1);
+    $array = array($myXML->getName() => $array);
+    
+
+    /*
+    foreach ($myobj->xpath('//OBJECTINFO') as $obj) {
+    echo 'Объект с id ', $obj->id, ', имя ', $obj->name, ', адрес:', $obj->address, PHP_EOL;
+    }
+    */
+    /*
+    $myXML = new \DOMDocument('1.0', 'utf-8');
+    
+    $myXML->load($data);
+    */
+   // $root = $myXML->documentElement;
+    
+   //  $objects = $myXML->childNodes;
+    
+    // var_dump($myXML);
+    
+    // var_dump($array);
+    
+    $objectinfo = $array['RP']['OBJECTINFO'];
+    
+    var_dump($objectinfo);
+    
+    if (!$objectinfo) {
+        
+            foreach ($array['Error'] as $obj) {
+            echo 'Ошибка: ', $obj['code'], '<br> Описание ошибки: ', $obj['Text'], PHP_EOL;
+            }
+        
+    } else {
+            
+            foreach ($array['RP']['OBJECTINFO'] as $obj) {
+            echo 'Объект id: ', $obj['id'], '<br>имя: ', $obj['name'], '<br>адрес: ', $obj['address'], PHP_EOL;
+            }
+    
+    }
+    /*
+    foreach ($objects as $object) {
+    
+    $id = $object->getAttribute('id');
+    $name = $object->getAttribute('name');
+    $address = $object->getAttribute('address');
+    
+    $restors[] = array('id' => $id, 'name' => $name, 'address' => $address);
+    }
+    
+    print_r($restors);
+    
+    */
+    
+    if(curl_errno($ch))
+    print curl_error($ch);
+    else
+    curl_close($ch);
+    
+    }
+    
+        
+    public function actionHello() 
     {
-        return 'Hello ' . $login.'/'.$pass.'/ Date:'.date("Y-m-d H:i:s") ;
+      // echo "1";
+       phpinfo();
+    }
+    
+    public function actionSettings() 
+    {
+      
+        return $this->render('settings' // ,[
+              //      'searchModel' => $searchModel,
+              //      'dataProvider' => $dataProvider,
+              // ]
+                );
+      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
+      //      ->queryAll();
+        
+      //  var_dump($langs);
     }
 
 
@@ -142,5 +397,20 @@ class RestorController extends Controller {
 
   }  
   
+  function XML2Array(\SimpleXMLElement $parent)
+{
+    $array = array();
+
+    foreach ($parent as $name => $element) {
+        ($node = & $array[$name])
+            && (1 === count($node) ? $node = array($node) : 1)
+            && $node = & $node[];
+
+        $node = $element->count() ? XML2Array($element) : trim($element);
+    }
+
+    return $array;
+}
+
    
 }

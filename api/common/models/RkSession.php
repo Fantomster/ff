@@ -5,28 +5,29 @@ namespace api\common\models;
 use Yii;
 
 /**
- * This is the model class for table "api_access".
+ * This is the model class for table "rk_session".
  *
  * @property integer $id
  * @property integer $fid
- * @property string $token
- * @property int $acc
- * @property string $nonce
+ * @property integer $acc
+ * @property string $cook
  * @property string $ip
  * @property datetime $fd
  * @property datetime $td
  * @property integer $ver
- * @property integer $status
- * @property datetime $extimefrom
+ * @property string $status
+ * @property datetime $extime
+ * @property string $comment
+ * 
  */
-class ApiSession extends \yii\db\ActiveRecord
+class RkSession extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'api_session';
+        return 'rk_session';
     }
 
     /**
@@ -35,9 +36,9 @@ class ApiSession extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['token','fid'], 'required'],
-            [['id','fid','acc','ver'], 'integer'],
-            [['token','nonce'], 'string', 'max' => 255],
+            [['id','fid','acc','cook','status','ver'], 'required'],
+            [['id','fid','org','ver'], 'integer'],
+            [['comment'], 'string', 'max' => 255],
         ];
     }
 

@@ -5,14 +5,14 @@ namespace api\assets;
 use yii\web\AssetBundle;
 
 /**
- * Main backend application asset bundle.
+ * Main api application asset bundle.
  */
 class AppAsset extends AssetBundle
 {
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        'css/site.css',
+          'css/site.css',
     ];
     public $js = [
     ];

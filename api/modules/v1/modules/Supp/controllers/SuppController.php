@@ -32,12 +32,11 @@ class SuppController extends Controller {
         
     public function actionIndex() {
      
-        echo "Welcome to F-Keeper API gateway. <b> (Version 1! SOAP )</b>Please use SOAP client to connect this service.";
-        
-      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-      //      ->queryAll();
-        
-      //  var_dump($langs);
+        return $this->render('index' // ,[
+              //      'searchModel' => $searchModel,
+              //      'dataProvider' => $dataProvider,
+              // ]
+                );
         
     }
 

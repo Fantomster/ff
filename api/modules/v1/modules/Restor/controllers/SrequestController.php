@@ -1,10 +1,11 @@
 <?php
 
-namespace api\modules\v1\controllers;
+namespace api\modules\v1\modules\restor\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\mongosoft\soapserver\Action;
+// use yii\mongosoft\soapserver\Action;
+use yii\httpclient\Client;
 
 /**
  * Description of SiteController
@@ -12,7 +13,7 @@ use yii\mongosoft\soapserver\Action;
  * Author: R.Smirnov
  */
 
-class RestorController extends Controller {
+class SrequestController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -23,124 +24,161 @@ class RestorController extends Controller {
     private $password;
     
         
+    
     public function actionIndex() {
         
-      
-        return $this->render('index' // ,[
-              //      'searchModel' => $searchModel,
-              //      'dataProvider' => $dataProvider,
-              // ]
-                );
-      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-      //      ->queryAll();
-        
-      //  var_dump($langs);
-        
-    }
+    $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Cmd";
     
-    public function actionHello() {
-     
-        echo "hello";
-        
-    }
+    $restr = "199990046";
     
-    public function actionTabson() {
-     
-        echo "tabson";
-        
-    }
+    $cook = 'C7C28BF23A769A7C6DDBFCE967EF2F848644A528624F9344CF05E237AF4969E'.
+            '9BCCC961EC2EEC157A4DD0348A94B0CE19D14A036255718D52634F86DE24C4C7'.
+            '9F09540B67EA78BFE823E5E086B28697898EE4CCB4F025006285DA75C18480C2'.
+            'F2AD54F5F546A52603C8B7D1466D4442EF040871DADEC9F4CC8D4D024D612F14D'.
+            '03C05B4402E3149CB99E133154C2ED9F0F399E06EC42829E9A2B1C09B3F3D1DE0'.
+            'F3115832F31264F6CC8984BD15D45A365088B7D44C28789465A256AC9002F44C9'.
+            '8F6AF1A9E5DEF4132F7EF5A1097EAFA4D2764983D076173396ECD49C5007B20D7'.
+            '4BBE6CE24499C1D31F80F6DA9947004E276E31B807CC6050A1CBCEF4B1F0091E83'.
+            '06ABD7D66462C7A2788C276F9FF69533F38B630BD628E3FD626B5582AF5B0AFE01'. 
+            '7A3E579AB7998AD9E15EB8A79B2123B3C96F71AAD58290CC1F1700DAA92C3717B01'.
+            '6427860E6D88BFAAB754630590E3082248C45A5648E8196E09F366';
     
     
 
+    $xml = '<?xml version="1.0" encoding="utf-8" ?>
+        <RQ cmd="get_objectinfo">
+        <PARAM name="object_id" val="'.$restr.'"/>
+        </RQ>';    
+       
+    // setcookie('_ASPXAUTH',$cook);
+    
+    $headers = array(
+        "Content-type: application/xml; charset=utf-8",
+        "Content-length: " . strlen($xml),
+        "Connection: close", 
+    );
 /*
-    public function actions()
+    echo "<hr>";
+    var_dump($xml);
+    echo "<hr>";
+  */
+    
+    $fp = fopen('runtime/logs/http-request1.log', 'w');
+    
+    $ch = curl_init(); 
+    curl_setopt($ch, CURLOPT_URL,$url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    // curl_setopt($ch, CURLOPT_HEADER, 1);
+    curl_setopt ($ch, CURLOPT_COOKIE, ".ASPXAUTH=".$cook.";"); 
+    
+    curl_setopt($ch, CURLOPT_VERBOSE, true);
+    curl_setopt($ch, CURLOPT_STDERR,$fp);
+
+    $data = curl_exec($ch); 
+    
+    
+    $info = curl_getinfo($ch);
+    // echo "Request result:<br>"; 
+    // var_dump($info);
+    // echo "<hr>";
+    // echo "Response:<br>";
+    // echo $data;
+    // echo "<hr><hr><hr>";
+    // var_dump ($data);
+    
+    
+   // $myXML = new \SimpleXMLElement($data);
+    $myXML   = simplexml_load_string($data);
+   // $array = $this->XML2Array($myXML);
+    $array = json_decode(json_encode((array) $myXML), 1);
+    $array = array($myXML->getName() => $array);
+    
+
+    /*
+    foreach ($myobj->xpath('//OBJECTINFO') as $obj) {
+    echo 'Объект с id ', $obj->id, ', имя ', $obj->name, ', адрес:', $obj->address, PHP_EOL;
+    }
+    */
+    /*
+    $myXML = new \DOMDocument('1.0', 'utf-8');
+    
+    $myXML->load($data);
+    */
+   // $root = $myXML->documentElement;
+    
+   //  $objects = $myXML->childNodes;
+    
+    // var_dump($myXML);
+    
+    // var_dump($array);
+    
+    $objectinfo = $array['RP']['OBJECTINFO'];
+    
+   // var_dump($objectinfo);
+    
+    if (!$objectinfo) {
+        
+            foreach ($array['Error'] as $obj) {
+          $res = 'Ошибка: '.$obj['code'].'<br> Описание ошибки: '.$obj['Text'].PHP_EOL;
+            }
+        
+    } else {
+            
+            foreach ($array['RP']['OBJECTINFO'] as $obj) {
+          $res = 'Объект id: '.$obj['id'].'<br>имя: '.$obj['name'].'<br>адрес: '.$obj['address'].PHP_EOL;
+            }
+    
+    }
+    /*
+    foreach ($objects as $object) {
+    
+    $id = $object->getAttribute('id');
+    $name = $object->getAttribute('name');
+    $address = $object->getAttribute('address');
+    
+    $restors[] = array('id' => $id, 'name' => $name, 'address' => $address);
+    }
+    
+    print_r($restors);
+    
+    */
+    
+    return $this->render('index'  ,[
+                   'myXML' => $myXML,
+                   'objectinfo' => $objectinfo,
+                   'data' => $data,
+                   'info' => $info,
+                   'res'  => $res,
+         
+               ]);
+    
+    if(curl_errno($ch))
+    print curl_error($ch);
+    else
+    curl_close($ch);
+    
+    }
+    
+
+
+  function XML2Array(\SimpleXMLElement $parent)
 {
-    return [
-        'hello' => [
-            'class' => 'mongosoft\soapserver\Action',
-            'serviceOptions' => [
-                'disableWsdlMode' => false,
-            ]
-        ],
-        'error' => [
-                'class' => 'yii\web\ErrorAction',
-            ],
-    ];
-}
-*/
-    
-/**
-* @param string $login
-* @param string $pass
-* @return string 
-* @soap
-*/
- 
-    
-    public function getHello($login,$pass) 
-    {
-        return 'Hello ' . $login.'/'.$pass.'/ Date:'.date("Y-m-d H:i:s") ;
+    $array = array();
+
+    foreach ($parent as $name => $element) {
+        ($node = & $array[$name])
+            && (1 === count($node) ? $node = array($node) : 1)
+            && $node = & $node[];
+
+        $node = $element->count() ? XML2Array($element) : trim($element);
     }
 
+    return $array;
+}
 
-   
-/**
-   * Soap authorization
-   * @return mixed result of auth
-   * @soap
-   */
-   
-  public function OpenSession() {
-      
-    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
-    {
-    header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-    header('HTTP/1.0 401 Unauthorized');
-    header('Warning: WSS security in not provided in SOAP header');
-    exit;
-   
-    } else { 
-        
-    // $identity = new UserIdentity($this->username, $this->password);    
-   
-        if (($this->username != 'cyborg') || ($this->password != 'mypass')) 
-        {
-            return 'Auth error. Login or password is not correct.';
-        } else {
-    
-            $sessionId = Yii::$app->getSecurity()->generateRandomString();
-            // $sessionId = md5(uniqid(rand(),1));
-          
-            return 'OK_SOPENED:'.$sessionId;
-        }
-       
-    }  
-    
-  }
-  
-    public function security($header) {
-    
-       
-        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($header->UsernameToken->Username)) // Проверяем послали ли нам данные авторизации (BASIC)
-        {
-            header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
-            header('HTTP/1.0 401 Unauthorized');
-            exit;
-   
-        } else {
-            
-        $this->username = $header->UsernameToken->Username;
-        $this->password = $header->UsernameToken->Password;
-         
-    //     $this->username =  Yii::$app->request->getAuthUser();
-    //     $this->password =  Yii::$app->request->getAuthPassword();
-         
-         return $header;
-         
-                     
-        }
-
-  }  
-  
    
 }

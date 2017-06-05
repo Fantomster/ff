@@ -1,33 +1,24 @@
 <?php
 
-/*
-
 use yii\helpers\Html;
-//use yii\grid\GridView;
-use kartik\grid\GridView;
-use kartik\export\ExportMenu;
-use yii\widgets\Pjax;
- * 
- * 
- */
 
-/* @var $this yii\web\View */
-/* @var $searchModel backend\models\UserSearch */
+
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'API test';
+$this->title = 'R-keeper API White Server (version 1)';
 // $this->params['breadcrumbs'][] = $this->title;
 
-        echo "<b>Welcome to R-Keeper integration gateway</b>";
-        echo "<hr>";
-        echo "Local date:   ".date('Y-m-d H:i:s',time());
-        echo "<hr>";
-        echo "GMT time:   ".gmdate("Y-m-d H:i:s");
-        echo "<hr>";
-        echo "Version: 1";
-        echo "<hr>";
-
-
+        echo "Local time:<strong> ".date('Y-m-d H:i:s',time())."</strong><br>";
+        echo "GMT time: <strong>".gmdate("Y-m-d H:i:s")."</strong><br><br>";
+        
+echo Html::a('Home', ['index'], ['class'=>'btn btn-primary']);
+echo "&nbsp; &nbsp; &nbsp; ";
+echo Html::a('Settings', ['/v1/restor/settings'], ['class'=>'btn btn-primary']);
+echo "&nbsp; &nbsp; &nbsp; ";
+echo Html::a('Auth', ['restor/sendlogin'], ['class'=>'btn btn-primary', 'target'=>'_blank']);
+echo "&nbsp; &nbsp; &nbsp; ";
+echo Html::a('Get Goods', ['/v1/restor/getgoods'], ['class'=>'btn btn-primary', 'target'=>'_blank']);
+echo "&nbsp; &nbsp; &nbsp; ";
+echo Html::a('Settings', ['/v1/restor/settings'], ['class'=>'btn btn-primary']);
 
 ?>
-

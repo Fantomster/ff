@@ -15,17 +15,10 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\UserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'API test';
+$this->title = '1C suppliers integration server (Version 1.0)';
 // $this->params['breadcrumbs'][] = $this->title;
 
-        echo "<b>Welcome to R-Keeper integration gateway</b>";
-        echo "<hr>";
-        echo "Local date:   ".date('Y-m-d H:i:s',time());
-        echo "<hr>";
-        echo "GMT time:   ".gmdate("Y-m-d H:i:s");
-        echo "<hr>";
-        echo "Version: 1";
-        echo "<hr>";
+
 
 
 

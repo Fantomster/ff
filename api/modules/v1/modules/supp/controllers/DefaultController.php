@@ -158,7 +158,7 @@ class DefaultController extends Controller {
       
       // return $org;
          
-      $cats = Yii::$app->db_api->createCommand('select id, type_id, name, city, address, zip_code,
+      $cats = Yii::$app->db_api->createCommand('select id as fid, type_id, name, city, address, zip_code,
           phone, email, website, created_at, updated_at, legal_entity, contact_name from organization 
           where id in ( select rest_org_id from relation_supp_rest where supp_org_id ='.$org.')')
       ->queryAll();

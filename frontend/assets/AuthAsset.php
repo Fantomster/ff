@@ -23,7 +23,7 @@ class AuthAsset extends AssetBundle {
         'js/helpers/object-fit.js',
         'js/helpers/object-fit.js',
         'js/helpers/bs_modal_fix.js',
-        'js/components/enter.js',
+//        'js/components/enter.js',
         'js/components/data-modal.js',
     ];
     public $depends = [

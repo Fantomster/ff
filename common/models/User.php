@@ -30,7 +30,7 @@ class User extends \amnah\yii2\user\models\User {
         $rules = parent::rules();
         $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite', 'manageNew']];
         $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
-        $rules[] = [['role_id'], 'compare', 'compareValue' => Role::ROLE_ADMIN, 'operator' => '>'];
+//        $rules[] = [['role_id'], 'compare', 'compareValue' => Role::ROLE_ADMIN, 'operator' => '>'];
         $rules[] = [['email'], 'unique', 'on'=>'sendInviteFromVendor', 'message' => 'ooo'];
         $rules[] = [['organization_id'], 'integer'];
 //        $rules[] = [['email'], 'required', 'message' => 'Пожалуйста, напишите ваш адрес электронной почты'];
@@ -40,6 +40,8 @@ class User extends \amnah\yii2\user\models\User {
         $rules[$pos]['message'] = 'Пожалуйста, напишите ваш адрес электронной почты';
         $pos = array_search([['newPassword'], 'required', 'on' => ['register', 'reset']], $rules);
         $rules[$pos]['message'] = 'Пожалуйста, введите пароль';
+        $pos = array_search([['newPasswordConfirm'], 'required', 'on' => ['reset']], $rules);
+        $rules[$pos]['message'] = 'Пожалуйста, повторите пароль';
         
         return $rules;
     }

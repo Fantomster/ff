@@ -3,28 +3,6 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Organization;
-use nirvana\showloading\ShowLoadingAsset;
-
-ShowLoadingAsset::register($this);
-//$this->registerJs(
-//        '$("document").ready(function(){
-//            $("#register-form").on("submit", function(e) {
-//                $("#loader-show").showLoading();
-//            });
-//        });'
-//);
-$this->registerCss(
-        '
-            .intl-tel-input.allow-dropdown input, .intl-tel-input.allow-dropdown input[type=text] {
-                padding-left: 62px;
-            }
-            .intl-tel-input.allow-dropdown .flag-container {
-                padding-bottom: 7px;
-                padding-left: 15px;
-            }
-        '
-);
-$this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
 
 $form = ActiveForm::begin([
             'id' => 'register-form',
@@ -34,24 +12,20 @@ $form = ActiveForm::begin([
             'options' => [
                 'class' => 'auth-sidebar__form form-check reg js-reg',
             ],
+            'fieldConfig' => ['template' => '{input}'],
         ]);
 ?>
 <input type="email" name="fake_email" style="position: absolute; top: -100%;">
 <input type="password" name="fake_pwd" style="position: absolute; top: -100%;">
 <div class="auth-sidebar__form-radios">
-<!--    <label>
-        <input type="radio" name="buy" checked><i class="radio-ico"></i><span>Я покупаю</span>
-    </label>
-    <label>
-        <input type="radio" name="buy"><i class="radio-ico"></i><span>Я продаю</span>
-    </label>-->
     <?=
             $form->field($organization, 'type_id')
             ->radioList(
                     [Organization::TYPE_RESTAURANT => 'Я покупаю', Organization::TYPE_SUPPLIER => 'Я продаю'], 
                     [
-                        'item' => function($index, $label, $name, $checked, $value) {
+                        'item' => function($index, $label, $name, $checked, $value) use ($organization) {
 
+                            $checked = $checked ? 'checked' : '';
                             $return = '<label class="modal-radio">';
                             $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" '.$checked.'>';
                             $return .= '<i class="radio-ico"></i><span>' . $label . '</span>';
@@ -97,6 +71,6 @@ $form = ActiveForm::begin([
     ?><i class="fa fa-lock"></i>
     </label>
 </div>
-<button type="submit" class="but but_green"><span>Зарегистрироваться</span><i class="ico"></i></button>
+<button type="submit" class="but but_green" id="btnRegister" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Регистрируемся..."><span>Зарегистрироваться</span><i class="ico"></i></button>
 <div class="auth-sidebar__enter reg"><span>Уже зарегистрированы?</span><a href="#">войти в систему</a></div>
 <?php ActiveForm::end(); ?>

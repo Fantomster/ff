@@ -134,6 +134,52 @@ class DefaultController extends Controller {
         
       
     }
+    
+/**
+* Get Categories
+* @param string $sessionId 
+* @param string $nonce 
+* @param string $lang
+* @return mixed 
+* @soap
+*/
+    
+    public function getAgents($sessionId, $nonce, $lang) 
+    {
+
+        if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];  
+        
+        if ($sess = $this->check_session($sessionId,$nonce)) {
+          
+      // return $sess;    
+      
+      $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="'.$sessionId.'");')
+      ->queryScalar();   
+      
+      // return $org;
+         
+      $cats = Yii::$app->db_api->createCommand('select id, type_id, name, city, address, zip_code,
+          phone, email, website, created_at, updated_at, legal_entity, contact_name from organization 
+          where id in ( select rest_org_id from relation_supp_rest where supp_org_id ='.$org.')')
+      ->queryAll();
+     
+      $this->save_action(__FUNCTION__, $sessionId, 1,'OK',$this->ip);     
+      return $cats;
+    
+      exit;
+            
+          
+      } else {
+          
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip);       
+        return 'Session error. Active session is not found.';
+
+      exit;   
+      }
+        
+      
+    }    
+    
    
 /**
 * Get Units

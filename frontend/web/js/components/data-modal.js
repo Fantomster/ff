@@ -1,1 +1,6 @@
-function initMap(){var a={lat:55.740707,lng:37.408388},o=new google.maps.Map(document.getElementById("modal-map"),{zoom:17,center:a});new google.maps.Marker({position:a,map:o})}function modalSlider(){$(".data-modal .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})}$(document).ready(function(){$("#data-modal").on("shown.bs.modal",function(){modalSlider(),initMap()}),$("#data-modal").length>0&&$("#data-modal").modal("show")});
+$(document).ready(function(){
+    $("#data-modal").on("shown.bs.modal",function(){
+        //$(".data-modal .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})
+    });
+    $("#data-modal").length>0&&$("#data-modal").modal("show");
+});

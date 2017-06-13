@@ -1333,7 +1333,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
-        return $this->render('dashboard/index', compact(
+        return $this->render('index', compact(
                                 'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp'
                                 //'chart_dates', 'chart_price'
         ));

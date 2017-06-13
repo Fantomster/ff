@@ -76,7 +76,7 @@ if (!empty($success)) {
         <div class="auth-sidebar h-fx_center auth">
             <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
             <div class="auth-sidebar__content">
-                <div class="auth-sidebar__logo"><img src="images/tmp_file/logo.png" alt=""></div>
+                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="images/tmp_file/logo.png" alt=""></a></div>
 
                 <div class="auth-sidebar__annotation">Введите новый пароль</div>
                 <?php

@@ -58,11 +58,11 @@ class SiteController extends Controller {
                                 throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
                             }
             
-                            if ($this->isRegistrationComplete($user->organization)) {
+                            //if ($this->isRegistrationComplete($user->organization)) {
                                 $this->redirectOrganizationIndex($user->organization);
-                            } else {
-                                $this->redirect(['/site/complete-registration']);
-                            }
+                            //} else {
+                            //    $this->redirect(['/site/complete-registration']);
+                            //}
                         }
                     ],
                 ],

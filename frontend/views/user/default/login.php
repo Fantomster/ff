@@ -78,7 +78,7 @@ $this->registerCss(
     <div class="auth-sidebar h-fx_center auth">
         <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
         <div class="auth-sidebar__content">
-            <div class="auth-sidebar__logo"><img src="images/tmp_file/logo.png" alt=""></div>
+            <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="images/tmp_file/logo.png" alt=""></a></div>
             <div class="auth-sidebar__annotation">Заполните поля<br>для входа в систему</div>
             <div class="form-slider">
                 <?= $registerFirst ? $this->render('_register-form', compact('user', 'profile', 'organization')) : $this->render('_login-form', compact('model')) ?>

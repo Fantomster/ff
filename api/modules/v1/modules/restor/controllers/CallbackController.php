@@ -26,9 +26,11 @@ class CallbackController extends Controller {
         
     public function actionIndex() {
         
+        
     $request = Yii::$app->request;
     
-    $getr = $request->post();    
+    $getr = $request->post();  
+    $gget = $request->get();  
     
     if($getr) {
     
@@ -41,6 +43,12 @@ class CallbackController extends Controller {
     echo '<?xml version="1.0" encoding="utf-8"?><RQ value="OK"></RQ>';
         
     }
+    
+    $fp = fopen('runtime/logs/callback.log', 'w');
+    
+    $fputs($fp,'log:'.$getr); 
+    
+    fclose($fp);
     // if (!Yii::$app->request->isPost) {
     
     // echo "Method POST is only accepted.";

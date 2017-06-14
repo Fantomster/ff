@@ -106,15 +106,15 @@ class PrequestController extends Controller {
     // echo "<hr><hr><hr>";
     // var_dump ($data);
     
-    
+    /*
    // $myXML = new \SimpleXMLElement($data);
     $myXML   = simplexml_load_string($data);
    // $array = $this->XML2Array($myXML);
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
-    
+    */
     var_dump($data);
-    var_dump($array);
+ //   var_dump($array);
     
 
     /*

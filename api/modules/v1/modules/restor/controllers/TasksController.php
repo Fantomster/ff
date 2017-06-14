@@ -111,8 +111,8 @@ class TasksController extends Controller {
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
     
-  //  var_dump($data);
-  //  var_dump($array);
+    var_dump($data);
+    var_dump($array);
     
 
     /*

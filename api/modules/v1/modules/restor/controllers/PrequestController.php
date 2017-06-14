@@ -130,7 +130,7 @@ class PrequestController extends Controller {
     
    // var_dump($objectinfo);
     
-    if (!$objectinfo) {
+    if (!isset($objectinfo)) {
         
             foreach ($array['Error'] as $obj) {
           $res = 'Ошибка: '.$obj['code'].'<br> Описание ошибки: '.$obj['Text'].PHP_EOL;

@@ -37,6 +37,8 @@ class CallbackController extends Controller {
     $fputs($fp,$getr); 
     
     fclose($fp);
+    
+    return "Ok";
         
     }
     // if (!Yii::$app->request->isPost) {

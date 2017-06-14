@@ -14,7 +14,7 @@ use api\common\models\RkSession;
  * Author: R.Smirnov
  */
 
-class PrequestController extends Controller {
+class TasksController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -27,9 +27,7 @@ class PrequestController extends Controller {
         
     public function actionIndex() {
         
-    //  $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Cmd";
-        
-      $url= "https://api.f-keeper.ru/api/web/v1/restor/callback";
+      $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Cmd";
     
     $restr = "199990046";
     
@@ -46,19 +44,19 @@ class PrequestController extends Controller {
         </RQ>';   
   */
     
-
+/*
    // Работает!! 
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goods" tasktype="any_call" guid="00000000-0000-0000-0000-000000000013" callback="https://api.f-keeper.ru/api/web/v1/restor/callback" >
+    <RQ cmd="sh_get_goods" tasktype="any_call" guid="00000000-0000-0000-0000-000000000012" callback="https://api.f-keeper.ru/api/web/v1/restor/callback" timeout="30">
     <PARAM name="object_id" val="'.$restr.'" />  
     </RQ>';
-
-  /*
+ */
+  
   $xml = '<?xml version="1.0" encoding="utf-8" ?>
   <RQ cmd="get_tasklist">
     <PARAM name="object_id" val="'.$restr.'" />
   </RQ>';
- */
+ 
   /*  
   $xml = '<?xml version="1.0" encoding="utf-8" ?>
   <RQ cmd="sh_get_goodgroups" callback="https://api.f-keeper.ru/api/web/v1/restor/callback">
@@ -106,15 +104,15 @@ class PrequestController extends Controller {
     // echo "<hr><hr><hr>";
     // var_dump ($data);
     
-    /*
+    
    // $myXML = new \SimpleXMLElement($data);
     $myXML   = simplexml_load_string($data);
    // $array = $this->XML2Array($myXML);
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
-    */
-    var_dump($data);
-    var_dump($array);
+    
+  //  var_dump($data);
+  //  var_dump($array);
     
 
     /*

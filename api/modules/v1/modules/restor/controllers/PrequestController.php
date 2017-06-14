@@ -165,9 +165,9 @@ class PrequestController extends Controller {
     
     return $this->render('index'  ,[
                    'myXML' => $myXML,
-                   'objectinfo' => $objectinfo,
-                   'data' => $data,
-                   'info' => $info,
+        //           'objectinfo' => $objectinfo,
+          //         'data' => $data,
+          //         'info' => $info,
                    'res'  => $res,
                    'xml'  => $xml,
          

@@ -38,7 +38,7 @@ class CallbackController extends Controller {
     
     fclose($fp);
     
-    return "Ok";
+    return '<?xml version="1.0" encoding="utf-8"?><RQ value="OK"></RQ>';
         
     }
     // if (!Yii::$app->request->isPost) {

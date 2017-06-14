@@ -57,7 +57,7 @@ class SrequestController extends Controller {
     echo "<hr>";
   */
     
-  //  $fp = fopen('runtime/logs/http-request1.log', 'w');
+    $fp = fopen('runtime/logs/http-request1.log', 'w');
     
     $ch = curl_init(); 
     curl_setopt($ch, CURLOPT_URL,$url);
@@ -70,7 +70,7 @@ class SrequestController extends Controller {
     curl_setopt ($ch, CURLOPT_COOKIE, ".ASPXAUTH=".$cook.";"); 
     
     curl_setopt($ch, CURLOPT_VERBOSE, true);
-  //  curl_setopt($ch, CURLOPT_STDERR,$fp);
+    curl_setopt($ch, CURLOPT_STDERR,$fp);
 
     $data = curl_exec($ch); 
     

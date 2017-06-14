@@ -4,12 +4,13 @@ use yii\helpers\Html;
 
 echo $this->render('/default/_menu.php');
 
-var_dump($xml);
+echo "<br><br>";
+print_r($xml);
 
 // echo "<h2>".$res."</h2>";
-    
+echo "<br><br>";    
 
-var_dump($myXML);
+print_r($myXML);
 echo "<br><br>";
 
 ?>

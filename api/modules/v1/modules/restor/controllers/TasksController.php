@@ -111,8 +111,8 @@ class TasksController extends Controller {
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
     
-    var_dump($data);
-    var_dump($array);
+  //  var_dump($data);
+  //  var_dump($array);
     
 
     /*
@@ -132,6 +132,7 @@ class TasksController extends Controller {
     // var_dump($myXML);
     
     // var_dump($array);
+    /*
     if (isset($array['RP'])) {
     $objectinfo = $array['RP'];
     }
@@ -152,7 +153,7 @@ class TasksController extends Controller {
             }
     
     }
-     
+    */ 
     
     /*
     foreach ($objects as $object) {
@@ -170,10 +171,10 @@ class TasksController extends Controller {
     
     return $this->render('index'  ,[
                    'myXML' => $myXML,
-                   'objectinfo' => $objectinfo,
-          //         'data' => $data,
+          //         'objectinfo' => $objectinfo,
+                   'data' => $data,
           //         'info' => $info,
-                   'res'  => $res,
+                   'res'  => '',
                    'xml'  => $xml,
          
                ]);

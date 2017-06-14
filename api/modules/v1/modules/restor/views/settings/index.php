@@ -14,7 +14,8 @@ use api\common\models\RkAccessSearch;
 $this->title = 'API settings';
 $this->params['breadcrumbs'][] = $this->title;
 
-require_once '/../default/_menu.php';
+echo $this->render('/default/_menu.php');
+
 ?>
 <div class="rk-access-index">
     

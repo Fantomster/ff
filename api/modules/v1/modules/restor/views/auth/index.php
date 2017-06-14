@@ -7,7 +7,8 @@ use api\common\models\RkSession;
 use api\common\models\RkSessionSearch;
 
 $this->params['breadcrumbs'][] = $this->title;
-require_once '/../default/_menu.php';
+
+echo $this->render('/default/_menu.php');
 
 /* @var $this yii\web\View */
 /* @var $searchModel api\common\models\RkAccessSearch */

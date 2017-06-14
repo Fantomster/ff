@@ -37,25 +37,22 @@ class CallbackController extends Controller {
     
     if($getr) {
     
-    fputs($fp,'\n'.now().':POST FOUND\n');    
+    fputs($fp,'\n'.date("Y-m-d H:i:s").':POST FOUND\n');    
     fputs($fp,$getr); 
            
     } else {
        
-    fputs($fp,'\n'.now().':POST NOT (!) FOUND\n');        
+    fputs($fp,'\n'.date("Y-m-d H:i:s").':POST NOT (!) FOUND\n');        
     
     
     }
-    
-    fclose($fp);
-    
     // if (!Yii::$app->request->isPost) {
     
     // echo "Method POST is only accepted.";
         
     return '<?xml version="1.0" encoding="utf-8"?><RQ value="OK">OK</RQ>';   
        
-       
+    fclose($fp);
     // }
         
         

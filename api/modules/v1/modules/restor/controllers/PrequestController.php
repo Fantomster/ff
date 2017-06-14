@@ -124,7 +124,7 @@ class PrequestController extends Controller {
     // var_dump($myXML);
     
     // var_dump($array);
-    if ($array['RP']) {
+    if (isset($array['RP'])) {
     $objectinfo = $array['RP'];
     }
     

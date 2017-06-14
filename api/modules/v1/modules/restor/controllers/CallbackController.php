@@ -39,7 +39,7 @@ class CallbackController extends Controller {
     
     fclose($fp);
     
-    // return '<?xml version="1.0" encoding="utf-8"?><RQ value="OK"></RQ>';
+    return '<?xml version="1.0" encoding="utf-8"?><RQ value="OK">OK</RQ>';
         
     }
     

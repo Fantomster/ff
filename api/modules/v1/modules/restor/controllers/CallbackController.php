@@ -30,13 +30,12 @@ class CallbackController extends Controller {
     $request = Yii::$app->request;
     
     $getr = $request->post();  
-    $gget = $request->get();  
-    
+        
     if($getr) {
     
     $fp = fopen('runtime/logs/callback.log', 'w');
     
-    $fputs($fp,'log:'.$getr); 
+    fputs($fp,$getr); 
     
     fclose($fp);
     
@@ -44,11 +43,7 @@ class CallbackController extends Controller {
         
     }
     
-    $fp = fopen('runtime/logs/callback.log', 'w');
     
-    $fputs($fp,'log:'.$getr); 
-    
-    fclose($fp);
     // if (!Yii::$app->request->isPost) {
     
     // echo "Method POST is only accepted.";

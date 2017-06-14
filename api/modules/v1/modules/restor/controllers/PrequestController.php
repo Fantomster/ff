@@ -168,7 +168,7 @@ class PrequestController extends Controller {
         //           'objectinfo' => $objectinfo,
           //         'data' => $data,
           //         'info' => $info,
-                   'res'  => $res,
+                   'res'  => '',
                    'xml'  => $xml,
          
                ]);

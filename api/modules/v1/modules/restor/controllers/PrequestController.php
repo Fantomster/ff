@@ -45,7 +45,7 @@ class PrequestController extends Controller {
   */
     
     $xml = '<?xml version="1.0" encoding="utf-8" ?>
-    <RQ cmd="sh_get_goods" tasktype="any_call" guid="sdfsd" callback="" timeout="int">
+    <RQ cmd="sh_get_goods" tasktype="any_call" guid="sdfsd" callback="https://api.f-keeper.ru/api/web/v1/restor/callback" timeout="int">
     <PARAM name="object_id" val="'.$restr.'" />
     <PARAM name="goodgroup_rid" val="1" />
     </RQ>';

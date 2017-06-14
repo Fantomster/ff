@@ -35,6 +35,8 @@ class CallbackController extends Controller {
     $fp = fopen('runtime/logs/callback.log', 'w');
     
     $fputs($fp,$getr); 
+    
+    fclose($fp);
         
     }
     // if (!Yii::$app->request->isPost) {

@@ -1,133 +1,199 @@
 <?php
-
 namespace api\common\controllers;
 
+
 use Yii;
+use yii\base\InvalidParamException;
+// use yii\web\BadRequestHttpException;
 use yii\web\Controller;
-use yii\mongosoft\soapserver\Action;
+use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+
+use common\models\forms\LoginForm;
+use frontend\models\PasswordResetRequestForm;
+use frontend\models\ResetPasswordForm;
+use frontend\models\SignupForm;
+use frontend\models\ContactForm;
+
 
 /**
- * Description of SiteController
- * F-Keeper SOAP server based on mongosoft\soapserver
- * Author: R.Smirnov
+ * Site controller
  */
-
-class SiteController extends Controller {
-    
-    public $enableCsrfValidation = false;
-    
-    protected $authenticated = false;
-    
-    private $sessionId = '';
-    private $username;
-    private $password;
-    
-        
-    public function actionIndex() {
-     
-        echo "Welcome to F-Keeper API gateway. Please use SOAP client to connect this service.";
-        
-      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-      //      ->queryAll();
-        
-      //  var_dump($langs);
-        
-    }
-    
-    public function actionHello() {
-     
-        echo "hello";
-        
-    }
-
-
-    public function actions()
+class SiteController extends Controller
 {
-    return [
-        'hello' => [
-            'class' => 'mongosoft\soapserver\Action',
-            'serviceOptions' => [
-                'disableWsdlMode' => false,
-            ]
-        ],
-        'error' => [
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['logout', 'signup'],
+                'rules' => [
+                    [
+                        'actions' => ['signup'],
+                        'allow' => true,
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'actions' => ['logout'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'logout' => ['post'],
+                ],
+            ],
+        ];
+    }
+    /**
+     * @inheritdoc
+     */
+    public function actions()
+    {
+        return [
+            'error' => [
                 'class' => 'yii\web\ErrorAction',
             ],
-    ];
-}
-   
-/**
-* @param string $login
-* @param string $pass
-* @return string 
-* @soap
-*/
- 
-    
-    public function getHello($login,$pass) 
-    {
-        return 'Hello ' . $login.'/'.$pass.'/ Date:'.date("Y-m-d H:i:s") ;
+            'captcha' => [
+                'class' => 'yii\captcha\CaptchaAction',
+                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
+            ],
+        ];
     }
-
-
-   
-/**
-   * Soap authorization
-   * @return mixed result of auth
-   * @soap
-   */
-   
-  public function OpenSession() {
-      
-    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
+    /**
+     * Displays homepage.
+     *
+     * @return mixed
+     */
+    public function actionIndex()
     {
-    header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-    header('HTTP/1.0 401 Unauthorized');
-    header('Warning: WSS security in not provided in SOAP header');
-    exit;
-   
-    } else { 
-        
-    // $identity = new UserIdentity($this->username, $this->password);    
-   
-        if (($this->username != 'cyborg') || ($this->password != 'mypass')) 
-        {
-            return 'Auth error. Login or password is not correct.';
-        } else {
-    
-            $sessionId = Yii::$app->getSecurity()->generateRandomString();
-            // $sessionId = md5(uniqid(rand(),1));
-          
-            return 'OK_SOPENED:'.$sessionId;
+        return $this->render('index');
+       // return Yii::$app->response->redirect(['/api/']);
+    }
+    /**
+     * Logs in a user.
+     *
+     * @return mixed
+     */
+    public function actionLogin()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
         }
-       
-    }  
-    
-  }
-  
-    public function security($header) {
-    
-       
-        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($header->UsernameToken->Username)) // Проверяем послали ли нам данные авторизации (BASIC)
-        {
-            header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
-            header('HTTP/1.0 401 Unauthorized');
-            exit;
-   
+        $model = new LoginForm();
+        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            return $this->goBack();
         } else {
-            
-        $this->username = $header->UsernameToken->Username;
-        $this->password = $header->UsernameToken->Password;
-         
-    //     $this->username =  Yii::$app->request->getAuthUser();
-    //     $this->password =  Yii::$app->request->getAuthPassword();
-         
-         return $header;
-         
-                     
+            return $this->render('login', [
+                'model' => $model,
+            ]);
         }
-
-  }  
-  
-   
+    }
+    /**
+     * Logs out the current user.
+     *
+     * @return mixed
+     */
+    public function actionLogout()
+    {
+        Yii::$app->user->logout();
+        return $this->goHome();
+    }
+    /**
+     * Displays contact page.
+     *
+     * @return mixed
+     */
+    public function actionContact()
+    {
+        $model = new ContactForm();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->sendEmail(Yii::$app->params['adminEmail'])) {
+                Yii::$app->session->setFlash('success', 'Thank you for contacting us. We will respond to you as soon as possible.');
+            } else {
+                Yii::$app->session->setFlash('error', 'There was an error sending your message.');
+            }
+            return $this->refresh();
+        } else {
+            return $this->render('contact', [
+                'model' => $model,
+            ]);
+        }
+    }
+    /**
+     * Displays about page.
+     *
+     * @return mixed
+     */
+    public function actionAbout()
+    {
+        return $this->render('about');
+    }
+    /**
+     * Signs user up.
+     *
+     * @return mixed
+     */
+    public function actionSignup()
+    {
+        $model = new SignupForm();
+        if ($model->load(Yii::$app->request->post())) {
+            if ($user = $model->signup()) {
+                if (Yii::$app->getUser()->login($user)) {
+                    return $this->goHome();
+                }
+            }
+        }
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+    }
+    /**
+     * Requests password reset.
+     *
+     * @return mixed
+     */
+    public function actionRequestPasswordReset()
+    {
+        $model = new PasswordResetRequestForm();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->sendEmail()) {
+                Yii::$app->session->setFlash('success', 'Check your email for further instructions.');
+                return $this->goHome();
+            } else {
+                Yii::$app->session->setFlash('error', 'Sorry, we are unable to reset password for the provided email address.');
+            }
+        }
+        return $this->render('requestPasswordResetToken', [
+            'model' => $model,
+        ]);
+    }
+    /**
+     * Resets password.
+     *
+     * @param string $token
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function actionResetPassword($token)
+    {
+        try {
+            $model = new ResetPasswordForm($token);
+        } catch (InvalidParamException $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->resetPassword()) {
+            Yii::$app->session->setFlash('success', 'New password saved.');
+            return $this->goHome();
+        }
+        return $this->render('resetPassword', [
+            'model' => $model,
+        ]);
+    }
 }

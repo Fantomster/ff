@@ -1,14 +1,14 @@
 <?php
 
-namespace api\modules\v1\controllers;
+namespace api\modules\v1\modules\supp\controllers;
 
 use Yii;
 use yii\web\Controller;
 use yii\mongosoft\soapserver\Action;
 
-use \api\common\models\ApiAccess;
-use \api\common\models\ApiSession;
-use \api\common\models\ApiActions;
+use api\common\models\ApiAccess;
+use api\common\models\ApiSession;
+use api\common\models\ApiActions;
 
 /**
  * Description of SiteController
@@ -16,7 +16,7 @@ use \api\common\models\ApiActions;
  * Author: R.Smirnov
  */
 
-class SuppController extends Controller {
+class DefaultController extends Controller {
     
     public $enableCsrfValidation = false;
     
@@ -32,12 +32,11 @@ class SuppController extends Controller {
         
     public function actionIndex() {
      
-        echo "Welcome to F-Keeper API gateway. <b> (Version 1! SOAP )</b>Please use SOAP client to connect this service.";
-        
-      //  $langs = Yii::$app->db_api->createCommand('SELECT * FROM api_lang')
-      //      ->queryAll();
-        
-      //  var_dump($langs);
+        return $this->render('index' // ,[
+              //      'searchModel' => $searchModel,
+              //      'dataProvider' => $dataProvider,
+              // ]
+                );
         
     }
 
@@ -135,6 +134,52 @@ class SuppController extends Controller {
         
       
     }
+    
+/**
+* Get Categories
+* @param string $sessionId 
+* @param string $nonce 
+* @param string $lang
+* @return mixed 
+* @soap
+*/
+    
+    public function getAgents($sessionId, $nonce, $lang) 
+    {
+
+        if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];  
+        
+        if ($sess = $this->check_session($sessionId,$nonce)) {
+          
+      // return $sess;    
+      
+      $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="'.$sessionId.'");')
+      ->queryScalar();   
+      
+      // return $org;
+         
+      $cats = Yii::$app->db_api->createCommand('select id as fid, type_id, name, city, address, zip_code,
+          phone, email, website, created_at, updated_at, legal_entity, contact_name from organization 
+          where id in ( select rest_org_id from relation_supp_rest where supp_org_id ='.$org.')')
+      ->queryAll();
+     
+      $this->save_action(__FUNCTION__, $sessionId, 1,'OK',$this->ip);     
+      return $cats;
+    
+      exit;
+            
+          
+      } else {
+          
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip);       
+        return 'Session error. Active session is not found.';
+
+      exit;   
+      }
+        
+      
+    }    
+    
    
 /**
 * Get Units

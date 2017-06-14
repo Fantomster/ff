@@ -206,7 +206,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $userToken->delete();
         }
 
-        return $this->render("confirm", compact("userToken", "success", "email"));
+        $this->performLogin($user, true);
+        return $this->redirect(['/site/index']);
+        //return $this->render("confirm", compact("userToken", "success", "email"));
     }
 
     /**

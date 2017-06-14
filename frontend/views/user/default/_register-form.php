@@ -6,6 +6,7 @@ use common\models\OrganizationType;
 use kartik\select2\Select2;
 use nirvana\showloading\ShowLoadingAsset;
 use kartik\checkbox\CheckboxX;
+
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
 ShowLoadingAsset::register($this);
@@ -23,9 +24,14 @@ $form = ActiveForm::begin([
             'enableAjaxValidation' => true,
             'action' => yii\helpers\Url::to(['/user/register']),
             'validateOnSubmit' => false,
+            'options' => [
+                'autocomplete' => 'off',
+            ],
         ]);
 ?>
 <div class="form-group">
+    <input style="display:none" type="text"/>
+    <input style="display:none" type="password"/>
     <?=
     $form->field($organization, 'type_id')->widget(
             Select2::className(), [
@@ -76,37 +82,39 @@ $form = ActiveForm::begin([
     <?=
             $form->field($profile, 'phone')
             ->widget(\common\widgets\PhoneInput::className(), [
-                                'jsOptions' => [
-                                    'preferredCountries' => ['ru'],
-                                    'nationalMode' => false,
-                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
-                                ],
-                                'options' => [
-                                    'class' => 'form-control',
-                                ],
-                            ])
+                'jsOptions' => [
+                    'preferredCountries' => ['ru'],
+                    'nationalMode' => false,
+                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                ],
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ])
             ->label(false)
             ->textInput(['class' => 'form-control', 'placeholder' => 'телефон'])
     ?>
-    
-    <?=$form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
+
+    <?=
+    $form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
         //'initInputType' => CheckboxX::INPUT_CHECKBOX,
         'autoLabel' => true,
         'model' => $profile,
         'attribute' => 'sms_allow',
-        'pluginOptions'=>[
-            'threeState'=>false,
+        'pluginOptions' => [
+            'threeState' => false,
             'theme' => 'krajee-flatblue',
             'enclosedLabel' => false,
-            'size'=>'md',
-            ],
+            'size' => 'md',
+        ],
         'labelSettings' => [
             'label' => 'Разрешить СМС уведомление',
             'position' => CheckboxX::LABEL_RIGHT,
-            'options' =>['style'=>'']
-            ]
-        ])->label(false);?>
-    
+            'options' => ['style' => '']
+        ]
+    ])->label(false);
+    ?>
+
     <?=
             $form->field($user, 'email')
             ->label(false)

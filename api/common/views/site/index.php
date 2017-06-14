@@ -8,6 +8,17 @@ $this->title = 'My Yii Application';
 
     <div class="jumbotron">
         <h1>Congratulations!</h1>
+        
+  <?php echo "isGuest:";
+                var_dump(Yii::$app->user->isGuest);  
+                
+        echo "canAdmin:";
+                var_dump(Yii::$app->user->can("admin"));
+                
+                Yii::$app->user->can("admin")
+                
+  
+  ?>
 
         <p class="lead">You have successfully created your Yii-powered application.</p>
 

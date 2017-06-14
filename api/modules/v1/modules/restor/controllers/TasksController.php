@@ -171,10 +171,11 @@ class TasksController extends Controller {
     
     return $this->render('index'  ,[
                    'myXML' => $myXML,
+                   'array' => $array, 
           //         'objectinfo' => $objectinfo,
-                   'data' => $data,
+          //         'data' => $data,
           //         'info' => $info,
-                   'res'  => '',
+          //         'res'  => '',
                    'xml'  => $xml,
          
                ]);

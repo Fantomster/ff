@@ -98,7 +98,7 @@ $organization = $user->organization;
 
 if ($organization->step == Organization::STEP_SET_INFO) {
     \frontend\assets\AuthAsset::register($this);
-    echo $this->render("dashboard/_wizard");
+    echo $this->render("dashboard/_wizard", compact("profile", "organization"));
 }
 ?>
 <section class="content-header">

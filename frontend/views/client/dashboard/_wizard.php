@@ -1,46 +1,305 @@
-<div id="data-modal" class="modal fade data-modal in" style="display: block; padding-left: 15px;">
+<?php
+
+use yii\widgets\ActiveForm;
+use yii\helpers\Html;
+
+$this->registerJs('
+    function stopRKey(evt) { 
+        var evt = (evt) ? evt : ((event) ? event : null); 
+        var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null); 
+        if ((evt.keyCode == 13) && (node.type=="text")) {return false;} 
+    } 
+
+    document.onkeypress = stopRKey; 
+    $(".next").on("click", function(e) {
+        e.preventDefault();
+        $(".data-modal .modal-content").slick("slickNext");
+    });
+');
+
+$gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+        'libraries' => 'places',
+        'key'=>Yii::$app->params['google-api']['key-id'],
+        'language'=>Yii::$app->params['google-api']['language'],
+        'callback'=>'initMap'
+    ));
+$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
+$this->registerJs("
+function initMap() {
+    var fields = {
+            sField : document.getElementById('organization-address'),
+            hLat : document.getElementById('organization-lat'),
+            hLng : document.getElementById('organization-lng'),
+            hCountry : document.getElementById('organization-country'),
+            hLocality : document.getElementById('organization-locality'),
+            hPlaceId : document.getElementById('organization-place_id'),
+            hRoute : document.getElementById('organization-route'),
+            hStreetNumber : document.getElementById('organization-street_number'),
+            hFormattedAddress : document.getElementById('organization-formatted_address')
+            };
+        
+	//инит карты
+	var map = new google.maps.Map(document.getElementById('map'), {
+	    mapTypeId: google.maps.MapTypeId.ROADMAP
+	});
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('organization-address');
+        var searchBox = new google.maps.places.SearchBox(input);
+        
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+          
+          if (places.length == 0) {
+            return;
+          }
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log('Returned place contains no geometry');
+              return;
+            }
+            if (place.geometry.viewport) {
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+            
+          })
+          if (places[0].address_components) {
+            marker.setPosition(places[0].geometry.location);
+            changeFields(fields, places)
+          }
+          map.fitBounds(bounds);
+          map.setZoom(17);
+        })
+
+
+            
+	//инит маркера
+	var marker = new google.maps.Marker({
+	            map: map,
+	            draggable:true
+	});	
+	var geocoder = new google.maps.Geocoder;
+	
+	if(typeof fields.hPlaceId.value == 'undefined' || fields.hPlaceId.value == ''){
+            geolocation(map, marker, fields)
+	}else{
+            geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value),fields)
+        }
+	
+	//событие на перемещение маркера
+	marker.addListener('dragend', function(e){
+	    geocoder.geocode({'latLng': e.latLng}, function(results, status) {
+	        if(status == 'OK') {
+	        	if (results[0]) {
+                        map.panTo(results[0].geometry.location);
+                        marker.setPosition(results[0].geometry.location);
+                        changeFields(fields, results)
+	        	}     
+	        } else {
+	        console.log('[dragger] Geocoder failed due to: ' + status);
+	        }
+	    });
+	})
+        
+        //Событие на клик по карте
+        map.addListener('click', function(e) {
+            geocoder.geocode({'latLng': e.latLng}, function(results, status) {
+                if(status == 'OK') {
+                        if (results[0]) {
+                        map.panTo(e.latLng);
+                        marker.setPosition(e.latLng);
+                        changeFields(fields, results)
+                        }     
+                } else {
+                console.log('[click] Geocoder failed due to: ' + status);
+                }
+            })
+        });
+}
+//Если нам известин placeId тогда выводим все данные
+function geocodePlaceId(geocoder, map, marker, placeId, fields) {
+    geocoder.geocode({'placeId': placeId}, function(results, status) {
+      if (status === 'OK') {
+        if (results[0]) {
+            map.setZoom(17);
+            map.panTo(results[0].geometry.location);
+            marker.setPosition(results[0].geometry.location);
+            changeFields(fields, results)
+        } else {
+          console.log('[PlaceId] No results found');
+        }
+      } else {
+        console.log('[geocodePlaceId]  failed due to: ' + status);
+      }
+    });
+}
+//геолокация по ip или геолокации из браузера
+function geolocation(map, marker, fields){
+    fields.sField.value = '';
+    fields.hLat.value = '';
+    fields.hLng.value = '';
+    fields.hCountry.value = '';
+    fields.hLocality.value = '';
+    fields.hRoute.value = '';
+    fields.hStreetNumber.value = '';
+    fields.hPlaceId.value = '';
+    fields.hFormattedAddress.value = '';
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) { 
+          var pos = {lat: parseFloat(position.coords.latitude), 
+                     lng: parseFloat(position.coords.longitude)};
+          map.setZoom(9);
+          map.panTo(pos);
+          marker.setPosition(pos);
+          },
+          function(failure) {
+              $.getJSON('https://ipinfo.io/geo', function(response) { 
+                  var loc = response.loc.split(',');
+                  var pos = {lat: parseFloat(loc[0]),
+                             lng: parseFloat(loc[1])};
+                  map.setZoom(9);
+                  map.panTo(pos);
+                  marker.setPosition(pos);
+              });  
+      });
+    }else{
+	 window.alert('Geolocation failed');   
+    }
+}
+//Сохранение полученных данных в хидден поля
+function changeFields(fields, results){
+    for (var i = 0; i < results[0].address_components.length; i++)
+        {
+          var addr = results[0].address_components[i];
+          var getCountry;
+          var getLocality;
+          var getRoute;
+          var getStreetNumber;
+          var getAdministrative_area_level_2;
+          var getFormattedAddress = results[0].formatted_address;
+          var getLat = results[0].geometry.location.lat();
+          var getLng = results[0].geometry.location.lng();
+          var getPlaceId = results[0].place_id;
+
+          if (addr.types[0] == 'country') 
+            getCountry = addr.long_name;
+          if (addr.types[0] == 'locality') 
+            getLocality = addr.long_name;
+          if (addr.types[0] == 'route') 
+            getRoute = addr.long_name;
+          if (addr.types[0] == 'street_number') 
+            getStreetNumber = addr.long_name;
+
+          if (addr.types[0] == 'administrative_area_level_2') 
+            getAdministrative_area_level_2 = addr.long_name; 
+
+        }
+        if(results[0]) {
+        var res = '';
+        typeof getRoute == 'undefined' ?'':
+            res = getRoute;
+        typeof getStreetNumber == 'undefined' ?'':
+            res = res+', '+getStreetNumber;
+        typeof getLocality == 'undefined' ?'':
+            res = res+', '+getLocality;
+        typeof getAdministrative_area_level_2 == 'undefined' ?'':
+            res = res+', '+getAdministrative_area_level_2;
+        typeof getCountry == 'undefined' ?'':
+            res = res+', '+getCountry;   
+        fields.sField.value = res;
+        fields.hLat.value = getLat;
+        fields.hLng.value = getLng;
+        fields.hCountry.value = getCountry;
+        fields.hLocality.value = getLocality;
+        fields.hRoute.value = getRoute;
+        fields.hStreetNumber.value = getStreetNumber;
+        fields.hPlaceId.value = getPlaceId;
+        fields.hFormattedAddress.value = getFormattedAddress;
+        } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+        }    
+}
+",yii\web\View::POS_END);
+?>
+<div id="data-modal" class="modal fade data-modal">
     <div class="modal-dialog">
         <button type="button" data-dismiss="modal" class="close hidden"></button>
-        <div class="modal-content slick-initialized slick-slider">
-            <div aria-live="polite" class="slick-list draggable" style="height: 646px;"><div class="slick-track" style="opacity: 1; width: 1896px; transform: translate3d(0px, 0px, 0px);" role="listbox"><div class="first-step slick-slide slick-current slick-active" data-slick-index="0" aria-hidden="false" style="width: 632px;" tabindex="-1" role="option" aria-describedby="slick-slide00">
-                        <div class="data-modal__logo"><img src="images/tmp_file/logo.png" alt=""></div>
-                        <div class="data-modal__sub-txt">Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.</div>
-                        <form class="auth-sidebar__form form-check data" novalidate="novalidate">
-                            <div class="auth-sidebar__form-brims">
-                                <label>
-                                    <input type="text" placeholder="ФИО" name="fio" class="form-control" tabindex="0"><i class="fa fa-user"></i>
-                                </label>
-                                <label>
-                                    <input type="text" placeholder="Название организации" name="org" class="form-control" tabindex="0"><i class="fa fa-bank"></i>
-                                </label>
-                                <label>
-                                    <input type="text" placeholder="Адрес" name="adress" class="form-control" tabindex="0"><i class="fa fa-map-marker"></i>
-                                </label>
-                            </div>
-                            <div id="modal-map" class="modal-map" style="position: relative; overflow: hidden;"><div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);"><div class="gm-style" style="position: absolute; z-index: 0; left: 0px; top: 0px; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px;"><div style="position: absolute; z-index: 0; left: 0px; top: 0px; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; cursor: url(&quot;https://maps.gstatic.com/mapfiles/openhand_8_8.cur&quot;) 8 8, default;"><div style="z-index: 1; position: absolute; top: 0px; left: 0px; width: 100%; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"><div style="position: absolute; left: 0px; top: 0px; z-index: 100; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="width: 256px; height: 256px; position: absolute; left: 66px; top: -186px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 66px; top: 70px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 322px; top: -186px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 322px; top: 70px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -190px; top: -186px;"></div><div style="width: 256px; height: 256px; position: absolute; left: -190px; top: 70px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 578px; top: -186px;"></div><div style="width: 256px; height: 256px; position: absolute; left: 578px; top: 70px;"></div></div></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 101; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 102; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 103; width: 100%;"><div style="position: absolute; left: 0px; top: 0px; z-index: -1;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 66px; top: -186px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 66px; top: 70px;"><canvas draggable="false" height="256" width="256" style="user-select: none; position: absolute; left: 0px; top: 0px; height: 256px; width: 256px;"></canvas></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 322px; top: -186px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 322px; top: 70px;"><canvas draggable="false" height="256" width="256" style="user-select: none; position: absolute; left: 0px; top: 0px; height: 256px; width: 256px;"></canvas></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -190px; top: -186px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: -190px; top: 70px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 578px; top: -186px;"></div><div style="width: 256px; height: 256px; overflow: hidden; position: absolute; left: 578px; top: 70px;"></div></div></div></div><div style="position: absolute; z-index: 0; left: 0px; top: 0px;"><div style="overflow: hidden; width: 632px; height: 246px;"><img src="https://maps.googleapis.com/maps/api/js/StaticMapService.GetMapImage?1m2&amp;1i20263614&amp;2i10491578&amp;2e1&amp;3u17&amp;4m2&amp;1u632&amp;2u246&amp;5m5&amp;1e0&amp;5sru-RU&amp;6sus&amp;10b1&amp;12b1&amp;token=102492" style="width: 632px; height: 246px;"></div></div><div style="position: absolute; left: 0px; top: 0px; z-index: 0;"><div aria-hidden="true" style="position: absolute; left: 0px; top: 0px; z-index: 1; visibility: inherit;"><div style="position: absolute; left: 66px; top: -186px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79155!3i40982!4i256!2m3!1e0!2sm!3i382073908!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=88887" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 66px; top: 70px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79155!3i40983!4i256!2m3!1e0!2sm!3i382074184!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=64732" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 322px; top: -186px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79156!3i40982!4i256!2m3!1e0!2sm!3i382073572!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=61961" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 322px; top: 70px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79156!3i40983!4i256!2m3!1e0!2sm!3i382074184!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=25011" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -190px; top: -186px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79154!3i40982!4i256!2m3!1e0!2sm!3i382073908!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=128608" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: -190px; top: 70px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79154!3i40983!4i256!2m3!1e0!2sm!3i382073908!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=33558" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 578px; top: -186px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79157!3i40982!4i256!2m3!1e0!2sm!3i382074148!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=62491" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div style="position: absolute; left: 578px; top: 70px; transition: opacity 200ms ease-out;"><img src="https://maps.googleapis.com/maps/vt?pb=!1m5!1m4!1i17!2i79157!3i40983!4i256!2m3!1e0!2sm!3i382074184!3m9!2sru-RU!3sUS!5e18!12m1!1e68!12m3!1e37!2m1!1ssmartmaps!4e0&amp;token=116361" draggable="false" alt="" style="width: 256px; height: 256px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div></div><div style="z-index: 2; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px;"></div><div style="z-index: 3; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px;"><div style="z-index: 1; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px;"></div></div><div style="z-index: 4; position: absolute; top: 0px; left: 0px; width: 100%; transform-origin: 0px 0px 0px; transform: matrix(1, 0, 0, 1, 0, 0);"><div style="position: absolute; left: 0px; top: 0px; z-index: 104; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 105; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 106; width: 100%;"></div><div style="position: absolute; left: 0px; top: 0px; z-index: 107; width: 100%;"></div></div></div><div style="margin-left: 5px; margin-right: 5px; z-index: 1000000; position: absolute; left: 0px; bottom: 0px;"><a target="_blank" href="https://maps.google.com/maps?ll=55.740707,37.408388&amp;z=17&amp;t=m&amp;hl=ru-RU&amp;gl=US&amp;mapclient=apiv3" title="Нажмите, чтобы отобразить эту область в Картах Google" style="position: static; overflow: visible; float: none; display: inline;"><div style="width: 66px; height: 26px; cursor: pointer;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/google4.png" draggable="false" style="position: absolute; left: 0px; top: 0px; width: 66px; height: 26px; user-select: none; border: 0px; padding: 0px; margin: 0px;"></div></a></div><div style="background-color: white; padding: 15px 21px; border: 1px solid rgb(171, 171, 171); font-family: Roboto, Arial, sans-serif; color: rgb(34, 34, 34); box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 16px; z-index: 10000002; display: none; width: 256px; height: 148px; position: absolute; left: 166px; top: 33px;"><div style="padding: 0px 0px 10px; font-size: 16px;">Картографические данные</div><div style="font-size: 13px;">Картографические данные © 2017 Google</div><div style="width: 13px; height: 13px; overflow: hidden; position: absolute; opacity: 0.7; right: 12px; top: 12px; z-index: 10000; cursor: pointer;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/mapcnt6.png" draggable="false" style="position: absolute; left: -2px; top: -336px; width: 59px; height: 492px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div><div class="gmnoprint" style="z-index: 1000001; position: absolute; right: 280px; bottom: 0px; width: 208px;"><div draggable="false" class="gm-style-cc" style="user-select: none; height: 14px; line-height: 14px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a style="color: rgb(68, 68, 68); text-decoration: none; cursor: pointer; display: none;">Картографические данные</a><span>Картографические данные © 2017 Google</span></div></div></div><div class="gmnoscreen" style="position: absolute; right: 0px; bottom: 0px;"><div style="font-family: Roboto, Arial, sans-serif; font-size: 11px; color: rgb(68, 68, 68); direction: ltr; text-align: right; background-color: rgb(245, 245, 245);">Картографические данные © 2017 Google</div></div><div class="gmnoprint gm-style-cc" draggable="false" style="z-index: 1000001; user-select: none; height: 14px; line-height: 14px; position: absolute; right: 153px; bottom: 0px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a href="https://www.google.com/intl/ru-RU_US/help/terms_maps.html" target="_blank" style="text-decoration: none; cursor: pointer; color: rgb(68, 68, 68);">Условия использования</a></div></div><div style="cursor: pointer; width: 25px; height: 25px; overflow: hidden; display: none; margin: 10px 14px; position: absolute; top: 0px; right: 0px;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/sv9.png" draggable="false" class="gm-fullscreen-control" style="position: absolute; left: -52px; top: -86px; width: 164px; height: 175px; user-select: none; border: 0px; padding: 0px; margin: 0px;"></div><div draggable="false" class="gm-style-cc" style="user-select: none; height: 14px; line-height: 14px; position: absolute; right: 0px; bottom: 0px;"><div style="opacity: 0.7; width: 100%; height: 100%; position: absolute;"><div style="width: 1px;"></div><div style="background-color: rgb(245, 245, 245); width: auto; height: 100%; margin-left: 1px;"></div></div><div style="position: relative; padding-right: 6px; padding-left: 6px; font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); white-space: nowrap; direction: ltr; text-align: right; vertical-align: middle; display: inline-block;"><a target="_new" title="Сообщить об ошибке на карте или снимке" href="https://www.google.com/maps/@55.740707,37.408388,17z/data=!10m1!1e1!12b1?source=apiv3&amp;rapsrc=apiv3" style="font-family: Roboto, Arial, sans-serif; font-size: 10px; color: rgb(68, 68, 68); text-decoration: none; position: relative;">Сообщить об ошибке на карте</a></div></div><div class="gmnoprint gm-bundled-control gm-bundled-control-on-bottom" draggable="false" controlwidth="28" controlheight="93" style="margin: 10px; user-select: none; position: absolute; bottom: 107px; right: 28px;"><div class="gmnoprint" controlwidth="28" controlheight="55" style="position: absolute; left: 0px; top: 38px;"><div draggable="false" style="user-select: none; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-radius: 2px; cursor: pointer; background-color: rgb(255, 255, 255); width: 28px; height: 55px;"><div title="Увеличить" style="position: relative; width: 28px; height: 27px; left: 0px; top: 0px;"><div style="overflow: hidden; position: absolute; width: 15px; height: 15px; left: 7px; top: 6px;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/tmapctrl.png" draggable="false" style="position: absolute; left: 0px; top: 0px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 120px; height: 54px;"></div></div><div style="position: relative; overflow: hidden; width: 67%; height: 1px; left: 16%; background-color: rgb(230, 230, 230); top: 0px;"></div><div title="Уменьшить" style="position: relative; width: 28px; height: 27px; left: 0px; top: 0px;"><div style="overflow: hidden; position: absolute; width: 15px; height: 15px; left: 7px; top: 6px;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/tmapctrl.png" draggable="false" style="position: absolute; left: 0px; top: -15px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 120px; height: 54px;"></div></div></div></div><div class="gm-svpc" controlwidth="28" controlheight="28" style="background-color: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-radius: 2px; width: 28px; height: 28px; cursor: url(&quot;https://maps.gstatic.com/mapfiles/openhand_8_8.cur&quot;) 8 8, default; position: absolute; left: 0px; top: 0px;"><div style="position: absolute; left: 1px; top: 1px;"></div><div style="position: absolute; left: 1px; top: 1px;"><div aria-label="Перейти в режим просмотра улиц" style="width: 26px; height: 26px; overflow: hidden; position: absolute; left: 0px; top: 0px;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/cb_scout5.png" draggable="false" style="position: absolute; left: -147px; top: -26px; width: 215px; height: 835px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div aria-label="Человечек находится над картой" style="width: 26px; height: 26px; overflow: hidden; position: absolute; left: 0px; top: 0px; visibility: hidden;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/cb_scout5.png" draggable="false" style="position: absolute; left: -147px; top: -52px; width: 215px; height: 835px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div aria-label="Перейти в режим просмотра улиц" style="width: 26px; height: 26px; overflow: hidden; position: absolute; left: 0px; top: 0px; visibility: hidden;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/cb_scout5.png" draggable="false" style="position: absolute; left: -147px; top: -78px; width: 215px; height: 835px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div><div class="gmnoprint" controlwidth="28" controlheight="0" style="display: none; position: absolute;"><div title="Повернуть карту на 90&nbsp;градусов" style="width: 28px; height: 28px; overflow: hidden; position: absolute; border-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; cursor: pointer; background-color: rgb(255, 255, 255); display: none;"><img src="https://maps.gstatic.com/mapfiles/api-3/images/tmapctrl4.png" draggable="false" style="position: absolute; left: -141px; top: 6px; width: 170px; height: 54px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div><div class="gm-tilt" style="width: 28px; height: 28px; overflow: hidden; position: absolute; border-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; top: 0px; cursor: pointer; background-color: rgb(255, 255, 255);"><img src="https://maps.gstatic.com/mapfiles/api-3/images/tmapctrl4.png" draggable="false" style="position: absolute; left: -141px; top: -13px; width: 170px; height: 54px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none;"></div></div></div><div class="gmnoprint" style="margin: 10px; z-index: 0; position: absolute; cursor: pointer; left: 0px; top: 0px;"><div class="gm-style-mtc" style="float: left;"><div draggable="false" title="Показать карту с названиями объектов" style="direction: ltr; overflow: hidden; text-align: center; position: relative; color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 8px; border-bottom-left-radius: 2px; border-top-left-radius: 2px; -webkit-background-clip: padding-box; background-clip: padding-box; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; min-width: 30px; font-weight: 500;">Карта</div><div style="background-color: white; z-index: -1; padding: 2px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; position: absolute; left: 0px; top: 29px; text-align: left; display: none;"><div draggable="false" title="Показать карту рельефа с названиями объектов" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 6px 8px 6px 6px; direction: ltr; text-align: left; white-space: nowrap;"><span role="checkbox" style="box-sizing: border-box; position: relative; line-height: 0; font-size: 0px; margin: 0px 5px 0px 0px; display: inline-block; background-color: rgb(255, 255, 255); border: 1px solid rgb(198, 198, 198); border-radius: 1px; width: 13px; height: 13px; vertical-align: middle;"><div style="position: absolute; left: 1px; top: -2px; width: 13px; height: 11px; overflow: hidden; display: none;"><img src="https://maps.gstatic.com/mapfiles/mv/imgs8.png" draggable="false" style="position: absolute; left: -52px; top: -44px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 68px; height: 67px;"></div></span><label style="vertical-align: middle; cursor: pointer;">Рельеф</label></div></div></div><div class="gm-style-mtc" style="float: left;"><div draggable="false" title="Показать спутниковую карту" style="direction: ltr; overflow: hidden; text-align: center; position: relative; color: rgb(86, 86, 86); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 8px; border-bottom-right-radius: 2px; border-top-right-radius: 2px; -webkit-background-clip: padding-box; background-clip: padding-box; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; border-left: 0px; min-width: 43px;">Спутник</div><div style="background-color: white; z-index: -1; padding: 2px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px; position: absolute; right: 0px; top: 29px; text-align: left; display: none;"><div draggable="false" title="Показать спутниковую карту с названиями объектов" style="color: rgb(0, 0, 0); font-family: Roboto, Arial, sans-serif; user-select: none; font-size: 11px; background-color: rgb(255, 255, 255); padding: 6px 8px 6px 6px; direction: ltr; text-align: left; white-space: nowrap;"><span role="checkbox" style="box-sizing: border-box; position: relative; line-height: 0; font-size: 0px; margin: 0px 5px 0px 0px; display: inline-block; background-color: rgb(255, 255, 255); border: 1px solid rgb(198, 198, 198); border-radius: 1px; width: 13px; height: 13px; vertical-align: middle;"><div style="position: absolute; left: 1px; top: -2px; width: 13px; height: 11px; overflow: hidden;"><img src="https://maps.gstatic.com/mapfiles/mv/imgs8.png" draggable="false" style="position: absolute; left: -52px; top: -44px; user-select: none; border: 0px; padding: 0px; margin: 0px; max-width: none; width: 68px; height: 67px;"></div></span><label style="vertical-align: middle; cursor: pointer;">Названия объектов</label></div></div></div></div></div></div></div>
-                            <button type="submit" class="but but_green" tabindex="0"><span>Продолжить работу</span><i class="ico"></i></button>
-                        </form>
-                    </div><div class="second-step slick-slide" data-slick-index="1" aria-hidden="true" style="width: 632px;" tabindex="-1" role="option" aria-describedby="slick-slide01">
-                        <div class="data-modal__icons-wrp">
-                            <div class="row">
-                                <div class="col-md-6 col-xs-6"><i class="ico ico-delivery"></i></div>
-                                <div class="col-md-6 col-xs-6"><i class="ico ico-basket"></i></div>
-                            </div>
-                        </div>
-                        <div class="data-modal__sub-txt">Вы хотите работать со своими поставщиками или найти новых?</div>
-                        <div class="data-modal__buts-wrp"><a href="#" class="search-new but but_green wt" tabindex="-1"><span>Найти новых</span></a><a href="#" class="but but_green" tabindex="-1"><span>Завести своих поставщиков</span></a></div>
-                    </div><div class="third-step slick-slide" data-slick-index="2" aria-hidden="true" style="width: 632px;" tabindex="-1" role="option" aria-describedby="slick-slide02">
-                        <div class="data-modal__icons-wrp">
-                            <div class="row">
-                                <div class="col-md-6"><i class="ico ico-tel"></i></div>
-                                <div class="col-md-6"><i class="ico ico-cart"></i></div>
-                            </div>
-                        </div>
-                        <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на f-market</div>
-                        <div class="data-modal__buts-wrp"><a href="#" class="but but_green wt" tabindex="-1"><span>Создать заявку</span></a><a href="#" class="but but_green" tabindex="-1"><span>Поиск на f-market</span></a></div>
-                    </div></div></div>
-
-
+        <div class="modal-content">
+            <div class="first-step">
+                <div class="data-modal__logo"><img src="images/tmp_file/logo.png" alt=""></div>
+                <div class="data-modal__sub-txt">Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.</div>
+                <?php
+                $form = ActiveForm::begin([
+                            'id' => 'login-form',
+                            'enableAjaxValidation' => false,
+                            'validateOnSubmit' => false,
+                            'options' => [
+                                'class' => 'auth-sidebar__form form-check data',
+                            ],
+                ]);
+                ?>
+                <?= Html::activeHiddenInput($organization, 'lat'); //широта ?>
+                <?= Html::activeHiddenInput($organization, 'lng'); //долгота ?>
+                <?= Html::activeHiddenInput($organization, 'country'); //страна ?> 
+                <?= Html::activeHiddenInput($organization, 'locality'); //Город ?>
+                <?= Html::activeHiddenInput($organization, 'route'); //улица ?>
+                <?= Html::activeHiddenInput($organization, 'street_number'); //дом ?>
+                <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
+                <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
+                <div class="auth-sidebar__form-brims">
+                    <label>
+                        <?=
+                                $form->field($profile, 'full_name')
+                                ->label(false)
+                                ->textInput(['class' => 'form-control', 'placeholder' => 'ФИО']);
+                        ?>
+                        <i class="fa fa-user"></i>
+                    </label>
+                    <label>
+                        <?=
+                                $form->field($organization, 'name')
+                                ->label(false)
+                                ->textInput(['class' => 'form-control', 'placeholder' => 'Название организации']);
+                        ?>
+                        <i class="fa fa-bank"></i>
+                    </label>
+                    <label>
+                        <?=
+                                $form->field($organization, 'address')
+                                ->label(false)
+                                ->textInput(['class' => 'form-control', ' onsubmit' => 'return false', 'placeholder' => 'Адрес'])
+                        ?>
+                        <i class="fa fa-map-marker"></i>
+                    </label>
+                </div>
+                <div id="map" class="modal-map"></div>
+                <!--<a href="#" class="but but_green next"><span>Продолжить работу</span><i class="ico"></i></a>-->
+                <button type="submit" class="but but_green next"><span>Продолжить работу</span><i class="ico"></i></button>
+                <?php ActiveForm::end(); ?>
+            </div>
+            <div class="second-step">
+                <div class="data-modal__icons-wrp">
+                    <div class="row">
+                        <div class="col-md-6 col-xs-6"><i class="ico ico-delivery"></i></div>
+                        <div class="col-md-6 col-xs-6"><i class="ico ico-basket"></i></div>
+                    </div>
+                </div>
+                <div class="data-modal__sub-txt">Вы хотите работать со своими поставщиками или найти новых?</div>
+                <div class="data-modal__buts-wrp"><a href="#" class="search-new but but_green wt next"><span>Найти новых</span></a><a href="#" class="but but_green"><span>Завести своих поставщиков</span></a></div>
+            </div>
+            <div class="third-step">
+                <div class="data-modal__icons-wrp">
+                    <div class="row">
+                        <div class="col-md-6"><i class="ico ico-tel"></i></div>
+                        <div class="col-md-6"><i class="ico ico-cart"></i></div>
+                    </div>
+                </div>
+                <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на f-market</div>
+                <div class="data-modal__buts-wrp"><a href="#" class="but but_green wt"><span>Создать заявку</span></a><a href="#" class="but but_green"><span>Поиск на f-market</span></a></div>
+            </div>
         </div>
     </div>
 </div>

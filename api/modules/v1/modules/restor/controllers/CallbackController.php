@@ -37,12 +37,12 @@ class CallbackController extends Controller {
     
     if($getr) {
     
-    fputs($fp,'\n'.date("Y-m-d H:i:s").':POST FOUND\n');    
+    fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST FOUND'.PHP_EOL);    
     fputs($fp,$getr); 
            
     } else {
        
-    fputs($fp,'\n'.date("Y-m-d H:i:s").':POST NOT (!) FOUND\n');        
+    fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST NOT (!) FOUND'.PHP_EOL);        
     
     
     }

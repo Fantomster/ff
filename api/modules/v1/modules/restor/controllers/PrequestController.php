@@ -106,6 +106,9 @@ class PrequestController extends Controller {
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
     
+    var_dump($data);
+    var_dump($array);
+    
 
     /*
     foreach ($myobj->xpath('//OBJECTINFO') as $obj) {
@@ -122,13 +125,14 @@ class PrequestController extends Controller {
    //  $objects = $myXML->childNodes;
     
     // var_dump($myXML);
-    
+    /*
     // var_dump($array);
     if (isset($array['RP'])) {
     $objectinfo = $array['RP'];
     }
     
-   // var_dump($objectinfo);
+     * 
+   
     
     if (!isset($objectinfo)) {
         
@@ -143,6 +147,8 @@ class PrequestController extends Controller {
             }
     
     }
+     * 
+     */
     /*
     foreach ($objects as $object) {
     

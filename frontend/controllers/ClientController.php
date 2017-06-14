@@ -304,7 +304,6 @@ class ClientController extends DefaultController {
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
-            $relationSuppRest->uploaded_catalog = UploadedFile::getInstance($relationSuppRest, 'uploaded_catalog');
 
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
@@ -314,7 +313,7 @@ class ClientController extends DefaultController {
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
 
-                if (($arrCatalog === Array()) && !isset($relationSuppRest->uploaded_catalog)) {
+                if ($arrCatalog === Array()) {
                     $result = ['success' => false, 'message' => 'Каталог пустой!'];
                     return $result;
                     exit;
@@ -328,15 +327,15 @@ class ClientController extends DefaultController {
                 }
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
-                    $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
-                    $units = trim($arrCatalogs['dataItem']['units']);
+                    //$article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
+                    //$units = trim($arrCatalogs['dataItem']['units']);
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                     $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
-                    if (empty($article)) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
-                        return $result;
-                        exit;
-                    }
+//                    if (empty($article)) {
+//                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
+//                        return $result;
+//                        exit;
+//                    }
                     if (empty($product)) {
                         $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];
                         return $result;
@@ -469,22 +468,22 @@ class ClientController extends DefaultController {
                      *    
                      * */
                     foreach ($arrCatalog as $arrCatalogs) {
-                        $article = trim($arrCatalogs['dataItem']['article']);
+                        $article = rand(10000, 99999);//trim($arrCatalogs['dataItem']['article']);
                         $product = trim($arrCatalogs['dataItem']['product']);
-                        $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        $units = 'NULL';//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
-                        if (substr($units, -3, 1) == '.') {
-                            $units = explode('.', $units);
-                            $last = array_pop($units);
-                            $units = join($units, '') . '.' . $last;
-                        } else {
-                            $units = str_replace('.', '', $units);
-                        }
+//                        if (substr($units, -3, 1) == '.') {
+//                            $units = explode('.', $units);
+//                            $last = array_pop($units);
+//                            $units = join($units, '') . '.' . $last;
+//                        } else {
+//                            $units = str_replace('.', '', $units);
+//                        }
                         if (empty($units) || $units < 0) {
                             $units = 'NULL';
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
-                        $note = trim($arrCatalogs['dataItem']['note']);
+                        //$note = trim($arrCatalogs['dataItem']['note']);
                         $ed = trim($arrCatalogs['dataItem']['ed']);
                         $price = str_replace(',', '.', $price);
                         if (substr($price, -3, 1) == '.') {
@@ -525,14 +524,14 @@ class ClientController extends DefaultController {
                         $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
                         \Yii::$app->db->createCommand($sql)->execute();
 
-                        if (!empty($note)) {
-                            $sql = "insert into " . GoodsNotes::tableName() . "(
-				      `rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES (
-				      $currentUser->organization_id, $lastInsert_base_goods_id, :note,NOW())";
-                            $command = \Yii::$app->db->createCommand($sql);
-                            $command->bindParam(":note", $note, \PDO::PARAM_STR);
-                            $command->execute();
-                        }
+//                        if (!empty($note)) {
+//                            $sql = "insert into " . GoodsNotes::tableName() . "(
+//				      `rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES (
+//				      $currentUser->organization_id, $lastInsert_base_goods_id, :note,NOW())";
+//                            $command = \Yii::$app->db->createCommand($sql);
+//                            $command->bindParam(":note", $note, \PDO::PARAM_STR);
+//                            $command->execute();
+//                        }
                     }
 
                     /**

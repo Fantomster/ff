@@ -15,17 +15,17 @@ yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
 $request = new \common\models\Request();
 ?>
 <style>
-    .req-items{
+.req-items{
     background: #fff;
     border-bottom: 1px solid #f4f4f4;
     position: relative;
     padding: 10px;
     margin-top:10px;
-    }
-    .req-items:hover, .req-name:hover{
+}
+.req-items:hover, .req-name:hover{
     border-bottom:1px solid #84bf76;
     cursor:pointer
-    }
+}
 .req-name{color:#84bf76;font-size:22px;margin-top:20px}
 .req-fire{margin-left:10px;color:#d9534f;font-size:18px;}
 .req-nal-besnal{margin-left:10px}

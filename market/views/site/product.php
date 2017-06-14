@@ -51,13 +51,18 @@ $this->title = 'F-MARKET информация о товаре';
 .title-param{
 font-family: "HelveticaBold",Arial,sans-serif;    
 }
+.size-bc {
+white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+   }
 </style>
 <div class="row">
   <div class="col-md-12 no-padding">
     <?=
     Breadcrumbs::widget([
         'options' => [
-            'class' => 'breadcrumb',
+            'class' => 'breadcrumb size-bc',
         ],
         'homeLink' => false,
         'links' => [

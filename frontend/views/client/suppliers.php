@@ -53,7 +53,7 @@ $this->registerCss('
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
                     <h4 class="modal-title">
-                        Добавить / Изменить Продукты
+                        Укажите товары, который Вы покупаете у поставщика
                     </h4>
                 </div>
             </div>
@@ -61,21 +61,7 @@ $this->registerCss('
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
-                <p style="text-align: center; padding-top: 3px; font-style: italic;">Вы можете загрузить каталог вашего поставщика, а наши менеджеры подготовят его для работы!</p>
-                <?=
-                FileInput::widget([
-                    'model' => $relationSuppRest,
-                    'attribute' => 'uploaded_catalog',
-                    'pluginOptions' => [
-                        'showPreview' => false,
-                        'showCaption' => true,
-                        'showRemove' => true,
-                        'showUpload' => false,
-                        'removeLabel' => '',
-                        'browseLabel' => 'Загрузить...'
-                    ],
-                ]);
-                ?>
+                
                 <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success">Отправить</button>
             </div>
@@ -518,24 +504,16 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
+  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (руб)'],
   columns: [
-        {data: 'article'},
         {data: 'product', wordWrap:true},
-	{
-            data: 'units', 
-            type: 'numeric',
-            format: '0.00',
-            language: 'ru-RU'
-        },
+        {data: 'ed', allowEmpty: false},
 	{
             data: 'price', 
             type: 'numeric',
             format: '0.00',
             language: 'ru-RU'
-        },
-        {data: 'ed', allowEmpty: false},
-        {data: 'note'}
+        }
     ],
   className : 'Handsontable_table',
   rowHeaders : true,
@@ -719,7 +697,7 @@ $('#invite').click(function(e){
     $('#loader-show').showLoading();
     e.preventDefault();
 	var i, items, item, dataItem, data = [];
-	var cols = [ 'article', 'product', 'units', 'price', 'ed', 'note'];
+	var cols = ['product', 'ed', 'price'];
 	$('#CreateCatalog tr').each(function() {
 	  items = $(this).children('td');
 	  if(items.length === 0) {
@@ -732,7 +710,7 @@ $('#invite').click(function(e){
 	      dataItem[cols[i]] = item.html();
 	    }
 	  }
-	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]] || dataItem[cols[3]] || dataItem[cols[4]] || dataItem[cols[5]]){
+	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]]){
 	    data.push({dataItem});    
 	  }	    
 	});
@@ -741,7 +719,6 @@ $('#invite').click(function(e){
         var form = $("#SuppliersFormSend")[0];
         var formData = new FormData(form);
         formData.append('catalog', catalog);
-        formData.append('RelationSuppRest[uploaded_catalog]', $('input[type=file]')[0].files[0]);
 	$.ajax({
                     processData: false,
                     contentType: false,

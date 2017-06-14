@@ -116,7 +116,7 @@ if (!Yii::$app->user->isGuest) {
         e.preventDefault();
         form = $("#inviteForm");
         swal({
-            title: "Приглашение на f-keeper",
+            title: "Приглашение на mix-cart",
             input: "text",
             showCancelButton: true,
             cancelButtonText: "Отмена",

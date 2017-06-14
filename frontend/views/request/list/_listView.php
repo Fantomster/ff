@@ -5,7 +5,7 @@ use yii\helpers\Url;
 <div class="col-md-12 req-items" data-id="<?=$model->id;?>">
   <div class="row">
     <div class="col-md-6">
-      <span class="req-name"><?=$model->product?></span>
+      <span class="req-name">№<?=$model->id;?> <?=$model->product?></span>
       <?php if ($model->rush_order){?>
       <span class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</span>
       <?php } ?>
@@ -44,7 +44,7 @@ use yii\helpers\Url;
       </span>
         <span class="req-created">
           <b>
-            <?=$model->responsible_supp_org_id ? $model->organization->name : '<span style="color:#ccc">не назначен</span>';?>
+            <?=$model->responsible_supp_org_id ? $model->vendor->name : '<span style="color:#ccc">не назначен</span>';?>
           </b>
         </span>
     </div>

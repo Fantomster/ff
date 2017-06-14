@@ -23,7 +23,7 @@
                                 'url' => '#', //['client/settings'],
                                 'options' => ['class' => "treeview hidden-xs"],
                                 'items' => [
-                                    //['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['site/settings']],
+                                    ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['site/settings']],
                                     ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['site/users']],
                                 ]
                             ],

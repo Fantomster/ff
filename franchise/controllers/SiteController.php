@@ -56,10 +56,10 @@ class SiteController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                'only' => ['index','setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                        'actions' => ['index','setting','setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -136,7 +136,22 @@ class SiteController extends DefaultController {
 
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType'));
     }
+    
+    
+    public function actionSettings() {
+        $franchisee = $this->currentFranchisee;
+        if ($franchisee->load(Yii::$app->request->post())) {
+            if ($franchisee->validate()) {
+                $franchisee->save();
+            }
+        }
 
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('settings', compact('franchisee'));
+        } else {
+            return $this->render('settings', compact('franchisee'));
+        }
+    }
     /**
      * Displays general settings
      * 
@@ -240,9 +255,6 @@ class SiteController extends DefaultController {
      * 
      * @return mixed
      */
-    public function actionSettings() {
-        return $this->render('/site/under-construction');
-    }
 
     /**
      * Displays franchise users list

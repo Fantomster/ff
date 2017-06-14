@@ -108,7 +108,7 @@ class ServiceDeskController extends Controller {
             
             $listFeed->insert([
                 'author' => 'Менеджер',
-                'region' => $model->region,
+                'region' => $model->locality,
                 'fio' => $model->fio,
                 'phone' => $model->phone,
                 'message' => $model->body,

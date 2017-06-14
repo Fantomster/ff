@@ -212,8 +212,8 @@ class CronController extends Controller {
                 if(\common\models\FranchiseeGeo::find()->where(['country'=>$organization->country])->exists()){
                     //если есть
                     //есть ли франшиза с этим городом?
-                    $flag = 0;
-                    if(\common\models\FranchiseeGeo::find()->where([
+                        $flag = 0;
+                        if(\common\models\FranchiseeGeo::find()->where([
                         'country'=>$organization->country,
                         'administrative_area_level_1'=>$organization->locality
                             ])->exists()){

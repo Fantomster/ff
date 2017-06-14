@@ -197,7 +197,7 @@ class RequestController extends DefaultController {
         }
     }
     public function actionSetResponsible(){
-        $client = $this->currentUser->organization_id;
+        $client = $this->currentUser;
         
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON; 
@@ -205,7 +205,7 @@ class RequestController extends DefaultController {
         $id = Yii::$app->request->post('id');
         $responsible_id = Yii::$app->request->post('responsible_id');
         
-        if(!Request::find()->where(['rest_org_id' => $client,'id'=>$id])->exists()){
+        if(!Request::find()->where(['rest_org_id' => $client->organization_id,'id'=>$id])->exists()){
             return ['success'=>false];
         }
         if(!RequestCallback::find()->where([
@@ -232,16 +232,33 @@ class RequestController extends DefaultController {
         }else{
             $request->responsible_supp_org_id = $responsible_id;
             $request->save();
+            $vendors = \common\models\User::find()->where(['organization_id' => $request->responsible_supp_org_id])->all();
             //Отправка почты
-            //$this->sendAcceptResponsive($request->client, $request->vendor, $request->id);
+            if($client->email){
+                $mailer = Yii::$app->mailer; 
+                $email = $client->email;
+                //$email = 'marshal1209448@gmail.com';
+                $subject = "f-keeper.ru - заявка №" . $request->id;
+                $mailer->htmlLayout = 'layouts/request';
+                $result = $mailer->compose('requestSetResponsible', compact("request","client"))
+                        ->setTo($email)->setSubject($subject)->send();
+            }
             //Отправка СМС
-            $rows = \common\models\User::find()->where(['organization_id' => $request->vendor->id])->all();
-            foreach($rows as $row){
-                if($row->profile->phone && $row->profile->sms_allow){
+            foreach($vendors as $vendor){
+                if($vendor->profile->phone && $vendor->profile->sms_allow){
                     $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе f-keeper.ru';
-                    $target = $row->profile->phone;
+                    $target = $vendor->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target); 
+                }
+                if($vendor->email){
+                $mailer = Yii::$app->mailer; 
+                $email = $vendor->email;
+                //$email = 'marshal1209448@gmail.com';
+                $subject = "f-keeper.ru - заявка №" . $request->id;
+                $mailer->htmlLayout = 'layouts/request';
+                $result = $mailer->compose('requestSetResponsibleMailToSupp', compact("request","vendor"))
+                        ->setTo($email)->setSubject($subject)->send();
                 }
             }
         }
@@ -273,16 +290,37 @@ class RequestController extends DefaultController {
                 $relationSuppRest->supp_org_id = $vendor->id;
                 $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
                 $relationSuppRest->save(); 
-
-                $rows = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
-                foreach($rows as $row){
-                    if($row->profile->phone && $row->profile->sms_allow){
+                $request = Request::findOne(['id'=>$request_id]);
+                
+                $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
+                if($client->email){
+                $mailer = Yii::$app->mailer; 
+                $email = $client->email;
+                //$email = 'marshal1209448@gmail.com';
+                $subject = "f-keeper.ru - заявка №" . $request->id;
+                $mailer->htmlLayout = 'layouts/request';
+                $result = $mailer->compose('requestInviteSupplierMailToRest', compact("request","client"))
+                        ->setTo($email)->setSubject($subject)->send();
+                }
+                foreach($vendorUsers as $user){
+                    if($user->profile->phone && $user->profile->sms_allow){
                         $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
-                        $target = $row->profile->phone;
+                        $target = $user->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target); 
                     }
+                    //$this->sendMail("invite-supplier", $request, $row);
+                    if(!empty($user->email)){
+                    $mailer = Yii::$app->mailer;
+                    $email = $user->email; 
+                    //$email = 'marshal1209448@gmail.com';
+                    $subject = "f-keeper.ru - заявка №" . $request->id;
+                    $mailer->htmlLayout = 'layouts/request';
+                    $result = $mailer->compose('requestInviteSupplier', compact("request","user"))
+                            ->setTo($email)->setSubject($subject)->send();
+                    }
                 }
+                
                 return ['success'=>true];
             }
         }
@@ -304,7 +342,7 @@ class RequestController extends DefaultController {
         }
     }
     public function actionAddCallback(){
-        $user = $this->currentUser;
+        $vendor = $this->currentUser;
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON; 
         $id = Yii::$app->request->post('id');
@@ -312,35 +350,30 @@ class RequestController extends DefaultController {
         $comment = Yii::$app->request->post('comment');
         $requestCallback = new RequestCallback();
         $requestCallback->request_id = $id;
-        $requestCallback->supp_org_id = $user->organization_id;
+        $requestCallback->supp_org_id = $vendor->organization_id;
         $requestCallback->price = $price;
         $requestCallback->comment = $comment;
         $requestCallback->save();
+        $request = Request::find()->where(['id' => $id])->one();
+        $clients = \common\models\User::find()->where(['organization_id'=>$request->rest_org_id])->all();
+        foreach($clients as $client){
+            if($client->profile->phone && $client->profile->sms_allow){
+                        $text = "Новый отклик по Вашей заявке №" . $request->id . " от поставщика " . $vendor->organization->name;
+                        $target = $client->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target); 
+            }
+            if($client->email){
+            $mailer = Yii::$app->mailer; 
+            $email = $client->email;
+            //$email = 'marshal1209448@gmail.com';
+            $subject = "f-keeper.ru - заявка №" . $request->id;
+            $mailer->htmlLayout = 'layouts/request';
+            $result = $mailer->compose('requestNewCallback', compact("request","client","vendor"))
+                    ->setTo($email)->setSubject($subject)->send();
+            }
+        }
         return ['success'=>true];
         }
-    }
-    private function sendAcceptResponsive($client, $vendor, $request_id) {
-        /** @var Mailer $mailer */
-        /** @var Message $message */
-        
-        
-        $subject = "f-keeper.ru - заявка №" . $request_id;
-        $mailer = Yii::$app->mailer;
-        $mailer->htmlLayout = 'layouts/request';
-        $senderOrg = $client->id;
-        $recipients = \common\models\User::find()->where(['organization_id'=>$vendor->id])->all();
-        foreach($recipients as $recipient){
-        if (empty($recipient)) {
-            return;
-        }
-        $email = $recipient->email;
-                  
-        $result = $mailer->compose('requestAcceptResponsible', 
-              compact("client", "vendor", "request_id"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();   
-        }
-        
     }
 }

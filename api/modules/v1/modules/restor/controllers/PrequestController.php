@@ -44,12 +44,21 @@ class PrequestController extends Controller {
         </RQ>';   
   */
     
-    $xml = '<?xml version="1.0" encoding="utf-8" ?>
+/*
+    
+    $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goods" tasktype="any_call" guid="sdfsd" callback="https://api.f-keeper.ru/api/web/v1/restor/callback" timeout="int">
     <PARAM name="object_id" val="'.$restr.'" />
     <PARAM name="goodgroup_rid" val="1" />
     </RQ>';
-       
+ */
+  
+  $xml = '<?xml version="1.0" encoding="utf-8" ?>
+  <RQ cmd="sh_get_goodgroups" tasktype="23" guid="guid" callback="https://api.f-keeper.ru/api/web/v1/restor/callback" timeout="30">
+    <PARAM name="object_id" val="'.$restr.'" />
+  </RQ>';
+    
+    
     // setcookie('_ASPXAUTH',$cook);
     
     $headers = array(
@@ -116,7 +125,7 @@ class PrequestController extends Controller {
     
     // var_dump($array);
     
-    $objectinfo = $array['RP']['OBJECTINFO'];
+    $objectinfo = $array['RP'];
     
    // var_dump($objectinfo);
     
@@ -128,8 +137,8 @@ class PrequestController extends Controller {
         
     } else {
             
-            foreach ($array['RP']['OBJECTINFO'] as $obj) {
-          $res = 'Объект id: '.$obj['id'].'<br>имя: '.$obj['name'].'<br>адрес: '.$obj['address'].PHP_EOL;
+            foreach ($array['RP'] as $obj) {
+          $res = 'Задача id: '.$obj['taskguid'].PHP_EOL;
             }
     
     }
@@ -153,6 +162,7 @@ class PrequestController extends Controller {
                    'data' => $data,
                    'info' => $info,
                    'res'  => $res,
+                   'xml'  => $xml,
          
                ]);
     

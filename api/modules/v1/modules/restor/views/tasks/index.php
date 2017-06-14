@@ -7,7 +7,7 @@ echo $this->render('/default/_menu.php');
 // echo "<br><br>";
 // print_r($xml);
 
-print_r($array);
+print_r(ArrayHelper::htmlEncode($array));
 // echo "<h2>".$res."</h2>";
 echo "<br><br>";    
 

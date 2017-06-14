@@ -34,7 +34,7 @@ class CallbackController extends Controller {
     
     $fp = fopen('runtime/logs/callback.log', 'w');
     
-    $fputs($fp,$getr); 
+    $fputs($fp,'log:'.$getr); 
     
     fclose($fp);
     

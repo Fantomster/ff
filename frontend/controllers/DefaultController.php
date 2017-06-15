@@ -41,7 +41,7 @@ class DefaultController extends Controller {
             $organization = $this->currentUser->organization;
             $this->setLayout($organization->type_id);
             if (($organization->step == Organization::STEP_SET_INFO) && ($this->currentUser->status == \common\models\User::STATUS_ACTIVE)) {
-                return $this->redirect(['/site/complete-registration']);
+                $this->redirectIfNotHome($organization);
             }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
                 throw new \yii\web\HttpException(403, 'Хуй тебе, Челиос!');
@@ -60,5 +60,12 @@ class DefaultController extends Controller {
             return false;
         }
         return true;
+    }
+    
+    private function redirectIfNotHome($organization) { 
+        $organizationHome = ($organization->type_id == Organization::TYPE_RESTAURANT) ? 'client' : 'vendor';
+        if (Yii::$app->controller->id != $organizationHome || Yii::$app->controller->action->id != 'index') {
+            return $this->redirect(['/'.$organizationHome.'/index']);
+        }
     }
 }

@@ -90,8 +90,9 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
-            ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
+            ['name', 'required', 'on' => 'complete', 'message' => 'Пожалуйста, напишите название вашей организации'],
+            ['name', 'required', 'on' => 'invite', 'message' => 'Пожалуйста, напишите название организации'],
+            ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы покупаете или продаете?'],
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
             [['address','place_id','lat','lng'], 'required', 'on' => 'complete','message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],

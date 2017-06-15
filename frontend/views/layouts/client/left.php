@@ -38,7 +38,7 @@ $cartCount = $user->organization->getCartCount();
 //                            'icon' => 'envelope', 
 //                            'url' => ['client/messages'],
 //                            ],
-                        ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
+                        ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'https://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
                         
                         ['label' => 'Заявки<sub class="sub-new">БЕТА</sub>', 'icon' => 'paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['client/analytics'], 'options' => ['class' => 'hidden-xs']],

@@ -2,6 +2,7 @@
 
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 $this->registerJs('
     function stopRKey(evt) { 
@@ -11,11 +12,42 @@ $this->registerJs('
     } 
 
     document.onkeypress = stopRKey; 
+
     $(".next").on("click", function(e) {
         e.preventDefault();
         $(".data-modal .modal-content").slick("slickNext");
     });
-');
+    
+    $(".wizard-off").on("click", function(e) {
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: "'.Url::to('/site/ajax-wizard-off').'"
+        });
+    });
+
+    $("#complete-form").on("submit", function() {
+        return false;
+    });
+
+    $("#complete-form").on("afterValidate", function(event, messages, errorAttributes) {
+        console.log(messages);
+        for (var input in messages) {
+            if (messages[input] != "") {
+                $("#" + input).tooltip({title: messages[input], placement: "auto right", container: "body"});
+                $("#" + input).tooltip();
+                $("#" + input).tooltip("show");
+                return;
+            }
+        }
+        $(".data-modal .modal-content").slick("slickNext");
+    });
+
+    $("#data-modal").on("shown.bs.modal",function(){
+        $(".data-modal .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})
+    });
+    $("#data-modal").length>0&&$("#data-modal").modal({backdrop: "static", keyboard: false});
+',yii\web\View::POS_READY);
 
 $gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
         'libraries' => 'places',
@@ -23,7 +55,6 @@ $gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
         'language'=>Yii::$app->params['google-api']['language'],
         'callback'=>'initMap'
     ));
-$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
 $this->registerJs("
 function initMap() {
     var fields = {
@@ -38,11 +69,9 @@ function initMap() {
             hFormattedAddress : document.getElementById('organization-formatted_address')
             };
         
-	//инит карты
 	var map = new google.maps.Map(document.getElementById('map'), {
 	    mapTypeId: google.maps.MapTypeId.ROADMAP
 	});
-        // Create the search box and link it to the UI element.
         var input = document.getElementById('organization-address');
         var searchBox = new google.maps.places.SearchBox(input);
         
@@ -52,7 +81,6 @@ function initMap() {
           if (places.length == 0) {
             return;
           }
-          // For each place, get the icon, name and location.
           var bounds = new google.maps.LatLngBounds();
           places.forEach(function(place) {
             if (!place.geometry) {
@@ -74,9 +102,6 @@ function initMap() {
           map.setZoom(17);
         })
 
-
-            
-	//инит маркера
 	var marker = new google.maps.Marker({
 	            map: map,
 	            draggable:true
@@ -89,7 +114,6 @@ function initMap() {
             geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value),fields)
         }
 	
-	//событие на перемещение маркера
 	marker.addListener('dragend', function(e){
 	    geocoder.geocode({'latLng': e.latLng}, function(results, status) {
 	        if(status == 'OK') {
@@ -104,7 +128,6 @@ function initMap() {
 	    });
 	})
         
-        //Событие на клик по карте
         map.addListener('click', function(e) {
             geocoder.geocode({'latLng': e.latLng}, function(results, status) {
                 if(status == 'OK') {
@@ -119,7 +142,7 @@ function initMap() {
             })
         });
 }
-//Если нам известин placeId тогда выводим все данные
+
 function geocodePlaceId(geocoder, map, marker, placeId, fields) {
     geocoder.geocode({'placeId': placeId}, function(results, status) {
       if (status === 'OK') {
@@ -136,7 +159,7 @@ function geocodePlaceId(geocoder, map, marker, placeId, fields) {
       }
     });
 }
-//геолокация по ip или геолокации из браузера
+
 function geolocation(map, marker, fields){
     fields.sField.value = '';
     fields.hLat.value = '';
@@ -169,7 +192,7 @@ function geolocation(map, marker, fields){
 	 window.alert('Geolocation failed');   
     }
 }
-//Сохранение полученных данных в хидден поля
+
 function changeFields(fields, results){
     for (var i = 0; i < results[0].address_components.length; i++)
         {
@@ -222,7 +245,8 @@ function changeFields(fields, results){
         alert('Geocode was not successful for the following reason: ' + status);
         }    
 }
-",yii\web\View::POS_END);
+",yii\web\View::POS_BEGIN);
+$this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
 ?>
 <div id="data-modal" class="modal fade data-modal">
     <div class="modal-dialog">
@@ -233,12 +257,15 @@ function changeFields(fields, results){
                 <div class="data-modal__sub-txt">Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.</div>
                 <?php
                 $form = ActiveForm::begin([
-                            'id' => 'login-form',
-                            'enableAjaxValidation' => false,
-                            'validateOnSubmit' => false,
+                            'id' => 'complete-form',
+                            'enableAjaxValidation' => true,
+                            'enableClientValidation' => false,
+                            'validateOnSubmit' => true,
+                            'action' => Url::to('/site/ajax-complete-registration'),
                             'options' => [
                                 'class' => 'auth-sidebar__form form-check data',
                             ],
+                            'fieldConfig' => ['template' => '{input}'],
                 ]);
                 ?>
                 <?= Html::activeHiddenInput($organization, 'lat'); //широта ?>
@@ -276,8 +303,7 @@ function changeFields(fields, results){
                     </label>
                 </div>
                 <div id="map" class="modal-map"></div>
-                <!--<a href="#" class="but but_green next"><span>Продолжить работу</span><i class="ico"></i></a>-->
-                <button type="submit" class="but but_green next"><span>Продолжить работу</span><i class="ico"></i></button>
+                <button type="submit" class="but but_green complete-reg"><span>Продолжить работу</span><i class="ico"></i></button>
                 <?php ActiveForm::end(); ?>
             </div>
             <div class="second-step">
@@ -288,7 +314,10 @@ function changeFields(fields, results){
                     </div>
                 </div>
                 <div class="data-modal__sub-txt">Вы хотите работать со своими поставщиками или найти новых?</div>
-                <div class="data-modal__buts-wrp"><a href="#" class="search-new but but_green wt next"><span>Найти новых</span></a><a href="#" class="but but_green"><span>Завести своих поставщиков</span></a></div>
+                <div class="data-modal__buts-wrp">
+                    <a href="#" class="search-new but but_green wt next"><span>Найти новых</span></a>
+                    <a href="<?= Url::to('client/add-first-supplier') ?>" class="but but_green wizard-off"><span>Завести своих поставщиков</span></a>
+                </div>
             </div>
             <div class="third-step">
                 <div class="data-modal__icons-wrp">
@@ -298,7 +327,10 @@ function changeFields(fields, results){
                     </div>
                 </div>
                 <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на f-market</div>
-                <div class="data-modal__buts-wrp"><a href="#" class="but but_green wt"><span>Создать заявку</span></a><a href="#" class="but but_green"><span>Поиск на f-market</span></a></div>
+                <div class="data-modal__buts-wrp">
+                    <a href="<?= Url::to('request/list') ?>" class="but but_green wt wizard-off"><span>Создать заявку</span></a>
+                    <a href="https://market.f-keeper.ru" class="but but_green"><span>Поиск на f-market</span></a>
+                </div>
             </div>
         </div>
     </div>

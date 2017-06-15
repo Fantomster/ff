@@ -21,7 +21,7 @@ class HelpersAsset extends AssetBundle {
         'js/helpers/resizer.js',
         'js/helpers/object-fit.js',
         'js/helpers/bs_modal_fix.js',
-        'js/components/data-modal.js',
+        //'js/components/data-modal.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

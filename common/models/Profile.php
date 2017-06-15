@@ -52,8 +52,8 @@ class Profile extends \amnah\yii2\user\models\Profile {
      */
     public function rules() {
         $rules = parent::rules();
-        $rules[] = [['full_name'], 'required'];
-        $rules[] = [['full_name'], 'required', 'on' => ['register', 'complete'], 'message' => 'Пожалуйста, напишите, как к вам обращаться'];
+        //$rules[] = [['full_name'], 'required'];
+        $rules[] = [['full_name'], 'required', 'on' => ['complete'], 'message' => 'Пожалуйста, напишите, как к вам обращаться'];
         $rules[] = [['full_name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
         $rules[] = [['phone'], 'string', 'max' => 255];
 //        $rules[] = [['phone'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];

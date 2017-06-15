@@ -9,6 +9,9 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
 <?= $orgType . ' ' . $senderOrg->name . ' создал новый заказ №' . $order->id ?>
 </p>
 <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
+    Менеджер: <?= $order->createdByProfile->full_name ?>
+</p>
+<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
     Для просмотра деталей пройдите по ссылке:
 </p>
 <br style="margin: 0; padding: 0;" />

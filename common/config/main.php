@@ -73,6 +73,7 @@ return [
                 'register' => 'user/register',
                 'forgot' => 'user/forgot',
                 'resend' => 'user/resend',
+                'reset' => 'user/reset',
             ],
         ],
         'assetManager' => [

@@ -52,8 +52,10 @@ class ClientController extends DefaultController {
                             'ajax-delete-user',
                             'ajax-update-user',
                             'ajax-validate-user',
+                            'ajax-validate-vendor',
                             'employees',
                             'remove-supplier',
+                            'add-first-vendor',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -468,9 +470,9 @@ class ClientController extends DefaultController {
                      *    
                      * */
                     foreach ($arrCatalog as $arrCatalogs) {
-                        $article = rand(10000, 99999);//trim($arrCatalogs['dataItem']['article']);
+                        $article = "".rand(10000, 99999);//trim($arrCatalogs['dataItem']['article']);
                         $product = trim($arrCatalogs['dataItem']['product']);
-                        $units = 'NULL';//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        $units = null;//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
 //                        if (substr($units, -3, 1) == '.') {
 //                            $units = explode('.', $units);
@@ -480,7 +482,7 @@ class ClientController extends DefaultController {
 //                            $units = str_replace('.', '', $units);
 //                        }
                         if (empty($units) || $units < 0) {
-                            $units = 'NULL';
+                            $units = null;
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                         //$note = trim($arrCatalogs['dataItem']['note']);
@@ -493,30 +495,21 @@ class ClientController extends DefaultController {
                         } else {
                             $price = str_replace('.', '', $price);
                         }
-                        $sql = "insert into {{%catalog_base_goods}}" .
-                                "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                                . "`units`,`price`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
-                                . $lastInsert_base_cat_id . ","
-                                . "NULL,"
-                                . $get_supp_org_id . ","
-                                . ":article,"
-                                . ":product,"
-                                . ":units,"
-                                . ":price,"
-                                . ":ed,"
-                                . CatalogBaseGoods::STATUS_ON . ","
-                                . "0,"
-                                . "0,"
-                                . "NOW())";
-                        $command = \Yii::$app->db->createCommand($sql);
-                        $command->bindParam(":article", $article, \PDO::PARAM_STR);
-                        $command->bindParam(":product", $product, \PDO::PARAM_STR);
-                        $command->bindParam(":units", $units);
-                        $command->bindParam(":price", $price);
-                        //$command->bindParam(":note", $note, \PDO::PARAM_STR);
-                        $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
-                        $command->execute();
-                        $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
+                        $newProduct = new CatalogBaseGoods();
+                        $newProduct->cat_id = $lastInsert_base_cat_id;
+                        $newProduct->supp_org_id = $get_supp_org_id;
+                        $newProduct->article = $article;
+                        $newProduct->product = $product;
+                        $newProduct->units = $units;
+                        $newProduct->price = $price;
+                        $newProduct->ed = $ed;
+                        $newProduct->status = CatalogBaseGoods::STATUS_ON;
+                        $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+                        $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
+                        $newProduct->save();
+                        $newProduct->refresh();
+                        
+                        $lastInsert_base_goods_id = $newProduct->id;
 
                         $sql = "insert into " . CatalogGoods::tableName() . "(
 				      `cat_id`,`base_goods_id`,`price`,`discount`,`created_at`) VALUES (
@@ -524,14 +517,6 @@ class ClientController extends DefaultController {
                         $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
                         \Yii::$app->db->createCommand($sql)->execute();
 
-//                        if (!empty($note)) {
-//                            $sql = "insert into " . GoodsNotes::tableName() . "(
-//				      `rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES (
-//				      $currentUser->organization_id, $lastInsert_base_goods_id, :note,NOW())";
-//                            $command = \Yii::$app->db->createCommand($sql);
-//                            $command->bindParam(":note", $note, \PDO::PARAM_STR);
-//                            $command->execute();
-//                        }
                     }
 
                     /**
@@ -565,10 +550,10 @@ class ClientController extends DefaultController {
                         $sms->post_message($text, $target);
                     }
                     if ($check['eventType'] == 5) {
-                        $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
+                        $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
                         return $result;
                     } else {
-                        $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  <strong>' . $email . '</strong>'];
+                        $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
                         return $result;
                     }
                 } else {
@@ -1347,72 +1332,12 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 
     public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        //$step = $currentUser->organization->step;
         $user = new User();
         $profile = new Profile();
         $relationCategory = new RelationCategory();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
-        //$searchString = "";
-        //$where = "";
-//        if (Yii::$app->request->isAjax) {
-//            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-//            empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";
-//        }
-//        $query = Yii::$app->db->createCommand("SELECT 
-//            relation_supp_rest.id,
-//            organization.name as 'organization_name',
-//            relation_supp_rest.cat_id,
-//            catalog.name as 'catalog_name',
-//            catalog.status as 'catalog_status',
-//            relation_supp_rest.created_at,
-//            relation_supp_rest.supp_org_id,
-//            invite,
-//            case 
-//                when invite=0 then 1 else 
-//                    case 
-//                        when
-//                        (SELECT count(*) from user where organization_id = relation_supp_rest.supp_org_id and status = 1)=0
-//                        then
-//                        2
-//                        else
-//                        3 
-//                        end
-//                    end as status_invite,
-//           `relation_supp_rest`.`status` 
-//            FROM {{%relation_supp_rest}}"
-//                . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
-//                . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-//                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where");
-//        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM "
-//                        . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
-//                        . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
-//                        . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-//                        . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`", [':name' => $searchString])->queryScalar();
-//        $dataProvider = new \yii\data\SqlDataProvider([
-//            'sql' => $query->sql,
-//            'totalCount' => $totalCount,
-//            'params' => [':name' => $searchString],
-//            'pagination' => [
-//                'pageSize' => 10,
-//            ],
-//            'sort' => [
-//                'attributes' => [
-//                    'id',
-//                    'supp_org_id',
-//                    'cat_id',
-//                    'invite',
-//                    'status',
-//                    'created_at',
-//                    'organization_name',
-//                    'catalog_name',
-//                    'status_invite'
-//                ],
-//                'defaultOrder' => [
-//                    'created_at' => SORT_DESC
-//                ]
-//            ],
-//        ]);
+
         $currentOrganization = $this->currentUser->organization;
 
         $searchModel = new \common\models\search\VendorSearch();
@@ -1426,9 +1351,83 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         } else {
             return $this->render('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         }
-        //return $this->render("suppliers", compact("user", "organization", "relationCategory", "relationSuppRest", "profile", "searchModel", "searchString", "dataProvider", "step"));
     }
 
+    public function actionAddFirstVendor() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $user = new User();
+        $profile = new Profile();
+        $relationSuppRest = new RelationSuppRest();
+        $organization = new Organization();
+
+        $currentOrganization = $this->currentUser->organization;
+
+        $searchModel = new \common\models\search\VendorSearch();
+
+        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
+
+        $dataProvider = $searchModel->search($params, $currentOrganization->id);
+        $dataProvider->pagination = false;
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+        } else {
+            return $this->render('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+        }
+    }
+    
+    public function actionAjaxValidateVendor() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $user =  new User();
+        //$user->scenario = 'invite';
+        $profile = new Profile();
+        $profile->scenario = 'invite';
+        $organization = new Organization();
+        $organization->scenario = 'invite';
+        $organization->type_id = Organization::TYPE_SUPPLIER;
+        
+        $post = Yii::$app->request->post();
+        if (Yii::$app->request->isAjax && $user->load($post)) {
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            
+            $vendorManager = User::find()
+                    ->joinWith('organization')
+                    ->where(['user.email' => $user->email, 'organization.type_id' => Organization::TYPE_SUPPLIER])->one();
+            if ($vendorManager) {
+                $relation = RelationSuppRest::findOne([
+                    'supp_org_id' => $vendorManager->organization_id,
+                    'rest_org_id' => $currentUser->organization_id,
+                    'deleted' => false,
+                        ]);
+            }
+            if ($user->validate() && $vendorManager && empty($relation)) {
+                $profile = $vendorManager->profile;
+                $organization = $vendorManager->organization;
+                $disabled = true;
+                return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => true];
+            } elseif ($user->validate() && empty($relation)) {
+                $validated = true;
+                if (!$profile->load($post)) {
+                    $profile = new Profile();
+                } else {
+                    $validated = $profile->validate();
+                }
+                if (!$organization->load($post)) {
+                    $organization = new Organization();
+                } else {
+                    $validated = $organization->validate();
+                }
+                $disabled = false;
+                if ($validated) {
+                    return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
+                }
+            }
+
+            return ['errors' => true, 'messages' => \yii\widgets\ActiveForm::validate($user, $profile, $organization), 'vendor_added' => isset($relation)];//\yii\widgets\ActiveForm::validate($user, $profile, $organization);
+        }
+    }
+    
     public function actionSidebar() {
         Yii::$app->session->get('sidebar-collapse') ?
                         Yii::$app->session->set('sidebar-collapse', false) :

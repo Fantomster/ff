@@ -1822,8 +1822,10 @@ class VendorController extends DefaultController {
         $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
-        return $this->render('dashboard/index', compact(
-                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats'
+        $organization = $currentUser->organization;
+        $profile = $currentUser->profile;
+        return $this->render('index', compact(
+                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats', 'organization', 'profile'
         ));
     }
 

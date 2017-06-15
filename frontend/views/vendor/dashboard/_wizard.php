@@ -13,19 +13,6 @@ $this->registerJs('
 
     document.onkeypress = stopRKey; 
 
-    $(".next").on("click", function(e) {
-        e.preventDefault();
-        $(".data-modal .modal-content").slick("slickNext");
-    });
-    
-    $(".wizard-off").on("click", function(e) {
-        $.ajax({
-            async: false,
-            type: "POST",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
-        });
-    });
-
     $("#complete-form").on("submit", function() {
         return false;
     });
@@ -39,7 +26,12 @@ $this->registerJs('
                 return;
             }
         }
-        $(".data-modal .modal-content").slick("slickNext");
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: "'.Url::to('/site/ajax-wizard-off').'"
+        });
+        location.href = "'.Url::to(['/vendor/catalogs']).'"
     });
 
     $("#data-modal").on("shown.bs.modal",function(){
@@ -304,32 +296,6 @@ $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()
                 <div id="map" class="modal-map"></div>
                 <button type="submit" class="but but_green complete-reg"><span>Продолжить работу</span><i class="ico"></i></button>
                 <?php ActiveForm::end(); ?>
-            </div>
-            <div class="second-step">
-                <div class="data-modal__icons-wrp">
-                    <div class="row">
-                        <div class="col-md-6 col-xs-6"><i class="ico ico-delivery"></i></div>
-                        <div class="col-md-6 col-xs-6"><i class="ico ico-basket"></i></div>
-                    </div>
-                </div>
-                <div class="data-modal__sub-txt">Вы хотите работать со своими поставщиками или найти новых?</div>
-                <div class="data-modal__buts-wrp">
-                    <a href="#" class="search-new but but_green wt next"><span>Найти новых</span></a>
-                    <a href="<?= Url::to('client/add-first-vendor') ?>" class="but but_green wizard-off"><span>Завести своих поставщиков</span></a>
-                </div>
-            </div>
-            <div class="third-step">
-                <div class="data-modal__icons-wrp">
-                    <div class="row">
-                        <div class="col-md-6"><i class="ico ico-tel"></i></div>
-                        <div class="col-md-6"><i class="ico ico-cart"></i></div>
-                    </div>
-                </div>
-                <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на f-market</div>
-                <div class="data-modal__buts-wrp">
-                    <a href="<?= Url::to('request/list') ?>" class="but but_green wt wizard-off"><span>Создать заявку</span></a>
-                    <a href="https://market.f-keeper.ru" class="but but_green"><span>Поиск на f-market</span></a>
-                </div>
             </div>
         </div>
     </div>

@@ -26,11 +26,11 @@ class CallbackController extends Controller {
         
     public function actionIndex() {
         
-    $getr = Yii::$app->request->get();
+    $getr = Yii::$app->request->post('RP');
         
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log', $getr, FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log', print_r($getr), FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
       
         

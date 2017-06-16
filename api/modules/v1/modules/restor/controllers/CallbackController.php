@@ -28,9 +28,12 @@ class CallbackController extends Controller {
         
     // $getr = Yii::$app->request;
         
+    $rest_json = file_get_contents("php://input");
+    $_POST = json_decode($rest_json, true);    
+        
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log', "php://input", FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log', print_r($_POST,true), FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
       
     /*    

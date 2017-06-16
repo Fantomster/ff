@@ -16,12 +16,14 @@ class AppAsset extends AssetBundle {
         'css/custom_style.less', 
         'css/datatables.min.css',
         'css/addsupp.css',
+        'css/zakaz.css',
     ];
     public $js = [
         'js/js.cookie.js',
         'js/socket.io-1.4.5.js',
         'js/main.js',
         'js/datatables.min.js',
+        'js/helpers/googleMap.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

@@ -69,7 +69,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 .select select:disabled ~ .select__arrow { border-top-color: #ccc;}
 #msform .f-title{font-size:32px;}
 #msform .text-small{color: #ccc;font:normal 20px;}
-#msform fieldset input[type=text]{border: 0;border-radius: 0;border-bottom: 2px solid #ccc;box-shadow: none;padding: 23px 0px 18px 0px;font-size: 22px; color: #999}
+#msform fieldset input[type=text]{border: 0;border-radius: 0;border-bottom: 2px solid #ccc;box-shadow: none;padding: 0px 0px 0px 0px;font-size: 22px; color: #999}
 #msform fieldset ::-webkit-input-placeholder { color:#efefef; font-size: 22px; letter-spacing: .05em}
 #msform fieldset ::-moz-placeholder { color:#efefef;  font-size: 22px; letter-spacing: .05em}
 #msform fieldset :-ms-input-placeholder { color:#efefef;  font-size: 22px; letter-spacing: .05em}
@@ -94,7 +94,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 .mswrapper, #progressbar{display:none}
 #msform .f-title{font:bold 24px;}
 #msform .text-small{color: #ccc;font:normal 14px;}
-#msform fieldset input[type=text]{border: 0;border-radius: 0;border-bottom: 2px solid #ccc;box-shadow: none;padding: 23px 0px 18px 0px;font-size: 22px; color: #999}
+#msform fieldset input[type=text]{border: 0;border-radius: 0;border-bottom: 2px solid #ccc;box-shadow: none;padding: 0px 0px 0px 0px;font-size: 22px; color: #999}
 #msform fieldset ::-webkit-input-placeholder { color:#efefef; font-size: 18px; letter-spacing: .01em}
 #msform fieldset ::-moz-placeholder { color:#efefef;  font-size: 18px; letter-spacing: .01em}
 #msform fieldset :-ms-input-placeholder { color:#efefef;  font-size: 18px; letter-spacing: .01em}
@@ -221,187 +221,6 @@ $(this).next().toggle(Boolean($(this).val()));
         $(this).prev().val('').focus();
         $(this).hide();
 })
-function initMap() {
-    var fields = {
-            sField : document.getElementById('organization-address'),
-            hLat : document.getElementById('organization-lat'),
-            hLng : document.getElementById('organization-lng'),
-            hCountry : document.getElementById('organization-country'),
-            hLocality : document.getElementById('organization-locality'),
-            hPlaceId : document.getElementById('organization-place_id'),
-            hRoute : document.getElementById('organization-route'),
-            hStreetNumber : document.getElementById('organization-street_number'),
-            hFormattedAddress : document.getElementById('organization-formatted_address')
-            };
-        
-	//инит карты
-	var map = new google.maps.Map(document.getElementById('map'), {
-	    mapTypeId: google.maps.MapTypeId.ROADMAP
-	});
-       
-	//инит маркера
-	var marker = new google.maps.Marker({
-	            map: map,
-	            draggable:true
-	});	
-	var geocoder = new google.maps.Geocoder;
-	
-	//Проверяем PlaceId и если он пустой, тогда проверить геолокацию
-	if(typeof fields.hPlaceId.value == 'undefined' || fields.hPlaceId.value == ''){
-            geolocation(map, marker, fields)
-	}else{
-            geocodePlaceId(geocoder, map, marker, String(fields.hPlaceId.value),fields)
-        }
-	
-	//событие на забивание текста в поисковую строку
-        var autocomplete = new google.maps.places.Autocomplete(
-            (document.getElementById('organization-address')),
-            {types: ['geocode']});
-	autocomplete.addListener('place_changed', function(){
-	    var place = autocomplete.getPlace();    
-	    if (place.geometry) {
-		    var results = {0 : place};
-                    map.setZoom(17);
-                    map.panTo(results[0].geometry.location);
-                    marker.setPosition(results[0].geometry.location);
-                    changeFields(fields, results)
-	    }else {
-          window.alert('[autocomplete] No results found');}
-        });
-    
-	//событие на перемещение маркера
-	marker.addListener('dragend', function(e){
-	    geocoder.geocode({'latLng': e.latLng}, function(results, status) {
-	        if(status == 'OK') {
-	        	if (results[0]) {
-                        map.panTo(results[0].geometry.location);
-                        marker.setPosition(results[0].geometry.location);
-                        changeFields(fields, results)
-	        	}     
-	        } else {
-	        console.log('[dragger] Geocoder failed due to: ' + status);
-	        }
-	    });
-	})
-        
-        //Событие на клик по карте
-        map.addListener('click', function(e) {
-            geocoder.geocode({'latLng': e.latLng}, function(results, status) {
-                if(status == 'OK') {
-                        if (results[0]) {
-                        map.panTo(e.latLng);
-                        marker.setPosition(e.latLng);
-                        changeFields(fields, results)
-                        }     
-                } else {
-                console.log('[click] Geocoder failed due to: ' + status);
-                }
-            })
-        });
-}
-//Если нам известин placeId тогда выводим все данные
-function geocodePlaceId(geocoder, map, marker, placeId, fields) {
-    geocoder.geocode({'placeId': placeId}, function(results, status) {
-      if (status === 'OK') {
-        if (results[0]) {
-            map.setZoom(17);
-            map.panTo(results[0].geometry.location);
-            marker.setPosition(results[0].geometry.location);
-            changeFields(fields, results)
-        } else {
-          console.log('[PlaceId] No results found');
-        }
-      } else {
-        console.log('[geocodePlaceId]  failed due to: ' + status);
-      }
-    });
-}
-//геолокация по ip или геолокации из браузера
-function geolocation(map, marker, fields){
-    fields.sField.value = '';
-    fields.hLat.value = '';
-    fields.hLng.value = '';
-    fields.hCountry.value = '';
-    fields.hLocality.value = '';
-    fields.hRoute.value = '';
-    fields.hStreetNumber.value = '';
-    fields.hPlaceId.value = '';
-    fields.hFormattedAddress.value = '';
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) { 
-          var pos = {lat: parseFloat(position.coords.latitude), 
-                     lng: parseFloat(position.coords.longitude)};
-          map.setZoom(9);
-          map.panTo(pos);
-          marker.setPosition(pos);
-          },
-          function(failure) {
-              $.getJSON('https://ipinfo.io/geo', function(response) { 
-                  var loc = response.loc.split(',');
-                  var pos = {lat: parseFloat(loc[0]),
-                             lng: parseFloat(loc[1])};
-                  map.setZoom(9);
-                  map.panTo(pos);
-                  marker.setPosition(pos);
-              });  
-      });
-    }else{
-	 window.alert('Geolocation failed');   
-    }
-}
-//Сохранение полученных данных в хидден поля
-function changeFields(fields, results){
-    for (var i = 0; i < results[0].address_components.length; i++)
-        {
-          var addr = results[0].address_components[i];
-          var getCountry;
-          var getLocality;
-          var getRoute;
-          var getStreetNumber;
-          var getAdministrative_area_level_2;
-          var getFormattedAddress = results[0].formatted_address;
-          var getLat = results[0].geometry.location.lat();
-          var getLng = results[0].geometry.location.lng();
-          var getPlaceId = results[0].place_id;
-
-          if (addr.types[0] == 'country') 
-            getCountry = addr.long_name;
-          if (addr.types[0] == 'locality') 
-            getLocality = addr.long_name;
-          if (addr.types[0] == 'route') 
-            getRoute = addr.long_name;
-          if (addr.types[0] == 'street_number') 
-            getStreetNumber = addr.long_name;
-
-          if (addr.types[0] == 'administrative_area_level_2') 
-            getAdministrative_area_level_2 = addr.long_name; 
-
-        }
-        if(results[0]) {
-        var res = '';
-        typeof getRoute == 'undefined' ?'':
-            res = getRoute;
-        typeof getStreetNumber == 'undefined' ?'':
-            res = res+', '+getStreetNumber;
-        typeof getLocality == 'undefined' ?'':
-            res = res+', '+getLocality;
-        typeof getAdministrative_area_level_2 == 'undefined' ?'':
-            res = res+', '+getAdministrative_area_level_2;
-        typeof getCountry == 'undefined' ?'':
-            res = res+', '+getCountry;   
-        fields.sField.value = res;
-        fields.hLat.value = getLat;
-        fields.hLng.value = getLng;
-        fields.hCountry.value = getCountry;
-        fields.hLocality.value = getLocality;
-        fields.hRoute.value = getRoute;
-        fields.hStreetNumber.value = getStreetNumber;
-        fields.hPlaceId.value = getPlaceId;
-        fields.hFormattedAddress.value = getFormattedAddress;
-        } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-        }    
-}
 ",yii\web\View::POS_END);
 ?>
             <h5>Выберите категорию товара<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>

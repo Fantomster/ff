@@ -44,13 +44,19 @@ class PrequestController extends Controller {
         </RQ>';   
   */
     
+        $xml = '<?xml version="1.0" encoding="utf-8"?>
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="00000000-0000-0000-0000-000000000013" callback="https://api.f-keeper.ru/api/web/v1/restor/callback">
+    <PARAM name="object_id" val="'.$restr.'" />  
+    </RQ>';
 
+    
+    /*
    // Работает!! 
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goods" tasktype="any_call" guid="00000000-0000-0000-0000-000000000013" callback="https://api.f-keeper.ru/api/web/v1/restor/callback">
     <PARAM name="object_id" val="'.$restr.'" />  
     </RQ>';
-
+*/
   /*
   $xml = '<?xml version="1.0" encoding="utf-8" ?>
   <RQ cmd="get_tasklist">

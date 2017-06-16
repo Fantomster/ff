@@ -28,12 +28,12 @@ class CallbackController extends Controller {
         
    // $getr = Yii::$app->request->post('RP');
         
-   // file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-   // file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-   // file_put_contents('runtime/logs/callback.log', $getr, FILE_APPEND);    
-   // file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
+    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log', sizeof($getr), FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
       
-        
+    /*    
         
     if (Yii::$app->request->post()){
         
@@ -76,7 +76,7 @@ class CallbackController extends Controller {
         
     }    
         
-        
+    */    
         
     //    return $this->render('index' // ,[
               //      'searchModel' => $searchModel,

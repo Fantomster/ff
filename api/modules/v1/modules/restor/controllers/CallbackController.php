@@ -26,24 +26,38 @@ class CallbackController extends Controller {
         
     public function actionIndex() {
         
+    $getr = Yii::$app->request->post('RP');
+        
+    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log', print_r($getr), FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
+      
+        
+    /*    
+    if (Yii::$app->request->post()){
         
     $request = Yii::$app->request;
     
     $getr = $request->post();  
-        
- 
-    
-    $fp = fopen('runtime/logs/callback.log', 'a');
     
     if($getr) {
     
-    fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST FOUND'.PHP_EOL);    
-    fputs($fp,$getr); 
+    // $fp = fopen('runtime/logs/callback.log', 'a');    
+    
+    // fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST FOUND'.PHP_EOL);    
+    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':POST FOUND:'.PHP_EOL, FILE_APPEND);   
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log', $getr, FILE_APPEND);    
+     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+   // fputs($fp,$getr); 
            
     } else {
        
-    fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST NOT (!) FOUND'.PHP_EOL);        
-    
+    // $fp = fopen('runtime/logs/callback.log', 'a');
+    // fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST NOT (!) FOUND'.PHP_EOL);        
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.date("Y-m-d H:i:s").':POST NOT (!) FOUND'.PHP_EOL, FILE_APPEND);    
+     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
     
     }
     // if (!Yii::$app->request->isPost) {
@@ -51,12 +65,17 @@ class CallbackController extends Controller {
     // echo "Method POST is only accepted.";
         
     return '<?xml version="1.0" encoding="utf-8"?><RQ value="OK">OK</RQ>';   
-       
-    fclose($fp);
+     
+   
+    // fclose($fp);
     // }
         
+    } else {
+    echo "Request MUST be POST.";
+    exit;
         
-        
+    }    
+    */    
         
         
     //    return $this->render('index' // ,[

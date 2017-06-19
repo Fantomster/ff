@@ -5,7 +5,7 @@ namespace api\modules\v1\modules\restor\controllers;
 use Yii;
 use yii\web\Controller;
 // use yii\mongosoft\soapserver\Action;
-use yii\httpclient\Client;
+// use yii\httpclient\Client;
 
 /**
  * Description of SiteController
@@ -26,15 +26,18 @@ class CallbackController extends Controller {
         
     public function actionIndex() {
         
-    $getr = Yii::$app->request->post('RP');
+    $getr = Yii::$app->request->getRawBody();
+        
+   // $rest_json = file_get_contents("php://input");
+   // $_POST = json_decode($rest_json, true);    
         
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log', print_r($getr), FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log', print_r($getr,true), FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
       
-        
     /*    
+        
     if (Yii::$app->request->post()){
         
     $request = Yii::$app->request;
@@ -75,8 +78,8 @@ class CallbackController extends Controller {
     exit;
         
     }    
-    */    
         
+    */    
         
     //    return $this->render('index' // ,[
               //      'searchModel' => $searchModel,

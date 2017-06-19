@@ -681,7 +681,7 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
 
-        //return $this->renderPartial('_print', compact('dataProvider', 'order'));
+        //return $this->renderPartial('_bill', compact('dataProvider', 'order'));
         $pdf = new Pdf([
             'mode' => Pdf::MODE_UTF8, // leaner size using standard fonts
             'format' => Pdf::FORMAT_A4,
@@ -689,8 +689,7 @@ class OrderController extends DefaultController {
             'orientation' => Pdf::ORIENT_PORTRAIT,
             // stream to browser inline
             'destination' => Pdf::DEST_BROWSER,
-            'content' => $this->renderPartial('_print', compact('dataProvider', 'order')),
-            //'cssFile' => '@webroot/css/tmp.css',
+            'content' => $this->renderPartial('_bill', compact('dataProvider', 'order')),
             'options' => [
 //                'title' => 'Privacy Policy - Krajee.com',
 //                'subject' => 'Generating PDF files via yii2-mpdf extension has never been easy'

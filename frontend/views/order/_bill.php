@@ -1,6 +1,6 @@
-<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;margin-top: 50px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 600px;">
+<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 600px;">
     <div class="block__wrapp" style="width: 100%;	height: 100%; padding: 20px;">
-        <img  src="/img/logo.png" alt="" style="margin: 0 auto;display: block;margin-top: 10px;margin-bottom: 30px;">
+        <img  src="https://f-keeper.ru/img/logo.png" alt="" style="margin: 0 auto;display: block;margin-top: 10px;margin-bottom: 30px;">
 
         <div class="block_left_wrap" style="width: 50%;float: left;">
             <div class="block_name" style=" width: 60%;float: left;">

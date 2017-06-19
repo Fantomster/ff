@@ -215,9 +215,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
             </div>
 
             <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp">
-                <div class = "block_wrapper">
-                    <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder')) ?>   
-                </div>
+                    <?= $this->render('_order-buttons~', compact('order', 'organizationType', 'canRepeatOrder')) ?>   
             </div>
             <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">
                 <div class = "block_wrapper top">

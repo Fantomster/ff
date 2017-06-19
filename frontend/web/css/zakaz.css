@@ -416,3 +416,6 @@ text-align: center;
 	font-size: 12px !important; 
 }
 }
+.box.box-info {
+    border-top-color: #00a65a;
+}

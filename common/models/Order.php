@@ -256,6 +256,16 @@ class Order extends \yii\db\ActiveRecord {
         return 0;
     }
     
+    public function forFreeDelivery() {
+        $diff = $this->vendor->delivery->min_free_delivery_charge - $this->total_price;
+        return ($diff > 0) ? $diff : 0;
+    }
+    
+    public function forMinOrderPrice() {
+        $diff = $this->vendor->delivery->min_order_price - $this->total_price;
+        return ($diff > 0) ? $diff : 0;
+    }
+    
     public function calculateTotalPrice() {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {

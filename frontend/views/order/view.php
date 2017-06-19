@@ -7,6 +7,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 
+$this->title = 'Заказ №' . $order->id;
+
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
     $priceEditable = false;
@@ -214,24 +216,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
 
             <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp">
                 <div class = "block_wrapper">
-                    <div class = "wrapppp">
-                        <?=
-                        $canRepeatOrder ? Html::button('Повторить заказ', [
-                                    'class' => 'but1',
-                                    'data-url' => Url::to(['order/repeat', 'id' => $order->id]),
-                                ]) : ""
-                        ?>
-                        <button class = "but2">Печать</button><br><br>
-                        <p class = "ppp" >Общая сумма</p>
-
-                        <p class = "pppp">17 800 <span>&#8399;</span></p><br>
-                        <p class = "ps">включая доставку</p>
-                        <p class = "ps">15 000 руб</p>
-                        <p class = "ps">дата создания </p>
-                        <p class = "ps">10 мая 2017</p>
-                        <button class = "but3">Отменить</button>
-                        <button class = "but4">Подтвердить</button><br><br>
-                    </div>
+                    <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder')) ?>   
                 </div>
             </div>
             <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">

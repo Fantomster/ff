@@ -1,4 +1,4 @@
-<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;margin-top: 50px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); ">
+<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;margin-top: 50px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 600px;">
     <div class="block__wrapp" style="width: 100%;	height: 100%; padding: 20px;">
         <img  src="/img/logo.png" alt="" style="margin: 0 auto;display: block;margin-top: 10px;margin-bottom: 30px;">
 
@@ -45,26 +45,11 @@
             <p class = "pl" style="margin-left: 10px;padding-left: 60px;padding-top: 13px;"><?= $order->comment ?></p>
         </div>
         <?php } ?>
-<!--        <table  class = "table" style="width: 100%;">
-            <tr style="border-bottom: 1px solid #DDDDDD;   padding: 3px;">
-                <td style="padding: 10px;width: 40%;">Товар</td><td>Количество</td><td>Цена за единицу</td><td>Сумма</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px;">
-                    <p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">Консервные натуральные креветки</p>
-                    <p style="line-height: 1px;font-size: 11px;color: #999C9E;">Артикул: 765</p>
-                </td><td>
-                    10</td>
-                <td>&#8399; 360/1</td><td>
-                    <p style="color: #82C073;">&#8399; 3600</p>
-                </td>
-            </tr>
-        </table>-->
-        <?= $this->render('_view-grid', compact('dataProvider', 'order', 'canRepeatOrder')) ?>
+        <?= $this->render('_view-grid', compact('dataProvider', 'order')) ?>
         <div style="width: 100%; height: 170px;">
             <div class = "sp_cen" style="width: 300px;float: right;">
                 <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: 20%</p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоисость доставки: 0 руб.</p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: 0 руб.</p>
                 <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: 2200000 руб.</p>
             </div>
             <p class = "but_p_1" style="color: #999C9E;margin-top: 150px;display: block;float: left;">Подпись: ______________ </p>

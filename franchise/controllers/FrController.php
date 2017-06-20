@@ -5,34 +5,39 @@ namespace franchise\controllers;
 use Yii;
 use yii\web\Controller;
 use yii\helpers\Html;
+use yii\web\Response;
 
 /**
  * Site controller
  */
 class FrController extends Controller {
 
+    public $enableCsrfValidation = false;
 
     public function actionPost() {
-//        if (!Yii::$app->user->isGuest) {
-//            return $this->redirect(["site/index"]);
-//        }
-        $this->layout = 'main-landing';
         if (Yii::$app->request->post('FIELDS')) {
             $fields = Yii::$app->request->post('FIELDS');
             $cname = Html::encode($fields['name']);
             $cphone = Html::encode($fields['phone']);
             $cemail = Html::encode($fields['email']);
-
+            $city = Html::encode($fields['city']);
             $lpartner = isset($fields['partner']) ? Html::encode($fields['partner']) : '';
             $lname = Html::encode($fields['lead_name']);
             $response = null;
             if (strlen(trim($cname)) < 2 || strlen(trim($cphone)) < 7 || strlen(trim($cemail)) < 2) {
-                die('error');
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['result' => 'error'];
             }
 
-            $responsible_user_id = 1295688; //id ответственного по сделке, контакту, компании
+            $responsible_user_id = 1515736; //id ответственного по сделке, контакту, компании
             $lead_name = $lname; //Название добавляемой сделки
-            $lead_status_id = 465726; //id этапа продаж, куда помещать сделку
+
+            $lead_status_id = 643219; //465726; //id этапа продаж, куда помещать сделку
+
+            if ($lpartner == '199894' || $lpartner == '199896') {
+                $lead_status_id = 465726; //643219; //id этапа продаж, куда помещать сделку
+            }
+
             $contact_name = $cname; //Название добавляемого контакта
             $contact_phone = $cphone; //Телефон контакта
             $contact_email = $cemail; //Емейл контакта
@@ -40,10 +45,9 @@ class FrController extends Controller {
             //АВТОРИЗАЦИЯ
             $user = array(
                 'USER_LOGIN' => 'artur@f-keeper.ru', #логин
-                'USER_HASH' => '98343695877a420c329e30940df91d71' #Хэш для доступа к API
+                'USER_HASH' => '74ed35efba91ce97c029ceb8006b447b' #Хэш для доступа к API
             );
             $subdomain = 'fkeeper';
-
             #Формируем ссылку для запроса
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/auth.php?type=json';
             $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
@@ -66,7 +70,7 @@ class FrController extends Controller {
             //ПОЛУЧАЕМ ДАННЫЕ АККАУНТА
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/accounts/current'; #$subdomain уже объявляли выше
             $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
-            //Устанавливаем необходимые опции для сеанса cURL
+            #Устанавливаем необходимые опции для сеанса cURL
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
             curl_setopt($curl, CURLOPT_URL, $link);
@@ -83,12 +87,11 @@ class FrController extends Controller {
             //ПОЛУЧАЕМ СУЩЕСТВУЮЩИЕ ПОЛЯ
             $amoAllFields = $account['custom_fields']; //Все поля
             $amoConactsFields = $account['custom_fields']['contacts']; //Поля контактов
-            //echo '<b>Поля из амо:</b>'; echo '<pre>'; print_r($amoConactsFields); echo '</pre>';
             //ФОРМИРУЕМ МАССИВ С ЗАПОЛНЕННЫМИ ПОЛЯМИ КОНТАКТА
             //Стандартные поля амо:
             $sFields = array_flip(array(
                 'PHONE', //Телефон. Варианты: WORK, WORKDD, MOB, FAX, HOME, OTHER
-                'EMAIL' //Email. Варианты: WORK, PRIV, OTHER
+                'EMAIL', //Email. Варианты: WORK, PRIV, OTHER
                     )
             );
             //Проставляем id этих полей из базы амо
@@ -102,7 +105,7 @@ class FrController extends Controller {
 
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
             $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
-            //Устанавливаем необходимые опции для сеанса cURL
+            #Устанавливаем необходимые опции для сеанса cURL
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
             curl_setopt($curl, CURLOPT_URL, $link);
@@ -115,37 +118,121 @@ class FrController extends Controller {
             $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             curl_close($curl);
-            $this->CheckCurlResponse($code);
-            if ($out) {
-            //die('Контакт с таким телефоном уже существует в amoCRM');
-                die('errorPhone');
+            if (!$this->CheckCurlResponse($code)) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['result' => 'error'];
             }
-            
+            if ($out) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['result' => 'errorPhone'];
+            }
             //ДОБАВЛЯЕМ СДЕЛКУ
-            $roistatData = array(
-                'roistat' => isset($_COOKIE['roistat_visit']) ? $_COOKIE['roistat_visit'] : null,
-                'key' => 'MTMyMjU6MzQwNjY6Mzk0MDdmZjFmMDljMDQ3N2Y3Mjc1Yzk1MTg4ZWNjYTk=', // Замените SECRET_KEY на секретный ключ из пункта меню Каталог интеграций -> Ваша CRM -> Настройки -> в нижней части экрана и строчке Ключ для интеграций
-                'title' => $lname,
-                //'comment' => 'Комментарий к сделке',
-                'name' => $cname,
-                'email' => $cemail,
-                'phone' => $cphone,
-                'is_need_callback' => '0', // Для автоматического использования обратного звонка при отправке контакта и сделки нужно поменять 0 на 1
-                'fields' => array(
-                    // Массив дополнительных полей, если нужны, или просто пустой массив. Более подробно про работу доп. полей можно посмотреть в видео в начале статьи
-                    // Примеры использования:
-                    "price" => 0, // Поле бюджет в amoCRM
-                    "responsible_user_id" => $responsible_user_id, // Ответственный по сделке
-                    '85130' => $lpartner, // Заполнение доп. поля 
-                    "status_id" => $lead_status_id, // Создавать лид с определенным статусом в определенной воронке. Указывать необходимо ID статуса.
-                //"charset" => "Windows-1251", // Сервер преобразует значения полей из указанной кодировки в UTF-8
-                //"tags" => "Тег1, Тег2", // Название тегов через запятую
-                ),
+            $leads['request']['leads']['add'] = array(
+                array(
+                    'name' => $lead_name,
+                    //'status_id' => $lead_status_id, //id статуса
+                    'pipeline_id' => $lead_status_id,
+                    'responsible_user_id' => $responsible_user_id, //id ответственного по сделке
+                    'custom_fields' => [
+                        [
+                            'id' => 85130,
+                            'values' => [
+                                [
+                                    'value' => $lead_partner
+                                ]
+                            ]
+                        ]
+                    ]
+                )
             );
-            $this->send_form("https://cloud.roistat.com/api/proxy/1.0/leads/add?" . http_build_query($roistatData));
-            die('success');
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/leads/set';
+            $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
+            #Устанавливаем необходимые опции для сеанса cURL
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
+            curl_setopt($curl, CURLOPT_URL, $link);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($leads));
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
+            curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+            $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
+            $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+            $Response = json_decode($out, true);
+
+            if (is_array($Response['response']['leads']['add']))
+                foreach ($Response['response']['leads']['add'] as $lead) {
+                    $lead_id = $lead["id"]; //id новой сделки
+                };
+            //ДОБАВЛЯЕМ СДЕЛКУ - КОНЕЦ
+            //ДОБАВЛЕНИЕ КОНТАКТА
+            $contact = array(
+                'name' => $contact_name,
+                'linked_leads_id' => array($lead_id), //id сделки
+                'responsible_user_id' => $responsible_user_id, //id ответственного
+                'custom_fields' => array(
+                    array(
+                        'id' => $sFields['PHONE'],
+                        'values' => array(
+                            array(
+                                'value' => $contact_phone,
+                                'enum' => 'MOB'
+                            )
+                        )
+                    ),
+                    array(
+                        'id' => $sFields['EMAIL'],
+                        'values' => array(
+                            array(
+                                'value' => $contact_email,
+                                'enum' => 'WORK'
+                            )
+                        )
+                    ),
+                    array(
+                        'id' => 105128,
+                        'values' => array(
+                            array(
+                                'value' => $city,
+                                'type_id' => 1,
+                                'multiple' => 'N',
+                            )
+                        )
+                    )
+                )
+            );
+            $set['request']['contacts']['add'][] = $contact;
+            #Формируем ссылку для запроса
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/set';
+            $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
+            #Устанавливаем необходимые опции для сеанса cURL
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
+            curl_setopt($curl, CURLOPT_URL, $link);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($set));
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
+            curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+            $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
+            $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            if (!$this->CheckCurlResponse($code)) {
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return ['result' => 'error'];
+            }
+
+            $Response = json_decode($out, true);
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ['result' => 'success'];
         }
-        return $this->render('index');
     }
 
     private function CheckCurlResponse($code) {
@@ -165,19 +252,9 @@ class FrController extends Controller {
             if ($code != 200 && $code != 204)
                 throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error', $code);
         } catch (Exception $E) {
-            //die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-            die('error');
+            return false;
         }
-    }
-
-    private function send_form($url) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Устанавливаем параметр, чтобы curl возвращал данные, вместо того, чтобы выводить их в браузер.
-        curl_setopt($ch, CURLOPT_URL, $url);
-        $data = curl_exec($ch);
-        curl_close($ch);
-        die('success');
+        return true;
     }
 
 }

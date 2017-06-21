@@ -10,9 +10,22 @@ use yii\web\Response;
 /**
  * Site controller
  */
-class FrController extends Controller {
+class FrController extends \yii\rest\Controller {
 
-    public $enableCsrfValidation = false;
+    public function behaviors() {
+        return [
+            'corsFilter' => [
+                'class' => \yii\filters\Cors::className(),
+                'cors' => [
+                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru', 'https://tmp.f-keeper.ru'],
+                    'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
+                    'Access-Control-Allow-Credentials' => true,
+                    'Access-Control-Max-Age' => 3600,
+                    'Access-Control-Allow-Headers' => ['Authorization', 'Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
+                ],
+            ],
+        ];
+    }
 
     public function actionPost() {
         if (Yii::$app->request->post('FIELDS')) {

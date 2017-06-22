@@ -7,7 +7,7 @@ use common\models\User;
 use backend\modules\api\v1\resources\User as UserResource;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBasicAuth;
-use yii\filters\auth\HttpBearerAuth;
+use api\modules\v1\modules\mobile\components\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
@@ -38,7 +38,7 @@ class UserController extends ActiveController
                     'auth' => function ($username, $password) {
                         return ApiUser::validate($username, $password);
                     }
-                ],
+                ], 
                HttpBearerAuth::className(),
                QueryParamAuth::className()
             ]

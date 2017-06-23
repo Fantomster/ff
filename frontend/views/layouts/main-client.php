@@ -31,7 +31,7 @@ use yii\helpers\Url;
             'header.php',
             ['directoryAsset' => $directoryAsset]
         ) ?>
-
+        <?= \frontend\widgets\cart\CartWidget::widget(['orders' => $this->params['orders']])?>
         <?= !Yii::$app->user->isGuest ? $this->render(
             'client/left',
             ['directoryAsset' => $directoryAsset]

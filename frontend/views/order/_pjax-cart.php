@@ -1,0 +1,1 @@
+<?= \frontend\widgets\cart\CartWidget::widget(['orders' => $this->params['orders']])?>

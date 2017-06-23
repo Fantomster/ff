@@ -114,7 +114,7 @@ $this->registerJs(
                                 form.serialize() + extData
                             ).done(function (result) {
                                 if (result) {
-                                    $.pjax.reload({container: "#checkout"});
+                                    $.pjax.reload("#checkout", {url:"http://f-keeper.dev/order/checkout"});
                                     dataEdited = 0;
                                     resolve(result);
                                 } else {
@@ -127,7 +127,6 @@ $this->registerJs(
                     swal(result);
                 });
             });
-
             $("#checkout").on("change", ".delivery-date", function(e) {
                 $.post(
                     "' . Url::to(['/order/ajax-set-delivery']) . '",

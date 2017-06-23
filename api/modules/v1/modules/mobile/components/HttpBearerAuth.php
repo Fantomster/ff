@@ -33,6 +33,8 @@ class HttpBearerAuth extends BaseHttpBearerAuth {
             if ($identity === null) {
                 $this->handleFailure($response);
             }
+           var_dump(Yii::$app->user);
+            die();
             Yii::$app->user->login($identity, 0);
             return $identity;
         }

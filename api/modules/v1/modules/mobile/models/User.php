@@ -2,14 +2,14 @@
 
 namespace api\modules\v1\modules\mobile\models;
 
-use common\models\User;
+use common\models\User as BaseUser;
 use Yii;
 use yii\filters\RateLimitInterface;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class ApiUserIdentity extends User implements RateLimitInterface
+class User extends BaseUser implements RateLimitInterface
 {
 
     /**

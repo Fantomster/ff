@@ -3,15 +3,14 @@
 namespace api\modules\v1\modules\mobile\controllers;
 
 use Yii;
-use common\models\User;
+use api\modules\v1\modules\mobile\models\User;
 use backend\modules\api\v1\resources\User as UserResource;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBasicAuth;
-use api\modules\v1\modules\mobile\components\HttpBearerAuth;
+use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\models\ApiUser;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -33,12 +32,7 @@ class UserController extends ActiveController
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
             'authMethods' => [
-                [
-                    'class' => HttpBasicAuth::className(),
-                    'auth' => function ($username, $password) {
-                        return ApiUser::validate($username, $password);
-                    }
-                ], 
+               HttpBasicAuth::className(),
                HttpBearerAuth::className(),
                QueryParamAuth::className()
             ]

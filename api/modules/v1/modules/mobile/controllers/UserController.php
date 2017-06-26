@@ -11,12 +11,13 @@ use yii\filters\auth\HttpBearerAuth;
 use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
+use common\models\forms\LoginForm;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class UserController extends ActiveController
-{
+class UserController extends ActiveController {
+
     /**
      * @var string
      */
@@ -25,16 +26,25 @@ class UserController extends ActiveController
     /**
      * @return array
      */
-    public function behaviors()
-    {
+    public function behaviors() {
         $behaviors = parent::behaviors();
 
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
             'authMethods' => [
-               HttpBasicAuth::className(),
-               HttpBearerAuth::className(),
-               QueryParamAuth::className()
+                [
+                    'class' => HttpBasicAuth::className(),
+                    'auth' => function ($username, $password) {
+            
+                        $model = new LoginForm();
+                        $model->email = $username;
+                        $model->password = $password;
+                        $model->validate();
+                        return ($model->validate()) ? $model->getUser() : null;
+                    }
+                ],
+                HttpBearerAuth::className(),
+                QueryParamAuth::className()
             ]
         ];
 
@@ -44,8 +54,7 @@ class UserController extends ActiveController
     /**
      * @inheritdoc
      */
-    public function actions()
-    {
+    public function actions() {
         return [
             'index' => [
                 'class' => 'yii\rest\IndexAction',
@@ -67,17 +76,16 @@ class UserController extends ActiveController
      * @return null|static
      * @throws NotFoundHttpException
      */
-    public function findModel($id)
-    {
+    public function findModel($id) {
         $model = UserResource::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
         return $model;
     }
-    
-    public function actionAuth()
-    {
+
+    public function actionAuth() {
         return User::findOne(Yii::$app->user->id);
     }
+
 }

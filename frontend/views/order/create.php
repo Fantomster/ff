@@ -33,9 +33,9 @@ $this->registerJs(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
-                    if (result) {
-                        $.pjax.reload({container: "#cart"});
-                    }
+//                    if (result) {
+//                        $.pjax.reload({container: "#cart"});
+//                    }
                     $("#loader-show").hideLoading();
                 });
             });
@@ -55,9 +55,9 @@ $this->registerJs(
                     clicked.data("url")
                 )
                 .done(function (result) {
-                    if (result) {
-                        $.pjax.reload({container: "#cart"});
-                    }
+//                    if (result) {
+//                        $.pjax.reload({container: "#cart"});
+//                    }
                     $("#loader-show").hideLoading();
                 });
                 return false;
@@ -76,9 +76,9 @@ $this->registerJs(
                     form.serialize()
                 )
                 .done(function (result) {
-                    if (result) {
-                        $.pjax.reload({container: "#cart"});
-                    }
+//                    if (result) {
+//                        $.pjax.reload({container: "#cart"});
+//                    }
                     $("#loader-show").hideLoading();
                 });
             });
@@ -107,7 +107,7 @@ $this->registerJs(
 </section>
 <section class="content">
     <div class="row">
-        <div class="col-lg-9 col-md-8 col-sm-12">
+        <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="box box-info" id="createP">
                 <div class="box-header with-border">
                     <h3 class="box-title">Список товаров</h3>
@@ -268,17 +268,17 @@ $this->registerJs(
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 col-md-4 col-sm-12">
+<!--                                <div class="col-lg-3 col-md-4 col-sm-12">
                                     <div class="box box-info ">
                                         <div class="box-header with-border">
                                             <h3 class="box-title"><i class="fa fa-shopping-cart m-r-xs"></i> Корзина</h3>
                                         </div>
-                                        <!-- /.box-header -->
+                                         /.box-header 
                                         <div class="box-body" id="orders">
-                                            <?= $this->render('_cart', compact('orders')) ?>
+                                            <?= ''//$this->render('_cart', compact('orders')) ?>
                                         </div>
                                     </div>
-                                </div>
+                                </div>-->
                             </div>
                         </section>
                         <?=

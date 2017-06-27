@@ -10,6 +10,7 @@ if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
     $homeUrl = parse_url(Url::base(true), PHP_URL_HOST);
+    $cartUrl = Url::to('/order/pjax-cart');
     $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
     //Yii::$app->urlManager->baseUrl;
     $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
@@ -18,6 +19,9 @@ if (!Yii::$app->user->isGuest) {
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
     $js = <<<JS
+    $("#checkout").on("pjax:complete", function() {
+        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
+    });
 
     socket = io.connect('$notificationsUrl');
 
@@ -83,12 +87,13 @@ if (!Yii::$app->user->isGuest) {
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);
                 try {
+                    $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
                     $.pjax.reload({container: "#checkout"});
                 } catch(e) {
                 }
             }
         }
-            
+
         $.get(
             '$refreshStatsUrl'
         ).done(function(result) {
@@ -217,7 +222,7 @@ JS;
                 <ul class="nav navbar-nav">
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                         <li>
-                            <a href="<?= Url::to(['order/checkout']) ?>">
+                            <a class="basket_a" href="<?= Url::to(['order/checkout']) ?>">
                                 <i class="fa fa-shopping-cart"></i><span class="label label-primary cartCount"><?= $organization->getCartCount() ?></span>
                             </a>
                         </li>

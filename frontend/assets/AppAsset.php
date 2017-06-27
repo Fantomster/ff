@@ -17,6 +17,7 @@ class AppAsset extends AssetBundle {
         'css/datatables.min.css',
         'css/addsupp.css',
         'css/zakaz.css',
+        'css/checkout.css',
     ];
     public $js = [
         'js/js.cookie.js',

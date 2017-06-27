@@ -1,99 +1,63 @@
 <?php
 
-use yii\data\ArrayDataProvider;
-use yii\grid\GridView;
 use kartik\widgets\TouchSpin;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-$dataProvider = new ArrayDataProvider([
-    'key' => 'id',
-    'allModels' => $content,
-        ]);
-
-$any = current($content);
-
-echo GridView::widget([
-    'id' => isset($any) ? 'orderContent' . $any['order_id'] : '',
-    'dataProvider' => $dataProvider,
-    'summary' => '',
-    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
-    'options' => ['class' => 'table-responsive'],
-    'columns' => [
-        [
-            'format' => 'raw',
-            'attribute' => 'product_name',
-            'value' => function($data) {
-                return "<div class='grid-prod'>" . $data['product_name'] . "</div><div class='grid-article'>Артикул: "
-                        . $data['article'] . "</div><div>"
-                        . $data['price'] . ' <i class="fa fa-fw fa-rub"></i></div>';
-            },
-            'label' => 'Название продукта',
-        ],
-        [
-            'format' => 'raw',
-            'value' => function($data) {
-                return TouchSpin::widget([
-                            'name' => "OrderContent[" . $data["id"] . "][quantity]",
-                            'pluginOptions' => [
-                                'initval' => $data["quantity"],
-                                'min' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 0.001,
-                                'max' => PHP_INT_MAX,
-                                'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
-                                'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
-                                'forcestepdivisibility' => (isset($data['units']) && ($data['units'] && (floor($data['units']) == $data['units']))) ? 'floor' : 'none',
-                                'buttonup_class' => 'btn btn-default',
-                                'buttondown_class' => 'btn btn-default',
-                                'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                            ],
-                            'options' => ['class' => 'quantity form-control '],
-                ]) . Html::hiddenInput("OrderContent[$data[id]][id]", $data["id"]);
-                // return Html::textInput('', 1, ['class' => 'quantity form-control']);
-            },
-                    'label' => 'Количество',
-                    'contentOptions' => ['class' => 'width150'],
-                    'headerOptions' => ['class' => 'width150']
+foreach ($content as $position) {
+    $note = $position->getNote();
+    ?>
+    <div class="block_left_bot">
+        <div class="block_left_bot_left">
+            <img class= "img_product" src="<?= $position->product->imageUrl ?>" alt="">
+            <p class = "block_left_bot_left_name"><?= $position->product_name ?></p>
+            <p class = "block_left_bot_left_art">Артикул: <?= $position->product->article ?></p>
+    <!--        <img  class = "izbranoe" src="/img/izb_icon.png" alt="">
+            <a class = "izbranoe_p" href="#">Избранное</a>--><br>
+            <p class = "kr_p">Кратность: <?= $position->product->units ? $position->product->units : '' ?><?= $position->product->ed ?></p>
+            <?=
+            Html::button('Комментарий к товару', [
+                'class' => 'add-note but_com',
+                'data' => [
+                    'id' => $position->product_id,
+                    'url' => Url::to(['order/ajax-set-note', 'product_id' => $position->product_id]),
+                    'toggle' => "tooltip",
+                    'placement' => "bottom",
+                    'original-title' => isset($note) ? $note->note : '',
                 ],
-                [
-                    'format' => 'raw',
-                    'header' => 'Цена',
-                    'value' => function ($data) {
-                        $total = number_format($data['price'] * $data['quantity'], 2);
-                        return "<span id=total$data[id]>$total</span> " . '<i class="fa fa-fw fa-rub"></i>';
-                    },
-                    'headerOptions' => ['class' => 'width100']
+            ])
+            ?>
+            <br><br>
+        </div>
+        <div class="block_chek_kolvo">
+            <?=
+            TouchSpin::widget([
+                'name' => "OrderContent[" . $position->id . "][quantity]",
+                'pluginOptions' => [
+                    'initval' => $position->quantity,
+                    'min' => (isset($position->units) && ($position->units)) ? $position->units : 0.001,
+                    'max' => PHP_INT_MAX,
+                    'step' => (isset($position->units) && ($position->units)) ? $position->units : 1,
+                    'decimals' => (empty($position->units) || (fmod($position->units, 1) > 0)) ? 3 : 0,
+                    'forcestepdivisibility' => (isset($position->units) && ($position->units && (floor($position->units) == $position->units))) ? 'floor' : 'none',
+                    'buttonup_class' => 'btn btn-default',
+                    'buttondown_class' => 'btn btn-default',
+                    'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
+                    'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
                 ],
-                [
-                    'format' => 'raw',
-                    'header' => 'Кратность',
-                    'value' => function ($data) {
-                        return $data["units"];
-                    },
-                    'headerOptions' => ['class' => 'width70']
-                ],
-                [
-                    'format' => 'raw',
-                    'value' => function($data) use ($vendor_id) {
-                        $note = $data->getNote();
-                        $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i> <span class="hidden-fk">Комментарий к товару</span>', '#', [
-                                    'class' => 'add-note btn btn-default margin-right-5',
-                                    'data' => [
-                                        'id' => $data->product_id,
-                                        'url' => Url::to(['order/ajax-set-note', 'product_id' => $data->product_id]),
-                                        'toggle' => "tooltip",
-                                        'placement' => "bottom",
-                                        'original-title' => isset($note) ? $note->note : '',
-                                    ],
-                        ]);
-                        $btnDelete = Html::a('<i class="fa fa-trash m-r-xxs"></i> <span class="hidden-fk">Удалить</span>', '#', [
-                                    'class' => 'btn btn-outline-danger remove',
-                                    'data-url' => Url::to(['/order/ajax-remove-position', 'vendor_id' => $vendor_id, 'product_id' => $data['product_id']]),
-                        ]);
-                        return '<div class="pull-right">' . $btnNote . $btnDelete . '</div>';
-                    },
-                            'headerOptions' => ['class' => 'checkout-action'],
-                        ],
-                    ]
-                ]);
-                
+                'options' => ['class' => 'quantity form-control '],
+            ]) . Html::hiddenInput("OrderContent[$position->id][id]", $position->id)
+            ?>
+        </div>
+        <div class="block_cena">
+            <p class = "block_cena_p"><span id="total<?= $position->id ?>"><?= number_format($position->price * $position->quantity, 2) ?></span> руб.</p>
+            <p class = "block_cena_p1"><?= $position->quantity ?> x <span> <?= $position->price ?> руб.</span></p>
+            <?=
+            Html::a('<img class= "delete_tovar1" src="/img/tovar_delete.png" alt="">', '#', [
+                'class' => 'remove',
+                'data-url' => Url::to(['/order/ajax-remove-position', 'vendor_id' => $vendor_id, 'product_id' => $position->product_id]),
+            ])
+            ?>
+        </div>
+    </div>
+<?php } ?>

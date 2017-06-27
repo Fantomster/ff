@@ -92,6 +92,7 @@ class OrderController extends DefaultController {
                             'ajax-set-delivery',
                             'ajax-show-details',
                             'complete-obsolete',
+                            'pjax-cart',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -146,6 +147,16 @@ class OrderController extends DefaultController {
         } else {
             return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
+    }
+    
+    public function actionPjaxCart() {
+//        if (Yii::$app->request->isPjax) {
+            $client = $this->currentUser->organization;
+            $orders = $client->getCart();
+            return $this->renderPartial('_pjax-cart', compact('orders'));
+//        } else {
+//            return $this->redirect('/site/index');
+//        }
     }
 
     public function actionAjaxAddToCart() {

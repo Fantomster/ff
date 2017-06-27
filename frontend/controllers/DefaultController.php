@@ -39,6 +39,9 @@ class DefaultController extends Controller {
         if (!Yii::$app->user->isGuest) {
             $this->loadCurrentUser();
             $organization = $this->currentUser->organization;
+            if ($organization->type_id == Organization::TYPE_RESTAURANT) {
+                $this->view->params['orders'] = $orders = $organization->getCart();
+            }
             $this->setLayout($organization->type_id);
             if (($organization->step == Organization::STEP_SET_INFO) && ($this->currentUser->status == \common\models\User::STATUS_ACTIVE)) {
                 $this->redirectIfNotHome($organization);

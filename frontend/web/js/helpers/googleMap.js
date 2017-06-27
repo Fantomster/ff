@@ -19,6 +19,10 @@ function initMap() {
         var input = document.getElementById('organization-address');
         var searchBox = new google.maps.places.SearchBox(input);
         
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo('bounds', map);
+
+        
         searchBox.addListener('places_changed', function() {
           var places = searchBox.getPlaces();
           

@@ -54,7 +54,7 @@ if (!Yii::$app->user->isGuest) {
             
         orderId = $("#order_id").val();
         if (orderId == message.order_id) {
-            $( ".direct-chat-messages" ).append( message.body );
+            $( "#chatBody" ).append( message.body );
             senderId = $("#sender_id").val();
             messageWrapper = $("#msg" + message.id);
             if (senderId == message.sender_id) {

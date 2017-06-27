@@ -48,12 +48,6 @@ $this->registerJs('
     $("#data-modal").length>0&&$("#data-modal").modal({backdrop: "static", keyboard: false});
 ',yii\web\View::POS_READY);
 
-$gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
-        'libraries' => 'places',
-        'key'=>Yii::$app->params['google-api']['key-id'],
-        'language'=>Yii::$app->params['google-api']['language'],
-        'callback'=>'initMap'
-    ));
 $this->registerJs("
 function initMap() {
     var fields = {
@@ -74,6 +68,11 @@ function initMap() {
         var input = document.getElementById('organization-address');
         var searchBox = new google.maps.places.SearchBox(input);
         
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
+
         searchBox.addListener('places_changed', function() {
           var places = searchBox.getPlaces();
           
@@ -244,7 +243,13 @@ function changeFields(fields, results){
         alert('Geocode was not successful for the following reason: ' + status);
         }    
 }
-",yii\web\View::POS_BEGIN);
+",yii\web\View::POS_END);
+$gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
+        'libraries' => 'places',
+        'key'=>Yii::$app->params['google-api']['key-id'],
+        'language'=>Yii::$app->params['google-api']['language'],
+        'callback'=>'initMap'
+    ));
 $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
 ?>
 <div id="data-modal" class="modal fade data-modal">

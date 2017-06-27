@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use yii\bootstrap\Modal;
@@ -10,59 +11,60 @@ use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii2assets\fullscreenmodal\FullscreenModal;
 use delocker\animate\AnimateAssetBundle;
+
 AnimateAssetBundle::register($this);
 yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
 $request = new \common\models\Request();
 ?>
 <style>
-.req-items{
-    background: #fff;
-    border-bottom: 1px solid #f4f4f4;
-    position: relative;
-    padding: 10px;
-    margin-top:10px;
-}
-.req-items:hover, .req-name:hover{
-    border-bottom:1px solid #84bf76;
-    cursor:pointer
-}
-.req-name{color:#84bf76;font-size:22px;margin-top:20px}
-.req-fire{margin-left:10px;color:#d9534f;font-size:18px;}
-.req-nal-besnal{margin-left:10px}
-.req-category{}
-.req-discription{font-size:18px;color:#757575}
-.req-created{font-size:12px;color:#757575}
-.req-visits{font-size:12px;color:#757575}
-.req-comments{font-size:12px;color:#757575}
-.modal.fade .modal-dialog {
-    -webkit-transform: scale(0.1);
-    -moz-transform: scale(0.1);
-    -ms-transform: scale(0.1);
-    transform: scale(0.1);
-    top: 300px;
-    opacity: 0;
-    -webkit-transition: all 0.3s;
-    -moz-transition: all 0.3s;
-    transition: all 0.3s;
-}
+    .req-items{
+        background: #fff;
+        border-bottom: 1px solid #f4f4f4;
+        position: relative;
+        padding: 10px;
+        margin-top:10px;
+    }
+    .req-items:hover, .req-name:hover{
+        border-bottom:1px solid #84bf76;
+        cursor:pointer
+    }
+    .req-name{color:#84bf76;font-size:22px;margin-top:20px}
+    .req-fire{margin-left:10px;color:#d9534f;font-size:18px;}
+    .req-nal-besnal{margin-left:10px}
+    .req-category{}
+    .req-discription{font-size:18px;color:#757575}
+    .req-created{font-size:12px;color:#757575}
+    .req-visits{font-size:12px;color:#757575}
+    .req-comments{font-size:12px;color:#757575}
+    .modal.fade .modal-dialog {
+        -webkit-transform: scale(0.1);
+        -moz-transform: scale(0.1);
+        -ms-transform: scale(0.1);
+        transform: scale(0.1);
+        top: 300px;
+        opacity: 0;
+        -webkit-transition: all 0.3s;
+        -moz-transition: all 0.3s;
+        transition: all 0.3s;
+    }
 
-.modal.fade.in .modal-dialog {
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -ms-transform: scale(1);
-    transform: scale(1);
-    -webkit-transform: translate3d(0, -300px, 0);
-    transform: translate3d(0, -300px, 0);
-    opacity: 1;
-}
-.req-name{font-size:16px;font-weight:bold;letter-spacing:0.02em;}
-.req-fire{font-size:14px;font-weight:normal}
-.req-cat{font-size:12px;font-weight:normal;color:#828384}
-.req-cat-name{font-size:12px;font-weight:bold;color:#828384}
-.req-nal-besnal{font-size:12px;font-weight:bold;color:#828384}
-.summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:27px}
-.req-discription{font-size:14px;font-weight:normal;color:#95989a}
-.req-created{font-size:12px;font-weight:normal;color:#828384;}
+    .modal.fade.in .modal-dialog {
+        -webkit-transform: scale(1);
+        -moz-transform: scale(1);
+        -ms-transform: scale(1);
+        transform: scale(1);
+        -webkit-transform: translate3d(0, -300px, 0);
+        transform: translate3d(0, -300px, 0);
+        opacity: 1;
+    }
+    .req-name{font-size:16px;font-weight:bold;letter-spacing:0.02em;}
+    .req-fire{font-size:14px;font-weight:normal}
+    .req-cat{font-size:12px;font-weight:normal;color:#828384}
+    .req-cat-name{font-size:12px;font-weight:bold;color:#828384}
+    .req-nal-besnal{font-size:12px;font-weight:bold;color:#828384}
+    .summary-pages{font-size:12px;font-weight:normal;color:#828384;margin-top:27px}
+    .req-discription{font-size:14px;font-weight:normal;color:#95989a}
+    .req-created{font-size:12px;font-weight:normal;color:#828384;}
 
 </style>
 <section class="content-header">
@@ -82,97 +84,101 @@ $request = new \common\models\Request();
     ?>
 </section>
 <section class="content">
-  <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-      <div class="row">
+    <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-          <div class="box box-info">
-            <div class="box-body no-padding" style="padding-bottom:15px !important;padding-top:15px !important;">
-              <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
-                <div class="input-group">
-                    <span class="input-group-addon">
-                      <i class="fa fa-search"></i>
-                    </span>
-                <?=Html::input('text', 'search', \Yii::$app->request->get('search')?:'',
-                        [
-                            'class' => 'form-control',
-                            'placeholder'=>'Поиск',
-                            'id'=>'search'
-                        ]);?>
-                </div>
-              </div>
-              <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-                 <?php Modal::begin([
-            'id' => 'create',
-            'toggleButton' => [
-                'id' => 'create-button',
-                'label' => '<i class="fa fa-paper-plane"></i> Разместить заявку',
-                'class'=>'btn btn-sm btn-fk-success',
-                'disabled'=>'disabled',
-                'data-loading-text'=>'<i class="fa fa-circle-o-notch fa-spin"></i> Подождите...',
-                'style'=>'width:100%'],
-            'options'=>['class'=>'modal-fs fade modal','tabindex'=>'-1']
-         ]);
-            ?>
-            <?php
-            echo $this->render("create", compact('request','organization','profile'));
-            Modal::end();
-            ?>   
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
-      <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-          <div class="box box-info">
-            <div class="box-body">
-              <div class="col-md-12 no-padding">
-              <?php 
-              Pjax::begin([
-                  'id' => 'list', 
-                  'timeout' => 10000, 
-                  'enablePushState' => false,
-                  ]);
-              ?> 
-              
-              <?=ListView::widget([
-                    'dataProvider' => $dataListRequest,
-                    'itemView' => function ($model, $key, $index, $widget) {
-                        return $this->render('list/_listView', ['model' => $model]);
-                        },
-                    'pager' => [
-                        'maxButtonCount' => 5,
-                            'options' => [
-                            'class' => 'pagination col-md-12  no-padding'
-                        ],
-                    ],
-                    'options'=>[
-                      'class'=>'col-lg-12 list-wrapper inline no-padding'
-                    ],
-                    'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
-                    'summary' => 'Показано {count} из {totalCount}',
-                    'emptyText' => 'Список пуст',
-                ])?>
-              <?php Pjax::end(); ?>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 hidden-xs hidden-sm">
-          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive', 'style'=>'margin-bottom:15px']) ?>
-          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive']) ?>
-    </div>
-</section>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="box box-info">
+                        <div class="box-body no-padding" style="padding-bottom:15px !important;padding-top:15px !important;">
+                            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                    <?=
+                                    Html::input('text', 'search', \Yii::$app->request->get('search')? : '', [
+                                        'class' => 'form-control',
+                                        'placeholder' => 'Поиск',
+                                        'id' => 'search'
+                                    ]);
+                                    ?>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                                <?php
+                                Modal::begin([
+                                    'id' => 'create',
+                                    'toggleButton' => [
+                                        'id' => 'create-button',
+                                        'label' => '<i class="fa fa-paper-plane"></i> Разместить заявку',
+                                        'class' => 'btn btn-sm btn-fk-success',
+                                        'disabled' => 'disabled',
+                                        'data-loading-text' => '<i class="fa fa-circle-o-notch fa-spin"></i> Подождите...',
+                                        'style' => 'width:100%'],
+                                    'options' => ['class' => 'modal-fs fade modal', 'tabindex' => '-1']
+                                ]);
+                                ?>
 <?php
+echo $this->render("create", compact('request', 'organization', 'profile'));
+Modal::end();
+?>   
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="box box-info">
+                        <div class="box-body">
+                            <div class="col-md-12 no-padding">
+                                <?php
+                                Pjax::begin([
+                                    'id' => 'list',
+                                    'timeout' => 10000,
+                                    'enablePushState' => false,
+                                ]);
+                                ?> 
+
+                                <?=
+                                ListView::widget([
+                                    'dataProvider' => $dataListRequest,
+                                    'itemView' => function ($model, $key, $index, $widget) {
+                                        return $this->render('list/_listView', ['model' => $model]);
+                                    },
+                                            'pager' => [
+                                                'maxButtonCount' => 5,
+                                                'options' => [
+                                                    'class' => 'pagination col-md-12  no-padding'
+                                                ],
+                                            ],
+                                            'options' => [
+                                                'class' => 'col-lg-12 list-wrapper inline no-padding'
+                                            ],
+                                            'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
+                                            'summary' => 'Показано {count} из {totalCount}',
+                                            'emptyText' => 'Список пуст',
+                                        ])
+                                        ?>
+        <?php Pjax::end(); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 hidden-xs hidden-sm">
+        <?= Html::a('<img src="/images/banners/240х400_Restorating.ru.gif" >', "https://www.restorating.ru/promo-msk/?utm_source=f-keeper&utm_medium=banner&utm_campaign=test_pack", ['class' => 'img-responsive', 'style' => 'margin-bottom:15px']) ?>
+        <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive']) ?>
+                </div>
+        </section>
+        <?php
 //$this->registerJs('$("#create-button").button("loading");',yii\web\View::POS_LOAD);
-$this->registerJs('$("#create-button").removeAttr("disabled");',yii\web\View::POS_READY);
-$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/jquery-ui.min.js', ['depends' => [yii\web\JqueryAsset::className()]]);
-$this->registerJs('
+        $this->registerJs('$("#create-button").removeAttr("disabled");', yii\web\View::POS_READY);
+        $this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/jquery-ui.min.js', ['depends' => [yii\web\JqueryAsset::className()]]);
+        $this->registerJs('
 $("#create").removeAttr("tabindex");
 $("#create .modal-content").css("overflow-y","auto")
 var timer;
@@ -325,5 +331,6 @@ $("#create").on("shown.bs.modal", function () {
         initMap();
     }
 });
-',yii\web\View::POS_END);
+', yii\web\View::POS_END);
 
+        

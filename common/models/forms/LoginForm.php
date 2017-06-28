@@ -36,7 +36,7 @@ class LoginForm extends \amnah\yii2\user\models\forms\LoginForm {
         }
 
         // check status and resend email if inactive
-        if ($user && $user->status == $user::STATUS_INACTIVE) {
+        if ($user && ($user->status == $user::STATUS_INACTIVE || $user->status == $user::STATUS_UNCONFIRMED_EMAIL)) {
             /** @var \amnah\yii2\user\models\UserToken $userToken */
 //            $userToken = $this->module->model("UserToken");
 //            $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);

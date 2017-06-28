@@ -24,7 +24,7 @@ class AppAsset extends AssetBundle {
         'js/socket.io-1.4.5.js',
         'js/main.js',
         'js/datatables.min.js',
-        'js/helpers/googleMap.js',
+        //'js/helpers/googleMap.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

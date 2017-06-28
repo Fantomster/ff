@@ -106,7 +106,7 @@ class ClientController extends DefaultController {
 
     public function actionSettings() {
         $organization = $this->currentUser->organization;
-        $organization->scenario = "complete";
+        $organization->scenario = "settings";
         if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;

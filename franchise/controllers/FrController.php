@@ -3,7 +3,6 @@
 namespace franchise\controllers;
 
 use Yii;
-use yii\web\Controller;
 use yii\helpers\Html;
 use yii\web\Response;
 

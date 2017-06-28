@@ -14,11 +14,15 @@ frontend\assets\AdminltePluginsAsset::register($this);
 $this->title = 'Рабочий стол';
 
 $this->registerCss('
-@media (max-width: 1320px){
+    @media (max-width: 1320px){
        th{
         min-width:135px;
         }
-    }');
+    }
+    .pac-container {
+        z-index: 1100;
+    }
+    ');
 if ($organization->step == Organization::STEP_SET_INFO) {
     \frontend\assets\AuthAsset::register($this);
     echo $this->render("dashboard/_wizard", compact("profile", "organization"));

@@ -100,6 +100,19 @@ $customJs = <<< JS
             }
         }
     });
+    
+    $(document).on("beforeValidate", "#SuppliersFormSend", function (e) {
+        $("input").tooltip("destroy");
+    });    
+        
+    $(document).on("change keyup paste cut", "#SuppliersFormSend input", function() {
+        if (timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(function() {
+            $("#SuppliersFormSend").submit();
+        }, 700);
+    });
         
     $(document).on('submit', '#SuppliersFormSend', function(e) {
         var form = $('#SuppliersFormSend');
@@ -363,6 +376,7 @@ $disabled = true;
                     'dataProvider' => $dataProvider,
                     'itemView' => 'suppliers/_vendorList',
                     'summary' => '',
+                    'emptyText' => '',
                 ])
                 ?>
                 <?php Pjax::end(); ?> 

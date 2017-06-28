@@ -86,6 +86,9 @@ overflow-y:scroll
 tr:hover {
     cursor: pointer;
 }
+.pac-container {
+    z-index: 1100;
+}
 ');
 $this->registerCss('
 @media (max-width: 1320px){

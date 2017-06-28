@@ -1422,8 +1422,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 }
                 $disabled = false;
                 if ($validated) {
-//                    return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
-                    return ['errors' => false, 'vendorFound' => false];
+                    return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
+                    //return ['errors' => false, 'vendorFound' => false];
                 }
             }
 

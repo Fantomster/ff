@@ -136,11 +136,11 @@ $customJs = <<< JS
         )
         .done(function(result) {
             if (!result.errors) {
-                //form.replaceWith(result.form);
+                form.replaceWith(result.form);
                 if (result.vendorFound) {
                     $("#addProduct").hide();
                     $("#inviteSupplier").show();
-                    form.replaceWith(result.form);
+                    //form.replaceWith(result.form);
                 } else {
                     enableFields();
                     //$("#profile-full_name").focus();

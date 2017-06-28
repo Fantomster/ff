@@ -7,18 +7,17 @@ class Module extends \yii\base\Module
     public function init()
     {
         parent::init();
-/*
+
         $this->modules = [
-            'restor' => [
+            'odinc' => [
                 // здесь имеет смысл использовать более лаконичное пространство имен
-                'class' => 'api\modules\v1\modules\restor\Module',
+                'class' => 'frontend\modules\vendorintegr\modules\odinc\Module',
             ],
             
-            'supp' => [
+        //    'supp' => [
                 // здесь имеет смысл использовать более лаконичное пространство имен
-                'class' => 'api\modules\v1\modules\supp\Module',
-            ],
+        //        'class' => 'api\modules\v1\modules\supp\Module',
+        //    ],
         ];
-    */
     }
 }

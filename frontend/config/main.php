@@ -56,5 +56,6 @@ return [
             'showScriptName' => false,
         ],
     ],
+
     'params' => $params,
 ];

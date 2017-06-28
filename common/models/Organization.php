@@ -122,7 +122,7 @@ class Organization extends \yii\db\ActiveRecord {
             [
                 'class' => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
-                'scenarios' => ['default'],
+                'scenarios' => ['settings'],
                 'path' => '@app/web/upload/temp/',
                 'url' => '/upload/temp/',
                 'thumbs' => [

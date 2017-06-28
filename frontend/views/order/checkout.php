@@ -12,6 +12,9 @@ $this->registerJs(
         '$("document").ready(function(){
             $(document).on("click", ".remove, .delete, .deleteAll", function(e) {
                 e.preventDefault();
+                if (!$(".block_wrap_bask_tover").length) {
+                    return false;
+                }
                 clicked = $(this);
                 if (clicked.hasClass("remove")) {
                     title = "Удаление товара из корзины";
@@ -55,6 +58,9 @@ $this->registerJs(
 
             $(document).on("click", ".create, .createAll", function(e) {
                 e.preventDefault();
+                if (!$(".block_wrap_bask_tover").length) {
+                    return false;
+                }
                 var clicked = $(this);
                 var form = $("#cartForm");
                 var extData = "&all=" + clicked.data("all") + "&id=" + clicked.data("id"); 

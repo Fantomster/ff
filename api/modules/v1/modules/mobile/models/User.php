@@ -64,4 +64,34 @@ class User extends BaseUser implements RateLimitInterface
     {
         return [__CLASS__, $this->getId(), $key];
     }
+    
+    /**
+     * Send email confirmation to user
+     * @param UserToken $userToken
+     * @return int
+     */
+    public function sendEmailConfirmation($userToken)
+    {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+
+        // send email
+        $user = $this;
+        $profile = $user->profile;
+        $email = $userToken->data ?: $user->email;
+        $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
+        $result = $mailer->compose('@common/mail/confirmEmail', compact("subject", "user", "profile", "userToken"))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        return $result;
+    }
 }

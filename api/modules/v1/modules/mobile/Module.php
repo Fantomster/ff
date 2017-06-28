@@ -17,12 +17,13 @@ class Module extends \yii\base\Module
         'identityClass' => 'api\modules\v1\modules\mobile\models\User',
         'loginUrl' => null,
         'enableSession' => false,
-        /*'identityCookie' => ['name' => 'editor', 'httpOnly' => true],
-        'idParam' => 'editor_id', //this is important !*/
         ]);
         
-       /* Yii::$app->user->identityClass = 'api\modules\v1\modules\mobile\models\ApiUserIdentity';
-        Yii::$app->user->enableSession = false;
-        Yii::$app->user->loginUrl = null;*/
+        Yii::$app->set(
+                'mailer', [
+                    'class' => 'yii\swiftmailer\Mailer',
+                    'viewPath' => '@common/mail',
+                    'htmlLayout' => '@common/mail/layouts/html'
+                    ]);
     }
 }

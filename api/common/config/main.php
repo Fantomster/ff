@@ -15,6 +15,9 @@ return [
     'defaultRoute' => 'site',
     'components' => [
         'request' => [
+            'parsers' => [
+                    'application/json' => 'yii\web\JsonParser',
+                ],
             'csrfParam' => '_csrf-api',
         ],
         'user' => [

@@ -1381,6 +1381,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $user =  new User();
         //$user->scenario = 'invite';
         $profile = new Profile();
+        $profile->phone = "+7";
         $profile->scenario = 'invite';
         $organization = new Organization();
         $organization->scenario = 'invite';
@@ -1406,6 +1407,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 $organization = $vendorManager->organization;
                 $disabled = true;
                 return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => true];
+//                return ['errors' => false, 'organization_name' => $organization->name, 'phone' => $profile->phone, 'full_name'=>$profile->full_name, 'vendorFound' => true];
             } elseif ($user->validate() && empty($relation)) {
                 $validated = true;
                 if (!$profile->load($post)) {
@@ -1413,14 +1415,15 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 } else {
                     $validated = $profile->validate();
                 }
-                if (!$organization->load($post)) {
+                if ($validated && !$organization->load($post)) {
                     $organization = new Organization();
                 } else {
                     $validated = $organization->validate();
                 }
                 $disabled = false;
                 if ($validated) {
-                    return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
+//                    return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
+                    return ['errors' => false, 'vendorFound' => false];
                 }
             }
 

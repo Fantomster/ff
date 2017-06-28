@@ -114,7 +114,21 @@ $customJs = <<< JS
         }, 700);
     });
         
+    function enableFields() {
+        $("#profile-full_name").prop("disabled", false);
+        $("#profile-phone").prop("disabled", false);
+        $("#organization-name").prop("disabled", false);
+    }
+        
+    function disableFields() {
+        $("#profile-full_name").prop("disabled", true);
+        $("#profile-phone").prop("disabled", true);
+        $("#organization-name").prop("disabled", true);
+    }
+        
     $(document).on('submit', '#SuppliersFormSend', function(e) {
+        
+        $("input").tooltip("destroy");
         var form = $('#SuppliersFormSend');
         $.post(
             form.attr("action"),
@@ -122,16 +136,20 @@ $customJs = <<< JS
         )
         .done(function(result) {
             if (!result.errors) {
-                form.replaceWith(result.form);
+                //form.replaceWith(result.form);
                 if (result.vendorFound) {
                     $("#addProduct").hide();
                     $("#inviteSupplier").show();
+                    form.replaceWith(result.form);
                 } else {
-                    $("#profile-full_name").focus();
+                    enableFields();
+                    //$("#profile-full_name").focus();
                     $("#addProduct").show();
                     $("#inviteSupplier").hide();
                 }
+                $("#addProduct").prop("disabled", false);
             } else {
+                $("#addProduct").prop("disabled", true);
                 if (result.vendor_added) {
                     $("#user-email").tooltip({title: "Поставщик уже добавлен!", placement: "auto right", container: "body"});
                     $("#user-email").tooltip();

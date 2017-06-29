@@ -19,6 +19,8 @@ class Bootstrap implements BootstrapInterface
         /** @var \yii\db\ActiveRecord $modelName */
         if ($app->getModule('v1')->hasModule('supp') && ($module = $app->getModule('v1')->getModule('supp')) instanceof Module) {
 
+            var_dump($module->urlRiles);
+            
             $configUrlRule = [
                    'prefix' => $module->urlPrefix,
                     'rules'  => $module->urlRules,
@@ -29,8 +31,7 @@ class Bootstrap implements BootstrapInterface
                 }
 
                 $app->urlManager->addRules([new GroupUrlRule($configUrlRule)], false);
-                
-                echo "YESS hello";
+          
 
             /*if (!isset($app->get('i18n')->translations['user*'])) {
                 $app->get('i18n')->translations['user*'] = [
@@ -39,6 +40,6 @@ class Bootstrap implements BootstrapInterface
                 ];
             }*/
         }
-       var_dump($app->modules);
+       
     }
 }

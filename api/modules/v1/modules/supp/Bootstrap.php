@@ -19,7 +19,7 @@ class Bootstrap implements BootstrapInterface
         /** @var \yii\db\ActiveRecord $modelName */
         if ($app->getModule('v1')->hasModule('supp') && ($module = $app->getModule('v1')->getModule('supp')) instanceof Module) {
 
-            var_dump($module->urlRiles);
+            var_dump($module->urlRules);
             
             $configUrlRule = [
                    'prefix' => $module->urlPrefix,

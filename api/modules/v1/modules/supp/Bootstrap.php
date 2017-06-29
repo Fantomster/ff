@@ -17,7 +17,7 @@ class Bootstrap implements BootstrapInterface
     {
         /** @var Module $module */
         /** @var \yii\db\ActiveRecord $modelName */
-        if ($app->hasModule('supp') && ($module = $app->getModule('supp')) instanceof Module) {
+        if ($app->hasModule('v1') && ($module = $app->getModule('v1')) instanceof Module) {
 
             $configUrlRule = [
                    'prefix' => $module->urlPrefix,
@@ -39,6 +39,6 @@ class Bootstrap implements BootstrapInterface
                 ];
             }*/
         }
-        echo "hello2";
+       // echo "hello2";
     }
 }

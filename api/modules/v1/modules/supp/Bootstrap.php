@@ -29,6 +29,8 @@ class Bootstrap implements BootstrapInterface
                 }
 
                 $app->urlManager->addRules([new GroupUrlRule($configUrlRule)], false);
+                
+                echo "hello";
 
             /*if (!isset($app->get('i18n')->translations['user*'])) {
                 $app->get('i18n')->translations['user*'] = [

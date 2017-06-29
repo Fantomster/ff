@@ -395,6 +395,9 @@ $disabled = true;
                     'itemView' => 'suppliers/_vendorList',
                     'summary' => '',
                     'emptyText' => '',
+                    'options' => [
+                        'style' => 'margin-top: 20px;'
+                    ],
                 ])
                 ?>
                 <?php Pjax::end(); ?> 

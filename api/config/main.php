@@ -10,7 +10,10 @@ return [
     'id' => 'api.f-keeper',
     'name' => 'api.f-keeper',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => [
+                    'log',
+                    'api\modules\v1\modules\supp\Bootstrap'    
+                   ],
     'controllerNamespace' => 'api\common\controllers',
     'defaultRoute' => 'site',
     'components' => [

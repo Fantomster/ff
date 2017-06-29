@@ -9,6 +9,8 @@ use yii\mongosoft\soapserver\Action;
 use api\common\models\ApiAccess;
 use api\common\models\ApiSession;
 use api\common\models\ApiActions;
+use common\models\CatalogBaseGoods;
+use common\models\MpEd;
 
 /**
  * Description of SiteController
@@ -73,19 +75,7 @@ class DefaultController extends Controller {
             }
     
             
-/**
-* @param array $arr
-* @return array
-* @soap
-*/
- 
-    
-    public function getArray($arr) 
-    {
-        
-        return $arr;
-        
-    }
+
              
 
 /**
@@ -158,13 +148,14 @@ class DefaultController extends Controller {
       
       // return $org;
          
-      $cats = Yii::$app->db_api->createCommand('select id as fid, type_id, name, city, address, zip_code,
+      $cats = Yii::$app->db->createCommand('select id as fid, type_id, name, city, address, zip_code,
           phone, email, website, created_at, updated_at, legal_entity, contact_name from organization 
           where id in ( select rest_org_id from relation_supp_rest where supp_org_id ='.$org.')')
       ->queryAll();
      
       $this->save_action(__FUNCTION__, $sessionId, 1,'OK',$this->ip);     
-      return $cats;
+      
+      return $cats ? $cats : 'No agents found!';
     
       exit;
             
@@ -179,6 +170,113 @@ class DefaultController extends Controller {
         
       
     }    
+   
+ /**
+* add goods to base catalog
+* @param string $sessionId 
+* @param string $nonce 
+* @param string $lang
+* @param integer $units_fid
+* @param integer $category_fid
+* @param string $article
+* @param string $product
+* @param double $price
+* @param double $pack
+* @param string $cid  
+* @return mixed 
+* @soap
+*/
+    
+    public function addtoBaseCatalog($sessionId, $nonce, $lang, $units_fid, $category_fid, $article, $product, $price, $cid, $pack) 
+    {
+
+        if (isset($_SERVER['REMOTE_ADDR'])) $this->ip = $_SERVER['REMOTE_ADDR'];  
+        
+        if ($sess = $this->check_session($sessionId,$nonce)) {
+         
+      // return $sess;    
+      
+      $org = Yii::$app->db_api->createCommand('select org from api_access where id = (select acc from api_session where token ="'.$sessionId.'");')
+      ->queryScalar();   
+      
+      $baseCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id ='.$org.' and type = 1')
+      ->queryScalar();   
+      
+      $clearProduct = "'".str_replace('"','`',$product)."'";
+      
+      $countProd = Yii::$app->db->createCommand('select count(*) from catalog_base_goods where product ='.$clearProduct.'and cat_id='.$baseCat." and deleted =0" )
+      ->queryScalar();   
+      
+      if ($countProd > 0) {
+          
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'Product name exists',$this->ip);       
+        return 'Product error. Name already exists.';   
+        exit;
+      }
+      
+      $countArt = Yii::$app->db->createCommand("select count(*) from catalog_base_goods where article ='".$article."'and cat_id=".$baseCat." and deleted = 0")
+      ->queryScalar();   
+      
+      if ($countArt > 0) {
+          
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'Product art exists',$this->ip);       
+        return 'Product error. Article already exists.';   
+        exit;
+      }
+      
+     $goodsModel = new CatalogBaseGoods;
+     
+     $goodsModel->product = str_replace('"','`',$product);
+     $goodsModel->cat_id = $baseCat;
+     $goodsModel->article = $article;
+     $goodsModel->units = $pack;
+     $goodsModel->created_at = time();
+     $goodsModel->price = $price;
+     $goodsModel->note = $cid;
+     $goodsModel->deleted = 0;
+     $goodsModel->market_place = 0;
+     $goodsModel->status = 1;
+     $goodsModel->ed = MpEd::find()->andwhere('id='.$units_fid)->one()->name;
+     $goodsModel->supp_org_id = $org;
+     $goodsModel->es_status = 1;
+     $goodsModel->category_id = $category_fid;
+     
+     
+     if (!$goodsModel->save()) {
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'Internal error. Model not saved',$this->ip);       
+        return $goodsModel->getErrors();
+        exit;    
+     } else {
+         $this->save_action(__FUNCTION__, $sessionId, 1,'OK',$this->ip);
+         return 'OK.NEWFID:'.$goodsModel->id;        
+     }
+     
+            
+     
+             
+         
+    //  $cats = Yii::$app->db->createCommand('select id as fid, type_id, name, city, address, zip_code,
+    //      phone, email, website, created_at, updated_at, legal_entity, contact_name from organization 
+    //      where id in ( select rest_org_id from relation_supp_rest where supp_org_id ='.$org.')')
+    //  ->queryAll();
+     
+           
+      
+    //  return $cats ? $cats : 'No agents found!';
+    
+      exit;
+            
+          
+      } else {
+          
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'No active session',$this->ip);       
+        return 'Session error. Active session is not found.';
+
+      exit;   
+      }
+        
+      
+    }     
     
    
 /**

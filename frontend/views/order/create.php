@@ -9,6 +9,9 @@ use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
 $this->title = 'Разместить заказ';
+
+yii\jui\JuiAsset::register($this);
+
 $this->registerJs(
         '$("document").ready(function(){
             $("#createP").on("change", "#selectedCategory", function(e) {
@@ -27,16 +30,50 @@ $this->registerJs(
             });
             $("#createP, #showDetails").on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
-                $("#loader-show").showLoading();
+                //$("#loader-show").showLoading();
                 quantity = $(this).parent().parent().find(".quantity").val();
+                var cart = $(".basket_a");
+                var imgtodrag = $(this);
+                if (imgtodrag) {
+                    var imgclone = imgtodrag.clone()
+                        .offset({
+                        top: imgtodrag.offset().top,
+                        left: imgtodrag.offset().left
+                    })
+                        .css({
+                        "opacity": "0.5",
+                            "position": "absolute",
+                            "height": "39px",
+                            "width": "34px",
+                            "z-index": "100"
+                    })
+                        .appendTo($("body"))
+                        .animate({
+                        "top": cart.offset().top + 10,
+                            "left": cart.offset().left + 10,
+                            "width": 39,
+                            "height": 34
+                    }, 1000, "easeInOutExpo");
+
+                    setTimeout(function () {
+                        cart.parent().effect("highlight", {
+                            times: 2,
+                            color: "#6ea262"
+                        }, 350);
+                    }, 1000);
+
+                    imgclone.animate({
+                        "width": 0,
+                            "height": 0
+                    }, function () {
+                        $(this).detach()
+                    });
+                }
                 $.post(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
-//                    if (result) {
-//                        $.pjax.reload({container: "#cart"});
-//                    }
-                    $("#loader-show").hideLoading();
+                    //$("#loader-show").hideLoading();
                 });
             });
             $("#createP").on("change keyup paste cut", "#searchString", function() {
@@ -55,9 +92,6 @@ $this->registerJs(
                     clicked.data("url")
                 )
                 .done(function (result) {
-//                    if (result) {
-//                        $.pjax.reload({container: "#cart"});
-//                    }
                     $("#loader-show").hideLoading();
                 });
                 return false;
@@ -76,9 +110,6 @@ $this->registerJs(
                     form.serialize()
                 )
                 .done(function (result) {
-//                    if (result) {
-//                        $.pjax.reload({container: "#cart"});
-//                    }
                     $("#loader-show").hideLoading();
                 });
             });

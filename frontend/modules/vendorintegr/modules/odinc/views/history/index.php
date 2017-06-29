@@ -42,12 +42,7 @@ use api\common\models\RkAccess;
 </section>
 <section class="content">
     <div class="catalog-index">
-            <div class="box-header with-border">
-              <div class="box-title pull-left">
-                 <?= Html::a('<i class="fa fa-plus-circle"></i> Создать доступ', ['create'],['class'=>'btn btn-md fk-button']) ?>
-              </div>
-            </div>
-    	<div class="box box-info">            
+    	<div class="box box-info">
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
@@ -58,10 +53,14 @@ use api\common\models\RkAccess;
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                         'columns' => [
-                                            'fid',
-                                            'login',
-                                            'fd',
-                                            'td',                                            
+                                            'id',
+                                            'action',
+                                            'session',
+                                            'created',
+                                            'result',
+                                            'comment',
+                                            'ip'
+                                            
                                         ],
                                         /* 'rowOptions' => function ($data, $key, $index, $grid) {
                                           return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];

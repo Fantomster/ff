@@ -7,7 +7,7 @@ class Module extends \yii\base\Module
     public $urlPrefix = '';
     
     public $urlRules = [
-        'supp/wsdl'                => 'supp/default/wsdl',
+        'v1/supp/wsdl'                => 'v1/supp/default/wsdl',
         
     ];
     

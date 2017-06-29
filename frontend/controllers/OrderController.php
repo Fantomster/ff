@@ -150,13 +150,13 @@ class OrderController extends DefaultController {
     }
     
     public function actionPjaxCart() {
-//        if (Yii::$app->request->isPjax) {
+        if (Yii::$app->request->isPjax) {
             $client = $this->currentUser->organization;
             $orders = $client->getCart();
             return $this->renderPartial('_pjax-cart', compact('orders'));
-//        } else {
-//            return $this->redirect('/site/index');
-//        }
+        } else {
+            return $this->redirect('/order/create');
+        }
     }
 
     public function actionAjaxAddToCart() {

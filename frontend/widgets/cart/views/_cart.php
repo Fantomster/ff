@@ -8,7 +8,7 @@ $count = count($orders);
 ?>
 <div class="maska1"></div>
 <div class="block_right_basket">
-    <?php Pjax::begin(['enablePushState' => false, 'id' => 'side-cart', 'timeout' => 5000, 'clientOptions' => ['url' => '/order/pjax-cart']]); ?>
+    <?php Pjax::begin(['enablePushState' => false, 'id' => 'side-cart', 'timeout' => 10000, 'clientOptions' => ['url' => '/order/pjax-cart']]); ?>
     <?php if ($count) { ?>
         <div class="block_pus">
             <div class="block_baasket_head">

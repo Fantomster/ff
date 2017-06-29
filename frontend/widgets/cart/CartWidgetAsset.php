@@ -12,10 +12,6 @@ use yii\web\AssetBundle;
 class CartWidgetAsset extends AssetBundle {
     public $sourcePath = '@frontend/widgets/cart/assets';
     
-    public $js = [
-        'js/cartwidget.js'
-    ];
-
     public $css = [
         'css/font-awesome.min.css',
         'css/cartwidget.css',

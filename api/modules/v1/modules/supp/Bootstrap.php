@@ -39,5 +39,6 @@ class Bootstrap implements BootstrapInterface
                 ];
             }*/
         }
+        echo "hello2";
     }
 }

@@ -32,7 +32,6 @@ body{
 	background-color: #F1F0EE;
 }
 .container1{
-	max-width: 1430px;
 	padding: 0 15px;
 	margin: 0 auto;
 }
@@ -182,8 +181,8 @@ body{
 }
 .block_wrap_zap{
 	width: 90%;
-	margin: 0 auto;
-	height: 80px;
+        display: inline-block;
+	height: auto;
 	padding-left: 20px;
 	border:  1px solid #ddd;
 	-webkit-border-radius: 3px;
@@ -191,6 +190,7 @@ body{
 	-ms-border-radius: 3px;
 	-o-border-radius: 3px;
 	border-radius: 3px;
+        margin-bottom: 10px;
 }
 .block_wrap_name{
 	float: left;

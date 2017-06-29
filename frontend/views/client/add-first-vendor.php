@@ -396,7 +396,7 @@ $disabled = true;
                     'summary' => '',
                     'emptyText' => '',
                     'options' => [
-                        'style' => 'margin-top: 20px;'
+                        'style' => 'margin-top: 20px;text-align:center;'
                     ],
                 ])
                 ?>

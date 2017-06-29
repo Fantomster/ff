@@ -4,7 +4,7 @@ use yii\helpers\Html;
 ?>
 <div class="block_wrap_zap">
     <div class="block_wrap_name">
-        <p><?= $model->vendor->contact_name ?><br><span><?= $model->vendor->name ?></span></p>
+        <p><?= $model->vendor->name ?></p>
     </div>
     <div class="block_wrap_d">
         <?php

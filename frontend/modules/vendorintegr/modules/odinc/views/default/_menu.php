@@ -17,8 +17,7 @@ use yii\helpers\Html;
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
                             <?= Html::a('Доступы', ['access/index'], ['class'=>'btn btn-md fk-button']); ?>                            
-                            <?= Html::a('Главный Каталог', ['catalog/index'], ['class'=>'btn btn-md fk-button']); ?>                            
-                            <?= Html::a('Персональные Каталоги', ['catalog/index'], ['class'=>'btn btn-md fk-button']); ?>                            
+                                                  
                             <?= Html::a('История', ['history/index'], ['class'=>'btn btn-md fk-button']); ?>                            
                         </div>
                         <div class="col-md-6 text-right">

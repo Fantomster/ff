@@ -42,7 +42,7 @@ if (Yii::$app->user->can('manage')) {
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
             ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
-            ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
+         //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
             ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
         ]

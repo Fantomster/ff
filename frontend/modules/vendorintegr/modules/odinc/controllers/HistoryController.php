@@ -4,8 +4,8 @@ namespace frontend\modules\vendorintegr\modules\odinc\controllers;
 
 use Yii;
 use yii\web\Controller;
-use api\common\models\ApiAccess;
-use api\common\models\ApiAccessSearch;
+use api\common\models\ApiActions;
+use api\common\models\ApiActionsSearch;
 // use yii\mongosoft\soapserver\Action;
 
 /**
@@ -14,12 +14,12 @@ use api\common\models\ApiAccessSearch;
  * Author: R.Smirnov
  */
 
-class AccessController extends Controller {
+class HistoryController extends Controller {
     
         
     public function actionIndex() {
         
-        $searchModel = new ApiAccessSearch();
+        $searchModel = new ApiActionsSearch;
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
                 
         if (Yii::$app->request->isPjax) {

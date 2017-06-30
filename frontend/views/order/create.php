@@ -33,26 +33,26 @@ $this->registerJs(
                 //$("#loader-show").showLoading();
                 quantity = $(this).parent().parent().find(".quantity").val();
                 var cart = $(".basket_a");
-                var imgtodrag = $(this);
+                var imgtodrag = $("#cart-image");
                 if (imgtodrag) {
                     var imgclone = imgtodrag.clone()
                         .offset({
-                        top: imgtodrag.offset().top,
-                        left: imgtodrag.offset().left
+                        top: $(this).offset().top - 30,
+                        left: $(this).offset().left + 60
                     })
                         .css({
                         "opacity": "0.5",
                             "position": "absolute",
-                            "height": "39px",
-                            "width": "34px",
-                            "z-index": "100"
+                            "height": "60px",
+                            "width": "60px",
+                            "z-index": "10000"
                     })
                         .appendTo($("body"))
                         .animate({
-                        "top": cart.offset().top + 10,
-                            "left": cart.offset().left + 10,
-                            "width": 39,
-                            "height": 34
+                        "top": cart.offset().top,
+                            "left": cart.offset().left,
+                            "width": 60,
+                            "height": 60
                     }, 1000, "easeInOutExpo");
 
                     setTimeout(function () {
@@ -120,6 +120,7 @@ $this->registerJs(
         });'
 );
 ?>
+<img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
 <section class="content-header">
     <h1>
         <i class="fa fa-opencart"></i> Разместить заказ

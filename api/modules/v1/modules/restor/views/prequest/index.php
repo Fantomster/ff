@@ -2,9 +2,14 @@
 
 use yii\helpers\Html;
 
-require_once '/../default/_menu.php';
+echo $this->render('/default/_menu.php');
 
+var_dump($xml);
 
-echo "<h1> Postponed request controller </h1>";
+echo "<h2>".$res."</h2>";
+    
+
+var_dump($myXML);
+echo "<br><br>";
 
 ?>

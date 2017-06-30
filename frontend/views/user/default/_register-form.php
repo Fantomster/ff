@@ -2,138 +2,75 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use common\models\OrganizationType;
-use kartik\select2\Select2;
-use nirvana\showloading\ShowLoadingAsset;
-use kartik\checkbox\CheckboxX;
-
-kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
-
-ShowLoadingAsset::register($this);
-$this->registerJs(
-        '$("document").ready(function(){
-            $("#register-form").on("submit", function(e) {
-                $("#loader-show").showLoading();
-            });
-        });'
-);
-$this->registerCss('#loader-show {position:absolute;width:100%;height:100%;display:none}');
+use common\models\Organization;
 
 $form = ActiveForm::begin([
             'id' => 'register-form',
             'enableAjaxValidation' => true,
             'action' => yii\helpers\Url::to(['/user/register']),
-            'validateOnSubmit' => false,
+            'validateOnSubmit' => true,
             'options' => [
-                'autocomplete' => 'off',
+                'class' => 'auth-sidebar__form form-check reg js-reg',
             ],
+            'fieldConfig' => ['template' => '{input}'],
         ]);
 ?>
-<div class="form-group">
-    <input style="display:none" type="text"/>
-    <input style="display:none" type="password"/>
+<input type="email" name="fake_email" style="position: absolute; top: -100%;">
+<input type="password" name="fake_pwd" style="position: absolute; top: -100%;">
+<div class="auth-sidebar__form-radios">
     <?=
-    $form->field($organization, 'type_id')->widget(
-            Select2::className(), [
-        'model' => $organization,
-        'attribute' => 'type_id',
-        'hideSearch' => true,
-        'data' => OrganizationType::getList(),
-        'theme' => Select2::THEME_BOOTSTRAP,
-        'options' => [
-            'placeholder' => 'Выберите тип бизнеса',
-            'class' => 'form-control',
-        ],
-        'pluginOptions' => [
-            'allowClear' => false,
-        ],
-            ]
-    )->label(false);
-//    Select2::widget([
-//        'model' => $organization,
-//        'attribute' => 'type_id',
-//        'hideSearch' => true,
-//        'data' => OrganizationType::getList(),
-//        'theme' => Select2::THEME_BOOTSTRAP,
-//        'options' => [
-//            'placeholder' => 'Выберите тип бизнеса',
-//            'class' => 'form-control',
-//        ],
-//        'pluginOptions' => [
-//            'allowClear' => false,
-//        ],
-//    ]);
-//                            $form->field($organization, 'type_id')
-//                            ->label(false)
-//                            ->dropDownList(OrganizationType::getList(), [
-//                                'prompt' => 'Выберите тип бизнеса',
-//                                'class' => 'form-control'])
-    ?>
-    <?=
-            $form->field($organization, 'name')
-            ->label(false)
-            ->textInput(['class' => 'form-control', 'placeholder' => 'название организации'])
-    ?>
-    <?=
-            $form->field($profile, 'full_name')
-            ->label(false)
-            ->textInput(['class' => 'form-control', 'placeholder' => 'фио'])
-    ?>
-    <?=
-            $form->field($profile, 'phone')
-            ->widget(\common\widgets\PhoneInput::className(), [
-                'jsOptions' => [
-                    'preferredCountries' => ['ru'],
-                    'nationalMode' => false,
-                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
-                ],
-                'options' => [
-                    'class' => 'form-control',
-                ],
-            ])
-            ->label(false)
-            ->textInput(['class' => 'form-control', 'placeholder' => 'телефон'])
-    ?>
+            $form->field($organization, 'type_id')
+            ->radioList(
+                    [Organization::TYPE_RESTAURANT => 'Я покупаю', Organization::TYPE_SUPPLIER => 'Я продаю'], 
+                    [
+                        'item' => function($index, $label, $name, $checked, $value) use ($organization) {
 
-    <?=
-    $form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
-        //'initInputType' => CheckboxX::INPUT_CHECKBOX,
-        'autoLabel' => true,
-        'model' => $profile,
-        'attribute' => 'sms_allow',
-        'pluginOptions' => [
-            'threeState' => false,
-            'theme' => 'krajee-flatblue',
-            'enclosedLabel' => false,
-            'size' => 'md',
-        ],
-        'labelSettings' => [
-            'label' => 'Разрешить СМС уведомление',
-            'position' => CheckboxX::LABEL_RIGHT,
-            'options' => ['style' => '']
-        ]
-    ])->label(false);
-    ?>
+                            $checked = $checked ? 'checked' : '';
+                            $return = '<label class="modal-radio">';
+                            $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" '.$checked.'>';
+                            $return .= '<i class="radio-ico"></i><span>' . $label . '</span>';
+                            $return .= '</label>';
 
-    <?=
-            $form->field($user, 'email')
-            ->label(false)
-            ->textInput(['class' => 'form-control', 'placeholder' => 'email'])
-    ?>
-    <?=
-            $form->field($user, 'newPassword')
-            ->label(false)
-            ->passwordInput(['class' => 'form-control', 'placeholder' => 'пароль'])
+                            return $return;
+                        }
+                    ]
+            )
+            ->label(false);
     ?>
 </div>
+<div class="auth-sidebar__form-brims">
+    <label>
+        <?=
+            $form->field($user, 'email')
+            ->label(false)
+            ->textInput(['class' => 'form-control', 'placeholder' => 'Email'])
+        ?><i class="fa fa-envelope-square"></i>
+    </label>
+    <label>
 <?=
-Html::a('Зарегистрироваться', '#', [
-    'id' => 'btnRegister',
-    'data' => [
-        'method' => 'post',
-    ],
-    'class' => 'send__btn',
-])
-?>
-<input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
+            $form->field($profile, 'phone')
+            ->widget(\common\widgets\PhoneInput::className(), [
+                                'jsOptions' => [
+                                    'preferredCountries' => ['ru'],
+                                    'nationalMode' => false,
+                                    'utilsScript' => Yii::$app->assetManager->getPublishedUrl('@bower/intl-tel-input') . '/build/js/utils.js',
+                                ],
+                                'options' => [
+                                    'class' => 'form-control',
+                                ],
+                            ])
+            ->label(false)
+            ->textInput(['class' => 'form-control', 'placeholder' => 'Телефон'])
+    ?>        <i class="fa fa-phone-square"></i>
+    </label>
+    <label>
+        <?=
+            $form->field($user, 'newPassword')
+            ->label(false)
+            ->passwordInput(['class' => 'form-control', 'placeholder' => 'Пароль'])
+    ?><i class="fa fa-lock"></i>
+    </label>
+</div>
+<button type="submit" class="but but_green" id="btnRegister" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Регистрируемся..."><span>Зарегистрироваться</span><i class="ico"></i></button>
+<div class="auth-sidebar__enter reg"><span>Уже зарегистрированы?</span><a href="#">войти в систему</a></div>
 <?php ActiveForm::end(); ?>

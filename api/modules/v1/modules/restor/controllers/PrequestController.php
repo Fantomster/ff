@@ -6,6 +6,7 @@ use Yii;
 use yii\web\Controller;
 // use yii\mongosoft\soapserver\Action;
 use yii\httpclient\Client;
+use api\common\models\RkSession;
 
 /**
  * Description of SiteController
@@ -30,19 +31,10 @@ class PrequestController extends Controller {
     
     $restr = "199990046";
     
-    $cook =    '8887253E07B9E41B2FC7AF60FF335370A9841B7F27ADEC48E7BB'
-              .'3878C7F80F98205840B4A65A803876CD8A4665DC58E37AFA93A24'
-              .'BED8AD92BA6B66E238A957E56F263A1033B65F67F3C3079DB42EA7'
-              .'243D192DCE86E922A4588A0D86E706244D9B40742720BC95F5031'
-              .'3D37F04D988D8969E6C73F3BD3BF6941B4DE686FCB0E8D0B25AFD6'
-              .'2F1EE5F418C6C5ECEEA9542159968D267CBF85EDD8D58861372590'
-              .'625ABB12406DB53910BC6B04C93BCFB7EDB54D48869707FA57EE69'
-              .'E450D096AE37B6F1C33F004A8A7A7EA7D4217A477B7120F2AD9A381'
-              .'7D4E040CB68973CBE747A63E7BF5C86A89E4B0A3B891C2022FBADC'
-              .'F847B0F874D4FFACE7F893CF0971662F52C1215F8F9C4B7AAE529B'
-              .'229A424063E0A68359A64408945A7CC3E89D48494614E39FE7ACDF9'
-              .'D18EE0DF9A953CC061CDF1032017E2B9CA580EF9159BA868DEC01AB'
-              .'93B8923C0C060E550D86741963ECBDE9B9DAD0E99C6393147097CC766';
+    $model = RkSession::find()->where('id=1')->one();
+    $cook = $model->cook;
+    
+    // $cook =    '8AC676108E295CBD193F9FD1D92D97E95DB023F2C4715BBAE4E73FF47CBDCA9463F8443FC5A0119BADF2BB57A40A9FF33653C1FAE71FD3FD2CC3592B2250356D965390F5931C26522575A500EE42B2999DA3468B07A0C908FEF94AE6C7E0DD618F2890EF88AB125223F5DF9ACBE36F988CCDE622DAACEB2B03BB5E34A2D4E1A06184DFDCEBF11821F874C7A211491B021C365FCBE1BB3D304E264627C74B8BC1D986BF1E80AE01AECBDD150BD5B3179B6714BF8213001E3B983708AEF70764161CF254F3F2B9512FFC06955EEA2DDE841438B21E20F8448F0E1BCCBFEC4C4BCF33DD6F70ED5F2CCDEDBBCD6A4F5FB344F4301D98F381EC42024DD5E82877135EDB167188E4E20A0D5FC3EB328CE15942B23E680CADBDFF7EFB9F0D535FFC02BD8F322F90254DA19442170E9FDFE3A2BCFCFE06C2C79B50407E2B37ACD8BB4A21286532D379A7A2A31DAD9B46A11BB2B2DE97D00C5189837788BC91744DEBF405';
     
     
 /*
@@ -51,13 +43,42 @@ class PrequestController extends Controller {
         <PARAM name="object_id" val="'.$restr.'"/>
         </RQ>';   
   */
-    
-    $xml = '<?xml version="1.0" encoding="utf-8" ?>
-    <RQ cmd="sh_get_goods" tasktype="any_call" guid="sdfsd" callback="" timeout="int">
-    <PARAM name="object_id" val="'.$restr.'" />
-    <PARAM name="goodgroup_rid" val="1" />
+
+    $xml = '<?xml version="1.0" encoding="utf-8"?>
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="00000000-0000-0000-0000-000000000013" callback="https://api.f-keeper.ru/api/web/v1/restor/callback">
+    <PARAM name="object_id" val="'.$restr.'" />  
+    <PARAM name="goodgroup_rid" val="1"/>
+    <PARAM name="include_goods" val="1"/>    
     </RQ>';
-       
+
+    /* 
+   // Работает!!
+        $xml = '<?xml version="1.0" encoding="utf-8"?>
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="00000000-0000-0000-0000-000000000013" callback="https://api.f-keeper.ru/api/web/v1/restor/callback">
+    <PARAM name="object_id" val="'.$restr.'" />  
+    </RQ>';
+*/
+    
+    /*
+   // Работает!! 
+    $xml = '<?xml version="1.0" encoding="utf-8"?>
+    <RQ cmd="sh_get_goods" tasktype="any_call" guid="00000000-0000-0000-0000-000000000013" callback="https://api.f-keeper.ru/api/web/v1/restor/callback">
+    <PARAM name="object_id" val="'.$restr.'" />  
+    </RQ>';
+*/
+  /*
+  $xml = '<?xml version="1.0" encoding="utf-8" ?>
+  <RQ cmd="get_tasklist">
+    <PARAM name="object_id" val="'.$restr.'" />
+  </RQ>';
+ */
+  /*  
+  $xml = '<?xml version="1.0" encoding="utf-8" ?>
+  <RQ cmd="sh_get_goodgroups" callback="https://api.f-keeper.ru/api/web/v1/restor/callback">
+    <PARAM name="object_id" val="'.$restr.'" />
+  </RQ>';
+    */
+    
     // setcookie('_ASPXAUTH',$cook);
     
     $headers = array(
@@ -71,7 +92,7 @@ class PrequestController extends Controller {
     echo "<hr>";
   */
     
-    $fp = fopen('runtime/logs/http-request1.log', 'w');
+    $fp = fopen('runtime/logs/http-callback.log', 'w');
     
     $ch = curl_init(); 
     curl_setopt($ch, CURLOPT_URL,$url);
@@ -105,6 +126,9 @@ class PrequestController extends Controller {
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
     
+  //  var_dump($data);
+  //  var_dump($array);
+    
 
     /*
     foreach ($myobj->xpath('//OBJECTINFO') as $obj) {
@@ -123,12 +147,14 @@ class PrequestController extends Controller {
     // var_dump($myXML);
     
     // var_dump($array);
+    if (isset($array['RP'])) {
+    $objectinfo = $array['RP'];
+    }
     
-    $objectinfo = $array['RP']['OBJECTINFO'];
+     
+   
     
-   // var_dump($objectinfo);
-    
-    if (!$objectinfo) {
+    if (!isset($objectinfo)) {
         
             foreach ($array['Error'] as $obj) {
           $res = 'Ошибка: '.$obj['code'].'<br> Описание ошибки: '.$obj['Text'].PHP_EOL;
@@ -136,11 +162,13 @@ class PrequestController extends Controller {
         
     } else {
             
-            foreach ($array['RP']['OBJECTINFO'] as $obj) {
-          $res = 'Объект id: '.$obj['id'].'<br>имя: '.$obj['name'].'<br>адрес: '.$obj['address'].PHP_EOL;
+            foreach ($array['RP'] as $obj) {
+          $res = 'Задача id: '.$obj['taskguid'].PHP_EOL;
             }
     
     }
+     
+    
     /*
     foreach ($objects as $object) {
     
@@ -158,9 +186,10 @@ class PrequestController extends Controller {
     return $this->render('index'  ,[
                    'myXML' => $myXML,
                    'objectinfo' => $objectinfo,
-                   'data' => $data,
-                   'info' => $info,
+          //         'data' => $data,
+          //         'info' => $info,
                    'res'  => $res,
+                   'xml'  => $xml,
          
                ]);
     

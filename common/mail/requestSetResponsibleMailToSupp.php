@@ -60,7 +60,7 @@ use yii\helpers\Url;
 
 			<tr>
 				<td style="padding: 10px 30px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 14px; mso-height-rule: exactly; line-height: 20px; color: #555;">
-					<b>&laquo;<?=$vendor->organization->name;?>&raquo;</b>  назначил Вас исполнителем по заявке <b>&laquo;<?=$request->product;?>&raquo;</b>
+					<b>&laquo;<?=$request->client->name;?>&raquo;</b>  назначил Вас исполнителем по заявке <b>&laquo;<?=$request->product;?>&raquo;</b>
 					<br><br>
 					
 				</td>

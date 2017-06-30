@@ -11,35 +11,35 @@ echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterPosition' => false,
     'summary' => '',
-    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable order-table'],
-    'options' => ['class' => 'table-responsive'],
-    // 'panel' => false,
-    //   'bootstrap' => false,
+    'headerRowOptions' => ['style' => "padding: 3px;"],
+    'tableOptions' => ['class' => 'table'],
     'columns' => [
         [
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = ""; //$data->product->note ? "<div class='grid-article'>Заметка: " . $data->product->note . "</div>" : ""; 
-                return "<div class='grid-prod'>" . $data->product_name . "</div>"
-                        . "<div class='grid-article'>Артикул: <span>"
-                        . $data->article . "</span></div>" . $note;
+                return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . $data->product_name . '</p>
+                    <p style="line-height: 1px;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>';
             },
             'label' => 'Товар',
+            'headerOptions' => ['style' => "padding: 10px;width: 40%;border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
+            'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
         [
             'attribute' => 'quantity',
             'value' => 'quantity',
             'label' => 'Количество',
-            'contentOptions' => ['class' => 'width150'],
+            'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
+            'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
-        [ 'format' => 'raw',
+        ['format' => 'raw',
             'attribute' => 'price',
             'value' => function($data) {
                 return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
             },
             'label' => 'Цена',
-            'contentOptions' => ['class' => 'width150'],
+            'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
+            'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
         [
             'format' => 'raw',
@@ -48,50 +48,9 @@ echo GridView::widget([
                 return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
             },
             'label' => 'Сумма',
-            'contentOptions' => ['class' => 'width150'],
+            'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
+            'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
     ],
 ]);
 ?>
-                    <div class="order-total">
-                        <div class="row">
-                            <div class="col-xs-4"><hr></div>
-                            <div class="col-xs-8"></div>
-                        </div>
-                        <?php if (!empty($order->comment)) { ?>
-                        <div class="row">
-                            <div class="col-xs-4"><span>Комментарий к заказу</span></div>
-                            <div class="col-xs-8"><?= $order->comment ?></div>
-                        </div>
-                        <?php } ?>
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <span><?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?></span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= ($order->discount) ? $order->discount : '-' ?></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-4 ">
-                                <span>Стоимость доставки:</span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= $order->calculateDelivery() . ' руб' ?></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <span>Итого:</span>
-                            </div>
-                            <div class="col-xs-8">
-                                <span><?= $order->total_price . ' руб' ?></span>
-                            </div>
-                        </div>
-                    </div>
-
-<?=
-(isset($canRepeatOrder) && $canRepeatOrder) ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
-            'class' => 'btn btn-default pull-right',
-            'style' => 'margin-right: 7px;'
-        ]) : "" ?>

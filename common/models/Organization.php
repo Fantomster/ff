@@ -90,11 +90,12 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
-            ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
+            ['name', 'required', 'on' => ['complete', 'settings'], 'message' => 'Пожалуйста, напишите название вашей организации'],
+            ['name', 'required', 'on' => 'invite', 'message' => 'Пожалуйста, напишите название организации'],
+            ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы покупаете или продаете?'],
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
-            [['address','place_id','lat','lng'], 'required', 'on' => 'complete','message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],
+            [['address','place_id','lat','lng'], 'required', 'on' => ['complete', 'settings'],'message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address','administrative_area_level_1'], 'string', 'max' => 255],
@@ -103,7 +104,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
-            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
+            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
         ];
     }
 
@@ -121,7 +122,7 @@ class Organization extends \yii\db\ActiveRecord {
             [
                 'class' => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
-                'scenarios' => ['default'],
+                'scenarios' => ['settings'],
                 'path' => '@app/web/upload/temp/',
                 'url' => '/upload/temp/',
                 'thumbs' => [

@@ -27,19 +27,51 @@ class User extends \amnah\yii2\user\models\User {
      * @inheritdoc
      */
     public function rules() {
-        $rules = parent::rules();
-        $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite', 'manageNew']];
-        $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
-        $rules[] = [['role_id'], 'compare', 'compareValue' => Role::ROLE_ADMIN, 'operator' => '>'];
-        $rules[] = [['email'], 'unique', 'on'=>'sendInviteFromVendor', 'message' => 'ooo'];
-        $rules[] = [['organization_id'], 'integer'];
-//        $rules[] = [['email'], 'required', 'message' => 'Пожалуйста, напишите ваш адрес электронной почты'];
-        //переопределим сообщения валидации быдланским способом
-        $pos = array_search(['email', 'required'], $rules);
-        $rules[$pos]['message'] = 'Пожалуйста, напишите ваш адрес электронной почты';
-        $pos = array_search([['newPassword'], 'required', 'on' => ['register', 'reset']], $rules);
-        $rules[$pos]['message'] = 'Пожалуйста, введите пароль';
-        
+        $rules = [
+            // general email and username rules
+            [['email', 'username'], 'string', 'max' => 255],
+            [['email', 'username'], 'unique', 'on' => ['register', 'admin', 'manage', 'manageNew']],
+            [['email', 'username'], 'filter', 'filter' => 'trim'],
+            [['email'], 'email'],
+            [['username'], 'match', 'pattern' => '/^\w+$/u', 'except' => 'social', 'message' => Yii::t('user', '{attribute} can contain only letters, numbers, and "_"')],
+
+            // password rules
+            [['newPassword'], 'string', 'min' => 3],
+            [['newPassword'], 'filter', 'filter' => 'trim'],
+            [['newPassword'], 'required', 'on' => ['register', 'reset', 'acceptInvite', 'manageNew']],
+            [['newPasswordConfirm'], 'required', 'on' => ['reset']],
+            [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
+            
+            // email rules
+            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message'=>'Введите эл.почту '],
+            
+            // account page
+            [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
+
+            // admin crud rules
+            [['role_id', 'status'], 'required', 'on' => ['admin']],
+            [['role_id', 'status'], 'integer', 'on' => ['admin']],
+            [['banned_at'], 'integer', 'on' => ['admin']],
+            [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
+            
+            [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
+            [['organization_id'], 'integer'],
+        ];
+
+        // add required for currentPassword on account page
+        // only if $this->password is set (might be null from a social login)
+        if ($this->password) {
+            $rules[] = [['currentPassword'], 'required', 'on' => ['account']];
+        }
+
+        // add required rules for email/username depending on module properties
+        if ($this->module->requireEmail) {
+            $rules[] = ["email", "required"];
+        }
+        if ($this->module->requireUsername) {
+            $rules[] = ["username", "required"];
+        }
+
         return $rules;
     }
     

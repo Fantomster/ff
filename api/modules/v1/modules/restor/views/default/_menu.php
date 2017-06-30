@@ -21,6 +21,8 @@ echo Html::a('Single requests', ['/v1/restor/srequest'], ['class'=>'btn btn-prim
 echo "&nbsp; &nbsp; &nbsp; ";
 echo Html::a('Postponed requests', ['/v1/restor/prequest'], ['class'=>'btn btn-primary']);
 echo "&nbsp; &nbsp; &nbsp; ";
+echo Html::a('Tasks', ['/v1/restor/tasks'], ['class'=>'btn btn-primary']);
+echo "&nbsp; &nbsp; &nbsp; ";
 echo Html::a('History', ['/v1/restor/history'], ['class'=>'btn btn-primary']);
 echo "&nbsp; &nbsp; &nbsp; ";
 echo Html::a('Error codes', ['/v1/restor/serror'], ['class'=>'btn btn-primary']);

@@ -1,0 +1,291 @@
+@font-face {
+    font-family: "Circe_Bold";
+    src: url("../fonts/Circe-Bold.ttf");
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: "Circe_ExtraBold";
+    src: url("../fonts/Circe-ExtraBold.ttf");
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: "Circe_ExtraLight";
+    src: url("../fonts/Circe-ExtraLight.ttf");
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: "Circe_Light";
+    src: url("../fonts/Circe-Light.ttf");
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: "Circe_Regular";
+    src: url("../fonts/Circe-Regular.ttf");
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: "Circe_Thin";
+    src: url("../fonts/Circe-Thin.ttf");
+    font-style: normal;
+    font-weight: normal;
+}
+.block_baasket_head{
+    width: 92%;
+    margin: 0 4%;
+    border-bottom: 1px solid #F6F6F6;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+.block_baasket_head img{
+    float: right;
+    margin-right: 10px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+.a_basket{
+    font-size: 18px;
+    font-family: "Circe_Regular";
+    color: #000;
+}
+.block_right_basket{
+    width: 440px;
+    right: -100%;
+    height: 100%;
+    position: absolute;
+    z-index: 999;
+    background-color: #fff;
+    overflow-y: auto;
+}
+.col_vo{
+    display: inline-block;
+    background-color: #378CBE;
+    color: #fff;
+    margin-left: 15px;
+    padding: 3px;
+    font-size: 12px;
+    padding-top: 2px;
+    vertical-align: top;
+    padding-bottom: 2px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -o-border-radius: 4px;
+    border-radius: 4px;
+}
+.block_name_copmain{
+    width: 100%;
+    border-bottom: 1px solid #E0E0E0;
+}
+.block_name_copmain p{
+    font-family: "Circe_Regular";
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    font-size: 18px;
+    color: #31353D;
+}
+.block_tovar_check{
+    width: 100%;
+    position: relative;
+    border-bottom: 1px solid #E0E0E0;
+}
+.count{
+    font-family: "Circe_Regular";
+    color: #95989A;
+    font-size: 16px;
+    padding-right: 10px;
+}
+.name_tovar{
+    font-family: "Circe_Regular";
+    font-size: 16px;
+    padding-top: 20px;
+    padding-right: 30px;
+    padding-left: 25px;
+}
+.name_tovar1{
+    font-family: "Circe_Regular";
+    font-size: 16px;
+    padding-right: 30px;
+    padding-left: 25px;
+}
+.name_tovar1 span{
+    display: inline-block;
+}
+.delete_tovar{
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    margin-top: -8.5px;
+    cursor: pointer;
+}
+.delete_tovar:hover{
+    opacity: 0.7;
+}
+.block_sum{
+    width: 100%;
+    background-color: #F4F4F4;
+    overflow: hidden;
+}
+.name_s{
+    font-family: "Circe_Regular";
+    font-size: 20px;
+    padding-top: 20px;
+    padding-left: 25px;
+    padding-bottom: 10px;
+    float: left;
+}
+.count_s{
+    font-family: "Circe_Regular";
+    font-size: 20px;
+    padding-top: 20px;
+    padding-right: 15px;
+    float: right;
+}
+.but_zakaz_bask{
+    width: 100%;
+    background-color: #82C073;
+    color: #fff;
+    font-size: 20px;
+    border: none;
+    outline: none;
+    font-family: "Circe_Regular";
+}
+.maska1{
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 980;
+    background: rgba(0,0,0,0.6);
+    width: 100%;
+    height: 100%;
+    display: none;
+    cursor: pointer;
+}
+.min_zakaz{
+    font-family: "Circe_Regular";
+    color: #95989A;
+    float: left;
+    width: 60%;
+    margin-top: 50px;
+    line-height: 18px;
+    margin-left: -54px;
+    padding-left: 0;
+}
+.dost_min{
+    font-family: "Circe_Regular";
+    color: #95989A;
+    float: right;
+    padding-right: 10px;
+    padding-left: 35px;
+    margin-top: -66px;
+    width: 38%;
+}
+.block_wrap_dont_tovar{
+    width: 100%;
+    background-color: #F5F5F5;
+    padding: 30px;
+}
+.block_wrap_dont_tovar_name{
+    font-family: "Circe_Bold";
+    font-size: 18px;
+}
+.block_wrap_dont_tovar_p{
+    font-family: "Circe_Regular";
+    font-size: 15px;
+}
+.block_wrap_dont_tovar_p span{
+    font-weight: bold;
+}
+.block_wrap_dont_tovar_p a{
+    color: #54A2D6;
+    text-decoration: underline;
+    font-size: 16px;
+}
+.block_wrap_dont_tovar_p a:hover{
+    color: #000;
+}
+@media (max-width: 770px) {
+    .block_right_basket{
+        height: 92.9%;
+    }
+}
+@media (max-width: 500px) {
+    .block_right_basket{
+        width: 100%;
+    }
+    .name_tovar{
+        font-size: 14px;
+        padding-left: 10px;
+    }
+    .name_tovar1{
+        font-size: 12px;
+        padding-left: 10px;
+    }
+}
+@media (max-width: 460px) {
+    .min_zakaz{
+        font-family: "Circe_Regular";
+        color: #95989A;
+        float: none;
+        width: 100%;
+        margin-top: 10px;
+        line-height: 18px;
+        margin-left: 0px;
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: center;
+        float: left;
+    }
+    .dost_min{
+        font-family: "Circe_Regular";
+        color: #95989A;
+        float: left;
+        padding-right: 10px;
+        padding-left: 10px;
+        margin-top: 6px;
+        width: 100%;
+        text-align: center;
+    }
+}
+@media (max-width: 358px) {
+    .block_right_basket{
+        height: 90%;
+    }
+    .block_right_basket{
+        margin-top: 50px;
+    }
+    .block_wrap_dont_tovar{
+        width: 100%;
+        background-color: #F5F5F5;
+        padding: 10px;
+    }
+    .block_wrap_dont_tovar_name{
+        font-family: "Circe_Bold";
+        font-size: 18px;
+    }
+    .block_wrap_dont_tovar_p{
+        font-family: "Circe_Regular";
+        font-size: 14px;
+    }
+    .block_wrap_dont_tovar_p span{
+        font-weight: bold;
+    }
+    .block_wrap_dont_tovar_p a{
+        color: #54A2D6;
+        text-decoration: underline;
+        font-size: 16px;
+    }
+}
+@media (max-width: 316px) {
+    .block_right_basket{
+        height: 88%;
+    }
+    .block_right_basket{
+        margin-top: 100px;
+    }
+}

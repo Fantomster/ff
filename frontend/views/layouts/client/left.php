@@ -19,30 +19,30 @@ $cartCount = $user->organization->getCartCount();
                     'encodeLabels' => false,
                     'items' => [
                         ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
-                        ['label' => 'Рабочий стол', 'icon' => 'home', 'url' => ['client/index']],
+                        ['label' => 'Рабочий стол', 'icon' => 'home', 'url' => ['/client/index']],
                         [
                             'label' => 'Разместить заказ',
                             'icon' => 'opencart',
-                            'url' => ['order/create'],
+                            'url' => ['/order/create'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label label-primary pull-right cartCount">' . $cartCount . '</span></span></a>',
                         ],
                         [
                             'label' => 'Заказы',
                             'icon' => 'history',
-                            'url' => ['order/index'],
+                            'url' => ['/order/index'],
                             'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
                         ],
-                        ['label' => 'Поставщики', 'icon' => 'users', 'url' => ['client/suppliers'], 'options' => ['class' => 'hidden-xs']],
+                        ['label' => 'Поставщики', 'icon' => 'users', 'url' => ['/client/suppliers'], 'options' => ['class' => 'hidden-xs']],
 //                        [
 //                            'label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 
 //                            'icon' => 'envelope', 
 //                            'url' => ['client/messages'],
 //                            ],
-                        ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
+                        ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'https://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
                         
-                        ['label' => 'Заявки<sub class="sub-new">БЕТА</sub>', 'icon' => 'paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
-                        ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['client/analytics'], 'options' => ['class' => 'hidden-xs']],
-                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['client/tutorial', 'video' => 'video']],
+                        ['label' => 'Заявки<sub class="sub-new">БЕТА</sub>', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
+                        ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs']],
+                        ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
                         ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
                         [
@@ -51,9 +51,9 @@ $cartCount = $user->organization->getCartCount();
                             'url' => '#', //['client/settings'],
                             'options' => ['class' => "treeview hidden-xs"],
                             'items' => [
-                                ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['client/settings']],
-                                ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['integration/index']],
-                                ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['client/employees']],
+                                ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
+                             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default']],
+                                ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],
@@ -73,11 +73,9 @@ $cartCount = $user->organization->getCartCount();
             </div>
         </form>
         <ul class="sidebar-menu personal-manager">
-            <li class="header"><span style="text-transform: uppercase;">Личный менеджер</span></li>
+            <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;">
-                <img src="/images/welcome-zalina.png" class="welcome-manager">
-                <p style="font-size: 14px;"><strong>Залина</strong></p><p></p>
-                <p>+7 929 611 79 00</p>
+                <p><a href="tel:+74994041018p202"><i class="fa fa-phone"></i> +7-499-404-10-18 доб.202</a></p>
             </div>
         </ul>
     </section>

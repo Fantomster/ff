@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 
-require_once '/../default/_menu.php';
+echo $this->render('/default/_menu.php');
 
 
 echo "<h2>".$res."</h2>";

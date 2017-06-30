@@ -124,23 +124,4 @@ $this->title = 'Поставщикам';
             </div>
         </div>
     </div>
-    <div class="contact__block">
-
-        <h4>Автоматизируйте свой бизнес сейчас</h4>
-        <p>Вы в одном шаге, расскажите о себе</p>
-
-        <div class="contact__form">
-            <?php if ($flash = Yii::$app->session->getFlash("Register-success")): ?>
-
-                <div class="alert alert-success">
-                    <p><?= $flash ?></p>
-                </div>
-
-            <?php 
-            else:
-                echo $this->render('/user/default/_register-form', compact("user", "profile", "organization"));
-            endif; 
-            ?>
-        </div>
-    </div>
 </main><!-- .content -->

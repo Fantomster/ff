@@ -5,7 +5,7 @@ namespace api\modules\v1\modules\restor\controllers;
 use Yii;
 use yii\web\Controller;
 // use yii\mongosoft\soapserver\Action;
-use yii\httpclient\Client;
+// use yii\httpclient\Client;
 
 /**
  * Description of SiteController
@@ -26,29 +26,60 @@ class CallbackController extends Controller {
         
     public function actionIndex() {
         
+    $getr = Yii::$app->request->getRawBody();
+        
+   // $rest_json = file_get_contents("php://input");
+   // $_POST = json_decode($rest_json, true);    
+        
+    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log', print_r($getr,true), FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
+      
+    /*    
+        
+    if (Yii::$app->request->post()){
+        
     $request = Yii::$app->request;
     
-    $getr = $request->post();    
+    $getr = $request->post();  
     
     if($getr) {
     
-    $fp = fopen('runtime/logs/callback.log', 'w');
+    // $fp = fopen('runtime/logs/callback.log', 'a');    
     
-    $fputs($fp,$getr); 
-        
+    // fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST FOUND'.PHP_EOL);    
+    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':POST FOUND:'.PHP_EOL, FILE_APPEND);   
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log', $getr, FILE_APPEND);    
+     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+   // fputs($fp,$getr); 
+           
+    } else {
+       
+    // $fp = fopen('runtime/logs/callback.log', 'a');
+    // fputs($fp,PHP_EOL.date("Y-m-d H:i:s").':POST NOT (!) FOUND'.PHP_EOL);        
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.date("Y-m-d H:i:s").':POST NOT (!) FOUND'.PHP_EOL, FILE_APPEND);    
+     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    
     }
     // if (!Yii::$app->request->isPost) {
     
     // echo "Method POST is only accepted.";
         
-       
-       
-       
+    return '<?xml version="1.0" encoding="utf-8"?><RQ value="OK">OK</RQ>';   
+     
+   
+    // fclose($fp);
     // }
         
+    } else {
+    echo "Request MUST be POST.";
+    exit;
         
+    }    
         
-        
+    */    
         
     //    return $this->render('index' // ,[
               //      'searchModel' => $searchModel,

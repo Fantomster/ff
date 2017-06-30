@@ -125,7 +125,7 @@ class VendorController extends DefaultController {
 
     public function actionSettings() {
         $organization = $this->currentUser->organization;
-        $organization->scenario = "complete";
+        $organization->scenario = "settings";
         if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;
@@ -1341,7 +1341,7 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
 
                 if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный товар']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный товар']];
                     return $result;
                     exit;
                 }
@@ -1349,7 +1349,7 @@ class VendorController extends DefaultController {
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
                     return $result;
                     exit;
                 }
@@ -1822,8 +1822,10 @@ class VendorController extends DefaultController {
         $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
-        return $this->render('dashboard/index', compact(
-                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats'
+        $organization = $currentUser->organization;
+        $profile = $currentUser->profile;
+        return $this->render('index', compact(
+                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats', 'organization', 'profile'
         ));
     }
 

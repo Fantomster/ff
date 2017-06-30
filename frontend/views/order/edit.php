@@ -234,7 +234,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
             <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
         </div>
         <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">
-            <div class = "block_wrapper top">
+            <div class = "block_wrapper">
                 <div class="block_head_w">
                     <img src="/img/chat.png" alt="">
                 </div>

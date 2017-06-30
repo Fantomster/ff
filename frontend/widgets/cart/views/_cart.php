@@ -42,8 +42,12 @@ $count = count($orders);
                     $forFreeDelivery = $order->forFreeDelivery();
                 ?>
                 <div class="block_sum">
-                    <p class="name_s">Сумма</p><p class="count_s"><?= $order->total_price ?> руб</p>
-                    <p class="min_zakaz">
+                    <div class="row">
+                        <div class="col-md-4 name_s">Сумма</div>
+                        <div class="col-md-8 count_s"><?= $order->total_price ?> руб.</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 min_zakaz">
                         <?php if ($forMinOrderPrice) { ?>
                         до минимального заказа <br><span><?= $forMinOrderPrice ?> руб</span>
                         <?php } elseif ($forFreeDelivery) { ?>
@@ -51,8 +55,9 @@ $count = count($orders);
                         <?php } else { ?>
                         бесплатная доставка!<br><span>&nbsp;</span>
                         <?php } ?>
-                    </p>
-                    <p class="dost_min">включая доставку<br><span><?= $order->calculateDelivery() ?> руб</span></p>
+                        </div>
+                        <div class="col-md-6 dost_min">включая доставку<br><span><?= $order->calculateDelivery() ?> руб</span></div>
+                    </div>
                 </div>
             <?php } ?>
             <?= Html::a('Оформить заказ', ['order/checkout'], ['class' => 'btn but_zakaz_bask', 'data-pjax' => 0]) ?>

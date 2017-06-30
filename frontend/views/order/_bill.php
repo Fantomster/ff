@@ -8,7 +8,7 @@
                 <p class= "name_dashed" style="font-family: sans-serif;font-size: 18px;border-bottom: 1px dashed #000; width: 80%;text-align: left;font-weight: 100;" ><?= $order->client->name ?></p>
             </div>
             <div class="block_img" style="  width: 40%;float: left;">
-                <img class = "img_i" src="<?= $order->client->pictureUrl ?>" style="float: left;" alt="" width="93" height="52">
+                <img class = "img_i" src="https://f-keeper.ru<?= $order->client->pictureUrl ?>" style="float: left;" alt="" width="93" height="52">
             </div>
             <div class="block_spisok" style="margin-top: 20px; display: block;float: left;">
                 <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;" >Город: <?= $order->client->locality ?></p>
@@ -40,7 +40,7 @@
         <?php if (!empty($order->comment)) { ?>
         <div style="width: 100%;height: auto;border: 1px solid #DDDDDD;float: left;margin: 30px 0%; border-radius: 100px;">
             <div style="border-right: 1px solid #DDDDDD;width: 55px;float: left;height: 50px;">
-                <img src="/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
+                <img src="https://f-keeper.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
             </div>
             <p class = "pl" style="margin-left: 10px;padding-left: 60px;padding-top: 13px;"><?= $order->comment ?></p>
         </div>
@@ -48,9 +48,11 @@
         <?= $this->render('_view-grid', compact('dataProvider', 'order')) ?>
         <div style="width: 100%; height: 170px;">
             <div class = "sp_cen" style="width: 300px;float: right;">
-                <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: 20%</p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: 0 руб.</p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: 2200000 руб.</p>
+                <?php if ($order->discount) { ?>
+                <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: <?= $order->getFormattedDiscount ?></p>
+                <?php } ?>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: <?= $order->calculateDelivery() ?> руб.</p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: <?= $order->total_price ?> руб.</p>
             </div>
             <p class = "but_p_1" style="color: #999C9E;margin-top: 150px;display: block;float: left;">Подпись: ______________ </p>
             <p class = "but_p_2"  style="color: #999C9E;margin-top: 150px;display: block;float: left;margin-left: 20px;">   Дата: _________________</p>

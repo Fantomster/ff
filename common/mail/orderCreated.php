@@ -35,5 +35,5 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
     <div><?= $order->comment ?></div>
     <?php } ?>
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-<?= $this->render("_mailGrid", compact("dataProvider")) ?>
+    <?= $this->render('@frontend/views/order/_bill', compact('order', 'dataProvider')) ?>
 </div>

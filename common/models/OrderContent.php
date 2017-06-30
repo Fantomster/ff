@@ -18,6 +18,7 @@ use Yii;
  * @property Order $order
  * @property CatalogBaseGoods $product
  * @property string $total
+ * @property string $note
  */
 class OrderContent extends \yii\db\ActiveRecord
 {
@@ -137,7 +138,7 @@ class OrderContent extends \yii\db\ActiveRecord
         return [];
     }
     
-    public function getNote() {
+    public function  getNote() {
         return GoodsNotes::findOne(['catalog_base_goods_id' => $this->product_id, 'rest_org_id' => $this->order->client_id]);
     }
 }

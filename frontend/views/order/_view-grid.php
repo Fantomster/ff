@@ -18,8 +18,9 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
+                $note = isset($data->note->note) ? '<p style="line-height: 0.5;font-size: 11px;color: #999C9E;">Заметка: ' . $data->note->note . '</p>' : ""; 
                 return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . $data->product_name . '</p>
-                    <p style="line-height: 1px;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>';
+                    <p style="line-height: 0.5;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>'.$note;
             },
             'label' => 'Товар',
             'headerOptions' => ['style' => "padding: 10px;width: 40%;border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],

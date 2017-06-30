@@ -7,8 +7,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 
-$this->title = 'Заказ №' . $order->id;
-
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
     $priceEditable = false;
@@ -24,7 +22,8 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
-$edit = false;
+$urlViewOrder = Url::to(['/order/view', 'id' => $order->id]);
+$edit = true;
 
 $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
@@ -89,7 +88,7 @@ $js = <<<JS
                 $('#toPrint').printThis();
             });
         });
-        $('.content').on('click', '#btnSave', function(e) {
+        $('.content').on('click', '.btnSave', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
             $("#loader-show").showLoading();
@@ -97,8 +96,9 @@ $js = <<<JS
                 form.attr("action"),
                 form.serialize()
             ).done(function(result) {
-                dataEdited = 0;
-                $("#loader-show").hideLoading();
+                document.location = "$urlViewOrder";
+//                dataEdited = 0;
+//                $("#loader-show").hideLoading();
             });
         });
         $('.content').on('click', '.deletePosition', function(e) {
@@ -209,66 +209,75 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     ?>
 </section>
 <section class="content">
-    <div class="container1 ">
-        <div class="row">
-            <div class="col-lg-8 col-md-12">
-                <?= $this->render('_bill', compact('order', 'dataProvider')) ?>
-            </div>
-
-            <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp" id="actionButtons">
-                <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
-            </div>
-            <?php
-            echo Html::beginForm(Url::to(['/order/ajax-refresh-buttons']), 'post', ['id' => 'actionButtonsForm']);
-            echo Html::hiddenInput('order_id', $order->id);
-            echo Html::endForm();
-            ?>
-            <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">
-                <div class = "block_wrapper">
-                    <div class="block_head_w">
-                        <img src="/img/chat.png" alt="">
-                    </div>
-                    <div class="direct-chat-messages wrapppp" id="chatBody">
+    <div class="row">
+        <div class="col-md-8" id="toPrint">
+            <div class="box box-info">
+                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
+                <div class="box-header">
+                    <h4 class="font-bold">Заказ №<?= $order->id ?></h4><hr>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div id="orderGrid">
                         <?php
-                        foreach ($order->orderChat as $chat) {
-                            echo $this->render('_chat-message', [
-                                'id' => $chat->id,
-                                'name' => $chat->sentBy->profile->full_name,
-                                'sender_id' => $chat->sent_by_id,
-                                'message' => $chat->message,
-                                'time' => $chat->created_at,
-                                'isSystem' => $chat->is_system,
-                                'ajax' => 0,
-                                'danger' => $chat->danger,
-                                'organizationType' => (isset($chat->sentBy->organization) ? $chat->sentBy->organization->type_id : 1)]);
-                        }
+                        echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'quantityEditable', 'priceEditable', 'order', 'canRepeatOrder'));
                         ?>
                     </div>
-                    <?=
-                    Html::beginForm(['/order/send-message'], 'POST', [
-                        'id' => 'chat-form'
-                    ])
-                    ?>
-                    <div class="block_bot_w">
-                        <?=
-                        Html::textInput('message', null, [
-                            'id' => 'message-field',
-                            'class' => 'message',
-                            'placeholder' => 'Отправить сообщение'
-                        ])
-                        ?>    
-                    </div>
-                    <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
-                    <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
-                    <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
-                    <?=
-                    Html::submitButton('', [
-                        'class' => 'hide'
-                    ])
+                    <!-- /.table-responsive -->
+                </div>
+                <!-- /.box-body -->
+                <?php Pjax::end(); ?>
+            </div>
+
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp" id="actionButtons">
+            <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
+        </div>
+        <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">
+            <div class = "block_wrapper">
+                <div class="block_head_w">
+                    <img src="/img/chat.png" alt="">
+                </div>
+                <div class="direct-chat-messages wrapppp" id="chatBody">
+                    <?php
+                    foreach ($order->orderChat as $chat) {
+                        echo $this->render('_chat-message', [
+                            'id' => $chat->id,
+                            'name' => $chat->sentBy->profile->full_name,
+                            'sender_id' => $chat->sent_by_id,
+                            'message' => $chat->message,
+                            'time' => $chat->created_at,
+                            'isSystem' => $chat->is_system,
+                            'ajax' => 0,
+                            'danger' => $chat->danger,
+                            'organizationType' => (isset($chat->sentBy->organization) ? $chat->sentBy->organization->type_id : 1)]);
+                    }
                     ?>
                 </div>
-                <?= Html::endForm() ?>
+                <?=
+                Html::beginForm(['/order/send-message'], 'POST', [
+                    'id' => 'chat-form'
+                ])
+                ?>
+                <div class="block_bot_w">
+                    <?=
+                    Html::textInput('message', null, [
+                        'id' => 'message-field',
+                        'class' => 'message',
+                        'placeholder' => 'Отправить сообщение'
+                    ])
+                    ?>    
+                </div>
+                <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
+                <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
+                <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
+                <?=
+                Html::submitButton('', [
+                    'class' => 'hide'
+                ])
+                ?>
             </div>
+            <?= Html::endForm() ?>
         </div>
     </div>
 </section>

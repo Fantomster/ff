@@ -52,16 +52,15 @@ $this->registerCss('
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
-                    <h4 class="modal-title">
-                        Укажите товары, который Вы покупаете у поставщика
-                    </h4>
+                    <h5 class="modal-title">
+                        <b class="client-manager-name"></b>, укажите товары, который Вы покупаете у поставщика <b class="supplier-org-name"></b>
+                    </h5>
                 </div>
             </div>
             <div class="modal-body">
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
-                
                 <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success">Отправить</button>
             </div>
@@ -463,7 +462,6 @@ $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['clint/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
-
 $customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
@@ -843,6 +841,10 @@ $("body").on("hidden.bs.modal", "#resend", function() {
 $("body").on("hidden.bs.modal", "#edit-catalog", function() {
     $(this).data("bs.modal", null);
 })
+$("#organization-name").keyup(function() {
+    $(".client-manager-name").html("$clientName");
+    $(".supplier-org-name").html($("#organization-name").val());
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

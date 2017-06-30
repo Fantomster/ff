@@ -1407,7 +1407,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
 //            ],
 //        ]);
         $currentOrganization = $this->currentUser->organization;
-
+        $clientName = $this->currentUser->profile->full_name;
         $searchModel = new \common\models\search\VendorSearch();
 
         $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
@@ -1415,9 +1415,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->renderPartial('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         } else {
-            return $this->render('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->render('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         }
         //return $this->render("suppliers", compact("user", "organization", "relationCategory", "relationSuppRest", "profile", "searchModel", "searchString", "dataProvider", "step"));
     }

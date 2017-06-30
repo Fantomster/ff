@@ -34,7 +34,6 @@ class User extends \amnah\yii2\user\models\User {
         $rules[] = [['email'], 'unique', 'on'=>'sendInviteFromVendor', 'message' => 'ooo'];
         $rules[] = [['organization_id'], 'integer'];
 //        $rules[] = [['email'], 'required', 'message' => 'Пожалуйста, напишите ваш адрес электронной почты'];
-        
         //переопределим сообщения валидации быдланским способом
         $pos = array_search(['email', 'required'], $rules);
         $rules[$pos]['message'] = 'Пожалуйста, напишите ваш адрес электронной почты';
@@ -43,7 +42,7 @@ class User extends \amnah\yii2\user\models\User {
         
         return $rules;
     }
-
+    
     /**
      * Set organization id
      * @param int $orgId

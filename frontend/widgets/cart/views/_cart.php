@@ -8,7 +8,7 @@ $count = count($orders);
 ?>
 <div class="maska1"></div>
 <div class="block_right_basket">
-    <?php Pjax::begin(['enablePushState' => false, 'id' => 'side-cart', 'timeout' => 5000, 'clientOptions' => ['url' => '/order/pjax-cart']]); ?>
+    <?php Pjax::begin(['enablePushState' => false, 'id' => 'side-cart', 'timeout' => 10000, 'clientOptions' => ['url' => '/order/pjax-cart']]); ?>
     <?php if ($count) { ?>
         <div class="block_pus">
             <div class="block_baasket_head">
@@ -37,11 +37,22 @@ $count = count($orders);
                         ])
                         ?>
                     </div>
-                <?php } ?>
+                <?php } 
+                    $forMinOrderPrice = $order->forMinOrderPrice();
+                    $forFreeDelivery = $order->forFreeDelivery();
+                ?>
                 <div class="block_sum">
                     <p class="name_s">Сумма</p><p class="count_s"><?= $order->total_price ?> руб</p>
-                    <p class="min_zakaz">до минимального(или бесплатной доставки) заказа <br><span>15 000 руб</span></p>
-                    <p class="dost_min">включая доставку<br><span>2333 руб</span></p>
+                    <p class="min_zakaz">
+                        <?php if ($forMinOrderPrice) { ?>
+                        до минимального заказа <br><span><?= $forMinOrderPrice ?> руб</span>
+                        <?php } elseif ($forFreeDelivery) { ?>
+                        до бесплатной доставки <br><span><?= $forFreeDelivery ?> руб</span>
+                        <?php } else { ?>
+                        бесплатная доставка!<br><span>&nbsp;</span>
+                        <?php } ?>
+                    </p>
+                    <p class="dost_min">включая доставку<br><span><?= $order->calculateDelivery() ?> руб</span></p>
                 </div>
             <?php } ?>
             <?= Html::a('Оформить заказ', ['order/checkout'], ['class' => 'btn but_zakaz_bask', 'data-pjax' => 0]) ?>

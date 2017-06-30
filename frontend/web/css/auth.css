@@ -5677,6 +5677,11 @@ This must be run when you have at least 2 sprites.
     width: 139px;
     height: 139px;
 }
+.ico-catalog {
+    background-image: url(../images/useful/sprites/theme/catalog.png);
+    width: 150px;
+    height: 152px;
+}
 .ico-basket {
     background-image: url(../images/useful/sprites/theme/theme-sprite.png);
     background-position: -152px 0px;

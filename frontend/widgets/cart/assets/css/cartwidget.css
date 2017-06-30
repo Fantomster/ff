@@ -55,10 +55,11 @@
 .block_right_basket{
     width: 440px;
     right: -100%;
-    height: 94.2%;
+    height: 100%;
     position: absolute;
     z-index: 999;
     background-color: #fff;
+    overflow-y: auto;
 }
 .col_vo{
     display: inline-block;

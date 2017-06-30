@@ -17,6 +17,14 @@ $this->registerJs('
         return false;
     });
 
+    $(".wizard-off").on("click", function(e) {
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: "'.Url::to('/site/ajax-wizard-off').'"
+        });
+    });
+
     $("#complete-form").on("afterValidate", function(event, messages, errorAttributes) {
         for (var input in messages) {
             if (messages[input] != "") {
@@ -26,12 +34,7 @@ $this->registerJs('
                 return;
             }
         }
-        $.ajax({
-            async: false,
-            type: "POST",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
-        });
-        location.href = "'.Url::to(['/vendor/catalogs']).'"
+        $(".data-modal .modal-content").slick("slickNext");
     });
 
     $("#data-modal").on("shown.bs.modal",function(){
@@ -296,6 +299,17 @@ $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()
                 <div id="map" class="modal-map"></div>
                 <button type="submit" class="but but_green complete-reg"><span>Продолжить работу</span><i class="ico"></i></button>
                 <?php ActiveForm::end(); ?>
+            </div>
+            <div class="second-step">
+                <div class="data-modal__icons-wrp">
+                    <div class="row">
+                        <div class="col-md-12 col-xs-12"><i class="ico ico-catalog"></i></div>
+                    </div>
+                </div>
+                <div class="data-modal__sub-txt">Создайте свой каталог с товарами</div>
+                <div class="data-modal__buts-wrp">
+                    <a href="<?= Url::to('/vendor/catalogs') ?>" class="but but_green wizard-off"><span>Заполнить свой каталог</span></a>
+                </div>
             </div>
         </div>
     </div>

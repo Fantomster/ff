@@ -52,7 +52,7 @@ $cartCount = $user->organization->getCartCount();
                             'options' => ['class' => "treeview hidden-xs"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
-                                ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default']],
+                             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default']],
                                 ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
                             ]
                         ],

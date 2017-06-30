@@ -448,14 +448,13 @@ text-align: center;
     width: 200px;
     vertical-align: middle;
     border-left: 1px solid #EBEBEB;
-    display: inline-block;
     display: table-cell;
+    text-align: right;
 }
 
 .block_right p span{
     font-size: 28px;
     font-weight: bold;
-    font-family: 'PT Sans', serif;
 }
 .block_right p {
     font-family: "Circe_Regular";

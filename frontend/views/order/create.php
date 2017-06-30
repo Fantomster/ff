@@ -9,6 +9,9 @@ use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
 $this->title = 'Разместить заказ';
+
+yii\jui\JuiAsset::register($this);
+
 $this->registerJs(
         '$("document").ready(function(){
             $("#createP").on("change", "#selectedCategory", function(e) {
@@ -27,16 +30,50 @@ $this->registerJs(
             });
             $("#createP, #showDetails").on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
-                $("#loader-show").showLoading();
+                //$("#loader-show").showLoading();
                 quantity = $(this).parent().parent().find(".quantity").val();
+                var cart = $(".basket_a");
+                var imgtodrag = $("#cart-image");
+                if (imgtodrag) {
+                    var imgclone = imgtodrag.clone()
+                        .offset({
+                        top: $(this).offset().top - 30,
+                        left: $(this).offset().left + 60
+                    })
+                        .css({
+                        "opacity": "0.5",
+                            "position": "absolute",
+                            "height": "60px",
+                            "width": "60px",
+                            "z-index": "10000"
+                    })
+                        .appendTo($("body"))
+                        .animate({
+                        "top": cart.offset().top,
+                            "left": cart.offset().left,
+                            "width": 60,
+                            "height": 60
+                    }, 1000, "easeInOutExpo");
+
+                    setTimeout(function () {
+                        cart.parent().effect("highlight", {
+                            times: 2,
+                            color: "#6ea262"
+                        }, 350);
+                    }, 1000);
+
+                    imgclone.animate({
+                        "width": 0,
+                            "height": 0
+                    }, function () {
+                        $(this).detach()
+                    });
+                }
                 $.post(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
-//                    if (result) {
-//                        $.pjax.reload({container: "#cart"});
-//                    }
-                    $("#loader-show").hideLoading();
+                    //$("#loader-show").hideLoading();
                 });
             });
             $("#createP").on("change keyup paste cut", "#searchString", function() {
@@ -55,9 +92,6 @@ $this->registerJs(
                     clicked.data("url")
                 )
                 .done(function (result) {
-//                    if (result) {
-//                        $.pjax.reload({container: "#cart"});
-//                    }
                     $("#loader-show").hideLoading();
                 });
                 return false;
@@ -76,9 +110,6 @@ $this->registerJs(
                     form.serialize()
                 )
                 .done(function (result) {
-//                    if (result) {
-//                        $.pjax.reload({container: "#cart"});
-//                    }
                     $("#loader-show").hideLoading();
                 });
             });
@@ -89,6 +120,7 @@ $this->registerJs(
         });'
 );
 ?>
+<img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
 <section class="content-header">
     <h1>
         <i class="fa fa-opencart"></i> Разместить заказ

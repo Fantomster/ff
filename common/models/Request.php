@@ -22,13 +22,13 @@ use yii\db\ActiveRecord;
  * @property integer $rest_org_id
  * @property integer $active_status
  *
- * @property RegularName $regularName
- * @property Vendor $vendor
- * @property Client $client
- * @property PaymentMethodName $paymentMethodName
- * @property CategoryName $categoryName
- * @property CountCallback $countCallback
- * @property RequestCallback[] $requestCallbacks
+ * @property string $regularName
+ * @property Organization $vendor
+ * @property Organization $client
+ * @property string $paymentMethodName
+ * @property string $categoryName
+ * @property string $countCallback
+ * @property array $requestCallbacks
  */
 class Request extends \yii\db\ActiveRecord
 {

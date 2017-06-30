@@ -19,7 +19,7 @@ $this->title = '1C suppliers integration server (Version 1.0)';
 // $this->params['breadcrumbs'][] = $this->title;
 
 
-
+echo "Index supp";
 
 
 ?>

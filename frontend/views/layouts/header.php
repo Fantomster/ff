@@ -18,10 +18,11 @@ if (!Yii::$app->user->isGuest) {
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
+//    $("#checkout").on("pjax:complete", function() {
+//        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
+//    });
     $js = <<<JS
-    $("#checkout").on("pjax:complete", function() {
-        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
-    });
+    
 
     socket = io.connect('$notificationsUrl');
 
@@ -87,7 +88,6 @@ if (!Yii::$app->user->isGuest) {
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);
                 try {
-                    $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
                     $.pjax.reload({container: "#checkout"});
                 } catch(e) {
                 }

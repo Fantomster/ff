@@ -282,4 +282,15 @@ class Order extends \yii\db\ActiveRecord {
         $this->save();
         return $this->total_price;
     }
+    
+    public function getFormattedDiscount() {
+        switch ($this->discount_type) {
+            case self::DISCOUNT_NO_DISCOUNT:
+                return false;
+            case self::DISCOUNT_FIXED:
+                return $this->discount . " руб";
+            case self::DISCOUNT_PERCENT:
+                return $this->discount  . "%";
+        }
+    }
 }

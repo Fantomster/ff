@@ -55,6 +55,7 @@ class OrderController extends DefaultController {
                         'actions' => [
                             'index',
                             'view',
+                            'edit',
                             'send-message',
                             'ajax-order-action',
                             'ajax-cancel-order',
@@ -670,6 +671,142 @@ class OrderController extends DefaultController {
             return $this->renderPartial('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
         } else {
             return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        }
+    }
+
+    public function actionEdit($id) {
+        $user = $this->currentUser;
+        $user->organization->markViewed($id);
+
+        if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
+            $order = $this->findOrder([Order::tableName() . '.id' => $id], Yii::$app->user->can('manage'));
+        } else {
+            $order = Order::findOne(['id' => $id]);
+            ;
+        }
+
+        if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+            $this->redirect(['/order/index']);
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+            $this->redirect(['/order/checkout']);
+        }
+        $organizationType = $user->organization->type_id;
+        $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
+        $message = "";
+
+        if (Yii::$app->request->post()) {
+            $orderChanged = 0;
+            $content = Yii::$app->request->post('OrderContent');
+            $discount = Yii::$app->request->post('Order');
+            foreach ($content as $position) {
+                $product = OrderContent::findOne(['id' => $position['id']]);
+                $initialQuantity = $product->initial_quantity;
+                $allowedStatuses = [
+                    Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                    Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                    Order::STATUS_PROCESSING
+                ];
+                $quantityChanged = ($position['quantity'] != $product->quantity);
+                $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
+                if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+                    $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
+                    if ($quantityChanged) {
+                        $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
+                        if ($position['quantity'] == 0) {
+                            $message .= "<br/>удалил $product->product_name из заказа";
+                        } else {
+                            $oldQuantity = $product->quantity + 0;
+                            $newQuantity = $position["quantity"] + 0;
+                            $message .= "<br/>изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                        }
+                        $product->quantity = $position['quantity'];
+                    }
+                    if ($priceChanged) {
+                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб";
+                        $product->price = $position['price'];
+                    }
+                    if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
+                        $product->initial_quantity = $initialQuantity;
+                    }
+                    if ($product->quantity == 0) {
+                        $product->delete();
+                    } else {
+                        $product->save();
+                    }
+                }
+            }
+            if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_SUPPLIER)) {
+                $order->status = Order::STATUS_REJECTED;
+                $orderChanged = -1;
+            }
+            if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
+                $order->status = Order::STATUS_CANCELLED;
+                $orderChanged = -1;
+            }
+            if ($orderChanged < 0) {
+                $systemMessage = $initiator . ' отменил заказ!';
+                $this->sendSystemMessage($user, $order->id, $systemMessage, true);
+                if ($organizationType == Organization::TYPE_RESTAURANT) {
+                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order->id);
+                } else {
+                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order->id);
+                }
+            }
+            if (($discount['discount_type']) && ($discount['discount'])) {
+                $discountChanged = (($order->discount_type != $discount['discount_type']) || ($order->discount != $discount['discount']));
+                if ($discountChanged) {
+                    $order->discount_type = $discount['discount_type'];
+                    $order->discount = $order->discount_type ? abs($discount['discount']) : null;
+                    if ($order->discount_type == Order::DISCOUNT_FIXED) {
+                        $message = $order->discount . " руб";
+                    } else {
+                        $message = $order->discount . "%";
+                    }
+                    $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
+                }
+                //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
+            } else {
+                $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
+                $order->discount = null;
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' отменил скидку на заказ №' . $order->id);
+            }
+            if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
+                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+                if (isset($order->accepted_by_id)) {
+                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
+                }
+            } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
+                $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                $order->accepted_by_id = $user->id;
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
+            }
+
+            if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
+                if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                    $systemMessage = $order->client->name . ' получил заказ!';
+                    $order->status = Order::STATUS_DONE;
+                    $this->sendSystemMessage($user, $order->id, $systemMessage);
+                    $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order->id);
+                }
+            }
+        }
+
+        $order->calculateTotalPrice();
+        $order->save();
+        $searchModel = new OrderContentSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('edit', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        } else {
+            return $this->render('edit', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
         }
     }
 

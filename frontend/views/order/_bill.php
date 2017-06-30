@@ -48,9 +48,11 @@
         <?= $this->render('_view-grid', compact('dataProvider', 'order')) ?>
         <div style="width: 100%; height: 170px;">
             <div class = "sp_cen" style="width: 300px;float: right;">
-                <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: 20%</p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: 0 руб.</p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: 2200000 руб.</p>
+                <?php if ($order->discount) { ?>
+                <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: <?= $order->getFormattedDiscount ?></p>
+                <?php } ?>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: <?= $order->calculateDelivery() ?> руб.</p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: <?= $order->total_price ?> руб.</p>
             </div>
             <p class = "but_p_1" style="color: #999C9E;margin-top: 150px;display: block;float: left;">Подпись: ______________ </p>
             <p class = "but_p_2"  style="color: #999C9E;margin-top: 150px;display: block;float: left;margin-left: 20px;">   Дата: _________________</p>

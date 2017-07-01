@@ -641,13 +641,13 @@ class OrderController extends DefaultController {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
-                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
+                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
                 }
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
+                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -776,13 +776,13 @@ class OrderController extends DefaultController {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
-                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
+                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
                 }
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
+                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -1224,17 +1224,17 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function sendOrderChange($sender, $recipient, $order_id) {
+    private function sendOrderChange($sender, $recipient, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
-        $subject = "f-keeper: измененения в заказе №" . $order_id;
+        $subject = "f-keeper: измененения в заказе №" . $order->id;
 
         $searchModel = new OrderContentSearch();
-        $params['OrderContentSearch']['order_id'] = $order_id;
+        $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
@@ -1242,7 +1242,7 @@ class OrderController extends DefaultController {
 //                ->setTo($email)
 //                ->setSubject($subject)
 //                ->queue();
-        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();

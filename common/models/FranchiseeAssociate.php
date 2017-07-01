@@ -10,12 +10,15 @@ use Yii;
  * @property integer $id
  * @property integer $franchisee_id
  * @property integer $organization_id
+ * @property integer $self_registered
  *
  * @property Franchisee $franchisee
  * @property Organization $organization
  */
 class FranchiseeAssociate extends \yii\db\ActiveRecord
 {
+    const SELF_REGISTERED = 1;
+    const REGISTERED = 2;
     /**
      * @inheritdoc
      */
@@ -31,7 +34,8 @@ class FranchiseeAssociate extends \yii\db\ActiveRecord
     {
         return [
             [['franchisee_id', 'organization_id'], 'required'],
-            [['franchisee_id', 'organization_id'], 'integer'],
+            [['organization_id'], 'unique'],
+            [['franchisee_id', 'organization_id', 'self_registered'], 'integer'],
             [['franchisee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Franchisee::className(), 'targetAttribute' => ['franchisee_id' => 'id']],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
         ];

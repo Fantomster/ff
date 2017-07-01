@@ -41,7 +41,7 @@ class FranchiseeSearch extends Franchisee
      */
     public function search($params)
     {
-        $query = Franchisee::find()->where(['deleted' => false]);
+        $query = Franchisee::find()->select('*,(select count(*) from franchisee_associate where franchisee_id = franchisee.id) as c_partners')->where(['deleted' => false]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

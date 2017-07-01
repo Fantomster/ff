@@ -23,7 +23,7 @@ use yii\filters\AccessControl;
  */
 class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
-    public $layout = "@frontend/views/layouts/main-user";
+    public $layout = "@frontend/views/layouts/main-auth";
 
     /**
      * @inheritdoc
@@ -52,6 +52,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         'roles' => ['@'],
                     ]
                 ],
+                'denyCallback' => function($rule, $action) {
+                    $this->redirect('\site\index');
+                }                
             ]
         ];
     }
@@ -155,21 +158,16 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 }
                 $this->afterRegister($user);
 
-                // set flash
-                // don't use $this->refresh() because user may automatically be logged in and get 403 forbidden
-                $successText = Yii::t("user", "Successfully registered [ {displayName} ]", ["displayName" => $user->getDisplayName()]);
-                $guestText = "";
-                if (Yii::$app->user->isGuest) {
-                    $guestText = Yii::t("user", " - Please check your email to confirm your account");
-                }
-                Yii::$app->session->setFlash("Register-success", $successText . $guestText);
+                return $this->render("registerSuccess", compact("user"));
             } else {
                 $profile->validate();
                 $organization->validate();
             }
         }
 
-        return $this->render("register", compact("user", "profile", "organization"));
+        $model = $this->module->model("LoginForm");
+        $registerFirst = true;
+        return $this->render("login", compact("model", "user", "profile", "organization", "registerFirst"));
     }
 
     /**
@@ -192,6 +190,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $newEmail = $userToken->data;
             if ($user->confirm($newEmail)) {
                 $success = true;
+                Yii::$app->user->login($user, 1);
             }
             if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome
@@ -202,7 +201,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $userToken->delete();
         }
 
-        return $this->render("confirm", compact("userToken", "success", "email"));
+        $this->performLogin($user, true);
+        return $this->redirect(['/site/index', 'new' => true]);
+        //return $this->render("confirm", compact("userToken", "success", "email"));
     }
 
     /**
@@ -234,8 +235,10 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $organization->save();
             // delete userToken and set success = true
             $userToken->delete();
+            $user->sendWelcome();
             $success = true;
-            return $this->redirect(['/user/login']);
+            Yii::$app->user->login($user, 1);
+            return $this->redirect(['/site/index']);
         }
 
         return $this->render('acceptRestaurantsInvite', compact("user", "profile", "organization", "success"));
@@ -250,23 +253,105 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         /** @var \amnah\yii2\user\models\forms\LoginForm $model */
         $model = $this->module->model("LoginForm");
 
+        $user = $this->module->model("User", ["scenario" => "register"]);
+        $profile = $this->module->model("Profile", ["scenario" => "register"]);
+        $organization = $this->module->model("Organization", ["scenario" => "register"]);
+        $organization->type_id = Organization::TYPE_RESTAURANT;
+
         // load post data and login
         $post = Yii::$app->request->post();
+
+        //ajax
+        if ($model->load($post) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+
         if ($model->load($post) && $model->validate()) {
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
             return $this->redirect($returnUrl);
         }
 
-        if ($model->hasErrors()) {
-            $test = $model->errors;
-            $confirmError = "Учетная запись не активирована!";
-            if (isset($test['email'][0]) && ($test['email'][0] !== $confirmError)) {
-                $model->clearErrors();
-                $model->addError('password', 'Вы указали неверную почту или пароль');
-            }
+//        if ($model->hasErrors()) {
+//            $test = $model->errors;
+//            $confirmError = "Учетная запись не активирована!";
+//            if (isset($test['email'][0]) && ($test['email'][0] !== $confirmError)) {
+//                $model->clearErrors();
+//                $model->addError('password', 'Вы указали неверную почту или пароль');
+//            }
+//        }
+        
+        
+        $registerFirst = false;
+        return $this->render('login', compact("model", "user", "profile", "organization", "registerFirst"));
+    }
+
+    /**
+     * Forgot password
+     */
+    public function actionForgot()
+    {
+        /** @var \amnah\yii2\user\models\forms\ForgotForm $model */
+
+        // load post data and send email
+        $model = $this->module->model("ForgotForm");
+        $post = Yii::$app->request->post();
+
+        //ajax
+        if ($model->load($post) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
         }
 
-        return $this->render('login', compact("model"));
+        if ($model->load($post) && $model->sendForgotEmail()) {
+
+            // set flash (which will show on the current page)
+            Yii::$app->session->setFlash("Forgot-success", Yii::t("user", "Instructions to reset your password have been sent"));
+        }
+
+        return $this->render("forgot", compact("model"));
+    }
+    
+    /**
+     * Reset password
+     */
+    public function actionReset($token)
+    {
+        /** @var \amnah\yii2\user\models\User $user */
+        /** @var \amnah\yii2\user\models\UserToken $userToken */
+
+        // get user token and check expiration
+        $userToken = $this->module->model("UserToken");
+        $userToken = $userToken::findByToken($token, $userToken::TYPE_PASSWORD_RESET);
+        if (!$userToken) {
+            return $this->render('reset', ["invalidToken" => true]);
+        }
+
+        // get user and set "reset" scenario
+        $success = false;
+        $user = $this->module->model("User");
+        $user = $user::findOne($userToken->user_id);
+        $user->setScenario("reset");
+
+        $post = Yii::$app->request->post();
+        
+        // ajax
+        if ($user->load($post) && Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($user);
+        }
+        
+        // load post data and reset user password
+        if ($user->load($post) && $user->save()) {
+
+            // delete userToken and set success = true
+            $userToken->delete();
+            $user->status = \common\models\User::STATUS_ACTIVE;
+            $user->save();
+            $success = true;
+        }
+
+        return $this->render('reset', compact("user", "success"));
     }
 
     public function actionAjaxInviteFriend() {

@@ -10,6 +10,7 @@ if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
     $homeUrl = parse_url(Url::base(true), PHP_URL_HOST);
+    $cartUrl = Url::to('/order/pjax-cart');
     $notificationsUrl = isset(Yii::$app->params['notificationsUrl']) ? Yii::$app->params['notificationsUrl'] : "http://$homeUrl:8890";
     //Yii::$app->urlManager->baseUrl;
     $refreshStatsUrl = Url::to(['order/ajax-refresh-stats']);
@@ -17,7 +18,11 @@ if (!Yii::$app->user->isGuest) {
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
+//    $("#checkout").on("pjax:complete", function() {
+//        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
+//    });
     $js = <<<JS
+    
 
     socket = io.connect('$notificationsUrl');
 
@@ -50,7 +55,7 @@ if (!Yii::$app->user->isGuest) {
             
         orderId = $("#order_id").val();
         if (orderId == message.order_id) {
-            $( ".direct-chat-messages" ).append( message.body );
+            $( "#chatBody" ).append( message.body );
             senderId = $("#sender_id").val();
             messageWrapper = $("#msg" + message.id);
             if (senderId == message.sender_id) {
@@ -88,7 +93,7 @@ if (!Yii::$app->user->isGuest) {
                 }
             }
         }
-            
+
         $.get(
             '$refreshStatsUrl'
         ).done(function(result) {
@@ -116,7 +121,7 @@ if (!Yii::$app->user->isGuest) {
         e.preventDefault();
         form = $("#inviteForm");
         swal({
-            title: "Приглашение на f-keeper",
+            title: "Приглашение на mix-cart",
             input: "text",
             showCancelButton: true,
             cancelButtonText: "Отмена",
@@ -217,7 +222,7 @@ JS;
                 <ul class="nav navbar-nav">
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                         <li>
-                            <a href="<?= Url::to(['order/checkout']) ?>">
+                            <a class="basket_a" href="<?= Url::to(['order/checkout']) ?>">
                                 <i class="fa fa-shopping-cart"></i><span class="label label-primary cartCount"><?= $organization->getCartCount() ?></span>
                             </a>
                         </li>

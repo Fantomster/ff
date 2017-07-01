@@ -25,13 +25,13 @@ use yii\helpers\Url;
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">
     <?php $this->beginBody() ?>
-    <div class="wrapper" style="margin-bottom: -20px;">
+    <div class="wrapper" style="margin-bottom: -20px;overflow-y:hidden;">
     
         <?= $this->render(
             'header.php',
             ['directoryAsset' => $directoryAsset]
         ) ?>
-
+        <?= \frontend\widgets\cart\CartWidget::widget(['orders' => $this->params['orders']])?>
         <?= !Yii::$app->user->isGuest ? $this->render(
             'client/left',
             ['directoryAsset' => $directoryAsset]

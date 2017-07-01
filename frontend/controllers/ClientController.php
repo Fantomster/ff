@@ -47,13 +47,15 @@ class ClientController extends DefaultController {
                 'rules' => [
                     [
                         'actions' => [
-                            'settings', 
-                            'ajax-create-user', 
-                            'ajax-delete-user', 
-                            'ajax-update-user', 
-                            'ajax-validate-user', 
+                            'settings',
+                            'ajax-create-user',
+                            'ajax-delete-user',
+                            'ajax-update-user',
+                            'ajax-validate-user',
+                            'ajax-validate-vendor',
                             'employees',
                             'remove-supplier',
+                            'add-first-vendor',
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -65,16 +67,16 @@ class ClientController extends DefaultController {
                     ],
                     [
                         'actions' => [
-                            'index', 
-                            'suppliers', 
-                            'tutorial', 
-                            'analytics', 
-                            'chkmail', 
-                            'create', 
-                            'edit-catalog', 
-                            'events', 
-                            'invite', 
-                            'messages', 
+                            'index',
+                            'suppliers',
+                            'tutorial',
+                            'analytics',
+                            'chkmail',
+                            'create',
+                            'edit-catalog',
+                            'events',
+                            'invite',
+                            'messages',
                             're-send-email-invite',
                             'sidebar',
                             'support',
@@ -104,9 +106,10 @@ class ClientController extends DefaultController {
 
     public function actionSettings() {
         $organization = $this->currentUser->organization;
-
+        $organization->scenario = "settings";
         if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
+                $organization->address = $organization->formatted_address;
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_VENDOR;
                     $organization->save();
@@ -256,7 +259,6 @@ class ClientController extends DefaultController {
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
-                
             }
         }
         $message = 'Не удалось удалить пользователя!';
@@ -304,8 +306,7 @@ class ClientController extends DefaultController {
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
-            $relationSuppRest->uploaded_catalog = UploadedFile::getInstance($relationSuppRest, 'uploaded_catalog');
-            
+
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             $relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -314,29 +315,29 @@ class ClientController extends DefaultController {
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
 
-                if (($arrCatalog === Array()) && !isset($relationSuppRest->uploaded_catalog)) {
+                if ($arrCatalog === Array()) {
                     $result = ['success' => false, 'message' => 'Каталог пустой!'];
                     return $result;
                     exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
-               if(count($arrCatalog)>5000){
-               $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
-                   . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
-               return $result;
-               exit;     
+                if (count($arrCatalog) > 5000) {
+                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
+                    return $result;
+                    exit;
                 }
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
-                    $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
-                    $units = trim($arrCatalogs['dataItem']['units']);
+                    //$article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
+                    //$units = trim($arrCatalogs['dataItem']['units']);
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                     $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
-                    if (empty($article)) {
-                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
-                        return $result;
-                        exit;
-                    }
+//                    if (empty($article)) {
+//                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
+//                        return $result;
+//                        exit;
+//                    }
                     if (empty($product)) {
                         $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];
                         return $result;
@@ -393,9 +394,11 @@ class ClientController extends DefaultController {
                          * Создаем нового поставщика и организацию
                          *    
                          * */
-                        $user->setRegisterAttributes(Role::getManagerRole($organization->type_id))->save();
+                        $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
+                        $user->status = User::STATUS_UNCONFIRMED_EMAIL;
+                        $user->save();
                         $profile->setUser($user->id);
-                        $profile->sms_allow = Profile::SMS_ALLOW;        
+                        $profile->sms_allow = Profile::SMS_ALLOW;
                         $profile->save();
                         $organization->save();
                         $user->setOrganization($organization)->save();
@@ -405,7 +408,6 @@ class ClientController extends DefaultController {
                             $currentOrganization->step = Organization::STEP_OK;
                             $currentOrganization->save();
                         }
-                        
                     } else {
                         //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
                         $get_supp_org_id = $check['org_id'];
@@ -436,12 +438,12 @@ class ClientController extends DefaultController {
                         $newBaseCatalog->refresh();
                         $lastInsert_base_cat_id = $newBaseCatalog->id;
                     } else {
-                       //Поставщик зарегистрирован, но не авторизован
-                       //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
-                       if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
-                           $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->one();
-                           $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
-                       }else{
+                        //Поставщик зарегистрирован, но не авторизован
+                        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+                        if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                            $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
+                            $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+                        } else {
                             $newBaseCatalog = new Catalog();
                             $newBaseCatalog->supp_org_id = $get_supp_org_id;
                             $newBaseCatalog->name = 'Главный каталог';
@@ -450,10 +452,9 @@ class ClientController extends DefaultController {
                             $newBaseCatalog->save();
                             $newBaseCatalog->refresh();
                             $lastInsert_base_cat_id = $newBaseCatalog->id;
-                       }
-                       
+                        }
                     }
-                    
+
                     $newCatalog = new Catalog();
                     $newCatalog->supp_org_id = $get_supp_org_id;
                     $newCatalog->name = $currentUser->organization->name;
@@ -461,31 +462,30 @@ class ClientController extends DefaultController {
                     $newCatalog->status = Catalog::STATUS_ON;
                     $newCatalog->save();
                     $newCatalog->refresh();
-                    
+
                     $lastInsert_cat_id = $newCatalog->id;
                     /**
                      *
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
                      *    
                      * */
-                    
                     foreach ($arrCatalog as $arrCatalogs) {
-                        $article = trim($arrCatalogs['dataItem']['article']);
+                        $article = "".rand(10000, 99999);//trim($arrCatalogs['dataItem']['article']);
                         $product = trim($arrCatalogs['dataItem']['product']);
-                        $units = htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        $units = null;//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
-                        if (substr($units, -3, 1) == '.') {
-                            $units = explode('.', $units);
-                            $last = array_pop($units);
-                            $units = join($units, '') . '.' . $last;
-                        } else {
-                            $units = str_replace('.', '', $units);
-                        }
+//                        if (substr($units, -3, 1) == '.') {
+//                            $units = explode('.', $units);
+//                            $last = array_pop($units);
+//                            $units = join($units, '') . '.' . $last;
+//                        } else {
+//                            $units = str_replace('.', '', $units);
+//                        }
                         if (empty($units) || $units < 0) {
-                            $units = 'NULL';
+                            $units = null;
                         }
                         $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
-                        $note = trim($arrCatalogs['dataItem']['note']);
+                        //$note = trim($arrCatalogs['dataItem']['note']);
                         $ed = trim($arrCatalogs['dataItem']['ed']);
                         $price = str_replace(',', '.', $price);
                         if (substr($price, -3, 1) == '.') {
@@ -495,30 +495,21 @@ class ClientController extends DefaultController {
                         } else {
                             $price = str_replace('.', '', $price);
                         }
-                        $sql = "insert into {{%catalog_base_goods}}" .
-                                "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                                . "`units`,`price`,`ed`,`status`,`market_place`,`deleted`,`created_at`) VALUES ("
-                                . $lastInsert_base_cat_id . ","
-                                . "NULL,"
-                                . $get_supp_org_id . ","
-                                . ":article,"
-                                . ":product,"
-                                . ":units,"
-                                . ":price,"
-                                . ":ed,"
-                                . CatalogBaseGoods::STATUS_ON . ","
-                                . "0,"
-                                . "0,"
-                                . "NOW())";
-                        $command = \Yii::$app->db->createCommand($sql);
-                        $command->bindParam(":article", $article, \PDO::PARAM_STR);
-                        $command->bindParam(":product", $product, \PDO::PARAM_STR);
-                        $command->bindParam(":units", $units);
-                        $command->bindParam(":price", $price);
-                        //$command->bindParam(":note", $note, \PDO::PARAM_STR);
-                        $command->bindParam(":ed", $ed, \PDO::PARAM_STR);
-                        $command->execute();
-                        $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
+                        $newProduct = new CatalogBaseGoods();
+                        $newProduct->cat_id = $lastInsert_base_cat_id;
+                        $newProduct->supp_org_id = $get_supp_org_id;
+                        $newProduct->article = $article;
+                        $newProduct->product = $product;
+                        $newProduct->units = $units;
+                        $newProduct->price = $price;
+                        $newProduct->ed = $ed;
+                        $newProduct->status = CatalogBaseGoods::STATUS_ON;
+                        $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+                        $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
+                        $newProduct->save();
+                        $newProduct->refresh();
+                        
+                        $lastInsert_base_goods_id = $newProduct->id;
 
                         $sql = "insert into " . CatalogGoods::tableName() . "(
 				      `cat_id`,`base_goods_id`,`price`,`discount`,`created_at`) VALUES (
@@ -526,14 +517,6 @@ class ClientController extends DefaultController {
                         $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
                         \Yii::$app->db->createCommand($sql)->execute();
 
-                        if (!empty($note)) {
-                            $sql = "insert into " . GoodsNotes::tableName() . "(
-				      `rest_org_id`,`catalog_base_goods_id`,`note`,`created_at`) VALUES (
-				      $currentUser->organization_id, $lastInsert_base_goods_id, :note,NOW())";
-                            $command =\Yii::$app->db->createCommand($sql);
-                            $command->bindParam(":note", $note, \PDO::PARAM_STR);
-                            $command->execute();
-                        }
                     }
 
                     /**
@@ -551,29 +534,28 @@ class ClientController extends DefaultController {
                     }
                     $relationSuppRest->save();
                     /**
-                         *
-                         * Отправка почты
-                         * 
-                         * */
+                     *
+                     * Отправка почты
+                     * 
+                     * */
                     $currentUser->sendInviteToVendor($user);
                     $currentOrganization = $currentUser->organization;
                     $currentOrganization->step = Organization::STEP_OK;
                     $currentOrganization->save();
-                    
-                    if(!empty($profile->phone)){
-                    $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
-                    $target = $profile->phone;
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target);
+
+                    if (!empty($profile->phone)) {
+                        $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                        $target = $profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target);
                     }
                     if ($check['eventType'] == 5) {
-                        $result = ['success' => true, 'message' => 'Поставщик <b>' . $fio . '</b> и каталог добавлен! Инструкция по авторизации была отправлена на почту <strong>' . $email . '</strong>'];
+                        $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
                         return $result;
                     } else {
-                        $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  <strong>' . $email . '</strong>'];
+                        $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
                         return $result;
                     }
-                    
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];
                     return $result;
@@ -621,22 +603,22 @@ class ClientController extends DefaultController {
                     $org = $organization->name;
 //                    $categorys = $relationCategory['category_id'];
                     $get_supp_org_id = $check['org_id'];
-                    
+
                     //check deleted relation
                     $relationSuppRest = RelationSuppRest::findOne([
-                        'rest_org_id' => $currentUser->organization_id, 
-                        'supp_org_id' => $get_supp_org_id, 
-                        'deleted' => true
-                        ]);
-                    
+                                'rest_org_id' => $currentUser->organization_id,
+                                'supp_org_id' => $get_supp_org_id,
+                                'deleted' => true
+                    ]);
+
                     if (empty($relationSuppRest)) {
                         $relationSuppRest = new RelationSuppRest;
                     } else {
                         $relationSuppRest->deleted = false;
                     }
-                    
-                    if(Catalog::find()->where(['supp_org_id' => $get_supp_org_id,'type'=>Catalog::BASE_CATALOG])->exists()){
-                        $supp_base_cat_id = Catalog::find()->where(['supp_org_id'=>$get_supp_org_id, 'type'=>1])->one()->id;
+
+                    if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                        $supp_base_cat_id = Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => 1])->one()->id;
                         $relationSuppRest->cat_id = $supp_base_cat_id;
                     }
                     $relationSuppRest->rest_org_id = $currentUser->organization_id;
@@ -651,17 +633,26 @@ class ClientController extends DefaultController {
 //                    }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
                     $currentOrganization = $currentUser->organization;
-                    
+
                     $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
-                    foreach($rows as $row){
-                        if($row->profile->phone && $row->profile->sms_allow){
+                    
+                    $mailer = Yii::$app->mailer; 
+                    $email = $row->email;
+                    $subject = "Ресторан " . $currentOrganization->organization->name . " приглашает вас в систему f-keeper.ru";
+                    $mailer->htmlLayout = 'layouts/html';
+                    $result = $mailer->compose('ClientInviteSupplier', compact("currentOrganization"))
+                            ->setTo($email)->setSubject($subject)->send();
+                    
+                    foreach ($rows as $row) {
+                        if ($row->profile->phone && $row->profile->sms_allow) {
                             $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target); 
+                            $sms->post_message($text, $target);
                         }
                     }
                     
+
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
                         $currentOrganization->step = Organization::STEP_OK;
                         $currentOrganization->save();
@@ -699,10 +690,10 @@ class ClientController extends DefaultController {
                             $user->save();
                             $currentUser->sendInviteToVendor($user);
                         }/* else {
-                            if (Yii::$app->request->post('resend_email') == 1) {
-                                $currentUser->sendInviteToVendor($user);
-                            }
-                        }*/
+                          if (Yii::$app->request->post('resend_email') == 1) {
+                          $currentUser->sendInviteToVendor($user);
+                          }
+                          } */
                     } else {
                         $message = 'Не верно заполнена форма!';
                         return $this->renderAjax('suppliers/_success', ['message' => $message]);
@@ -739,12 +730,12 @@ class ClientController extends DefaultController {
             $currentUser = User::findIdentity(Yii::$app->user->id);
             $organization = Organization::find()->where(['id' => $id])->one();
             foreach ($organization->users as $recipient) {
-                $currentUser->sendInviteToVendor($recipient);  
-                if($recipient->profile->phone && $recipient->profile->sms_allow){
+                $currentUser->sendInviteToVendor($recipient);
+                if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                     $text = "Повторное приглашение в систему F-keeper от " . $currentUser->organization->name;
                     $target = $recipient->profile->phone;
                     $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target); 
+                    $sms->post_message($text, $target);
                 }
             }
         }
@@ -753,7 +744,7 @@ class ClientController extends DefaultController {
     public function actionViewCatalog($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        
+
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::BASE_CATALOG) {
             $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status "
                     . " FROM `catalog` "
@@ -808,36 +799,36 @@ class ClientController extends DefaultController {
         $catalog_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $supp_org_id = Catalog::find()->where(['id' => $catalog_id])->one()->supp_org_id;
-        $supplier = Organization::find()->where(['id'=>$supp_org_id])->one();
-        
+        $supplier = Organization::find()->where(['id' => $supp_org_id])->one();
+
         $catalog = CatalogGoods::find()->where(['cat_id' => $catalog_id])->all();
         $array_base_goods_id = ArrayHelper::getColumn($catalog, 'base_goods_id');
         $array_goods_id = ArrayHelper::getColumn($catalog, 'id');
-        
+
         $base_catalog = Catalog::find()->where(['supp_org_id' => $supplier->id, 'type' => Catalog::BASE_CATALOG])->one();
         $arr_check_double_article = [];
         if (Yii::$app->request->isAjax && Yii::$app->request->post('catalog')) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
-            
+
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             if ($arrCatalog === Array()) {
-                    $result = ['success' => false, 'alert' => [
-                            'class' => 'danger-fk',
-                            'title' => 'УПС! Ошибка',
-                            'body' => 'Каталог пустой']];
-                    return $result;
-                    exit;
-                }
-                if(count($arrCatalog)>5000){
-                    $result = ['success' => false, 'alert' => [
-                            'class' => 'danger-fk',
-                            'title' => 'Уведомление',
-                            'body' => 'Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами '
-                   . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>']];
-                    return $result;
-                    exit;     
-                }   
+                $result = ['success' => false, 'alert' => [
+                        'class' => 'danger-fk',
+                        'title' => 'УПС! Ошибка',
+                        'body' => 'Каталог пустой']];
+                return $result;
+                exit;
+            }
+            if (count($arrCatalog) > 5000) {
+                $result = ['success' => false, 'alert' => [
+                        'class' => 'danger-fk',
+                        'title' => 'Уведомление',
+                        'body' => 'Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами '
+                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>']];
+                return $result;
+                exit;
+            }
             foreach ($arrCatalog as $arrCatalogs) {
                 $base_goods_id = trim($arrCatalogs['dataItem']['base_goods_id']);
                 $goods_id = trim($arrCatalogs['dataItem']['goods_id']);
@@ -847,11 +838,10 @@ class ClientController extends DefaultController {
                 $price = trim($arrCatalogs['dataItem']['price']);
                 $ed = trim($arrCatalogs['dataItem']['ed']);
                 $note = trim($arrCatalogs['dataItem']['note']);
-                if(
-                        !empty($base_goods_id) && 
-                        !ArrayHelper::isIn($base_goods_id,$array_base_goods_id)
-                  )
-                {
+                if (
+                        !empty($base_goods_id) &&
+                        !ArrayHelper::isIn($base_goods_id, $array_base_goods_id)
+                ) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
                             'title' => 'УПС! Ошибка',
@@ -859,11 +849,10 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;
                 }
-                if(
-                        !empty($goods_id) && 
-                        !ArrayHelper::isIn($goods_id,$array_goods_id)
-                  )
-                {
+                if (
+                        !empty($goods_id) &&
+                        !ArrayHelper::isIn($goods_id, $array_goods_id)
+                ) {
                     $result = ['success' => false, 'alert' => [
                             'class' => 'danger-fk',
                             'title' => 'УПС! Ошибка',
@@ -924,15 +913,15 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;
                 }
-                array_push($arr_check_double_article,$arrCatalogs['dataItem']['article']);
+                array_push($arr_check_double_article, $arrCatalogs['dataItem']['article']);
             }
-            if(array_diff(array_count_values($arr_check_double_article), array('1'))){
-            $result = ['success' => false, 'alert' => [
-                            'class' => 'danger-fk',
-                            'title' => 'УПС! Ошибка',
-                            'body' => 'Артикул товара должен быть уникальным!']];
-                    return $result;
-                    exit;    
+            if (array_diff(array_count_values($arr_check_double_article), array('1'))) {
+                $result = ['success' => false, 'alert' => [
+                        'class' => 'danger-fk',
+                        'title' => 'УПС! Ошибка',
+                        'body' => 'Артикул товара должен быть уникальным!']];
+                return $result;
+                exit;
             }
             $transaction = Yii::$app->db->beginTransaction();
             try {
@@ -948,8 +937,8 @@ class ClientController extends DefaultController {
                     $note = trim($arrCatalogs['dataItem']['note']);
                     //сравниваем массивы каталога и пришедший массив
                     //Если пришедший ID п есть в массиве каталога 
-                    if(!ArrayHelper::isIn($goods_id,$array_goods_id)){
-                        
+                    if (!ArrayHelper::isIn($goods_id, $array_goods_id)) {
+
                         $CatalogBaseGoods = new CatalogBaseGoods();
                         $CatalogBaseGoods->cat_id = $base_catalog->id;
                         $CatalogBaseGoods->supp_org_id = $supp_org_id;
@@ -960,22 +949,22 @@ class ClientController extends DefaultController {
                         $CatalogBaseGoods->price = $price;
                         $CatalogBaseGoods->ed = $ed;
                         $CatalogBaseGoods->save();
-                        
+
                         $CatalogGoods = new CatalogGoods();
                         $CatalogGoods->cat_id = $catalog_id;
                         $CatalogGoods->base_goods_id = $CatalogBaseGoods->id;
                         $CatalogGoods->price = $price;
                         $CatalogGoods->save();
-                        
+
                         if (!empty($note)) {
-                            $GoodsNotes = new GoodsNotes();  
+                            $GoodsNotes = new GoodsNotes();
                             $GoodsNotes->rest_org_id = $currentUser->organization_id;
                             $GoodsNotes->catalog_base_goods_id = $CatalogBaseGoods->id;
                             $GoodsNotes->note = $note;
                             $GoodsNotes->save();
-                        }    
-                    }else{
-                        $CatalogBaseGoods = CatalogBaseGoods::find()->where(['id'=>$base_goods_id])->one();
+                        }
+                    } else {
+                        $CatalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $base_goods_id])->one();
                         $CatalogBaseGoods->article = $article;
                         $CatalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                         $CatalogBaseGoods->product = $product;
@@ -983,39 +972,38 @@ class ClientController extends DefaultController {
                         $CatalogBaseGoods->price = $price;
                         $CatalogBaseGoods->ed = $ed;
                         $CatalogBaseGoods->save();
-                        
-                        $CatalogGoods = CatalogGoods::find()->where(['id'=>$goods_id])->one();
+
+                        $CatalogGoods = CatalogGoods::find()->where(['id' => $goods_id])->one();
                         $CatalogGoods->price = $price;
                         $CatalogGoods->save();
                         if (!empty($note)) {
-                            if($GoodsNotes = GoodsNotes::find()->where([
-                                'rest_org_id'=>$currentUser->organization_id,
-                                'catalog_base_goods_id' => $CatalogBaseGoods->id
-                                ])->exists()){
-                                
-                                
+                            if ($GoodsNotes = GoodsNotes::find()->where([
+                                        'rest_org_id' => $currentUser->organization_id,
+                                        'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                    ])->exists()) {
+
+
                                 $GoodsNotes = GoodsNotes::find()->where([
-                                'rest_org_id'=>$currentUser->organization_id,
-                                'catalog_base_goods_id' => $CatalogBaseGoods->id
-                                ])->one();
-                                
-                                }else{
-                                $GoodsNotes = new GoodsNotes();  
-                                } 
+                                            'rest_org_id' => $currentUser->organization_id,
+                                            'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                        ])->one();
+                            } else {
+                                $GoodsNotes = new GoodsNotes();
+                            }
                             $GoodsNotes->rest_org_id = $currentUser->organization_id;
                             $GoodsNotes->catalog_base_goods_id = $CatalogBaseGoods->id;
                             $GoodsNotes->note = $note;
                             $GoodsNotes->save();
-                        }else{
-                            if($GoodsNotes = GoodsNotes::find()->where([
-                                'rest_org_id'=>$currentUser->organization_id,
-                                'catalog_base_goods_id' => $CatalogBaseGoods->id
-                                ])->exists()){
-                                
+                        } else {
+                            if ($GoodsNotes = GoodsNotes::find()->where([
+                                        'rest_org_id' => $currentUser->organization_id,
+                                        'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                    ])->exists()) {
+
                                 $GoodsNotes = GoodsNotes::find()->where([
-                                'rest_org_id'=>$currentUser->organization_id,
-                                'catalog_base_goods_id' => $CatalogBaseGoods->id
-                                ])->one();
+                                            'rest_org_id' => $currentUser->organization_id,
+                                            'catalog_base_goods_id' => $CatalogBaseGoods->id
+                                        ])->one();
                                 $GoodsNotes->rest_org_id = $currentUser->organization_id;
                                 $GoodsNotes->catalog_base_goods_id = $CatalogBaseGoods->id;
                                 $GoodsNotes->note = $note;
@@ -1023,16 +1011,15 @@ class ClientController extends DefaultController {
                             }
                         }
                     }
-                    
-                    if($base_goods_id){
-                       array_push($array_ids, $base_goods_id);
+
+                    if ($base_goods_id) {
+                        array_push($array_ids, $base_goods_id);
                     }
-                    
                 }
                 $delete_ids = array_diff($array_base_goods_id, $array_ids);
-                if(!empty($delete_ids)){
-                    foreach($delete_ids as $delete_id){
-                        $CatalogBaseGoods = CatalogBaseGoods::find()->where(['id'=>$delete_id])->one();
+                if (!empty($delete_ids)) {
+                    foreach ($delete_ids as $delete_id) {
+                        $CatalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $delete_id])->one();
                         $CatalogBaseGoods->deleted = CatalogBaseGoods::DELETED_ON;
                         $CatalogBaseGoods->save();
                     }
@@ -1058,26 +1045,27 @@ class ClientController extends DefaultController {
         }
         $catalog = CatalogGoods::find()
                 ->joinWith([
-                    'baseProduct' => function ($q) { $q->where([
-                        CatalogBaseGoods::tableName() . '.deleted'=>CatalogBaseGoods::DELETED_OFF]);
-                },'goodsNotes'])
-                ->where([CatalogGoods::tableName() . '.cat_id'=>$catalog_id])
+                    'baseProduct' => function ($q) {
+                        $q->where([
+                            CatalogBaseGoods::tableName() . '.deleted' => CatalogBaseGoods::DELETED_OFF]);
+                    }, 'goodsNotes'])
+                ->where([CatalogGoods::tableName() . '.cat_id' => $catalog_id])
                 ->all();
-                
-               
+
+
         $array = [];
         foreach ($catalog as $catalog_elem) {
             array_push($array, [
                 'catalog_id' => $catalog_elem->cat_id,
                 'goods_id' => $catalog_elem->id,
-                'base_goods_id' =>  $catalog_elem->base_goods_id,
+                'base_goods_id' => $catalog_elem->base_goods_id,
                 'article' => $catalog_elem->baseProduct->article,
                 'product' => $catalog_elem->baseProduct->product,
                 'units' => $catalog_elem->baseProduct->units,
                 'ed' => $catalog_elem->baseProduct->ed,
                 'price' => $catalog_elem->baseProduct->price,
-                'note' => isset($catalog_elem->goodsNotes->note)?$catalog_elem->goodsNotes->note:''
-                    ]);
+                'note' => isset($catalog_elem->goodsNotes->note) ? $catalog_elem->goodsNotes->note : ''
+            ]);
         }
         $array = json_encode($array, JSON_UNESCAPED_UNICODE);
         return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array'));
@@ -1100,16 +1088,16 @@ class ClientController extends DefaultController {
 
         $header_info_zakaz = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id])->count();
-        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int)$header_info_zakaz;
+        empty($header_info_zakaz) ? $header_info_zakaz = 0 : $header_info_zakaz = (int) $header_info_zakaz;
         $header_info_suppliers = \common\models\RelationSuppRest::find()->
                         where(['rest_org_id' => $currentUser->organization_id, 'invite' => RelationSuppRest::INVITE_ON])->count();
-        empty($header_info_suppliers) ? $header_info_suppliers = 0 : $header_info_suppliers = (int)$header_info_suppliers;
+        empty($header_info_suppliers) ? $header_info_suppliers = 0 : $header_info_suppliers = (int) $header_info_suppliers;
         $header_info_purchases = \common\models\Order::find()->
                         where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])->count();
-        empty($header_info_purchases) ? $header_info_purchases = 0 : $header_info_purchases = (int)$header_info_purchases;
+        empty($header_info_purchases) ? $header_info_purchases = 0 : $header_info_purchases = (int) $header_info_purchases;
         $header_info_items = \common\models\OrderContent::find()->select('sum(quantity) as quantity')->
                         where(['in', 'order_id', \common\models\Order::find()->select('id')->where(['client_id' => $currentUser->organization_id, 'status' => \common\models\Order::STATUS_DONE])])->one()->quantity;
-        empty($header_info_items) ? $header_info_items = 0 : $header_info_items = (int)$header_info_items;
+        empty($header_info_items) ? $header_info_items = 0 : $header_info_items = (int) $header_info_items;
         $filter_get_supplier = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('supp_org_id')->
@@ -1261,7 +1249,7 @@ class ClientController extends DefaultController {
     public function actionTutorial() {
         return $this->render('tutorial');
     }
-    
+
     public function actionSupport() {
         return $this->render('/site/underConstruction');
     }
@@ -1313,17 +1301,17 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $orders = $currentUser->organization->getCart();
         $totalCart = count($orders);
-        
+
         $count_products_from_mp = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
-                    'market_place'=>CatalogBaseGoods::MARKETPLACE_ON,
+                    'organization.white_list' => Organization::WHITE_LIST_ON,
+                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                    'deleted' => CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->count();
-        
+
         $filter_from_date = date("d-m-Y", strtotime(" -1 months"));
         $filter_to_date = date("d-m-Y");
 
@@ -1338,84 +1326,29 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
-        return $this->render('dashboard/index', compact(
-                                'dataProvider', 'suppliers_dataProvider','totalCart','count_products_from_mp'
-                //'chart_dates', 'chart_price'
-        ));
-         
+        $organization = $currentUser->organization;
+        if ($organization->step == Organization::STEP_SET_INFO) {
+            $profile = $currentUser->profile;
+            return $this->render('index', compact(
+                                    'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp', 'profile', 'organization'
+            ));
+        } else {
+            return $this->render('index', compact(
+                                    'dataProvider', 'suppliers_dataProvider', 'totalCart', 'count_products_from_mp'
+            ));
+        }
     }
 
     public function actionSuppliers() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        //$step = $currentUser->organization->step;
         $user = new User();
         $profile = new Profile();
         $relationCategory = new RelationCategory();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
-        //$searchString = "";
-        //$where = "";
-        
-//        if (Yii::$app->request->isAjax) {
-//            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-//            empty(trim(\Yii::$app->request->get('searchString'))) ? "" : $where .= " and organization.name LIKE :name";
-//        }
-//        $query = Yii::$app->db->createCommand("SELECT 
-//            relation_supp_rest.id,
-//            organization.name as 'organization_name',
-//            relation_supp_rest.cat_id,
-//            catalog.name as 'catalog_name',
-//            catalog.status as 'catalog_status',
-//            relation_supp_rest.created_at,
-//            relation_supp_rest.supp_org_id,
-//            invite,
-//            case 
-//                when invite=0 then 1 else 
-//                    case 
-//                        when
-//                        (SELECT count(*) from user where organization_id = relation_supp_rest.supp_org_id and status = 1)=0
-//                        then
-//                        2
-//                        else
-//                        3 
-//                        end
-//                    end as status_invite,
-//           `relation_supp_rest`.`status` 
-//            FROM {{%relation_supp_rest}}"
-//                . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
-//                . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-//                . "WHERE rest_org_id = " . $currentUser->organization_id . " $where");
-//        $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) FROM "
-//                        . "(SELECT `relation_supp_rest`.id FROM {{%relation_supp_rest}} "
-//                        . "JOIN `organization` on `relation_supp_rest`.`supp_org_id` = `organization`.`id` "
-//                        . "LEFT OUTER JOIN `catalog` on `relation_supp_rest`.`cat_id` = `catalog`.`id` "
-//                        . "WHERE rest_org_id = " . $currentUser->organization_id . " $where)`tb`", [':name' => $searchString])->queryScalar();
-//        $dataProvider = new \yii\data\SqlDataProvider([
-//            'sql' => $query->sql,
-//            'totalCount' => $totalCount,
-//            'params' => [':name' => $searchString],
-//            'pagination' => [
-//                'pageSize' => 10,
-//            ],
-//            'sort' => [
-//                'attributes' => [
-//                    'id',
-//                    'supp_org_id',
-//                    'cat_id',
-//                    'invite',
-//                    'status',
-//                    'created_at',
-//                    'organization_name',
-//                    'catalog_name',
-//                    'status_invite'
-//                ],
-//                'defaultOrder' => [
-//                    'created_at' => SORT_DESC
-//                ]
-//            ],
-//        ]);
-        $currentOrganization = $this->currentUser->organization;
 
+        $currentOrganization = $this->currentUser->organization;
+        $clientName = $this->currentUser->profile->full_name;
         $searchModel = new \common\models\search\VendorSearch();
 
         $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
@@ -1423,13 +1356,92 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->renderPartial('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         } else {
-            return $this->render('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
-        }        
-        //return $this->render("suppliers", compact("user", "organization", "relationCategory", "relationSuppRest", "profile", "searchModel", "searchString", "dataProvider", "step"));
+            return $this->render('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+        }
     }
 
+    public function actionAddFirstVendor() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $user = new User();
+        $profile = new Profile();
+        $relationSuppRest = new RelationSuppRest();
+        $organization = new Organization();
+        
+        $relations = RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id, 'deleted' => false])->count();
+
+        $currentOrganization = $this->currentUser->organization;
+
+        $searchModel = new \common\models\search\VendorSearch();
+
+        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
+
+        $dataProvider = $searchModel->search($params, $currentOrganization->id);
+        $dataProvider->pagination = false;
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'relations'));
+        } else {
+            return $this->render('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'relations'));
+        }
+    }
+    
+    public function actionAjaxValidateVendor() {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $user =  new User();
+        //$user->scenario = 'invite';
+        $profile = new Profile();
+        $profile->phone = "+7";
+        $profile->scenario = 'invite';
+        $organization = new Organization();
+        $organization->scenario = 'invite';
+        $organization->type_id = Organization::TYPE_SUPPLIER;
+        
+        $post = Yii::$app->request->post();
+        if (Yii::$app->request->isAjax && $user->load($post)) {
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            
+            $vendorManager = User::find()
+                    ->joinWith('organization')
+                    ->where(['user.email' => $user->email, 'organization.type_id' => Organization::TYPE_SUPPLIER])->one();
+            if ($vendorManager) {
+                $relation = RelationSuppRest::findOne([
+                    'supp_org_id' => $vendorManager->organization_id,
+                    'rest_org_id' => $currentUser->organization_id,
+                    'deleted' => false,
+                        ]);
+            }
+            if ($user->validate() && $vendorManager && empty($relation)) {
+                $profile = $vendorManager->profile;
+                $organization = $vendorManager->organization;
+                $disabled = true;
+                return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => true];
+//                return ['errors' => false, 'organization_name' => $organization->name, 'phone' => $profile->phone, 'full_name'=>$profile->full_name, 'vendorFound' => true];
+            } elseif ($user->validate() && empty($relation)) {
+                $validated = true;
+                if (!$profile->load($post)) {
+                    $profile = new Profile();
+                } else {
+                    $validated = $profile->validate();
+                }
+                if ($validated && !$organization->load($post)) {
+                    $organization = new Organization();
+                } else {
+                    $validated = $organization->validate();
+                }
+                $disabled = false;
+                if ($validated) {
+                    return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
+                    //return ['errors' => false, 'vendorFound' => false];
+                }
+            }
+
+            return ['errors' => true, 'messages' => \yii\widgets\ActiveForm::validate($user, $profile, $organization), 'vendor_added' => isset($relation)];//\yii\widgets\ActiveForm::validate($user, $profile, $organization);
+        }
+    }
+    
     public function actionSidebar() {
         Yii::$app->session->get('sidebar-collapse') ?
                         Yii::$app->session->set('sidebar-collapse', false) :

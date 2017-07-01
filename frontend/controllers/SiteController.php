@@ -13,6 +13,7 @@ use common\models\Role;
 use common\components\AccessRule;
 use yii\web\HttpException;
 use yii\helpers\Url;
+use yii\web\Response;
 
 /**
  * Site controller
@@ -37,7 +38,7 @@ class SiteController extends Controller {
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on'],
+                        'actions' => ['logout', 'complete-registration', 'ajax-tutorial-off', 'ajax-tutorial-on', 'ajax-complete-registration', 'ajax-wizard-off'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -53,17 +54,17 @@ class SiteController extends Controller {
                             Role::ROLE_ADMIN,
                         ],
                         'denyCallback' => function($rule, $action) {
-                            $user = Yii::$app->user->identity;
-                            if (empty($user->organization)) {
-                                throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
-                            }
-            
-                            if ($this->isRegistrationComplete($user->organization)) {
-                                $this->redirectOrganizationIndex($user->organization);
-                            } else {
-                                $this->redirect(['/site/complete-registration']);
-                            }
-                        }
+                    $user = Yii::$app->user->identity;
+                    if (empty($user->organization)) {
+                        throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+                    }
+
+                    //if ($this->isRegistrationComplete($user->organization)) {
+                    $this->redirectOrganizationIndex($user->organization);
+                    //} else {
+                    //    $this->redirect(['/site/complete-registration']);
+                    //}
+                }
                     ],
                 ],
             ],
@@ -112,15 +113,15 @@ class SiteController extends Controller {
     public function actionAbout() {
         return $this->render('about');
     }
-    
+
     public function actionContacts() {
         return $this->render('contacts');
     }
-    
+
     public function actionFaq() {
         return $this->render('faq');
     }
-    
+
     public function actionRestaurant() {
         $user = new User();
         $user->scenario = 'register';
@@ -130,7 +131,7 @@ class SiteController extends Controller {
         $organization->scenario = 'register';
         return $this->render('restaurant', compact("user", "profile", "organization"));
     }
-    
+
     public function actionSupplier() {
         $user = new User();
         $user->scenario = 'register';
@@ -140,37 +141,71 @@ class SiteController extends Controller {
         $organization->scenario = 'register';
         return $this->render('supplier', compact("user", "profile", "organization"));
     }
-    
+
     public function actionCompleteRegistration() {
         $this->layout = "main-user";
         $user = Yii::$app->user->identity;
+//        $profile = $user->profile;
+//        $profile->scenario = "complete";
+        $organization = $user->organization;
+        $organization->scenario = "complete";
+
+        $post = Yii::$app->request->post();
+        if ($organization->load($post)) {
+            if ($organization->validate()) {
+
+                //$profile->save();
+                $organization->step = Organization::STEP_TUTORIAL;
+                $organization->save();
+                $user->sendWelcome();
+
+                //Временный скрипт оповещания входа клиентов delivery-club
+                if (strpos($user->email, '@delivery-club.ru')) {
+                    $text = "[ " . $organization->name . " ] [ " . $profile->phone . " ] вошел в систему f-keeper";
+                    $target = '89296117900,89099056888';
+                    $sms = new \common\components\QTSMS();
+                    $sms->post_message($text, $target);
+                }
+                return $this->redirect(['/site/index']);
+            }
+        }
+
+        //return $this->render("complete-registration", compact("profile", "organization"));
+        return $this->render("complete-registration", compact("organization"));
+    }
+
+    public function actionAjaxCompleteRegistration() {
+        $user = Yii::$app->user->identity;
+        $profile = new Profile();
         $profile = $user->profile;
         $profile->scenario = "complete";
         $organization = $user->organization;
         $organization->scenario = "complete";
-        
+
         $post = Yii::$app->request->post();
-        if ($profile->load($post) && $organization->load($post)) {
+        if (Yii::$app->request->isAjax && $profile->load($post) && $organization->load($post)) {
             if ($profile->validate() && $organization->validate()) {
-                
                 $profile->save();
-                $organization->step = Organization::STEP_TUTORIAL;
                 $organization->save();
-                
-                //Временный скрипт оповещания входа клиентов delivery-club
-                if(strpos($user->email, '@delivery-club.ru')){
-                    $text = "[ " . $organization->name . " ] [ " . $profile->phone . " ] вошел в систему f-keeper";
-                    $target = '89296117900,89099056888';
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target); 
-                }
-                return $this->redirect(['/site/index']);  
             }
         }
-        
-        return $this->render("complete-registration", compact("profile", "organization"));
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
-    
+
+    public function actionAjaxWizardOff() {
+        $user = Yii::$app->user->identity;
+        $organization = $user->organization;
+        if (Yii::$app->request->isAjax) {
+            $organization->step = Organization::STEP_TUTORIAL;
+            $organization->save();
+            $user->sendWelcome();
+            return true;
+        }
+        return false;
+    }
+
     public function actionAjaxTutorialOff() {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
@@ -180,7 +215,7 @@ class SiteController extends Controller {
         }
         return false;
     }
-    
+
     public function actionAjaxTutorialOn() {
         $user = Yii::$app->user->identity;
         if (isset($user->organization)) {
@@ -190,11 +225,11 @@ class SiteController extends Controller {
         }
         return false;
     }
-    
+
     private function isRegistrationComplete($organization) {
         return ($organization->step != Organization::STEP_SET_INFO);
     }
-    
+
     private function redirectOrganizationIndex($organization) {
         if ($organization->type_id === Organization::TYPE_RESTAURANT) {
             $this->redirect(['/client/index']);
@@ -203,4 +238,5 @@ class SiteController extends Controller {
             $this->redirect(['/vendor/index']);
         }
     }
+
 }

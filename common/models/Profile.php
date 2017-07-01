@@ -52,15 +52,16 @@ class Profile extends \amnah\yii2\user\models\Profile {
      */
     public function rules() {
         $rules = parent::rules();
-        $rules[] = [['full_name'], 'required'];
-        $rules[] = [['full_name'], 'required', 'on' => ['register', 'complete'], 'message' => 'Пожалуйста, напишите, как к вам обращаться'];
+        //$rules[] = [['full_name'], 'required'];
+        $rules[] = [['full_name'], 'required', 'on' => ['complete'], 'message' => 'Пожалуйста, напишите, как к вам обращаться'];
         $rules[] = [['full_name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
         $rules[] = [['phone'], 'string', 'max' => 255];
 //        $rules[] = [['phone'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
 //        $rules[] = [['phone'], 'match', 'pattern' => '/^\+7 \([0-9]{3}\) [0-9]{3} [0-9]{2} [0-9]{2}$/', 'message' => 'Некорректный номер'];
-        $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()];
+        $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className(), 'on' => ['register', 'invite'], 'message' => 'Некорректный номер'];
         $rules[] = [['phone'], 'default', 'value' => null];
-        $rules[] = [['phone'], 'required', 'on' => ['register', 'complete'], 'message' => 'Пожалуйста, введите свой номер телефона'];
+        $rules[] = [['phone'], 'required', 'on' => ['register'], 'message' => 'Пожалуйста, введите свой номер телефона'];
+        $rules[] = [['phone'], 'required', 'on' => ['invite'], 'message' => 'Пожалуйста, введите номер телефона'];
         $rules[] = [['avatar'], 'image', 'extensions' => 'jpg, jpeg, gif, png'];
         $rules[] = [['sms_allow'], 'default', 'value' => 0];
 //        //переопределим сообщения валидации быдланским способом

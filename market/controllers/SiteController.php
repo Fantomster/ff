@@ -717,6 +717,7 @@ class SiteController extends Controller {
         $products = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
+                    'category_id' => $id,
                     'organization.white_list'=>  Organization::WHITE_LIST_ON,
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
@@ -726,6 +727,7 @@ class SiteController extends Controller {
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
+        
         $category = \common\models\MpCategory::find()->where(['id' => $id])->one();
         if ($products) {
             return $this->render('category', compact('products', 'id', 'count', 'category'));
@@ -745,42 +747,7 @@ class SiteController extends Controller {
             return $this->render('not-found', compact('title','breadcrumbs','message','products','category'));
         }
     }
-    public function actionSuppliers() {
-        if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-        } else {
-            $currentUser = Yii::$app->user->identity;
-            $client = $currentUser->organization;
-            $addwhere = [];
-            if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
-                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
-                        ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'id', $relationSupplier];
-            }
-        }
-        $suppliers = Organization::find()
-                ->where([
-                    'type_id' => Organization::TYPE_SUPPLIER,
-                    'white_list'=>  Organization::WHITE_LIST_ON
-                    ])
-                ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->limit(12)
-                ->all();
-        $suppliersCount = Organization::find()
-                ->where([
-                    'type_id' => Organization::TYPE_SUPPLIER,
-                    'white_list'=>  Organization::WHITE_LIST_ON
-                    ])
-                ->andWhere($addwhere)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->count();
-        return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
-    }
-
+    
     public function actionAjaxProductCatLoader($num, $category) {
         $cbgTable = CatalogBaseGoods::tableName();
         if (\Yii::$app->user->isGuest) {
@@ -831,7 +798,42 @@ class SiteController extends Controller {
             }
         }
     }
-
+    
+    public function actionSuppliers() {
+        if (\Yii::$app->user->isGuest) {
+            $addwhere = [];
+        } else {
+            $currentUser = Yii::$app->user->identity;
+            $client = $currentUser->organization;
+            $addwhere = [];
+            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+                $relationSupplier = RelationSuppRest::find()
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->asArray()
+                        ->all();
+                $addwhere = ['not in', 'id', $relationSupplier];
+            }
+        }
+        $suppliers = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
+                ->andWhere($addwhere)
+                ->orderBy(['rating'=>SORT_DESC])
+                ->limit(12)
+                ->all();
+        $suppliersCount = Organization::find()
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list'=>  Organization::WHITE_LIST_ON
+                    ])
+                ->andWhere($addwhere)
+                ->orderBy(['rating'=>SORT_DESC])
+                ->count();
+        return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
+    }
     public function actionView() {
         if (\Yii::$app->user->isGuest) {
             $filterNotIn = [];

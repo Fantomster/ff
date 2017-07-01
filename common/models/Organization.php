@@ -35,7 +35,9 @@ use Imagine\Image\ManipulatorInterface;
  * @property string $route
  * @property string $street_number
  * @property string $place_id
+ * @property string $administrative_area_level_1
  * @property string $formatted_address
+ * @property string $franchisee_sorted
  *
  * @property OrganizationType $type
  * @property Delivery $delivery
@@ -52,6 +54,9 @@ use Imagine\Image\ManipulatorInterface;
  */
 class Organization extends \yii\db\ActiveRecord {
 
+    const FRANCHISEE_SORTED = 1;
+    const FRANCHISEE_UNSORTED = 2;
+    
     const TYPE_RESTAURANT = 1;
     const TYPE_SUPPLIER = 2;
     const TYPE_FRANCHISEE = 3;
@@ -85,19 +90,21 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            ['name', 'required', 'on' => 'register', 'message' => 'Пожалуйста, напишите название вашей организации'],
-            ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы "Ресторан" или "Поставщик"?'],
+            ['name', 'required', 'on' => ['complete', 'settings'], 'message' => 'Пожалуйста, напишите название вашей организации'],
+            ['name', 'required', 'on' => 'invite', 'message' => 'Пожалуйста, напишите название организации'],
+            ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы покупаете или продаете?'],
             [['type_id'], 'required'],
-            [['name', 'address'], 'required', 'on' => 'complete'],
-            [['id', 'type_id', 'step', 'es_status', 'rating'], 'integer'],
+            //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
+            [['address','place_id','lat','lng'], 'required', 'on' => ['complete', 'settings'],'message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],
+            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address','administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             //[['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
-            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png'],
+            [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
         ];
     }
 
@@ -115,7 +122,7 @@ class Organization extends \yii\db\ActiveRecord {
             [
                 'class' => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
-                'scenarios' => ['default'],
+                'scenarios' => ['settings'],
                 'path' => '@app/web/upload/temp/',
                 'url' => '/upload/temp/',
                 'thumbs' => [
@@ -150,11 +157,13 @@ class Organization extends \yii\db\ActiveRecord {
             'lat' => 'Lat',
             'lng' => 'Lng',
             'country' => 'Страна',
+            'administrative_area_level_1' => 'Область',
             'locality' => 'Город',
             'route' => 'Улица',
             'street_number' => 'Дом',
             'place_id' => 'Place ID',
             'formatted_address' => 'Formatted Address',
+            'franchisee_sorted'=>'Назначен Франшизы'
         ];
     }
 

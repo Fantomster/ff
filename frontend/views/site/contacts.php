@@ -25,7 +25,7 @@ $this->title = 'Контакты';
             <div class="col-md-4">
                 <div class="inside__contact">
                     <b>Почта</b>
-                    <span><a href="mailto:info@mixcart.ru">info@mixcart.ru</a></span>
+                    <span><a href="mailto:info@f-keeper.ru">info@f-keeper.ru</a></span>
                 </div>
             </div>
         </div>

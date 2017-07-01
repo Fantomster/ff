@@ -899,6 +899,7 @@ class OrderController extends DefaultController {
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
             $organizationType = $this->currentUser->organization->type_id;
             $danger = false;
+            $edit = false;
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
@@ -921,10 +922,12 @@ class OrderController extends DefaultController {
                         $order->status = Order::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . ' подтвердил заказ!';
                         $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order);
+                        $edit = true;
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $systemMessage = $order->vendor->name . ' подтвердил заказ!';
                         $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
+                        $edit = true;
                         $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . ' получил заказ!';
@@ -936,7 +939,7 @@ class OrderController extends DefaultController {
             }
             if ($order->save()) {
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
-                return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
+                return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit'));
             }
         }
     }
@@ -975,7 +978,11 @@ class OrderController extends DefaultController {
         if (Yii::$app->request->post()) {
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
             $organizationType = $this->currentUser->organization->type_id;
-            return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
+            $edit = false;
+            if (in_array($order->status, [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING])) {
+                $edit = true;
+            }
+            return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit'));
         }
     }
 

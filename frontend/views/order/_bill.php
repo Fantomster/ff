@@ -8,7 +8,7 @@
                 <p class= "name_dashed" style="font-family: sans-serif;font-size: 18px;border-bottom: 1px dashed #000; width: 80%;text-align: left;font-weight: 100;" ><?= $order->client->name ?></p>
             </div>
             <div class="block_img" style="  width: 40%;float: left;">
-                <img class = "img_i" src="https://f-keeper.ru<?= $order->client->pictureUrl ?>" style="float: left;" alt="" width="93" height="52">
+                <img class = "img_i" src="<?= $order->client->pictureUrl ?>" style="float: left;" alt="" width="93" height="52">
             </div>
             <div class="block_spisok" style="margin-top: 20px; display: block;float: left;">
                 <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;" >Город: <?= $order->client->locality ?></p>

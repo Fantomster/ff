@@ -18,6 +18,7 @@ $canEdit = false;
 if ($order->isObsolete) {
     $actionButtons .= $btnCancel;
     $actionButtons .= '<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm"><i class="icon fa fa-check"></i> Завершить</a>';
+    $canEdit = true;
 } else {
     switch ($order->status) {
         case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:

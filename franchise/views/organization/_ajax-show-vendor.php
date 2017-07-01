@@ -19,7 +19,7 @@ use yii\helpers\Html;
                   <div class="col-md-4">
                     <img width="163" height="100" src="<?= $vendor->pictureUrl ?>">
                     <div class="btn-edite">
-                      <?=Html::a('Базовый прайс-лист',['site/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block'])?>
+                      <?= isset($catalog->id) ? Html::a('Базовый прайс-лист',['site/catalog','id'=>$catalog->id],['class'=>'btn btn-green btn-block']) : ''?>
                       <!-- <button type="button" class="btn btn-strip-green btn-block">Аналитика</button> -->
                     </div>
                   </div>

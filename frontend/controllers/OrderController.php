@@ -641,13 +641,13 @@ class OrderController extends DefaultController {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
-                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
+                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
                 }
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -776,13 +776,13 @@ class OrderController extends DefaultController {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
-                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
+                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
                 }
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {

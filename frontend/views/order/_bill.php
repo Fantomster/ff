@@ -49,7 +49,7 @@
         <div style="width: 100%; height: 170px;">
             <div class = "sp_cen" style="width: 300px;float: right;">
                 <?php if ($order->discount) { ?>
-                <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: <?= $order->getFormattedDiscount ?></p>
+                <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: <?= $order->getFormattedDiscount() ?></p>
                 <?php } ?>
                 <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: <?= $order->calculateDelivery() ?> руб.</p>
                 <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: <?= $order->total_price ?> руб.</p>

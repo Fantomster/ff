@@ -1,7 +1,6 @@
 <div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); width: 570px;">
     <div class="block__wrapp" style="width: 100%;	height: 100%;">
-        <img  src="https://f-keeper.ru/img/logo.png" alt="" style="margin: 0 auto;display: block;margin-top: 10px;margin-bottom: 30px;">
-
+        <br><br>
         <div class="block_left_wrap" style="width: 275px;float: left;padding-left:10px;">
             <div class="block_name" style=" width: 60%;float: left;">
                 <p class = "z_1" style="font-family: Circe_Bold; text-transform: uppercase;font-size: 16px; text-align: left;">Заказчик</p>
@@ -43,6 +42,20 @@
                 <img src="https://f-keeper.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
             </div>
             <p class = "pl" style="margin-left: 10px;padding-left: 60px;padding-top: 13px;"><?= $order->comment ?></p>
+        </div>
+        <?php }
+        if (count($order->orderChat)) { ?>
+        <div style="width: 100%;height: auto;border: 1px solid #DDDDDD;float: left;margin: 30px 0%; border-radius: 100px;">
+            <div style="border-right: 1px solid #DDDDDD;width: 55px;float: left;height: 50px;">
+                <img src="https://f-keeper.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
+            </div>
+            <div style="padding: 20px 60px 20px 60px;text-align:left;">
+            <?php foreach ($order->orderChat as $message) { ?>
+            <p class = "pl" style="padding-left: 10px;padding-top: 5px;">
+                <?= "<span style='color: #a4a4a4'>(".Yii::$app->formatter->asTime($message->created_at, "php:j M Y, H:i:s").")</span> ".($message->is_system ? '' : "<b>".$message->sentBy->profile->full_name."</b>: ").$message->message ?>
+            </p>
+            <?php } ?>
+            </div>
         </div>
         <?php } ?>
         <?= $this->render('_view-grid', compact('dataProvider', 'order')) ?>

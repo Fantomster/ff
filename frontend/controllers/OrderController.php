@@ -149,7 +149,7 @@ class OrderController extends DefaultController {
             return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
     }
-    
+
     public function actionPjaxCart() {
         if (Yii::$app->request->isPjax) {
             $client = $this->currentUser->organization;
@@ -642,6 +642,8 @@ class OrderController extends DefaultController {
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
+                } else {
+                    $this->sendOrderChangeAll($order->createdBy, $order);
                 }
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
@@ -779,6 +781,8 @@ class OrderController extends DefaultController {
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
+                } else {
+                    $this->sendOrderChangeAll($order->createdBy, $order);
                 }
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
@@ -1232,7 +1236,6 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $email = $recipient->email;
         $subject = "f-keeper: измененения в заказе №" . $order->id;
 
         $searchModel = new OrderContentSearch();
@@ -1240,14 +1243,38 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
+        $email = $recipient->email;
         $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
+    }
+
+    private function sendOrderChangeAll($sender, $order) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $subject = "f-keeper: измененения в заказе №" . $order->id;
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        foreach ($order->vendor->users as $recipient) {
+
+//        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->queue();
+            $email = $recipient->email;
+            $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+        }
     }
 
     private function sendOrderDone($sender, $recipient, $order) {

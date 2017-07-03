@@ -15,7 +15,7 @@ $form = ActiveForm::begin([
                 'data-pjax' => true,
             ],
             'method' => 'post',
-            'action' => Url::to(['order/edit', 'id' => $order->id]),
+            'action' => Url::to(['order/view', 'id' => $order->id]),
         ]);
 echo GridView::widget([
     'dataProvider' => $dataProvider,

@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 $count = count($orders);
 ?>
 <div class="maska1"></div>
-<div class="block_right_basket">
+<div class="block_right_basket" style="padding-bottom: 50px;">
     <?php Pjax::begin(['enablePushState' => false, 'id' => 'side-cart', 'timeout' => 10000, 'clientOptions' => ['url' => '/order/pjax-cart']]); ?>
     <?php if ($count) { ?>
         <div class="block_pus">

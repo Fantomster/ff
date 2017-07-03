@@ -16,6 +16,7 @@ $this->registerJs(
                     return false;
                 }
                 clicked = $(this);
+                activeCart = $(document).find(".block_wrap_bask_tover.active").attr("id");
                 if (clicked.hasClass("remove")) {
                     title = "Удаление товара из корзины";
                     text = "Вы уверены, что хотите удалить товар из заказа?";
@@ -325,7 +326,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                     $forMinOrderPrice = $order->forMinOrderPrice();
                     $forFreeDelivery = $order->forFreeDelivery();
                     ?>
-                    <div class="block_wrap_bask_tover">
+                    <div class="block_wrap_bask_tover" id="cartOrder<?= $order->id ?>">
                         <div class="block_left">
                             <div class="block_left_top">
 

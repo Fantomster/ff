@@ -91,6 +91,7 @@ if (!Yii::$app->user->isGuest) {
                 $(".cartCount").html(message.body);
                 try {
                     $.pjax.reload({container: "#checkout"});
+                    
                 } catch(e) {
                 }
             }
@@ -102,6 +103,10 @@ if (!Yii::$app->user->isGuest) {
             refreshMenu(result);
         });
     });
+            
+    $(document).on("pjax:complete", "#checkout", function() {
+        $("#"+activeCart).addClass("active");
+    });            
         
     $('#chat-form').submit(function() {
 
@@ -194,6 +199,7 @@ JS;
         var link = '#';
         var timer = null;
         var saving = false;
+        var activeCart;
     </script>
 <?php } ?>
 <header class="main-header">

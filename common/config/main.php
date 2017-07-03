@@ -54,6 +54,8 @@ return [
             // Use pretty URLs
             'enablePrettyUrl' => true,
             'rules' => [
+                '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
+                '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
                 '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
@@ -73,6 +75,8 @@ return [
                 'register' => 'user/register',
                 'forgot' => 'user/forgot',
                 'resend' => 'user/resend',
+                'reset' => 'user/reset',
+
             ],
         ],
         'assetManager' => [
@@ -109,5 +113,16 @@ return [
         'gridview' => [
             'class' => 'kartik\grid\Module',
         ],
+        'clientintegr' => [
+            'class' => 'frontend\modules\clientintegr\Module',
+            'layout' => '@frontend/views/layouts/main-client.php',
+        ],  
+        'vendorintegr' => [
+            'class' => 'frontend\modules\vendorintegr\Module',
+            'layout' => '@frontend/views/layouts/main-vendor.php',
+        ],  
+
+   
+
     ],
 ];

@@ -25,13 +25,18 @@ use Yii;
  * @property string $updated_at
  * @property integer $type_id
  * @property bool $deleted
- * 
+ * @property string $picture_manager
+ * @property string $fio_manager
+ * @property string $phone_manager
+ *  
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
  * @property FracnchiseeType type
+ * @property string $pictureUrl
  */
 class Franchisee extends \yii\db\ActiveRecord {
-
+    
+    const DEFAULT_AVATAR = '/image/franchisse/no-avatar.jpg';
     /**
      * @inheritdoc
      */
@@ -62,7 +67,7 @@ class Franchisee extends \yii\db\ActiveRecord {
             [['type_id'], 'required'],
             [['info'], 'string'],
             [['created_at', 'updated_at', 'deleted'], 'safe'],
-            [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'phone', 'correspondent_account', 'checking_account'], 'string', 'max' => 255],
+            [['signed', 'legal_entity', 'legal_address', 'legal_email', 'inn', 'kpp', 'ogrn', 'bank_name', 'bik', 'phone', 'correspondent_account', 'checking_account','picture_manager','fio_manager','phone_manager'], 'string', 'max' => 255],
         ];
     }
 
@@ -87,6 +92,9 @@ class Franchisee extends \yii\db\ActiveRecord {
             'correspondent_account' => 'р/с',
             'checking_account' => 'к/с',
             'phone' => 'Телефон',
+            'picture_manager' => 'Аватар менеджера',
+            'fio_manager' => 'фио менеджера',
+            'phone_manager' => 'Телефон менеджера',
         ];
     }
 
@@ -108,14 +116,14 @@ class Franchisee extends \yii\db\ActiveRecord {
     public function getFranchiseeAssociates() {
         return $this->hasMany(FranchiseeAssociate::className(), ['franchisee_id' => 'id']);
     }
-
+    
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getFranchiseeUsers() {
         return $this->hasMany(FranchiseeUser::className(), ['franchisee_id' => 'id']);
     }
-
+    
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -168,5 +176,9 @@ class Franchisee extends \yii\db\ActiveRecord {
         $turnover = $orders->sum("$ordTable.total_price");
         $turnoverCut = $orders->andWhere(["$rsrTable.is_from_market" => true])->sum("$ordTable.total_price * $biTable.reward / 100");
         return ['orderCount' => $orderCount, 'turnover' => $turnover, 'turnoverCut' => $turnoverCut];
+    }
+    
+    public function getPictureUrl() {
+        return $this->picture_manager ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
     }
 }

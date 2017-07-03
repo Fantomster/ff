@@ -22,13 +22,13 @@ use yii\db\ActiveRecord;
  * @property integer $rest_org_id
  * @property integer $active_status
  *
- * @property RegularName $regularName
- * @property Vendor $vendor
- * @property Client $client
- * @property PaymentMethodName $paymentMethodName
- * @property CategoryName $categoryName
- * @property CountCallback $countCallback
- * @property RequestCallback[] $requestCallbacks
+ * @property string $regularName
+ * @property Organization $vendor
+ * @property Organization $client
+ * @property string $paymentMethodName
+ * @property string $categoryName
+ * @property string $countCallback
+ * @property array $requestCallbacks
  */
 class Request extends \yii\db\ActiveRecord
 {
@@ -107,7 +107,7 @@ class Request extends \yii\db\ActiveRecord
     public function getModifyDate()
     {
           $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at),'php:Y-m-d H:i:s');
-          
+          $m = Yii::$app->formatter->asDatetime($date,'php:n');
           $ypd = Yii::$app->formatter->asDatetime($date,'php:yy');
           $mpd = Yii::$app->formatter->asDatetime($date,'php:m.y');
           $dpd = Yii::$app->formatter->asDatetime($date,'php:j');
@@ -164,11 +164,11 @@ class Request extends \yii\db\ActiveRecord
         );
         if  (($today == false) & ($yesterday == false) & ($ypd == $yy))
         {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[(date('n'))] . ', в HH:mm');
+            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ', в HH:mm');
         }
         else
         {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[(date('n'))] . ' Y, в HH:mm');
+            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ' Y, в HH:mm');
         }
     }
     static function  getTimeFormatWord($number, $suffix) {
@@ -213,18 +213,20 @@ class Request extends \yii\db\ActiveRecord
                 break;
         }
     }
-    
+    public function getManagers($id)
+    {
+        if(User::find()->where(['organization_id' => $id])->exists()){
+           return User::find()->where(['organization_id'=>$id])->all(); 
+        }else{
+           return; 
+        }
+    }
     public function getClient()
     {
         return $this->hasOne(Organization::className(), ['id' => 'rest_org_id']);
     }
     
     public function getVendor()
-    {
-        return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);
-    }
-    
-    public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'responsible_supp_org_id']);
     }

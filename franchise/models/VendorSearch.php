@@ -60,7 +60,7 @@ class VendorSearch extends Organization {
             $t2_f = $to->format('Y-m-d');
         }
 
-        $query = "SELECT org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
+        $query = "SELECT self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where supp_org_id=org.id) as clientCount, 
                 (select count(id) from relation_supp_rest where supp_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
                 (select count(id) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
                 (select count(id) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
@@ -84,6 +84,7 @@ class VendorSearch extends Organization {
             'sort' => [
                 'attributes' => [
                     'name',
+                    'self_registered',
                     'clientCount',
                     'orderCount',
                     'orderSum',

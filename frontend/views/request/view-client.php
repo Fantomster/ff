@@ -46,7 +46,7 @@ use yii\widgets\ListView;
 	  <div class="col-md-6">
             <div class="row">
               <div class="col-md-12">
-		<h3 class="text-success"><?=$request->product?>
+		<h3 class="text-success">№<?=$request->id?> <?=$request->product?>
                 <?php if ($request->rush_order){?>
       <span style="color:#d9534f"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</span>
       <?php } ?>
@@ -59,7 +59,7 @@ use yii\widgets\ListView;
             <h6><b>Способ оплаты:</b> <?=$request->paymentMethodName ?></h6>
             <div class="req-respons">Исполнитель: 
                 <?=$request->responsible_supp_org_id ? 
-                      '<span style="color:#84bf76;text-decoration:underline">' . $request->organization->name . '</span>' : 
+                      '<span style="color:#84bf76;text-decoration:underline">' . $request->vendor->name . '</span>' : 
                       '<span style="color:#ccc;">не назначен</span>';
                 ?>
             </div>
@@ -72,8 +72,8 @@ use yii\widgets\ListView;
             }
             ?>
             <div class="pull-right" style="margin-top: 9px">
-                  <i class="fa fa-eye" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->counter?>
-                  <i class="fa fa-handshake-o" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->countCallback?>
+                  <span  data-toggle="tooltip" data-placement="bottom" data-original-title="Кол-во уникальных просмотров поставщиков"><i class="fa fa-eye" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->counter?></span>
+                <span  data-toggle="tooltip" data-placement="bottom" data-original-title="Предложений от поставщиков"><i class="fa fa-handshake-o" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->countCallback?></span>
 		</div>
 	  </div>
           <div class="col-md-6">

@@ -20,7 +20,7 @@ use yii\helpers\Url;
 <p>При отправке этого письма, автоматически был создан аккаунт для вас в <a href="http://f-keeper.ru" style="color: #84bf76;">F-keeper</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения.</p>
 <br />
 <div style="width: 100%; text-align: center;">
-    <a href="<?= Url::toRoute(["/user/accept-restaurants-invite", "token" => $userToken->token], true); ?>"
+    <a href="<?= Url::toRoute(["/user/reset", "token" => $userToken->token], true); ?>"
        style="text-decoration: none;
     color: #FFF;
     background-color: #84bf76;

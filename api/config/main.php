@@ -10,16 +10,21 @@ return [
     'id' => 'api.f-keeper',
     'name' => 'api.f-keeper',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
-    'controllerNamespace' => 'api\controllers',
+    'bootstrap' => [
+                    'log',
+                    'api\modules\v1\modules\supp\Bootstrap'    
+                   ],
+    'controllerNamespace' => 'api\common\controllers',
     'defaultRoute' => 'site',
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-api',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
-            'enableAutoLogin' => true,
+
+                'class' => 'amnah\yii2\user\components\User',
+        //        'identityClass' => 'api\common\models\User',      
+        //    'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-api', 'httpOnly' => true],
             
         ],
@@ -56,24 +61,30 @@ return [
         */
     ],
     'modules' => [
+        
         'user' => [
-            'class' => 'amnah\yii2\user\Module',
+            'class' => '\amnah\yii2\user\Module',
             'loginEmail' => true,
-            'requireEmail' => true,
-            'requireUsername' => false,
+        //   'requireEmail' => true,
+        //    'requireUsername' => false,
             'loginUsername' => false,
-            'controllerMap' => [
-                'default' => 'api\controllers\UserController',
+              'controllerMap' => [
+                'default' => 'api\common\controllers\UserController',
             ],
-            'modelClasses' => [
-                'User' => 'common\models\User',
-                'Profile' => 'common\models\Profile',
-                'Role' => 'common\models\Role',
-                'Organization' => 'common\models\Organization',
-                'LoginForm' => 'common\models\forms\LoginForm',
+        'modelClasses' => [
+                'User' => 'api\common\models\User',
+                'Profile' => 'api\common\models\Profile',
+                'Role' => 'api\common\models\Role',
+                'UserAuth' => 'api\common\models\UserAuth',
+                'UserToken' => 'api\common\models\UserToken',
+            //    'Organization' => 'api\common\models\Organization',
+            //    'LoginForm' => 'api\common\models\forms\LoginForm',
             ],
             'emailViewPath' => '@api/mail',
-        ],
+        ], 
+        'v1' => [
+            'class' => 'api\modules\v1\Module',
+        ]
     ],
     'params' => $params,
 ];

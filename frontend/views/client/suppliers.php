@@ -52,85 +52,21 @@ $this->registerCss('
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
-                    <h4 class="modal-title">
-                        Добавить / Изменить Продукты
-                    </h4>
+                    <h5 class="modal-title">
+                        <b class="client-manager-name"></b>, укажите товары, который Вы покупаете у поставщика <b class="supplier-org-name"></b>
+                    </h5>
                 </div>
             </div>
             <div class="modal-body">
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
-                <p style="text-align: center; padding-top: 3px; font-style: italic;">Вы можете загрузить каталог вашего поставщика, а наши менеджеры подготовят его для работы!</p>
-                <?=
-                FileInput::widget([
-                    'model' => $relationSuppRest,
-                    'attribute' => 'uploaded_catalog',
-                    'pluginOptions' => [
-                        'showPreview' => false,
-                        'showCaption' => true,
-                        'showRemove' => true,
-                        'showUpload' => false,
-                        'removeLabel' => '',
-                        'browseLabel' => 'Загрузить...'
-                    ],
-                ]);
-                ?>
                 <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success">Отправить</button>
             </div>
         </div>
     </div>
 </div>
-<?php /*
-  yii\bootstrap\Alert::widget([
-  'options' => [
-  'class' => 'alert-warning',
-  ],
-  'body' => 'Для того, чтобы начать работу с новым поставщиком, посмотрите видео инструкцию. '
-  . '<a class="btn btn-default btn-sm" href="#">Смотреть!</a>',
-  ]); */
-?>
-<?php
-if (false) {//$step == common\models\Organization::STEP_ADD_VENDOR
-    $this->registerJs('
-        $("document").ready(function(){
-            $("#showVideo").modal("show");
-            
-            $("body").on("hidden.bs.modal", "#showVideo", function() {
-                $("#showVideo").remove()
-            });
-        });
-            ');
-
-//    echo yii\bootstrap\Alert::widget([
-//        'options' => [
-//            'class' => 'alert-warning fade in',
-//        ],
-//        'body' => 'Для того, чтобы продолжить работу с нашей системой, добавьте ваших поставщиков.'
-//        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-//    ]);
-
-    Modal::begin([
-        'id' => 'showVideo',
-        'header' => '<h4>Загрузка каталогов поставщиков</h4>',
-        'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>',
-    ]);
-    ?>
-    <div class="modal-body form-inline"> 
-        <div class="embed-responsive embed-responsive-16by9">
-            <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/Cj85FCJOZbQ" frameborder="0" allowfullscreen=""></iframe>
-        </div>
-        <div style="padding-top: 15px;">
-            Для того, чтобы продолжить работу с нашей системой, добавьте ваших поставщиков
-        </div>
-    </div>
-    <?php
-    Modal::end();
-}
-?>
-
-
 <section class="content-header">
     <h1>
         <i class="fa fa-users"></i> Поставщики
@@ -187,72 +123,7 @@ $gridColumnsCatalog = [
         'headerOptions' => ['style' => 'text-align:right'],
         'format' => 'raw',
         'value' => function ($data) {
-    $result = "";
-    /* $data["invite"] == 0 ? 
-      $result .=
-      Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-      'class' => 'btn btn-success btn-sm',
-      'disabled' => 'disabled']) :
-      $result .=
-      $data["cat_id"] == 0 ?
-      $result .=
-      Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
-      'class' => 'btn btn-success btn-sm',
-      'disabled' => 'disabled']) :
-      Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
-      'OrderCatalogSearch[searchString]' => "",
-      'OrderCatalogSearch[selectedCategory]' => "",
-      'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
-      ], [
-      'class' => 'btn btn-success btn-sm',
-      'data-pjax' => 0,
-      ]);
-      $data["invite"] == 0 ?
-      $result .=
-      Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-      'class' => 'btn btn-default btn-sm',
-      'disabled' => 'disabled']) :
-      $result .=
-      $data["cat_id"] == 0 ?
-      $result .=
-      Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
-      'class' => 'btn btn-default btn-sm',
-      'disabled' => 'disabled']) :
-      $data["status_invite"] == 2 ?
-      Html::a('<i class="fa fa-pencil"></i>', ['client/edit-catalog', 'id' => $data["cat_id"]], [
-      'class' => 'btn btn-default btn-sm',
-      'style' => 'text-center',
-      'data-pjax' => 0,
-      'data' => [
-      'target' => '#edit-catalog',
-      'toggle' => 'modal',
-      'backdrop' => 'static',]
-      ]) :
-      Html::a('<i class="fa fa-eye"></i>', ['client/view-catalog', 'id' => $data["cat_id"]], [
-      'class' => 'btn btn-default btn-sm',
-      'style' => 'text-center',
-      'data-pjax' => 0,
-      'data' => [
-      'target' => '#view-catalog',
-      'toggle' => 'modal',
-      'backdrop' => 'static',
-      ],
-      ]);
-      $data["status_invite"] == 2 ?
-      $result .= Html::a('<i class="fa fa-envelope m-r-xs"></i>', ['client/re-send-email-invite',
-      'id' => $data["supp_org_id"],
-      ], [
-      'class' => 'btn btn-default btn-sm resend-invite',
-      'data-pjax' => 0,]) :
-      $result .=Html::tag('span', '<i class="fa fa-envelope m-r-xs"></i>', [
-      'class' => 'btn btn-default btn-sm',
-      'disabled' => 'disabled']);
-
-      $result .= Html::a('<i class="fa fa-trash m-r-xs"></i>', ['client/remove-supplier',
-      'id' => $data["supp_org_id"],
-      ], [
-      'class' => 'btn btn-danger btn-sm remove-supplier',
-      'data-pjax' => 0,]); */
+        $result = "";
     if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
         //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
         $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
@@ -314,7 +185,7 @@ $gridColumnsCatalog = [
                         'disabled' => 'disabled']);
         }
     }
-
+    
     $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                 'class' => 'btn btn-danger btn-sm del',
                 'data' => ['id' => $data["supp_org_id"]],
@@ -416,19 +287,6 @@ $gridColumnsCatalog = [
                             ->textInput()
                     ?>
                     <?= $form->field($organization, 'name')->label('Организация') ?>
-                    <?=
-                    ''
-//                    $form->field($relationCategory, 'category_id')->label('Категория поставщика')->widget(Select2::classname(), [
-//                        'data' => Category::allCategory(),
-//                        'theme' => 'krajee',
-//                        //'language' => 'ru',
-//                        'hideSearch' => true,
-//                        'options' => ['multiple' => true, 'placeholder' => 'Выберите категорию'],
-//                        'pluginOptions' => [
-//                            'allowClear' => true,
-//                        ],
-//                    ]);
-                    ?>
                 </div> 
                 <div class="box-footer">
                     <div class="form-group">
@@ -458,26 +316,12 @@ $gridColumnsCatalog = [
 </section>
 
 <?php
-//$this->registerCssFile('/modules/handsontable/dist/handsontable.full.css');
-//$this->registerCssFile('/modules/handsontable/dist/bootstrap.css');
-//$this->registerCssFile('/modules/handsontable/dist/chosen.css');
-//$this->registerCssFile('/modules/handsontable/dist/pikaday/pikaday.css');
-//$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
-//$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
-//$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
-//$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
-//$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-//$this->registerJsFile('modules/handsontable/dist/handsontable.js');
-//$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
-//$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
-//$this->registerJsFile('modules/alerts.js');
 
 $chkmailUrl = Url::to(['client/chkmail']);
 $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
-$suppliersUrl = Url::to(['clint/suppliers']);
+$suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
-
 $customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
@@ -518,24 +362,16 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
+  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (руб)'],
   columns: [
-        {data: 'article'},
         {data: 'product', wordWrap:true},
-	{
-            data: 'units', 
-            type: 'numeric',
-            format: '0.00',
-            language: 'ru-RU'
-        },
+        {data: 'ed', allowEmpty: false},
 	{
             data: 'price', 
             type: 'numeric',
             format: '0.00',
             language: 'ru-RU'
-        },
-        {data: 'ed', allowEmpty: false},
-        {data: 'note'}
+        }
     ],
   className : 'Handsontable_table',
   rowHeaders : true,
@@ -719,7 +555,7 @@ $('#invite').click(function(e){
     $('#loader-show').showLoading();
     e.preventDefault();
 	var i, items, item, dataItem, data = [];
-	var cols = [ 'article', 'product', 'units', 'price', 'ed', 'note'];
+	var cols = ['product', 'ed', 'price'];
 	$('#CreateCatalog tr').each(function() {
 	  items = $(this).children('td');
 	  if(items.length === 0) {
@@ -732,7 +568,7 @@ $('#invite').click(function(e){
 	      dataItem[cols[i]] = item.html();
 	    }
 	  }
-	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]] || dataItem[cols[3]] || dataItem[cols[4]] || dataItem[cols[5]]){
+	  if(dataItem[cols[0]] || dataItem[cols[1]] || dataItem[cols[2]]){
 	    data.push({dataItem});    
 	  }	    
 	});
@@ -741,7 +577,6 @@ $('#invite').click(function(e){
         var form = $("#SuppliersFormSend")[0];
         var formData = new FormData(form);
         formData.append('catalog', catalog);
-        formData.append('RelationSuppRest[uploaded_catalog]', $('input[type=file]')[0].files[0]);
 	$.ajax({
                     processData: false,
                     contentType: false,
@@ -866,6 +701,10 @@ $("body").on("hidden.bs.modal", "#resend", function() {
 $("body").on("hidden.bs.modal", "#edit-catalog", function() {
     $(this).data("bs.modal", null);
 })
+$("#organization-name").keyup(function() {
+    $(".client-manager-name").html("$clientName");
+    $(".supplier-org-name").html($("#organization-name").val());
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

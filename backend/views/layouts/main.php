@@ -73,6 +73,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             } else {
                 if (Yii::$app->user->identity->role_id === \common\models\Role::ROLE_ADMIN) {
                     $menuItems = array_merge($menuItems, [
+                        ['label' => 'SERVICEDESK', 'url' => ['/service-desk/index'],'linkOptions'=>['style'=>'color:#f4c871;font-size:bold']],
                         [
                             'label' => 'Пользователи',
                             'items' => [

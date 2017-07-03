@@ -9,6 +9,7 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
+
 $this->title = 'Заказы';
 $this->registerJs('
     $("document").ready(function(){
@@ -153,7 +154,7 @@ $this->registerCss("
                     ?>
                 </div>
                 <div class="col-lg-5 col-md-6 col-sm-6"> 
-                    <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
                         <?=
                         DatePicker::widget([
@@ -174,7 +175,7 @@ $this->registerCss("
                     </div>
                 </div>
             </div>
-            <?php ActiveForm::end(); ?>
+<?php ActiveForm::end(); ?>
             <div class="row">
                 <div class="col-md-12">
                     <?=
@@ -262,7 +263,7 @@ $this->registerCss("
                                         case Order::STATUS_DONE:
                                         case Order::STATUS_REJECTED:
                                         case Order::STATUS_CANCELLED:
-                                            return Html::a('Повторить', '#' , [
+                                            return Html::a('Повторить', '#', [
                                                         'class' => 'reorder btn btn-outline-processing',
                                                         'data' => [
                                                             'toggle' => 'tooltip',
@@ -275,30 +276,30 @@ $this->registerCss("
                                         case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
                                         case Order::STATUS_PROCESSING:
                                             if ($data->isObsolete) {
-                                                return Html::a('Завершить', '#' , [
-                                                        'class' => 'complete btn btn-outline-success',
-                                                        'data' => [
-                                                            'toggle' => 'tooltip',
-                                                            'original-title' => 'Завершить заказ',
-                                                            'url' => Url::to(['order/complete-obsolete', 'id' => $data->id])
-                                                        ],
+                                                return Html::a('Завершить', '#', [
+                                                            'class' => 'complete btn btn-outline-success',
+                                                            'data' => [
+                                                                'toggle' => 'tooltip',
+                                                                'original-title' => 'Завершить заказ',
+                                                                'url' => Url::to(['order/complete-obsolete', 'id' => $data->id])
+                                                            ],
                                                 ]);
                                             }
                                             break;
                                     }
                                     return '';
                                 },
-                                        'contentOptions' => ['class' => 'text-center'],
-                                        'headerOptions' => ['style' => 'width: 20px;']
-                                    ],
-                                ],
-                                'rowOptions' => function ($model, $key, $index, $grid) {
+                                'contentOptions' => ['class' => 'text-center'],
+                                'headerOptions' => ['style' => 'width: 20px;']
+                            ],
+                        ],
+                        'rowOptions' => function ($model, $key, $index, $grid) {
                             return ['data-url' => Url::to(['order/view', 'id' => $model->id])];
                         },
-                            ]);
-                            ?>
-                        </div></div>
-                    <?php Pjax::end() ?>
+                    ]);
+                    ?>
+                </div></div>
+<?php Pjax::end() ?>
             <!-- /.table-responsive -->
         </div>
         <!-- /.box-body -->

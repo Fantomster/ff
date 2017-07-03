@@ -47,10 +47,18 @@
         "kartik-v/yii2-widget-typeahead": "*",
         "2amigos/yii2-chartjs-widget": "~2.0",
         "bower-asset/sweetalert2": "*",
+        "bower-asset/core.js": "*",
         "yii2assets/yii2-fullscreen-modal": "*",
         "delocker/yii2-animate.css": "dev-master",
         "borales/yii2-phone-input": "*",
-        "mongosoft/yii2-soap-server": "*"
+        "mongosoft/yii2-soap-server": "*",
+        "asimlqt/php-google-spreadsheet-client": "3.0.*",
+        "google/apiclient": "1.1.7",
+        "yiisoft/yii2-httpclient": "^2.0",
+        "bower-asset/perfect-scrollbar": "*",
+        "bower-asset/slick-carousel": "*",
+        "bower-asset/svg4everybody": "*",
+        "yiisoft/yii2-jui": "~2.0.0"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

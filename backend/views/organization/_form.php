@@ -20,6 +20,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'legal_entity')->textInput(['maxlength' => true]) ?>
     <style>#map{width:100%;height:250px;}</style>
+    <?='адрес в базе: ' . $model->address;?>
     <?= $form->field($model, 'address')->textInput(['maxlength' => true]) ?>
     <div id="map"></div>
     <script type="text/javascript"> 
@@ -48,7 +49,7 @@ document.onkeypress = stopRKey;
             'language'=>Yii::$app->params['google-api']['language'],
             'callback'=>'initMap'
         ));
-    $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
+    $this->registerJsFile($gpJsLink, ['async'=>true, 'defer'=>true]);
     $this->registerJs("
     $(document).on('keyup change', '#organization-address', function(){
     $(this).next().toggle(Boolean($(this).val()));

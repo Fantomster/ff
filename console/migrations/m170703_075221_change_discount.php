@@ -6,12 +6,12 @@ class m170703_075221_change_discount extends Migration
 {
     public function safeUp()
     {
-        $this->alterColumn('{{%order}}', 'discount', $this->decimal(10,2)->null);
+        $this->alterColumn('{{%order}}', 'discount', $this->decimal(10,2)->null());
     }
 
     public function safeDown()
     {
-        $this->alterColumn('{{%order}}', 'discount', $this->decimal(2,0)->null);
+        $this->alterColumn('{{%order}}', 'discount', $this->decimal(2,0)->null());
     }
 
     /*

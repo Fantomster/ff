@@ -43,3 +43,5 @@ phpunit.phar
 /instant/cert/ssl-cert-snakeoil.pem
 /instant/cert/ssl-cert-snakeoil.key
 /instant/port.js
+/api/config/main-local.php
+/api/config/params-local.php

@@ -11,25 +11,25 @@ $newClientCount = Yii::$app->user->can('manage') ? $user->organization->getNewCl
 
 $menuItems = [
     ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
-    ['label' => 'Рабочий стол', 'icon' => 'home', 'url' => ['vendor/index']],
+    ['label' => 'Рабочий стол', 'icon' => 'home', 'url' => ['/vendor/index']],
     [
         'label' => 'Заказы',
         'icon' => 'history',
-        'url' => ['order/index'],
+        'url' => ['/order/index'],
         'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right new-orders-count">' . ($newOrdersCount ? $newOrdersCount : '') . '</span></span></a>',
     ],
-    ['label' => 'Мои каталоги', 'icon' => 'list-alt', 'url' => ['vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
+    ['label' => 'Мои каталоги', 'icon' => 'list-alt', 'url' => ['/vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
     ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
-    ['label' => 'Заявки<sub class="sub-new">БЕТА</sub>', 'icon' => 'paper-plane', 'url' => ['request/list'], 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'Заявки<sub class="sub-new">БЕТА</sub>', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
     [
         'label' => 'Мои клиенты',
         'icon' => 'users',
-        'url' => ['vendor/clients'],
+        'url' => ['/vendor/clients'],
         'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">' . ($newClientCount ? $newClientCount : '') . '</span></span></a>',
     ],
-    ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
-    ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['vendor/tutorial', 'video' => 'video']],
+    ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
+    ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/vendor/tutorial', 'video' => 'video']],
     //['label' => 'Мои акции', 'icon' => 'ticket', 'url' => ['vendor/events']],
     ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
     //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],
@@ -41,9 +41,10 @@ if (Yii::$app->user->can('manage')) {
         'url' => '#',
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
-            ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['vendor/settings']],
-            ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['vendor/employees']],
-            ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['vendor/delivery']],
+            ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
+         //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
+            ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
+            ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
         ]
     ];
 }
@@ -73,11 +74,9 @@ $menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options
             </div>
         </form>
         <ul class="sidebar-menu personal-manager">
-            <li class="header"><span style="text-transform: uppercase;">Личный менеджер</span></li>
+            <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;">
-                <img src="/images/welcome-zalina.png" class="welcome-manager">
-                <p style="font-size: 14px;"><strong>Залина</strong></p><p></p>
-                <p>+7 929 611 79 00</p>
+                <p><a href="tel:+74994041018p202"><i class="fa fa-phone"></i> +7-499-404-10-18 доб.202</a></p>
             </div>
         </ul>
     </section>

@@ -121,6 +121,10 @@ class ClientController extends Controller {
             throw new NotFoundHttpException('Редактирование этого аккаунта отключено во имя Луны!');
         }
 
+        if (($model->organization_id === 1) && (Yii::$app->user->identity->id !== 76)) {
+            throw new NotFoundHttpException('Добавление пользователей в эту организацию отключено во имя Луны!');
+        }
+
         try {
             if ($model->load(Yii::$app->request->post()) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);

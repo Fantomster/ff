@@ -6,6 +6,7 @@ use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Json;
+use common\models\forms\ServiceDesk;
 use common\components\AccessRule;
 use common\models\Role;
 use common\models\User;
@@ -16,6 +17,16 @@ use common\models\CatalogBaseGoods;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
+use Google\Spreadsheet\DefaultServiceRequest;
+use Google\Spreadsheet\ServiceRequestFactory;
+use Google\Spreadsheet\SpreadsheetService;
+
+
+define('CLIENT_APP_NAME', 'sonorous-dragon-167308');
+define('SERVICE_ACCOUNT_CLIENT_ID', '114798227950751078238');
+define('SERVICE_ACCOUNT_EMAIL', 'f-keeper@sonorous-dragon-167308.iam.gserviceaccount.com');
+define('SERVICE_ACCOUNT_PKCS12_FILE_PATH', Yii::getAlias('@common') . '/google/GoogleApiDocs-356b554846a5.p12');
+define('CLIENT_KEY_PW', 'notasecret');
 /**
  * Description of AppController
  *
@@ -45,10 +56,10 @@ class SiteController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                'only' => ['index','setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                        'actions' => ['index','setting','setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -125,7 +136,22 @@ class SiteController extends DefaultController {
 
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType'));
     }
+    
+    
+    public function actionSettings() {
+        $franchisee = $this->currentFranchisee;
+        if ($franchisee->load(Yii::$app->request->post())) {
+            if ($franchisee->validate()) {
+                $franchisee->save();
+            }
+        }
 
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('settings', compact('franchisee'));
+        } else {
+            return $this->render('settings', compact('franchisee'));
+        }
+    }
     /**
      * Displays general settings
      * 
@@ -150,15 +176,85 @@ class SiteController extends DefaultController {
             return $this->render('orders', compact('searchModel', 'dataProvider'));
         }
     }
+    public function actionServiceDesk() {
+        $model = new ServiceDesk();
+        $franchise = $this->currentFranchisee;
+        $franchise_user = $this->currentUser->profile;
+        if ($model->load(Yii::$app->request->post())) {
 
+            $model->region = '';
+            $model->phone = str_replace("+", "", $franchise_user->phone);
+            $model->fio = $franchise_user->full_name;
+            
+          if($model->validate()){
+            $objClientAuth  = new \Google_Client();
+            $objClientAuth -> setApplicationName (CLIENT_APP_NAME);
+            $objClientAuth -> setClientId (SERVICE_ACCOUNT_CLIENT_ID);
+            
+            $objClientAuth -> setAssertionCredentials (new \Google_Auth_AssertionCredentials (
+                SERVICE_ACCOUNT_EMAIL, 
+                array('https://spreadsheets.google.com/feeds','https://docs.google.com/feeds'), 
+                file_get_contents (SERVICE_ACCOUNT_PKCS12_FILE_PATH), 
+                CLIENT_KEY_PW
+            ));
+            
+            $objClientAuth->getAuth()->refreshTokenWithAssertion();
+            $objToken  = json_decode($objClientAuth->getAccessToken());
+            
+            $accessToken = $objToken->access_token;
+            
+            /**
+            * Initialize the service request factory
+            */ 
+
+            $serviceRequest = new DefaultServiceRequest($accessToken);
+            ServiceRequestFactory::setInstance($serviceRequest);
+            
+            /**
+            * Get spreadsheet by title 
+            */
+            
+            $spreadsheetTitle = 'f-keeper';
+            $spreadsheetService = new SpreadsheetService();
+            $spreadsheetFeed = $spreadsheetService->getSpreadsheetFeed();
+            $spreadsheet = $spreadsheetFeed->getByTitle($spreadsheetTitle);
+            
+            /**
+            * Get particular worksheet of the selected spreadsheet
+            */
+            
+            $worksheetTitle = 'Franchise';
+            $worksheetFeed = $spreadsheet->getWorksheetFeed();
+            $worksheet = $worksheetFeed->getByTitle($worksheetTitle);
+            $listFeed = $worksheet->getListFeed();
+            
+            $listFeed->insert([
+                'fid' => $franchise->id,
+                'fuid' => $franchise_user->user_id,
+                'region' => $model->region,
+                'fio' => $model->fio,
+                'phone' => $model->phone,
+                'priority' => $model->priority,
+                'message' => $model->body,
+                'startdatetime' => date("Y-m-d H:i:s")
+            ]);  
+          }
+        }
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('service-desk',[
+                'model' => $model,
+                ]);
+        } else {
+            return $this->render('service-desk',[
+                'model' => $model,
+                ]);
+        }
+    }
     /**
      * Displays general settings
      * 
      * @return mixed
      */
-    public function actionSettings() {
-        return $this->render('/site/under-construction');
-    }
 
     /**
      * Displays franchise users list

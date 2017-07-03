@@ -125,9 +125,10 @@ class VendorController extends DefaultController {
 
     public function actionSettings() {
         $organization = $this->currentUser->organization;
-
+        $organization->scenario = "settings";
         if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
+                $organization->address = $organization->formatted_address;
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_CATALOG;
                     $organization->save();
@@ -476,6 +477,7 @@ class VendorController extends DefaultController {
 
     public function actionBasecatalog() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        
         $searchString = "";
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->id;
         $currentCatalog = $baseCatalog;
@@ -1139,6 +1141,9 @@ class VendorController extends DefaultController {
     public function actionStep1Update($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        if(!Catalog::find()->where(['id'=>$id, 'supp_org_id'=>$currentUser->organization_id])->exists()){
+           return $this->redirect(['vendor/index']);  
+        }
         $catalog = Catalog::find()->where(['id' => $cat_id])->one();
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1160,8 +1165,11 @@ class VendorController extends DefaultController {
     public function actionStep1Clone($id) {
         $cat_id_old = $id; //id исходного каталога
         $currentUser = User::findIdentity(Yii::$app->user->id);
-
-        $model = Catalog::findOne(['id' => $id]);
+        
+        $model = Catalog::findOne(['id' => $id, 'supp_org_id'=>$currentUser->organization_id]);
+        if(empty($model)){
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
         $model->id = null;
         $model->name = $model->name . ' ' . date('H:i:s');
         $cat_type = $model->type;   //текущий тип каталога(исходный)    
@@ -1195,7 +1203,7 @@ class VendorController extends DefaultController {
                 $catalogGoods = new CatalogGoods;
                 $catalogGoods->base_goods_id = $product_id;
                 $catalogGoods->cat_id = Yii::$app->request->post('cat_id');
-                ;
+
                 $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
                 $catalogGoods->save();
                 return (['success' => true, 'Добавлен']);
@@ -1224,24 +1232,27 @@ class VendorController extends DefaultController {
             }
         }
 
-        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->id;
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if(empty($baseCatalog)){
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
         $searchString = "";
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
             $sql = "SELECT id,article,product,units,category_id,price,ed,status FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog AND "
+                    . "WHERE cat_id = $baseCatalog->id AND "
                     . "deleted=0 AND (product LIKE :product or article LIKE :article)";
             $query = \Yii::$app->db->createCommand($sql);
             $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                            . "WHERE cat_id = $baseCatalog AND "
+                            . "WHERE cat_id = $baseCatalog->id AND "
                             . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
         } else {
             $sql = "SELECT id,article,product,units,category_id,price,ed,status FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog AND "
+                    . "WHERE cat_id = $baseCatalog->id AND "
                     . "deleted=0";
             $query = \Yii::$app->db->createCommand($sql);
             $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                            . "WHERE cat_id = $baseCatalog AND "
+                            . "WHERE cat_id = $baseCatalog->id AND "
                             . "deleted=0")->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
@@ -1273,6 +1284,10 @@ class VendorController extends DefaultController {
     public function actionStep3Copy($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $model = Catalog::findOne(['id' => $id, 'supp_org_id'=>$currentUser->organization_id]);
+        if(empty($model)){
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
         // выборка для handsontable
         /* $arr = CatalogGoods::find()->select(['id', 'base_goods_id', 'price', 'discount', 'discount_percent'])->where(['cat_id' => $id])->
           andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->
@@ -1326,7 +1341,7 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
 
                 if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный товар']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный товар']];
                     return $result;
                     exit;
                 }
@@ -1334,7 +1349,7 @@ class VendorController extends DefaultController {
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
                     return $result;
                     exit;
                 }
@@ -1359,6 +1374,10 @@ class VendorController extends DefaultController {
     public function actionStep3($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $model = Catalog::findOne(['id' => $id, 'supp_org_id'=>$currentUser->organization_id]);
+        if(empty($model)){
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
         $searchModel = new CatalogGoods();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $cat_id);
         return $this->render('newcatalog/step-3', compact('searchModel', 'dataProvider', 'exportModel'));
@@ -1384,6 +1403,10 @@ class VendorController extends DefaultController {
     public function actionStep4($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $model = Catalog::findOne(['id' => $id, 'supp_org_id'=>$currentUser->organization_id]);
+        if(empty($model)){
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
         $searchModel = new RelationSuppRest;
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
         if (Yii::$app->request->isAjax) {
@@ -1799,8 +1822,10 @@ class VendorController extends DefaultController {
         $dataProvider->pagination = ['pageSize' => 10];
         // <----- GRIDVIEW ИСТОРИЯ ЗАКАЗОВ
 
-        return $this->render('dashboard/index', compact(
-                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats'
+        $organization = $currentUser->organization;
+        $profile = $currentUser->profile;
+        return $this->render('index', compact(
+                                'dataProvider', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'stats', 'organization', 'profile'
         ));
     }
 

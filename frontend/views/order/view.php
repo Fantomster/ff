@@ -7,6 +7,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 
+$this->title = 'Заказ №' . $order->id;
+
 if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organization::TYPE_SUPPLIER)) {
     $quantityEditable = false;
     $priceEditable = false;
@@ -22,6 +24,7 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
 $urlGetGrid = Url::to(['/order/ajax-order-grid', 'id' => $order->id]);
+$edit = false;
 
 $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
@@ -206,90 +209,26 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     ?>
 </section>
 <section class="content">
-    <div class="row">
-        <div class="col-md-8" id="toPrint">
-            <div class="box box-info">
-                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
-                <div class="box-header with-border">
-                    <h4 class="font-bold">Заказ №<?= $order->id ?></h4><hr>
-                    <div class="row m-b-xl" style="line-height: 1.8;">
-                        <div class="col-xs-6">
-                            <span class="org-type">Заказчик:</span><br>
-                            <?= $order->client->name ?><br><br>
-                            <address>
-                                <b>Город:</b> <?= $order->client->city ?><br>
-                                <b>Адрес:</b> <?= $order->client->address ?><br>
-                                <b>Телефон:</b> <?= $order->client->phone ?>
-                            </address>
-                            <p class="text-left">
-                                <b>Размещен:</b>
-                                <?= $order->createdBy->profile->full_name ?><br>
-                                <b>Email:</b> <?= $order->createdBy->email ?>
-                            </p>
-                            <p class="text-left">
-                                <strong>Запрошенная дата доставки:</strong><br>
-                                <?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:j M Y") : '' ?>
-                            </p>
-                        </div>
-                        <div class="col-xs-6 text-right">
-                            <span class="org-type">Поставщик:</span><br>
-                            <?= $order->vendor->name ?><br><br>
-                            <address>
-                                <b>Город:</b> <?= $order->vendor->city ?><br>
-                                <b>Адрес:</b> <?= $order->vendor->address ?><br>
-                                <b>Телефон:</b> <?= $order->vendor->phone ?>
-                            </address>
-                            <p class="text-right">
-                                <span><strong>Дата создания заказа:</strong><br><?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></span><br>
-                                <span><strong>Дата доставки:</strong><br><?= $order->actual_delivery ? Yii::$app->formatter->asDatetime($order->actual_delivery, "php:j M Y") : '' ?></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <!-- /.box-header -->
-                <div class="box-body">
-                    <div id="orderGrid">
-                        <?php
-                        if ($quantityEditable || $priceEditable) {
-                            echo $this->render('_edit-grid', compact('dataProvider', 'searchModel', 'quantityEditable', 'priceEditable', 'order', 'canRepeatOrder'));
-                        } else {
-                            echo $this->render('_view-grid', compact('dataProvider', 'order', 'canRepeatOrder'));
-                        }
-                        ?>
-                    </div>
-                    <!-- /.table-responsive -->
-                </div>
-                <!-- /.box-body -->
-                <?php Pjax::end(); ?>
+    <div class="container1 ">
+        <div class="row">
+            <div class="col-lg-8 col-md-12">
+                <?= $this->render('_bill', compact('order', 'dataProvider')) ?>
             </div>
 
-        </div>
-        <div class="col-md-4">
-            <div class="box box-info">
-                <div class="box-header">
-                    <h3 class="box-title">Итого</h3>
-                    <a href="#" class="btn btn-outline-default pull-right btn-xs" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>
-                </div>
-                <div class="box-body" id="actionButtons">
-                    <?= $this->render('_order-buttons', compact('order', 'organizationType')) ?>   
-                </div>
+            <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp" id="actionButtons">
+                <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
             </div>
             <?php
             echo Html::beginForm(Url::to(['/order/ajax-refresh-buttons']), 'post', ['id' => 'actionButtonsForm']);
             echo Html::hiddenInput('order_id', $order->id);
             echo Html::endForm();
             ?>
-
-        </div>
-        <div class="col-md-4">
-            <div class="box box-info direct-chat direct-chat-success">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Чат заказа</h3>
-                </div>
-                <!-- /.box-header -->
-                <div class="box-body">
-                    <!-- Conversations are loaded here -->
-                    <div class="direct-chat-messages" id="chatBody">
+            <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">
+                <div class = "block_wrapper">
+                    <div class="block_head_w">
+                        <img src="/img/chat.png" alt="">
+                    </div>
+                    <div class="direct-chat-messages wrapppp" id="chatBody">
                         <?php
                         foreach ($order->orderChat as $chat) {
                             echo $this->render('_chat-message', [
@@ -301,41 +240,34 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                                 'isSystem' => $chat->is_system,
                                 'ajax' => 0,
                                 'danger' => $chat->danger,
-                                'organizationType' => $chat->sentBy->organization->type_id]);
+                                'organizationType' => (isset($chat->sentBy->organization) ? $chat->sentBy->organization->type_id : 1)]);
                         }
                         ?>
                     </div>
-                    <!--/.direct-chat-messages-->
-                </div>
-                <!-- /.box-body -->
-                <div class="box-footer">
                     <?=
                     Html::beginForm(['/order/send-message'], 'POST', [
                         'id' => 'chat-form'
                     ])
                     ?>
-                    <div class="input-group">
-                        <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
-                        <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
-                        <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
+                    <div class="block_bot_w">
                         <?=
                         Html::textInput('message', null, [
                             'id' => 'message-field',
-                            'class' => 'form-control',
-                            'placeholder' => 'Сообщение ...'
+                            'class' => 'message',
+                            'placeholder' => 'Отправить сообщение'
                         ])
-                        ?>                     
-                        <span class="input-group-btn">
-                            <?=
-                            Html::submitButton('<i class="fa fa-paper-plane" style="margin-top:-3px;"></i> Отправить', [
-                                'class' => 'btn btn-success'
-                            ])
-                            ?>
-                        </span>
+                        ?>    
                     </div>
-                    <?= Html::endForm() ?>
+                    <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
+                    <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
+                    <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
+                    <?=
+                    Html::submitButton('', [
+                        'class' => 'hide'
+                    ])
+                    ?>
                 </div>
-                <!-- /.box-footer-->
+                <?= Html::endForm() ?>
             </div>
         </div>
     </div>

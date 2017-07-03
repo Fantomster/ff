@@ -194,7 +194,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             }
             if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome
-                $user->sendWelcome();
+                //$user->sendWelcome();
             }
             // set email and delete token
             $email = $newEmail ? : $user->email;

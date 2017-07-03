@@ -82,7 +82,7 @@ if (!Yii::$app->user->isGuest) {
                     $('#actionButtons').html(result);
                     if (!saving) {
                         try {
-                            $.pjax.reload({container: "#orderContent"});
+                            $.pjax.reload({container: "#orderContent",timeout:30000});
                         } catch(e) {
                         }
                     }
@@ -90,8 +90,7 @@ if (!Yii::$app->user->isGuest) {
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);
                 try {
-                    $.pjax.reload({container: "#checkout"});
-                    
+                    $.pjax.reload({container: "#checkout",timeout:30000});
                 } catch(e) {
                 }
             }

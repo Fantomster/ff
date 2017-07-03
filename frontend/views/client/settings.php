@@ -11,7 +11,7 @@ $this->title = 'Настройки';
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
-                $.pjax.reload({container: "#settingsInfo"});      
+                $.pjax.reload({container: "#settingsInfo",timeout:30000});      
             });
             $(".settings").on("change paste keyup", ".form-control, input", function() {
                 $("#cancelOrg").prop( "disabled", false );

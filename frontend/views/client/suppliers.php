@@ -588,8 +588,8 @@ $('#invite').click(function(e){
 		  success: function (response) {
                         if(response.success){
                           $('#loader-show').hideLoading();
-                          $.pjax.reload({container: "#add-supplier-list"});
-                          $.pjax.reload({container: "#sp-list"});
+                          $.pjax.reload({container: "#add-supplier-list",timeout:30000});
+                          $.pjax.reload({container: "#sp-list",timeout:30000});
 			  $('#modal_addProduct').modal('hide'); 
                           bootbox.dialog({
 			  message: response.message,
@@ -623,7 +623,7 @@ $("#view-supplier").on("click", ".save-form", function() {
     data: form.serialize(),
     cache: false,
     success: function(response) {
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
             form.replaceWith(response);
                   
         },
@@ -683,7 +683,7 @@ $(document).on("click",".del", function(e){
 			         
 		        }	
 		    });
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
 		}else{
 		console.log('cancel');	
 		}

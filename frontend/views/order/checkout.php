@@ -121,7 +121,7 @@ $this->registerJs(
                                 form.serialize() + extData
                             ).done(function (result) {
                                 if (result) {
-                                    $.pjax.reload("#checkout", {url:"http://f-keeper.dev/order/checkout"});
+                                    $.pjax.reload("#checkout", {url:"http://f-keeper.dev/order/checkout",timeout:30000});
                                     dataEdited = 0;
                                     resolve(result);
                                 } else {

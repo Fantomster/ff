@@ -176,12 +176,6 @@ class Organization extends \yii\db\ActiveRecord {
         return false;
     }
 
-    public static function getOrganization($id) {
-        $getOrganization = Organization::find()
-                        ->where(['id' => $id])->one();
-        return $getOrganization;
-    }
-
     public static function get_value($id) {
         $model = Organization::find()->where(["id" => $id])->one();
         if (!empty($model)) {
@@ -518,12 +512,12 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function getPictureUrl() {
         if ($this->type_id == self::TYPE_SUPPLIER) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_VENDOR_AVATAR;
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['client-noavatar'];
         }
         if ($this->type_id == self::TYPE_RESTAURANT) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_RESTAURANT_AVATAR;
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['vendor-noavatar'];
         }
-        return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
+        return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['org-noavatar'];
     }
 
     public function inviteVendor($vendor, $invite, $includeBaseCatalog = false, $fromMarket = false) {

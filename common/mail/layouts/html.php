@@ -27,7 +27,7 @@ use yii\helpers\Html;
                     <td style="margin: 0; padding: 0;"></td>
                     <td style="display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto; padding: 0;">
 
-                        <div style="max-width: 600px; display: block; background-color: #fff; margin: 0 auto; padding: 15px;">
+                        <div style="max-width: 570px; display: block; background-color: #fff; margin: 0 auto; padding: 15px;">
                             <table style="display: table; border-spacing: 0px; width: 100%; margin: 0; padding: 0;">
                                 <tr style="margin: 0; padding: 0;">
                                     <td style="margin: 0; padding: 0;text-align:center;"><img src="http://f-keeper.ru/img/logo.png" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" /></td>

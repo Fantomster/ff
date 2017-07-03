@@ -15,9 +15,9 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
                 Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
                 Order::STATUS_PROCESSING]));
-    $priceEditable = ($organizationType == Organization::TYPE_SUPPLIER) && (in_array($order->status, [
+    $priceEditable = (in_array($order->status, [
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
+                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT])); //($organizationType == Organization::TYPE_SUPPLIER) && 
 }
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);

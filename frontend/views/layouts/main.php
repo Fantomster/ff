@@ -216,7 +216,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="copy">
-                                        <span>© <?= date('Y') ?> F-Keeper — ООО «Онлайн Маркет» </span>
+                                        <span>© <?= date('Y') ?> f-keeper — ООО «Онлайн Маркет» </span>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-sm-4">

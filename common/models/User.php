@@ -42,8 +42,9 @@ class User extends \amnah\yii2\user\models\User {
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
             [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
             
-            // email rules
-            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message'=>'Введите эл.почту '],
+            // email rules invite client
+            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message'=>'Введите эл.почту партнера'],
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message'=>'Пользователь с таким Email уже работает в системе f-keeper, пожалуйста, свяжитесь с ним для сотрудничества!'],
             
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],

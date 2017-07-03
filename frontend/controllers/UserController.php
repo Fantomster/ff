@@ -199,11 +199,12 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             // set email and delete token
             $email = $newEmail ? : $user->email;
             $userToken->delete();
+            $this->performLogin($user, true);
+            return $this->redirect(['/site/index', 'new' => true]);
         }
 
-        $this->performLogin($user, true);
-        return $this->redirect(['/site/index', 'new' => true]);
-        //return $this->render("confirm", compact("userToken", "success", "email"));
+        $invalidToken = true;
+        return $this->render("reset", compact("invalidToken"));
     }
 
     /**

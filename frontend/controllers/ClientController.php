@@ -637,11 +637,6 @@ class ClientController extends DefaultController {
                     $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
                     
                     $mailer = Yii::$app->mailer; 
-                    $email = $row->email;
-                    $subject = "Ресторан " . $currentOrganization->organization->name . " приглашает вас в систему f-keeper.ru";
-                    $mailer->htmlLayout = 'layouts/html';
-                    $result = $mailer->compose('ClientInviteSupplier', compact("currentOrganization"))
-                            ->setTo($email)->setSubject($subject)->send();
                     
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
@@ -650,6 +645,11 @@ class ClientController extends DefaultController {
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
                         }
+                        $email = $row->email;
+                        $subject = "Ресторан " . $currentOrganization->organization->name . " приглашает вас в систему f-keeper.ru";
+                        $mailer->htmlLayout = 'layouts/html';
+                        $result = $mailer->compose('ClientInviteSupplier', compact("currentOrganization"))
+                                ->setTo($email)->setSubject($subject)->send();
                     }
                     
 

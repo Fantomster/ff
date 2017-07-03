@@ -320,11 +320,21 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             'action' => Url::to(['order/checkout']),
                 ]);
                 ?>
-                <?php foreach ($orders as $order) { ?>
+                <?php
+                foreach ($orders as $order) {
+                    $forMinOrderPrice = $order->forMinOrderPrice();
+                    $forFreeDelivery = $order->forFreeDelivery();
+                    ?>
                     <div class="block_wrap_bask_tover">
                         <div class="block_left">
                             <div class="block_left_top">
-                                <img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">
+
+                                <?=
+                                Html::a('<img class= "delete_tovar_bask" src="/img/bask_del.png" alt="">', '#', [
+                                    'class' => 'delete',
+                                    'data-url' => Url::to(['/order/ajax-delete-order', 'all' => false, 'order_id' => $order->id]),
+                                ]);
+                                ?>
                                 <div class="block_wrap_activess">
                                     <p class = "basket_tovar_postav_name">Заказ у поставщика <span><?= $order->vendor->name ?></span></p>
                                     <img class = "active_tov" src="/img/bot_ar.png" alt="">
@@ -373,7 +383,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     ?>
                                 </div>
                             </div>
-                            <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
+    <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
                         </div>
                         <div class="block_right">
                             <div class="block_right_wrap">
@@ -381,27 +391,30 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
 
                             </div>
                             <div class="block_right_wrap_1">
-                                <p>включая доставку</p>
-                                <p>15 000 руб</p>
-                                <p>до минимального(или бесплатной доставки) заказа</p>
-                                <p>15 000 руб</p>
+                                <?php if ($forMinOrderPrice) { ?>
+                                    <p>до минимального заказа</p><p><?= $forMinOrderPrice ?> руб</p>
+                                <?php } elseif ($forFreeDelivery) { ?>
+                                    <p>до бесплатной доставки </p><p><?= $forFreeDelivery ?> руб</p>
+                                <?php } else { ?>
+                                    <p>бесплатная доставка!</p>
+                                <?php } ?>
                                 <?=
-                                    Html::button('Оформить заказ', [
-                                        'class' => 'create',
-                                        'data' => [
-                                            'url' => Url::to(['/order/ajax-make-order']),
-                                            'id' => $order->id,
-                                            'all' => false,
-                                        ]
-                                    ]);
-                                    ?>
+                                Html::button('Оформить заказ', [
+                                    'class' => 'create',
+                                    'data' => [
+                                        'url' => Url::to(['/order/ajax-make-order']),
+                                        'id' => $order->id,
+                                        'all' => false,
+                                    ]
+                                ]);
+                                ?>
                             </div>
 
 
                         </div>
                     </div>
                 <?php } ?>
-                <?php ActiveForm::end(); ?>
+<?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>

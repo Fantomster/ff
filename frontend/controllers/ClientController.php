@@ -646,7 +646,7 @@ class ClientController extends DefaultController {
                             $sms->post_message($text, $target);
                         }
                         $email = $row->email;
-                        $subject = "Ресторан " . $currentOrganization->organization->name . " приглашает вас в систему f-keeper.ru";
+                        $subject = "Ресторан " . $currentOrganization->name . " приглашает вас в систему f-keeper.ru";
                         $mailer->htmlLayout = 'layouts/html';
                         $result = $mailer->compose('ClientInviteSupplier', compact("currentOrganization"))
                                 ->setTo($email)->setSubject($subject)->send();

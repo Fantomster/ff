@@ -47,7 +47,7 @@ class DefaultController extends Controller {
                 $this->redirectIfNotHome($organization);
             }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
-                throw new \yii\web\HttpException(403, 'Хуй тебе, Челиос!');
+                throw new \yii\web\HttpException(403, 'Доступ запрещен');
             }
         } elseif (Yii::$app->request->get("token")) {
             $token = Yii::$app->request->get("token");

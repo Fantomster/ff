@@ -171,6 +171,7 @@ $customJs = <<< JS
     });
     $(document).on('click', '#inviteSupplier', function(e){
         e.preventDefault();
+        $(this).button("loading");
         $.ajax({
             url: '$inviteUrl',
             type: 'POST',

@@ -8,5 +8,6 @@ return [
         'org-noavatar' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/rest-noavatar.gif',
         'client-noavatar' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/restaurant-noavatar.gif',
         'vendor-noavatar' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif',
+        'bill-logo' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/logo.png',
     ],
 ];

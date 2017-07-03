@@ -78,6 +78,32 @@ class OrderContent extends \yii\db\ActiveRecord
         return $this->quantity * $this->price;
     }
     
+    public function getProductFromCatalog() {
+        $cgTable = CatalogGoods::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+        $orgTable = Organization::tableName();
+        $rsrTable = RelationSuppRest::tableName();
+        $catTable = Catalog::tableName();
+        
+        $product = CatalogGoods::find()
+                ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.status" => RelationSuppRest::CATALOG_STATUS_ON,
+                    "$rsrTable.deleted" => false,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.supp_org_id" => $this->order->vendor_id,
+                    "$rsrTable.rest_org_id" => $this->order->client_id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $this->product_id,
+                ])
+                ->one();
+        return $product;
+    }
+    
     public function copyIfPossible() {
         $cgTable = CatalogGoods::tableName();
         $cbgTable = CatalogBaseGoods::tableName();

@@ -80,9 +80,11 @@ if (!Yii::$app->user->isGuest) {
                     form.serialize()
                 ).done(function(result) {
                     $('#actionButtons').html(result);
-                    try {
-                        $.pjax.reload({container: "#orderContent"});
-                    } catch(e) {
+                    if (!saving) {
+                        try {
+                            $.pjax.reload({container: "#orderContent"});
+                        } catch(e) {
+                        }
                     }
                 });
             } else if (message.isSystem == 2) {
@@ -191,6 +193,7 @@ JS;
         var dataEdited = 0;
         var link = '#';
         var timer = null;
+        var saving = false;
     </script>
 <?php } ?>
 <header class="main-header">

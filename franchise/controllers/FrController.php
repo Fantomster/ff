@@ -122,8 +122,11 @@ class FrController extends \yii\rest\Controller {
             }
 
             //// Проверка на уже существующий контакт
-
+            if($type == 'restaurant'){
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;    
+            }else{
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
+            }
             $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
             #Устанавливаем необходимые опции для сеанса cURL
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);

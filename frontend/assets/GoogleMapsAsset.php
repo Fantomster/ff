@@ -22,6 +22,6 @@ class GoogleMapsAsset extends AssetBundle {
                     'callback' => 'initMap'
         ));
         Yii::$app->view->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()], 'async' => true, 'defer' => true, 'position' => \yii\web\View::POS_END]);
-        Yii::$app->view->registerJs("try{google.maps.event.trigger(map, 'resize');}catch(e){}",\yii\web\View::POS_END);
+        //Yii::$app->view->registerJs("google.maps.event.trigger(map, 'resize');",\yii\web\View::POS_READY);
     }
 }

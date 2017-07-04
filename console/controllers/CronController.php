@@ -199,15 +199,57 @@ class CronController extends Controller {
     }
     
     public function actionGeoFranchiseeAndOrganization() {
-      
-        if(Organization::find()->where(['franchisee_sorted'=>0])->exists()){
-
-	//берем в массив все актуальные организации но 50 штук
-
-	$organizations = Organization::find()->where('franchisee_sorted = 0 and country is not null')->limit(500)->all();
+        $orgTable = Organization::tableName();
+        $fraTable = \common\models\FranchiseeAssociate::tableName();
+        if(Organization::find()
+                ->leftJoin($fraTable, "$orgTable.id = $fraTable.organization_id")
+                ->where('(`country` is not null and `country` <>"undefined" and `country` <>"") 
+    and locality <>"Москва" and `locality` <>"Московская область" and `franchisee_associate`.id is null')
+                ->exists()){
+	//берем в массив все актуальные организации но 500 штук
+        $organizations = Organization::find()
+                ->leftJoin($fraTable, "$orgTable.id = $fraTable.organization_id")
+                ->where('(`country` is not null and `country` <>"undefined" and `country` <>"") 
+    and locality <>"Москва" and `locality` <>"Московская область" and `franchisee_associate`.id is null')
+                ->limit(500)->all();
 
             foreach($organizations as $organization)
             {
+                if(empty($organization->administrative_area_level_1) && !empty($organization->lat) && !empty($organization->lng)){
+                    $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.Yii::$app->params['google-api']['key-id'].'&latlng=' . $organization->lat . ',' . $organization->lng . '&language=ru&sensor=false';
+                    $address_json = json_decode(file_get_contents($address_url));
+                    if(!empty($address_json->results[0]->address_components)){
+                        $address_data = $address_json->results[0]->address_components;
+                        $location = array();
+                        $location['locality'] = '';
+                        $location['admin_1'] = '';
+                        $location['country'] = '';
+                            foreach ($address_data as $component) {
+                              switch ($component->types) {
+                                case in_array('locality', $component->types):
+                                  $location['locality'] = $component->long_name;
+                                  break;
+                                case in_array('administrative_area_level_1', $component->types):
+                                  $location['admin_1'] = $component->long_name;
+                                  break;
+                                case in_array('country', $component->types):
+                                  $location['country'] = $component->long_name;
+                                  break;
+                              }
+
+                            }  
+                        $country = $location['country'];
+                        $locality = $location['locality'];
+                        $administrative_area_level_1 = $location['admin_1'];
+
+                        $model = Organization::findOne($organization->id);
+                        if(empty($model->locality) || $model->locality == 'undefined'){
+                        $model->locality = $locality;    
+                        }
+                        $model->administrative_area_level_1 = $administrative_area_level_1;
+                        $model->save();
+                    }
+                }
                 //Есть ли франшиза с этой страной?
                 if(\common\models\FranchiseeGeo::find()->where(['country'=>$organization->country])->exists()){
                     //если есть

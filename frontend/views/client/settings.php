@@ -507,7 +507,7 @@ function changeFields(fields, results){
         alert('Geocode was not successful for the following reason: ' + status);
         }    
 }
-",yii\web\View::POS_END);
+",yii\web\View::POS_HEAD);
 ?>
         <?php
         ActiveForm::end();

@@ -239,7 +239,7 @@ function changeFields(fields, results){
         alert('Geocode was not successful for the following reason: ' + status);
         }    
 }
-",yii\web\View::POS_BEGIN);
+",yii\web\View::POS_HEAD);
 $this->registerJsFile($gpJsLink, ['depends' => [yii\web\JqueryAsset::className()],'async'=>true, 'defer'=>true]);
 ?>
 <div id="data-modal" class="modal fade data-modal">

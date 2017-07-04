@@ -101,6 +101,7 @@ $organization = $user->organization;
 
 if ($organization->step == Organization::STEP_SET_INFO) {
     \frontend\assets\AuthAsset::register($this);
+    \frontend\assets\GoogleMapsAsset::register($this);
     echo $this->render("dashboard/_wizard", compact("profile", "organization"));
 }
 ?>

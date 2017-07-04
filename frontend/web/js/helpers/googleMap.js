@@ -96,9 +96,9 @@ function initMap() {
         })
     });
 
-    map.addListener('tilesloaded', function () {
-        google.maps.event.trigger(map, 'resize')
-        google.maps.event.clearListeners(map, 'tilesloaded');
+    google.maps.event.addListener(map, 'idle', function ()
+    {
+        google.maps.event.trigger(map, 'resize');
     });
 
 }

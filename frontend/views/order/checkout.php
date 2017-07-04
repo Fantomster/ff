@@ -337,8 +337,9 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                 ]);
                                 ?>
                                 <div class="block_wrap_activess">
-                                    <p class = "basket_tovar_postav_name">Заказ у поставщика <span><?= $order->vendor->name ?></span></p>
-                                    <img class = "active_tov" src="/img/bot_ar.png" alt="">
+                                    <p class = "basket_tovar_postav_name">Заказ у поставщика <span><?= $order->vendor->name ?> </span>
+                                    <img class = "" src="/img/bot_ar.png" alt="">
+                                    </p>
                                 </div>
                                 <div class="checkout_buttons">
                                     <?=

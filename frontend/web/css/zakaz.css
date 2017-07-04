@@ -418,25 +418,36 @@
 
 }
 @media (max-width: 680px) {
-    .block_left {
-        padding-bottom: 0;
+    .block_wrap_bask_tover {
+        overflow: hidden !important;
+    }
+    .checkout_buttons {
+        display: table-row !important;
+        width: 100%;
+        text-align: center;    
+    }
+    .block_wrap_activess {
+        width: 100% !important;
+        float: none !important;
+        text-align: center !important;
+        margin: 0 !important;
+        
+    }
+    .basket_tovar_postav_name {
+        float: none;
+        width: 100%;
     }
     .block_right {
-        float: left;
+        display: inline-block !important;
         width: 100% !important;
         text-align: center !important;
     }
-/*    .checkout_buttons {
-        float: left;
-        width: 100%;
-    }*/
-    .delete_tovar_bask {
-        margin-top: 0;
+    .basket_tovar_postav_name {
+        padding-top: 0 !important;
     }
-    .block_wrap_activess {
-        /*width: 100% !important;*/
-/*        margin-left: 0 !important;
-        text-align: center;
-        padding-right: 0 !important;*/
+    .date {
+        margin-left: 12px !important;
+        margin-bottom: 5px !important;
+       
     }
 }

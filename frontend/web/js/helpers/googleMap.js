@@ -98,7 +98,7 @@ function initMap() {
 
     map.addListener('tilesloaded', function () {
         google.maps.event.trigger(map, 'resize')
-        map.clearListeners('tilesloaded');
+        google.maps.event.clearListeners(map, 'tilesloaded');
     });
 
 }

@@ -43,14 +43,23 @@ $this->registerJs(
                 $("#btnRegister").button("loading");
                 return true;
             });            
-            $(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:true});
-            $(".go-to-reg").on("click",function(e){
+            $(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:true});'.
+            ($registerFirst ? (
+            '$(".go-to-reg").on("click",function(e){
+                e.preventDefault(),$(".form-slider").slick("slickPrev")
+            });
+            $(".auth-sidebar__enter.reg a").on("click",function(e){
+                e.preventDefault(),$(".form-slider").slick("slickNext")
+            });'
+            ) : (
+            '$(".go-to-reg").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickNext")
             });
             $(".auth-sidebar__enter.reg a").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickPrev")
-            });
-            $(".call-menu-but").on("click",function(){
+            });'
+            )).
+            '$(".call-menu-but").on("click",function(){
                 $(".present-wrapper").addClass("active"),$("body").addClass("over_hidden")
             });
             $(".close-menu-but").on("click",function(){

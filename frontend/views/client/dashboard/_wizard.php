@@ -243,7 +243,7 @@ function changeFields(fields, results){
         alert('Geocode was not successful for the following reason: ' + status);
         }    
 }
-",yii\web\View::POS_HEAD);
+",yii\web\View::POS_BEGIN);
 $gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
         'libraries' => 'places',
         'key'=>Yii::$app->params['google-api']['key-id'],

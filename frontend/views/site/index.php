@@ -23,7 +23,7 @@ $this->title = 'F-keeper';
 </h1>
         </div>
         <div class="buttons__block">
-            <?= Html::a('<span>для ресторанов</span>', ["/site/restaurant"], ['class' => 'for__restaurants']) ?>
+            <?= Html::a('<span>для ресторанов</span>', "https://client.f-keeper.ru", ['class' => 'for__restaurants']) ?>
 <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
             <div class="watch_video">

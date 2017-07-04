@@ -314,15 +314,15 @@ class ClientController extends DefaultController {
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
-
+                
                 if ($arrCatalog === Array()) {
                     $result = ['success' => false, 'message' => 'Каталог пустой!'];
                     return $result;
                     exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
-                if (count($arrCatalog) > 5000) {
-                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                if (count($arrCatalog) > 300) {
+                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>300</strong> позиций, пожалуйста свяжитесь с нами '
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
                     return $result;
                     exit;

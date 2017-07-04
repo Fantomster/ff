@@ -407,9 +407,36 @@
 .box.box-info {
     border-top-color: #00a65a;
 }
+.block_right {
+    width:260px;
+    min-width:260px;
+}
 @media (max-width: 1495px) {
     .block_left{
         padding-bottom: 30px;
     }
 
+}
+@media (max-width: 680px) {
+    .block_left {
+        padding-bottom: 0;
+    }
+    .block_right {
+        float: left;
+        width: 100% !important;
+        text-align: center !important;
+    }
+/*    .checkout_buttons {
+        float: left;
+        width: 100%;
+    }*/
+    .delete_tovar_bask {
+        margin-top: 0;
+    }
+    .block_wrap_activess {
+        /*width: 100% !important;*/
+/*        margin-left: 0 !important;
+        text-align: center;
+        padding-right: 0 !important;*/
+    }
 }

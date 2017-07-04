@@ -340,7 +340,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     <p class = "basket_tovar_postav_name">Заказ у поставщика <span><?= $order->vendor->name ?></span></p>
                                     <img class = "active_tov" src="/img/bot_ar.png" alt="">
                                 </div>
-                                <div>
+                                <div class="checkout_buttons">
                                     <?=
                                     Html::button('Оформить заказ', [
                                         'class' => 'but_go_zakaz create pull-right',
@@ -386,7 +386,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             </div>
     <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
                         </div>
-                        <div class="block_right" style="width:260px;min-width:260px;">
+                        <div class="block_right">
                             <div class="block_right_wrap">
                                 <p>Итого: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> р.</p>
 

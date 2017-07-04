@@ -54,7 +54,7 @@ class FrController extends \yii\rest\Controller {
             }
             if (!empty($type) && $type == 'restaurant'){
                 $lpartner = '';
-                $lname = 'Заявка ресторана';
+                $lead_name = 'Заявка ресторана';
                 $responsible_user_id = 1427371;
                 $lead_status_id = 465729;
             }

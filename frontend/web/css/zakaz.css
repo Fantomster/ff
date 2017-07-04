@@ -407,3 +407,9 @@
 .box.box-info {
     border-top-color: #00a65a;
 }
+@media (max-width: 1495px) {
+    .block_left{
+        padding-bottom: 30px;
+    }
+
+}

@@ -327,7 +327,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                     $forFreeDelivery = $order->forFreeDelivery();
                     ?>
                     <div class="block_wrap_bask_tover" id="cartOrder<?= $order->id ?>">
-                        <div class="block_left" style="padding-bottom: 30px;">
+                        <div class="block_left">
                             <div class="block_left_top">
 
                                 <?=

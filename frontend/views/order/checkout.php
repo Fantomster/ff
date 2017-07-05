@@ -8,6 +8,7 @@ use yii\bootstrap\Modal;
 use yii\widgets\Breadcrumbs;
 use kartik\form\ActiveForm;
 
+$checkoutUrl = Url::to(['order/checkout']);
 $this->registerJs(
         '$("document").ready(function(){
             $(document).on("click", ".remove, .delete, .deleteAll", function(e) {
@@ -121,7 +122,7 @@ $this->registerJs(
                                 form.serialize() + extData
                             ).done(function (result) {
                                 if (result) {
-                                    $.pjax.reload("#checkout", {url:"http://f-keeper.dev/order/checkout",timeout:30000});
+                                    $.pjax.reload("#checkout", {url:"'.$checkoutUrl.'",timeout:30000});
                                     dataEdited = 0;
                                     resolve(result);
                                 } else {

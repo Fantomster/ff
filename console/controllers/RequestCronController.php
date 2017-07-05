@@ -38,6 +38,7 @@ join `user` u on `supp_org_id` = u.organization_id
 join `profile` p on u.id = p.`user_id`
 order by u.organization_id LIMIT 4";//LIMIT на боевом убрать
         $vendors = \Yii::$app->db->createCommand($sql)->queryAll();
+        //выход, если ничего нет
         if(empty($vendors)){
           return; 
         }

@@ -150,6 +150,8 @@ class FrController extends \yii\rest\Controller {
                 return ['result' => 'errorPhone'];
             }
             //ДОБАВЛЯЕМ СДЕЛКУ
+            $post = Yii::$app->request->post();
+            $roistat_cookie = isset($post['roi']) ? $post['roi'] : "неизвестно";
             $leads['request']['leads']['add'] = array(
                 array(
                     'name' => $lead_name,
@@ -173,14 +175,14 @@ class FrController extends \yii\rest\Controller {
                             ]
                         ],
                         //Добавляем поле roistat
-//                        [
-//                            'id' => 78106,
-//                            'values' => [
-//                                [
-//                                    'value' => isset(Yii::$app->request->post['c']) ? Yii::$app->request->post['c'] : "неизвестно"
-//                                ],
-//                            ],
-//                        ],
+                        [
+                            'id' => 78106,
+                            'values' => [
+                                [
+                                    'value' => $roistat_cookie
+                                ],
+                            ],
+                        ],
                     ]
                 )
             );

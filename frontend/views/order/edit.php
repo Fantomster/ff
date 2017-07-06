@@ -92,14 +92,16 @@ $js = <<<JS
             e.preventDefault();
             var form = $("#editOrder");
             $("#loader-show").showLoading();
-            $.post(
-                form.attr("action"),
-                form.serialize()
-            ).done(function(result) {
-                document.location = "$urlViewOrder";
-//                dataEdited = 0;
-//                $("#loader-show").hideLoading();
-            });
+            form.submit();
+            saving = true;
+//            $.post(
+//                form.attr("action"),
+//                form.serialize()
+//            ).done(function(result) {
+//                document.location = "$urlViewOrder";
+////                dataEdited = 0;
+////                $("#loader-show").hideLoading();
+//            });
         });
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();
@@ -212,7 +214,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
     <div class="row">
         <div class="col-md-8" id="toPrint">
             <div class="box box-info">
-                <?php Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
+                <?php //Pjax::begin(['enablePushState' => false, 'id' => 'orderContent', 'timeout' => 30000]); ?>
                 <div class="box-header">
                     <h4 class="font-bold">Заказ №<?= $order->id ?></h4><hr>
                 </div>
@@ -226,13 +228,18 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                     <!-- /.table-responsive -->
                 </div>
                 <!-- /.box-body -->
-                <?php Pjax::end(); ?>
+                <?php //Pjax::end(); ?>
             </div>
 
         </div>
         <div class="col-lg-4 col-md-6 col-sm-6  col-xs-8 pp" id="actionButtons">
             <?= $this->render('_order-buttons', compact('order', 'organizationType', 'canRepeatOrder', 'edit')) ?>   
         </div>
+        <?php
+        echo Html::beginForm(Url::to(['/order/ajax-refresh-buttons']), 'post', ['id' => 'actionButtonsForm']);
+        echo Html::hiddenInput('order_id', $order->id);
+        echo Html::endForm();
+        ?>
         <div class="col-lg-4 col-md-6  col-sm-6 col-xs-8 pp">
             <div class = "block_wrapper">
                 <div class="block_head_w">

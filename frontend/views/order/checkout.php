@@ -8,6 +8,7 @@ use yii\bootstrap\Modal;
 use yii\widgets\Breadcrumbs;
 use kartik\form\ActiveForm;
 
+$checkoutUrl = Url::to(['order/checkout']);
 $this->registerJs(
         '$("document").ready(function(){
             $(document).on("click", ".remove, .delete, .deleteAll", function(e) {
@@ -16,6 +17,7 @@ $this->registerJs(
                     return false;
                 }
                 clicked = $(this);
+                activeCart = $(document).find(".block_wrap_bask_tover.active").attr("id");
                 if (clicked.hasClass("remove")) {
                     title = "Удаление товара из корзины";
                     text = "Вы уверены, что хотите удалить товар из заказа?";
@@ -120,7 +122,7 @@ $this->registerJs(
                                 form.serialize() + extData
                             ).done(function (result) {
                                 if (result) {
-                                    $.pjax.reload("#checkout", {url:"http://f-keeper.dev/order/checkout"});
+                                    $.pjax.reload("#checkout", {url:"'.$checkoutUrl.'",timeout:30000});
                                     dataEdited = 0;
                                     resolve(result);
                                 } else {
@@ -325,7 +327,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                     $forMinOrderPrice = $order->forMinOrderPrice();
                     $forFreeDelivery = $order->forFreeDelivery();
                     ?>
-                    <div class="block_wrap_bask_tover">
+                    <div class="block_wrap_bask_tover" id="cartOrder<?= $order->id ?>">
                         <div class="block_left">
                             <div class="block_left_top">
 
@@ -336,10 +338,11 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                 ]);
                                 ?>
                                 <div class="block_wrap_activess">
-                                    <p class = "basket_tovar_postav_name">Заказ у поставщика <span><?= $order->vendor->name ?></span></p>
-                                    <img class = "active_tov" src="/img/bot_ar.png" alt="">
+                                    <p class = "basket_tovar_postav_name">Заказ у поставщика <span><?= $order->vendor->name ?> </span>
+                                    <img class = "" src="/img/bot_ar.png" alt="">
+                                    </p>
                                 </div>
-                                <div style="padding: 20px 0;">
+                                <div class="checkout_buttons">
                                     <?=
                                     Html::button('Оформить заказ', [
                                         'class' => 'but_go_zakaz create pull-right',

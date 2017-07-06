@@ -171,6 +171,7 @@ $customJs = <<< JS
     });
     $(document).on('click', '#inviteSupplier', function(e){
         e.preventDefault();
+        $(this).button("loading");
         $.ajax({
             url: '$inviteUrl',
             type: 'POST',
@@ -318,7 +319,7 @@ $(document).on("click",".del", function(e){
 			         
 		        }	
 		    });
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
 		}else{
 		console.log('cancel');	
 		}

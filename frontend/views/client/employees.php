@@ -47,7 +47,7 @@ $this->registerJs(
             });
             $("body").on("hidden.bs.modal", "#add-user", function() {
                 $(this).data("bs.modal", null);
-                $.pjax.reload({container: "#users-list"});
+                $.pjax.reload({container: "#users-list",timeout:30000});
             });
         });'
 );

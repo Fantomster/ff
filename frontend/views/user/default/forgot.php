@@ -95,6 +95,7 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
                     </label>
                 </div>
                 <button type="submit" id="btnSend" class="but but_green" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span><i class="ico"></i></button>
+                    <?= Html::a("Войти / зарегистрироваться", ["/user/login"], ["class" => "reestablish-link"]) ?>
                 <?php ActiveForm::end(); ?>
                 <div class="auth-sidebar__contacts">
                     <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>

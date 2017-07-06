@@ -11,7 +11,7 @@ $this->title = 'Настройки';
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
-                $.pjax.reload({container: "#settingsInfo"});      
+                $.pjax.reload({container: "#settingsInfo",timeout:30000});      
             });
             $(".settings").on("change paste keyup", ".form-control, input", function() {
                 $("#cancelOrg").prop( "disabled", false );
@@ -507,7 +507,7 @@ function changeFields(fields, results){
         alert('Geocode was not successful for the following reason: ' + status);
         }    
 }
-",yii\web\View::POS_END);
+",yii\web\View::POS_HEAD);
 ?>
         <?php
         ActiveForm::end();

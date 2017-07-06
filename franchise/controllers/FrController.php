@@ -173,14 +173,14 @@ class FrController extends \yii\rest\Controller {
                             ]
                         ],
                         //Добавляем поле roistat
-                        [
-                            'id' => 78106,
-                            'values' => [
-                                [
-                                    'value' => isset(Yii::$app->request->post['c']) ? Yii::$app->request->post['c'] : "неизвестно"
-                                ],
-                            ],
-                        ],
+//                        [
+//                            'id' => 78106,
+//                            'values' => [
+//                                [
+//                                    'value' => isset(Yii::$app->request->post['c']) ? Yii::$app->request->post['c'] : "неизвестно"
+//                                ],
+//                            ],
+//                        ],
                     ]
                 )
             );

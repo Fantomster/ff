@@ -177,7 +177,7 @@ class FrController extends \yii\rest\Controller {
                             'id' => 78106,
                             'values' => [
                                 [
-                                    'value' => array_key_exists('roistat_visit', $_COOKIE) ? $_COOKIE['roistat_visit'] : "неизвестно"
+                                    'value' => isset(Yii::$app->request->cookies['roistat_visit']) ? Yii::$app->request->cookies['roistat_visit'] : "неизвестно"
                                 ],
                             ],
                         ],

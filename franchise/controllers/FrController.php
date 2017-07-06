@@ -177,7 +177,7 @@ class FrController extends \yii\rest\Controller {
                             'id' => 78106,
                             'values' => [
                                 [
-                                    'value' => isset(Yii::$app->request->post['c']) ? $app->request->post['c'] : "неизвестно"
+                                    'value' => isset(Yii::$app->request->post['c']) ? Yii::$app->request->post['c'] : "неизвестно"
                                 ],
                             ],
                         ],

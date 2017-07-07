@@ -12,7 +12,7 @@ echo GridView::widget([
     'filterPosition' => false,
     'summary' => '',
     'headerRowOptions' => ['style' => "padding: 3px;"],
-    'tableOptions' => ['class' => 'table'],
+    'tableOptions' => ['class' => 'table', 'style' => 'width:100%;'],
     'columns' => [
         [
             'format' => 'raw',

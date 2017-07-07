@@ -208,12 +208,11 @@ $gridColumnsCatalog = [
                             <?php
                             $form = ActiveForm::begin([
                                         'options' => [
-                                            'id' => 'search_form',
+                                            'id' => 'search-form',
                                             'role' => 'search',
                                         ],
                             ]);
                             ?>
-                            <?php ActiveForm::end(); ?>
                             <?=
                                     $form->field($searchModel, "search_string", [
                                         'addon' => [
@@ -225,9 +224,10 @@ $gridColumnsCatalog = [
                                             ],
                                         ],
                                     ])
-                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'search_string'])
+                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'searchString'])
                                     ->label(false)
                             ?>
+                            <?php ActiveForm::end(); ?>
                             <!--                            <div class="input-group">
                                                             <span class="input-group-addon">
                                                                 <i class="fa fa-search"></i>
@@ -239,7 +239,7 @@ $gridColumnsCatalog = [
                     <div class="row">
                         <div class="col-md-12">
                             <div class="box-body table-responsive no-padding">
-                                <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
+                                <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
                                 <?=
                                 GridView::widget([
                                     'dataProvider' => $dataProvider,
@@ -323,20 +323,14 @@ $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
 $customJs = <<< JS
-var timer;
-$('#search').on("keyup", function () {
-window.clearTimeout(timer);
-   timer = setTimeout(function () {
-       $.pjax({
-        type: 'GET',
-        push: false,
-        timeout: 10000,
-        url: '$suppliersUrl',
-        container: '#sp-list',
-        data: {searchString: $('#search').val()}
-      })
-   }, 700);
-});
+$(".content").on("change keyup paste cut", "#searchString", function() {
+    if (timer) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+        $("#search-form").submit();
+    }, 700);
+});        
 $(".modal").removeAttr("tabindex");
 function bootboxDialogShow(msg){
 bootbox.dialog({

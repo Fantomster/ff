@@ -94,4 +94,46 @@ class User extends BaseUser implements RateLimitInterface
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
+    
+    /**
+     * Send welcome email after confirmation
+     * @param User $client
+     * @return int
+     */
+    public function sendWelcome() {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        // modify view path to module views
+        $mailer = Yii::$app->mailer;
+        $oldViewPath = $mailer->viewPath;
+        $mailer->viewPath = $this->module->emailViewPath;
+		// send email
+        $type = $this->organization->type_id;
+        $name = $this->profile->full_name;
+        $subject = "Добро пожаловать на  f-keeper";
+        $result = $mailer->compose('@common/mail/welcome', compact("subject", "type", "name"))
+                ->setTo($this->email)
+                ->setSubject($subject)
+                ->send();
+
+        // restore view path and return result
+        $mailer->viewPath = $oldViewPath;
+        return $result;
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrganization() {
+        $organization = new \common\models\Organization();
+        return $this->hasOne($organization::className(), ['id' => 'organization_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfile() {
+        $profile = new \common\models\Profile();
+        return $this->hasOne($profile::className(), ['user_id' => 'id']);
+    }
 }

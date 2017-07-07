@@ -15,7 +15,9 @@ use common\models\forms\LoginForm;
 use common\models\Profile;
 use common\models\Organization;
 use common\models\Role;
-use amnah\yii2\user\models\UserToken;
+use common\models\UserToken;
+use yii\filters\ContentNegotiator;
+use yii\web\Response;
 
 
 /**
@@ -36,7 +38,7 @@ class UserController extends ActiveController {
 
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
-            'only' => ['auth'],
+            'only' => ['auth','complete-registration'],
             'authMethods' => [
                 [
                     'class' => HttpBasicAuth::className(),
@@ -52,6 +54,14 @@ class UserController extends ActiveController {
                 HttpBearerAuth::className(),
                 QueryParamAuth::className()
             ]
+        ];
+                
+        $behaviors['contentNegotiator'] = [
+        'class' => ContentNegotiator::className(),
+        'formats' => [
+            'application/json' => Response::FORMAT_JSON
+        ]
+
         ];
 
         return $behaviors;
@@ -94,7 +104,7 @@ class UserController extends ActiveController {
         return User::findOne(Yii::$app->user->id);
     }
     
-    public function actionRegister() {
+    public function actionRegistration() {
         
         $user = new User(["scenario" => "register"]);
         $profile = new Profile (["scenario" => "register"]);
@@ -103,8 +113,7 @@ class UserController extends ActiveController {
         //$user->setScenario("register");
         // load post data
         $post = Yii::$app->request->post();
-        //var_dump($post['user']);
-        if ($user->load($post, 'user')) {
+        if ($user->load($post, 'user') && $user->validate()) {
             // ensure profile data gets loaded
             
             $profile->load($post, 'profile');
@@ -113,7 +122,7 @@ class UserController extends ActiveController {
             $organization->load($post,'organization');
 
             // validate for normal request
-            if ($user->validate() && $profile->validate() && $organization->validate()) {
+            if ($profile->validate() && $organization->validate()) {
 
                 // perform registration
                 $role = new Role();
@@ -132,13 +141,16 @@ class UserController extends ActiveController {
                     //$this->initDemoData($user, $profile, $organization);
                 }
                 $this->afterRegister($user);
-                return ['succcess' => 1];
-                
+                return ['success' => 1];  
             }
+            elseif(!$profile->validate())
+                    $profile_errors = $profile->getErrors();
+                else
+                    $organization_errors = $organization->getErrors();
+        }else
+        {
+            $user_errors = $user->getErrors();
         }
-        $user_errors = $user->getErrors();
-        $profile_errors = $profile->getErrors();
-        $organization_errors = $organization->getErrors();
         return compact("user", "profile", "organization", "user_errors", "profile_errors","organization_errors");
     }
     
@@ -162,14 +174,66 @@ class UserController extends ActiveController {
         // check if we have a userToken type to process, or just log user in directly
         if ($userTokenType) {
             $userToken = $userToken::generate($user->id, $userTokenType);
-            if (!$numSent = $user->sendEmailConfirmation($userToken)) {
+            $user->sendEmailConfirmation($userToken);
+        } 
+    }
+    
+     /**
+     * Confirm email
+     */
+    public function actionConfirm($pin) {
+        /** @var \amnah\yii2\user\models\UserToken $userToken */
+        /** @var \amnah\yii2\user\models\User $user */
+        // search for userToken
+        $success = false;
+        $email = "";
+        $userToken = new UserToken();
+        $userToken = $userToken::findByPIN($pin, [$userToken::TYPE_EMAIL_ACTIVATE, $userToken::TYPE_EMAIL_CHANGE]);
+        if ($userToken) {
 
-                // handle email error
-                //Yii::$app->session->setFlash("Email-error", "Failed to send email");
+            // find user and ensure that another user doesn't have that email
+            //   for example, user registered another account before confirming change of email
+            $user = new User();
+            $user = $user::findOne($userToken->user_id);
+            $newEmail = $userToken->data;
+            if ($user->confirm($newEmail)) {
+                $success = true;
             }
-        } else {
-            Yii::$app->user->login($user, $this->module->loginDuration);
+            if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
+                //send welcome
+                $user->sendWelcome();
+            }
+            // set email and delete token
+            $email = $newEmail ? : $user->email;
+            $userToken->delete();
         }
+
+        return ($success) ? $user : ['error' => Yii::t('user','Invalid PIN')];
+    }
+
+    public function actionCompleteRegistration() {
+        $user = Yii::$app->user->identity;
+        $profile = new Profile();
+        $profile = $user->profile;
+        $profile->scenario = "complete";
+        $organization = $user->organization;
+        $organization->scenario = "complete";
+
+        $post = Yii::$app->request->post();
+        if ($profile->load($post, 'profile') && $organization->load($post, 'organization')) {
+            if ($profile->validate() && $organization->validate()) {
+                $profile->save();
+                $organization->save();
+                return ['success' => 1];
+            }
+             elseif(!$profile->validate())
+                    $profile_errors = $profile->getErrors();
+                else
+                    $organization_errors = $organization->getErrors();
+                
+        }
+
+        return compact("profile", "organization", "profile_errors","organization_errors");
     }
     
 }

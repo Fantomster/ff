@@ -25,5 +25,14 @@ class Module extends \yii\base\Module
                     'viewPath' => '@common/mail',
                     'htmlLayout' => '@common/mail/layouts/html'
                     ]);
+        
+        Yii::$app->set(
+                'request', [
+                        'class' => 'yii\web\Request',
+                        'parsers' => [
+                            'application/json' => 'yii\web\JsonParser',
+                        ]
+                    ]
+                );
     }
 }

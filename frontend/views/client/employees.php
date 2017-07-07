@@ -36,6 +36,7 @@ $this->registerJs(
                 return false;
             });
             $(".content").on("click", ".delete", function() {
+                $(".delete").button("loading");
                 var form = $("#user-form");
                 $.post(
                     $(this).data("action"),

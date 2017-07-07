@@ -80,6 +80,7 @@ $form = ActiveForm::begin([
         'data' => [
             'id' => $user->id,
             'action' => Url::to(["client/ajax-delete-user"]),
+            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Удаляем..."
     ]])
     ?>
     <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>

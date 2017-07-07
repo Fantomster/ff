@@ -102,7 +102,7 @@ class OrderSearch extends Order {
                 $query->from(Profile::tableName() . ' acceptedByProfile');
             },
                 ], true);
-        $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = vendor.id");
+        $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = client.id");
         $query->where(Order::tableName() . '.status != ' .Order::STATUS_FORMING);
         $query->andWhere(['franchisee_associate.franchisee_id' => $franchisee_id]);
         

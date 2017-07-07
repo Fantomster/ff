@@ -224,7 +224,9 @@ class OrganizationController extends DefaultController {
         $catalog = new \common\models\Catalog();
         $vendor->type_id = Organization::TYPE_SUPPLIER;
         $user = new User();
+        $user->scenario = 'admin';
         $user->password = uniqid();
+        $user->setRegisterAttributes(Role::ROLE_SUPPLIER_MANAGER, User::STATUS_ACTIVE);
         $profile = new Profile();
         $buisinessInfo = new BuisinessInfo();
 

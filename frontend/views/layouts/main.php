@@ -221,11 +221,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="sot__set_block">
-                                        <a href="https://vk.com/f_keeper"><i class="fa fa-vk"></i></a>
-                                        <a href="https://www.instagram.com/f_keeper.ru/"><i class="fa fa-instagram"></i> </a>
+                                        <a href="https://vk.com/f_keeper" target="_blank"><i class="fa fa-vk"></i></a>
+                                        <a href="https://www.instagram.com/f_keeper.ru/" target="_blank"><i class="fa fa-instagram"></i> </a>
 <!--                                        <a href="#"><i class="fa fa-youtube"></i></a>
                                         <a href="#"><i class="fa fa-twitter"></i></a>-->
-                                        <a href="https://www.facebook.com/fkeeper.ru/"><i class="fa fa-facebook"></i></a>
+                                        <a href="https://www.facebook.com/fkeeper.ru/" target="_blank"><i class="fa fa-facebook"></i></a>
                                     </div>
                                 </div>
                             </div>

@@ -30,6 +30,7 @@ $this->registerJs(
                 searchInput[0].setSelectionRange(strLength, strLength);
             });
             $(".content").on("click", ".edit", function() {
+                $(".edit").button("loading");
                 var form = $("#user-form");
                 $.post(
                     form.attr("action"),

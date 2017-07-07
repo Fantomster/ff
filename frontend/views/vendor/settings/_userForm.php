@@ -64,7 +64,9 @@ $form = ActiveForm::begin([
 
 </div>
 <div class="modal-footer">
-    <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success edit']) ?>
+    <?= Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', [
+        'class' => 'btn btn-success edit', 
+        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем..."]) ?>
     <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', [
         'class' => 'btn btn-danger delete', 
         'data' => [

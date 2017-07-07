@@ -1071,3 +1071,22 @@ margin-left: 20px;
 
 .flaticon-cross-out:before { content: "\f100"; }
 .flaticon-cancel:before { content: "\f101"; }
+
+.glyphicon.spinning {
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin2 1s infinite linear;
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+.glyphicon-left {
+    margin-right: 7px;
+}

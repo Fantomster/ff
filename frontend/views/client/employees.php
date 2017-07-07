@@ -24,6 +24,7 @@ $this->registerJs(
                 }, 700);
             });
             $(".content").on("click", ".edit", function() {
+                $(".edit").button("loading");
                 var form = $("#user-form");
                 $.post(
                     form.attr("action"),

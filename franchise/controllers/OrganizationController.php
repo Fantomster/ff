@@ -104,7 +104,9 @@ class OrganizationController extends DefaultController {
         $client = new Organization();
         $client->type_id = Organization::TYPE_RESTAURANT;
         $user = new User();
+        $user->scenario = 'admin';
         $user->password = uniqid();
+        $user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE);
         $profile = new Profile();
         $buisinessInfo = new BuisinessInfo();
 
@@ -116,7 +118,8 @@ class OrganizationController extends DefaultController {
 
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        $user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE)->save();
+                        //$user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE)->save();
+                        $user->save();
                         $profile->setUser($user->id)->save();
                         $client->save();
                         $user->setOrganization($client);
@@ -222,7 +225,9 @@ class OrganizationController extends DefaultController {
         $catalog = new \common\models\Catalog();
         $vendor->type_id = Organization::TYPE_SUPPLIER;
         $user = new User();
+        $user->scenario = 'admin';
         $user->password = uniqid();
+        $user->setRegisterAttributes(Role::ROLE_SUPPLIER_MANAGER, User::STATUS_ACTIVE);
         $profile = new Profile();
         $buisinessInfo = new BuisinessInfo();
 
@@ -234,7 +239,7 @@ class OrganizationController extends DefaultController {
 
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        $user->setRegisterAttributes(Role::ROLE_SUPPLIER_MANAGER, User::STATUS_ACTIVE)->save();
+                        $user->save();
                         $profile->setUser($user->id)->save();
                         $vendor->save();
                         $catalog->name = \common\models\Catalog::CATALOG_BASE_NAME;

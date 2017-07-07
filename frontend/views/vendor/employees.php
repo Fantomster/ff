@@ -30,6 +30,7 @@ $this->registerJs(
                 searchInput[0].setSelectionRange(strLength, strLength);
             });
             $(".content").on("click", ".edit", function() {
+                $(".edit").button("loading");
                 var form = $("#user-form");
                 $.post(
                     form.attr("action"),
@@ -41,6 +42,7 @@ $this->registerJs(
                 return false;
             });
             $(".content").on("click", ".delete", function(e) {
+                $(".delete").button("loading");
                 var form = $("#user-form");
                 $.post(
                     $(this).data("action"),

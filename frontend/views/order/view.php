@@ -250,21 +250,24 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                     ])
                     ?>
                     <div class="block_bot_w">
-                        <?=
-                        Html::textInput('message', null, [
-                            'id' => 'message-field',
-                            'class' => 'message',
-                            'placeholder' => 'Отправить сообщение'
-                        ])
-                        ?>    
+                        <div class="message-wrap">
+                            <?=
+                            Html::textInput('message', null, [
+                                'id' => 'message-field',
+                                'class' => 'message',
+                                'placeholder' => 'Отправить сообщение'
+                            ])
+                            ?>    
+                            <button type="submit"><img src="/img/message.png"></button>
+                        </div>
                     </div>
                     <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
                     <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
                     <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
-                    <?=
-                    Html::submitButton('', [
-                        'class' => 'hide'
-                    ])
+                    <?= ''
+                    //Html::submitButton('', [
+                    //    'class' => 'hide'
+                    //])
                     ?>
                 </div>
                 <?= Html::endForm() ?>

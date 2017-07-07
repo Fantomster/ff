@@ -698,9 +698,9 @@ class OrderController extends DefaultController {
         $organizationType = $user->organization->type_id;
         $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
         $message = "";
+        $orderChanged = 0;
 
         if (Yii::$app->request->post()) {
-            $orderChanged = 0;
             $content = Yii::$app->request->post('OrderContent');
             $discount = Yii::$app->request->post('Order');
             foreach ($content as $position) {
@@ -812,6 +812,11 @@ class OrderController extends DefaultController {
 
         $order->calculateTotalPrice();
         $order->save();
+        
+        if ($orderChanged) {
+            return $this->redirect(["order/view", "id" => $order->id]);
+        }
+        
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -841,7 +846,8 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
-
+        $dataProvider->pagination = false;
+        
         //return $this->renderPartial('_bill', compact('dataProvider', 'order'));
         $pdf = new Pdf([
             'mode' => Pdf::MODE_UTF8, // leaner size using standard fonts

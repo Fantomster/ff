@@ -12,7 +12,7 @@
     box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
     position: relative;
 }
-.top{
+.top-zakaz{
     margin-top: 30px;
 }
 .wrapppp{
@@ -155,23 +155,32 @@
 
     width: 100%;
 }
-.message{
+.message-wrap {
+    display: inline-block;
     width: 90%;
     margin: 0 5%;
+    border-bottom: 1px solid #DDDDDD;
+    height: 31px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+.message-wrap button {
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: none;
+    float: right;
+}
+.message-wrap button img {
+    width: 20px;
+    height: 20px;
+}
+.message{
     border: none;
     outline: none;
-    border-bottom: 1px solid #DDDDDD;
-    background-image: url(../img/message.png);
-    background-repeat: no-repeat;
-
-    height: 30px;
-    margin-top: 15px;
     font-family: "Circle";
-    background-position: center right;
-    -webkit-background-size: 20px;
-    background-size: 20px;
     font-size: 16px;
-    margin-bottom: 20px;
+    height: 30px;
 }
 @media (max-width: 1200px) {
     .but1{
@@ -406,4 +415,48 @@
 }
 .box.box-info {
     border-top-color: #00a65a;
+}
+.block_right {
+    width:260px;
+    min-width:260px;
+}
+@media (max-width: 1495px) {
+    .block_left{
+        padding-bottom: 30px;
+    }
+
+}
+@media (max-width: 680px) {
+    .block_wrap_bask_tover {
+        overflow: hidden !important;
+    }
+    .checkout_buttons {
+        display: table-row !important;
+        width: 100%;
+        text-align: center;    
+    }
+    .block_wrap_activess {
+        width: 100% !important;
+        float: none !important;
+        text-align: center !important;
+        margin: 0 !important;
+
+    }
+    .basket_tovar_postav_name {
+        float: none;
+        width: 100%;
+    }
+    .block_right {
+        display: inline-block !important;
+        width: 100% !important;
+        text-align: center !important;
+    }
+    .basket_tovar_postav_name {
+        padding-top: 0 !important;
+    }
+    .date {
+        margin-left: 12px !important;
+        margin-bottom: 5px !important;
+
+    }
 }

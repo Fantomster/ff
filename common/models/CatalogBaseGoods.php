@@ -49,7 +49,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const STATUS_OFF = 0;
     const MP_SHOW_PRICE = 1;
     const MP_HIDE_PRICE = 0;
-    const MAX_INSERT_FROM_XLS = 5000;
+    const MAX_INSERT_FROM_XLS = 2000;
     const MARKETPLACE_ON = 1;
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;

@@ -548,28 +548,25 @@ class SiteController extends DefaultController {
             exit;
         }
     }
-
-    public function actionImportFromXls($id) {
+    public function actionImportFromXls($id){
+        set_time_limit(180);
         $vendor = \common\models\Catalog::find()->where([
-                            'id' => $id,
-                            'type' => \common\models\Catalog::BASE_CATALOG
-                        ])
-                        ->one()
-                ->vendor;
+                    'id' => $id,
+                    'type' => \common\models\Catalog::BASE_CATALOG
+                ])
+                ->one()
+        ->vendor;
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
             $unique = 'article'; //уникальное поле
-            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where([
-                        'cat_id' => $id,
-                        'deleted' => CatalogBaseGoods::DELETED_OFF
-                    ])->asArray()->all();
+            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
             $count_array = count($sql_array_products);
             $arr = [];
             //массив артикулов из базы
             for ($i = 0; $i < $count_array; $i++) {
-                array_push($arr, $sql_array_products[$i][$unique]);
+                array_push($arr, (string)$sql_array_products[$i][$unique]);
             }
-
+            
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
@@ -587,7 +584,7 @@ class SiteController extends DefaultController {
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row));
                 if (!in_array($row_article, $arr)) {
                     $newRows++;
                 }
@@ -598,23 +595,38 @@ class SiteController extends DefaultController {
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
+            
             $transaction = Yii::$app->db->beginTransaction();
             try {
+                $data_insert = [];
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
-                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+                    $row_article = (string)$worksheet->getCellByColumnAndRow(0, $row); //артикул
+                    $row_product = $worksheet->getCellByColumnAndRow(1, $row); //наименование
                     $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
-                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
-                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row));  //Комментарий
+                    $row_ed = $worksheet->getCellByColumnAndRow(4, $row); //единица измерения
+                    $row_note = $worksheet->getCellByColumnAndRow(5, $row);  //Комментарий
                     if (!empty($row_article && $row_product && $row_price && $row_ed)) {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
                         }
-                        if (in_array($row_article, $arr)) {
-                            $CatalogBaseGoods = CatalogBaseGoods::find()->where([
+                        if (!in_array($row_article, $arr)) {
+                            $data_insert[] = [
+                                $id, 
+                                $vendor->id, 
+                                $row_article,
+                                $row_product,
+                                $row_units,
+                                $row_price,
+                                $row_ed,
+                                $row_note,
+                                CatalogBaseGoods::STATUS_ON
+                                ];
+                        }else{
+                                $CatalogBaseGoods = CatalogBaseGoods::find()->where([
                                         'cat_id' => $id,
-                                        'article' => $row_article
+                                        'article' => $row_article,
+                                        'deleted' => CatalogBaseGoods::DELETED_OFF
                                     ])->one();
                             $CatalogBaseGoods->product = $row_product;
                             $CatalogBaseGoods->units = $row_units;
@@ -623,19 +635,15 @@ class SiteController extends DefaultController {
                             $CatalogBaseGoods->note = $row_note;
                             $CatalogBaseGoods->es_status = CatalogBaseGoods::ES_UPDATE;
                             $CatalogBaseGoods->save();
-                        } else {
-                            $CatalogBaseGoods = new CatalogBaseGoods();
-                            $CatalogBaseGoods->cat_id = $id;
-                            $CatalogBaseGoods->supp_org_id = $vendor->id;
-                            $CatalogBaseGoods->article = $row_article;
-                            $CatalogBaseGoods->product = $row_product;
-                            $CatalogBaseGoods->units = $row_units;
-                            $CatalogBaseGoods->price = $row_price;
-                            $CatalogBaseGoods->ed = $row_ed;
-                            $CatalogBaseGoods->note = $row_note;
-                            $CatalogBaseGoods->save();
                         }
                     }
+                }
+                if(!empty($data_insert)){
+                $db = Yii::$app->db;
+                $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
+                    'cat_id','supp_org_id','article','product','units','price','ed','note','status'
+                    ], $data_insert);
+                Yii::$app->db->createCommand($sql)->execute();
                 }
                 $transaction->commit();
                 unlink($path);
@@ -648,8 +656,109 @@ class SiteController extends DefaultController {
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
             }
         }
-
         return $this->renderAjax('catalog/_importCatalog', compact('importModel'));
     }
+//    public function actionImportFromXls($id) {
+//        $vendor = \common\models\Catalog::find()->where([
+//                            'id' => $id,
+//                            'type' => \common\models\Catalog::BASE_CATALOG
+//                        ])
+//                        ->one()
+//                ->vendor;
+//        $importModel = new \common\models\upload\UploadForm();
+//        if (Yii::$app->request->isPost) {
+//            $unique = 'article'; //уникальное поле
+//            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where([
+//                        'cat_id' => $id,
+//                        'deleted' => CatalogBaseGoods::DELETED_OFF
+//                    ])->asArray()->all();
+//            $count_array = count($sql_array_products);
+//            $arr = [];
+//            //массив артикулов из базы
+//            for ($i = 0; $i < $count_array; $i++) {
+//                array_push($arr, $sql_array_products[$i][$unique]);
+//            }
+//
+//            $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
+//            $path = $importModel->upload();
+//            if (!is_readable($path)) {
+//                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
+//                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+//                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+//                return $this->redirect(\Yii::$app->request->getReferrer());
+//            }
+//            $localFile = \PHPExcel_IOFactory::identify($path);
+//            $objReader = \PHPExcel_IOFactory::createReader($localFile);
+//            $objPHPExcel = $objReader->load($path);
+//
+//            $worksheet = $objPHPExcel->getSheet(0);
+//            $highestRow = $worksheet->getHighestRow(); // получаем количество строк
+//            $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
+//            $newRows = 0;
+//            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+//                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+//                if (!in_array($row_article, $arr)) {
+//                    $newRows++;
+//                }
+//            }
+//            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
+//                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+//                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+//                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+//                return $this->redirect(\Yii::$app->request->getReferrer());
+//            }
+//            $transaction = Yii::$app->db->beginTransaction();
+//            try {
+//                for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+//                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+//                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+//                    $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
+//                    $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
+//                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
+//                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row));  //Комментарий
+//                    if (!empty($row_article && $row_product && $row_price && $row_ed)) {
+//                        if (empty($row_units) || $row_units < 0) {
+//                            $row_units = 0;
+//                        }
+//                        if (in_array($row_article, $arr)) {
+//                            $CatalogBaseGoods = CatalogBaseGoods::find()->where([
+//                                        'cat_id' => $id,
+//                                        'article' => $row_article
+//                                    ])->one();
+//                            $CatalogBaseGoods->product = $row_product;
+//                            $CatalogBaseGoods->units = $row_units;
+//                            $CatalogBaseGoods->price = $row_price;
+//                            $CatalogBaseGoods->ed = $row_ed;
+//                            $CatalogBaseGoods->note = $row_note;
+//                            $CatalogBaseGoods->es_status = CatalogBaseGoods::ES_UPDATE;
+//                            $CatalogBaseGoods->save();
+//                        } else {
+//                            $CatalogBaseGoods = new CatalogBaseGoods();
+//                            $CatalogBaseGoods->cat_id = $id;
+//                            $CatalogBaseGoods->supp_org_id = $vendor->id;
+//                            $CatalogBaseGoods->article = $row_article;
+//                            $CatalogBaseGoods->product = $row_product;
+//                            $CatalogBaseGoods->units = $row_units;
+//                            $CatalogBaseGoods->price = $row_price;
+//                            $CatalogBaseGoods->ed = $row_ed;
+//                            $CatalogBaseGoods->note = $row_note;
+//                            $CatalogBaseGoods->save();
+//                        }
+//                    }
+//                }
+//                $transaction->commit();
+//                unlink($path);
+//                return $this->redirect(['site/catalog', 'id' => $id]);
+//            } catch (Exception $e) {
+//                unlink($path);
+//                $transaction->rollback();
+//                Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
+//                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+//                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+//            }
+//        }
+//
+//        return $this->renderAjax('catalog/_importCatalog', compact('importModel'));
+//    }
 
 }

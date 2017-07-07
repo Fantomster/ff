@@ -525,6 +525,7 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportToXls($id) {
+        set_time_limit(90);
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
@@ -559,9 +560,9 @@ class VendorController extends DefaultController {
                     $newRows++;
                 }
             }
-            if ($newRows > 5000) {
+            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше '.CatalogBaseGoods::MAX_INSERT_FROM_XLS.' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }

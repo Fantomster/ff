@@ -19,7 +19,7 @@
                     <p style="font-family: Circe_Bold;padding-top: 20px;text-align: left;color: #999C9E;flex-wrap: bold;">Запрошенная дата доставки: <?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:j M Y") : '' ?></p>
                 </td><td colspan="2" style="width:50%;vertical-align: top;">
                     <p style="font-family: Circle_Regular;color: #999C9E;text-align: right;" >Город: <?= $order->vendor->locality ?></p>
-                    <p style="font-family: Circle_Regular;color: #999C9E; text-align: right;">Адрес: <?= $order->vendor->route ?>, <?= $order->vendor->street_number ?></p>
+                    <p style="font-family: Circle_Regular;color: #999C9E;text-align: right;">Адрес: <?= $order->vendor->route ?>, <?= $order->vendor->street_number ?></p>
                     <p style="font-family: Circle_Regular;color: #999C9E;text-align: right;">Телефон: <?= $order->vendor->phone ?></p>
                     <p style="font-family: Circle_Regular;color: #999C9E;text-align: right;">Дата создания заказа: <?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>
                     <p style="font-family: Circle_Regular;color: #999C9E;text-align: right;">Дата доставки: <?= $order->actual_delivery ? Yii::$app->formatter->asDatetime($order->actual_delivery, "php:j M Y") : '' ?></p>

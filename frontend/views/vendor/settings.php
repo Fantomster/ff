@@ -11,13 +11,14 @@ $this->title = 'Настройки';
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
-                $.pjax.reload({container: "#settingsInfo"});      
+                //$.pjax.reload({container: "#settingsInfo"});      
+                location.reload();
             });
             $(".settings").on("change paste keyup", ".form-control, input", function() {
                 $("#cancelOrg").prop( "disabled", false );
                 $("#saveOrg").prop( "disabled", false );
             });
-            $(".settings").on("click", ".country", function() {
+            $(".settings").on("click", ".country, #map", function() {
                 $("#cancelOrg").prop( "disabled", false );
                 $("#saveOrg").prop( "disabled", false );
             });
@@ -142,13 +143,13 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
 <section class="content">
     <div class="box box-info settings">
         <?php
-        Pjax::begin(['enablePushState' => false, 'id' => 'settingsInfo', 'timeout' => 5000]);
+        //Pjax::begin(['enablePushState' => false, 'id' => 'settingsInfo', 'timeout' => 5000]);
         $form = ActiveForm::begin([
                     'id' => 'generalSettings',
                     'enableAjaxValidation' => false,
-                    'options' => [
-                        'data-pjax' => true,
-                    ],
+//                    'options' => [
+//                        'data-pjax' => true,
+//                    ],
                     'method' => 'post',
         ]);
         ?>
@@ -508,7 +509,7 @@ function changeFields(fields, results){
 ?>
         <?php
         ActiveForm::end();
-        Pjax::end();
+        //Pjax::end();
         ?>
     </div>
 </section>

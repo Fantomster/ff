@@ -55,6 +55,7 @@ class OrderController extends DefaultController {
                         'actions' => [
                             'index',
                             'view',
+                            'edit',
                             'send-message',
                             'ajax-order-action',
                             'ajax-cancel-order',
@@ -148,7 +149,7 @@ class OrderController extends DefaultController {
             return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
     }
-    
+
     public function actionPjaxCart() {
         if (Yii::$app->request->isPjax) {
             $client = $this->currentUser->organization;
@@ -344,9 +345,9 @@ class OrderController extends DefaultController {
                 $danger = true;
                 $order->save();
                 if ($initiator->type_id == Organization::TYPE_RESTAURANT) {
-                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order->id);
+                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
                 } else {
-                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order->id);
+                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
                 }
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -614,9 +615,9 @@ class OrderController extends DefaultController {
                 $systemMessage = $initiator . ' отменил заказ!';
                 $this->sendSystemMessage($user, $order->id, $systemMessage, true);
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
-                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order->id);
+                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
                 } else {
-                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order->id);
+                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
                 }
             }
             if (($discount['discount_type']) && ($discount['discount'])) {
@@ -631,7 +632,6 @@ class OrderController extends DefaultController {
                     }
                     $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
                 }
-                //$this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
             } else {
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 $order->discount = null;
@@ -641,13 +641,15 @@ class OrderController extends DefaultController {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 if (isset($order->accepted_by_id)) {
-                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order->id);
+                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
+                } else {
+                    $this->sendOrderChangeAll($order->createdBy, $order);
                 }
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order->id);
+                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -655,7 +657,7 @@ class OrderController extends DefaultController {
                     $systemMessage = $order->client->name . ' получил заказ!';
                     $order->status = Order::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
-                    $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order->id);
+                    $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order);
                 }
             }
         }
@@ -670,6 +672,159 @@ class OrderController extends DefaultController {
             return $this->renderPartial('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
         } else {
             return $this->render('view', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        }
+    }
+
+    public function actionEdit($id) {
+        $user = $this->currentUser;
+        $user->organization->markViewed($id);
+
+        if ($user->organization->type_id == Organization::TYPE_SUPPLIER) {
+            $order = $this->findOrder([Order::tableName() . '.id' => $id], Yii::$app->user->can('manage'));
+        } else {
+            $order = Order::findOne(['id' => $id]);
+            ;
+        }
+
+        if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_SUPPLIER)) {
+            $this->redirect(['/order/index']);
+        }
+        if (($order->status == Order::STATUS_FORMING) && ($user->organization->type_id == Organization::TYPE_RESTAURANT)) {
+            $this->redirect(['/order/checkout']);
+        }
+        $organizationType = $user->organization->type_id;
+        $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
+        $message = "";
+        $orderChanged = 0;
+
+        if (Yii::$app->request->post()) {
+            $content = Yii::$app->request->post('OrderContent');
+            $discount = Yii::$app->request->post('Order');
+            foreach ($content as $position) {
+                $product = OrderContent::findOne(['id' => $position['id']]);
+                $initialQuantity = $product->initial_quantity;
+                $allowedStatuses = [
+                    Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT,
+                    Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
+                    Order::STATUS_PROCESSING
+                ];
+                $quantityChanged = ($position['quantity'] != $product->quantity);
+                $priceChanged = isset($position['price']) ? ($position['price'] != $product->price) : false;
+                if (in_array($order->status, $allowedStatuses) && ($quantityChanged || $priceChanged)) {
+                    $orderChanged = ($orderChanged || $quantityChanged || $priceChanged);
+                    if ($quantityChanged) {
+                        $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
+                        if ($position['quantity'] == 0) {
+                            $message .= "<br/>удалил $product->product_name из заказа";
+                        } else {
+                            $oldQuantity = $product->quantity + 0;
+                            $newQuantity = $position["quantity"] + 0;
+                            $message .= "<br/>изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                        }
+                        $product->quantity = $position['quantity'];
+                    }
+                    if ($priceChanged) {
+                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб";
+                        $product->price = $position['price'];
+                        if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
+                            $prodFromCat = $product->getProductFromCatalog();
+                            if (!empty($prodFromCat)) {
+                                $prodFromCat->price = $product->price;
+                                $prodFromCat->baseProduct->price = $product->price;
+                                $prodFromCat->save();
+                                $prodFromCat->baseProduct->save();
+                            }
+                        }
+                    }
+                    if ($quantityChanged && ($order->status == Order::STATUS_PROCESSING) && !isset($product->initial_quantity)) {
+                        $product->initial_quantity = $initialQuantity;
+                    }
+                    if ($product->quantity == 0) {
+                        $product->delete();
+                    } else {
+                        $product->save();
+                    }
+                }
+            }
+            if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_SUPPLIER)) {
+                $order->status = Order::STATUS_REJECTED;
+                $orderChanged = -1;
+            }
+            if ($order->positionCount == 0 && ($organizationType == Organization::TYPE_RESTAURANT)) {
+                $order->status = Order::STATUS_CANCELLED;
+                $orderChanged = -1;
+            }
+            if ($orderChanged < 0) {
+                $systemMessage = $initiator . ' отменил заказ!';
+                $this->sendSystemMessage($user, $order->id, $systemMessage, true);
+                if ($organizationType == Organization::TYPE_RESTAURANT) {
+                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
+                } else {
+                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
+                }
+            }
+            if (($discount['discount_type']) && ($discount['discount'])) {
+                $discountChanged = (($order->discount_type != $discount['discount_type']) || ($order->discount != $discount['discount']));
+                if ($discountChanged) {
+                    $order->discount_type = $discount['discount_type'];
+                    $order->discount = $order->discount_type ? abs($discount['discount']) : null;
+                    if ($order->discount_type == Order::DISCOUNT_FIXED) {
+                        $message = $order->discount . " руб";
+                    } else {
+                        $message = $order->discount . "%";
+                    }
+                    $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
+                }
+            } else {
+                if ($order->discount > 0) {
+                    $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' отменил скидку на заказ №' . $order->id);
+                }
+                $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
+                $order->discount = null;
+            }
+            if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
+                $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+                if (isset($order->accepted_by_id)) {
+                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
+                } else {
+                    $this->sendOrderChangeAll($order->createdBy, $order);
+                }
+            } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
+                $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
+                $order->accepted_by_id = $user->id;
+                $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+            }
+
+            if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
+                if (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                    $systemMessage = $order->client->name . ' получил заказ!';
+                    $order->status = Order::STATUS_DONE;
+                    $this->sendSystemMessage($user, $order->id, $systemMessage);
+                    $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order);
+                }
+            }
+        }
+
+        $order->calculateTotalPrice();
+        $order->save();
+        
+        if ($orderChanged) {
+            return $this->redirect(["order/view", "id" => $order->id]);
+        }
+        
+        $searchModel = new OrderContentSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('edit', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
+        } else {
+            return $this->render('edit', compact('order', 'searchModel', 'dataProvider', 'organizationType', 'user'));
         }
     }
 
@@ -691,7 +846,8 @@ class OrderController extends DefaultController {
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
-
+        $dataProvider->pagination = false;
+        
         //return $this->renderPartial('_bill', compact('dataProvider', 'order'));
         $pdf = new Pdf([
             'mode' => Pdf::MODE_UTF8, // leaner size using standard fonts
@@ -704,6 +860,7 @@ class OrderController extends DefaultController {
             'options' => [
 //                'title' => 'Privacy Policy - Krajee.com',
 //                'subject' => 'Generating PDF files via yii2-mpdf extension has never been easy'
+            //'showImageErrors' => true,
             ],
             'methods' => [
 //                'SetHeader' => ['Generated By: Krajee Pdf Component||Generated On: ' . date("r")],
@@ -764,6 +921,7 @@ class OrderController extends DefaultController {
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
             $organizationType = $this->currentUser->organization->type_id;
             $danger = false;
+            $edit = false;
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
@@ -771,9 +929,9 @@ class OrderController extends DefaultController {
                     $systemMessage = $initiator . ' отменил заказ!';
                     $danger = true;
                     if ($organizationType == Organization::TYPE_RESTAURANT) {
-                        $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order->id);
+                        $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
                     } else {
-                        $this->sendOrderCanceled($order->vendor, $order->createdBy, $order->id);
+                        $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
                     }
                     break;
                 case 'confirm':
@@ -781,27 +939,29 @@ class OrderController extends DefaultController {
                         $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-                        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
+                        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . ' подтвердил заказ!';
-                        $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order->id);
+                        $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order);
+                        $edit = true;
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $systemMessage = $order->vendor->name . ' подтвердил заказ!';
                         $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
-                        $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order->id);
+                        $edit = true;
+                        $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-                        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
+                        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order);
                     }
                     break;
             }
             if ($order->save()) {
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
-                return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
+                return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit'));
             }
         }
     }
@@ -820,7 +980,7 @@ class OrderController extends DefaultController {
         $systemMessage = $order->client->name . ' получил заказ!';
         $order->status = Order::STATUS_DONE;
         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order->id);
+        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order);
         if ($order->save()) {
             $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, false);
             $this->redirect(['order/view', 'id' => $id]);
@@ -840,7 +1000,11 @@ class OrderController extends DefaultController {
         if (Yii::$app->request->post()) {
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
             $organizationType = $this->currentUser->organization->type_id;
-            return $this->renderPartial('_order-buttons', compact('order', 'organizationType'));
+            $edit = false;
+            if (in_array($order->status, [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING])) {
+                $edit = true;
+            }
+            return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit'));
         }
     }
 
@@ -1082,31 +1246,54 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function sendOrderChange($sender, $recipient, $order_id) {
+    private function sendOrderChange($sender, $recipient, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $email = $recipient->email;
-        $subject = "f-keeper: измененения в заказе №" . $order_id;
+        $subject = "f-keeper: измененения в заказе №" . $order->id;
 
         $searchModel = new OrderContentSearch();
-        $params['OrderContentSearch']['order_id'] = $order_id;
+        $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
-        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        $email = $recipient->email;
+        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
     }
 
-    private function sendOrderDone($sender, $recipient, $order_id) {
+    private function sendOrderChangeAll($sender, $order) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $subject = "f-keeper: измененения в заказе №" . $order->id;
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        foreach ($order->vendor->users as $recipient) {
+
+//        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
+//                ->setTo($email)
+//                ->setSubject($subject)
+//                ->queue();
+            $email = $recipient->email;
+            $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+        }
+    }
+
+    private function sendOrderDone($sender, $recipient, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         if (empty($recipient)) {
@@ -1117,10 +1304,10 @@ class OrderController extends DefaultController {
         // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
-        $subject = "f-keeper: заказ №" . $order_id . " выполнен!";
+        $subject = "f-keeper: заказ №" . $order->id . " выполнен!";
 
         $searchModel = new OrderContentSearch();
-        $params['OrderContentSearch']['order_id'] = $order_id;
+        $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
@@ -1128,7 +1315,7 @@ class OrderController extends DefaultController {
 //                ->setTo($email)
 //                ->setSubject($subject)
 //                ->queue();
-        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
@@ -1166,17 +1353,17 @@ class OrderController extends DefaultController {
         }
     }
 
-    private function sendOrderProcessing($sender, $recipient, $order_id) {
+    private function sendOrderProcessing($sender, $recipient, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
         $email = $recipient->email;
-        $subject = "f-keeper: заказ №" . $order_id . " подтвержден!";
+        $subject = "f-keeper: заказ №" . $order->id . " подтвержден!";
 
         $searchModel = new OrderContentSearch();
-        $params['OrderContentSearch']['order_id'] = $order_id;
+        $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
@@ -1184,21 +1371,21 @@ class OrderController extends DefaultController {
 //                ->setTo($email)
 //                ->setSubject($subject)
 //                ->queue();
-        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
+        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
                 ->send();
     }
 
-    private function sendOrderCanceled($senderOrg, $recipient, $order_id) {
+    private function sendOrderCanceled($senderOrg, $recipient, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order_id . " отменен!";
+        $subject = "f-keeper: заказ №" . $order->id . " отменен!";
 
         $searchModel = new OrderContentSearch();
-        $params['OrderContentSearch']['order_id'] = $order_id;
+        $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
@@ -1209,14 +1396,14 @@ class OrderController extends DefaultController {
         if ($recipient instanceof Organization) {
             foreach ($recipient->users as $user) {
                 $email = $user->email;
-                $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
+                $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
         } else {
             $email = $recipient->email;
-            $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
+            $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
                     ->setTo($email)
                     ->setSubject($subject)
                     ->send();

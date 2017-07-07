@@ -52,16 +52,15 @@ $this->registerCss('
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
-                    <h4 class="modal-title">
-                        Укажите товары, который Вы покупаете у поставщика
-                    </h4>
+                    <h5 class="modal-title">
+                        <b class="client-manager-name"></b>, укажите товары, который Вы покупаете у поставщика <b class="supplier-org-name"></b>
+                    </h5>
                 </div>
             </div>
             <div class="modal-body">
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
-                
                 <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success">Отправить</button>
             </div>
@@ -124,7 +123,7 @@ $gridColumnsCatalog = [
         'headerOptions' => ['style' => 'text-align:right'],
         'format' => 'raw',
         'value' => function ($data) {
-    $result = "";
+        $result = "";
     if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
         //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
         $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
@@ -186,7 +185,7 @@ $gridColumnsCatalog = [
                         'disabled' => 'disabled']);
         }
     }
-
+    
     $result .= Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                 'class' => 'btn btn-danger btn-sm del',
                 'data' => ['id' => $data["supp_org_id"]],
@@ -209,12 +208,11 @@ $gridColumnsCatalog = [
                             <?php
                             $form = ActiveForm::begin([
                                         'options' => [
-                                            'id' => 'search_form',
+                                            'id' => 'search-form',
                                             'role' => 'search',
                                         ],
                             ]);
                             ?>
-                            <?php ActiveForm::end(); ?>
                             <?=
                                     $form->field($searchModel, "search_string", [
                                         'addon' => [
@@ -226,9 +224,10 @@ $gridColumnsCatalog = [
                                             ],
                                         ],
                                     ])
-                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'search_string'])
+                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'searchString'])
                                     ->label(false)
                             ?>
+                            <?php ActiveForm::end(); ?>
                             <!--                            <div class="input-group">
                                                             <span class="input-group-addon">
                                                                 <i class="fa fa-search"></i>
@@ -240,7 +239,7 @@ $gridColumnsCatalog = [
                     <div class="row">
                         <div class="col-md-12">
                             <div class="box-body table-responsive no-padding">
-                                <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
+                                <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
                                 <?=
                                 GridView::widget([
                                     'dataProvider' => $dataProvider,
@@ -323,22 +322,15 @@ $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
-
 $customJs = <<< JS
-var timer;
-$('#search').on("keyup", function () {
-window.clearTimeout(timer);
-   timer = setTimeout(function () {
-       $.pjax({
-        type: 'GET',
-        push: false,
-        timeout: 10000,
-        url: '$suppliersUrl',
-        container: '#sp-list',
-        data: {searchString: $('#search').val()}
-      })
-   }, 700);
-});
+$(".content").on("change keyup paste cut", "#searchString", function() {
+    if (timer) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+        $("#search-form").submit();
+    }, 700);
+});        
 $(".modal").removeAttr("tabindex");
 function bootboxDialogShow(msg){
 bootbox.dialog({
@@ -590,8 +582,8 @@ $('#invite').click(function(e){
 		  success: function (response) {
                         if(response.success){
                           $('#loader-show').hideLoading();
-                          $.pjax.reload({container: "#add-supplier-list"});
-                          $.pjax.reload({container: "#sp-list"});
+                          $.pjax.reload({container: "#add-supplier-list",timeout:30000});
+                          $.pjax.reload({container: "#sp-list",timeout:30000});
 			  $('#modal_addProduct').modal('hide'); 
                           bootbox.dialog({
 			  message: response.message,
@@ -625,7 +617,7 @@ $("#view-supplier").on("click", ".save-form", function() {
     data: form.serialize(),
     cache: false,
     success: function(response) {
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
             form.replaceWith(response);
                   
         },
@@ -685,7 +677,7 @@ $(document).on("click",".del", function(e){
 			         
 		        }	
 		    });
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
 		}else{
 		console.log('cancel');	
 		}
@@ -703,6 +695,10 @@ $("body").on("hidden.bs.modal", "#resend", function() {
 $("body").on("hidden.bs.modal", "#edit-catalog", function() {
     $(this).data("bs.modal", null);
 })
+$("#organization-name").keyup(function() {
+    $(".client-manager-name").html("$clientName");
+    $(".supplier-org-name").html($("#organization-name").val());
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

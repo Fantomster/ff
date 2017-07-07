@@ -12,10 +12,10 @@ $form = ActiveForm::begin([
             'id' => 'editOrder',
             'enableAjaxValidation' => false,
             'options' => [
-                'data-pjax' => true,
+                'data-pjax' => false,
             ],
             'method' => 'post',
-            'action' => Url::to(['order/view', 'id' => $order->id]),
+            'action' => Url::to(['order/edit', 'id' => $order->id]),
         ]);
 echo GridView::widget([
     'dataProvider' => $dataProvider,
@@ -32,7 +32,7 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = ""; //$data->product->note ? "<div class='grid-article'>Заметка: " . $data->product->note . "</div>" : ""; 
+                $note = isset($data->note->note) ? "<div class='grid-article'>Заметка: " . $data->note->note . "</div>" : ""; 
                 return "<div class='grid-prod'>" . $data->product_name . "</div>"
                         . "<div class='grid-article'>Артикул: <span>"
                         . $data->article . "</span></div>" . $note;
@@ -195,7 +195,7 @@ echo GridView::widget([
                     </div>
                     <?php
                 }
-                echo Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right', 'id' => 'btnSave']);
+                echo Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success pull-right btnSave']);
                 echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
                             'class' => 'btn btn-default pull-right',
                             'style' => 'margin-right: 7px;'

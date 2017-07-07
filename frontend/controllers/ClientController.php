@@ -314,15 +314,15 @@ class ClientController extends DefaultController {
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
-
+                
                 if ($arrCatalog === Array()) {
                     $result = ['success' => false, 'message' => 'Каталог пустой!'];
                     return $result;
                     exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
-                if (count($arrCatalog) > 5000) {
-                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>1000</strong> позиций, пожалуйста свяжитесь с нами '
+                if (count($arrCatalog) > 300) {
+                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>300</strong> позиций, пожалуйста свяжитесь с нами '
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
                     return $result;
                     exit;
@@ -635,6 +635,9 @@ class ClientController extends DefaultController {
                     $currentOrganization = $currentUser->organization;
 
                     $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
+                    
+                    $mailer = Yii::$app->mailer; 
+                    
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
                             $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
@@ -642,7 +645,13 @@ class ClientController extends DefaultController {
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
                         }
+                        $email = $row->email;
+                        $subject = "Ресторан " . $currentOrganization->name . " приглашает вас в систему f-keeper.ru";
+                        $mailer->htmlLayout = 'layouts/html';
+                        $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
+                                ->setTo($email)->setSubject($subject)->send();
                     }
+                    
 
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
                         $currentOrganization->step = Organization::STEP_OK;
@@ -1339,7 +1348,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $organization = new Organization();
 
         $currentOrganization = $this->currentUser->organization;
-
+        $clientName = $this->currentUser->profile->full_name;
         $searchModel = new \common\models\search\VendorSearch();
 
         $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
@@ -1347,9 +1356,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->renderPartial('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         } else {
-            return $this->render('suppliers', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->render('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         }
     }
 
@@ -1359,6 +1368,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $profile = new Profile();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
+        
+        $relations = RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id, 'deleted' => false])->count();
 
         $currentOrganization = $this->currentUser->organization;
 
@@ -1370,9 +1381,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider->pagination = false;
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->renderPartial('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'relations'));
         } else {
-            return $this->render('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->render('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'relations'));
         }
     }
     

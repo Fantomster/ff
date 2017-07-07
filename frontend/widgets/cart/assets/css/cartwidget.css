@@ -134,17 +134,16 @@
 .name_s{
     font-family: "Circe_Regular";
     font-size: 20px;
-    padding-top: 20px;
-    padding-left: 25px;
-    padding-bottom: 10px;
-    float: left;
+    padding-left: 30px;
+    padding-top: 10px;
+    text-align: left;
 }
 .count_s{
     font-family: "Circe_Regular";
     font-size: 20px;
-    padding-top: 20px;
-    padding-right: 15px;
-    float: right;
+    padding-right: 30px;
+    padding-top: 10px;
+    text-align: right;
 }
 .but_zakaz_bask{
     width: 100%;
@@ -169,21 +168,17 @@
 .min_zakaz{
     font-family: "Circe_Regular";
     color: #95989A;
-    float: left;
-    width: 60%;
-    margin-top: 50px;
     line-height: 18px;
-    margin-left: -54px;
-    padding-left: 0;
+    padding-left: 30px;
+    padding-bottom: 10px;
+    text-align: left;
 }
 .dost_min{
     font-family: "Circe_Regular";
     color: #95989A;
-    float: right;
-    padding-right: 10px;
-    padding-left: 35px;
-    margin-top: -66px;
-    width: 38%;
+    padding-right: 30px;
+    padding-bottom: 10px;
+    text-align: right;
 }
 .block_wrap_dont_tovar{
     width: 100%;

@@ -44,6 +44,7 @@ $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
+$home = Url::to(['client/index']);
 
 $customJs = <<< JS
     $(".modal").removeAttr("tabindex");
@@ -170,6 +171,7 @@ $customJs = <<< JS
     });
     $(document).on('click', '#inviteSupplier', function(e){
         e.preventDefault();
+        $(this).button("loading");
         $.ajax({
             url: '$inviteUrl',
             type: 'POST',
@@ -178,6 +180,7 @@ $customJs = <<< JS
             cache: false,
             success: function (response) {
                 if(response.success){
+                    $("#continue").prop("disabled", false);
                     swal({
                         title: "Поставщик добавлен!", 
                         text: response.message,
@@ -266,6 +269,7 @@ $('#invite').click(function(e){
             cache: false,
             success: function (response) {
                 if(response.success){
+                    $("#continue").prop("disabled", false);
                     $('#loader-show').hideLoading();
                     swal({
                         title: "Поставщик добавлен!", 
@@ -315,13 +319,15 @@ $(document).on("click",".del", function(e){
 			         
 		        }	
 		    });
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
 		}else{
 		console.log('cancel');	
 		}
 	}});      
 })
-        
+$(document).on("click", "#continue", function(e) {
+        document.location = "$home";
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
@@ -373,7 +379,7 @@ $disabled = true;
 
 
             <p class = "p_head">Добавьте информацию о Ваших поставщиках и их продуктов. Нажмите "Продолжить" для завершения настроек</p>
-            <button class = "button_head">Продолжить</button>
+            <button class = "button_head" id="continue" <?= $relations ? "" : "disabled"?>>Продолжить</button>
         </div>
         <div class="col-lg-6 col-md-12">
             <div class="block_wrap_info">

@@ -51,10 +51,9 @@ $this->title = 'F-MARKET информация о товаре';
 .title-param{
 font-family: "HelveticaBold",Arial,sans-serif;    
 }
-.size-bc {
-white-space: nowrap;
+.text-overflow {
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
    }
 </style>
 <div class="row">
@@ -62,16 +61,23 @@ white-space: nowrap;
     <?=
     Breadcrumbs::widget([
         'options' => [
-            'class' => 'breadcrumb size-bc',
+            'class' => 'breadcrumb text-overflow',
+            'title' => Html::decode($product->product),
+            'data-toggle' => 'tooltip',
+            'data-placement' => 'bottom',
+            'data-original-title' => Html::decode($product->product),
         ],
         'homeLink' => false,
         'links' => [
-            $product->mainCategory->name,
+            Html::decode($product->mainCategory->name),
             [
-                'label' => $product->category->name,
+                'label' => Html::decode($product->category->name),
                 'url' => ['site/category', 'id' => $product->category_id],
             ],
-            Html::decode($product->product),
+            [
+            'label' => Html::decode($product->product, ['style'=>'text-overflow: ellipsis']),
+            'encode' => false,
+            ]
         ],
     ])
     ?>

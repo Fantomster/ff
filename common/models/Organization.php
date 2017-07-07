@@ -100,7 +100,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address','administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
-            //[['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
+            [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
@@ -174,12 +174,6 @@ class Organization extends \yii\db\ActiveRecord {
             return true;
         }
         return false;
-    }
-
-    public static function getOrganization($id) {
-        $getOrganization = Organization::find()
-                        ->where(['id' => $id])->one();
-        return $getOrganization;
     }
 
     public static function get_value($id) {
@@ -518,12 +512,12 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function getPictureUrl() {
         if ($this->type_id == self::TYPE_SUPPLIER) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_VENDOR_AVATAR;
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['client-noavatar'];
         }
         if ($this->type_id == self::TYPE_RESTAURANT) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_RESTAURANT_AVATAR;
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['vendor-noavatar'];
         }
-        return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
+        return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['org-noavatar'];
     }
 
     public function inviteVendor($vendor, $invite, $includeBaseCatalog = false, $fromMarket = false) {

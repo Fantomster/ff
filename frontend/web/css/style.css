@@ -1241,6 +1241,7 @@ a:focus {
 }
 .sot__set_block a {
     color: #84bf76;
+    font-size: 20px;
 }
 .sot__set_block a:hover {
     text-decoration: none;

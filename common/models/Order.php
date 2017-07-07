@@ -43,17 +43,16 @@ class Order extends \yii\db\ActiveRecord {
     const STATUS_REJECTED = 5;
     const STATUS_CANCELLED = 6;
     const STATUS_FORMING = 7;
-
     const DISCOUNT_NO_DISCOUNT = null;
     const DISCOUNT_FIXED = 1;
     const DISCOUNT_PERCENT = 2;
-    
     const DELAY_WITH_DELIVERY_DATE = 86400; //sec - 1 day
     const DELAY_WITHOUT_DELIVERY_DATE = 86400; //sec - 1 day
 
     /**
      * @inheritdoc
      */
+
     public static function tableName() {
         return 'order';
     }
@@ -108,10 +107,10 @@ class Order extends \yii\db\ActiveRecord {
 
     public function beforeSave($insert) {
         $result = parent::beforeSave($insert);
-        $this->discount = abs((int)$this->discount);
+        $this->discount = abs((int) $this->discount);
         return $result;
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -184,7 +183,7 @@ class Order extends \yii\db\ActiveRecord {
             return $interval > self::DELAY_WITH_DELIVERY_DATE;
         }
     }
-    
+
     public static function statusText($status) {
         $text = 'Неопределен';
         switch ($status) {
@@ -205,7 +204,7 @@ class Order extends \yii\db\ActiveRecord {
         }
         return $text;
     }
-    
+
     public static function discountDropDown() {
         return [
             '' => 'Без скидки',
@@ -213,12 +212,12 @@ class Order extends \yii\db\ActiveRecord {
             '2' => 'Скидка (%)',
         ];
     }
-    
+
     public function getStatusText() {
         $statusList = self::getStatusList();
         return $statusList[$this->status];
     }
-    
+
     public static function getStatusList() {
         return [
             Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => 'Ожидает подтверждения поставщика',
@@ -230,7 +229,7 @@ class Order extends \yii\db\ActiveRecord {
             Order::STATUS_FORMING => 'Формируется',
         ];
     }
-    
+
     public static function getStatusColors() {
         return [
             Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR => '#368CBF',
@@ -249,23 +248,35 @@ class Order extends \yii\db\ActiveRecord {
 
     public function calculateDelivery() {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
-        $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
+        if (isset($this->vendor->delivery)) {
+            $free_delivery = $this->vendor->delivery->min_free_delivery_charge;
+        } else {
+            $free_delivery = 0;
+        }
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
             return $this->vendor->delivery->delivery_charge;
         }
         return 0;
     }
-    
+
     public function forFreeDelivery() {
-        $diff = $this->vendor->delivery->min_free_delivery_charge - $this->total_price;
+        if (isset($this->vendor->delivery)) {
+            $diff = $this->vendor->delivery->min_free_delivery_charge - $this->total_price;
+        } else {
+            $diff = 0;
+        }
         return ($diff > 0) ? $diff : 0;
     }
-    
+
     public function forMinOrderPrice() {
-        $diff = $this->vendor->delivery->min_order_price - $this->total_price;
+        if (isset($this->vendor->delivery)) {
+            $diff = $this->vendor->delivery->min_order_price - $this->total_price;
+        } else {
+            $diff = 0;
+        }
         return ($diff > 0) ? $diff : 0;
     }
-    
+
     public function calculateTotalPrice() {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {
@@ -282,4 +293,16 @@ class Order extends \yii\db\ActiveRecord {
         $this->save();
         return $this->total_price;
     }
+
+    public function getFormattedDiscount() {
+        switch ($this->discount_type) {
+            case self::DISCOUNT_NO_DISCOUNT:
+                return false;
+            case self::DISCOUNT_FIXED:
+                return $this->discount . " руб";
+            case self::DISCOUNT_PERCENT:
+                return $this->discount . "%";
+        }
+    }
+
 }

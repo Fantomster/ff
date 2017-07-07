@@ -29,11 +29,6 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
        border-radius: 4px;
        width: 80%;">Заказ №<?= $order->id ?></a>
 </div>
-<?php if (!empty($order->comment)) { ?>
-    <div>
-        Комментарий к заказу:</div>
-    <div><?= $order->comment ?></div>
-    <?php } ?>
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-<?= $this->render("_mailGrid", compact("dataProvider")) ?>
+    <?= $this->render('_bill', compact('order', 'dataProvider')) ?>
 </div>

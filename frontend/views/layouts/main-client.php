@@ -25,7 +25,7 @@ use yii\helpers\Url;
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">
     <?php $this->beginBody() ?>
-    <div class="wrapper" style="margin-bottom: -20px;">
+    <div class="wrapper" style="margin-bottom: -20px;overflow-y:hidden;">
     
         <?= $this->render(
             'header.php',

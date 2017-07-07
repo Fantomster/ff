@@ -27,19 +27,6 @@ class User extends \amnah\yii2\user\models\User {
      * @inheritdoc
      */
     public function rules() {
-        $rules = parent::rules();
-        $rules[] = [['newPassword'], 'required', 'on' => ['acceptInvite', 'manageNew']];
-        $rules[] = [['role_id'], 'required', 'on' => ['manage', 'manageNew']];
-        $rules[] = [['organization_id'], 'integer'];
-
-        //переопределим сообщения валидации быдланским способом
-        $pos = array_search(['email', 'required'], $rules);
-        $rules[$pos]['message'] = 'Пожалуйста, укажите адрес электронной почты';
-        $pos = array_search([['newPassword'], 'required', 'on' => ['register', 'reset']], $rules);
-        $rules[$pos]['message'] = 'Пожалуйста, введите пароль';
-        $pos = array_search([['newPasswordConfirm'], 'required', 'on' => ['reset']], $rules);
-        $rules[$pos]['message'] = 'Пожалуйста, повторите пароль';
-        
         $rules = [
             // general email and username rules
             [['email', 'username'], 'string', 'max' => 255],
@@ -54,7 +41,11 @@ class User extends \amnah\yii2\user\models\User {
             [['newPassword'], 'required', 'on' => ['register', 'reset', 'acceptInvite', 'manageNew']],
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
             [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
-
+            
+            // email rules invite client
+            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message'=>'Введите эл.почту партнера'],
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message'=>'Пользователь с таким Email уже работает в системе f-keeper, пожалуйста, свяжитесь с ним для сотрудничества!'],
+            
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
 
@@ -84,7 +75,7 @@ class User extends \amnah\yii2\user\models\User {
 
         return $rules;
     }
-
+    
     /**
      * Set organization id
      * @param int $orgId

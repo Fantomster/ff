@@ -153,9 +153,9 @@ Modal::end();
         <div class="alert alert-danger alert-dismissable">
             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
             <h4><i class="icon fa fa-check"></i>Ошибка</h4>
-    <?= Yii::$app->session->getFlash('success') ?>
+            <?= Yii::$app->session->getFlash('success') ?>
         </div>
-<?php endif; ?>
+    <?php endif; ?>
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs" style="background-color: #f1f0ee;">
             <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5 class="box-title">Редактирование</h5></a></li>
@@ -169,7 +169,7 @@ Modal::end();
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                    <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
+                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
                         </div>
                     </div>   
                     <?=
@@ -310,28 +310,28 @@ Modal::end();
                                 $data['category_id'] == 0 ? $category_name = '' : $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
                                 return $category_name;
                             },
-                                    'contentOptions' => ['style' => 'vertical-align:middle;'],
-                                ],
-                                [
-                                    'attribute' => 'price',
-                                    'label' => 'Цена',
-                                    'value' => 'price',
-                                    'contentOptions' => ['style' => 'vertical-align:middle;'],
-                                ],
-                                [
-                                    'attribute' => 'ed',
-                                    'label' => 'Ед. измерения',
-                                    'value' => function ($data) {
-                                        return $data['ed'];
-                                    },
-                                    'contentOptions' => ['style' => 'vertical-align:middle;'],
-                                ],
-                                [
-                                    'attribute' => 'status',
-                                    'label' => 'Наличие',
-                                    'format' => 'raw',
-                                    'contentOptions' => ['style' => 'vertical-align:middle;'],
-                                    'value' => function ($data) {
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                        ],
+                        [
+                            'attribute' => 'price',
+                            'label' => 'Цена',
+                            'value' => 'price',
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                        ],
+                        [
+                            'attribute' => 'ed',
+                            'label' => 'Ед. измерения',
+                            'value' => function ($data) {
+                                return $data['ed'];
+                            },
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                        ],
+                        [
+                            'attribute' => 'status',
+                            'label' => 'Наличие',
+                            'format' => 'raw',
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                            'value' => function ($data) {
                                 $link = CheckboxX::widget([
                                             'name' => 'status_' . $data['id'],
                                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
@@ -347,161 +347,164 @@ Modal::end();
                                 ]);
                                 return $link;
                             },
-                                ],
-                                [
-                                    'attribute' => '',
-                                    'label' => 'F-MARKET',
-                                    'format' => 'raw',
-                                    'contentOptions' => ['style' => 'width:70px'],
-                                    'headerOptions' => ['class' => 'text-center'],
-                                    'value' => function ($data) {
+                        ],
+                        [
+                            'attribute' => '',
+                            'label' => 'F-MARKET',
+                            'format' => 'raw',
+                            'contentOptions' => ['style' => 'width:70px'],
+                            'headerOptions' => ['class' => 'text-center'],
+                            'value' => function ($data) {
                                 $data['market_place'] == 0 ?
-                                                $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', ['/vendor/ajax-update-product-market-place',
-                                                    'id' => $data['id']], [
-                                                    'data' => [
-                                                        'target' => '#add-product-market-place',
-                                                        'toggle' => 'modal',
-                                                        'backdrop' => 'static',
-                                                    ],
-                                                    'class' => 'btn btn-sm btn-outline-success'
-                                                ]) :
-                                                $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', ['/vendor/ajax-update-product-market-place',
-                                                    'id' => $data['id']], [
-                                                    'data' => [
-                                                        'target' => '#add-product-market-place',
-                                                        'toggle' => 'modal',
-                                                        'backdrop' => 'static',
-                                                    ],
-                                                    'class' => 'btn btn-sm btn-success'
+                                        $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', ['/vendor/ajax-update-product-market-place',
+                                            'id' => $data['id']], [
+                                            'data' => [
+                                                'target' => '#add-product-market-place',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
+                                            'class' => 'btn btn-sm btn-outline-success'
+                                        ]) :
+                                        $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', ['/vendor/ajax-update-product-market-place',
+                                            'id' => $data['id']], [
+                                            'data' => [
+                                                'target' => '#add-product-market-place',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
+                                            'class' => 'btn btn-sm btn-success'
                                 ]);
                                 return $link;
                             },
-                                ],
-                                [
-                                    'attribute' => '',
-                                    'label' => '',
-                                    'format' => 'raw',
-                                    'contentOptions' => ['style' => 'width:50px;'],
-                                    'value' => function ($data) {
+                        ],
+                        [
+                            'attribute' => '',
+                            'label' => '',
+                            'format' => 'raw',
+                            'contentOptions' => ['style' => 'width:50px;'],
+                            'value' => function ($data) {
                                 $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                                             'class' => 'btn btn-sm btn-danger del-product',
                                             'data' => ['id' => $data['id']],
                                 ]);
                                 return $link;
                             },
+                        ],
+                    ];
+                    ?>
+                    <div class="panel-body">
+                        <div class="box-body table-responsive no-padding">
+                            <?=
+                            GridView::widget([
+                                'dataProvider' => $dataProvider,
+                                'pjax' => true, // pjax is set to always true for this demo
+                                'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
+                                'filterPosition' => false,
+                                'columns' => $gridColumnsBaseCatalog,
+                                /* 'rowOptions' => function ($data, $key, $index, $grid) {
+                                  return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
+                                  }, */
+                                'options' => ['class' => 'table-responsive'],
+                                'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                                'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                                'bordered' => false,
+                                'striped' => true,
+                                'condensed' => false,
+                                'responsive' => false,
+                                'hover' => true,
+                                'resizableColumns' => false,
+                                'export' => [
+                                    'fontAwesome' => true,
                                 ],
-                            ];
+                                'pager' => [
+                                    'firstPageLabel' => true,
+                                    'lastPageLabel' => true,
+                                ],
+                            ]);
                             ?> 
-                            <div class="panel-body">
-                                <div class="box-body table-responsive no-padding">
-                                    <?=
-                                    GridView::widget([
-                                        'dataProvider' => $dataProvider,
-                                        'pjax' => true, // pjax is set to always true for this demo
-                                        'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
-                                        'filterPosition' => false,
-                                        'columns' => $gridColumnsBaseCatalog,
-                                        /* 'rowOptions' => function ($data, $key, $index, $grid) {
-                                          return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
-                                          }, */
-                                        'options' => ['class' => 'table-responsive'],
-                                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                                        'bordered' => false,
-                                        'striped' => true,
-                                        'condensed' => false,
-                                        'responsive' => false,
-                                        'hover' => true,
-                                        'resizableColumns' => false,
-                                        'export' => [
-                                            'fontAwesome' => true,
-                                        ],
-                                    ]);
-                                    ?> 
-                                </div>
-                            </div>      
+                        </div>
+                    </div>      
 
 
-                        </div>       
+                </div>       
 
-                    </div>
-                    <div id="tabClients" class="tab-pane fade"> 	    
-                        <?php
-                        $gridColumnsCatalog = [
-                            [
-                                'label' => 'Ресторан',
-                                'value' => function ($data) {
-                                    $organization_name = common\models\Organization::find()->where(['id' => $data->rest_org_id])->one()->name;
-                                    return $organization_name;
-                                }
-                                    ],
-                                    [
-                                        'label' => 'Текущий каталог',
-                                        'format' => 'raw',
-                                        'value' => function ($data) {
-                                            $catalog_name = $data->cat_id == 0 ? '' :
-                                                    common\models\Catalog::find()->where(['id' => $data->cat_id])->one()->name;
-                                            return $catalog_name;
-                                        }
-                                            ],
-                                            [
-                                                'attribute' => 'Назначить',
-                                                'format' => 'raw',
-                                                'contentOptions' => ['style' => 'width:50px;'],
-                                                'value' => function ($data) {
-                                            $link = CheckboxX::widget([
-                                                        'name' => 'setcatalog_' . $data->id,
-                                                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                                        'value' => $data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
-                                                        'autoLabel' => true,
-                                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog'],
-                                                        'pluginOptions' => [
-                                                            'threeState' => false,
-                                                            'theme' => 'krajee-flatblue',
-                                                            'enclosedLabel' => true,
-                                                            'size' => 'lg',
-                                                        ]
-                                            ]);
-                                            return $link;
-                                        },
-                                            ],
-                                        ];
-                                        ?>
-                                        <div class="panel-body">
-                                            <div class="box-body table-responsive no-padding">
-                                                <?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
-                                                <?=
-                                                GridView::widget([
-                                                    'dataProvider' => $dataProvider2,
-                                                    'filterModel' => $searchModel2,
-                                                    'filterPosition' => false,
-                                                    'columns' => $gridColumnsCatalog,
-                                                    'options' => ['class' => 'table-responsive'],
-                                                    'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
-                                                    'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
-                                                    'summary' => false,
-                                                    'bordered' => false,
-                                                    'striped' => true,
-                                                    'condensed' => false,
-                                                    'responsive' => false,
-                                                    'hover' => false,
-                                                ]);
-                                                ?>
+            </div>
+            <div id="tabClients" class="tab-pane fade"> 	    
+                <?php
+                $gridColumnsCatalog = [
+                    [
+                        'label' => 'Ресторан',
+                        'value' => function ($data) {
+                            $organization_name = common\models\Organization::find()->where(['id' => $data->rest_org_id])->one()->name;
+                            return $organization_name;
+                        }
+                    ],
+                    [
+                        'label' => 'Текущий каталог',
+                        'format' => 'raw',
+                        'value' => function ($data) {
+                            $catalog_name = $data->cat_id == 0 ? '' :
+                                    common\models\Catalog::find()->where(['id' => $data->cat_id])->one()->name;
+                            return $catalog_name;
+                        }
+                    ],
+                    [
+                        'attribute' => 'Назначить',
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:50px;'],
+                        'value' => function ($data) {
+                            $link = CheckboxX::widget([
+                                        'name' => 'setcatalog_' . $data->id,
+                                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                                        'value' => $data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
+                                        'autoLabel' => true,
+                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog'],
+                                        'pluginOptions' => [
+                                            'threeState' => false,
+                                            'theme' => 'krajee-flatblue',
+                                            'enclosedLabel' => true,
+                                            'size' => 'lg',
+                                        ]
+                            ]);
+                            return $link;
+                        },
+                    ],
+                ];
+                ?>
+                <div class="panel-body">
+                    <div class="box-body table-responsive no-padding">
+                        <?php Pjax::begin(['enablePushState' => false, 'id' => 'clients-list',]); ?>
+                        <?=
+                        GridView::widget([
+                            'dataProvider' => $dataProvider2,
+                            'filterModel' => $searchModel2,
+                            'filterPosition' => false,
+                            'columns' => $gridColumnsCatalog,
+                            'options' => ['class' => 'table-responsive'],
+                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
+                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
+                            'summary' => false,
+                            'bordered' => false,
+                            'striped' => true,
+                            'condensed' => false,
+                            'responsive' => false,
+                            'hover' => false,
+                        ]);
+                        ?>
                         <?php Pjax::end(); ?>
-                                            </div>
-                                        </div>              
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        <?php
-                        
-$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog]);  
+                    </div>
+                </div>              
+            </div>
+        </div>
+    </div>
+</section>
+<?php
+$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog]);
 $changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
 $changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
 $deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
-                        
-                        $customJs = <<< JS
+
+$customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
 window.clearTimeout(timer);
@@ -676,5 +679,5 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
   $('#add-product-market-place').removeAttr('tabindex');
   
 JS;
-                        $this->registerJs($customJs, View::POS_READY);
-                        ?>
+$this->registerJs($customJs, View::POS_READY);
+?>

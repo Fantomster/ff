@@ -6273,7 +6273,6 @@ label.error {
     }
 }
 .auth-sidebar__content {
-    width: 555px;
     margin-left: auto;
     margin-right: auto;
     margin: auto;
@@ -6282,6 +6281,11 @@ label.error {
     -o-transition: all 0.3s ease;
     -moz-transition: all 0.3s ease;
     transition: all 0.3s ease;
+}
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .auth-sidebar__content {
+        margin: 0;
+    }
 }
 .auth-sidebar__annotation {
     width: 256px;

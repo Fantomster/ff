@@ -21,6 +21,13 @@ $form = ActiveForm::begin([
     <h4 class="modal-title">Информация об организации</h4>
 </div>
 <div class="modal-body">
+    <?php if(empty($relation_supp_rest->cat_id)){?>
+    <div class="alert alert-warning alert-dismissible" style="margin: -15px -15px 15px -15px;">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true" style="right: -16px;">×</button>
+                <h4><i class="icon fa fa-warning"></i> Внимание! </h4>
+                Необходимо назначить каталог для данного клиента.
+    </div>
+    <?php } ?>
     <div class="row">
         <div class="col-md-6">
             <?=

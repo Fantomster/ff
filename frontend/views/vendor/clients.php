@@ -51,7 +51,7 @@ $gridColumnsClients = [
                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                 },
             ],
-            [
+            /*[
                 'label' => 'Текущий каталог',
                 'format' => 'raw',
                 'attribute' => 'catalog_name',
@@ -66,7 +66,7 @@ $gridColumnsClients = [
                                 'class' => 'current-catalog',
                     ]);
                 }
-                    ],
+                    ],*/
                     [
                         'label' => 'Назначенные менеджеры',
                         'format' => 'raw',
@@ -80,10 +80,10 @@ $gridColumnsClients = [
                         },
                     ],
                     [
-                        'label' => 'Статус сотрудничества',
+                        'label' => 'Мой клиент',
                         'attribute' => 'invite',
                         'format' => 'raw',
-                        'contentOptions' => ['style' => 'width:190px;text-align:center'],
+                        'contentOptions' => ['style' => 'text-align:left'],
                         'value' => function ($data) {
                     $link = CheckboxX::widget([
                                 'name' => 'restOrgId_' . $data->rest_org_id,
@@ -98,8 +98,30 @@ $gridColumnsClients = [
                                     'size' => 'lg',
                                 ]
                     ]);
-                    return $link;
-                },
+                    if(!empty($data->invite) && !empty($data->cat_id)){
+                        $result = Html::a($data->catalog->name, ['vendor/view-catalog', 'id' => $data->cat_id], [
+                                    'data' => [
+                                        'target' => '#view-catalog',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                    ],
+                        ]);    
+                        }
+                        elseif(empty($data->invite)){
+                        $result = "";    
+                        }
+                        elseif(!empty($data->invite) && empty($data->cat_id)){
+                        $result = Html::a("Каталог не назначен", ['vendor/view-client', 'id' => $data->rest_org_id], [
+                                'data' => [
+                                    'target' => '#view-client',
+                                    'toggle' => 'modal',
+                                    'backdrop' => 'static',
+                                ],
+                                'style'=>'color: #cccccc;'
+                            ]);    
+                        }
+                        return $link . " " .$result;
+                    },
                     ],
                     [
                         'label' => '',

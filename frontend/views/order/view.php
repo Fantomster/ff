@@ -264,13 +264,8 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
                     <?= Html::hiddenInput('order_id', $order->id, ['id' => 'order_id']); ?>
                     <?= Html::hiddenInput('sender_id', $user->id, ['id' => 'sender_id']); ?>
                     <?= Html::hiddenInput('', $user->profile->full_name, ['id' => 'name']); ?>
-                    <?= ''
-                    //Html::submitButton('', [
-                    //    'class' => 'hide'
-                    //])
-                    ?>
+                    <?= Html::endForm() ?>
                 </div>
-                <?= Html::endForm() ?>
             </div>
         </div>
     </div>

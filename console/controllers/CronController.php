@@ -334,7 +334,7 @@ class CronController extends Controller {
                 $franchiseeAssociate = new \common\models\FranchiseeAssociate();
                 $franchiseeAssociate->franchisee_id = $f['franchisee_id'];
                 $franchiseeAssociate->organization_id = $organization->id;
-                $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
+                $franchiseeAssociate->self_registered = 0;
                 $franchiseeAssociate->save();
                 //Если спонсор, тогда никто больше не претендует на эту организацию 
                 //во всех дальнейших итераций

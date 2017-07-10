@@ -43,23 +43,23 @@ $this->registerJs(
                 $("#btnRegister").button("loading");
                 return true;
             });            
-            $(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:true});'.
-            ($registerFirst ? (
-            '$(".go-to-reg").on("click",function(e){
+            $(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:true});' .
+        ($registerFirst ? (
+                '$(".go-to-reg").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickPrev")
             });
             $(".auth-sidebar__enter.reg a").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickNext")
             });'
-            ) : (
-            '$(".go-to-reg").on("click",function(e){
+                ) : (
+                '$(".go-to-reg").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickNext")
             });
             $(".auth-sidebar__enter.reg a").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickPrev")
             });'
-            )).
-            '$(".call-menu-but").on("click",function(){
+                )) .
+        '$(".call-menu-but").on("click",function(){
                 $(".present-wrapper").addClass("active"),$("body").addClass("over_hidden")
             });
             $(".close-menu-but").on("click",function(){
@@ -87,15 +87,17 @@ $this->registerCss(
     <div class="auth-sidebar h-fx_center auth">
         <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
         <div class="auth-sidebar__content">
-            <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="images/tmp_file/logo.png" alt=""></a></div>
-            <div class="auth-sidebar__annotation">Заполните поля<br>для входа в систему</div>
-            <div class="form-slider">
-                <?= $registerFirst ? $this->render('_register-form', compact('user', 'profile', 'organization')) : $this->render('_login-form', compact('model')) ?>
-                <?= $registerFirst ? $this->render('_login-form', compact('model')) : $this->render('_register-form', compact('user', 'profile', 'organization')) ?>
-            </div>
-            <div class="auth-sidebar__contacts">
-                <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>
-                <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@f-keeper.ru">info@f-keeper.ru</a></div>
+            <div class="for_ie">
+                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="images/tmp_file/logo.png" alt=""></a></div>
+                <div class="auth-sidebar__annotation">Заполните поля<br>для входа в систему</div>
+                <div class="form-slider">
+                    <?= $registerFirst ? $this->render('_register-form', compact('user', 'profile', 'organization')) : $this->render('_login-form', compact('model')) ?>
+                    <?= $registerFirst ? $this->render('_login-form', compact('model')) : $this->render('_register-form', compact('user', 'profile', 'organization')) ?>
+                </div>
+                <div class="auth-sidebar__contacts">
+                    <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>
+                    <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@f-keeper.ru">info@f-keeper.ru</a></div>
+                </div>
             </div>
         </div>
     </div>

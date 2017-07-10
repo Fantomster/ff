@@ -583,10 +583,12 @@ class SiteController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
+            $xlsArray = [];
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row));
+                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                 if (!in_array($row_article, $arr)) {
                     $newRows++;
+                    array_push($xlsArray, (string)$row_article);
                 }
             }
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
@@ -595,7 +597,12 @@ class SiteController extends DefaultController {
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
-            
+            if(max(array_count_values($xlsArray))>1){
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer()); 
+            }
             $transaction = Yii::$app->db->beginTransaction();
             try {
                 $data_insert = [];

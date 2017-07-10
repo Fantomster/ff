@@ -255,26 +255,25 @@ class CronController extends Controller {
                     //если есть
                     //есть ли франшиза с этим городом?
                         $flag = 0;
-                        if(\common\models\FranchiseeGeo::find()->where([
-                        'country'=>$organization->country,
-                        'administrative_area_level_1'=>$organization->locality
-                            ])->exists()){
+                        if(\Yii::$app->db->createCommand("select count(*) from franchisee f
+                    join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
+                    where LENGTH(locality)>2 and country = '" . $organization->country . "' and 
+                          locality = '" . $organization->locality . "' order by type_id desc")->queryScalar()>0){     
                     //Если есть, тогда дать список всех франшиз с этой городом
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where LENGTH(locality)>2 and country = '" . $organization->country . "' and 
                           locality = '" . $organization->locality . "' order by type_id desc")->queryAll();
-                          
+                         ;
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
                     }
                     //А есть ли франшиза с этой областью? 
-                    if($flag == 0 && \common\models\FranchiseeGeo::find()
-                        ->where([
-                        'country'=>$organization->country,
-                        'administrative_area_level_1'=>$organization->administrative_area_level_1,
-                            ]) 
-                        ->exists()){
+                    if($flag == 0 && \Yii::$app->db->createCommand("select count(*) from franchisee f
+                    join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
+                    where LENGTH(administrative_area_level_1)>2 and country = '" . $organization->country . "' and 
+      administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' order by type_id desc")->queryScalar()>0){
+                        echo 2;
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
@@ -287,15 +286,19 @@ class CronController extends Controller {
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
                         $flag = 1;
                     }//А есть ли франшиза с этой страной? 
-                    if($flag == 0 && \common\models\FranchiseeGeo::find()->where([
-                        'country'=>$organization->country
-                            ])
-                    ->exists()){
+                    if($flag == 0 && \Yii::$app->db->createCommand("select count(*) from franchisee f
+                    join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
+                    where country = '" . $organization->country . "' and 
+    (locality ='' or locality is null) and 
+    (administrative_area_level_1 ='' or administrative_area_level_1 is null) 
+    order by type_id desc")->queryScalar()>0){
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where country = '" . $organization->country . "' and 
-    (locality ='' or locality is null) and (administrative_area_level_1 ='' or administrative_area_level_1 is null) order by type_id desc")->queryAll();
+    (locality ='' or locality is null) and 
+    (administrative_area_level_1 ='' or administrative_area_level_1 is null) 
+    order by type_id desc")->queryAll();
                     //проходим по всему пулу франшиз, что подходят, order by type_id дает нам некую автоматизацию, то-есть,
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     

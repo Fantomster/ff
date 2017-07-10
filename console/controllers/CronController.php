@@ -273,7 +273,7 @@ class CronController extends Controller {
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where LENGTH(administrative_area_level_1)>2 and country = '" . $organization->country . "' and 
       administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' order by type_id desc")->queryScalar()>0){
-                        echo 2;
+                        
                     //Если есть, тогда дать список всех франшиз с этой областью
                     $pullFranchisees = \Yii::$app->db->createCommand("select * from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)

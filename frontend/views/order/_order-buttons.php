@@ -46,7 +46,7 @@ if ($order->isObsolete) {
             } else {
                 $actionButtons .= '<a href="#" class="btn btn-outline-success btnOrderAction" data-action="confirm"><i class="icon fa fa-check"></i> Получить</a>';
             }
-            $edit = true;
+            $canEdit = true;
             break;
         case Order::STATUS_DONE;
             $statusInfo .= '<a href="#" class="btn btn-success disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Выполнен</a>';

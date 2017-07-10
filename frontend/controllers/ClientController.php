@@ -469,8 +469,10 @@ class ClientController extends DefaultController {
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
                      *    
                      * */
+                    $article_create = 0;
                     foreach ($arrCatalog as $arrCatalogs) {
-                        $article = "".rand(10000, 99999);//trim($arrCatalogs['dataItem']['article']);
+                        $article_create++;
+                        $article = $article_create;//trim($arrCatalogs['dataItem']['article']);
                         $product = trim($arrCatalogs['dataItem']['product']);
                         $units = null;//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
@@ -829,6 +831,7 @@ class ClientController extends DefaultController {
                 return $result;
                 exit;
             }
+            $articleArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $base_goods_id = trim($arrCatalogs['dataItem']['base_goods_id']);
                 $goods_id = trim($arrCatalogs['dataItem']['goods_id']);
@@ -838,6 +841,7 @@ class ClientController extends DefaultController {
                 $price = trim($arrCatalogs['dataItem']['price']);
                 $ed = trim($arrCatalogs['dataItem']['ed']);
                 $note = trim($arrCatalogs['dataItem']['note']);
+                array_push($articleArray, (string)$article);
                 if (
                         !empty($base_goods_id) &&
                         !ArrayHelper::isIn($base_goods_id, $array_base_goods_id)
@@ -913,13 +917,9 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;
                 }
-                array_push($arr_check_double_article, $arrCatalogs['dataItem']['article']);
             }
-            if (array_diff(array_count_values($arr_check_double_article), array('1'))) {
-                $result = ['success' => false, 'alert' => [
-                        'class' => 'danger-fk',
-                        'title' => 'УПС! Ошибка',
-                        'body' => 'Артикул товара должен быть уникальным!']];
+            if(max(array_count_values($articleArray))>1){
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
                 return $result;
                 exit;
             }

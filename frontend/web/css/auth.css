@@ -6286,6 +6286,9 @@ label.error {
     .auth-sidebar__content {
         margin: 0;
     }
+    .success-message {
+        width: 708px;
+    }
 }
 .auth-sidebar__annotation {
     width: 256px;

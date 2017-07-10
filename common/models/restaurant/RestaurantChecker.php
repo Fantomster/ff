@@ -59,7 +59,7 @@ class RestaurantChecker
 	
 					} 
 				}else{
-                                        $managersIsActive = User::find()->where(['organization_id' => $userOrgId, 'status' =>1])->count();
+                                        $managersIsActive = User::find()->where('organization_id =' . $userOrgId . ' and status >0')->count();
 					if($managersIsActive==0){
 					//поставщик не авторизован
 					//добавляем к базовому каталогу поставщика каталог ресторана и создаем связь    

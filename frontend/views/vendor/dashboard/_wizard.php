@@ -13,11 +13,7 @@ $this->registerJs('
 
     document.onkeypress = stopRKey; 
 
-    $("#complete-form").on("submit", function() {
-        return false;
-    });
-
-    $(".wizard-off").on("click", function(e) {
+    $(document).on("click", ".wizard-off", function(e) {
         $.ajax({
             async: false,
             type: "POST",
@@ -25,7 +21,11 @@ $this->registerJs('
         });
     });
 
-    $("#complete-form").on("afterValidate", function(event, messages, errorAttributes) {
+    $(document).on("submit", "#complete-form", function() {
+        return false;
+    });
+
+    $(document).on("afterValidate", "#complete-form", function(event, messages, errorAttributes) {
         for (var input in messages) {
             if (messages[input] != "") {
                 $("#" + input).tooltip({title: messages[input], placement: "auto right", container: "body"});

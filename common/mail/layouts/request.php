@@ -161,7 +161,6 @@ use yii\helpers\Url;
         
                 <?= $content ?>                        
                 <!-- Email Footer : END -->
-		  <p style="color: #b7b7b7; font-family: 'Open-Sans', sans-serif; font-size: 11px; padding-bottom: 10px;">P.S. Вы всегда можете отписаться от рассылки, для этого достаточно нажать <a href="#" style="color: inherit;">здесь</a>. © 2016 F-Keeper — ООО «Онлайн Маркет»</p>
 		</div>
             <?php $this->endBody() ?>
     </body>

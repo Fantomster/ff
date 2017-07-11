@@ -503,7 +503,7 @@ class ClientController extends DefaultController {
                         $newProduct = new CatalogBaseGoods();
                         $newProduct->cat_id = $lastInsert_base_cat_id;
                         $newProduct->supp_org_id = $get_supp_org_id;
-                        $newProduct->article = $article;
+                        $newProduct->article = (string)$article;
                         $newProduct->product = $product;
                         $newProduct->units = $units;
                         $newProduct->price = $price;
@@ -547,13 +547,14 @@ class ClientController extends DefaultController {
                     $currentOrganization = $currentUser->organization;
                     $currentOrganization->step = Organization::STEP_OK;
                     $currentOrganization->save();
-
+                    
                     if (!empty($profile->phone)) {
                         $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
                         $target = $profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target);
                     }
+                    $transaction->commit();
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
                         return $result;
@@ -561,6 +562,7 @@ class ClientController extends DefaultController {
                         $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
                         return $result;
                     }
+                
                 } catch (Exception $e) {
                     $transaction->rollback();
                     $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];

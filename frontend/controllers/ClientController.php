@@ -387,7 +387,8 @@ class ClientController extends DefaultController {
                     return $check;
                 }
                 if ($check['eventType'] == 3 || $check['eventType'] == 5) {
-
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
                     if ($check['eventType'] == 5) {
                         /**
                          *
@@ -512,13 +513,13 @@ class ClientController extends DefaultController {
                         $newProduct->refresh();
                         
                         $lastInsert_base_goods_id = $newProduct->id;
-
-                        $sql = "insert into " . CatalogGoods::tableName() . "(
-				      `cat_id`,`base_goods_id`,`price`,`discount`,`created_at`) VALUES (
-				      $lastInsert_cat_id, $lastInsert_base_goods_id, '$price', 0,NOW())";
-                        $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
-                        \Yii::$app->db->createCommand($sql)->execute();
-
+                        
+                        $newGoods = new CatalogGoods();
+                        $newGoods->cat_id = $lastInsert_cat_id;
+                        $newGoods->base_goods_id = $lastInsert_base_goods_id;
+                        $newGoods->price = $price;
+                        $newGoods->save();
+                        $newGoods->refresh();
                     }
 
                     /**
@@ -557,6 +558,12 @@ class ClientController extends DefaultController {
                     } else {
                         $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
                         return $result;
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollback();
+                    $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
+                    return $result;
+                    exit;
                     }
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];

@@ -156,7 +156,7 @@ class OrderController extends DefaultController {
             $orders = $client->getCart();
             return $this->renderPartial('_pjax-cart', compact('orders'));
         } else {
-            return $this->redirect('/order/create'); 
+            return $this->redirect('/order/create');
         }
     }
 

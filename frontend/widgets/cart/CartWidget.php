@@ -42,7 +42,7 @@ class CartWidget extends Widget {
             clicked.data("url")
         )
         .done(function (result) {
-            $.pjax.reload("#side-cart", {url:"'.$cartUrl.'", replace: false});
+            $.pjax.reload("#side-cart", {url:"'.$cartUrl.'", replace: false, timeout:30000});
         });
         return false;
     });

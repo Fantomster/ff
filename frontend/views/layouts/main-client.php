@@ -16,7 +16,7 @@ use yii\helpers\Url;
     <!DOCTYPE html>
     <html lang="<?= Yii::$app->language ?>">
     <head>
-        <meta charset="<?= Yii::$app->charset ?>"/>
+        <meta http-equiv="content-type" content="text/html; charset=<?= Yii::$app->charset ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>

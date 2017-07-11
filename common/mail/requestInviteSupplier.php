@@ -78,39 +78,4 @@ use yii\helpers\Url;
 
 </table>
 <br />
-<table cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#ffffff" width="600" style="margin: auto; border: 5px solid #b7b7b7;" class="email-container">
-
-        <!-- Hero Image, Flush : BEGIN -->
-
-        <!-- Hero Image, Flush : END -->
-        <!-- 1 Column Text : BEGIN -->
-        <tr>
-                <td style="padding: 10px 30px; padding-top: 40px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 24px; mso-height-rule: exactly; line-height: 30px; color: #555;">
-                         Ваш личный менеджер
-                </td>
-        </tr>
-        <tr>
-                <td style="padding: 10px 30px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 14px; mso-height-rule: exactly; line-height: 20px; color: #555;">
-                        <img src="http://f-keeper.ru/img/request/welcome-zalina.png" alt="" />
-
-                </td>
-        </tr>
-        <tr>
-                <td style="padding: 10px 30px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 14px; mso-height-rule: exactly; line-height: 20px; color: #555;">
-                        Залина
-
-                </td>
-        </tr>
-        <tr>
-                <td style="padding: 10px 30px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 14px; mso-height-rule: exactly; line-height: 20px; color: #555;">
-                        <strong style="font-size: 20px;">+7 929 611 79 00</strong>
-                        <br><br>
-
-                </td>
-        </tr>
-        <!-- 1 Column Text : BEGIN -->
-        <!-- Background Image with Text : BEGIN -->
-
-
-</table>
 		

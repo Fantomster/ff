@@ -298,7 +298,7 @@ class ClientController extends DefaultController {
                 $user = new User();
             }
             $relationSuppRest = new RelationSuppRest();
-            $relationCategory = new RelationCategory();
+            //$relationCategory = new RelationCategory();
             $organization = new Organization();
             $profile = new Profile();
 
@@ -308,7 +308,7 @@ class ClientController extends DefaultController {
             $organization->load($post); //name
 
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
-            $relationCategory->load($post); //array category
+            //$relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
@@ -372,7 +372,7 @@ class ClientController extends DefaultController {
                 $email = $user->email;
                 $fio = $profile->full_name;
                 $org = $organization->name;
-                $categorys = $relationCategory['category_id'];
+                //$categorys = $relationCategory['category_id'];
 
                 if ($check['eventType'] == 1) {
                     return $check;
@@ -394,7 +394,7 @@ class ClientController extends DefaultController {
                          *
                          * Создаем нового поставщика и организацию
                          *    
-                         * */
+                         **/
                         $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                         $user->status = User::STATUS_UNCONFIRMED_EMAIL;
                         $user->save();
@@ -418,12 +418,13 @@ class ClientController extends DefaultController {
                      * 1) Делаем связь категорий поставщика
                      * 
                      * */
-                    if (!empty($categorys)) {
-                        foreach ($categorys as $arrCategorys) {
-                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                            \Yii::$app->db->createCommand($sql)->execute();
-                        }
-                    }
+//                    if (!empty($categorys)) {
+//                        foreach ($categorys as $arrCategorys) {
+//                            
+//                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+//                            \Yii::$app->db->createCommand($sql)->execute();
+//                        }
+//                    }
                     /**
                      *
                      * 2) Создаем базовый и каталог для ресторана
@@ -475,8 +476,9 @@ class ClientController extends DefaultController {
                         $article_create++;
                         $article = $article_create;//trim($arrCatalogs['dataItem']['article']);
                         $product = trim($arrCatalogs['dataItem']['product']);
-                        $units = null;//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
+                        $units = null;
 //                        if (substr($units, -3, 1) == '.') {
 //                            $units = explode('.', $units);
 //                            $last = array_pop($units);
@@ -593,7 +595,7 @@ class ClientController extends DefaultController {
             } else {
                 $user = new User();
             }
-            $relationCategory = new RelationCategory;
+            //$relationCategory = new RelationCategory;
             $organization = new Organization;
             $profile = new Profile();
 
@@ -1350,7 +1352,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
         $profile = new Profile();
-        $relationCategory = new RelationCategory();
+        //$relationCategory = new RelationCategory();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
 

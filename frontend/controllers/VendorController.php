@@ -1633,7 +1633,11 @@ class VendorController extends DefaultController {
                     ->sum('total_price');
         }
         //---header stats end
-
+        $filter_get_employee = yii\helpers\ArrayHelper::map(\common\models\Profile::find()->
+                                where(['in', 'user_id', \common\models\User::find()->
+                                    select('id')->
+                                    where(['organization_id' => $currentUser->organization_id])])->all(), 'user_id', 'full_name');
+        
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('rest_org_id')->
@@ -1663,7 +1667,7 @@ class VendorController extends DefaultController {
         }
 
         if (Yii::$app->request->isAjax) {
-
+            $filter_employee = trim(\Yii::$app->request->get('filter_employee'));
             $filter_status = trim(\Yii::$app->request->get('filter_status'));
             $filter_from_date = trim(\Yii::$app->request->get('filter_from_date'));
             $filter_to_date = trim(\Yii::$app->request->get('filter_to_date'));
@@ -1671,6 +1675,7 @@ class VendorController extends DefaultController {
 
             empty($filter_status) ? "" : $where .= " and status='" . $filter_status . "'";
             empty($filter_client) ? "" : $where .= " and client_id='" . $filter_client . "'";
+            empty($filter_employee) ? "" : $where .= " and accepted_by_id='" . $filter_employee . "'";
         }
         // Объем продаж чарт
         if (Yii::$app->user->can('manage')) {
@@ -1775,7 +1780,7 @@ class VendorController extends DefaultController {
         }
         $arr_clients_price = json_encode($arr_clients_price);
 
-        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price'
+        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price', 'filter_get_employee'
         ));
     }
 

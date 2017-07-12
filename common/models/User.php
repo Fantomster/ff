@@ -236,7 +236,9 @@ class User extends \amnah\yii2\user\models\User {
                 ->setTo($this->email)
                 ->setSubject($subject)
                 ->send();
-
+        
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
+                
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
         return $result;

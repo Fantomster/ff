@@ -18,6 +18,7 @@ use common\models\Role;
 use common\models\UserToken;
 use yii\filters\ContentNegotiator;
 use yii\web\Response;
+use common\models\UserFcmToken;
 
 
 /**
@@ -38,7 +39,7 @@ class UserController extends ActiveController {
 
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
-            'only' => ['auth','complete-registration'],
+            'only' => ['auth','complete-registration', 'refresh-fcm-token', 'send'],
             'authMethods' => [
                 [
                     'class' => HttpBasicAuth::className(),
@@ -220,8 +221,10 @@ class UserController extends ActiveController {
         $organization->scenario = "complete";
 
         $post = Yii::$app->request->post();
-        if ($profile->load($post, 'profile') && $organization->load($post, 'organization')) {
-            if ($profile->validate() && $organization->validate()) {
+        $profile->load($post, 'profile');
+        $organization->load($post, 'organization');
+        
+        if ($profile->validate() && $organization->validate()) {
                 $profile->save();
                 $organization->save();
                 return ['success' => 1];
@@ -230,10 +233,46 @@ class UserController extends ActiveController {
                     $profile_errors = $profile->getErrors();
                 else
                     $organization_errors = $organization->getErrors();
-                
-        }
 
         return compact("profile", "organization", "profile_errors","organization_errors");
     }
     
+    /**
+     * Forgot password
+     */
+    public function actionForgot()
+    {
+        // load post data and send email
+        $model =  new \api\modules\v1\modules\mobile\models\ForgotForm();
+        $model->email = Yii::$app->request->post('email');
+
+        if ($model->sendForgotEmail()) {
+            return ['success' => 1];
+        }
+        $email_errors =  $model->getErrors();   
+        return compact('email_errors');
+    }
+    
+    public function actionSend()
+    {
+        $user = Yii::$app->user->identity;
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($user->email, $user->id);
+    }
+    
+    public function actionRefreshFcmToken() {
+        $device_id = Yii::$app->request->post('device_id');
+        $token = Yii::$app->request->post('token');
+        
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
+        
+        if($fcm === null)
+        {
+            $fcm = new UserFcmToken();
+            $fcm->device_id = $device_id;
+        }
+        
+        $fcm->token = $token;
+
+        return ($fcm->save()) ? "success" : print_r($fcm->getErrors());
+    }
 }

@@ -525,6 +525,7 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportToXls($id) {
+        set_time_limit(90);
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
@@ -553,17 +554,26 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
+            $xlsArray = [];
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                 $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                 if (!in_array($row_article, $arr)) {
                     $newRows++;
+                    array_push($xlsArray, (string)$row_article);
                 }
             }
-            if ($newRows > 5000) {
+            
+            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                    . '<small>Вы пытаетесь загрузить каталог объемом больше '.CatalogBaseGoods::MAX_INSERT_FROM_XLS.' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
+            }
+            if(max(array_count_values($xlsArray))>1){
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer()); 
             }
             $transaction = Yii::$app->db->beginTransaction();
             try {

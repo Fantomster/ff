@@ -345,9 +345,11 @@ class VendorController extends DefaultController {
                 return $result;
                 exit;
             }
+            
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             $arrEd = \yii\helpers\ArrayHelper::getColumn(\common\models\MpEd::find()->all(), 'name');
+            $articleArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -355,6 +357,7 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
+                array_push($articleArray, (string)$article);
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
                     return $result;
@@ -392,6 +395,11 @@ class VendorController extends DefaultController {
                     return $result;
                     exit;
                 }
+            }
+            if(max(array_count_values($articleArray))>1){
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
+                return $result;
+                exit;
             }
             $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
             \Yii::$app->db->createCommand($sql)->execute();
@@ -525,6 +533,7 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportToXls($id) {
+        set_time_limit(90);
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
@@ -553,17 +562,26 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
+            $xlsArray = [];
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                 $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                 if (!in_array($row_article, $arr)) {
                     $newRows++;
+                    array_push($xlsArray, (string)$row_article);
                 }
             }
-            if ($newRows > 5000) {
+            
+            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                    . '<small>Вы пытаетесь загрузить каталог объемом больше '.CatalogBaseGoods::MAX_INSERT_FROM_XLS.' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
+            }
+            if(max(array_count_values($xlsArray))>1){
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer()); 
             }
             $transaction = Yii::$app->db->beginTransaction();
             try {
@@ -642,7 +660,6 @@ class VendorController extends DefaultController {
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
 
-
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
@@ -665,7 +682,17 @@ class VendorController extends DefaultController {
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
-
+            $xlsArray = [];
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                array_push($xlsArray, $row_article);
+            }
+            if(max(array_count_values($xlsArray))>1){
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer()); 
+            }
             $transaction = Yii::$app->db->beginTransaction();
             try {
 
@@ -881,7 +908,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар добавлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
@@ -889,7 +916,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->market_place = 0;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар добавлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }
@@ -922,7 +949,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар обновлен!';
 
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
@@ -932,7 +959,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
 
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }

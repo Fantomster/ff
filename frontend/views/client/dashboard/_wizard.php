@@ -13,12 +13,12 @@ $this->registerJs('
 
     document.onkeypress = stopRKey; 
 
-    $(".next").on("click", function(e) {
+    $(document).on("click", ".next", function(e) {
         e.preventDefault();
         $(".data-modal .modal-content").slick("slickNext");
     });
     
-    $(".wizard-off").on("click", function(e) {
+    $(document).on("click", ".wizard-off", function(e) {
         $.ajax({
             async: false,
             type: "POST",
@@ -26,11 +26,11 @@ $this->registerJs('
         });
     });
 
-    $("#complete-form").on("submit", function() {
+    $(document).on("submit", "#complete-form", function() {
         return false;
     });
 
-    $("#complete-form").on("afterValidate", function(event, messages, errorAttributes) {
+    $(document).on("afterValidate", "#complete-form", function(event, messages, errorAttributes) {
         for (var input in messages) {
             if (messages[input] != "") {
                 $("#" + input).tooltip({title: messages[input], placement: "auto right", container: "body"});

@@ -808,14 +808,14 @@ class OrderController extends DefaultController {
                     $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order);
                 }
             }
+            $order->calculateTotalPrice();
+            $order->save();
+        
+//        if ($orderChanged) {
+            return $this->redirect(["order/view", "id" => $order->id]);
+  //      }
         }
 
-        $order->calculateTotalPrice();
-        $order->save();
-        
-        if ($orderChanged) {
-            return $this->redirect(["order/view", "id" => $order->id]);
-        }
         
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();

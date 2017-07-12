@@ -6282,6 +6282,14 @@ label.error {
     -moz-transition: all 0.3s ease;
     transition: all 0.3s ease;
 }
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .auth-sidebar__content {
+        margin: 0;
+    }
+    .success-message {
+        width: 708px;
+    }
+}
 .auth-sidebar__annotation {
     width: 256px;
     margin-left: auto;

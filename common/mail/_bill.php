@@ -61,4 +61,3 @@
         <p style="width:600px;color: #999C9E;margin-top: 150px;display: block;text-align: left;margin-top: 10px;">Подпись: ______________ &nbsp;Дата: _________________</p>
     </div>
 </div>
-</div>

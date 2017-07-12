@@ -298,7 +298,7 @@ class ClientController extends DefaultController {
                 $user = new User();
             }
             $relationSuppRest = new RelationSuppRest();
-            $relationCategory = new RelationCategory();
+            //$relationCategory = new RelationCategory();
             $organization = new Organization();
             $profile = new Profile();
 
@@ -308,7 +308,7 @@ class ClientController extends DefaultController {
             $organization->load($post); //name
 
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
-            $relationCategory->load($post); //array category
+            //$relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
@@ -372,7 +372,7 @@ class ClientController extends DefaultController {
                 $email = $user->email;
                 $fio = $profile->full_name;
                 $org = $organization->name;
-                $categorys = $relationCategory['category_id'];
+                //$categorys = $relationCategory['category_id'];
 
                 if ($check['eventType'] == 1) {
                     return $check;
@@ -387,13 +387,14 @@ class ClientController extends DefaultController {
                     return $check;
                 }
                 if ($check['eventType'] == 3 || $check['eventType'] == 5) {
-
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
                     if ($check['eventType'] == 5) {
                         /**
                          *
                          * Создаем нового поставщика и организацию
                          *    
-                         * */
+                         **/
                         $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                         $user->status = User::STATUS_UNCONFIRMED_EMAIL;
                         $user->save();
@@ -417,12 +418,13 @@ class ClientController extends DefaultController {
                      * 1) Делаем связь категорий поставщика
                      * 
                      * */
-                    if (!empty($categorys)) {
-                        foreach ($categorys as $arrCategorys) {
-                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                            \Yii::$app->db->createCommand($sql)->execute();
-                        }
-                    }
+//                    if (!empty($categorys)) {
+//                        foreach ($categorys as $arrCategorys) {
+//                            
+//                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+//                            \Yii::$app->db->createCommand($sql)->execute();
+//                        }
+//                    }
                     /**
                      *
                      * 2) Создаем базовый и каталог для ресторана
@@ -469,11 +471,14 @@ class ClientController extends DefaultController {
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
                      *    
                      * */
+                    $article_create = 0;
                     foreach ($arrCatalog as $arrCatalogs) {
-                        $article = "".rand(10000, 99999);//trim($arrCatalogs['dataItem']['article']);
+                        $article_create++;
+                        $article = $article_create;//trim($arrCatalogs['dataItem']['article']);
                         $product = trim($arrCatalogs['dataItem']['product']);
-                        $units = null;//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
+                        $units = null;
 //                        if (substr($units, -3, 1) == '.') {
 //                            $units = explode('.', $units);
 //                            $last = array_pop($units);
@@ -498,7 +503,7 @@ class ClientController extends DefaultController {
                         $newProduct = new CatalogBaseGoods();
                         $newProduct->cat_id = $lastInsert_base_cat_id;
                         $newProduct->supp_org_id = $get_supp_org_id;
-                        $newProduct->article = $article;
+                        $newProduct->article = (string)$article;
                         $newProduct->product = $product;
                         $newProduct->units = $units;
                         $newProduct->price = $price;
@@ -510,13 +515,13 @@ class ClientController extends DefaultController {
                         $newProduct->refresh();
                         
                         $lastInsert_base_goods_id = $newProduct->id;
-
-                        $sql = "insert into " . CatalogGoods::tableName() . "(
-				      `cat_id`,`base_goods_id`,`price`,`discount`,`created_at`) VALUES (
-				      $lastInsert_cat_id, $lastInsert_base_goods_id, '$price', 0,NOW())";
-                        $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
-                        \Yii::$app->db->createCommand($sql)->execute();
-
+                        
+                        $newGoods = new CatalogGoods();
+                        $newGoods->cat_id = $lastInsert_cat_id;
+                        $newGoods->base_goods_id = $lastInsert_base_goods_id;
+                        $newGoods->price = $price;
+                        $newGoods->save();
+                        $newGoods->refresh();
                     }
 
                     /**
@@ -542,19 +547,27 @@ class ClientController extends DefaultController {
                     $currentOrganization = $currentUser->organization;
                     $currentOrganization->step = Organization::STEP_OK;
                     $currentOrganization->save();
-
+                    
                     if (!empty($profile->phone)) {
                         $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
                         $target = $profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target);
                     }
+                    $transaction->commit();
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
                         return $result;
                     } else {
                         $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
                         return $result;
+                    }
+                
+                } catch (Exception $e) {
+                    $transaction->rollback();
+                    $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
+                    return $result;
+                    exit;
                     }
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];
@@ -584,7 +597,7 @@ class ClientController extends DefaultController {
             } else {
                 $user = new User();
             }
-            $relationCategory = new RelationCategory;
+            //$relationCategory = new RelationCategory;
             $organization = new Organization;
             $profile = new Profile();
 
@@ -829,6 +842,7 @@ class ClientController extends DefaultController {
                 return $result;
                 exit;
             }
+            $articleArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $base_goods_id = trim($arrCatalogs['dataItem']['base_goods_id']);
                 $goods_id = trim($arrCatalogs['dataItem']['goods_id']);
@@ -838,6 +852,7 @@ class ClientController extends DefaultController {
                 $price = trim($arrCatalogs['dataItem']['price']);
                 $ed = trim($arrCatalogs['dataItem']['ed']);
                 $note = trim($arrCatalogs['dataItem']['note']);
+                array_push($articleArray, (string)$article);
                 if (
                         !empty($base_goods_id) &&
                         !ArrayHelper::isIn($base_goods_id, $array_base_goods_id)
@@ -913,13 +928,9 @@ class ClientController extends DefaultController {
                     return $result;
                     exit;
                 }
-                array_push($arr_check_double_article, $arrCatalogs['dataItem']['article']);
             }
-            if (array_diff(array_count_values($arr_check_double_article), array('1'))) {
-                $result = ['success' => false, 'alert' => [
-                        'class' => 'danger-fk',
-                        'title' => 'УПС! Ошибка',
-                        'body' => 'Артикул товара должен быть уникальным!']];
+            if(max(array_count_values($articleArray))>1){
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
                 return $result;
                 exit;
             }
@@ -1343,7 +1354,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
         $profile = new Profile();
-        $relationCategory = new RelationCategory();
+        //$relationCategory = new RelationCategory();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
 

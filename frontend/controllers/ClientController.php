@@ -387,13 +387,14 @@ class ClientController extends DefaultController {
                     return $check;
                 }
                 if ($check['eventType'] == 3 || $check['eventType'] == 5) {
-
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
                     if ($check['eventType'] == 5) {
                         /**
                          *
                          * Создаем нового поставщика и организацию
                          *    
-                         * */
+                         **/
                         $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
                         $user->status = User::STATUS_UNCONFIRMED_EMAIL;
                         $user->save();
@@ -417,12 +418,13 @@ class ClientController extends DefaultController {
                      * 1) Делаем связь категорий поставщика
                      * 
                      * */
-                    if (!empty($categorys)) {
-                        foreach ($categorys as $arrCategorys) {
-                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-                            \Yii::$app->db->createCommand($sql)->execute();
-                        }
-                    }
+//                    if (!empty($categorys)) {
+//                        foreach ($categorys as $arrCategorys) {
+//                            
+//                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+//                            \Yii::$app->db->createCommand($sql)->execute();
+//                        }
+//                    }
                     /**
                      *
                      * 2) Создаем базовый и каталог для ресторана
@@ -469,11 +471,14 @@ class ClientController extends DefaultController {
                      * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
                      *    
                      * */
+                    $article_create = 0;
                     foreach ($arrCatalog as $arrCatalogs) {
-                        $article = "".rand(10000, 99999);//trim($arrCatalogs['dataItem']['article']);
+                        $article_create++;
+                        $article = $article_create;//trim($arrCatalogs['dataItem']['article']);
                         $product = trim($arrCatalogs['dataItem']['product']);
-                        $units = null;//htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                         $units = str_replace(',', '.', $units);
+                        $units = null;
 //                        if (substr($units, -3, 1) == '.') {
 //                            $units = explode('.', $units);
 //                            $last = array_pop($units);
@@ -498,7 +503,7 @@ class ClientController extends DefaultController {
                         $newProduct = new CatalogBaseGoods();
                         $newProduct->cat_id = $lastInsert_base_cat_id;
                         $newProduct->supp_org_id = $get_supp_org_id;
-                        $newProduct->article = $article;
+                        $newProduct->article = (string)$article;
                         $newProduct->product = $product;
                         $newProduct->units = $units;
                         $newProduct->price = $price;
@@ -510,13 +515,13 @@ class ClientController extends DefaultController {
                         $newProduct->refresh();
                         
                         $lastInsert_base_goods_id = $newProduct->id;
-
-                        $sql = "insert into " . CatalogGoods::tableName() . "(
-				      `cat_id`,`base_goods_id`,`price`,`discount`,`created_at`) VALUES (
-				      $lastInsert_cat_id, $lastInsert_base_goods_id, '$price', 0,NOW())";
-                        $lastInsert_goods_id = Yii::$app->db->getLastInsertID();
-                        \Yii::$app->db->createCommand($sql)->execute();
-
+                        
+                        $newGoods = new CatalogGoods();
+                        $newGoods->cat_id = $lastInsert_cat_id;
+                        $newGoods->base_goods_id = $lastInsert_base_goods_id;
+                        $newGoods->price = $price;
+                        $newGoods->save();
+                        $newGoods->refresh();
                     }
 
                     /**
@@ -542,19 +547,210 @@ class ClientController extends DefaultController {
                     $currentOrganization = $currentUser->organization;
                     $currentOrganization->step = Organization::STEP_OK;
                     $currentOrganization->save();
-
+                    
                     if (!empty($profile->phone)) {
                         $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
                         $target = $profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target);
                     }
+                    $transaction->commit();
                     if ($check['eventType'] == 5) {
                         $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
                         return $result;
                     } else {
                         $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
                         return $result;
+                    }
+                
+                } catch (Exception $e) {
+                    $transaction->rollback();
+                    $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
+                    return $result;
+                    exit;
+                    }
+                }if ($check['eventType'] == 3 || $check['eventType'] == 5) {
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                    if ($check['eventType'] == 5) {
+                        /**
+                         *
+                         * Создаем нового поставщика и организацию
+                         *    
+                         **/
+                        $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
+                        $user->status = User::STATUS_UNCONFIRMED_EMAIL;
+                        $user->save();
+                        $profile->setUser($user->id);
+                        $profile->sms_allow = Profile::SMS_ALLOW;
+                        $profile->save();
+                        $organization->save();
+                        $user->setOrganization($organization)->save();
+                        $get_supp_org_id = $organization->id;
+                        $currentOrganization = $currentUser->organization;
+                        if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                            $currentOrganization->step = Organization::STEP_OK;
+                            $currentOrganization->save();
+                        }
+                    } else {
+                        //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
+                        $get_supp_org_id = $check['org_id'];
+                    }
+                    /**
+                     *
+                     * 1) Делаем связь категорий поставщика
+                     * 
+                     * */
+//                    if (!empty($categorys)) {
+//                        foreach ($categorys as $arrCategorys) {
+//                            
+//                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+//                            \Yii::$app->db->createCommand($sql)->execute();
+//                        }
+//                    }
+                    /**
+                     *
+                     * 2) Создаем базовый и каталог для ресторана
+                     *    
+                     * */
+                    if ($check['eventType'] == 5) {
+                        $newBaseCatalog = new Catalog();
+                        $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                        $newBaseCatalog->name = 'Главный каталог';
+                        $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                        $newBaseCatalog->status = Catalog::STATUS_ON;
+                        $newBaseCatalog->save();
+                        $newBaseCatalog->refresh();
+                        $lastInsert_base_cat_id = $newBaseCatalog->id;
+                    } else {
+                        //Поставщик зарегистрирован, но не авторизован
+                        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+                        if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                            $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
+                            $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+                        } else {
+                            $newBaseCatalog = new Catalog();
+                            $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                            $newBaseCatalog->name = 'Главный каталог';
+                            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                            $newBaseCatalog->status = Catalog::STATUS_ON;
+                            $newBaseCatalog->save();
+                            $newBaseCatalog->refresh();
+                            $lastInsert_base_cat_id = $newBaseCatalog->id;
+                        }
+                    }
+
+                    $newCatalog = new Catalog();
+                    $newCatalog->supp_org_id = $get_supp_org_id;
+                    $newCatalog->name = $currentUser->organization->name;
+                    $newCatalog->type = Catalog::CATALOG;
+                    $newCatalog->status = Catalog::STATUS_ON;
+                    $newCatalog->save();
+                    $newCatalog->refresh();
+
+                    $lastInsert_cat_id = $newCatalog->id;
+                    /**
+                     *
+                     * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
+                     *    
+                     * */
+                    $article_create = 0;
+                    foreach ($arrCatalog as $arrCatalogs) {
+                        $article_create++;
+                        $article = $article_create;//trim($arrCatalogs['dataItem']['article']);
+                        $product = trim($arrCatalogs['dataItem']['product']);
+                        //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                        $units = str_replace(',', '.', $units);
+                        $units = null;
+//                        if (substr($units, -3, 1) == '.') {
+//                            $units = explode('.', $units);
+//                            $last = array_pop($units);
+//                            $units = join($units, '') . '.' . $last;
+//                        } else {
+//                            $units = str_replace('.', '', $units);
+//                        }
+                        if (empty($units) || $units < 0) {
+                            $units = null;
+                        }
+                        $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                        //$note = trim($arrCatalogs['dataItem']['note']);
+                        $ed = trim($arrCatalogs['dataItem']['ed']);
+                        $price = str_replace(',', '.', $price);
+                        if (substr($price, -3, 1) == '.') {
+                            $price = explode('.', $price);
+                            $last = array_pop($price);
+                            $price = join($price, '') . '.' . $last;
+                        } else {
+                            $price = str_replace('.', '', $price);
+                        }
+                        $newProduct = new CatalogBaseGoods();
+                        $newProduct->cat_id = $lastInsert_base_cat_id;
+                        $newProduct->supp_org_id = $get_supp_org_id;
+                        $newProduct->article = (string)$article;
+                        $newProduct->product = $product;
+                        $newProduct->units = $units;
+                        $newProduct->price = $price;
+                        $newProduct->ed = $ed;
+                        $newProduct->status = CatalogBaseGoods::STATUS_ON;
+                        $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+                        $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
+                        $newProduct->save();
+                        $newProduct->refresh();
+                        
+                        $lastInsert_base_goods_id = $newProduct->id;
+                        
+                        $newGoods = new CatalogGoods();
+                        $newGoods->cat_id = $lastInsert_cat_id;
+                        $newGoods->base_goods_id = $lastInsert_base_goods_id;
+                        $newGoods->price = $price;
+                        $newGoods->save();
+                        $newGoods->refresh();
+                    }
+
+                    /**
+                     *  
+                     * 5) Связь ресторана и поставщика
+                     *     
+                     * */
+                    $relationSuppRest->rest_org_id = $currentUser->organization_id;
+                    $relationSuppRest->supp_org_id = $get_supp_org_id;
+                    $relationSuppRest->cat_id = $lastInsert_cat_id;
+                    $relationSuppRest->status = 1;
+                    $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
+                    if (isset($relationSuppRest->uploaded_catalog)) {
+                        $relationSuppRest->uploaded_processed = 0;
+                    }
+                    $relationSuppRest->save();
+                    /**
+                     *
+                     * Отправка почты
+                     * 
+                     * */
+                    $currentUser->sendInviteToVendor($user);
+                    $currentOrganization = $currentUser->organization;
+                    $currentOrganization->step = Organization::STEP_OK;
+                    $currentOrganization->save();
+                    
+                    if (!empty($profile->phone)) {
+                        $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                        $target = $profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target);
+                    }
+                    $transaction->commit();
+                    if ($check['eventType'] == 5) {
+                        $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
+                        return $result;
+                    } else {
+                        $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
+                        return $result;
+                    }
+                
+                } catch (Exception $e) {
+                    $transaction->rollback();
+                    $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
+                    return $result;
+                    exit;
                     }
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];

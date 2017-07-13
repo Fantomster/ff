@@ -5,6 +5,20 @@ use yii\web\View;
 use yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
+
+$franchiseeManager = $user->organization->getFranchiseeManagerInfo();
+if($franchiseeManager && $franchiseeManager->phone_manager){
+    if($franchiseeManager->additional_number_manager){
+      $phoneUrl = $franchiseeManager->phone_manager . "p" . $franchiseeManager->additional_number_manager; 
+      $phone = $franchiseeManager->phone_manager . " доб. " . $franchiseeManager->additional_number_manager;
+    }else{
+      $phoneUrl = $franchiseeManager->phone_manager;
+      $phone = $franchiseeManager->phone_manager;
+    }
+}else{
+    $phoneUrl = "+7-499-404-10-18p202";
+    $phone = "+7-499-404-10-18 доб. 202";
+}
 $manager_id = Yii::$app->user->can('manage') ? null : $user->id;
 $newOrdersCount = $user->organization->getNewOrdersCount($manager_id);
 $newClientCount = Yii::$app->user->can('manage') ? $user->organization->getNewClientCount() : 0;
@@ -76,7 +90,7 @@ $menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;">
-                <p><a href="tel:+74994041018p202"><i class="fa fa-phone"></i> +7-499-404-10-18 доб.202</a></p>
+                <p><a href="<?=$phoneUrl?>"><i class="fa fa-phone"></i> <?=$phone?></a></p>
             </div>
         </ul>
     </section>

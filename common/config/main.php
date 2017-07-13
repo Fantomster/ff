@@ -39,6 +39,14 @@ return [
         ],
         'mailer' => [
             'viewPath' => '@common/mail',
+            'class' => 'yashop\ses\Mailer',
+            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
+            'secret_key' => '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',
+            'host' => 'email.eu-west-1.amazonaws.com',
+            'messageConfig' => [
+                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+                'charset' => 'UTF-8',
+            ],
         ],
         'mailqueue' => [
             'class' => 'nterms\mailqueue\MailQueue',
@@ -76,7 +84,6 @@ return [
                 'forgot' => 'user/forgot',
                 'resend' => 'user/resend',
                 'reset' => 'user/reset',
-
             ],
         ],
         'assetManager' => [
@@ -116,13 +123,10 @@ return [
         'clientintegr' => [
             'class' => 'frontend\modules\clientintegr\Module',
             'layout' => '@frontend/views/layouts/main-client.php',
-        ],  
+        ],
         'vendorintegr' => [
             'class' => 'frontend\modules\vendorintegr\Module',
             'layout' => '@frontend/views/layouts/main-vendor.php',
-        ],  
-
-   
-
+        ],
     ],
 ];

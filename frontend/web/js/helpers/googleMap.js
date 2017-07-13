@@ -22,6 +22,25 @@ function initMap() {
     var autocomplete = new google.maps.places.Autocomplete(input);
     autocomplete.bindTo('bounds', map);
 
+    autocomplete.addListener('place_changed', function () {
+        var place = autocomplete.getPlace();
+        var bounds = new google.maps.LatLngBounds();
+        if (!place.geometry) {
+            console.log('Returned place contains no geometry');
+            return;
+        }
+        if (place.geometry.viewport) {
+            bounds.union(place.geometry.viewport);
+        } else {
+            bounds.extend(place.geometry.location);
+        }
+
+        marker.setPosition(place.geometry.location);
+        changeFields(fields, [place]);
+        map.fitBounds(bounds);
+        map.setZoom(17);
+        map.panTo(place.geometry.location);
+    });
 
     searchBox.addListener('places_changed', function () {
         var places = searchBox.getPlaces();

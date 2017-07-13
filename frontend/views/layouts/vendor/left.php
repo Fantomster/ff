@@ -21,7 +21,7 @@ $menuItems = [
     ['label' => 'Мои каталоги', 'icon' => 'list-alt', 'url' => ['/vendor/catalogs'], 'options' => ['class' => 'hidden-xs']],
 //                        ['label' => 'Сообщения' . Html::tag('span', 4, ['class' => 'label label-danger pull-right']), 'icon' => 'fa fa-envelope', 'url' => ['vendor/messages']],
     ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'http://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
-    ['label' => 'Заявки<sub class="sub-new">БЕТА</sub>', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
+    ['label' => 'Заявки', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
     [
         'label' => 'Мои клиенты',
         'icon' => 'users',

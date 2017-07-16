@@ -53,7 +53,7 @@ $this->registerCss('
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
                     <h5 class="modal-title">
-                        <b class="client-manager-name"></b>, укажите товары, который Вы покупаете у поставщика <b class="supplier-org-name"></b>
+                        <b class="client-manager-name"></b>, укажите товары, которые Вы покупаете у поставщика <b class="supplier-org-name"></b>
                     </h5>
                 </div>
             </div>

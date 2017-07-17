@@ -533,9 +533,15 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportToXls($id) {
-        set_time_limit(90);
+        set_time_limit(180);
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
+        $vendor = \common\models\Catalog::find()->where([
+                    'id' => $id,
+                    'type' => \common\models\Catalog::BASE_CATALOG
+                ])
+                ->one()
+        ->vendor;
         if (Yii::$app->request->isPost) {
             $unique = 'article'; //уникальное поле
             $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
@@ -585,6 +591,9 @@ class VendorController extends DefaultController {
             }
             $transaction = Yii::$app->db->beginTransaction();
             try {
+                $data_insert = [];
+                $data_update = "";
+                $cbgTable = CatalogBaseGoods::tableName();
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                     $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                     $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
@@ -597,48 +606,41 @@ class VendorController extends DefaultController {
                             $row_units = 0;
                         }
                         if (in_array($row_article, $arr)) {
-                            $sql = "update {{%catalog_base_goods}} set "
-                                    . "article=:article,"
-                                    . "product=:product,"
-                                    . "units=:units,"
-                                    . "price=:price,"
-                                    . "ed=:ed,"
-                                    . "note=:note,"
-                                    . "es_status=1"
-                                    . " where cat_id=$id and article='{$row_article}' ";
-                            $command = \Yii::$app->db->createCommand($sql);
-                            $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
-                            $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
-                            $command->bindParam(":units", $row_units);
-                            $command->bindParam(":price", $row_price);
-                            $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
-                            $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
-                            $command->execute();
+                            
+                            $data_update .= "UPDATE $cbgTable set 
+                                `cat_id` = $id, 
+                                `supp_org_id` = $vendor->id, 
+                                `article` = '$row_article',
+                                `product` = '$row_product',
+                                `units` = $row_units,
+                                `price` = $row_price,
+                                `ed` = '$row_ed',
+                                `note` = '$row_note' 
+                                 where cat_id=$id and article='{$row_article}; \n'";
                         } else {
-                            $sql = "insert into {{%catalog_base_goods}}" .
-                                    "(`cat_id`,`supp_org_id`,`article`,`product`,"
-                                    . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
-                                    . ":cat_id,"
-                                    . $currentUser->organization_id . ","
-                                    . ":article,"
-                                    . ":product,"
-                                    . ":units,"
-                                    . ":price,"
-                                    . ":ed,"
-                                    . ":note,"
-                                    . CatalogBaseGoods::STATUS_ON . ","
-                                    . "NOW())";
-                            $command = \Yii::$app->db->createCommand($sql);
-                            $command->bindParam(":cat_id", $id, \PDO::PARAM_INT);
-                            $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
-                            $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
-                            $command->bindParam(":units", $row_units);
-                            $command->bindParam(":price", $row_price);
-                            $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
-                            $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
-                            $command->execute();
+                            $data_insert[] = [
+                                $id, 
+                                $vendor->id, 
+                                $row_article,
+                                $row_product,
+                                $row_units,
+                                $row_price,
+                                $row_ed,
+                                $row_note,
+                                CatalogBaseGoods::STATUS_ON
+                            ];
                         }
                     }
+                }
+                if(!empty($data_insert)){
+                    $db = Yii::$app->db;
+                    $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
+                        'cat_id','supp_org_id','article','product','units','price','ed','note','status'
+                        ], $data_insert);
+                    Yii::$app->db->createCommand($sql)->execute();
+                }
+                if(!empty($data_update)){
+                    Yii::$app->db->createCommand($data_update)->execute();
                 }
                 $transaction->commit();
                 unlink($path);

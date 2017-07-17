@@ -6,30 +6,40 @@ use yii\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Agent Requests';
+$this->title = 'Ваши заявки на регистрацию организаций';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="agent-request-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <p>
-        <?= Html::a('Create Agent Request', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
-    <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
+<section class="content-header">
+    <h1>
+        <i class="fa fa-home"></i> Ваши заявки на регистрацию организаций
+    </h1>
+</section>
+<section class="content">
+    <div class="row hidden-xs">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <?= Html::a('Создать заявку', ['create'], ['class' => 'btn btn-success']) ?>
+                </div>
+                <div class="box-body">
+                    <?=
+                    GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'columns' => [
+                            ['class' => 'yii\grid\SerialColumn'],
+                            'id',
 //            'agent_id',
-            'target_email:email',
-            'comment',
-            //'is_processed',
-             'created_at',
-             'updated_at',
-
-            ['class' => 'yii\grid\ActionColumn'],
-        ],
-    ]); ?>
-</div>
+                            'target_email:email',
+                            'comment',
+                            //'is_processed',
+                            'created_at',
+                            'updated_at',
+                            ['class' => 'yii\grid\ActionColumn'],
+                        ],
+                    ]);
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

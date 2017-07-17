@@ -27,6 +27,9 @@ class DefaultController extends Controller {
     public function beforeAction($action) {
         if (!Yii::$app->user->isGuest) {
             $this->loadCurrentUser();
+            if ($this->currentUser->role_id === \common\models\Role::ROLE_FRANCHISEE_AGENT) {
+                return $this->redirect(['agent-request/index']);
+            }
         }
         if (!parent::beforeAction($action)) {
             return false;

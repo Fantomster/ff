@@ -5,20 +5,26 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\AgentRequest */
 
-$this->title = 'Update Agent Request: ' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Agent Requests', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->title = 'Редактировать заявку №' . $model->id;
 ?>
-<div class="agent-request-update">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-
-    <?=
-    $this->render('_form', [
-        'model' => $model,
-        'attachment' => $attachment,
-    ])
-    ?>
-
-</div>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-home"></i> Редактировать заявку
+    </h1>
+</section>
+<section class="content">
+    <div class="row hidden-xs">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-body with-border">
+                    <?=
+                    $this->render('_form', [
+                        'model' => $model,
+                        'attachment' => $attachment,
+                    ])
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

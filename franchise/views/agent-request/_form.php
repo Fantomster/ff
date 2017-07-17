@@ -16,11 +16,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'comment')->textInput(['maxlength' => true]) ?>
 
-    Приложения:
-    <?php foreach($model->attachments as $attachment) { ?>
-    <a href="<?= $attachment->getUploadUrl("attachment") ?>"><?= $attachment->attachment ?></a>
-    <?php } ?>
-    
+    <div style="padding-top: 10px;padding-bottom: 10px;">Приложения:
+        <?php foreach ($model->attachments as $attachment) { ?>
+            <a href="<?= $attachment->getUploadUrl("attachment") ?>"><?= $attachment->attachment ?></a>
+        <?php } ?>
+    </div>
+
     <?= $form->field($attachment, 'attachment')->fileInput(['maxlength' => true]) ?>
 
     <div class="form-group">

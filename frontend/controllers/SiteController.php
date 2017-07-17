@@ -253,12 +253,31 @@ class SiteController extends Controller {
                 'EMAIL', //Email. Варианты: WORK, PRIV, OTHER
                     )
             );
-            //Проставляем id этих полей из базы амо
-            foreach ($amoConactsFields as $afield) {
-                if (isset($sFields[$afield['code']])) {
-                    $sFields[$afield['code']] = $afield['id'];
-                }
+            
+            //// Проверка на уже существующий контакт
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_email;    
+            
+            $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
+            #Устанавливаем необходимые опции для сеанса cURL
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
+            curl_setopt($curl, CURLOPT_URL, $link);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../../franchise/cookie/cookie.txt');
+            curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../../franchise/cookie/cookie.txt');
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+
+            $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
+            $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            curl_close($curl);
+            if (!$this->CheckCurlResponse($code)) {
+                return false;
             }
+            
+            
+            
+            
             //ДОБАВЛЯЕМ СДЕЛКУ
             $leads['request']['leads']['add'] = array(
                 array(
@@ -301,7 +320,7 @@ class SiteController extends Controller {
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
             $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
+            curl_close($curl);
             $Response = json_decode($out, true);
 
             if (is_array($Response['response']['leads']['add']))
@@ -316,7 +335,7 @@ class SiteController extends Controller {
                 'responsible_user_id' => $responsible_user_id, //id ответственного
                 'custom_fields' => array(
                     array(
-                        'id' => $sFields['PHONE'],
+                        'id' => 58054,
                         'values' => array(
                             array(
                                 'value' => $contact_phone,
@@ -325,7 +344,7 @@ class SiteController extends Controller {
                         )
                     ),
                     array(
-                        'id' => $sFields['EMAIL'],
+                        'id' => 58056,
                         'values' => array(
                             array(
                                 'value' => $contact_email,
@@ -363,9 +382,9 @@ class SiteController extends Controller {
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
             $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            curl_close($curl);
             if (!$this->CheckCurlResponse($code)) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return ['result' => 'error'];
+                return;
             }
             $Response = json_decode($out, true);
            
@@ -385,8 +404,8 @@ class SiteController extends Controller {
         try {
             #Если код ответа не равен 200 или 204 - возвращаем сообщение об ошибке
             if ($code != 200 && $code != 204)
-                throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error', $code);
-        } catch (Exception $E) {
+                throw new \yii\base\Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error', $code);
+        } catch (\yii\base\Exception $E) {
             return false;
         }
         return true;

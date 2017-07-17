@@ -65,7 +65,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
             ])->label(false);
             ?>
 
-            <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType)) ?>
+            <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown()) ?>
 
         </div>
         <div class="modal-footer">

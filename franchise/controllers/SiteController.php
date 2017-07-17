@@ -344,7 +344,7 @@ class SiteController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if ($user->load($post)) {
+            if ($user->load($post) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
@@ -381,7 +381,7 @@ class SiteController extends DefaultController {
                     $message = 'Может воздержимся от удаления себя?';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
-                if ($user && ($usersCount > 1)) {
+                if ($user && ($usersCount > 1) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
                     $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save() && $user->franchiseeUser->delete()) {

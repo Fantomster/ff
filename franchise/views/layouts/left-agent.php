@@ -1,8 +1,21 @@
-<?php
+<aside class="main-sidebar">
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+    <section class="sidebar">
+        <?php if (!Yii::$app->user->isGuest) { ?>
+            <?=
+            dmstr\widgets\Menu::widget(
+                    [
+                        'options' => ['class' => 'sidebar-menu'],
+                        'encodeLabels' => false,
+                        'items' => [
+                            ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
+                            ['label' => 'Список запросов', 'icon' => 'life-buoy', 'url' => ['agent-request/index'], 'options' => ['class' => 'hidden-xs']],
+                            ['label' => 'Клиенты', 'icon' => 'users', 'url' => ['organization/agent'], 'options' => ['class' => 'hidden-xs']],
+                        ],
+                    ]
+            )
+            ?>
+<?php } ?>
+    </section>
 
+</aside>

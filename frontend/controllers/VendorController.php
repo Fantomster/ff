@@ -616,7 +616,7 @@ class VendorController extends DefaultController {
                                 `price` = $row_price,
                                 `ed` = '$row_ed',
                                 `note` = '$row_note' 
-                                 where cat_id=$id and article='{$row_article}; \n'";
+                                 where cat_id=$id and article='{$row_article}'; \n";
                         } else {
                             $data_insert[] = [
                                 $id, 

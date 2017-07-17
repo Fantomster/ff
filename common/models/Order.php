@@ -261,7 +261,7 @@ class Order extends \yii\db\ActiveRecord {
 
     public function forFreeDelivery() {
         if (isset($this->vendor->delivery)) {
-            $diff = $this->vendor->delivery->min_free_delivery_charge - $this->total_price;
+            $diff = $this->vendor->delivery->min_free_delivery_charge - $this->total_price - $this->vendor->delivery->delivery_charge;
         } else {
             $diff = 0;
         }
@@ -270,7 +270,7 @@ class Order extends \yii\db\ActiveRecord {
 
     public function forMinOrderPrice() {
         if (isset($this->vendor->delivery)) {
-            $diff = $this->vendor->delivery->min_order_price - $this->total_price;
+            $diff = $this->vendor->delivery->min_order_price - $this->total_price - $this->vendor->delivery->delivery_charge;
         } else {
             $diff = 0;
         }

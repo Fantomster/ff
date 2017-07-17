@@ -141,9 +141,13 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }
     public function uniqueArticle($attribute, $params, $validator)
     {
-        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])->exists()) {
-            $this->addError($attribute, 'Такой артикул уже существует в каталоге');
+        empty($this->id)?$where= "true":$where = "id <> $this->id";
+        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
+                    ->andWhere($where)
+                    ->exists()) {
+                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
         }
+        
     }
     /**
      * @inheritdoc

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "franchisee_associate".
@@ -11,6 +12,9 @@ use Yii;
  * @property integer $franchisee_id
  * @property integer $organization_id
  * @property integer $self_registered
+ * @property integer $agent_id
+ * @property string $created_at
+ * @property string $updated_at 
  *
  * @property Franchisee $franchisee
  * @property Organization $organization
@@ -25,6 +29,20 @@ class FranchiseeAssociate extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'franchisee_associate';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return ArrayHelper::merge(parent::behaviors(), [
+                    'timestamp' => [
+                        'class' => 'yii\behaviors\TimestampBehavior',
+                        'value' => function ($event) {
+                            return gmdate("Y-m-d H:i:s");
+                        },
+                    ],
+        ]);
     }
 
     /**
@@ -67,5 +85,13 @@ class FranchiseeAssociate extends \yii\db\ActiveRecord
     public function getOrganization()
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAgent()
+    {
+        return $this->hasOne(User::className(), ['id' => 'agent_id']);
     }
 }

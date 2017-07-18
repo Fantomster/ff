@@ -17,10 +17,10 @@ use yii\helpers\Html;
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
                             <?= Html::a('Доступы', ['access/index'], ['class'=>'btn btn-md fk-button']); ?>                            
-                            <?= Html::a('Проверка', ['srequest/index'], ['class'=>'btn btn-md fk-button']); ?>    
+                            <?= Html::a('Проверка', ['srequest/check'], ['class'=>'btn btn-md fk-button']); ?>    
                             <?= Html::a('Авторизация', ['auth/index'], ['class'=>'btn btn-md fk-button']); ?>   
                             <?= Html::a('Номенклатура', ['getgoods/index'], ['class'=>'btn btn-md fk-button']); ?>    
-                            <?= Html::a('Задачи', ['tasks/index'], ['class'=>'btn btn-md fk-button']); ?>    
+                            <?= Html::a('Задачи', ['task/index'], ['class'=>'btn btn-md fk-button']); ?>    
                             <?= Html::a('История', ['history/index'], ['class'=>'btn btn-md fk-button']); ?>                            
                         </div>
                         <div class="col-md-6 text-right">

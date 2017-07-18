@@ -7,6 +7,9 @@ use yii\web\Controller;
 use api\common\models\RkSession;
 use api\common\models\RkWserror;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
+use frontend\modules\clientintegr\modules\rkws\components\UUID;
+use api\common\models\RkAccess;
+use common\models\User;
 
 
 // use yii\mongosoft\soapserver\Action;
@@ -30,8 +33,43 @@ class SrequestController extends Controller {
         }     
         
     }
+    
+    public function actionCheck() {
+        
+        if (Yii::$app->request->isPjax) {
+            //return $this->renderPartial('index');
+        } else {
+            
+        $org = User::findOne(Yii::$app->user->id)->organization_id;
+        
+        $restr = RkAccess::find()->andwhere('org= :org',[':org' => $org])->one();
+
+        $cmd = 'get_objectinfo';     
+                    
+        $res = ApiHelper::sendCmd($cmd, $restr, $org);
+        
+        $errd = RkWserror::find()->andwhere('code = :code',[':code' =>$res['respcode']['code']])->one()->denom;
+              
+        return $this->render('index'  ,[
+            'res'  => $res,
+            'errd' => $errd,
+        ]);
+        
+        }     
+        
+    }
+    
+    public function actionUid() {
+        
+        $uuid4 = UUID::uuid4();
+        
+        var_dump($uuid4);
+        
+    }
+    
+    
      
-       public function actionCheck() {
+       public function actionCheck2() {
         
     $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Cmd";
     

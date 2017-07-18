@@ -45,7 +45,7 @@ use api\common\models\RkAccess;
     <div class="catalog-index">
             <div class="box-header with-border">
               <div class="box-title pull-left">
-                 <?= Html::a('<i class="fa fa-sign-in"></i> Авторизовать', ['sendlogin'],['class'=>'btn btn-md fk-button']) ?>
+                 <?= Html::a('<i class="fa fa-sign-in"></i> Отправить запрос', ['sendlogin'],['class'=>'btn btn-md fk-button']) ?>
               </div>
             </div>
     </div>   
@@ -54,13 +54,49 @@ use api\common\models\RkAccess;
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
-                            <?= $res ? $res : 'Данных нет' ?>  
                             
                             <?php 
-                            if ($errd) {
-                            echo "<div border=1>".$errd."</div>";    
+                            
+                            if ($res['resp']) {
+                                
+                                echo '<p><table class="table table-condensed">';
+                                    foreach ($res['resp'] as $key => $value) {
+                                    echo "<tr>";    
+                                    echo '<td>'.$key."</td>";    
+                                    echo '<td>'.$value."</td>";    
+                                    echo "</tr>";
+                                }
+                                echo '</table></p>';
+                            } else {
+                                echo 'Данных нет';
                             }
+                            
                             ?>        
+                                </div>
+                            </div>
+                                   <div class="panel-body">
+                                <div class="box-body table-responsive no-padding">         
+                            <?php
+                            
+                            if ($res['respcode']) {
+                              
+                                echo '<p><table class="table table-condensed">';
+                                    foreach ($res as $key => $value) {
+                                    echo "<tr>";    
+                                    if ($key === 'Text') { $key = 'Текст';}
+                                    if ($key === 'code') { $key = 'Код статуса';}
+                                      
+                                        echo '<td>'.$key."</td>";   
+                                        echo '<td>'.$value;
+                                             if ($key === 'Код статуса') { 
+                                                echo " (".$errd.")"; }
+                                        echo "</td>";
+                                    
+                                    echo "</tr>";
+                                }
+                                echo '</table></p>';
+                            }
+                            ?>
                                 </div>
                             </div>
             </div>

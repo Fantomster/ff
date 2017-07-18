@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use Yii;
 use yii\web\Controller;
+use api\common\models\RkTasksSearch;
 // use yii\mongosoft\soapserver\Action;
 
 /**
@@ -12,25 +13,21 @@ use yii\web\Controller;
  * Author: R.Smirnov
  */
 
-class CatalogController extends Controller {
+class TaskController extends Controller {
     
     public $enableCsrfValidation = false;
-    
-    protected $authenticated = false;
-    
-    private $sessionId = '';
-    private $username;
-    private $password;
-    
         
-    public function actionIndex() {
+    public function actionIndex()
+    {
+        $searchModel = new RkTasksSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]); 
         
-        if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index');
-        } else {
-            return $this->render('index');
-        }     
-        
+      //  echo "hello";
     }
       
     

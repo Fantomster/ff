@@ -1327,7 +1327,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: Создан новый заказ №" . $order->id . "!";
+        $subject = "f-keeper: новый заказ №" . $order->id . "!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1345,7 +1345,7 @@ class OrderController extends DefaultController {
                     ->setSubject($subject)
                     ->send();
             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                $text = "f-keeper: Создан новый заказ №" . $order->id;
+                $text = $senderOrg->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

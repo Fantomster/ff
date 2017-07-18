@@ -102,7 +102,11 @@ class UserController extends ActiveController {
     }
 
     public function actionAuth() {
-        return User::findOne(Yii::$app->user->id);
+        
+        $user = User::findOne(Yii::$app->user->id);
+        $profile = $user->profile;
+        $organization = $user->organization;
+        return compact("user","profile","organization");
     }
     
     public function actionRegistration() {
@@ -199,6 +203,8 @@ class UserController extends ActiveController {
             $newEmail = $userToken->data;
             if ($user->confirm($newEmail)) {
                 $success = true;
+                $profile = $user->profile;
+                $organization = $user->organization;
             }
             if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome
@@ -209,7 +215,7 @@ class UserController extends ActiveController {
             $userToken->delete();
         }
 
-        return ($success) ? $user : ['error' => Yii::t('user','Invalid PIN')];
+        return ($success) ? compact("user","profile","organization") : ['error' => Yii::t('user','Invalid PIN')];
     }
 
     public function actionCompleteRegistration() {

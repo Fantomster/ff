@@ -788,6 +788,20 @@ class OrderController extends DefaultController {
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":$message";
+                foreach ($order->vendor->users as $recipient) {
+                    /*$email = $recipient->email;
+                    $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();*/
+                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                        $text = $subject;
+                        $target = $recipient->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target);
+                    }
+                }
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
                 } else {
@@ -798,6 +812,20 @@ class OrderController extends DefaultController {
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message";
+                foreach ($order->client->users as $recipient) {
+                    /*$email = $recipient->email;
+                    $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();*/
+                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                        $text = $subject;
+                        $target = $recipient->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target);
+                    }
+                }
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {

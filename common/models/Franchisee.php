@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use common\models\Role;
 
 /**
  * This is the model class for table "franchisee".
@@ -28,6 +29,7 @@ use Yii;
  * @property string $picture_manager
  * @property string $fio_manager
  * @property string $phone_manager
+ * @property integer $additional_number_manager
  *  
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
@@ -63,7 +65,7 @@ class Franchisee extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['type_id'], 'integer'],
+            [['type_id','additional_number_manager'], 'integer'],
             [['type_id'], 'required'],
             [['info'], 'string'],
             [['created_at', 'updated_at', 'deleted'], 'safe'],
@@ -95,6 +97,7 @@ class Franchisee extends \yii\db\ActiveRecord {
             'picture_manager' => 'Аватар менеджера',
             'fio_manager' => 'фио менеджера',
             'phone_manager' => 'Телефон менеджера',
+            'additional_number_manager' => 'Добавочный номер менеджера'
         ];
     }
 
@@ -180,5 +183,20 @@ class Franchisee extends \yii\db\ActiveRecord {
     
     public function getPictureUrl() {
         return $this->picture_manager ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
+    }
+    
+    public static function limitedDropdown()
+    {
+        // get all records from database and generate
+        static $dropdown;
+        if ($dropdown === null) {
+                $models = Role::findAll(['organization_type' => Organization::TYPE_FRANCHISEE]);
+            foreach ($models as $model) {
+                if ($model->id !== Role::ROLE_FRANCHISEE_AGENT) {
+                    $dropdown[$model->id] = $model->name;
+                }
+            }
+        }
+        return $dropdown;
     }
 }

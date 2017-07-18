@@ -159,13 +159,6 @@ class SiteController extends Controller {
                 $organization->save();
                 $user->sendWelcome();
 
-                //Временный скрипт оповещания входа клиентов delivery-club
-                if (strpos($user->email, '@delivery-club.ru')) {
-                    $text = "[ " . $organization->name . " ] [ " . $profile->phone . " ] вошел в систему f-keeper";
-                    $target = '89296117900,89099056888';
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target);
-                }
                 return $this->redirect(['/site/index']);
             }
         }

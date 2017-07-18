@@ -27,6 +27,16 @@ $this->registerJs('
     });
 
     $(document).on("submit", "#complete-form", function() {
+        var form = $(this);
+        $.post(
+            form.attr("action"),
+            form.serialize()
+        ).done(function(result) {
+            console.log(result);
+            if (result.length == 0) {
+                $(".data-modal .modal-content").slick("slickNext");
+            }
+        });
         return false;
     });
 
@@ -39,8 +49,8 @@ $this->registerJs('
                 return;
             }
         }
-        $(".data-modal .modal-content").slick("slickNext");
     });
+
 
     $("#data-modal").on("shown.bs.modal",function(){
         $(".data-modal .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})

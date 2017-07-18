@@ -5,6 +5,21 @@ use yii\web\View;
 use yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
+
+$franchiseeManager = $user->organization->getFranchiseeManagerInfo();
+if($franchiseeManager && $franchiseeManager->phone_manager){
+    if($franchiseeManager->additional_number_manager){
+      $phoneUrl = $franchiseeManager->phone_manager . "p" . $franchiseeManager->additional_number_manager; 
+      $phone = $franchiseeManager->phone_manager . " доб. " . $franchiseeManager->additional_number_manager;
+    }else{
+      $phoneUrl = $franchiseeManager->phone_manager;
+      $phone = $franchiseeManager->phone_manager;
+    }
+}else{
+    $phoneUrl = "+7-499-404-10-18p202";
+    $phone = "+7-499-404-10-18 доб. 202";
+}
+
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 ?>
@@ -40,7 +55,7 @@ $cartCount = $user->organization->getCartCount();
 //                            ],
                         ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'https://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
                         
-                        ['label' => 'Заявки<sub class="sub-new">БЕТА</sub>', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
+                        ['label' => 'Заявки', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs']],
                         ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
                         // ['label' => 'Мои акции', 'icon' => 'fa fa-ticket', 'url' => ['client/events']],
@@ -74,8 +89,12 @@ $cartCount = $user->organization->getCartCount();
         </form>
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
-            <div style="text-align: center; color: #d8d7d7;">
-                <p><a href="tel:+74994041018p202"><i class="fa fa-phone"></i> +7-499-404-10-18 доб.202</a></p>
+            <div style="text-align: center; color: #d8d7d7;padding-top:10px">
+                <p>
+                    <a href="tel:<?php echo $phoneUrl; ?>">
+                        <i class="fa fa-phone"></i> <?php echo $phone;?>
+                    </a>
+                </p>
             </div>
         </ul>
     </section>

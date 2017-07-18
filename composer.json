@@ -59,7 +59,8 @@
         "bower-asset/slick-carousel": "*",
         "bower-asset/svg4everybody": "*",
         "yiisoft/yii2-jui": "~2.0.0",
-        "understeam/yii2-fcm": "~0.1"
+        "understeam/yii2-fcm": "~0.1",
+        "ofat/yii2-yashop-ses": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

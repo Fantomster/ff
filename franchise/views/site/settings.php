@@ -178,7 +178,7 @@ $this->registerCss("
                                     ?>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4" style="width:auto">
                             <div class="form-group">
                                 <?=
                                     $form->field($franchisee, 'phone_manager')
@@ -194,6 +194,15 @@ $this->registerCss("
                                 ])
                                         ->label('Телефон менеджера')
                                 ?>                           
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                    <?=
+                                            $form->field($franchisee, 'additional_number_manager')
+                                            ->label('Добавочный номер')
+                                            ->textInput(['placeholder' => ''])
+                                    ?>
                             </div>
                         </div>
                     </div>

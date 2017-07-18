@@ -52,7 +52,7 @@ $this->registerCss(
 );
 ?>
 <div class="main-page-wrapper <?php
-if (!empty($success)) {
+if (!empty($success) || !empty($invalidToken)) {
     echo "success";
 }
 ?>">

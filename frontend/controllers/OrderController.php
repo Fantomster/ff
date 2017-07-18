@@ -788,7 +788,7 @@ class OrderController extends DefaultController {
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":$message";
+                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>',' ',$message);
                 foreach ($order->vendor->users as $recipient) {
                     /*$email = $recipient->email;
                     $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
@@ -812,7 +812,7 @@ class OrderController extends DefaultController {
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
-                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message";
+                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>',' ',$message);
                 foreach ($order->client->users as $recipient) {
                     /*$email = $recipient->email;
                     $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))

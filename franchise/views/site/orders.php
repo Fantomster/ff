@@ -40,20 +40,9 @@ $this->registerJs('
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i>  Заказы ваших поставщиков
-        <small>Список заказов подключенных вами поставщиков и их статус</small>
+        <i class="fa fa-home"></i>  Заказы ваших ресторанов
+        <small>Список заказов подключенных вами ресторанов и их статус</small>
     </h1>
-    <?=
-    ''
-//    Breadcrumbs::widget([
-//        'options' => [
-//            'class' => 'breadcrumb',
-//        ],
-//        'links' => [
-//            'Список ваших поставщиков',
-//        ],
-//    ])
-    ?>
 </section>
 <section class="content">
 

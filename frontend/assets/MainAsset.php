@@ -21,5 +21,6 @@ class MainAsset extends AssetBundle {
         'yii\bootstrap\BootstrapAsset',
         'yii\bootstrap\BootstrapThemeAsset',
         'yii\bootstrap\BootstrapPluginAsset',
+        '\rmrevin\yii\fontawesome\AssetBundle',
     ];
 }

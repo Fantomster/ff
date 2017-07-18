@@ -24,7 +24,7 @@ class ClientSearch extends Organization {
     public function rules() {
         return [
             [['id', 'type_id'], 'integer'],
-            [['name', 'vendorCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'search_string'], 'safe'],
+            [['name', 'vendorCount', 'orderCount', 'orderSum', 'created_at', 'contact_name', 'phone', 'date_from', 'date_to', 'searchString'], 'safe'],
         ];
     }
 

@@ -95,6 +95,7 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
                     </label>
                 </div>
                 <button type="submit" id="btnSend" class="but but_green" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span><i class="ico"></i></button>
+                    <?= Html::a("Войти / зарегистрироваться", ["/user/login"], ["class" => "reestablish-link"]) ?>
                 <?php ActiveForm::end(); ?>
                 <div class="auth-sidebar__contacts">
                     <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>
@@ -105,7 +106,7 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
     <?php endif; ?>
     <div class="present-wrapper">
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
-        <h1>Онлайн-сервис для автоматизации закупок в сфере HoReCa</h1>
+        <h1>Онлайн-сервис для автоматизации закупок</h1>
         <div class="present__media clearfix">
             <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div><a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a><a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>
         </div>

@@ -12,10 +12,10 @@ $form = ActiveForm::begin([
             'id' => 'editOrder',
             'enableAjaxValidation' => false,
             'options' => [
-                'data-pjax' => true,
+                'data-pjax' => false,
             ],
             'method' => 'post',
-            'action' => Url::to(['order/view', 'id' => $order->id]),
+            'action' => Url::to(['order/edit', 'id' => $order->id]),
         ]);
 echo GridView::widget([
     'dataProvider' => $dataProvider,

@@ -18,6 +18,7 @@ yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
 use kartik\select2\Select2;
 kartik\select2\Select2Asset::register($this);
 $request = new \common\models\Request();
+$this->title = 'Заявки';
 ?>
 <style>
     .req-items{

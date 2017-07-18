@@ -80,15 +80,17 @@ if (!Yii::$app->user->isGuest) {
                     form.serialize()
                 ).done(function(result) {
                     $('#actionButtons').html(result);
-                    try {
-                        $.pjax.reload({container: "#orderContent"});
-                    } catch(e) {
+                    if (!saving) {
+                        try {
+                            $.pjax.reload({container: "#orderContent",timeout:30000});
+                        } catch(e) {
+                        }
                     }
                 });
             } else if (message.isSystem == 2) {
                 $(".cartCount").html(message.body);
                 try {
-                    $.pjax.reload({container: "#checkout"});
+                    $.pjax.reload({container: "#checkout",timeout:30000});
                 } catch(e) {
                 }
             }
@@ -100,6 +102,10 @@ if (!Yii::$app->user->isGuest) {
             refreshMenu(result);
         });
     });
+            
+    $(document).on("pjax:complete", "#checkout", function() {
+        $("#"+activeCart).addClass("active");
+    });            
         
     $('#chat-form').submit(function() {
 
@@ -191,6 +197,8 @@ JS;
         var dataEdited = 0;
         var link = '#';
         var timer = null;
+        var saving = false;
+        var activeCart;
     </script>
 <?php } ?>
 <header class="main-header">

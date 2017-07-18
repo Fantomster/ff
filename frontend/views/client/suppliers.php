@@ -53,7 +53,7 @@ $this->registerCss('
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
                     <h5 class="modal-title">
-                        <b class="client-manager-name"></b>, укажите товары, который Вы покупаете у поставщика <b class="supplier-org-name"></b>
+                        <b class="client-manager-name"></b>, укажите товары, которые Вы покупаете у поставщика <b class="supplier-org-name"></b>
                     </h5>
                 </div>
             </div>
@@ -109,11 +109,11 @@ $gridColumnsCatalog = [
         'format' => 'raw',
         'value' => function ($data) {
     if ($data->invite == 0) {
-        return '<span class="text-danger">Ожидается<br>подтверждение</span>';
+        return '<span class="text-danger">Приглашение<br>отправлено</span>';
     } elseif (isset($data->catalog) && $data->catalog->status == 1) {
-        return '<span class="text-success">Подтвержден</span>';
+        return '<span class="text-success">Партнер</span>';
     } else {
-        return '<span class="text-yellow">Подтвержден<br>Каталог не назначен</span>';
+        return '<span class="text-yellow">Партнер<br> Каталог не назначен</span>';
     }
 }
     ],
@@ -208,12 +208,11 @@ $gridColumnsCatalog = [
                             <?php
                             $form = ActiveForm::begin([
                                         'options' => [
-                                            'id' => 'search_form',
+                                            'id' => 'search-form',
                                             'role' => 'search',
                                         ],
                             ]);
                             ?>
-                            <?php ActiveForm::end(); ?>
                             <?=
                                     $form->field($searchModel, "search_string", [
                                         'addon' => [
@@ -225,9 +224,10 @@ $gridColumnsCatalog = [
                                             ],
                                         ],
                                     ])
-                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'search_string'])
+                                    ->textInput(['prompt' => 'Поиск', 'class' => 'form-control', 'id' => 'searchString'])
                                     ->label(false)
                             ?>
+                            <?php ActiveForm::end(); ?>
                             <!--                            <div class="input-group">
                                                             <span class="input-group-addon">
                                                                 <i class="fa fa-search"></i>
@@ -239,7 +239,7 @@ $gridColumnsCatalog = [
                     <div class="row">
                         <div class="col-md-12">
                             <div class="box-body table-responsive no-padding">
-                                <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
+                                <?php Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
                                 <?=
                                 GridView::widget([
                                     'dataProvider' => $dataProvider,
@@ -323,20 +323,14 @@ $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
 $customJs = <<< JS
-var timer;
-$('#search').on("keyup", function () {
-window.clearTimeout(timer);
-   timer = setTimeout(function () {
-       $.pjax({
-        type: 'GET',
-        push: false,
-        timeout: 10000,
-        url: '$suppliersUrl',
-        container: '#sp-list',
-        data: {searchString: $('#search').val()}
-      })
-   }, 700);
-});
+$(".content").on("change keyup paste cut", "#searchString", function() {
+    if (timer) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+        $("#search-form").submit();
+    }, 700);
+});        
 $(".modal").removeAttr("tabindex");
 function bootboxDialogShow(msg){
 bootbox.dialog({
@@ -588,8 +582,8 @@ $('#invite').click(function(e){
 		  success: function (response) {
                         if(response.success){
                           $('#loader-show').hideLoading();
-                          $.pjax.reload({container: "#add-supplier-list"});
-                          $.pjax.reload({container: "#sp-list"});
+                          $.pjax.reload({container: "#add-supplier-list",timeout:30000});
+                          $.pjax.reload({container: "#sp-list",timeout:30000});
 			  $('#modal_addProduct').modal('hide'); 
                           bootbox.dialog({
 			  message: response.message,
@@ -623,7 +617,7 @@ $("#view-supplier").on("click", ".save-form", function() {
     data: form.serialize(),
     cache: false,
     success: function(response) {
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
             form.replaceWith(response);
                   
         },
@@ -683,7 +677,7 @@ $(document).on("click",".del", function(e){
 			         
 		        }	
 		    });
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
 		}else{
 		console.log('cancel');	
 		}

@@ -24,6 +24,7 @@ $this->registerJs(
                 }, 700);
             });
             $(".content").on("click", ".edit", function() {
+                $(".edit").button("loading");
                 var form = $("#user-form");
                 $.post(
                     form.attr("action"),
@@ -35,6 +36,7 @@ $this->registerJs(
                 return false;
             });
             $(".content").on("click", ".delete", function() {
+                $(".delete").button("loading");
                 var form = $("#user-form");
                 $.post(
                     $(this).data("action"),
@@ -47,7 +49,7 @@ $this->registerJs(
             });
             $("body").on("hidden.bs.modal", "#add-user", function() {
                 $(this).data("bs.modal", null);
-                $.pjax.reload({container: "#users-list"});
+                $.pjax.reload({container: "#users-list",timeout:30000});
             });
         });'
 );

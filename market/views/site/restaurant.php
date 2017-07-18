@@ -136,9 +136,6 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
             <div class="row">
                 <div class="col-md-6"> 
                     <h5><span class="title-param">Адрес:</span> <?= empty($restaurant->address) ? '<span class="noinfo">нет информации</span>':$restaurant->address ?></h5>
-                    <h5><span class="title-param">Кол-во заказов:</span></h5>   
-                    <h5><span class="title-param">Кол-во поставщиков:</span></h5>  
-                    <h5><span class="title-param">Категории:</span></h5> 
                 </div>
                 <div class="col-md-6">
                     <h5><?= empty($restaurant->about) ? '<span class="noinfo">нет информации</span>':$restaurant->about ?></h5>  

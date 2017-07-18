@@ -81,7 +81,12 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-6">
+        <div class="col-lg-2 col-md-3 col-sm-6">
+<?= Html::label('Сотрудник', null, ['class' => 'label','style'=>'color:#555']) ?>
+<?= Html::dropDownList('filter_employee', null,
+                            $filter_get_employee,['prompt' => 'Все сотрудники','class' => 'form-control','id'=>'filter_employee']) ?>        
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6">
 <?= Html::label('Статус заказа', null, ['class' => 'label','style'=>'color:#555']) ?>
 <?= Html::dropDownList('filter_status', null,
                             [
@@ -125,7 +130,7 @@ HTML;
 ]);
 ?>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-6">
+        <div class="col-lg-2 col-md-3 col-sm-6">
 <?= Html::label('Клиент', null, ['class' => 'label','style'=>'color:#555']) ?>
 <?= Html::dropDownList('filter_client', null,
                             $filter_restaurant,['prompt' => 'Все','class' => 'form-control','id'=>'filter_client','options'=>[\Yii::$app->request->get('filter_client')=>["Selected"=>true]]]) ?>        
@@ -327,12 +332,13 @@ $filter_clear_to_date = date("d-m-Y");
 $analyticsUrl = Url::to(['vendor/analytics']);
 
 $customJs = <<< JS
-$("#filter_status,#filter-date,#filter-date-2,#filter_client").on("change", function () {
-$("#filter_status,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
+$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client").on("change", function () {
+$("#filter_status,#filter_employee,#filter-date,#filter-date-2,#filter_client").attr('disabled','disabled')
 var filter_status = $("#filter_status").val();
 var filter_from_date =  $("#filter-date").val();
 var filter_to_date =  $("#filter-date-2").val();
 var filter_client =  $("#filter_client").val();
+var filter_employee =  $("#filter_employee").val();
 
     $.pjax({
      type: 'GET',
@@ -345,14 +351,16 @@ var filter_client =  $("#filter_client").val();
          filter_from_date: filter_from_date,
          filter_to_date: filter_to_date,
          filter_client: filter_client,
+         filter_employee: filter_employee,
            }
-   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee").removeAttr('disabled') });
 });
 $("#reset").on("click", function () {
     $("#filter_status").val('');
     $("#filter-date").val('$filter_clear_from_date');
     $("#filter-date-2").val('$filter_clear_to_date');
-    $("#filter_client").val('');       
+    $("#filter_client").val('');     
+    $("#filter_employee").val('');        
     $.pjax({
      type: 'GET',
      push: false,
@@ -364,8 +372,10 @@ $("#reset").on("click", function () {
          filter_from_date: '$filter_clear_from_date',
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
+         filter_supplier: filter_supplier,
+         filter_employee: filter_employee,
            }
-   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client").removeAttr('disabled') });
+   }).done(function() { $("#filter_status,#filter-date,#filter-date-2,#filter_client,#filter_employee").removeAttr('disabled') });
 })
 $.pjax({
      type: 'GET',
@@ -378,6 +388,7 @@ $.pjax({
          filter_from_date: '$filter_clear_from_date',
          filter_to_date: '$filter_clear_to_date',
          filter_client: '',
+         filter_employee: '',
            }
    })
 JS;

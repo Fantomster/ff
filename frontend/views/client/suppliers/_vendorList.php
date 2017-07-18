@@ -56,7 +56,7 @@ use yii\helpers\Html;
         ?>
         <?=
         Html::a('<img src="/img/corzina_icon.png" alt="">Удалить', '#', [
-            'class' => 'delete del',
+            'class' => 'delete-vendor del',
             'data' => ['id' => $model->supp_org_id],
         ]);
         ?>

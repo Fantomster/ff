@@ -16,7 +16,8 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru', 'https://tmp.f-keeper.ru'],
+                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru', 'https://tmp.f-keeper.ru',
+                                 'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,
@@ -31,12 +32,14 @@ class FrController extends \yii\rest\Controller {
             $fields = Yii::$app->request->post('FIELDS');
             $cname = Html::encode($fields['name']);
             $cphone = Html::encode($fields['phone']);
-            $cemail = Html::encode($fields['email']);
+            $cemail = isset($fields['email']) ? Html::encode($fields['email']) : '';
             $city = Html::encode($fields['city']);
+            $comment = isset($fields['comment']) ? Html::encode($fields['comment']) : '';
+            $type = isset($fields['type']) ? Html::encode($fields['type']) : '';
             $lpartner = isset($fields['partner']) ? Html::encode($fields['partner']) : '';
-            $lname = Html::encode($fields['lead_name']);
+            $lname = isset($fields['lead_name']) ? Html::encode($fields['lead_name']) : '';
             $response = null;
-            if (strlen(trim($cname)) < 2 || strlen(trim($cphone)) < 7 || strlen(trim($cemail)) < 2) {
+            if (strlen(trim($cname)) < 2 || strlen(trim($cphone)) < 7) {
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 return ['result' => 'error'];
             }
@@ -49,7 +52,12 @@ class FrController extends \yii\rest\Controller {
             if ($lpartner == '199894' || $lpartner == '199896') {
                 $lead_status_id = 465726; //643219; //id этапа продаж, куда помещать сделку
             }
-
+            if (!empty($type) && $type == 'restaurant'){
+                $lpartner = '';
+                $lead_name = 'Заявка ресторана';
+                $responsible_user_id = 1427371;
+                $lead_status_id = 465729;
+            }
             $contact_name = $cname; //Название добавляемого контакта
             $contact_phone = $cphone; //Телефон контакта
             $contact_email = $cemail; //Емейл контакта
@@ -114,8 +122,11 @@ class FrController extends \yii\rest\Controller {
             }
 
             //// Проверка на уже существующий контакт
-
+            if($type == 'restaurant'){
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;    
+            }else{
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
+            }
             $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
             #Устанавливаем необходимые опции для сеанса cURL
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -139,21 +150,39 @@ class FrController extends \yii\rest\Controller {
                 return ['result' => 'errorPhone'];
             }
             //ДОБАВЛЯЕМ СДЕЛКУ
+            $post = Yii::$app->request->post();
+            $roistat_cookie = isset($post['roi']) ? $post['roi'] : "неизвестно";
             $leads['request']['leads']['add'] = array(
                 array(
                     'name' => $lead_name,
-                    //'status_id' => $lead_status_id, //id статуса
                     'pipeline_id' => $lead_status_id,
                     'responsible_user_id' => $responsible_user_id, //id ответственного по сделке
                     'custom_fields' => [
                         [
-                            'id' => 85130,
+                            'id' => 85130, //парнерство
                             'values' => [
                                 [
                                     'value' => $lead_partner
                                 ]
                             ]
-                        ]
+                        ],
+                        [
+                            'id' => 544713, //комментарий
+                            'values' => [
+                                [
+                                    'value' => $comment
+                                ]
+                            ]
+                        ],
+                        //Добавляем поле roistat
+                        [
+                            'id' => 78106,
+                            'values' => [
+                                [
+                                    'value' => $roistat_cookie
+                                ],
+                            ],
+                        ],
                     ]
                 )
             );

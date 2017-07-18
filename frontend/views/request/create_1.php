@@ -243,7 +243,7 @@ $(this).next().toggle(Boolean($(this).val()));
     ['template'=>'{input}{error}'])->
     textInput(['placeholder' => '']) ?>
             <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>1]) ?>
-            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
+            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться к списку заявок</a>
         </fieldset>
         <!-- fieldsets 2 -->
 	<fieldset class="text-left">
@@ -282,7 +282,7 @@ $(this).next().toggle(Boolean($(this).val()));
                             ])->label(false);?>
             <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
             <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>2]) ?>
-            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>
+            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться к списку заявок</a>
         </fieldset>
         <!-- fieldsets 3 -->
 	<fieldset class="text-left">
@@ -306,7 +306,7 @@ $(this).next().toggle(Boolean($(this).val()));
                 </div>
                 <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
                 <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
-        <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться на главную</a>        
+        <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться к списку заявок</a>        
         </fieldset>
 <?php ActiveForm::end(); ?>
 

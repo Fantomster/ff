@@ -27,5 +27,5 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
     width: 80%;">Заказ №<?= $order->id ?></a>
 </div>
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-    <?= $this->render('@frontend/views/order/_bill', compact('order', 'dataProvider')) ?>
+    <?= $this->render('_bill', compact('order', 'dataProvider')) ?>
 </div>

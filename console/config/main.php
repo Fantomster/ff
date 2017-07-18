@@ -25,5 +25,10 @@ return [
             'table' => '{{%mail_queue}}',
         ],
     ],
+    'aliases' => [
+          '@baseUrl'=>'https://f-keeper.ru'
+//        '@web' => 'http://f-keeper.dev',
+//        '@webroot' => '/var/www/html/f-keeper.dev/frontend/web',
+    ],
     'params' => $params,
 ];

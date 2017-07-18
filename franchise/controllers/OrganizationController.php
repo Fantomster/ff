@@ -32,7 +32,7 @@ class OrganizationController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'clients', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
+                'only' => ['index', 'clients', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent'],
                 'rules' => [
                     [
                         'actions' => ['index', 'clients', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
@@ -42,6 +42,13 @@ class OrganizationController extends DefaultController {
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
                             Role::ROLE_ADMIN,
+                        ],
+                    ],
+                    [
+                        'actions' => ['agent'],
+                        'allow' => true,
+                        'roles' => [
+                            Role::ROLE_FRANCHISEE_AGENT,
                         ],
                     ],
                 ],
@@ -104,7 +111,9 @@ class OrganizationController extends DefaultController {
         $client = new Organization();
         $client->type_id = Organization::TYPE_RESTAURANT;
         $user = new User();
+        $user->scenario = 'admin';
         $user->password = uniqid();
+        $user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE);
         $profile = new Profile();
         $buisinessInfo = new BuisinessInfo();
 
@@ -116,7 +125,8 @@ class OrganizationController extends DefaultController {
 
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        $user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE)->save();
+                        //$user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE)->save();
+                        $user->save();
                         $profile->setUser($user->id)->save();
                         $client->save();
                         $user->setOrganization($client);
@@ -143,7 +153,7 @@ class OrganizationController extends DefaultController {
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->one();
         if (empty($client)) {
-            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
         if (empty($client->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
@@ -199,7 +209,17 @@ class OrganizationController extends DefaultController {
             return $this->render('vendors', compact('dataProvider', 'searchModel'));
         }
     }
-    
+
+    /**
+     * Displays vendors list
+     * 
+     * @return mixed
+     */
+    public function actionAgent() {
+        
+        return $this->render('agent', compact('dataProvider'));
+    }
+
     public function actionAjaxShowVendor($id) {
         $vendor = Organization::find()
                 ->joinWith("franchiseeAssociate")
@@ -210,8 +230,8 @@ class OrganizationController extends DefaultController {
             $buisinessInfo->setOrganization($vendor);
             $vendor->refresh();
         }
-        $catalog = \common\models\Catalog::find()->where(['supp_org_id'=>$vendor->id, 'type'=>  \common\models\Catalog::BASE_CATALOG])->one();
-        return $this->renderAjax("_ajax-show-vendor", compact('vendor','catalog'));
+        $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $vendor->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
+        return $this->renderAjax("_ajax-show-vendor", compact('vendor', 'catalog'));
     }
 
     /**
@@ -222,7 +242,9 @@ class OrganizationController extends DefaultController {
         $catalog = new \common\models\Catalog();
         $vendor->type_id = Organization::TYPE_SUPPLIER;
         $user = new User();
+        $user->scenario = 'admin';
         $user->password = uniqid();
+        $user->setRegisterAttributes(Role::ROLE_SUPPLIER_MANAGER, User::STATUS_ACTIVE);
         $profile = new Profile();
         $buisinessInfo = new BuisinessInfo();
 
@@ -234,7 +256,7 @@ class OrganizationController extends DefaultController {
 
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        $user->setRegisterAttributes(Role::ROLE_SUPPLIER_MANAGER, User::STATUS_ACTIVE)->save();
+                        $user->save();
                         $profile->setUser($user->id)->save();
                         $vendor->save();
                         $catalog->name = \common\models\Catalog::CATALOG_BASE_NAME;
@@ -265,7 +287,7 @@ class OrganizationController extends DefaultController {
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
         if (empty($vendor)) {
-            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
         if (empty($vendor->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();

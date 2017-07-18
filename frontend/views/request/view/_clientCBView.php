@@ -46,7 +46,7 @@ use yii\helpers\Url;
                 'data-event'=>$n['event']]);
                  }
                  ?>
-                  <a href="#" class="btn btn-gray pull-right disabled" style="font-size:16px;margin-top:-10px;margin-right:10px"><i class="fa fa-comment"></i></a>
+                  <!--a href="#" class="btn btn-gray pull-right disabled" style="font-size:16px;margin-top:-10px;margin-right:10px"><i class="fa fa-comment"></i></a-->
               </h4>
               <h5>Стоимость услуги: <span class="text-bold"><?=$model->price?> руб.</span></h5>
               <p><b>Комментарий поставщика:</b> <?=$model->comment?></p>

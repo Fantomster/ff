@@ -42,9 +42,9 @@ Html::button('Добавить продукты', [
         'toggle' => 'modal',
         'backdrop' => 'static',
     ],
-]);
+]);//data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Регистрируемся..."
 ?>
 <?= Html::submitButton('fake', ['class' => 'hide']) ?>
-<?= Html::button('Пригласить', ['class' => 'submit', 'style'=> 'display: none;', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier']) ?>
+<?= Html::button('Пригласить', ['class' => 'submit', 'style'=> 'display: none;', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier', 'data-loading-text'=>"<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Приглашаем..."]) ?>
 <br>
 <?php ActiveForm::end(); ?>

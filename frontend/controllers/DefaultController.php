@@ -7,6 +7,7 @@ use yii\web\Controller;
 use common\models\Organization;
 use common\models\RelationSuppRest;
 use common\models\Catalog;
+use common\models\Role;
 
 /**
  * Description of DefaultController
@@ -43,11 +44,12 @@ class DefaultController extends Controller {
                 $this->view->params['orders'] = $orders = $organization->getCart();
             }
             $this->setLayout($organization->type_id);
-            if (($organization->step == Organization::STEP_SET_INFO) && ($this->currentUser->status == \common\models\User::STATUS_ACTIVE)) {
+            $isAdmin = in_array($this->currentUser->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER]);
+            if (($organization->step == Organization::STEP_SET_INFO) && ($this->currentUser->status == \common\models\User::STATUS_ACTIVE) && !$isAdmin) {
                 $this->redirectIfNotHome($organization);
             }
             if (($this->currentUser->status === \common\models\User::STATUS_UNCONFIRMED_EMAIL) && (Yii::$app->controller->id != 'order')) {
-                throw new \yii\web\HttpException(403, 'Хуй тебе, Челиос!');
+                throw new \yii\web\HttpException(403, 'Доступ запрещен');
             }
         } elseif (Yii::$app->request->get("token")) {
             $token = Yii::$app->request->get("token");

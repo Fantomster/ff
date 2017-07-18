@@ -161,7 +161,7 @@ Modal::widget([
 $customJs = <<< JS
 $("body").on("hidden.bs.modal", "#view-supplier", function() {
     $(this).data("bs.modal", null);
-    //$.pjax.reload({container: "#sp-list"});
+    //$.pjax.reload({container: "#sp-list",timeout:30000});
 })
 $("body").on("hidden.bs.modal", "#view-catalog", function() {
     $(this).data("bs.modal", null);
@@ -175,7 +175,7 @@ $("#view-supplier").on("click", ".save-form", function() {
     data: form.serialize(),
     cache: false,
     success: function(response) {
-        $.pjax.reload({container: "#sp-list"});
+        $.pjax.reload({container: "#sp-list",timeout:30000});
             form.replaceWith(response);
                   
         },

@@ -43,14 +43,23 @@ $this->registerJs(
                 $("#btnRegister").button("loading");
                 return true;
             });            
-            $(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:true});
-            $(".go-to-reg").on("click",function(e){
+            $(".form-slider").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,fade:!0,adaptiveHeight:true});'.
+            ($registerFirst ? (
+            '$(".go-to-reg").on("click",function(e){
+                e.preventDefault(),$(".form-slider").slick("slickPrev")
+            });
+            $(".auth-sidebar__enter.reg a").on("click",function(e){
+                e.preventDefault(),$(".form-slider").slick("slickNext")
+            });'
+            ) : (
+            '$(".go-to-reg").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickNext")
             });
             $(".auth-sidebar__enter.reg a").on("click",function(e){
                 e.preventDefault(),$(".form-slider").slick("slickPrev")
-            });
-            $(".call-menu-but").on("click",function(){
+            });'
+            )).
+            '$(".call-menu-but").on("click",function(){
                 $(".present-wrapper").addClass("active"),$("body").addClass("over_hidden")
             });
             $(".close-menu-but").on("click",function(){
@@ -92,9 +101,10 @@ $this->registerCss(
     </div>
     <div class="present-wrapper">
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
-        <h1>Онлайн-сервис для автоматизации закупок в сфере HoReCa</h1>
+        <h1>Онлайн-сервис для автоматизации закупок</h1>
         <div class="present__media clearfix">
-            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div><a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a><a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>
+            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div>
+            <!--<a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a><a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>-->
         </div>
     </div>
 </div>

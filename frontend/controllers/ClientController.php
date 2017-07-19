@@ -301,6 +301,7 @@ class ClientController extends DefaultController {
             //$relationCategory = new RelationCategory();
             $organization = new Organization();
             $profile = new Profile();
+            $profile->scenario = "invite";
 
             $post = Yii::$app->request->post();
             $user->load($post); //user-email

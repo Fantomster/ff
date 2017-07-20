@@ -215,7 +215,7 @@ class ClientController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if ($user->load($post)) {
+            if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
@@ -315,7 +315,7 @@ class ClientController extends DefaultController {
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
 
             if ($user->validate() && $profile->validate() && $organization->validate()) {
-                
+
                 if ($arrCatalog === Array()) {
                     $result = ['success' => false, 'message' => 'Каталог пустой!'];
                     return $result;
@@ -390,35 +390,35 @@ class ClientController extends DefaultController {
                 if ($check['eventType'] == 3 || $check['eventType'] == 5) {
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                    if ($check['eventType'] == 5) {
+                        if ($check['eventType'] == 5) {
+                            /**
+                             *
+                             * Создаем нового поставщика и организацию
+                             *    
+                             * */
+                            $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
+                            $user->status = User::STATUS_UNCONFIRMED_EMAIL;
+                            $user->save();
+                            $profile->setUser($user->id);
+                            $profile->sms_allow = Profile::SMS_ALLOW;
+                            $profile->save();
+                            $organization->save();
+                            $user->setOrganization($organization)->save();
+                            $get_supp_org_id = $organization->id;
+                            $currentOrganization = $currentUser->organization;
+                            if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                                $currentOrganization->step = Organization::STEP_OK;
+                                $currentOrganization->save();
+                            }
+                        } else {
+                            //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
+                            $get_supp_org_id = $check['org_id'];
+                        }
                         /**
                          *
-                         * Создаем нового поставщика и организацию
-                         *    
-                         **/
-                        $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
-                        $user->status = User::STATUS_UNCONFIRMED_EMAIL;
-                        $user->save();
-                        $profile->setUser($user->id);
-                        $profile->sms_allow = Profile::SMS_ALLOW;
-                        $profile->save();
-                        $organization->save();
-                        $user->setOrganization($organization)->save();
-                        $get_supp_org_id = $organization->id;
-                        $currentOrganization = $currentUser->organization;
-                        if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
-                            $currentOrganization->step = Organization::STEP_OK;
-                            $currentOrganization->save();
-                        }
-                    } else {
-                        //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
-                        $get_supp_org_id = $check['org_id'];
-                    }
-                    /**
-                     *
-                     * 1) Делаем связь категорий поставщика
-                     * 
-                     * */
+                         * 1) Делаем связь категорий поставщика
+                         * 
+                         * */
 //                    if (!empty($categorys)) {
 //                        foreach ($categorys as $arrCategorys) {
 //                            
@@ -426,27 +426,12 @@ class ClientController extends DefaultController {
 //                            \Yii::$app->db->createCommand($sql)->execute();
 //                        }
 //                    }
-                    /**
-                     *
-                     * 2) Создаем базовый и каталог для ресторана
-                     *    
-                     * */
-                    if ($check['eventType'] == 5) {
-                        $newBaseCatalog = new Catalog();
-                        $newBaseCatalog->supp_org_id = $get_supp_org_id;
-                        $newBaseCatalog->name = 'Главный каталог';
-                        $newBaseCatalog->type = Catalog::BASE_CATALOG;
-                        $newBaseCatalog->status = Catalog::STATUS_ON;
-                        $newBaseCatalog->save();
-                        $newBaseCatalog->refresh();
-                        $lastInsert_base_cat_id = $newBaseCatalog->id;
-                    } else {
-                        //Поставщик зарегистрирован, но не авторизован
-                        //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
-                        if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
-                            $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
-                            $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
-                        } else {
+                        /**
+                         *
+                         * 2) Создаем базовый и каталог для ресторана
+                         *    
+                         * */
+                        if ($check['eventType'] == 5) {
                             $newBaseCatalog = new Catalog();
                             $newBaseCatalog->supp_org_id = $get_supp_org_id;
                             $newBaseCatalog->name = 'Главный каталог';
@@ -455,31 +440,46 @@ class ClientController extends DefaultController {
                             $newBaseCatalog->save();
                             $newBaseCatalog->refresh();
                             $lastInsert_base_cat_id = $newBaseCatalog->id;
+                        } else {
+                            //Поставщик зарегистрирован, но не авторизован
+                            //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+                            if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                                $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
+                                $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+                            } else {
+                                $newBaseCatalog = new Catalog();
+                                $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                                $newBaseCatalog->name = 'Главный каталог';
+                                $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                                $newBaseCatalog->status = Catalog::STATUS_ON;
+                                $newBaseCatalog->save();
+                                $newBaseCatalog->refresh();
+                                $lastInsert_base_cat_id = $newBaseCatalog->id;
+                            }
                         }
-                    }
 
-                    $newCatalog = new Catalog();
-                    $newCatalog->supp_org_id = $get_supp_org_id;
-                    $newCatalog->name = $currentUser->organization->name;
-                    $newCatalog->type = Catalog::CATALOG;
-                    $newCatalog->status = Catalog::STATUS_ON;
-                    $newCatalog->save();
-                    $newCatalog->refresh();
+                        $newCatalog = new Catalog();
+                        $newCatalog->supp_org_id = $get_supp_org_id;
+                        $newCatalog->name = $currentUser->organization->name;
+                        $newCatalog->type = Catalog::CATALOG;
+                        $newCatalog->status = Catalog::STATUS_ON;
+                        $newCatalog->save();
+                        $newCatalog->refresh();
 
-                    $lastInsert_cat_id = $newCatalog->id;
-                    /**
-                     *
-                     * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
-                     *    
-                     * */
-                    $article_create = 0;
-                    foreach ($arrCatalog as $arrCatalogs) {
-                        $article_create++;
-                        $article = $article_create;//trim($arrCatalogs['dataItem']['article']);
-                        $product = trim($arrCatalogs['dataItem']['product']);
-                        //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
-                        $units = str_replace(',', '.', $units);
-                        $units = null;
+                        $lastInsert_cat_id = $newCatalog->id;
+                        /**
+                         *
+                         * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
+                         *    
+                         * */
+                        $article_create = 0;
+                        foreach ($arrCatalog as $arrCatalogs) {
+                            $article_create++;
+                            $article = $article_create; //trim($arrCatalogs['dataItem']['article']);
+                            $product = trim($arrCatalogs['dataItem']['product']);
+                            //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                            $units = str_replace(',', '.', $units);
+                            $units = null;
 //                        if (substr($units, -3, 1) == '.') {
 //                            $units = explode('.', $units);
 //                            $last = array_pop($units);
@@ -487,88 +487,270 @@ class ClientController extends DefaultController {
 //                        } else {
 //                            $units = str_replace('.', '', $units);
 //                        }
-                        if (empty($units) || $units < 0) {
-                            $units = null;
-                        }
-                        $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
-                        //$note = trim($arrCatalogs['dataItem']['note']);
-                        $ed = trim($arrCatalogs['dataItem']['ed']);
-                        $price = str_replace(',', '.', $price);
-                        if (substr($price, -3, 1) == '.') {
-                            $price = explode('.', $price);
-                            $last = array_pop($price);
-                            $price = join($price, '') . '.' . $last;
-                        } else {
-                            $price = str_replace('.', '', $price);
-                        }
-                        $newProduct = new CatalogBaseGoods();
-                        $newProduct->cat_id = $lastInsert_base_cat_id;
-                        $newProduct->supp_org_id = $get_supp_org_id;
-                        $newProduct->article = (string)$article;
-                        $newProduct->product = $product;
-                        $newProduct->units = $units;
-                        $newProduct->price = $price;
-                        $newProduct->ed = $ed;
-                        $newProduct->status = CatalogBaseGoods::STATUS_ON;
-                        $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
-                        $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
-                        $newProduct->save();
-                        $newProduct->refresh();
-                        
-                        $lastInsert_base_goods_id = $newProduct->id;
-                        
-                        $newGoods = new CatalogGoods();
-                        $newGoods->cat_id = $lastInsert_cat_id;
-                        $newGoods->base_goods_id = $lastInsert_base_goods_id;
-                        $newGoods->price = $price;
-                        $newGoods->save();
-                        $newGoods->refresh();
-                    }
+                            if (empty($units) || $units < 0) {
+                                $units = null;
+                            }
+                            $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                            //$note = trim($arrCatalogs['dataItem']['note']);
+                            $ed = trim($arrCatalogs['dataItem']['ed']);
+                            $price = str_replace(',', '.', $price);
+                            if (substr($price, -3, 1) == '.') {
+                                $price = explode('.', $price);
+                                $last = array_pop($price);
+                                $price = join($price, '') . '.' . $last;
+                            } else {
+                                $price = str_replace('.', '', $price);
+                            }
+                            $newProduct = new CatalogBaseGoods();
+                            $newProduct->cat_id = $lastInsert_base_cat_id;
+                            $newProduct->supp_org_id = $get_supp_org_id;
+                            $newProduct->article = (string) $article;
+                            $newProduct->product = $product;
+                            $newProduct->units = $units;
+                            $newProduct->price = $price;
+                            $newProduct->ed = $ed;
+                            $newProduct->status = CatalogBaseGoods::STATUS_ON;
+                            $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+                            $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
+                            $newProduct->save();
+                            $newProduct->refresh();
 
-                    /**
-                     *  
-                     * 5) Связь ресторана и поставщика
-                     *     
-                     * */
-                    $relationSuppRest->rest_org_id = $currentUser->organization_id;
-                    $relationSuppRest->supp_org_id = $get_supp_org_id;
-                    $relationSuppRest->cat_id = $lastInsert_cat_id;
-                    $relationSuppRest->status = 1;
-                    $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
-                    if (isset($relationSuppRest->uploaded_catalog)) {
-                        $relationSuppRest->uploaded_processed = 0;
-                    }
-                    $relationSuppRest->save();
-                    /**
-                     *
-                     * Отправка почты
-                     * 
-                     * */
-                    $currentUser->sendInviteToVendor($user);
-                    $currentOrganization = $currentUser->organization;
-                    $currentOrganization->step = Organization::STEP_OK;
-                    $currentOrganization->save();
-                    
-                    if (!empty($profile->phone)) {
-                        $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
-                        $target = $profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target);
-                    }
-                    $transaction->commit();
-                    if ($check['eventType'] == 5) {
-                        $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
+                            $lastInsert_base_goods_id = $newProduct->id;
+
+                            $newGoods = new CatalogGoods();
+                            $newGoods->cat_id = $lastInsert_cat_id;
+                            $newGoods->base_goods_id = $lastInsert_base_goods_id;
+                            $newGoods->price = $price;
+                            $newGoods->save();
+                            $newGoods->refresh();
+                        }
+
+                        /**
+                         *  
+                         * 5) Связь ресторана и поставщика
+                         *     
+                         * */
+                        $relationSuppRest->rest_org_id = $currentUser->organization_id;
+                        $relationSuppRest->supp_org_id = $get_supp_org_id;
+                        $relationSuppRest->cat_id = $lastInsert_cat_id;
+                        $relationSuppRest->status = 1;
+                        $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
+                        if (isset($relationSuppRest->uploaded_catalog)) {
+                            $relationSuppRest->uploaded_processed = 0;
+                        }
+                        $relationSuppRest->save();
+                        /**
+                         *
+                         * Отправка почты
+                         * 
+                         * */
+                        $currentUser->sendInviteToVendor($user);
+                        $currentOrganization = $currentUser->organization;
+                        $currentOrganization->step = Organization::STEP_OK;
+                        $currentOrganization->save();
+
+                        if (!empty($profile->phone)) {
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                            $target = $profile->phone;
+                            $sms = new \common\components\QTSMS();
+                            $sms->post_message($text, $target);
+                        }
+                        $transaction->commit();
+                        if ($check['eventType'] == 5) {
+                            $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
+                            return $result;
+                        } else {
+                            $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
+                            return $result;
+                        }
+                    } catch (Exception $e) {
+                        $transaction->rollback();
+                        $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
                         return $result;
-                    } else {
-                        $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
-                        return $result;
+                        exit;
                     }
-                
-                } catch (Exception $e) {
-                    $transaction->rollback();
-                    $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
-                    return $result;
-                    exit;
+                }
+                if ($check['eventType'] == 3 || $check['eventType'] == 5) {
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+                        if ($check['eventType'] == 5) {
+                            /**
+                             *
+                             * Создаем нового поставщика и организацию
+                             *    
+                             * */
+                            $user->setRegisterAttributes(Role::getManagerRole($organization->type_id));
+                            $user->status = User::STATUS_UNCONFIRMED_EMAIL;
+                            $user->save();
+                            $profile->setUser($user->id);
+                            $profile->sms_allow = Profile::SMS_ALLOW;
+                            $profile->save();
+                            $organization->save();
+                            $user->setOrganization($organization)->save();
+                            $get_supp_org_id = $organization->id;
+                            $currentOrganization = $currentUser->organization;
+                            if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
+                                $currentOrganization->step = Organization::STEP_OK;
+                                $currentOrganization->save();
+                            }
+                        } else {
+                            //Поставщик уже есть, но тот еще не авторизовался, забираем его org_id
+                            $get_supp_org_id = $check['org_id'];
+                        }
+                        /**
+                         *
+                         * 1) Делаем связь категорий поставщика
+                         * 
+                         * */
+//                    if (!empty($categorys)) {
+//                        foreach ($categorys as $arrCategorys) {
+//                            
+//                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
+//                            \Yii::$app->db->createCommand($sql)->execute();
+//                        }
+//                    }
+                        /**
+                         *
+                         * 2) Создаем базовый и каталог для ресторана
+                         *    
+                         * */
+                        if ($check['eventType'] == 5) {
+                            $newBaseCatalog = new Catalog();
+                            $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                            $newBaseCatalog->name = 'Главный каталог';
+                            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                            $newBaseCatalog->status = Catalog::STATUS_ON;
+                            $newBaseCatalog->save();
+                            $newBaseCatalog->refresh();
+                            $lastInsert_base_cat_id = $newBaseCatalog->id;
+                        } else {
+                            //Поставщик зарегистрирован, но не авторизован
+                            //проверяем, есть ли у поставщика Главный каталог и если нету, тогда создаем ему каталог
+                            if (Catalog::find()->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
+                                $lastInsert_base_cat_id = Catalog::find()->select('id')->where(['supp_org_id' => $get_supp_org_id, 'type' => Catalog::BASE_CATALOG])->one();
+                                $lastInsert_base_cat_id = $lastInsert_base_cat_id['id'];
+                            } else {
+                                $newBaseCatalog = new Catalog();
+                                $newBaseCatalog->supp_org_id = $get_supp_org_id;
+                                $newBaseCatalog->name = 'Главный каталог';
+                                $newBaseCatalog->type = Catalog::BASE_CATALOG;
+                                $newBaseCatalog->status = Catalog::STATUS_ON;
+                                $newBaseCatalog->save();
+                                $newBaseCatalog->refresh();
+                                $lastInsert_base_cat_id = $newBaseCatalog->id;
+                            }
+                        }
+
+                        $newCatalog = new Catalog();
+                        $newCatalog->supp_org_id = $get_supp_org_id;
+                        $newCatalog->name = $currentUser->organization->name;
+                        $newCatalog->type = Catalog::CATALOG;
+                        $newCatalog->status = Catalog::STATUS_ON;
+                        $newCatalog->save();
+                        $newCatalog->refresh();
+
+                        $lastInsert_cat_id = $newCatalog->id;
+                        /**
+                         *
+                         * 3 и 4) Создаем каталог базовый и его продукты, создаем новый каталог для ресторана и забиваем продукты на основе базового каталога
+                         *    
+                         * */
+                        $article_create = 0;
+                        foreach ($arrCatalog as $arrCatalogs) {
+                            $article_create++;
+                            $article = $article_create; //trim($arrCatalogs['dataItem']['article']);
+                            $product = trim($arrCatalogs['dataItem']['product']);
+                            //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
+                            $units = str_replace(',', '.', $units);
+                            $units = null;
+//                        if (substr($units, -3, 1) == '.') {
+//                            $units = explode('.', $units);
+//                            $last = array_pop($units);
+//                            $units = join($units, '') . '.' . $last;
+//                        } else {
+//                            $units = str_replace('.', '', $units);
+//                        }
+                            if (empty($units) || $units < 0) {
+                                $units = null;
+                            }
+                            $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                            //$note = trim($arrCatalogs['dataItem']['note']);
+                            $ed = trim($arrCatalogs['dataItem']['ed']);
+                            $price = str_replace(',', '.', $price);
+                            if (substr($price, -3, 1) == '.') {
+                                $price = explode('.', $price);
+                                $last = array_pop($price);
+                                $price = join($price, '') . '.' . $last;
+                            } else {
+                                $price = str_replace('.', '', $price);
+                            }
+                            $newProduct = new CatalogBaseGoods();
+                            $newProduct->cat_id = $lastInsert_base_cat_id;
+                            $newProduct->supp_org_id = $get_supp_org_id;
+                            $newProduct->article = (string) $article;
+                            $newProduct->product = $product;
+                            $newProduct->units = $units;
+                            $newProduct->price = $price;
+                            $newProduct->ed = $ed;
+                            $newProduct->status = CatalogBaseGoods::STATUS_ON;
+                            $newProduct->market_place = CatalogBaseGoods::MARKETPLACE_OFF;
+                            $newProduct->deleted = CatalogBaseGoods::DELETED_OFF;
+                            $newProduct->save();
+                            $newProduct->refresh();
+
+                            $lastInsert_base_goods_id = $newProduct->id;
+
+                            $newGoods = new CatalogGoods();
+                            $newGoods->cat_id = $lastInsert_cat_id;
+                            $newGoods->base_goods_id = $lastInsert_base_goods_id;
+                            $newGoods->price = $price;
+                            $newGoods->save();
+                            $newGoods->refresh();
+                        }
+
+                        /**
+                         *  
+                         * 5) Связь ресторана и поставщика
+                         *     
+                         * */
+                        $relationSuppRest->rest_org_id = $currentUser->organization_id;
+                        $relationSuppRest->supp_org_id = $get_supp_org_id;
+                        $relationSuppRest->cat_id = $lastInsert_cat_id;
+                        $relationSuppRest->status = 1;
+                        $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
+                        if (isset($relationSuppRest->uploaded_catalog)) {
+                            $relationSuppRest->uploaded_processed = 0;
+                        }
+                        $relationSuppRest->save();
+                        /**
+                         *
+                         * Отправка почты
+                         * 
+                         * */
+                        $currentUser->sendInviteToVendor($user);
+                        $currentOrganization = $currentUser->organization;
+                        $currentOrganization->step = Organization::STEP_OK;
+                        $currentOrganization->save();
+
+                        if (!empty($profile->phone)) {
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                            $target = $profile->phone;
+                            $sms = new \common\components\QTSMS();
+                            $sms->post_message($text, $target);
+                        }
+                        $transaction->commit();
+                        if ($check['eventType'] == 5) {
+                            $result = ['success' => true, 'message' => 'Поставщик ' . $organization->name . ' и каталог добавлен! Инструкция по авторизации была отправлена на почту ' . $email . ''];
+                            return $result;
+                        } else {
+                            $result = ['success' => true, 'message' => 'Каталог добавлен! приглашение было отправлено на почту  ' . $email . ''];
+                            return $result;
+                        }
+                    } catch (Exception $e) {
+                        $transaction->rollback();
+                        $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
+                        return $result;
+                        exit;
                     }
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];
@@ -649,9 +831,9 @@ class ClientController extends DefaultController {
                     $currentOrganization = $currentUser->organization;
 
                     $rows = User::find()->where(['organization_id' => $get_supp_org_id])->all();
-                    
-                    $mailer = Yii::$app->mailer; 
-                    
+
+                    $mailer = Yii::$app->mailer;
+
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
                             $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
@@ -665,7 +847,7 @@ class ClientController extends DefaultController {
                         $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
                                 ->setTo($email)->setSubject($subject)->send();
                     }
-                    
+
 
                     if ($currentOrganization->step == Organization::STEP_ADD_VENDOR) {
                         $currentOrganization->step = Organization::STEP_OK;
@@ -853,7 +1035,7 @@ class ClientController extends DefaultController {
                 $price = trim($arrCatalogs['dataItem']['price']);
                 $ed = trim($arrCatalogs['dataItem']['ed']);
                 $note = trim($arrCatalogs['dataItem']['note']);
-                array_push($articleArray, (string)$article);
+                array_push($articleArray, (string) $article);
                 if (
                         !empty($base_goods_id) &&
                         !ArrayHelper::isIn($base_goods_id, $array_base_goods_id)
@@ -930,7 +1112,7 @@ class ClientController extends DefaultController {
                     exit;
                 }
             }
-            if(max(array_count_values($articleArray))>1){
+            if (max(array_count_values($articleArray)) > 1) {
                 $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
                 return $result;
                 exit;
@@ -1368,9 +1550,9 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $dataProvider = $searchModel->search($params, $currentOrganization->id);
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->renderPartial('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         } else {
-            return $this->render('suppliers', compact('searchModel','clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
+            return $this->render('suppliers', compact('searchModel', 'clientName', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile'));
         }
     }
 
@@ -1380,7 +1562,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $profile = new Profile();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();
-        
+
         $relations = RelationSuppRest::find()->where(['rest_org_id' => $currentUser->organization_id, 'deleted' => false])->count();
 
         $currentOrganization = $this->currentUser->organization;
@@ -1398,10 +1580,10 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
             return $this->render('add-first-vendor', compact('searchModel', 'dataProvider', 'user', 'organization', 'relationCategory', 'relationSuppRest', 'profile', 'relations'));
         }
     }
-    
+
     public function actionAjaxValidateVendor() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $user =  new User();
+        $user = new User();
         //$user->scenario = 'invite';
         $profile = new Profile();
         $profile->phone = "+7";
@@ -1409,21 +1591,21 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $organization = new Organization();
         $organization->scenario = 'invite';
         $organization->type_id = Organization::TYPE_SUPPLIER;
-        
+
         $post = Yii::$app->request->post();
         if (Yii::$app->request->isAjax && $user->load($post)) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
-            
+
             $vendorManager = User::find()
-                    ->joinWith('organization')
-                    ->where(['user.email' => $user->email, 'organization.type_id' => Organization::TYPE_SUPPLIER])->one();
+                            ->joinWith('organization')
+                            ->where(['user.email' => $user->email, 'organization.type_id' => Organization::TYPE_SUPPLIER])->one();
             if ($vendorManager) {
                 $relation = RelationSuppRest::findOne([
-                    'supp_org_id' => $vendorManager->organization_id,
-                    'rest_org_id' => $currentUser->organization_id,
-                    'deleted' => false,
-                        ]);
+                            'supp_org_id' => $vendorManager->organization_id,
+                            'rest_org_id' => $currentUser->organization_id,
+                            'deleted' => false,
+                ]);
             }
             if ($user->validate() && $vendorManager && empty($relation)) {
                 $profile = $vendorManager->profile;
@@ -1450,10 +1632,10 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 }
             }
 
-            return ['errors' => true, 'messages' => \yii\widgets\ActiveForm::validate($user, $profile, $organization), 'vendor_added' => isset($relation)];//\yii\widgets\ActiveForm::validate($user, $profile, $organization);
+            return ['errors' => true, 'messages' => \yii\widgets\ActiveForm::validate($user, $profile, $organization), 'vendor_added' => isset($relation)]; //\yii\widgets\ActiveForm::validate($user, $profile, $organization);
         }
     }
-    
+
     public function actionSidebar() {
         Yii::$app->session->get('sidebar-collapse') ?
                         Yii::$app->session->set('sidebar-collapse', false) :

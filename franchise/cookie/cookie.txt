@@ -5,5 +5,5 @@
 .amocrm.ru	TRUE	/	FALSE	0	session_id	kp2plg74fle5ovkr1o20aker6baip202opv6v4plt91ugjb3mpk0
 .amocrm.ru	TRUE	/	FALSE	1642864612	BITRIX_SM_LOGIN	artur%40f-keeper.ru
 .amocrm.ru	TRUE	/	FALSE	1518448612	BITRIX_SM_SALE_UID	156201
-.amocrm.ru	TRUE	/	FALSE	1645111013	user_lang	ru
+.amocrm.ru	TRUE	/	FALSE	1657805264	user_lang	ru
 .amocrm.ru	TRUE	/	FALSE	0	BITRIX_SM_SOUND_LOGIN_PLAYED	Y

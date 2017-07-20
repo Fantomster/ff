@@ -253,7 +253,7 @@ class VendorController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if ($user->load($post)) {
+            if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {

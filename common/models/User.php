@@ -20,6 +20,8 @@ use Yii;
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
  * @property ManagerAssociate $associated
+ * @property EmailNotification $emailNotification
+ * @property SmsNotification $smsNotification
  */
 class User extends \amnah\yii2\user\models\User {
 
@@ -128,6 +130,20 @@ class User extends \amnah\yii2\user\models\User {
         return $this->hasMany(ManagerAssociate::className(), ['manager_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailNotification() {
+        return $this->hasOne(EmailNotification::className(), ['user_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSmsNotification() {
+        return $this->hasOne(SmsNotification::className(), ['user_id' => 'id']);
+    }
+    
     /**
      * Check if user account is active
      * 

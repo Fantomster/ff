@@ -39,7 +39,7 @@ class UserController extends ActiveController {
 
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
-            'only' => ['auth','complete-registration', 'refresh-fcm-token', 'send'],
+            'only' => ['index', 'view', 'options', 'auth','complete-registration', 'refresh-fcm-token', 'send'],
             'authMethods' => [
                 [
                     'class' => HttpBasicAuth::className(),

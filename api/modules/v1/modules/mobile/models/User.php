@@ -5,13 +5,13 @@ namespace api\modules\v1\modules\mobile\models;
 use common\models\User as BaseUser;
 use Yii;
 use yii\filters\RateLimitInterface;
+use common\models\Role;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
 class User extends BaseUser implements RateLimitInterface
 {
-
     /**
      * @var int
      */
@@ -136,4 +136,5 @@ class User extends BaseUser implements RateLimitInterface
         $profile = new \common\models\Profile();
         return $this->hasOne($profile::className(), ['user_id' => 'id']);
     }
+
 }

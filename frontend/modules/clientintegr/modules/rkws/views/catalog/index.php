@@ -41,6 +41,6 @@ use api\common\models\RkAccess;
     <?= $this->render('/default/_menu.php'); ?>
 </section>
 <section class="content">
-    <div>Каталоги</div>
+    <div>Номенклатура</div>
 </section>
 

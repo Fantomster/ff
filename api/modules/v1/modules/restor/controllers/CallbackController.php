@@ -27,5 +27,9 @@ class CallbackController extends Controller {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
               
     }
+    
+    public function actionAgent() {
+        \frontend\modules\clientintegr\modules\rkws\components\AgentHelper::callback();
+    }
 
 }

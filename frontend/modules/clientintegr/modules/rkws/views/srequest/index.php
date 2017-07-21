@@ -57,6 +57,8 @@ use api\common\models\RkAccess;
                             
                             <?php 
                             
+                            var_dump($res);
+                            
                             if ($res['resp']) {
                                 
                                 echo '<p><table class="table table-condensed">';

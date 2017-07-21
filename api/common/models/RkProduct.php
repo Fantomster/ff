@@ -26,7 +26,7 @@ use common\models\Organization;
  * 
  * 
  */
-class RkTasks extends \yii\db\ActiveRecord
+class RkProduct extends \yii\db\ActiveRecord
 {
     
     const STATUS_UNLOCKED = 0;
@@ -38,7 +38,7 @@ class RkTasks extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'rk_tasks';
+        return 'rk_product';
     }
 
     /**
@@ -47,10 +47,9 @@ class RkTasks extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['fid','acc','guid'], 'required'],
-            [['id','fid','acc'], 'integer'],
-            [['guid','acc','created_at','updated_at', 'callback_at', 'intstatus_id', 'wsstatus_id', 
-                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive' ], 'safe'],
+            [['login','fid','password','token','lic','org'], 'required'],
+            [['id','fid','org','ver'], 'integer'],
+            [['token','login','password','salespoint'], 'string', 'max' => 255],
         ];
     }
 
@@ -62,12 +61,12 @@ class RkTasks extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'fid' => 'FID',
-            'guid' => 'GUID',
+            'token' => 'Token',
             'Nonce' => 'Nonce'
         ];
     }
     
-   /* 
+    
     public static function getStatusArray() {
         return [
         RkAccess::STATUS_UNLOCKED  => 'Активен',
@@ -86,7 +85,6 @@ class RkTasks extends \yii\db\ActiveRecord
     return $org ? $org->name : 'no';
 }
     
-    */
     
     public static function getDb()
     {

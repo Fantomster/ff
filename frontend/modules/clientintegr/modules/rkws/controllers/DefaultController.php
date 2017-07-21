@@ -4,6 +4,9 @@ namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use Yii;
 use yii\web\Controller;
+use api\common\models\RkDicSearch;
+use api\common\models\RkDic;
+
 // use yii\mongosoft\soapserver\Action;
 
 /**
@@ -25,11 +28,20 @@ class DefaultController extends Controller {
         
     public function actionIndex() {
         
+        $searchModel = new RkDicSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+                
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index');
+            return $this->renderPartial('index',[
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
         } else {
-            return $this->render('index');
-        }     
+            return $this->render('index',[
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+        }   
         
     }
       

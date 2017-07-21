@@ -39,19 +39,13 @@ class SrequestController extends Controller {
         if (Yii::$app->request->isPjax) {
             //return $this->renderPartial('index');
         } else {
-            
-        $org = User::findOne(Yii::$app->user->id)->organization_id;
-        
-        $restr = RkAccess::find()->andwhere('org= :org',[':org' => $org])->one();
 
-        $cmd = 'get_objectinfo';     
-                    
-        $res = ApiHelper::sendCmd($cmd, $restr, $org);
+        $result = ApiHelper::checkAuth();
         
-        $errd = RkWserror::find()->andwhere('code = :code',[':code' =>$res['respcode']['code']])->one()->denom;
+        $errd = RkWserror::find()->andwhere('code = :code',[':code' =>$result['respcode']['code']])->one()->denom;
               
         return $this->render('index'  ,[
-            'res'  => $res,
+            'res'  => $result,
             'errd' => $errd,
         ]);
         
@@ -59,13 +53,7 @@ class SrequestController extends Controller {
         
     }
     
-    public function actionUid() {
-        
-        $uuid4 = UUID::uuid4();
-        
-        var_dump($uuid4);
-        
-    }
+
     
     
      

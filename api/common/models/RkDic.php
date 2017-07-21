@@ -26,7 +26,7 @@ use common\models\Organization;
  * 
  * 
  */
-class RkTasks extends \yii\db\ActiveRecord
+class RkDic extends \yii\db\ActiveRecord
 {
     
     const STATUS_UNLOCKED = 0;
@@ -38,7 +38,7 @@ class RkTasks extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'rk_tasks';
+        return 'rk_dic';
     }
 
     /**
@@ -47,10 +47,9 @@ class RkTasks extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['fid','acc','guid'], 'required'],
-            [['id','fid','acc'], 'integer'],
-            [['guid','acc','created_at','updated_at', 'callback_at', 'intstatus_id', 'wsstatus_id', 
-                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive' ], 'safe'],
+      //      [['login','fid','password','token','lic','org'], 'required'],
+            [['id','fid','org','ver'], 'integer'],
+            [['token','login','password','salespoint','contr'], 'string', 'max' => 255],
         ];
     }
 
@@ -61,13 +60,19 @@ class RkTasks extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'fid' => 'FID',
-            'guid' => 'GUID',
-            'Nonce' => 'Nonce'
+            'dictype_id' => 'Справочник',
+            'dicstatus_id' => 'Состояние',
+            'created_at' => 'Создано',
+            'updated_at' => 'Обновлено',
+            'obj_count' => 'Кол-во объектов',
+            'obj_mapcount' => 'Кол-во сопоставленных',
+          //  'dictype_id' => '',
+            
+            
         ];
     }
     
-   /* 
+    
     public static function getStatusArray() {
         return [
         RkAccess::STATUS_UNLOCKED  => 'Активен',
@@ -80,13 +85,24 @@ class RkTasks extends \yii\db\ActiveRecord
            
     }
     
+    
+    public function getDictype() {
+           return $this->hasOne(RkDictype::className(), ['id' => 'dictype_id']);          
+           
+    }
+    
+        
+    public function getDicstatus() {
+           return $this->hasOne(RkDicstatus::className(), ['id' => 'dicstatus_id']);          
+           
+    }
+    
     public function getOrganizationName()
 {
     $org = $this->organization;
     return $org ? $org->name : 'no';
 }
     
-    */
     
     public static function getDb()
     {

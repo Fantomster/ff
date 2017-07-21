@@ -778,10 +778,12 @@ class OrderController extends DefaultController {
                         $message = $order->discount . "%";
                     }
                     $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
+                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
                 }
             } else {
                 if ($order->discount > 0) {
                     $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' отменил скидку на заказ №' . $order->id);
+                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
                 }
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 $order->discount = null;
@@ -805,6 +807,7 @@ class OrderController extends DefaultController {
                     }
                 }
                 $order->calculateTotalPrice();
+                $order->save();
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
                 } else {
@@ -813,6 +816,8 @@ class OrderController extends DefaultController {
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
+                $order->calculateTotalPrice();
+                $order->save();
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
                 $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);

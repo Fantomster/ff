@@ -15,7 +15,7 @@ use api\common\models\RkDic;
  * Author: R.Smirnov
  */
 
-class DefaultController extends Controller {
+class DefaultController extends \frontend\modules\clientintegr\controllers\DefaultController {
     
     public $enableCsrfValidation = false;
     

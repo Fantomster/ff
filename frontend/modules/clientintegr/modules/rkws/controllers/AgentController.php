@@ -15,7 +15,7 @@ use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
  * Author: R.Smirnov
  */
 
-class AgentController extends Controller {
+class AgentController extends \frontend\modules\clientintegr\controllers\DefaultController {
     
         
     public function actionIndex() {

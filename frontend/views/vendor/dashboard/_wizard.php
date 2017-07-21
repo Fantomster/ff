@@ -17,7 +17,7 @@ $this->registerJs('
         $.ajax({
             type: "POST",
             dataType: "json",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
+            url: "'.Url::to('/site/ajax-wizard-off').'",
             async: false
         });
     });

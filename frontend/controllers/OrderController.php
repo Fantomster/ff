@@ -771,6 +771,7 @@ class OrderController extends DefaultController {
                 if ($discountChanged) {
                     $order->discount_type = $discount['discount_type'];
                     $order->discount = $order->discount_type ? abs($discount['discount']) : null;
+                    $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
                         $message = $order->discount . " руб";
                     } else {
@@ -784,17 +785,18 @@ class OrderController extends DefaultController {
                 }
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 $order->discount = null;
+                $order->calculateTotalPrice();
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>',' ',$message);
+                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->vendor->users as $recipient) {
-                    /*$email = $recipient->email;
-                    $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                            ->setTo($email)
-                            ->setSubject($subject)
-                            ->send();*/
+                    /* $email = $recipient->email;
+                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                      ->setTo($email)
+                      ->setSubject($subject)
+                      ->send(); */
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
@@ -802,6 +804,7 @@ class OrderController extends DefaultController {
                         $sms->post_message($text, $target);
                     }
                 }
+                $order->calculateTotalPrice();
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
                 } else {
@@ -812,13 +815,13 @@ class OrderController extends DefaultController {
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
-                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>',' ',$message);
+                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->client->users as $recipient) {
-                    /*$email = $recipient->email;
-                    $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                            ->setTo($email)
-                            ->setSubject($subject)
-                            ->send();*/
+                    /* $email = $recipient->email;
+                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                      ->setTo($email)
+                      ->setSubject($subject)
+                      ->send(); */
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
@@ -836,15 +839,14 @@ class OrderController extends DefaultController {
                     $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order);
                 }
             }
-            $order->calculateTotalPrice();
             $order->save();
-        
+
 //        if ($orderChanged) {
             return $this->redirect(["order/view", "id" => $order->id]);
-  //      }
+            //      }
         }
 
-        
+
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -875,7 +877,7 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
-        
+
         //return $this->renderPartial('_bill', compact('dataProvider', 'order'));
         $pdf = new Pdf([
             'mode' => Pdf::MODE_UTF8, // leaner size using standard fonts
@@ -888,7 +890,7 @@ class OrderController extends DefaultController {
             'options' => [
 //                'title' => 'Privacy Policy - Krajee.com',
 //                'subject' => 'Generating PDF files via yii2-mpdf extension has never been easy'
-            //'showImageErrors' => true,
+            'showImageErrors' => true,
             ],
             'methods' => [
 //                'SetHeader' => ['Generated By: Krajee Pdf Component||Generated On: ' . date("r")],

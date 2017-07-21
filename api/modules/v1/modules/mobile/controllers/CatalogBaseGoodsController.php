@@ -3,14 +3,8 @@
 namespace api\modules\v1\modules\mobile\controllers;
 
 use Yii;
-use yii\filters\auth\CompositeAuth;
-use yii\filters\auth\HttpBasicAuth;
-use yii\filters\auth\HttpBearerAuth;
-use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use yii\filters\ContentNegotiator;
-use yii\web\Response;
 use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
 use common\models\CatalogGoods;
@@ -33,33 +27,7 @@ class CatalogBaseGoodsController extends ActiveController {
     public function behaviors() {
         $behaviors = parent::behaviors();
 
-        $behaviors['authenticator'] = [
-            'class' => CompositeAuth::className(),
-            'only' => ['index', 'view', 'options'],
-            'authMethods' => [
-                [
-                    'class' => HttpBasicAuth::className(),
-                    'auth' => function ($username, $password) {
-            
-                        $model = new LoginForm();
-                        $model->email = $username;
-                        $model->password = $password;
-                        $model->validate();
-                        return ($model->validate()) ? $model->getUser() : null;
-                    }
-                ],
-                HttpBearerAuth::className(),
-                QueryParamAuth::className()
-            ]
-        ];
-                
-        $behaviors['contentNegotiator'] = [
-        'class' => ContentNegotiator::className(),
-        'formats' => [
-            'application/json' => Response::FORMAT_JSON
-        ]
-
-        ];
+        $behaviors = array_merge($behaviors, $this->module->controllerBehaviors);
 
         return $behaviors;
     }
@@ -91,7 +59,7 @@ class CatalogBaseGoodsController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = Catalog::findOne($id);
+        $model = CatalogBaseGoods::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }

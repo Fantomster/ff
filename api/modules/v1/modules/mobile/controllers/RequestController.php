@@ -5,19 +5,19 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\resources\Catalog;
+use api\modules\v1\modules\mobile\resources\Request;
 use yii\data\ActiveDataProvider;
 
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class CatalogController extends ActiveController {
+class RequestController extends ActiveController {
 
     /**
      * @var string
      */
-    public $modelClass = 'api\modules\v1\modules\mobile\resources\Catalog';
+    public $modelClass = 'api\modules\v1\modules\mobile\resources\Request';
 
     /**
      * @return array
@@ -57,7 +57,7 @@ class CatalogController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = Catalog::findOne($id);
+        $model = Request::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
@@ -69,24 +69,38 @@ class CatalogController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new Catalog();
-        $query = Catalog::find();
+        $params = new Request();
+        $query = Request::find();
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
         ));
+        
+        $user = Yii::$app->user->getIdentity();
+        
+        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+        $query->andWhere (['rest_org_id'=>$user->organization_id]);
+       
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
   
          $query->andFilterWhere([
             'id' => $params->id, 
-            'type' => $params->type, 
-            'supp_org_id' => Yii::$app->user->id, 
-            'name' => $params->name, 
-            'status' => $params->status, 
+            'category' => $params->category, 
+            'product' => $params->product, 
+            'comment' => $params->comment, 
+            'regular' => $params->regular, 
+            'amount' => $params->amount, 
+            'rush_order' => $params->rush_order, 
+            'payment_method' => $params->payment_method, 
+            'deferment_payment' => $params->deferment_payment,
+            'responsible_supp_org_id' => $params->responsible_supp_org_id, 
+            'count_views' => $params->count_views, 
             'created_at' => $params->created_at, 
-            'updated_at' => $params->updated_at
+            'end' => $params->end, 
+            'rest_org_id' => $params->rest_org_id, 
+            'active_status' => $params->active_status
            ]);
         return $dataProvider;
     }

@@ -5,19 +5,12 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use api\modules\v1\modules\mobile\models\User;
 use backend\modules\api\v1\resources\User as UserResource;
-use yii\filters\auth\CompositeAuth;
-use yii\filters\auth\HttpBasicAuth;
-use yii\filters\auth\HttpBearerAuth;
-use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use common\models\forms\LoginForm;
 use common\models\Profile;
 use common\models\Organization;
 use common\models\Role;
 use common\models\UserToken;
-use yii\filters\ContentNegotiator;
-use yii\web\Response;
 use common\models\UserFcmToken;
 
 
@@ -37,33 +30,7 @@ class UserController extends ActiveController {
     public function behaviors() {
         $behaviors = parent::behaviors();
 
-        $behaviors['authenticator'] = [
-            'class' => CompositeAuth::className(),
-            'only' => ['index', 'view', 'options', 'auth','complete-registration', 'refresh-fcm-token', 'send'],
-            'authMethods' => [
-                [
-                    'class' => HttpBasicAuth::className(),
-                    'auth' => function ($username, $password) {
-            
-                        $model = new LoginForm();
-                        $model->email = $username;
-                        $model->password = $password;
-                        $model->validate();
-                        return ($model->validate()) ? $model->getUser() : null;
-                    }
-                ],
-                HttpBearerAuth::className(),
-                QueryParamAuth::className()
-            ]
-        ];
-                
-        $behaviors['contentNegotiator'] = [
-        'class' => ContentNegotiator::className(),
-        'formats' => [
-            'application/json' => Response::FORMAT_JSON
-        ]
-
-        ];
+        $behaviors = array_merge($behaviors, $this->module->controllerBehaviors);
 
         return $behaviors;
     }

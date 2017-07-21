@@ -5,19 +5,20 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\resources\Catalog;
+use api\modules\v1\modules\mobile\resources\RequestCallback;
 use yii\data\ActiveDataProvider;
+use api\modules\v1\modules\mobile\resources\Request;
 
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class CatalogController extends ActiveController {
+class RequestCallbackController extends ActiveController {
 
     /**
      * @var string
      */
-    public $modelClass = 'api\modules\v1\modules\mobile\resources\Catalog';
+    public $modelClass = 'api\modules\v1\modules\mobile\resources\RequestCallback';
 
     /**
      * @return array
@@ -57,7 +58,7 @@ class CatalogController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = Catalog::findOne($id);
+        $model = RequestCallback::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
@@ -69,22 +70,32 @@ class CatalogController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new Catalog();
-        $query = Catalog::find();
+        $params = new RequestCallback();
+        $query = RequestCallback::find();
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
         ));
+        
+        $user = Yii::$app->user->getIdentity();
+        
+        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+            $query = RequestCallback::find()->where(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
+     
+        
+        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
+             $query->andWhere (['supp_org_id' => $user->organization_id]);
+                
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
   
          $query->andFilterWhere([
             'id' => $params->id, 
-            'type' => $params->type, 
-            'supp_org_id' => Yii::$app->user->id, 
-            'name' => $params->name, 
-            'status' => $params->status, 
+            'request_id' => $params->request_id, 
+            'supp_org_id' => $params->supp_org_id, 
+            'price' => $params->price, 
+            'comment' => $params->comment, 
             'created_at' => $params->created_at, 
             'updated_at' => $params->updated_at
            ]);

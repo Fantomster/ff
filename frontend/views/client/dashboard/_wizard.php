@@ -20,9 +20,14 @@ $this->registerJs('
     
     $(document).on("click", ".wizard-off", function(e) {
         $.ajax({
-            async: false,
             type: "POST",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
+            dataType: "json",
+            url: "'.Url::to('/site/ajax-wizard-off').'",
+            success: function (response) {
+                if (response.result == "moscow") {
+                }
+            },
+            async: false
         });
     });
 
@@ -32,7 +37,6 @@ $this->registerJs('
             form.attr("action"),
             form.serialize()
         ).done(function(result) {
-            console.log(result);
             if (result.length == 0) {
                 $(".data-modal .modal-content").slick("slickNext");
             }

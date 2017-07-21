@@ -15,9 +15,15 @@ $this->registerJs('
 
     $(document).on("click", ".wizard-off", function(e) {
         $.ajax({
-            async: false,
             type: "POST",
+            dataType: "json",
             url: "'.Url::to('/site/ajax-wizard-off').'"
+            success: function (response) {
+                if (response.result == "moscow") {
+                    yaCounter45202749.reachGoal("regmoscow", function () {});
+                }
+            },
+            async: false
         });
     });
 

@@ -19,12 +19,17 @@ $this->registerJs('
     });
     
     $(document).on("click", ".wizard-off", function(e) {
+        e.preventDefault();
+        var url = $(this).attr("href");
         $.ajax({
             type: "POST",
             dataType: "json",
             url: "'.Url::to('/site/ajax-wizard-off').'",
             success: function (response) {
                 if (response.result == "moscow") {
+                    yaCounter44637517.reachGoal("regmoscow", function () {
+                        document.location = url;
+                    });
                 }
             },
             async: false

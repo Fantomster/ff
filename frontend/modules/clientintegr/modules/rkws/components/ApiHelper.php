@@ -266,13 +266,27 @@ class ApiHelper  {
             if (count($r->children()) == 0) {
                 if ($xml->$k->count() == 1) {
                     $arr[$r->getName()] = strval($r);
+                    
+                    $atts_object = $r->attributes();
+                    $atts_array = (array) $atts_object;
+                    $arr[$r->getName()][]=$atts_array;
+                    
+                  //  foreach ($r->attributes as $a => $b) {
+                  //   $arr[$r->getName()]['@attributes'] = [$a => $b]; 
+                  //  }    
+                    
                 } else {
                     $arr[$r->getName()][] = strval($r);
+                    
+                    $atts_object = $r->attributes();
+                    $atts_array = (array) $atts_object;
+                    $arr[$r->getName()][][]=$atts_array;
                 }//Endif
             } else {
           
                 $arr[$r->getName()][] = self::xml2array($r);
             }//Endif
+            
         }//Endofreach
 
         return $arr;

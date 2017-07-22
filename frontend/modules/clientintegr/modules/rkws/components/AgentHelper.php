@@ -48,11 +48,11 @@ class AgentHelper extends AuthHelper {
      $tmodel->intstatus_id = 1; 
      
      if (!$tmodel->save()) {
-      
+         echo "Ошибка валидации<br>";
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($tmodel);
+     var_dump($res);
     
     }
     

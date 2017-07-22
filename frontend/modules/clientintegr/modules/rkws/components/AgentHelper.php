@@ -61,9 +61,9 @@ class AgentHelper extends AuthHelper {
     $getr = Yii::$app->request->getRawBody();
         
     $myXML   = simplexml_load_string($getr);
-   // $array = $this->XML2Array($myXML);
-    $array = json_decode(json_encode((array) $myXML), 1);
-    $array = array($myXML->getName() => $array);
+    $array = $this->xml2array($myXML);
+  //  $array = json_decode(json_encode((array) $myXML), 1);
+  //  $array = array($myXML->getName() => $array);
    
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
@@ -74,4 +74,27 @@ class AgentHelper extends AuthHelper {
               
     }
     
+    public function xml2array($xml) {
+
+        $arr = array();
+
+        foreach ($xml->children() as $k => $r) {
+
+            if (count($r->children()) == 0) {
+                if ($xml->$k->count() == 1) {
+                    $arr[$r->getName()] = strval($r);
+                } else {
+                    $arr[$r->getName()][] = strval($r);
+                }//Endif
+            } else {
+
+                print_r(xml2array($r));
+
+                $arr[$r->getName()][] = xml2array($r);
+            }//Endif
+        }//Endofreach
+
+        return $arr;
+    }
+
 }

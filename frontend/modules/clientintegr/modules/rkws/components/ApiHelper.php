@@ -271,8 +271,7 @@ class ApiHelper  {
                 }//Endif
             } else {
 
-                print_r(xml2array($r));
-
+            
                 $arr[$r->getName()][] = xml2array($r);
             }//Endif
         }//Endofreach

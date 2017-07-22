@@ -52,7 +52,7 @@ class AgentHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($tmodel);
+    var_dump($res);
     
     }
     

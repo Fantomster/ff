@@ -61,8 +61,30 @@ class AgentHelper extends AuthHelper {
     $getr = Yii::$app->request->getRawBody();
         
     $myXML   = simplexml_load_string($getr);
+    
+    $gr_count = 0;
+        
+    foreach ($myXML->CORRGROUP as $corrgroup) {
+        
+        $gr_count++;
+        $corr_count = 0;
+                        
+        foreach ($corrgroup->CORR as $corr) {
+            
+        $corr_count++;
+        
+            foreach($corr->attributes() as $a => $b) {
+                
+                $array[$gr_count][$corr_count][$a] = $b;
+            }
+         
+            
+        }
+        
+    }
    
-    $array = ApiHelper::xml2array($myXML);
+   
+  //  $array = ApiHelper::xml2array($myXML);
   //  
   //  $array = json_decode(json_encode((array) $myXML), 1);
   //  $array = array($myXML->getName() => $array);

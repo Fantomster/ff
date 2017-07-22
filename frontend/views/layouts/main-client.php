@@ -25,6 +25,8 @@ use yii\helpers\Url;
     </head>
     <body class="hold-transition skin-blue sidebar-mini <?=Yii::$app->session->get('sidebar-collapse')?'sidebar-collapse':''?>">
     <?php $this->beginBody() ?>
+        <?php echo "kk"; var_dump($this->params); ?>
+        
     <div class="wrapper" style="margin-bottom: -20px;overflow-y:hidden;">
     
         <?= $this->render(

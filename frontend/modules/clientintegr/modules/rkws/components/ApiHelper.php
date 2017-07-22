@@ -293,7 +293,9 @@ class ApiHelper  {
             
         }//Endofreach
 
-        return ['RP'][$arr];
+        $arrb = array('RP' => $arr);
+        
+        return $arrb;
     }
     
 }

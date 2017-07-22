@@ -66,6 +66,16 @@ class AgentHelper extends AuthHelper {
   //  $array = json_decode(json_encode((array) $myXML), 1);
   //  $array = array($myXML->getName() => $array);
    
+    /*
+    foreach($array['CORRGROUP'] as $corgroup) {
+        
+        foreach ($corgroup['CORR'] as $cor) {
+            
+            
+        }
+        
+    }
+   */
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    

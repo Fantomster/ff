@@ -286,7 +286,7 @@ class ApiHelper  {
           
                 $atts_object = $r->attributes();
                 $atts_array = (array) $atts_object;
-                $arr[$r->getName()][]=$atts_array;
+                $arr[$r->getName()]=$atts_array;
                 
                 $arr[$r->getName()][] = self::xml2array($r);
             }//Endif

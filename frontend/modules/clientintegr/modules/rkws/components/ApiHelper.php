@@ -270,9 +270,8 @@ class ApiHelper  {
                     $arr[$r->getName()][] = strval($r);
                 }//Endif
             } else {
-
-            
-                $arr[$r->getName()][] = xml2array($r);
+          
+                $arr[$r->getName()][] = self::xml2array($r);
             }//Endif
         }//Endofreach
 

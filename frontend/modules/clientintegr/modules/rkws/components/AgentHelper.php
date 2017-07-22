@@ -56,7 +56,7 @@ class AgentHelper extends AuthHelper {
     
     }
     
-    public function callback()
+    public static function callback()
     {       
     $getr = Yii::$app->request->getRawBody();
         

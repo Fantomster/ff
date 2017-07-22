@@ -249,7 +249,7 @@ JS;
                                 <ul class="menu unread-messages">
                                     <?php
                                         foreach ($unreadMessages as $message) {
-                                            echo $this->render('/order/_header-message', compact('message'));
+                                            echo $this->render('@frontend/views/order/_header-message', compact('message'));
                                         }
                                     ?>
                                 </ul>

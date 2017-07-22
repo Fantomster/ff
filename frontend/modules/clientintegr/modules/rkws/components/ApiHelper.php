@@ -257,7 +257,28 @@ class ApiHelper  {
     }
 */
     
+    public static function xml2array($xml) {
 
+        $arr = array();
+
+        foreach ($xml->children() as $k => $r) {
+
+            if (count($r->children()) == 0) {
+                if ($xml->$k->count() == 1) {
+                    $arr[$r->getName()] = strval($r);
+                } else {
+                    $arr[$r->getName()][] = strval($r);
+                }//Endif
+            } else {
+
+                print_r(xml2array($r));
+
+                $arr[$r->getName()][] = xml2array($r);
+            }//Endif
+        }//Endofreach
+
+        return $arr;
+    }
     
 }
 

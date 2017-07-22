@@ -255,7 +255,7 @@ JS;
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-url="<?= Url::to(['order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['@frontend/views/order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>">Пометить как прочитанные</a>
                             </li>
                         </ul>
                     </li>
@@ -271,13 +271,13 @@ JS;
                                 <ul class="menu unread-notifications">
                                     <?php
                                         foreach ($unreadNotifications as $message) {
-                                            echo $this->render('/order/_header-message', compact('message'));
+                                            echo $this->render('@frontend/views/order/_header-message', compact('message'));
                                         }
                                     ?>
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-url="<?= Url::to(['order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['@frontend/views/order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>">Пометить как прочитанные</a>
                             </li>
                         </ul>
                     </li>

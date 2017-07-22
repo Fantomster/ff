@@ -75,9 +75,8 @@ class AgentHelper extends AuthHelper {
         
             foreach($corr->attributes() as $a => $b) {
                 
-                $array[$gr_count][$corr_count][$a] = $b;
+                $array[$gr_count][$corr_count][$a] = strval($b[0]);
             }
-         
             
         }
         

@@ -264,24 +264,24 @@ class ApiHelper  {
         foreach ($xml->children() as $k => $r) {
 
             if (count($r->children()) == 0) {
-                if ($xml->$k->count() == 1) {
-                    $arr[$r->getName()] = strval($r);
+            //    if ($xml->$k->count() == 1) {
+            //        $arr[$r->getName()] = strval($r);
                     
-                    $atts_object = $r->attributes();
-                    $atts_array = (array) $atts_object;
-                    $arr[$r->getName()][]=$atts_array;
+            //        $atts_object = $r->attributes();
+            //        $atts_array = (array) $atts_object;
+            //        $arr[$r->getName()][]=$atts_array;
                     
                   //  foreach ($r->attributes as $a => $b) {
                   //   $arr[$r->getName()]['@attributes'] = [$a => $b]; 
                   //  }    
                     
-                } else {
+            //    } else {
                     $arr[$r->getName()][] = strval($r);
                     
                     $atts_object = $r->attributes();
                     $atts_array = (array) $atts_object;
                     $arr[$r->getName()][][]=$atts_array;
-                }//Endif
+            //    }//Endif
             } else {
           
                 $atts_object = $r->attributes();
@@ -293,10 +293,9 @@ class ApiHelper  {
             
         }//Endofreach
 
-        $arrb = array('RP' => $arr);
-        
-        return $arrb;
+        return $arr;
     }
+    
     
 }
 

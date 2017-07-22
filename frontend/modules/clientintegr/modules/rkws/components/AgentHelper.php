@@ -62,11 +62,10 @@ class AgentHelper extends AuthHelper {
         
     $myXML   = simplexml_load_string($getr);
     
-            
+    $gcount = 0;        
+    
     foreach ($myXML->CORRGROUP as $corrgroup) {
          
-        $corr_count = 0;
-        
         foreach($corrgroup->attributes() as $c => $d) {
                 
         //    $array[$corr_count][$c] = strval($d[0]);
@@ -80,13 +79,14 @@ class AgentHelper extends AuthHelper {
             }
                 foreach ($corrgroup->CORR as $corr) {
             
-                $corr_count++;
-                $array[$corr_count]['group_rid'] = $grid;
-                $array[$corr_count]['group_name'] = $grname;
+                
+                $array[$gcount]['group_rid'] = $grid;
+                $array[$gcount]['group_name'] = $grname;
+                $gcount++;
         
                         foreach($corr->attributes() as $a => $b) {
                 
-                            $array[$corr_count][$a] = strval($b[0]);
+                            $array[$gcount][$a] = strval($b[0]);
                         }
             
         }

@@ -59,15 +59,16 @@ class AgentHelper extends AuthHelper {
     public static function callback()
     {       
     $getr = Yii::$app->request->getRawBody();
+    $getrs = print_r($getr,true);
     
-    $myXML   = simplexml_load_string($getr);
+    $myXML   = simplexml_load_string($getrs);
    // $array = $this->XML2Array($myXML);
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
    
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log', print_r($getr,true), FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',var_dump($array) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);     
               
     }

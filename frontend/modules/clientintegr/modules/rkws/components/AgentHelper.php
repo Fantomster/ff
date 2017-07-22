@@ -79,10 +79,10 @@ class AgentHelper extends AuthHelper {
             }
                 foreach ($corrgroup->CORR as $corr) {
             
-                
+                $gcount++;
                 $array[$gcount]['group_rid'] = $grid;
                 $array[$gcount]['group_name'] = $grname;
-                $gcount++;
+               
         
                         foreach($corr->attributes() as $a => $b) {
                 

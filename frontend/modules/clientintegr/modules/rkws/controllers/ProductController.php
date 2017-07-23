@@ -12,7 +12,7 @@ use yii\web\Controller;
  * Author: R.Smirnov
  */
 
-class CatalogController extends Controller {
+class ProductController extends Controller {
     
     public $enableCsrfValidation = false;
     

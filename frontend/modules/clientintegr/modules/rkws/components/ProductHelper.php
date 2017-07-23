@@ -16,11 +16,11 @@ use api\common\models\RkStore;
  * and open the template in the editor.
  */
 
-class StoreHelper extends AuthHelper {
+class ProductHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/store";
+    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/product";
     
-    public function getStore () {
+    public function getProduct () {
     if (!$this->Authorizer()) {
        
       echo "Can't perform authorization";
@@ -30,8 +30,10 @@ class StoreHelper extends AuthHelper {
     $guid = UUID::uuid4();
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_stores" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
+    <PARAM name="goodgorup_rid" val="1" />
+    <PARAM name="include_goods" val="1" />    
     </RQ>'; 
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
@@ -39,7 +41,7 @@ class StoreHelper extends AuthHelper {
      
      $tmodel = new RkTasks();
      
-     $tmodel->tasktype_id = 25;
+     $tmodel->tasktype_id = 23;
      $tmodel->acc = $this->org;
      $tmodel->fid = 1;
      $tmodel->guid = $res['respcode']['taskguid'];
@@ -67,7 +69,7 @@ class StoreHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
-    
+    /*
     foreach ($myXML->STOREGROUP as $storegroup) {
             foreach($storegroup->attributes() as $c => $d) {
                 if ($c == 'rid') $grid=strval($d[0]);
@@ -83,6 +85,7 @@ class StoreHelper extends AuthHelper {
                         }
                 }
     }
+    */
     
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 
@@ -143,7 +146,7 @@ class StoreHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
+  //  file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
               
     }

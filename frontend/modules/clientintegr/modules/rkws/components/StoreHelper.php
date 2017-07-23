@@ -67,36 +67,22 @@ class StoreHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
-    /*
-    foreach ($myXML->CORRGROUP as $corrgroup) {
-            foreach($corrgroup->attributes() as $c => $d) {
+    
+    foreach ($myXML->STOREGROUP as $storegroup) {
+            foreach($storegroup->attributes() as $c => $d) {
                 if ($c == 'rid') $grid=strval($d[0]);
                 if ($c == 'name') $grname=strval($d[0]);
             }
-                foreach ($corrgroup->CORR as $corr) {
+                foreach ($storegroup->STORE as $store) {
                     $gcount++;
                     $array[$gcount]['group_rid'] = $grid;
                     $array[$gcount]['group_name'] = $grname;
                
-                        foreach($corr->attributes() as $a => $b) {
+                        foreach($store->attributes() as $a => $b) {
                           $array[$gcount][$a] = strval($b[0]);
                         }
                 }
     }
-    */
-    
-    /*
-    foreach ($myXML->RP as $rp) {
-        
-        $cmdguid = 'не зашли в RP';
-        $posid = 'не зашли в RP';
-        foreach($rp->attributes() as $a => $b) { 
-                if ($a == 'cmdguid') $cmdguid=strval($b);
-                if ($a == 'posid') $posid=strval($b);
-        }
-        
-    }
-    */
     
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 
@@ -107,8 +93,8 @@ class StoreHelper extends AuthHelper {
      //   $tmodel = RkTasks::find()->andWhere('')
      //   
         
-     // Заполнение контрагентов
-        
+     // Заполнение складов
+        /*
         foreach ($array as $a)   {
             
             $amodel = new RkAgent();
@@ -124,7 +110,7 @@ class StoreHelper extends AuthHelper {
             } else $er = "Данные контрагентов успешно сохранены.(ID:".$amodel->id." )";
          
         }
-        
+        */
     }
     
    
@@ -155,8 +141,8 @@ class StoreHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-   // file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-   // file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+    file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
    // file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
               

@@ -84,10 +84,14 @@ class AgentHelper extends AuthHelper {
     }
     
     foreach ($myXML->RP as $rp) {
+        
+        $cmdguid = 'нет';
+        $posid = 'нет';
         foreach($rp->attributes() as $a => $b) { 
-                if ($a == 'cmdguid') $cmdguid=strval($b[0]);
-                if ($a == 'posid') $posid=strval($b[0]);
+                if ($a == 'cmdguid') $cmdguid=strval($b);
+                if ($a == 'posid') $posid=strval($b);
         }
+        
     }
     
    

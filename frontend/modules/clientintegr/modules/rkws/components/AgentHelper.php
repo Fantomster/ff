@@ -117,7 +117,7 @@ class AgentHelper extends AuthHelper {
             
             if (!$amodel->save()) {
                 $er = $amodel->getErrors();
-            }
+            } else $er = "Данные контрагентов успешно сохранены";
          
         }
         

@@ -36,5 +36,9 @@ class CallbackController extends Controller {
     public function actionStore() {
         \frontend\modules\clientintegr\modules\rkws\components\StoreHelper::callback();
     }
+    
+    public function actionProduct() {
+        \frontend\modules\clientintegr\modules\rkws\components\ProductHelper::callback();
+    }
 
 }

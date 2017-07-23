@@ -109,7 +109,7 @@ class AgentHelper extends AuthHelper {
             
             $amodel = new RkAgent();
             
-            $amodel->acc = self::org;
+            $amodel->acc = parent::org;
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->agent_type = $a['type'];

@@ -85,8 +85,8 @@ class AgentHelper extends AuthHelper {
     
     foreach ($myXML->RP as $rp) {
         
-        $cmdguid = 'нет';
-        $posid = 'нет';
+        $cmdguid = 'не зашли в RP';
+        $posid = 'не зашли в RP';
         foreach($rp->attributes() as $a => $b) { 
                 if ($a == 'cmdguid') $cmdguid=strval($b);
                 if ($a == 'posid') $posid=strval($b);
@@ -94,7 +94,10 @@ class AgentHelper extends AuthHelper {
         
     }
     
-   
+    if (empty($cmdguid)) $cmdguid = 'пусто'; 
+    if (empty($posid)) $posid = 'пусто'; 
+    
+    
    
   //  $array = ApiHelper::xml2array($myXML);
   //  

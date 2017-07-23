@@ -40,9 +40,10 @@ class StoreController extends Controller {
         
     }
     
-    public function actionLoadws() {
+    public function actionGetws() {
         
-    $resres = ApiHelper::getAgents();        
+    $res = new \frontend\modules\clientintegr\modules\rkws\components\StoreHelper();
+    $res->getStore();
             
     }
       

@@ -18,9 +18,9 @@ use api\common\models\RkAgent;
 
 class AgentHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/agent";
+    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/store";
     
-    public function getAgents () {
+    public function getStore () {
     if (!$this->Authorizer()) {
        
       echo "Can't perform authorization";
@@ -30,15 +30,16 @@ class AgentHelper extends AuthHelper {
     $guid = UUID::uuid4();
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_corrs" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <RQ cmd="sh_get_stores" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     </RQ>'; 
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
+     
      $tmodel = new RkTasks();
      
-     $tmodel->tasktype_id = 27;
+     $tmodel->tasktype_id = 25;
      $tmodel->acc = $this->org;
      $tmodel->fid = 1;
      $tmodel->guid = $res['respcode']['taskguid'];
@@ -61,9 +62,12 @@ class AgentHelper extends AuthHelper {
     {       
     
     $getr = Yii::$app->request->getRawBody();
+    
+    
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
+    /*
     foreach ($myXML->CORRGROUP as $corrgroup) {
             foreach($corrgroup->attributes() as $c => $d) {
                 if ($c == 'rid') $grid=strval($d[0]);
@@ -79,7 +83,7 @@ class AgentHelper extends AuthHelper {
                         }
                 }
     }
-    
+    */
     
     /*
     foreach ($myXML->RP as $rp) {
@@ -143,7 +147,7 @@ class AgentHelper extends AuthHelper {
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
         
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT START===================='.PHP_EOL,FILE_APPEND);  
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
@@ -151,9 +155,9 @@ class AgentHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
+   // file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+   // file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+   // file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
               
     }

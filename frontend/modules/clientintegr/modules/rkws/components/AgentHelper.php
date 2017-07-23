@@ -92,6 +92,10 @@ class AgentHelper extends AuthHelper {
         }
         
     }
+    
+    if (empty($array)) {
+        $array=array(0 => '0');
+    }
    
    
   //  $array = ApiHelper::xml2array($myXML);

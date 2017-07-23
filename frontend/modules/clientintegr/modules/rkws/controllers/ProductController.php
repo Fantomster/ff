@@ -12,7 +12,7 @@ use yii\web\Controller;
  * Author: R.Smirnov
  */
 
-class ProductController extends Controller {
+class ProductController extends extends\frontend\modules\clientintegr\controllers\DefaultController {
     
     public $enableCsrfValidation = false;
     
@@ -32,7 +32,13 @@ class ProductController extends Controller {
         }     
         
     }
-      
+     
+    public function actionGetws() {
+        
+    $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductHelper();
+    $res->getProduct();
+            
+    }
     
 
 /*

@@ -12,7 +12,7 @@ use yii\web\Controller;
  * Author: R.Smirnov
  */
 
-class ProductController extends extends\frontend\modules\clientintegr\controllers\DefaultController {
+class ProductController extends\frontend\modules\clientintegr\controllers\DefaultController {
     
     public $enableCsrfValidation = false;
     

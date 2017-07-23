@@ -69,23 +69,30 @@ class ProductHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
-    /*
-    foreach ($myXML->STOREGROUP as $storegroup) {
-            foreach($storegroup->attributes() as $c => $d) {
+    
+    foreach ($myXML->ITEM as $goodsgroup) {
+            foreach($goodsgroup->attributes() as $c => $d) {
                 if ($c == 'rid') $grid=strval($d[0]);
                 if ($c == 'name') $grname=strval($d[0]);
+                if ($c == 'parent') $grparent=strval($d[0]);
             }
-                foreach ($storegroup->STORE as $store) {
-                    $gcount++;
-                    $array[$gcount]['group_rid'] = $grid;
-                    $array[$gcount]['group_name'] = $grname;
-               
-                        foreach($store->attributes() as $a => $b) {
+                foreach ($goodsgroup->GOODS_LIST as $glist) {
+                    
+                    foreach ($glist->ITEM as $item) {
+                        $gcount++;
+                        $array[$gcount]['group_rid'] = $grid;
+                        $array[$gcount]['group_name'] = $grname;
+                        $array[$gcount]['group_parent'] = $grparent;
+                        
+                        foreach($item->attributes() as $a => $b) {
                           $array[$gcount][$a] = strval($b[0]);
                         }
+                        
+                    }
+                                     
                 }
     }
-    */
+    
     
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 
@@ -97,7 +104,7 @@ class ProductHelper extends AuthHelper {
      //   
         
      // Заполнение складов
-       
+       /*
         foreach ($array as $a)   {
             
             $amodel = new RkStore();
@@ -113,7 +120,7 @@ class ProductHelper extends AuthHelper {
             } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
          
         }
-       
+       */
     }
     
    

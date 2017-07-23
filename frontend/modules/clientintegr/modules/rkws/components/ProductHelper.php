@@ -32,7 +32,7 @@ class ProductHelper extends AuthHelper {
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
-    <PARAM name="goodgorup_rid" val="1" />
+    <PARAM name="goodgroup_rid" val="1" />
     <PARAM name="include_goods" val="1" />    
     </RQ>'; 
        

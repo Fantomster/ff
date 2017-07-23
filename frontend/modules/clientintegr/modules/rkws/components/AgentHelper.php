@@ -58,44 +58,38 @@ class AgentHelper extends AuthHelper {
     
     public static function callback()
     {       
-    $getr = Yii::$app->request->getRawBody();
-        
-    $myXML   = simplexml_load_string($getr);
     
+    $getr = Yii::$app->request->getRawBody();
+    $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
     foreach ($myXML->CORRGROUP as $corrgroup) {
-         
-        foreach($corrgroup->attributes() as $c => $d) {
-                
-        //    $array[$corr_count][$c] = strval($d[0]);
-            
-            if ($c == 'rid')
-                    $grid=strval($d[0]);
-            
-            if ($c == 'name')
-                    $grname=strval($d[0]);
-            
+            foreach($corrgroup->attributes() as $c => $d) {
+                if ($c == 'rid') $grid=strval($d[0]);
+                if ($c == 'name') $grname=strval($d[0]);
             }
                 foreach ($corrgroup->CORR as $corr) {
-            
-                $gcount++;
-                $array[$gcount]['group_rid'] = $grid;
-                $array[$gcount]['group_name'] = $grname;
+                    $gcount++;
+                    $array[$gcount]['group_rid'] = $grid;
+                    $array[$gcount]['group_name'] = $grname;
                
-        
                         foreach($corr->attributes() as $a => $b) {
-                
-                            $array[$gcount][$a] = strval($b[0]);
+                          $array[$gcount][$a] = strval($b[0]);
                         }
-            
-        }
-        
+                }
     }
     
     if (empty($array)) {
         $array=array(0 => '0');
     }
+    
+    foreach ($myXML->RP as $rp) {
+        foreach($rp->attributes() as $a => $b) { 
+                if ($a == 'cmdguid') $cmdguid=strval($b[0]);
+                if ($a == 'posid') $posid=strval($b[0]);
+        }
+    }
+    
    
    
   //  $array = ApiHelper::xml2array($myXML);
@@ -115,8 +109,11 @@ class AgentHelper extends AuthHelper {
    */
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'**********************************========='.PHP_EOL,FILE_APPEND);     
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND);   
               

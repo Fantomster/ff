@@ -16,7 +16,7 @@ use api\common\models\RkAgent;
  * and open the template in the editor.
  */
 
-class AgentHelper extends AuthHelper {
+class StoreHelper extends AuthHelper {
     
     const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/store";
     

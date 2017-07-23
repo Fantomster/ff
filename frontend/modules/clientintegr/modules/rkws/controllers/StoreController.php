@@ -18,7 +18,7 @@ use api\common\models\RkStore;
  * Author: R.Smirnov
  */
 
-class StoreController extends Controller {
+class StoreController extends\frontend\modules\clientintegr\controllers\DefaultController {
     
         
     public function actionIndex() {

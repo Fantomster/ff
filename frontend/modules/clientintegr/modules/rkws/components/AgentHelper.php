@@ -109,7 +109,7 @@ class AgentHelper extends AuthHelper {
             
             $amodel = new RkAgent();
             
-            $amodel->acc = parent::org;
+            $amodel->acc = User::findOne(Yii::$app->user->id)->organization_id;
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->agent_type = $a['type'];

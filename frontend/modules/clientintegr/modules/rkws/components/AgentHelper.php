@@ -82,7 +82,7 @@ class AgentHelper extends AuthHelper {
     if (empty($array)) {
         $array=array(0 => '0');
     }
-    
+    /*
     foreach ($myXML->RP as $rp) {
         
         $cmdguid = 'не зашли в RP';
@@ -93,8 +93,12 @@ class AgentHelper extends AuthHelper {
         }
         
     }
+    */
     
+    $cmdguid = $myXML['cmdguid']; 
     if (empty($cmdguid)) $cmdguid = 'пусто'; 
+    
+    $posid = $myXML['posid']; 
     if (empty($posid)) $posid = 'пусто'; 
     
     

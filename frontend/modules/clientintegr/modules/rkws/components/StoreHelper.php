@@ -8,7 +8,7 @@ use api\common\models\RkSession;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
-use api\common\models\RkAgent;
+use api\common\models\RkStore;
 
 /* 
  * To change this license header, choose License Headers in Project Properties.
@@ -94,23 +94,23 @@ class StoreHelper extends AuthHelper {
      //   
         
      // Заполнение складов
-        /*
+       
         foreach ($array as $a)   {
             
-            $amodel = new RkAgent();
+            $amodel = new RkStore();
             
             $amodel->acc = 4273; // Потом взять из task, когда заработает сервер
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
-            $amodel->agent_type = $a['type'];
+        //    $amodel->agent_type = $a['type'];
             $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
             
             if (!$amodel->save()) {
                 $er = $amodel->getErrors();
-            } else $er = "Данные контрагентов успешно сохранены.(ID:".$amodel->id." )";
+            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
          
         }
-        */
+       
     }
     
    

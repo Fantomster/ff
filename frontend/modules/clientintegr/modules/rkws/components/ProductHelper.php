@@ -8,7 +8,7 @@ use api\common\models\RkSession;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
-use api\common\models\RkStore;
+use api\common\models\RkProduct;
 
 /* 
  * To change this license header, choose License Headers in Project Properties.
@@ -103,13 +103,13 @@ class ProductHelper extends AuthHelper {
      //   $tmodel = RkTasks::find()->andWhere('')
      //   
         
-     // Заполнение складов
-       /*
+     // Заполнение номенклатуры
+     
         foreach ($array as $a)   {
             
-            $amodel = new RkStore();
+            $amodel = new RkProduct();
             
-            $amodel->acc = 4273; // Потом взять из task, когда заработает сервер
+            $amodel->acc = $this->org; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
         //    $amodel->agent_type = $a['type'];
@@ -117,10 +117,10 @@ class ProductHelper extends AuthHelper {
             
             if (!$amodel->save()) {
                 $er = $amodel->getErrors();
-            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
+            } else $er = "Данные продуктов успешно сохранены.(ID:".$amodel->id." )";
          
         }
-       */
+     
     }
     
    

@@ -60,6 +60,8 @@ class AgentHelper extends AuthHelper {
     public function callback()
     {       
     
+    $acc =0;    
+        
     $getr = Yii::$app->request->getRawBody();
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
@@ -122,6 +124,8 @@ class AgentHelper extends AuthHelper {
         $tmodel->isactive = 0;
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         
+        $acc= $tmodel->acc;
+        
             if (!$tmodel->save()) {
                 $er2 = $tmodel->getErrors();
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
@@ -132,7 +136,7 @@ class AgentHelper extends AuthHelper {
             
             $amodel = new RkAgent();
             
-            $amodel->acc = 3243; // $tmodel->acc; 
+            $amodel->acc = $acc; // $tmodel->acc; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->agent_type = $a['type'];

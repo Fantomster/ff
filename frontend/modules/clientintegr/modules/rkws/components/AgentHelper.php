@@ -103,10 +103,12 @@ class AgentHelper extends AuthHelper {
         $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
         
         if (!$tmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+        exit;
         }
         
-    /*    $tmodel->intstatus_id = 2;
+        $tmodel->intstatus_id = 2;
         $tmodel->isactive = 0;
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         
@@ -114,15 +116,13 @@ class AgentHelper extends AuthHelper {
                 $er2 = $tmodel->getErrors();
             } else $er = "Данные task успешно сохранены (ID:".$amodel->id." )";
         
-    */    
-        
      // Заполнение контрагентов
         
         foreach ($array as $a)   {
             
             $amodel = new RkAgent();
             
-            $amodel->acc = 4273; //$tmodel->acc; 
+            $amodel->acc = $tmodel->acc; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->agent_type = $a['type'];

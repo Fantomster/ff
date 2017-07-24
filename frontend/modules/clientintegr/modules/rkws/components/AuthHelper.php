@@ -23,7 +23,8 @@ class AuthHelper extends Object {
     
     public function init() {
         $this->org = User::findOne(Yii::$app->user->id)->organization_id;
-        $this->restr = RkAccess::find()->andwhere('org= :org',[':org' => $this->org])->one();
+        $this->restr = RkAccess::find()->one();
+       
     } 
     
     public function Authorizer ()

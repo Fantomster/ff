@@ -72,7 +72,7 @@ class AuthHelper extends Object {
     
     $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Login";
     
-    $restrModel = RkAccess::find()->andwhere('id = 1')->limit(1)->one();
+    $restrModel = RkAccess::find()->andwhere('id = 1')->one();
        
     $licReq = $restrModel->lic;
     $rlogin = $restrModel->login;
@@ -80,6 +80,9 @@ class AuthHelper extends Object {
     $rtoken = $restrModel->token;
                   
     $usrReq = base64_encode($rlogin.';'.strtolower(md5($rlogin.$rpass)).';'.strtolower(md5($rtoken)));
+    
+    var_dump($usrReq);
+    exit;
     
     $xml ='<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="'.$licReq.'" usr="'.$usrReq.'"/>';
    

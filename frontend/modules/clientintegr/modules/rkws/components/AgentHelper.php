@@ -100,7 +100,7 @@ class AgentHelper extends AuthHelper {
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
         
      // Заполнение tasks
-        $tmodel = RkTasks::find()->andWhere('guid=:guid',[':guid'=>$cmdguid])->one();
+        $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
         
         if (!$tmodel) {
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
@@ -122,7 +122,7 @@ class AgentHelper extends AuthHelper {
             
             $amodel = new RkAgent();
             
-            $amodel->acc = $tmodel->acc; 
+            $amodel->acc = 4273; //$tmodel->acc; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->agent_type = $a['type'];

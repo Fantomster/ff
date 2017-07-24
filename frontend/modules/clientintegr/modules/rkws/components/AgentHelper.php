@@ -102,6 +102,10 @@ class AgentHelper extends AuthHelper {
      // Заполнение tasks
         $tmodel = RkTasks::find()->andWhere('guid=:guid',[':guid'=>$cmdguid])->one();
         
+        if (!$tmodel) {
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
+        }
+        
     /*    $tmodel->intstatus_id = 2;
         $tmodel->isactive = 0;
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');

@@ -94,14 +94,23 @@ class AgentHelper extends AuthHelper {
     }
     */
     
-    $cmdguid = $myXML['cmdguid']; 
-    $posid = $myXML['posid']; 
+    $cmdguid = strval($myXML['cmdguid']); 
+    $posid = strval($myXML['posid']); 
     
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
         
      // Заполнение tasks
-     //   $tmodel = RkTasks::find()->andWhere('')
-     //   
+        $tmodel = RkTasks::find()->andWhere('guid=:guid',[':guid'=>$cmdguid])->one();
+        
+        $tmodel->intstatus_id = 2;
+        $tmodel->isactive = 0;
+        $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        
+            if (!$tmodel->save()) {
+                $er2 = $tmodel->getErrors();
+            } else $er = "Данные task успешно сохранены (ID:".$amodel->id." )";
+        
+        
         
      // Заполнение контрагентов
         
@@ -109,7 +118,7 @@ class AgentHelper extends AuthHelper {
             
             $amodel = new RkAgent();
             
-            $amodel->acc = 4273; // Потом взять из task, когда заработает сервер
+            $amodel->acc = $tmodel->acc; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->agent_type = $a['type'];

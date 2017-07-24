@@ -9,6 +9,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkAgent;
+use api\common\models\RkDic;
 
 /* 
  * To change this license header, choose License Headers in Project Properties.
@@ -131,6 +132,8 @@ class AgentHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение контрагентов
+        
+        $icount =0;    
       
         foreach ($array as $a)   {
             
@@ -145,10 +148,34 @@ class AgentHelper extends AuthHelper {
             if (!$amodel->save()) {
                 $er = $amodel->getErrors();
             } else $er = "Данные контрагентов успешно сохранены.(ID:".$amodel->id." )";
+            
+            $icount++;
          
         }
         
     }
+    
+    // Обновление словаря RkDic
+    
+    $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 1')->one();
+    
+        if (!$rmodel) {
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+        exit;
+        }
+        
+        
+    $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
+    $rmodel->dicstatus_id= 6;
+    $rmodel->objcount = $icount;
+    
+            if (!$rmodel->save()) {
+                $er3 = $rmodel->getErrors();
+            } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
+    
+    
+    
     
    
   //  $array = ApiHelper::xml2array($myXML);
@@ -182,6 +209,7 @@ class AgentHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',print_r($er2,true) , FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',print_r($er3,true) , FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
  //   file_put_contents('runtime/logs/callback.log',PHP_EOL.$tmodel->guid.PHP_EOL,FILE_APPEND);            
     }

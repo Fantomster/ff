@@ -162,20 +162,18 @@ class AgentHelper extends AuthHelper {
         if (!$rmodel) {
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
-        exit;
-        }
-        
-        
-    $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
-    $rmodel->dicstatus_id= 6;
-    $rmodel->obj_count = $icount;
+
+        } else {
+            
+            $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
+            $rmodel->dicstatus_id= 6;
+            $rmodel->obj_count = $icount;
     
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
-    
-    
-    
+        }
+        
     
    
   //  $array = ApiHelper::xml2array($myXML);

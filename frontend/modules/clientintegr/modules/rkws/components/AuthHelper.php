@@ -51,7 +51,7 @@ class AuthHelper extends Object {
         } else {
         $xml = '<?xml version="1.0" encoding="utf-8" ?>
         <RQ cmd="get_objectinfo">
-        <PARAM name="object_id" val="'.$restr->salespoint.'"/>
+        <PARAM name="object_id" val="'.$this->restr->salespoint.'"/>
         </RQ>';  
         
         $res = ApiHelper::sendCurl($xml,$this->restr);

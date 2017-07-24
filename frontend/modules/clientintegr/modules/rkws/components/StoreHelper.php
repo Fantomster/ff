@@ -58,7 +58,7 @@ class StoreHelper extends AuthHelper {
     
     }
     
-    public static function callback()
+    public function callback()
     {       
     
     $getr = Yii::$app->request->getRawBody();
@@ -99,7 +99,7 @@ class StoreHelper extends AuthHelper {
             
             $amodel = new RkStore();
             
-            $amodel->acc = 4273; // Потом взять из task, когда заработает сервер
+            $amodel->acc = $this->org; // Потом взять из task, когда заработает сервер
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
         //    $amodel->agent_type = $a['type'];

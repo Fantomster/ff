@@ -131,10 +131,10 @@ use api\common\models\RkAccess;
                                                         return \yii\helpers\Html::a( '<i class="fa fa-download" aria-hidden="true"></i>', $customurl,
                                                                      ['title' => Yii::t('backend', 'Update'), 'data-pjax'=>"0"]);
                                                            },     
-                                                        'map' =>  function ($url, $model) {
-                                                        return \yii\helpers\Html::a( '<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
-                                                                     ['title' => Yii::t('backend', 'Update'), 'data-pjax'=>"0"]);
-                                                           },           
+                                                      //  'map' =>  function ($url, $model) {
+                                                      //  return \yii\helpers\Html::a( '<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
+                                                      //               ['title' => Yii::t('backend', 'Update'), 'data-pjax'=>"0"]);
+                                                      //     },           
                                                   
                                                            ]                               
                                                                    

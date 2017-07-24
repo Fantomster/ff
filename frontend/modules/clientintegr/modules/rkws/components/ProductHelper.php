@@ -60,7 +60,7 @@ class ProductHelper extends AuthHelper {
     
     }
     
-    public static function callback()
+    public function callback()
     {       
     
     $getr = Yii::$app->request->getRawBody();

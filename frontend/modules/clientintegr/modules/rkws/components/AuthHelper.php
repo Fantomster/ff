@@ -56,9 +56,14 @@ class AuthHelper extends Object {
         $res = ApiHelper::sendCurl($xml,$this->restr);
         
       if ($res['respcode']['code'] == '0') 
+              file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
+              file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:SUCCESS'.PHP_EOL, FILE_APPEND);   
+              file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
           return true;
       } 
-      
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
+            file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:FAILED'.PHP_EOL, FILE_APPEND);   
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
       return false;
     }  
  
@@ -125,6 +130,9 @@ class AuthHelper extends Object {
     $objectinfo = $array['Error']['@attributes']  ;
     
     if ($cook && $respcode === '0') { 
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
+            file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':SENDAUTH OK RECEIVED'.PHP_EOL, FILE_APPEND);   
+         
         
     $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restrModel->fid])->andwhere('sysdate() between fd and td')->one();
     
@@ -134,13 +142,13 @@ class AuthHelper extends Object {
     
         $newsess->cook = $cook;
         $newsess->fd= Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');    
-        $newsess->td= Yii::$app->formatter->asDate('2030-01-01 23:59:59', 'yyyy-MM-dd H:i:s');
+        $newsess->td= Yii::$app->formatter->asDate('2030-01-01 23:59:59', 'yyyy-MM-dd HH:mm:ss');
         $newsess->acc = $restrModel->fid;
         $newsess->status = 1;
                   
         if ($sess) {
         
-            $sess->td = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');
+            $sess->td = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $sess->status = 0;     
             $newsess->fid = $sess->fid;
             $newsess->ver = $sess->ver+1; 
@@ -150,6 +158,7 @@ class AuthHelper extends Object {
                 if ($sess->save(false) &&  $newsess->save(false)) {
     
                     $transaction->commit();
+                    file_put_contents('runtime/logs/auth.log',PHP_EOL.'NEW SESSION IS CREATED (ID:'.$newsess->id.')'.PHP_EOL,FILE_APPEND); 
                 } else {
     
                     var_dump($sess->getErrors());
@@ -166,6 +175,13 @@ class AuthHelper extends Object {
             if (!$newsess->save(false)) {
                 var_dump($newsess->getErrors());
                 exit;
+        } else {
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.'================='.PHP_EOL,FILE_APPEND);    
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.print_r($objectinfo, true).PHP_EOL,FILE_APPEND);    
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.'================='.PHP_EOL,FILE_APPEND);    
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.print_r($respcode, true).PHP_EOL,FILE_APPEND);                
+            file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
+               
         }
 
         

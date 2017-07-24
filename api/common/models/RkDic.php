@@ -48,8 +48,9 @@ class RkDic extends \yii\db\ActiveRecord
     {
         return [
       //      [['login','fid','password','token','lic','org'], 'required'],
-            [['id','fid','org','ver'], 'integer'],
-            [['token','login','password','salespoint','contr'], 'string', 'max' => 255],
+            [['org_id','dictype_id','dicstatus_id','obj_count','obj_mapcount'], 'integer'],
+            [['org_id','dictype_id','dicstatus_id','obj_count','obj_mapcount','created_at','updated_at'], 'safe'],
+            
         ];
     }
 

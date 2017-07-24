@@ -72,7 +72,7 @@ class AuthHelper extends Object {
     
     $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Login";
     
-    $restrModel = RkAccess::find()->andwhere('sysdate() between fd and td and org= :org',[':org' => $this->org])->limit(1)->one();
+    $restrModel = RkAccess::find()->andwhere('id = 1')->limit(1)->one();
        
     $licReq = $restrModel->lic;
     $rlogin = $restrModel->login;

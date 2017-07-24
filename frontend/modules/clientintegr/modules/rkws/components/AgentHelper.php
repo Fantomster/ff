@@ -103,6 +103,16 @@ class AgentHelper extends AuthHelper {
         $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
         
         if (!$tmodel) {
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
+        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+        file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
         exit;
@@ -114,15 +124,15 @@ class AgentHelper extends AuthHelper {
         
             if (!$tmodel->save()) {
                 $er2 = $tmodel->getErrors();
-            } else $er = "Данные task успешно сохранены (ID:".$amodel->id." )";
+            } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение контрагентов
-        
+      
         foreach ($array as $a)   {
             
             $amodel = new RkAgent();
             
-            $amodel->acc = $tmodel->acc; 
+            $amodel->acc = 3243; // $tmodel->acc; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->agent_type = $a['type'];
@@ -167,6 +177,7 @@ class AgentHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',print_r($er2,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
  //   file_put_contents('runtime/logs/callback.log',PHP_EOL.$tmodel->guid.PHP_EOL,FILE_APPEND);            
     }

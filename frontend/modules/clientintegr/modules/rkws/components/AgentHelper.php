@@ -102,7 +102,7 @@ class AgentHelper extends AuthHelper {
      // Заполнение tasks
         $tmodel = RkTasks::find()->andWhere('guid=:guid',[':guid'=>$cmdguid])->one();
         
-        $tmodel->intstatus_id = 2;
+    /*    $tmodel->intstatus_id = 2;
         $tmodel->isactive = 0;
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         
@@ -110,7 +110,7 @@ class AgentHelper extends AuthHelper {
                 $er2 = $tmodel->getErrors();
             } else $er = "Данные task успешно сохранены (ID:".$amodel->id." )";
         
-        
+    */    
         
      // Заполнение контрагентов
         
@@ -164,7 +164,7 @@ class AgentHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
-              
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.$tmodel->guid.PHP_EOL,FILE_APPEND);            
     }
 
 }

@@ -138,7 +138,7 @@ class ApiHelper  {
     $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restr->fid])->andwhere('sysdate() between fd and td')->one();
     
     if (!$sess) {
-                 echo "Session is not found :(";
+                 echo "SendCurl. Session is not found :((";
                  exit;
     }
     

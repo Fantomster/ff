@@ -101,4 +101,29 @@ class OrderChatController extends ActiveController {
   
         return $dataProvider;
     }
+    
+    public function actionCreate() {
+        $user = Yii::$app->user->identity;
+        if (Yii::$app->request->post() && Yii::$app->request->post('message')) {
+            $message = Yii::$app->request->post('message');
+            $order_id = Yii::$app->request->post('order_id');
+            return (OrderChat::sendChatMessage($user, $order_id, $message)) ? "success" : "fail";
+        }else
+        {
+            throw new \yii\web\BadRequestHttpException(Yii::t('yii', 'Unable to verify your data submission.'));
+        }
+    }
+    
+    public function actionViewed() {
+        if (Yii::$app->request->post() && Yii::$app->request->post('message_id')) {
+            $message = OrderChat::findOne(['id'=>Yii::$app->request->post('message_id')]);
+            if($message == mull)
+                return;
+                $message->viewed = 1;
+                $message->save();
+        }else
+        {
+            throw new \yii\web\BadRequestHttpException(Yii::t('yii', 'Unable to verify your data submission.'));
+        }
+    }
 }

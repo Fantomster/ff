@@ -1115,6 +1115,9 @@ class OrderController extends DefaultController {
             $newMessage->recipient_id = $order->client_id;
         }
         $newMessage->save();
+        
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionSendMessage($user->id, $newMessage->recipient_id, $message, $order_id);
+        
         $name = $user->profile->full_name;
 
         $body = $this->renderPartial('_chat-message', [

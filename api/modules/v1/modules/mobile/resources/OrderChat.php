@@ -25,5 +25,22 @@ class OrderChat extends \common\models\OrderChat
             [['sent_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['sent_by_id' => 'id']],
         ];
     }
+    
+    public static function sendChatMessage($user, $order_id, $message) {
+        $order = \common\models\Order::findOne(['id' => $order_id]);
+
+        $newMessage = new \common\models\OrderChat(['scenario' => 'userSent']);
+        $newMessage->order_id = $order_id;
+        $newMessage->sent_by_id = $user->id;
+        $newMessage->message = $message;
+        if ($order->client_id == $user->organization_id) {
+            $newMessage->recipient_id = $order->vendor_id;
+        } else {
+            $newMessage->recipient_id = $order->client_id;
+        }
+        if(!$newMessage->save())
+           return false;
+        return true;
+    }
 
 }

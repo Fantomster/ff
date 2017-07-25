@@ -78,15 +78,19 @@ class WaybillHelper extends AuthHelper {
     
     if(!isset($myXML->ERROR)) {
         
+        $cmdguid = strval($myXML['cmdguid']); 
+        $posid = strval($myXML['posid']); 
+        
         foreach ($myXML->DOC as $doc) {
             foreach($doc->attributes() as $a => $b) {
                 $array[$gcount][$a] = strval($b[0]);                
             }
-
+       
         }
         
     } else {
         
+        $cmdguid = strval($myXML['taskguid']); 
         foreach ($myXML->ERROR as $doc) {
             foreach($doc->attributes() as $a => $b) {
                 $array[$gcount][$a] = strval($b[0]);                
@@ -97,21 +101,6 @@ class WaybillHelper extends AuthHelper {
     
     
     
-    /*
-    foreach ($myXML->RP as $rp) {
-        
-        $cmdguid = 'не зашли в RP';
-        $posid = 'не зашли в RP';
-        foreach($rp->attributes() as $a => $b) { 
-                if ($a == 'cmdguid') $cmdguid=strval($b);
-                if ($a == 'posid') $posid=strval($b);
-        }
-        
-    }
-    */
-    
-    $cmdguid = strval($myXML['cmdguid']); 
-    $posid = strval($myXML['posid']); 
     
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
         

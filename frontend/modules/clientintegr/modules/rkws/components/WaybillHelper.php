@@ -76,13 +76,25 @@ class WaybillHelper extends AuthHelper {
     $gcount = 0;        
     
     
-    
-    foreach ($myXML->DOC as $doc) {
+    if(!isset($myXML->ERROR)) {
+        
+        foreach ($myXML->DOC as $doc) {
             foreach($doc->attributes() as $a => $b) {
                 $array[$gcount][$a] = strval($b[0]);                
             }
 
+        }
+        
+    } else {
+        
+        foreach ($myXML->ERROR as $doc) {
+            foreach($doc->attributes() as $a => $b) {
+                $array[$gcount][$a] = strval($b[0]);                
+            }
+
+        }
     }
+    
     
     
     /*

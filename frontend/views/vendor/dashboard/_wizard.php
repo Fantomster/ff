@@ -15,9 +15,10 @@ $this->registerJs('
 
     $(document).on("click", ".wizard-off", function(e) {
         $.ajax({
-            async: false,
             type: "POST",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
+            dataType: "json",
+            url: "'.Url::to('/site/ajax-wizard-off').'",
+            async: false
         });
     });
 

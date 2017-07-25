@@ -169,7 +169,7 @@ class WaybillHelper extends AuthHelper {
     }
     
     // Обновление словаря RkDic
-    
+    /*
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 1')->one();
     
         if (!$rmodel) {
@@ -187,7 +187,7 @@ class WaybillHelper extends AuthHelper {
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
         
-    
+    */
    
   //  $array = ApiHelper::xml2array($myXML);
   //  
@@ -208,7 +208,7 @@ class WaybillHelper extends AuthHelper {
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
         
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======WAYBILL==EVENT==START================='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 

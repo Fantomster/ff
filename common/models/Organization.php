@@ -506,7 +506,14 @@ class Organization extends \yii\db\ActiveRecord {
     public function getFranchiseeAssociate() {
         return $this->hasOne(FranchiseeAssociate::className(), ['organization_id' => 'id']);
     }
-
+    
+    public function getFranchiseeManagerInfo() {
+        $sql = 'SELECT `franchisee`.* FROM `organization` 
+        JOIN `franchisee_associate` ON `organization`.id = `franchisee_associate`.`organization_id`
+        JOIN `franchisee` ON `franchisee_associate`.`franchisee_id` = `franchisee`.`id` 
+        WHERE `organization`.`id` = ' . $this->id;
+        return Franchisee::findBySql($sql)->one();    
+    }
     /**
      * @return string url to avatar image
      */

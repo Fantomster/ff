@@ -150,6 +150,8 @@ class FrController extends \yii\rest\Controller {
                 return ['result' => 'errorPhone'];
             }
             //ДОБАВЛЯЕМ СДЕЛКУ
+            $post = Yii::$app->request->post();
+            $roistat_cookie = isset($post['roi']) ? $post['roi'] : "неизвестно";
             $leads['request']['leads']['add'] = array(
                 array(
                     'name' => $lead_name,
@@ -177,7 +179,7 @@ class FrController extends \yii\rest\Controller {
                             'id' => 78106,
                             'values' => [
                                 [
-                                    'value' => array_key_exists('roistat_visit', $_COOKIE) ? $_COOKIE['roistat_visit'] : "неизвестно"
+                                    'value' => $roistat_cookie
                                 ],
                             ],
                         ],

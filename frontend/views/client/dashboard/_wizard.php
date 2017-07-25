@@ -19,14 +19,33 @@ $this->registerJs('
     });
     
     $(document).on("click", ".wizard-off", function(e) {
+        e.preventDefault();
+        var url = $(this).attr("href");
         $.ajax({
-            async: false,
             type: "POST",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
+            dataType: "json",
+            url: "'.Url::to('/site/ajax-wizard-off').'",
+            success: function (response) {
+                if (response.result == "moscow") {
+                    yaCounter44637517.reachGoal("regmoscow", function () {
+                        document.location = url;
+                    });
+                }
+            },
+            async: false
         });
     });
 
     $(document).on("submit", "#complete-form", function() {
+        var form = $(this);
+        $.post(
+            form.attr("action"),
+            form.serialize()
+        ).done(function(result) {
+            if (result.length == 0) {
+                $(".data-modal .modal-content").slick("slickNext");
+            }
+        });
         return false;
     });
 
@@ -39,8 +58,8 @@ $this->registerJs('
                 return;
             }
         }
-        $(".data-modal .modal-content").slick("slickNext");
     });
+
 
     $("#data-modal").on("shown.bs.modal",function(){
         $(".data-modal .modal-content").slick({arrows:!1,dots:!1,swipe:!1,infinite:!1,adaptiveHeight:!0})

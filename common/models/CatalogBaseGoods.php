@@ -49,7 +49,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const STATUS_OFF = 0;
     const MP_SHOW_PRICE = 1;
     const MP_HIDE_PRICE = 0;
-    const MAX_INSERT_FROM_XLS = 5000;
+    const MAX_INSERT_FROM_XLS = 2000;
     const MARKETPLACE_ON = 1;
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;
@@ -104,10 +104,15 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['cat_id', 'article', 'price', 'product', 'ed'], 'required'],
-            [['cat_id', 'category_id', 'supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price', 'rating'], 'integer'],
+            
+            [['cat_id', 'price', 'product', 'ed','article'], 'required'],
+            [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
+            [['article'], 'required', 'on' => 'uniqueArticle'],
             [['article'], 'string', 'max' => 50],
+            [['article'], 'uniqueArticle','when' => function($model) {
+            return !empty($model->cat_id);
+            }],
             [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['note'], 'string', 'max' => 255],
@@ -134,7 +139,16 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             ],
         ];
     }
-
+    public function uniqueArticle($attribute, $params, $validator)
+    {
+        empty($this->id)?$where= "true":$where = "id <> $this->id";
+        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
+                    ->andWhere($where)
+                    ->exists()) {
+                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
+        }
+        
+    }
     /**
      * @inheritdoc
      */

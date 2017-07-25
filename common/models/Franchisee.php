@@ -28,6 +28,7 @@ use Yii;
  * @property string $picture_manager
  * @property string $fio_manager
  * @property string $phone_manager
+ * @property integer $additional_number_manager
  *  
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
@@ -63,7 +64,7 @@ class Franchisee extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['type_id'], 'integer'],
+            [['type_id','additional_number_manager'], 'integer'],
             [['type_id'], 'required'],
             [['info'], 'string'],
             [['created_at', 'updated_at', 'deleted'], 'safe'],
@@ -95,6 +96,7 @@ class Franchisee extends \yii\db\ActiveRecord {
             'picture_manager' => 'Аватар менеджера',
             'fio_manager' => 'фио менеджера',
             'phone_manager' => 'Телефон менеджера',
+            'additional_number_manager' => 'Добавочный номер менеджера'
         ];
     }
 

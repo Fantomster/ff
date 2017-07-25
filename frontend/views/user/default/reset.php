@@ -52,7 +52,7 @@ $this->registerCss(
 );
 ?>
 <div class="main-page-wrapper <?php
-if (!empty($success)) {
+if (!empty($success) || !empty($invalidToken)) {
     echo "success";
 }
 ?>">
@@ -119,9 +119,11 @@ if (!empty($success)) {
 <?php endif; ?>
     <div class="present-wrapper">
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
-        <h1>Онлайн-сервис для автоматизации закупок в сфере HoReCa</h1>
+        <h1>Онлайн-сервис для автоматизации закупок</h1>
         <div class="present__media clearfix">
-            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div><a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a><a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>
+            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div>
+<!--            <a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a>
+            <a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>-->
         </div>
     </div>
 </div>

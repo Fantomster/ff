@@ -15,13 +15,24 @@ $this->registerJs('
 
     $(document).on("click", ".wizard-off", function(e) {
         $.ajax({
-            async: false,
             type: "POST",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
+            dataType: "json",
+            url: "'.Url::to('/site/ajax-wizard-off').'",
+            async: false
         });
     });
 
     $(document).on("submit", "#complete-form", function() {
+        var form = $(this);
+        $.post(
+            form.attr("action"),
+            form.serialize()
+        ).done(function(result) {
+            console.log(result);
+            if (result.length == 0) {
+                $(".data-modal .modal-content").slick("slickNext");
+            }
+        });
         return false;
     });
 
@@ -34,7 +45,6 @@ $this->registerJs('
                 return;
             }
         }
-        $(".data-modal .modal-content").slick("slickNext");
     });
 
     $("#data-modal").on("shown.bs.modal",function(){

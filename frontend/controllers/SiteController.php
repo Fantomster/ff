@@ -418,7 +418,12 @@ class SiteController extends Controller {
             $organization->step = Organization::STEP_TUTORIAL;
             $organization->save();
             $user->sendWelcome();
-            return true;
+            $result = true;
+            if($organization->locality == 'Москва'){
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                $result = ["result" => "moscow"];
+            }
+            return $result;
         }
         return false;
     }

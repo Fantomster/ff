@@ -253,7 +253,7 @@ class VendorController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if ($user->load($post)) {
+            if (!in_array($user->role_id, Role::getAdminRoles()) && $user->load($post)) {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
@@ -345,9 +345,11 @@ class VendorController extends DefaultController {
                 return $result;
                 exit;
             }
+            
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
             $arrEd = \yii\helpers\ArrayHelper::getColumn(\common\models\MpEd::find()->all(), 'name');
+            $articleArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
                 $product = htmlspecialchars(trim($arrCatalogs['dataItem']['product']));
@@ -355,6 +357,7 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                 $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
+                array_push($articleArray, (string)$article);
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
                     return $result;
@@ -392,6 +395,11 @@ class VendorController extends DefaultController {
                     return $result;
                     exit;
                 }
+            }
+            if(max(array_count_values($articleArray))>1){
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
+                return $result;
+                exit;
             }
             $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
             \Yii::$app->db->createCommand($sql)->execute();
@@ -525,9 +533,15 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportToXls($id) {
-        set_time_limit(90);
+        set_time_limit(180);
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
+        $vendor = \common\models\Catalog::find()->where([
+                    'id' => $id,
+                    'type' => \common\models\Catalog::BASE_CATALOG
+                ])
+                ->one()
+        ->vendor;
         if (Yii::$app->request->isPost) {
             $unique = 'article'; //уникальное поле
             $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
@@ -575,8 +589,17 @@ class VendorController extends DefaultController {
                     . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer()); 
             }
+            if(max(array_count_values($xlsArray))>1){
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer()); 
+            }
             $transaction = Yii::$app->db->beginTransaction();
             try {
+                $data_insert = [];
+                $data_update = "";
+                $cbgTable = CatalogBaseGoods::tableName();
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                     $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
                     $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
@@ -589,48 +612,41 @@ class VendorController extends DefaultController {
                             $row_units = 0;
                         }
                         if (in_array($row_article, $arr)) {
-                            $sql = "update {{%catalog_base_goods}} set "
-                                    . "article=:article,"
-                                    . "product=:product,"
-                                    . "units=:units,"
-                                    . "price=:price,"
-                                    . "ed=:ed,"
-                                    . "note=:note,"
-                                    . "es_status=1"
-                                    . " where cat_id=$id and article='{$row_article}' ";
-                            $command = \Yii::$app->db->createCommand($sql);
-                            $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
-                            $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
-                            $command->bindParam(":units", $row_units);
-                            $command->bindParam(":price", $row_price);
-                            $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
-                            $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
-                            $command->execute();
+                            
+                            $data_update .= "UPDATE $cbgTable set 
+                                `cat_id` = $id, 
+                                `supp_org_id` = $vendor->id, 
+                                `article` = '$row_article',
+                                `product` = '$row_product',
+                                `units` = $row_units,
+                                `price` = $row_price,
+                                `ed` = '$row_ed',
+                                `note` = '$row_note' 
+                                 where cat_id=$id and article='{$row_article}'; \n";
                         } else {
-                            $sql = "insert into {{%catalog_base_goods}}" .
-                                    "(`cat_id`,`supp_org_id`,`article`,`product`,"
-                                    . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
-                                    . ":cat_id,"
-                                    . $currentUser->organization_id . ","
-                                    . ":article,"
-                                    . ":product,"
-                                    . ":units,"
-                                    . ":price,"
-                                    . ":ed,"
-                                    . ":note,"
-                                    . CatalogBaseGoods::STATUS_ON . ","
-                                    . "NOW())";
-                            $command = \Yii::$app->db->createCommand($sql);
-                            $command->bindParam(":cat_id", $id, \PDO::PARAM_INT);
-                            $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
-                            $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
-                            $command->bindParam(":units", $row_units);
-                            $command->bindParam(":price", $row_price);
-                            $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
-                            $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
-                            $command->execute();
+                            $data_insert[] = [
+                                $id, 
+                                $vendor->id, 
+                                $row_article,
+                                $row_product,
+                                $row_units,
+                                $row_price,
+                                $row_ed,
+                                $row_note,
+                                CatalogBaseGoods::STATUS_ON
+                            ];
                         }
                     }
+                }
+                if(!empty($data_insert)){
+                    $db = Yii::$app->db;
+                    $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
+                        'cat_id','supp_org_id','article','product','units','price','ed','note','status'
+                        ], $data_insert);
+                    Yii::$app->db->createCommand($sql)->execute();
+                }
+                if(!empty($data_update)){
+                    Yii::$app->db->createCommand($data_update)->execute();
                 }
                 $transaction->commit();
                 unlink($path);
@@ -651,7 +667,6 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
-
 
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
@@ -675,7 +690,17 @@ class VendorController extends DefaultController {
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
-
+            $xlsArray = [];
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
+                array_push($xlsArray, $row_article);
+            }
+            if(max(array_count_values($xlsArray))>1){
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
+                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                return $this->redirect(\Yii::$app->request->getReferrer()); 
+            }
             $transaction = Yii::$app->db->beginTransaction();
             try {
 
@@ -891,7 +916,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар добавлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
@@ -899,7 +924,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->market_place = 0;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар добавлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }
@@ -932,7 +957,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар обновлен!';
 
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
@@ -942,7 +967,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
 
-                        $message = 'Продукт обновлен!';
+                        $message = 'Товар обновлен!';
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }
@@ -1616,7 +1641,11 @@ class VendorController extends DefaultController {
                     ->sum('total_price');
         }
         //---header stats end
-
+        $filter_get_employee = yii\helpers\ArrayHelper::map(\common\models\Profile::find()->
+                                where(['in', 'user_id', \common\models\User::find()->
+                                    select('id')->
+                                    where(['organization_id' => $currentUser->organization_id])])->all(), 'user_id', 'full_name');
+        
         $filter_restaurant = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                 where(['in', 'id', \common\models\RelationSuppRest::find()->
                                     select('rest_org_id')->
@@ -1646,7 +1675,7 @@ class VendorController extends DefaultController {
         }
 
         if (Yii::$app->request->isAjax) {
-
+            $filter_employee = trim(\Yii::$app->request->get('filter_employee'));
             $filter_status = trim(\Yii::$app->request->get('filter_status'));
             $filter_from_date = trim(\Yii::$app->request->get('filter_from_date'));
             $filter_to_date = trim(\Yii::$app->request->get('filter_to_date'));
@@ -1654,6 +1683,7 @@ class VendorController extends DefaultController {
 
             empty($filter_status) ? "" : $where .= " and status='" . $filter_status . "'";
             empty($filter_client) ? "" : $where .= " and client_id='" . $filter_client . "'";
+            empty($filter_employee) ? "" : $where .= " and accepted_by_id='" . $filter_employee . "'";
         }
         // Объем продаж чарт
         if (Yii::$app->user->can('manage')) {
@@ -1758,7 +1788,7 @@ class VendorController extends DefaultController {
         }
         $arr_clients_price = json_encode($arr_clients_price);
 
-        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price'
+        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price', 'filter_get_employee'
         ));
     }
 

@@ -156,7 +156,7 @@ class OrderController extends DefaultController {
             $orders = $client->getCart();
             return $this->renderPartial('_pjax-cart', compact('orders'));
         } else {
-            return $this->redirect('/order/create');
+            return $this->redirect('/order/checkout');
         }
     }
 
@@ -771,23 +771,43 @@ class OrderController extends DefaultController {
                 if ($discountChanged) {
                     $order->discount_type = $discount['discount_type'];
                     $order->discount = $order->discount_type ? abs($discount['discount']) : null;
+                    $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
                         $message = $order->discount . " руб";
                     } else {
                         $message = $order->discount . "%";
                     }
                     $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
+                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
                 }
             } else {
                 if ($order->discount > 0) {
                     $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' отменил скидку на заказ №' . $order->id);
+                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
                 }
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 $order->discount = null;
+                $order->calculateTotalPrice();
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
+                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+                foreach ($order->vendor->users as $recipient) {
+                    /* $email = $recipient->email;
+                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                      ->setTo($email)
+                      ->setSubject($subject)
+                      ->send(); */
+                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                        $text = $subject;
+                        $target = $recipient->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target);
+                    }
+                }
+                $order->calculateTotalPrice();
+                $order->save();
                 if (isset($order->accepted_by_id)) {
                     $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
                 } else {
@@ -796,8 +816,24 @@ class OrderController extends DefaultController {
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
+                $order->calculateTotalPrice();
+                $order->save();
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
+                foreach ($order->client->users as $recipient) {
+                    /* $email = $recipient->email;
+                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                      ->setTo($email)
+                      ->setSubject($subject)
+                      ->send(); */
+                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                        $text = $subject;
+                        $target = $recipient->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target);
+                    }
+                }
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -808,15 +844,14 @@ class OrderController extends DefaultController {
                     $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order);
                 }
             }
+            $order->save();
+
+//        if ($orderChanged) {
+            return $this->redirect(["order/view", "id" => $order->id]);
+            //      }
         }
 
-        $order->calculateTotalPrice();
-        $order->save();
-        
-        if ($orderChanged) {
-            return $this->redirect(["order/view", "id" => $order->id]);
-        }
-        
+
         $searchModel = new OrderContentSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -847,7 +882,7 @@ class OrderController extends DefaultController {
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
-        
+
         //return $this->renderPartial('_bill', compact('dataProvider', 'order'));
         $pdf = new Pdf([
             'mode' => Pdf::MODE_UTF8, // leaner size using standard fonts
@@ -860,7 +895,7 @@ class OrderController extends DefaultController {
             'options' => [
 //                'title' => 'Privacy Policy - Krajee.com',
 //                'subject' => 'Generating PDF files via yii2-mpdf extension has never been easy'
-            //'showImageErrors' => true,
+//            'showImageErrors' => true,
             ],
             'methods' => [
 //                'SetHeader' => ['Generated By: Krajee Pdf Component||Generated On: ' . date("r")],
@@ -1001,10 +1036,17 @@ class OrderController extends DefaultController {
             $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
             $organizationType = $this->currentUser->organization->type_id;
             $edit = false;
-            if (in_array($order->status, [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT, Order::STATUS_PROCESSING])) {
-                $edit = true;
+            $canRepeatOrder = false;
+            if ($organizationType == Organization::TYPE_RESTAURANT) {
+                switch ($order->status) {
+                    case Order::STATUS_DONE:
+                    case Order::STATUS_REJECTED:
+                    case Order::STATUS_CANCELLED:
+                        $canRepeatOrder = true;
+                        break;
+                }
             }
-            return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit'));
+            return $this->renderPartial('_order-buttons', compact('order', 'organizationType', 'edit', 'canRepeatOrder'));
         }
     }
 
@@ -1327,7 +1369,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: Создан новый заказ №" . $order->id . "!";
+        $subject = "f-keeper: новый заказ №" . $order->id . "!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1345,7 +1387,7 @@ class OrderController extends DefaultController {
                     ->setSubject($subject)
                     ->send();
             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                $text = "f-keeper: Создан новый заказ №" . $order->id;
+                $text = $senderOrg->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

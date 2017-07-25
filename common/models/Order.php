@@ -33,6 +33,7 @@ use Yii;
  * @property integer positionCount
  * @property string $statusText
  * @property bool $isObsolete
+ * @property string $rawPrice
  */
 class Order extends \yii\db\ActiveRecord {
 
@@ -261,22 +262,26 @@ class Order extends \yii\db\ActiveRecord {
 
     public function forFreeDelivery() {
         if (isset($this->vendor->delivery)) {
-            $diff = $this->vendor->delivery->min_free_delivery_charge - $this->total_price;
+            $diff = $this->vendor->delivery->min_free_delivery_charge - $this->rawPrice;
         } else {
             $diff = 0;
         }
-        return ($diff > 0) ? $diff : 0;
+        return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
     public function forMinOrderPrice() {
         if (isset($this->vendor->delivery)) {
-            $diff = $this->vendor->delivery->min_order_price - $this->total_price;
+            $diff = $this->vendor->delivery->min_order_price - $this->rawPrice;
         } else {
             $diff = 0;
         }
-        return ($diff > 0) ? $diff : 0;
+        return ceil((($diff > 0) ? $diff : 0) * 100) / 100;
     }
 
+    public function getRawPrice() {
+        return OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
+    }
+    
     public function calculateTotalPrice() {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {

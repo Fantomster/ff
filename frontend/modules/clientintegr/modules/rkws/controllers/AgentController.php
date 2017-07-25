@@ -45,7 +45,7 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         $res->getAgents();
         
         if($res) {
-            $this->redirect('clientintegr\rkws\default');
+            $this->redirect('\clientintegr\rkws\default');
         }
             
     }

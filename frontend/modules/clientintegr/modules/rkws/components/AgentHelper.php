@@ -54,7 +54,9 @@ class AgentHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($res);
+     // var_dump($res);
+     
+     return true;
     
     }
     
@@ -121,7 +123,7 @@ class AgentHelper extends AuthHelper {
         exit;
         }
         
-        $tmodel->intstatus_id = 2;
+        $tmodel->intstatus_id = 3;
         $tmodel->isactive = 0;
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         

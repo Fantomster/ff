@@ -548,10 +548,11 @@ class VendorController extends DefaultController {
             $count_array = count($sql_array_products);
             $arr = [];
             //массив артикулов из базы
-            for ($i = 0; $i < $count_array; $i++) {
-                array_push($arr, $sql_array_products[$i][$unique]);
+            if(!empty($sql_array_products)){
+                for ($i = 0; $i < $count_array; $i++) {
+                    array_push($arr, $sql_array_products[$i][$unique]);
+                }
             }
-
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
@@ -569,11 +570,14 @@ class VendorController extends DefaultController {
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
             $xlsArray = [];
+            //Проверяем наличие дублей в списке
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                 $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
-                if (!in_array($row_article, $arr)) {
-                    $newRows++;
-                    array_push($xlsArray, (string)$row_article);
+                if(!empty($row_article)){
+                    if (!in_array($row_article, $arr)) {
+                        $newRows++;
+                    }
+                array_push($xlsArray, (string)$row_article);
                 }
             }
             
@@ -582,12 +586,6 @@ class VendorController extends DefaultController {
                     . '<small>Вы пытаетесь загрузить каталог объемом больше '.CatalogBaseGoods::MAX_INSERT_FROM_XLS.' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                     . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
-            }
-            if(max(array_count_values($xlsArray))>1){
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
-                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
-                return $this->redirect(\Yii::$app->request->getReferrer()); 
             }
             if(max(array_count_values($xlsArray))>1){
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'

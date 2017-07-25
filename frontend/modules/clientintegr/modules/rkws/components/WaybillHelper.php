@@ -62,6 +62,8 @@ class WaybillHelper extends AuthHelper {
      
      var_dump($res);
      
+     // Обновление статуса выгрузки накладной
+     
      return true;
     
     }
@@ -69,7 +71,8 @@ class WaybillHelper extends AuthHelper {
     public function callback()
     {       
     
-    $acc =0;    
+    $acc =0; 
+    $stat =0;
         
     $getr = Yii::$app->request->getRawBody();
     $myXML   = simplexml_load_string($getr);
@@ -80,6 +83,7 @@ class WaybillHelper extends AuthHelper {
         
         $cmdguid = strval($myXML['cmdguid']); 
         $posid = strval($myXML['posid']); 
+        $stat = 3;
         
         foreach ($myXML->DOC as $doc) {
             foreach($doc->attributes() as $a => $b) {
@@ -91,6 +95,7 @@ class WaybillHelper extends AuthHelper {
     } else {
         
         $cmdguid = strval($myXML['taskguid']); 
+        $stat = 4;
         foreach ($myXML->ERROR as $doc) {
             foreach($doc->attributes() as $a => $b) {
                 $array[$gcount][$a] = strval($b[0]);                
@@ -102,7 +107,7 @@ class WaybillHelper extends AuthHelper {
     
     
     
-    if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
+    if (!empty($array) && !empty($cmdguid))  {
         
      // Заполнение tasks
         $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
@@ -112,7 +117,7 @@ class WaybillHelper extends AuthHelper {
         file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
+     //   file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
         file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
@@ -123,7 +128,7 @@ class WaybillHelper extends AuthHelper {
         exit;
         }
         
-        $tmodel->intstatus_id = 3;
+        $tmodel->intstatus_id = $stat;
         $tmodel->isactive = 0;
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         

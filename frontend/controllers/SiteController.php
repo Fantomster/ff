@@ -181,7 +181,7 @@ class SiteController extends Controller {
                 $profile->save();
                 $organization->save();
                 $organization->refresh();
-                if($organization->locality == 'Москва'){
+                if($organization->locality == 'Москва' || $organization->administrative_area_level_1 == 'Московская область'){
                    $this->SendToAmo($organization, $profile, $user);  
                 }
             }

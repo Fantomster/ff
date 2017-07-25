@@ -39,7 +39,7 @@ class AgentHelper extends AuthHelper {
      
      $tmodel = new RkTasks();
      
-     $tmodel->tasktype_id = 27;
+     $tmodel->tasktype_id = 32;
      $tmodel->acc = $this->org;
      $tmodel->fid = 1;
      $tmodel->guid = $res['respcode']['taskguid'];

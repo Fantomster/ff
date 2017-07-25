@@ -34,17 +34,17 @@ class WaybillHelper extends AuthHelper {
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     <DOC date="2017-07-12" corr="8" store="3" active="0" duedate="1" note="текст примечания" textcode="fk" numcode="5379">
-    <ITEM rid="4" quant="48000" mu="2" sum="12900" vatrate="18000" />
-    <ITEM rid="3" quant="12345" mu="1" sum="12900" vatrate="18000" />
+    <ITEM rid="4" quant="48000" mu="2" sum="1290000" vatrate="1800" />
+    <ITEM rid="3" quant="12345" mu="1" sum="1290000" vatrate="1800" />
     </DOC>
     </RQ>'; 
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
-     /*
+     
      $tmodel = new RkTasks();
      
-     $tmodel->tasktype_id = 27;
+     $tmodel->tasktype_id = 33;
      $tmodel->acc = $this->org;
      $tmodel->fid = 1;
      $tmodel->guid = $res['respcode']['taskguid'];
@@ -59,8 +59,8 @@ class WaybillHelper extends AuthHelper {
          echo "Ошибка валидации<br>";
          var_dump($tmodel->getErrors());
      }
-     */
-     // var_dump($res);
+     
+     var_dump($res);
      
      return true;
     
@@ -75,24 +75,15 @@ class WaybillHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
-    /*
     
-    foreach ($myXML->CORRGROUP as $corrgroup) {
-            foreach($corrgroup->attributes() as $c => $d) {
-                if ($c == 'rid') $grid=strval($d[0]);
-                if ($c == 'name') $grname=strval($d[0]);
+    
+    foreach ($myXML->DOC as $doc) {
+            foreach($doc->attributes() as $a => $b) {
+                $array[$gcount][$a] = strval($b[0]);                
             }
-                foreach ($corrgroup->CORR as $corr) {
-                    $gcount++;
-                    $array[$gcount]['group_rid'] = $grid;
-                    $array[$gcount]['group_name'] = $grname;
-               
-                        foreach($corr->attributes() as $a => $b) {
-                          $array[$gcount][$a] = strval($b[0]);
-                        }
-                }
+
     }
-    */
+    
     
     /*
     foreach ($myXML->RP as $rp) {
@@ -116,7 +107,7 @@ class WaybillHelper extends AuthHelper {
         $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
         
         if (!$tmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======WAYBILL==EVENT==START================='.PHP_EOL,FILE_APPEND);  
         file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 

@@ -40,5 +40,9 @@ class CallbackController extends Controller {
     public function actionProduct() {
         (new \frontend\modules\clientintegr\modules\rkws\components\ProductHelper())->callback();
     }
+    
+    public function actionWaybill() {
+        (new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper())->callback();
+    }
 
 }

@@ -15,7 +15,7 @@ use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
  * Author: R.Smirnov
  */
 
-class AgentController extends \frontend\modules\clientintegr\controllers\DefaultController {
+class WaybillController extends \frontend\modules\clientintegr\controllers\DefaultController {
     
         
     public function actionIndex() {
@@ -37,12 +37,13 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         
     }
     
-    public function actionGetws() {
+    public function actionSendws() {
         
    //  $resres = ApiHelper::getAgents();     
         
-        $res = new \frontend\modules\clientintegr\modules\rkws\components\AgentHelper();
-        $res->getAgents();
+        $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
+        $res->sendWaybill();
+                
             
     }
       

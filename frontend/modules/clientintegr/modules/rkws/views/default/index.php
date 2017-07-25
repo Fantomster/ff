@@ -88,7 +88,7 @@ use api\common\models\RkAccess;
                                             'created_at',
                                             'updated_at',
                                             'obj_count',
-                                            'obj_mapcount',
+                                        //    'obj_mapcount',
                                             [
                                                 'attribute'=>'dicstatus_id',
                                                 'value'=>function ($model) {

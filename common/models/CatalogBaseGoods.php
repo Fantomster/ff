@@ -144,7 +144,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         empty($this->id)?$where= "true":$where = "id <> $this->id";
         if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
                     ->andWhere($where)
-                    ->exists()) {
+                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
                 $this->addError($attribute, 'Такой артикул уже существует в каталоге');
         }
         

@@ -9,6 +9,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkProduct;
+use api\common\models\RkDic;
 
 /* 
  * To change this license header, choose License Headers in Project Properties.
@@ -56,7 +57,9 @@ class ProductHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($res);
+   //  var_dump($res);
+     
+     return true;
     
     }
     

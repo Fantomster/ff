@@ -9,6 +9,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkStore;
+use api\common\models\RkDic;
 
 /* 
  * To change this license header, choose License Headers in Project Properties.

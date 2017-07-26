@@ -146,7 +146,7 @@ class StoreHelper extends AuthHelper {
     }
     
      // Обновление словаря RkDic
-    /*
+    
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 2')->one();
     
         if (!$rmodel) {
@@ -163,7 +163,7 @@ class StoreHelper extends AuthHelper {
                 $er3 = $rmodel->getErrors();
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
-   */
+   
   //  $array = ApiHelper::xml2array($myXML);
   //  
   //  $array = json_decode(json_encode((array) $myXML), 1);
@@ -194,6 +194,8 @@ class StoreHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
               
     }

@@ -44,6 +44,10 @@ class StoreController extends\frontend\modules\clientintegr\controllers\DefaultC
         
     $res = new \frontend\modules\clientintegr\modules\rkws\components\StoreHelper();
     $res->getStore();
+    
+        if($res) {
+            $this->redirect('\clientintegr\rkws\default');
+        }
             
     }
       

@@ -42,7 +42,7 @@ class WaybillHelper extends AuthHelper {
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
      
-     $tmodel = new RkTasks();
+     $tmodel = new RkTasks();   
      
      $tmodel->tasktype_id = 33;
      $tmodel->acc = $this->org;
@@ -62,7 +62,7 @@ class WaybillHelper extends AuthHelper {
      
      var_dump($res);
      
-     // Обновление статуса выгрузки накладной
+     // Обновление статуса выгрузки накладной 
      
      return true;
     
@@ -107,7 +107,7 @@ class WaybillHelper extends AuthHelper {
     
     
     
-    if (!empty($array) && !empty($cmdguid))  {
+    if (!empty($array) && !empty($cmdguid))  { 
         
      // Заполнение tasks
         $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();

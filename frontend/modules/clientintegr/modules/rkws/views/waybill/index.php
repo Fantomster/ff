@@ -5,11 +5,13 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
+use common\models\Order;
 use yii\web\View;
 use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
+use api\common\models\RkWaybill;
 
 
 ?>
@@ -39,15 +41,11 @@ use api\common\models\RkAccess;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    КОНТРАГЕНТЫ
+    ЗАВЕРШЕННЫЕ ЗАКАЗЫ
 </section>
 <section class="content">
     <div class="catalog-index">
-            <div class="box-header with-border">
-              <div class="box-title pull-left">
-                 <?= Html::a('<i class="fa fa-download"></i> Отправить тестовую накладную', ['sendws'],['class'=>'btn btn-md fk-button']) ?>
-              </div>
-            </div>
+
     	<div class="box box-info">            
             <div class="box-header with-border">
                             <div class="panel-body">
@@ -59,13 +57,40 @@ use api\common\models\RkAccess;
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                         'columns' => [
-                                            'fid',
-                                            'login',
-                                            'fd',
-                                            'td',  
-                                            'ver',
-                                            'salespoint'
-                                        ],
+                                                'id',
+                                                [
+                                                    'attribute' => 'vendor.name',
+                                                    'value' => 'vendor.name',
+                                                    'label' => 'Поставщик',
+                                                    //'headerOptions' => ['class'=>'sorting',],
+                                                ],
+                                                [
+                                                    'format' => 'raw',
+                                                    'attribute' => 'status',
+                                                    'value' => function($data) {
+                                                                 $statusClass = 'done';
+                                    
+                                                    return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';  
+                                                               },
+                                                     'label' => 'Статус',
+                                                  ],
+                                                'updated_at',
+                                                'positionCount',
+                                                'total_price',
+                                                                                                                       [
+                                                    'class'=>'kartik\grid\ExpandRowColumn',
+                                                    'width'=>'50px',
+                                                    'value'=>function ($model, $key, $index, $column) {
+                                                                return GridView::ROW_COLLAPSED;
+                                                             },
+                                                    'detail'=>function ($model, $key, $index, $column) {
+                                                              $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id]);
+                                                    return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel]);
+                                                              },
+                                                    'headerOptions'=>['class'=>'kartik-sheet-style'], 
+                                                    'expandOneOnly'=>true,
+                                                ],
+                                                ],
                                         /* 'rowOptions' => function ($data, $key, $index, $grid) {
                                           return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
                                           }, */

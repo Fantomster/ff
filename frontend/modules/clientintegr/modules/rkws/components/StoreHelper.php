@@ -122,6 +122,8 @@ class StoreHelper extends AuthHelper {
         
             
      // Заполнение складов
+            
+        $icount =0;     
        
         foreach ($array as $a)   {
             

@@ -138,8 +138,9 @@ if (!Yii::$app->user->isGuest) {
             inputValue: $("#email").val(),
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
-                    var emailRegex = /^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-                    if (emailRegex.test(email)) {
+                    //var emailRegex = /^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/;
+                    //if (emailRegex.test(email)) {
+                    if (email) {
                         resolve();
                     } else {
                         reject('Некорректный email!');

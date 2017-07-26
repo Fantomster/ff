@@ -417,7 +417,7 @@ class SiteController extends Controller {
         if (Yii::$app->request->isAjax) {
             $organization->step = Organization::STEP_TUTORIAL;
             $organization->save();
-            //$user->sendWelcome();
+            $user->sendWelcome();
             $result = true;
             if($organization->locality == 'Москва'){
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;

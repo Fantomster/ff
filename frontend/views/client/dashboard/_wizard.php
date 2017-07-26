@@ -30,6 +30,8 @@ $this->registerJs('
                     yaCounter44637517.reachGoal("regmoscow", function () {
                         document.location = url;
                     });
+                }else{
+                document.location = url;
                 }
             },
             async: false

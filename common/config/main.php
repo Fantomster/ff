@@ -38,7 +38,7 @@ return [
             'locale' => 'ru_RU',
         ],
         'mailer' => [
-//            'viewPath' => '@common/mail',
+            'viewPath' => '@common/mail',
 //            'class' => 'yashop\ses\Mailer',
 //            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
 //            'secret_key' => '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',

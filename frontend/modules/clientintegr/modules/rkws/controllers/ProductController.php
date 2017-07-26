@@ -37,6 +37,10 @@ class ProductController extends\frontend\modules\clientintegr\controllers\Defaul
         
     $res = new \frontend\modules\clientintegr\modules\rkws\components\ProductHelper();
     $res->getProduct();
+    
+            if($res) {
+            $this->redirect('\clientintegr\rkws\default');
+        }
             
     }
     

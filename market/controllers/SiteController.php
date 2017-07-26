@@ -316,18 +316,18 @@ class SiteController extends Controller {
                         ]
                     ]
                 ],
-                'highlight'=>[
-                    'fields'=>[
-                      'supplier_name'=>[
-                        'post_tags'=>[
-                          "</span>"
-                        ],
-                        'pre_tags'=>[
-                          '<span class=\"vulners-highlight\">'
-                        ]
-                      ]
-                    ]
-                ],
+//                'highlight'=>[
+//                    'fields'=>[
+//                      'supplier_name'=>[
+//                        'post_tags'=>[
+//                          "</span>"
+//                        ],
+//                        'pre_tags'=>[
+//                          '<span class=\"vulners-highlight\">'
+//                        ]
+//                      ]
+//                    ]
+//                ],
                 'filter' => [
                     'bool' => [
                         'must_not' => [

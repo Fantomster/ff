@@ -21,7 +21,7 @@ class WaybillHelper extends AuthHelper {
     
     const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
     
-    public function sendWaybill () {
+    public function sendWaybill ($id) {
     if (!$this->Authorizer()) {
        
       echo "Can't perform authorization";
@@ -29,6 +29,9 @@ class WaybillHelper extends AuthHelper {
     }    
     
     $guid = UUID::uuid4();
+    
+    var_dump($model);
+    exit;
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
@@ -60,7 +63,7 @@ class WaybillHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($model);
+    // $wmodel = 
      
      // Обновление статуса выгрузки накладной 
      

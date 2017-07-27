@@ -128,6 +128,11 @@ class StoreHelper extends AuthHelper {
        
         foreach ($array as $a)   {
             
+                    $checks = RkStore::find()->andWhere('acc = :acc',[':acc' => $acc])
+                                        ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
+                                        ->one();
+                if (!$checks) {
+            
             $amodel = new RkStore();
             
             $amodel->acc = $acc;
@@ -140,6 +145,8 @@ class StoreHelper extends AuthHelper {
                 $er = $amodel->getErrors();
             } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
             
+                }
+                
             $icount++;
          
         }

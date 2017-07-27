@@ -193,7 +193,7 @@ class AuthHelper extends Object {
                 }
         
         } else {
-           $newsess->fid = $sessmax +1;
+           $newsess->fid = 1;
            $newsess->ver =1; 
            
             if (!$newsess->save(false)) {

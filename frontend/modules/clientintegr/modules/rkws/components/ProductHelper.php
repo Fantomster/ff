@@ -72,7 +72,47 @@ class ProductHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
+    foreach ($myXML->ITEM as $goodsgroup) {
+            foreach($goodsgroup->attributes() as $c => $d) {
+                if ($c == 'rid') $grid=strval($d[0]);
+                if ($c == 'name') $grname=strval($d[0]);
+                if ($c == 'parent') $grparent=strval($d[0]);
+            }
+                foreach ($goodsgroup->GOODS_LIST as $glist) {
+                    
+                    foreach ($glist->ITEM as $item) {
+                        
+                        foreach($item->attributes() as $a => $b) {
+                            if ($a == 'rid') $prid=strval($b[0]);
+                            if ($a == 'name') $prname=strval($b[0]);
+                        
+                            foreach ($item->MUNITS-MUNIT as $unit) {
+                            $gcount++;
+                                $array[$gcount]['group_rid'] = $grid;
+                                $array[$gcount]['group_name'] = $grname;
+                                $array[$gcount]['group_parent'] = $grparent;
+                                $array[$gcount]['product_rid'] = $grparent;
+                                $array[$gcount]['product_name'] = $grparent;
+                                
+                                foreach($unit->attributes() as $e => $h) {
+                                    if ($e == 'rid') $array[$gcount]['unit_rid'] = strval($h[0]);
+                                    if ($e == 'name') $array[$gcount]['unit_name'] = strval($h[0]);
+                                }
+                                
+                            }
+
+                        }
+                        
+                    }
+                                     
+                }
+    }
     
+
+                        
+                        
+    
+    /* Работает без едизм
     foreach ($myXML->ITEM as $goodsgroup) {
             foreach($goodsgroup->attributes() as $c => $d) {
                 if ($c == 'rid') $grid=strval($d[0]);
@@ -95,7 +135,7 @@ class ProductHelper extends AuthHelper {
                                      
                 }
     }
-    
+    */
     
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 

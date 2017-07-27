@@ -166,7 +166,7 @@ class AuthHelper extends Object {
     $newsess = new RkSession();
     
         $newsess->cook = $cook;
-        $newsess->fd= Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ms');    
+        $newsess->fd= Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');    
         $newsess->td= Yii::$app->formatter->asDate('2030-01-01 23:59:59', 'yyyy-MM-dd HH:mm:ss');
         $newsess->acc = 1;
         $newsess->status = 1;

@@ -180,6 +180,13 @@ class ProductHelper extends AuthHelper {
             
             $amodel = new RkProduct();
             
+                $checks = RkProduct::find()->andWhere('acc = :acc',[':acc' => $acc])
+                                           ->andWhere('rid = :rid',[':rid' => $a['product_rid']])
+                                           ->andWhere('unit_rid = :unit_rid',[':unit_rid' => $a['unit_rid']])
+                                           ->one();
+                if (!$checks) {
+                    
+                       
             $amodel->acc = $acc; 
             $amodel->rid = $a['product_rid'];
             $amodel->denom = $a['product_name'];
@@ -195,7 +202,8 @@ class ProductHelper extends AuthHelper {
                 $er = $amodel->getErrors();
             } else $er = "Данные продуктов успешно сохранены.(ID:".$amodel->id." )";
             
-           $icount++;
+                }
+           $icount++;          
         }
      
     }

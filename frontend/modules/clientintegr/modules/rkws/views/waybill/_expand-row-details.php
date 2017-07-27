@@ -56,7 +56,14 @@
                                                 'value'=>function ($model) {
                                                     return $model->readytoexport ? 'готова' : 'не готова';
                                                          },    
-                                                ],                         
+                                                ],      
+                                                [
+                                                'attribute'=>'status_id',
+                                                'label' => 'Статус',   
+                                                'value'=>function ($model) {
+                                                    return $model->status->denom;
+                                                         },    
+                                                ],                   
                                                                                             [
                                                 'class' => 'yii\grid\ActionColumn',
                                                 'contentOptions'=>['style'=>'width: 6%;'],

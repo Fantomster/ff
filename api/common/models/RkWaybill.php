@@ -89,6 +89,14 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
+    
+    public function getStatus() {
+
+        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
+        return RkWaybillstatus::find()->andWhere('id = :id', [':id' => $this->status_id])->one();
+
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    }
 
     
     public function afterSave($insert, $changedAttributes) {

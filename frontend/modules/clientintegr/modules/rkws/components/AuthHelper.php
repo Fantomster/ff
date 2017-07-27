@@ -157,8 +157,6 @@ class AuthHelper extends Object {
          
         
     $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('sysdate() between fd and td')->one();
-    
-    var_dump($sess);
         
     $sessmax = RkSession::find()->max('fid');   
     
@@ -195,6 +193,9 @@ class AuthHelper extends Object {
         } else {
            $newsess->fid = 1;
            $newsess->ver =1; 
+           
+           var_dump($newsess);
+           exit;
            
             if (!$newsess->save(false)) {
                 var_dump($newsess->getErrors());

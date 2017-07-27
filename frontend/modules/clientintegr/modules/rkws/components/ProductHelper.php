@@ -59,7 +59,7 @@ class ProductHelper extends AuthHelper {
      
      var_dump($res);
      
-    return true;
+    // return true;
     
     }
     

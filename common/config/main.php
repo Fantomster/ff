@@ -37,17 +37,17 @@ return [
         'formatter' => [
             'locale' => 'ru_RU',
         ],
-//        'mailer' => [
-//            'viewPath' => '@common/mail',
-//            'class' => 'yashop\ses\Mailer',
-//            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
-//            'secret_key' => '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',
-//            'host' => 'email.eu-west-1.amazonaws.com',
-//            'messageConfig' => [
-//                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
-//                'charset' => 'UTF-8',
-//            ],
-//        ],
+        'mailer' => [
+            'viewPath' => '@common/mail',
+            'class' => 'yashop\ses\Mailer',
+            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
+            'secret_key' => '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',
+            'host' => 'email.eu-west-1.amazonaws.com',
+            'messageConfig' => [
+                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+                'charset' => 'UTF-8',
+            ],
+        ],
         'mailqueue' => [
             'class' => 'nterms\mailqueue\MailQueue',
             'table' => '{{%mail_queue}}',

@@ -91,8 +91,8 @@ class ProductHelper extends AuthHelper {
                                 $array[$gcount]['group_rid'] = $grid;
                                 $array[$gcount]['group_name'] = $grname;
                                 $array[$gcount]['group_parent'] = $grparent;
-                                $array[$gcount]['product_rid'] = $grparent;
-                                $array[$gcount]['product_name'] = $grparent;
+                                $array[$gcount]['product_rid'] = $prid;
+                                $array[$gcount]['product_name'] = $prname;
                                 
                                 foreach($unit->attributes() as $e => $h) {
                                     if ($e == 'rid') $array[$gcount]['unit_rid'] = strval($h[0]);

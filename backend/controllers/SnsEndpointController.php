@@ -18,7 +18,7 @@ class SnsEndpointController extends \yii\rest\Controller {
     //put your code here
     public function actionBounce() {
         //
-        $message = MessageValidator\Message::fromRawPostData();
+        $message = Message::fromRawPostData();
         $validator = new MessageValidator();
 
         try {

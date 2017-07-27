@@ -25,6 +25,7 @@ class SnsEndpointController extends Controller {
             $validator->validate($message);
         } catch (SnsException $ex) {
             http_response_code(404);
+            Yii::error($ex->getMessage());
             die();
         }
         // Check the type of the message and handle the subscription.

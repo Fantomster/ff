@@ -33,11 +33,11 @@ class AuthHelper extends Object {
     public function Authorizer ()           
             
     {
-         $auth = $this->sendAuth();
+       //  $auth = $this->sendAuth();
         
         if (!$check = $this->checkAuthBool()) {
             
-          echo "Проверка авторизации провалена. Перехожу к попытке авторизации";
+     //     echo "Проверка авторизации провалена. Перехожу к попытке авторизации";
     //    exit;
        
         $auth = $this->sendAuth();
@@ -65,10 +65,10 @@ class AuthHelper extends Object {
         
         $res = ApiHelper::sendCurl($xml,$this->restr);
         
-        echo "Checkauthbool<br>";
-        var_dump($res);
-        echo "dsf";
-        var_dump($res['respcode']['code']);
+      //  echo "Checkauthbool<br>";
+      //  var_dump($res);
+      //  echo "dsf";
+      //  var_dump($res['respcode']['code']);
         
      //   throw new Exception(print_r($res,true));
         

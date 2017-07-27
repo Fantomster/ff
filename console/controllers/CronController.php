@@ -308,8 +308,14 @@ class CronController extends Controller {
                 }else{
                 // нет подходящего франча / в не отсортированные
                 $organization_model = Organization::findOne($organization->id);
-                $organization_model->franchisee_sorted = 0;
+                $organization_model->franchisee_sorted = 1;
                 $organization_model->save();
+                
+                $franchiseeAssociate = new \common\models\FranchiseeAssociate();
+                $franchiseeAssociate->franchisee_id = 1;
+                $franchiseeAssociate->organization_id = $organization->id;
+                $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
+                $franchiseeAssociate->save();
                 }
             }
         }

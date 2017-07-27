@@ -169,6 +169,10 @@ class AuthHelper extends Object {
         $newsess->status = 1;
                   
         if ($sess) {
+          
+            echo "sess есть";
+            var_dump($newsess);
+           exit;
         
             $sess->td = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $sess->status = 0;     

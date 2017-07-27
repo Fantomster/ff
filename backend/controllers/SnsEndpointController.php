@@ -11,4 +11,7 @@ use yii\web\Controller;
  */
 class SnsEndpointController extends Controller {
     //put your code here
+    public function actionBounce() {
+        //
+    }
 }

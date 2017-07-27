@@ -34,7 +34,8 @@ class AuthHelper extends Object {
     {
         if (!$check = $this->checkAuthBool()) {
             
-       //  echo "Проверка авторизации провалена. Перехожу к попытке авторизации";
+        echo "Проверка авторизации провалена. Перехожу к попытке авторизации";
+        exit;
        
         $auth = $this->sendAuth();
         
@@ -63,7 +64,7 @@ class AuthHelper extends Object {
         
         echo "Checkauthbool<br>";
         var_dump($res);
-        exit;
+       
       //  var_dump(['respcode']['code']);
         
      //   throw new Exception(print_r($res,true));

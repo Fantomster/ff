@@ -140,7 +140,8 @@ class AuthHelper extends Object {
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
     
-    // var_dump($myXML);
+    var_dump($myXML);
+    exit;
     
     $respcode = $array['Error']['@attributes']['code'];
     

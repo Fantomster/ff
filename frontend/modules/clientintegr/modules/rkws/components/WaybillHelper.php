@@ -60,7 +60,7 @@ class WaybillHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($res);
+     var_dump($model);
      
      // Обновление статуса выгрузки накладной 
      

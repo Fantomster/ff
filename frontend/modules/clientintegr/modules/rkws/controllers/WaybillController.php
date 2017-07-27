@@ -144,6 +144,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     {
         $model = new RkWaybill();
         $model->order_id = $order_id;
+        $model->status_id = 1;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             

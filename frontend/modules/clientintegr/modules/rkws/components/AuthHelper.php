@@ -30,8 +30,11 @@ class AuthHelper extends Object {
        
     } 
     
-    public function Authorizer ()
+    public function Authorizer ()           
+            
     {
+         $auth = $this->sendAuth();
+        
         if (!$check = $this->checkAuthBool()) {
             
           echo "Проверка авторизации провалена. Перехожу к попытке авторизации";
@@ -140,8 +143,8 @@ class AuthHelper extends Object {
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
     
-    var_dump($myXML);
-    var_dump($cook);
+   // var_dump($myXML);
+   // var_dump($cook);
       
     $respcode = $array['Error']['@attributes']['code'];
     
@@ -156,9 +159,9 @@ class AuthHelper extends Object {
             file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':SENDAUTH OK RECEIVED'.PHP_EOL, FILE_APPEND);   
          
         
-    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('sysdate() between fd and td')->one();
+    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('status = 1')->one();
         
-    $sessmax = RkSession::find()->max('fid');   
+   // $sessmax = RkSession::find()->max('fid');   
     
     $newsess = new RkSession();
     
@@ -170,9 +173,9 @@ class AuthHelper extends Object {
                   
         if ($sess) {
           
-            echo "sess есть";
-            var_dump($newsess);
-           exit;
+     //       echo "sess есть";
+     //       var_dump($newsess);
+     //      exit;
         
             $sess->td = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $sess->status = 0;     
@@ -197,9 +200,10 @@ class AuthHelper extends Object {
         } else {
            $newsess->fid = 1;
            $newsess->ver =1; 
+           $newsess->status =1;
            
-           var_dump($newsess);
-           exit;
+       //    var_dump($newsess);
+       //    exit;
            
             if (!$newsess->save(false)) {
                 var_dump($newsess->getErrors());
@@ -217,8 +221,10 @@ class AuthHelper extends Object {
         }
         
     } else {
-           var_dump('херь');
-           exit;
+        
+        echo "Auth not successful";
+        exit;
+        return false;
     }        
 
     if(curl_errno($ch))

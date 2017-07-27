@@ -142,8 +142,7 @@ class AuthHelper extends Object {
     
     var_dump($myXML);
     var_dump($cook);
-    exit;
-    
+      
     $respcode = $array['Error']['@attributes']['code'];
     
     if (!$respcode === null) {
@@ -159,14 +158,17 @@ class AuthHelper extends Object {
         
     $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restrModel->fid])->andwhere('sysdate() between fd and td')->one();
     
+    var_dump($sess);
+    exit;
+    
     $sessmax = RkSession::find()->max('fid');   
     
     $newsess = new RkSession();
     
         $newsess->cook = $cook;
-        $newsess->fd= Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');    
+        $newsess->fd= Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ms');    
         $newsess->td= Yii::$app->formatter->asDate('2030-01-01 23:59:59', 'yyyy-MM-dd HH:mm:ss');
-        $newsess->acc = $restrModel->fid;
+        $newsess->acc = 1;
         $newsess->status = 1;
                   
         if ($sess) {

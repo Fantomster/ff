@@ -200,7 +200,7 @@ class ProductHelper extends AuthHelper {
      
     }
     
-        
+    /*    
     // Обновление словаря RkDic
     
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 3')->one();
@@ -220,7 +220,7 @@ class ProductHelper extends AuthHelper {
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
         
-    
+   */ 
    
   //  $array = ApiHelper::xml2array($myXML);
   //  

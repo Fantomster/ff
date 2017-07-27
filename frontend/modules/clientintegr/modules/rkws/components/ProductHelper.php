@@ -186,7 +186,7 @@ class ProductHelper extends AuthHelper {
             $amodel->unit_rid = $a['unit_rid'];
             $amodel->unit_name = $a['unit_name'];
             $amodel->group_rid = $a['group_rid'];
-            $amodel->denom = $a['group_name'];
+            $amodel->group_name = $a['group_name'];
             
         //    $amodel->agent_type = $a['type'];
             $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  

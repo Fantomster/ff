@@ -211,7 +211,7 @@ class ProductHelper extends AuthHelper {
             $amodel->rid = $a['product_rid'];
             $amodel->denom = $a['product_name'];
             $amodel->unit_rid = $a['unit_rid'];
-            $amodel->unit_name = $a['unit_name'];
+            $amodel->unitname = $a['unit_name'];
             $amodel->group_rid = $a['group_rid'];
             $amodel->group_name = $a['group_name'];
             

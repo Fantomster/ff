@@ -4,6 +4,7 @@ namespace api\common\models;
 
 use Yii;
 use common\models\Organization;
+use yii\base\Exception;
 
 
 /**
@@ -47,10 +48,10 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['acc','rid','denom'], 'required'],
-            [['acc','rid'], 'integer'],
-            [['comment'], 'string', 'max' => 255],
-            [['acc','rid','denom','agent_type','updated_at'],'safe']
+            [['waybill_id','product_id'], 'required'],
+         //   [['acc','rid'], 'integer'],
+         //   [['comment'], 'string', 'max' => 255],
+            [['waybill_id','product_rid','product_id','munit_rid','updated_at','quant','sum','vat'],'safe']
         ];
     }
 

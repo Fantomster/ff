@@ -3,9 +3,21 @@
  use kartik\grid\GridView;
  use yii\data\ActiveDataProvider;
  use common\models\User;
+ use yii\helpers\Html;
 
  ?>
 Приходная Накладная:<br><br>
+
+<?php 
+    
+    // var_dump($model);   
+
+    if(empty($model)) {
+        
+         echo Html::a('Создать накладную', ['create','order_id'=>$order_id], ['class'=>'btn btn-md fk-button']);   
+    } else {
+
+?>
 
                                     <?=
                                     GridView::widget([
@@ -65,7 +77,7 @@
                                                            },
                                                        'map' =>  function ($url, $model) {
                                                       //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
-                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['map', 'id'=>$model->id]);
+                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\map', 'waybill_id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
                                                                      ['title' => Yii::t('backend', 'Map'), 'data-pjax'=>"0"]);
                                                            },           
@@ -92,4 +104,5 @@
                                         ],
                                     ]);
                                     ?> 
+    <?php } ?>
 

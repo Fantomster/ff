@@ -84,8 +84,15 @@ use api\common\models\RkWaybill;
                                                                 return GridView::ROW_COLLAPSED;
                                                              },
                                                     'detail'=>function ($model, $key, $index, $column) {
-                                                              $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id]);
-                                                    return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel]);
+                                                              $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id])->one();
+                                                              
+                                                              if ($wmodel) {
+                                                                  $wmodel = RkWaybill::find()->andWhere('order_id = :order_id',[':order_id'=> $model->id]);
+                                                              } else {
+                                                                  $wmodel = null;
+                                                              }
+                                                              $order_id = $model->id;
+                                                    return Yii::$app->controller->renderPartial('_expand-row-details', ['model'=>$wmodel,'order_id'=>$order_id]);
                                                               },
                                                     'headerOptions'=>['class'=>'kartik-sheet-style'], 
                                                     'expandOneOnly'=>true,

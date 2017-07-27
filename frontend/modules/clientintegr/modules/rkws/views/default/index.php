@@ -40,7 +40,7 @@ use api\common\models\RkAccess;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-
+    СПРАВОЧНИКИ:
 </section>
 
 <section class="content-header">
@@ -102,7 +102,7 @@ use api\common\models\RkAccess;
                                             [
                                                 'class' => 'yii\grid\ActionColumn',
                                                 'contentOptions'=>['style'=>'width: 6%;'],
-                                                'template'=>'{view}&nbsp;{update}&nbsp;{getws}&nbsp;{map}',
+                                                'template'=>'{view}&nbsp;{getws}&nbsp;{map}',
                                                     'visibleButtons' => [
      
                                                         'update' => function ($model, $key, $index) {
@@ -113,10 +113,10 @@ use api\common\models\RkAccess;
                                                         // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
                                                         return true;     
                                                         },                   
-                                                        'map' => function ($model, $key, $index) {
-                                                        // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
-                                                        return true;     
-                                                        },                           
+                                                    //    'map' => function ($model, $key, $index) {
+                                                    //    // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                                                    //    return true;     
+                                                    //    },                           
                                                     ],
                 
                                                 'buttons'=>[

@@ -41,7 +41,7 @@ class WaybillHelper extends AuthHelper {
     
     
     
-    var_dump($xml);
+    print_r($xml,true);
     
     
     
@@ -54,7 +54,7 @@ class WaybillHelper extends AuthHelper {
     </DOC>
     </RQ>'; 
     
-    var_dump($xml2);
+   print_r($xml2,true);
     
     exit;
        

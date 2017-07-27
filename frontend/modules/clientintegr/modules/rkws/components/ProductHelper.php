@@ -83,16 +83,17 @@ class ProductHelper extends AuthHelper {
                     foreach ($glist->ITEM as $item) {
                         
                         foreach($item->attributes() as $a => $b) {
-                            if ($a == 'rid') $prid=strval($b[0]);
-                            if ($a == 'name') $prname=strval($b[0]);
+                            if ($a == 'rid') { $prid=strval($b[0]); }
+                            if ($a == 'name') { $prname=strval($b[0]); }
+                        }    
                         
-                            foreach ($item->MUNITS-MUNIT as $unit) {
+                            foreach ($item->MUNITS->MUNIT as $unit) {
                             $gcount++;
                                 $array[$gcount]['group_rid'] = $grid;
                                 $array[$gcount]['group_name'] = $grname;
                                 $array[$gcount]['group_parent'] = $grparent;
-                                $array[$gcount]['product_rid'] = $grparent;
-                                $array[$gcount]['product_name'] = $grparent;
+                                $array[$gcount]['product_rid'] = $prid;
+                                $array[$gcount]['product_name'] = $prname;
                                 
                                 foreach($unit->attributes() as $e => $h) {
                                     if ($e == 'rid') $array[$gcount]['unit_rid'] = strval($h[0]);
@@ -103,9 +104,9 @@ class ProductHelper extends AuthHelper {
 
                         }
                         
-                    }
+            }
                                      
-                }
+                
     }
     
 

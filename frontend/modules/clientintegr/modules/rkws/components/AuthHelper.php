@@ -62,7 +62,7 @@ class AuthHelper extends Object {
         
         echo "Checkauthbool<br>";
         var_dump($res);
-        var_dump(['respcode']['code']);
+     //   var_dump(['respcode']['code']);
         
       if ($res['respcode']['code'] == '0') {
               file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  

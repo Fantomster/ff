@@ -173,7 +173,7 @@ class ProductHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение номенклатуры
-         /*  
+           
              $icount =0; 
      
         foreach ($array as $a)   {
@@ -181,8 +181,8 @@ class ProductHelper extends AuthHelper {
             $amodel = new RkProduct();
             
             $amodel->acc = $acc; 
-            $amodel->rid = $a['rid'];
-            $amodel->denom = $a['name'];
+            $amodel->rid = $a['product_rid'];
+            $amodel->denom = $a['product_name'];
             $amodel->unit_rid = $a['unit_rid'];
             $amodel->unit_name = $a['unit_name'];
             $amodel->group_rid = $a['group_rid'];
@@ -197,10 +197,10 @@ class ProductHelper extends AuthHelper {
             
            $icount++;
         }
-     */
+     
     }
     
-    /*    
+       
     // Обновление словаря RkDic
     
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 3')->one();
@@ -220,8 +220,7 @@ class ProductHelper extends AuthHelper {
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
         
-   */ 
-   
+      
   //  $array = ApiHelper::xml2array($myXML);
   //  
   //  $array = json_decode(json_encode((array) $myXML), 1);

@@ -139,6 +139,11 @@ class AgentHelper extends AuthHelper {
       
         foreach ($array as $a)   {
             
+                            $checks = RkAgent::find()->andWhere('acc = :acc',[':acc' => $acc])
+                                           ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
+                                           ->one();
+                if (!$checks) {
+            
             $amodel = new RkAgent();
             
             $amodel->acc = $acc; // $tmodel->acc; 
@@ -151,6 +156,8 @@ class AgentHelper extends AuthHelper {
                 $er = $amodel->getErrors();
             } else $er = "Данные контрагентов успешно сохранены.(ID:".$amodel->id." )";
             
+                }
+                
             $icount++;
          
         }

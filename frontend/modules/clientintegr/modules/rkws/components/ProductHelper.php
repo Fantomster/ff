@@ -178,7 +178,7 @@ class ProductHelper extends AuthHelper {
      
         foreach ($array as $a)   {
             
-            $amodel = new RkProduct();
+
             
                 $checks = RkProduct::find()->andWhere('acc = :acc',[':acc' => $acc])
                                            ->andWhere('rid = :rid',[':rid' => $a['product_rid']])
@@ -186,7 +186,8 @@ class ProductHelper extends AuthHelper {
                                            ->one();
                 if (!$checks) {
                     
-                       
+            $amodel = new RkProduct();
+                    
             $amodel->acc = $acc; 
             $amodel->rid = $a['product_rid'];
             $amodel->denom = $a['product_name'];

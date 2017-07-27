@@ -74,6 +74,7 @@ use api\common\models\RkAccess;
                                         'pjax' => true, // pjax is set to always true for this demo
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
+                                        'layout' => '{items}',
                                         'columns' => [
                                             'id',
                                             [

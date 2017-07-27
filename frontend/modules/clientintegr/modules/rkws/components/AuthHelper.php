@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use common\models\User;
 use api\common\models\RkTasks;
+use Exception;
 
 use yii\base\Object;
 

@@ -30,7 +30,9 @@ class WaybillHelper extends AuthHelper {
     
     $guid = UUID::uuid4();
     
-    var_dump($model);
+    $wmodel = \api\common\models\RkWaybill::findOne(['id' => $id]);
+    
+    var_dump($wmodel);
     exit;
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>

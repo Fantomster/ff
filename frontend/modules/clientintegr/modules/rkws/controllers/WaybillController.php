@@ -164,12 +164,12 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     
     
     
-    public function actionSendws() {
+    public function actionSendws($waybill_id) {
         
    //  $resres = ApiHelper::getAgents();     
         
         $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
-        $res->sendWaybill($id);
+        $res->sendWaybill($waybill_id);
                 
             
     }

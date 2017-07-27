@@ -86,7 +86,7 @@ class ProductHelper extends AuthHelper {
                             if ($a == 'rid') $prid=strval($b[0]);
                             if ($a == 'name') $prname=strval($b[0]);
                         
-                            foreach ($item->MUNITS-MUNIT as $unit) {
+                            foreach ($item->MUNITS->MUNIT as $unit) {
                             $gcount++;
                                 $array[$gcount]['group_rid'] = $grid;
                                 $array[$gcount]['group_name'] = $grname;

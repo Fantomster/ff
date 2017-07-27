@@ -141,7 +141,8 @@ class AuthHelper extends Object {
     $array = array($myXML->getName() => $array);
     
     var_dump($myXML);
-    exit;
+    var_dump($cook);
+   //  exit;
     
     $respcode = $array['Error']['@attributes']['code'];
     

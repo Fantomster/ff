@@ -28,7 +28,7 @@ use yii\helpers\ArrayHelper;
                 'type' => DatePicker::TYPE_COMPONENT_APPEND,
                 'convertFormat' => true,
                 'layout' => '{picker}{input}',
-                'disabled'=>$disable,
+             //   'disabled'=>$disable,
                 'pluginOptions' => [
                     'autoclose'=>true,
                  //   'format' => 'Y-m-d',

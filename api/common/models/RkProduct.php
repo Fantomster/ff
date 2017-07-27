@@ -50,7 +50,7 @@ class RkProduct extends \yii\db\ActiveRecord
             [['acc','rid','denom'], 'required'],
             [['acc','rid'], 'integer'],
             [['comment'], 'string', 'max' => 255],
-            [['acc','rid','denom','cat_id','updated_at'],'safe']
+            [['acc','rid','denom','cat_id','updated_at','group_rid','group_name','unit_rid','unit_name'],'safe']
         ];
     }
 

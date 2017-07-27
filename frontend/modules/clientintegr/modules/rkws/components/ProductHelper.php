@@ -57,9 +57,9 @@ class ProductHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-   //  var_dump($res);
+     var_dump($res);
      
-     return true;
+    return true;
     
     }
     

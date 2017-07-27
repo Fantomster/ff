@@ -13,7 +13,7 @@ use Aws\Sns\Exception\SnsException;
  *
  * @author elbabuino
  */
-class SnsEndpointController extends Controller {
+class SnsEndpointController extends \yii\rest\Controller {
 
     //put your code here
     public function actionBounce() {

@@ -65,7 +65,7 @@ class AuthHelper extends Object {
         echo "Checkauthbool<br>";
         var_dump($res);
        
-      //  var_dump(['respcode']['code']);
+        var_dump($res['respcode']['code']);
         
      //   throw new Exception(print_r($res,true));
         

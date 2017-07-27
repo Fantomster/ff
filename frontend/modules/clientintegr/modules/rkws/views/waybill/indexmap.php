@@ -14,6 +14,7 @@ use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;
 
+
 ?>
 
 
@@ -75,7 +76,7 @@ GridView::widget([
         //'widgetClass'=> 'kartik\datecontrol\DateControl',
         'options'=>[
 
-            'data' => $data,
+       //     'data' => $data,
             'options' => ['placeholder' => 'Выберите продукт из списка',           
                 ],
              'pluginOptions' => [

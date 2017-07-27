@@ -142,7 +142,7 @@ class AuthHelper extends Object {
     
     var_dump($myXML);
     var_dump($cook);
-   //  exit;
+    exit;
     
     $respcode = $array['Error']['@attributes']['code'];
     

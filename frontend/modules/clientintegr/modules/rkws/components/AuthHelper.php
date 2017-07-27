@@ -32,6 +32,8 @@ class AuthHelper extends Object {
     public function Authorizer ()
     {
         if (!$check = $this->checkAuthBool()) {
+            
+       //  echo "Проверка авторизации провалена. Перехожу к попытке авторизации";
        
         $auth = $this->sendAuth();
         
@@ -58,16 +60,22 @@ class AuthHelper extends Object {
         
         $res = ApiHelper::sendCurl($xml,$this->restr);
         
-      if ($res['respcode']['code'] == '0') 
+     //   echo "Checkauthbool<br>";
+     //   var_dump($res);
+     //   var_dump(['respcode']['code']);
+        
+      if ($res['respcode']['code'] == '0') {
               file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
               file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:SUCCESS'.PHP_EOL, FILE_APPEND);   
               file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
           return true;
-      } 
+      } else {
             file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
             file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:FAILED'.PHP_EOL, FILE_APPEND);   
             file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
       return false;
+            }
+    }
     }  
  
     public function sendAuth() {
@@ -84,7 +92,7 @@ class AuthHelper extends Object {
     $usrReq = base64_encode($rlogin.';'.strtolower(md5($rlogin.$rpass)).';'.strtolower(md5($rtoken)));
     
     var_dump($usrReq);
-    exit;
+    // exit;
     
     $xml ='<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="'.$licReq.'" usr="'.$usrReq.'"/>';
    
@@ -126,6 +134,8 @@ class AuthHelper extends Object {
     $myXML   = simplexml_load_string($partx);   
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
+    
+    // var_dump($myXML);
     
     $respcode = $array['Error']['@attributes']['code'];
     

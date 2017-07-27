@@ -176,7 +176,7 @@ class ApiHelper  {
     $myXML   = simplexml_load_string($data);
     
    // echo "&&&&&&&&&&&&&<br>";
-    var_dump($data,true);
+   // var_dump($data,true);
     
     foreach ($myXML->OBJECTINFO as $obj) {
      
@@ -239,10 +239,10 @@ class ApiHelper  {
     else
     curl_close($ch);
     
-    echo ('*******<br>');
-    var_dump($objectinfo);
-    echo ('------<br>');
-    var_dump($respcode);
+   // echo ('*******<br>');
+   // var_dump($objectinfo);
+   // echo ('------<br>');
+   // var_dump($respcode);
     
   //  exit;
     

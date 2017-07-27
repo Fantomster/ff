@@ -62,7 +62,7 @@ class AuthHelper extends Object {
         $res = ApiHelper::sendCurl($xml,$this->restr);
         
         echo "Checkauthbool<br>";
-        VarDumper::dump($res);
+        var_dump($res);
         exit;
       //  var_dump(['respcode']['code']);
         

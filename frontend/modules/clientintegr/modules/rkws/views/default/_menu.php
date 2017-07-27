@@ -28,7 +28,6 @@ use yii\helpers\Html;
                              
                             <?= Html::a('Задачи', ['task/index'], ['class'=>'btn btn-md fk-button']); ?>    
                             <?= Html::a('История', ['history/index'], ['class'=>'btn btn-md fk-button']); ?>                            
-                       sdfsfdsf
                         </div>
                         <div class="col-md-4 text-right">
                             <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>

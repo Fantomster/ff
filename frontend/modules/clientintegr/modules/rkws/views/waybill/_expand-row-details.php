@@ -49,11 +49,18 @@
                                                                     
                                                 ],  
                                                 'doc_date',
-                                                'note',      
+                                                'note', 
+                                                [
+                                                'attribute'=>'readytoexport',
+                                                'label' => 'К выгрузке',   
+                                                'value'=>function ($model) {
+                                                    return $model->readytoexport ? 'готова' : 'не готова';
+                                                         },    
+                                                ],                         
                                                                                             [
                                                 'class' => 'yii\grid\ActionColumn',
                                                 'contentOptions'=>['style'=>'width: 6%;'],
-                                                'template'=>'{view}&nbsp;{update}&nbsp;{map}',
+                                                'template'=>'{view}&nbsp;{update}&nbsp;{map}&nbsp;{export}',
                                                     'visibleButtons' => [
      
                                                         'update' => function ($model, $key, $index) {
@@ -64,6 +71,10 @@
                                                         // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
                                                         return true;     
                                                         },          
+                                                        'export' => function ($model, $key, $index) {
+                                                        return $model->readytoexport ? true : false;
+                                                        return true;     
+                                                        },                  
                           
                                                     ],
                 
@@ -73,15 +84,20 @@
                                                       //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                                                         $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\update', 'id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-pencil" aria-hidden="true"></i>', $customurl,
-                                                                     ['title' => Yii::t('backend', 'Update'), 'data-pjax'=>"0"]);
+                                                                     ['title' => Yii::t('backend', 'Изменить шапку'), 'data-pjax'=>"0"]);
                                                            },
                                                        'map' =>  function ($url, $model) {
                                                       //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
                                                         $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\map', 'waybill_id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,
-                                                                     ['title' => Yii::t('backend', 'Map'), 'data-pjax'=>"0"]);
+                                                                     ['title' => Yii::t('backend', 'Сопоставить'), 'data-pjax'=>"0"]);
                                                            },           
-                                                    
+                                                       'export' =>  function ($url, $model) {
+                                                      //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\sendws', 'waybill_id'=>$model->id]);
+                                                        return \yii\helpers\Html::a( '<i class="fa fa-upload" aria-hidden="true"></i>', $customurl,
+                                                                     ['title' => Yii::t('backend', 'Выгрузить'), 'data-pjax'=>"0"]);
+                                                           },                                                      
                                                   
                                                            ]                               
                                                                    

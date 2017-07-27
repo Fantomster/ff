@@ -59,15 +59,25 @@ GridView::widget([
     'filterPosition' => false,
     'columns' => [
         'product_id',
-        'quant',
-        'sum',
+        [
+           'attribute' => 'product_id',
+           'value' => function ($model) {
+                      return $model->fproductname->product;
+                      },
+           'format' => 'raw',
+           'label' => 'Наименование F-keeper',                   
+         ],
+
+     //   'munit_rid',
+
         [
             'class' => 'kartik\grid\EditableColumn',
             'attribute' => 'product_rid',
+            'label' => 'RID в Store House',
           //  'pageSummary' => 'Total',
             'vAlign' => 'middle',
             'width' => '210px',
-      
+            'refreshGrid' => true,
             'editableOptions'=>[
                  'formOptions' => ['action' => ['edit']],
         'header'=>'Продукт R-keeper', 
@@ -100,7 +110,26 @@ GridView::widget([
             
         ]
         ]],
-        'munit_rid',
+                [
+                'attribute' => 'product_rid',
+                'value' => function ($model) {
+                    return $model->product->denom;
+                },
+                'format' => 'raw',
+                'label' => 'Наименование StoreHouse', 
+                ],
+                [
+                'attribute' => 'munit_rid',
+                'value' => function ($model) {
+                    return $model->product->unitname;
+                },
+                'format' => 'raw',
+                'label' => 'Ед.изм. StoreHouse',         
+                ],        
+                'quant',
+                'sum',        
+              
+       
     ],
     /* 'rowOptions' => function ($data, $key, $index, $grid) {
       return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];

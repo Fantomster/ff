@@ -63,8 +63,10 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'fid' => 'FID',
-            'token' => 'Token',
-            'Nonce' => 'Nonce'
+            'sum' => 'Цена',
+            'quant' => 'Количество',
+            'product_id' => 'ID в F-keeper',            
+
         ];
     }
     
@@ -76,17 +78,55 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getOrganization() {
-           return $this->hasOne(Organization_api::className(), ['id' => 'org']);          
-           
+    public function getWaybill() {
+
+        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
+        return RkWaybill::findOne(['id'=>$this->waybill_id]);
+
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
     
-    public function getOrganizationName()
-{
-    $org = $this->organization;
-    return $org ? $org->name : 'no';
-}
+    public function getProduct() {
+
+        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
+        $rprod = RkProduct::find()->andWhere('rid = :rid and unit_rid = :urid',[':rid' =>$this->product_rid,':urid' => $this->munit_rid]);
+        
+        return $rprod;
+
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    }
     
+    public function getFproductname() {
+
+        //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
+        $rprod = \common\models\CatalogBaseGoods::find()->andWhere('id = :id',[':id' =>$this->product_id]);
+        
+        return $rprod;
+
+        //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    }
+    
+        public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        
+        $wmodel = $this->waybill;
+        
+        $check = $this::find()
+                      ->andwhere('waybill_id= :id',[':id'=>$wmodel->id])
+                      ->andwhere('product_rid is null or munit_rid is null')
+                      ->count('*');
+        if ($check > 0) {
+                         $wmodel->readytoexport = 0;
+        } else {
+                         $wmodel->readytoexport = 1;
+        }
+        
+        if (!$wmodel->save(false)) {
+            echo "Can't save model in after save";
+            exit;
+        }
+        
+    }
     
     public static function getDb()
     {

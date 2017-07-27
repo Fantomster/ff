@@ -36,7 +36,7 @@ class WaybillHelper extends AuthHelper {
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     <DOC date="'.$wmodel->doc_date.'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store_rid.'" active="0"'
-            . ' duedate="1" note="'.$model->note.'" textcode="'.$model->text_code.'" numcode="'.$model->num_code.'">';
+            . ' duedate="1" note="'.$wmodel->note.'" textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'">';
     
     
     

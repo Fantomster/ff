@@ -57,9 +57,28 @@ class ProductHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($res);
+        // Обновление словаря RkDic
+    
+        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 3')->one();
+    
+        if (!$rmodel) {
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+
+        } else {
+            
+            $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
+            $rmodel->dicstatus_id= 2;
+            $rmodel->obj_count = 0;
+    
+            if (!$rmodel->save()) {
+                $er3 = $rmodel->getErrors();
+            } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
+        }
      
-    // return true;
+    // var_dump($res);
+     
+     return true;
     
     }
     

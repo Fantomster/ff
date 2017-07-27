@@ -32,10 +32,20 @@ class WaybillHelper extends AuthHelper {
     
     $wmodel = \api\common\models\RkWaybill::findOne(['id' => $id]);
     
-    var_dump($wmodel);
-    exit;
-          
     $xml = '<?xml version="1.0" encoding="utf-8"?>
+    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
+    <DOC date="'.$wmodel->doc_date.'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store_rid.'" active="0"'
+            . ' duedate="1" note="'.$model->note.'" textcode="'.$model->text_code.'" numcode="'.$model->num_code.'">';
+    
+    
+    
+    
+    var_dump($xml);
+    
+    
+    
+    $xml2 = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     <DOC date="2017-07-12" corr="8" store="3" active="0" duedate="1" note="текст примечания" textcode="fk" numcode="5379">
@@ -43,6 +53,10 @@ class WaybillHelper extends AuthHelper {
     <ITEM rid="3" quant="12345" mu="1" sum="1290000" vatrate="1800" />
     </DOC>
     </RQ>'; 
+    
+    var_dump($xml2);
+    
+    exit;
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
      

@@ -173,7 +173,7 @@ class ProductHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение номенклатуры
-            
+      /*      
              $icount =0; 
      
         foreach ($array as $a)   {
@@ -199,7 +199,7 @@ class ProductHelper extends AuthHelper {
         }
      
     }
-    
+    */
     /*    
     // Обновление словаря RkDic
     

@@ -60,9 +60,11 @@ class AuthHelper extends Object {
         
         $res = ApiHelper::sendCurl($xml,$this->restr);
         
-        echo "Checkauthbool<br>";
-        var_dump($res);
+     //   echo "Checkauthbool<br>";
+     //   var_dump($res);
      //   var_dump(['respcode']['code']);
+        
+        throw new Exception(var_dump($res));
         
       if ($res['respcode']['code'] == '0') {
               file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  

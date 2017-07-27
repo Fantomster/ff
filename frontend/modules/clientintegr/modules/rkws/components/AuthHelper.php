@@ -216,6 +216,9 @@ class AuthHelper extends Object {
         
         }
         
+    } else {
+           var_dump('херь');
+           exit;
     }        
 
     if(curl_errno($ch))

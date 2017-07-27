@@ -83,8 +83,9 @@ class ProductHelper extends AuthHelper {
                     foreach ($glist->ITEM as $item) {
                         
                         foreach($item->attributes() as $a => $b) {
-                            if ($a == 'rid') $prid=strval($b[0]);
-                            if ($a == 'name') $prname=strval($b[0]);
+                            if ($a == 'rid') { $prid=strval($b[0]); }
+                            if ($a == 'name') { $prname=strval($b[0]); }
+                        }    
                         
                             foreach ($item->MUNITS->MUNIT as $unit) {
                             $gcount++;
@@ -103,9 +104,9 @@ class ProductHelper extends AuthHelper {
 
                         }
                         
-                    }
+            }
                                      
-                }
+                
     }
     
 

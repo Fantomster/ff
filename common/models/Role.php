@@ -68,6 +68,10 @@ class Role extends \amnah\yii2\user\models\Role {
         return isset($role) ? $role->id : static::ROLE_USER;
     }
     
+    public static function getAdminRoles() {
+        return [self::ROLE_ADMIN, self::ROLE_FKEEPER_MANAGER, self::ROLE_FKEEPER_OBSERVER];
+    }
+    
     public static function getEmployeeRole($organization_type) {
         $role = static::find()->where('can_manage=0 AND organization_type = :orgType', [
             ':orgType' => $organization_type

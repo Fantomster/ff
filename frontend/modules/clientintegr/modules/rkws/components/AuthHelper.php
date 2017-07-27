@@ -156,11 +156,10 @@ class AuthHelper extends Object {
             file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':SENDAUTH OK RECEIVED'.PHP_EOL, FILE_APPEND);   
          
         
-    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restrModel->fid])->andwhere('sysdate() between fd and td')->one();
+    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('sysdate() between fd and td')->one();
     
     var_dump($sess);
-    exit;
-    
+        
     $sessmax = RkSession::find()->max('fid');   
     
     $newsess = new RkSession();

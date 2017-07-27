@@ -8,7 +8,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use common\models\User;
 use api\common\models\RkTasks;
-use Exception;
+use yii\helpers\VarDumper;
 
 use yii\base\Object;
 
@@ -62,7 +62,7 @@ class AuthHelper extends Object {
         $res = ApiHelper::sendCurl($xml,$this->restr);
         
         echo "Checkauthbool<br>";
-        var_dump($res);
+        VarDumper::dump($res);
       //  var_dump(['respcode']['code']);
         
      //   throw new Exception(print_r($res,true));

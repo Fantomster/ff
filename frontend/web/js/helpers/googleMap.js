@@ -5,6 +5,7 @@ function initMap() {
         hLng: document.getElementById('organization-lng'),
         hCountry: document.getElementById('organization-country'),
         hLocality: document.getElementById('organization-locality'),
+        hAdministrativeAreaLevel1: document.getElementById('organization-administrative_area_level_1'),
         hPlaceId: document.getElementById('organization-place_id'),
         hRoute: document.getElementById('organization-route'),
         hStreetNumber: document.getElementById('organization-street_number'),
@@ -145,6 +146,7 @@ function geolocation(map, marker, fields) {
     fields.hLng.value = '';
     fields.hCountry.value = '';
     fields.hLocality.value = '';
+    fields.hAdministrativeAreaLevel1.value = '';
     fields.hRoute.value = '';
     fields.hStreetNumber.value = '';
     fields.hPlaceId.value = '';
@@ -180,6 +182,7 @@ function changeFields(fields, results) {
         var getLocality;
         var getRoute;
         var getStreetNumber;
+        var getAdministrative_area_level_1;
         var getAdministrative_area_level_2;
         var getFormattedAddress = results[0].formatted_address;
         var getLat = results[0].geometry.location.lat();
@@ -194,10 +197,10 @@ function changeFields(fields, results) {
             getRoute = addr.long_name;
         if (addr.types[0] == 'street_number')
             getStreetNumber = addr.long_name;
-
         if (addr.types[0] == 'administrative_area_level_2')
             getAdministrative_area_level_2 = addr.long_name;
-
+        if (addr.types[0] == 'administrative_area_level_1')
+            getAdministrative_area_level_1 = addr.long_name;
     }
     if (results[0]) {
         var res = '';
@@ -209,6 +212,8 @@ function changeFields(fields, results) {
                 res = res + ', ' + getLocality;
         typeof getAdministrative_area_level_2 == 'undefined' ? '' :
                 res = res + ', ' + getAdministrative_area_level_2;
+        typeof getAdministrative_area_level_1 == 'undefined' ? '' :
+                res = res + ', ' + getAdministrative_area_level_1;
         typeof getCountry == 'undefined' ? '' :
                 res = res + ', ' + getCountry;
         fields.sField.value = res;
@@ -216,6 +221,7 @@ function changeFields(fields, results) {
         fields.hLng.value = getLng;
         fields.hCountry.value = getCountry;
         fields.hLocality.value = getLocality;
+        fields.hAdministrativeAreaLevel1.value = getAdministrative_area_level_1;
         fields.hRoute.value = getRoute;
         fields.hStreetNumber.value = getStreetNumber;
         fields.hPlaceId.value = getPlaceId;

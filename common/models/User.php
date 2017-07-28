@@ -20,6 +20,8 @@ use Yii;
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
  * @property ManagerAssociate $associated
+ * @property EmailNotification $emailNotification
+ * @property SmsNotification $smsNotification
  */
 class User extends \amnah\yii2\user\models\User {
 
@@ -129,6 +131,20 @@ class User extends \amnah\yii2\user\models\User {
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailNotification() {
+        return $this->hasOne(EmailNotification::className(), ['user_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSmsNotification() {
+        return $this->hasOne(SmsNotification::className(), ['user_id' => 'id']);
+    }
+    
+    /**
      * Check if user account is active
      * 
      * @return bool
@@ -152,7 +168,7 @@ class User extends \amnah\yii2\user\models\User {
 		// send email
         $restaurant = $this->organization->name;
         $userToken = $this->module->model("UserToken");
-        $userToken = $userToken::generate($vendor->id, $userToken::TYPE_EMAIL_ACTIVATE);
+        $userToken = $userToken::generate($vendor->id, $userToken::TYPE_PASSWORD_RESET);
         $email = $vendor->email;
         $subject = "Приглашение на f-keeper";
         $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "vendor", "userToken", "restaurant"))

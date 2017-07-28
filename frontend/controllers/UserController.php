@@ -360,10 +360,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $currentUser = Yii::$app->user->identity;
         if (Yii::$app->request->isAjax) {
             $email = Yii::$app->request->post('email');
-            $validator = new \yii\validators\EmailValidator();
+            //$validator = new \yii\validators\EmailValidator();
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            if ($validator->validate($email) && $currentUser->sendInviteToFriend($email)) {
-                return [
+            if(preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/",$email)  && $currentUser->sendInviteToFriend($email))
+            {
+               return [
                     'success' => true,
                 ];
             }

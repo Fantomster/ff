@@ -12,14 +12,14 @@ class m170628_120843_add_category_furniture extends Migration
         $newMasterCategory->save();
         $newMasterCategory->refresh();
         $this->batchInsert('{{%mp_category}}', ['name','parent'], [
-            ['Авторская мебель', $newMasterCategory->id],
-            ['Винотека', $newMasterCategory->id],
-            ['Декор интерьера', $newMasterCategory->id],
-            ['Интерьер и мебель', $newMasterCategory->id],
-            ['Реплики итальянской мебели⁠⁠⁠⁠', $newMasterCategory->id],
-            ['Ресепшн', $newMasterCategory->id],
-            ['Столовые комплекты', $newMasterCategory->id],
-            ['Столы банкетные', $newMasterCategory->id],
+            ['Столы', $newMasterCategory->id],
+            ['Стулья', $newMasterCategory->id],
+            ['Мягкая мебель', $newMasterCategory->id],
+            ['Барные стойки, станции официанта, ресепшн', $newMasterCategory->id],
+            ['Двери', $newMasterCategory->id],
+            ['Реставрация', $newMasterCategory->id],
+            ['Интерьер', $newMasterCategory->id],
+            ['Производство мебели на заказ', $newMasterCategory->id]
         ]);
     }
 

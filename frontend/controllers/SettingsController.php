@@ -12,12 +12,40 @@ use yii\filters\AccessControl;
  * @author sharaf
  */
 class SettingsController extends DefaultController {
-    
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'ruleConfig' => [
+                    'class' => AccessRule::className(),
+                ],
+                'rules' => [
+                    [
+                        'actions' => ['notifications'],
+                        'allow' => true,
+                        'roles' => [
+                            Role::ROLE_RESTAURANT_MANAGER,
+                            Role::ROLE_RESTAURANT_EMPLOYEE,
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public function actionUser() {
         $profile = $this->currentUser->profile;
         return $this->render("user", compact('profile'));
     }
-    
+
     public function actionAjaxChangeAvatar() {
         $profile = $this->currentUser->profile;
 
@@ -30,7 +58,7 @@ class SettingsController extends DefaultController {
 
         return $this->renderAjax('/settings/user/_change-avatar', compact('profile'));
     }
-    
+
     public function actionAjaxDeleteAvatar() {
         $profile = $this->currentUser->profile;
         $profile->avatar = 'delete';
@@ -38,4 +66,9 @@ class SettingsController extends DefaultController {
             return $profile->avatarUrl;
         }
     }
+
+    public function actionNotifications() {
+        return $this->render('notifications');
+    }
+
 }

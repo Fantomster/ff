@@ -19,10 +19,22 @@ $this->registerJs('
     });
     
     $(document).on("click", ".wizard-off", function(e) {
+        e.preventDefault();
+        var url = $(this).attr("href");
         $.ajax({
-            async: false,
             type: "POST",
-            url: "'.Url::to('/site/ajax-wizard-off').'"
+            dataType: "json",
+            url: "'.Url::to('/site/ajax-wizard-off').'",
+            success: function (response) {
+                if (response.result == "moscow") {
+                    yaCounter44637517.reachGoal("regmoscow", function () {
+                        document.location = url;
+                    });
+                }else{
+                document.location = url;
+                }
+            },
+            async: false
         });
     });
 
@@ -32,7 +44,6 @@ $this->registerJs('
             form.attr("action"),
             form.serialize()
         ).done(function(result) {
-            console.log(result);
             if (result.length == 0) {
                 $(".data-modal .modal-content").slick("slickNext");
             }
@@ -84,6 +95,7 @@ $this->registerJs('
                 <?= Html::activeHiddenInput($organization, 'locality'); //Город ?>
                 <?= Html::activeHiddenInput($organization, 'route'); //улица ?>
                 <?= Html::activeHiddenInput($organization, 'street_number'); //дом ?>
+                <?= Html::activeHiddenInput($organization, 'administrative_area_level_1'); //область ?>
                 <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
                 <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
                 <div class="auth-sidebar__form-brims">

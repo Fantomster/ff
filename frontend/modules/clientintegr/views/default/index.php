@@ -46,7 +46,7 @@ use api\common\models\RkAccess;
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
-                            <?= Html::a('<h4 class="m-b-xs text-info">1С</h4>', ['#']) ?>
+                            <?= Html::a('<h4 class="m-b-xs text-info">R-Keeper</h4>', ['rkws/default']) ?>
                             <p class="small">Интеграция с R-keeper STORE HOUSE через White Server (облачная версия)</p>
                         </div>
                         <div class="col-md-6 text-right">

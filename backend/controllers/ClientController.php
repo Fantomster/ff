@@ -116,17 +116,17 @@ class ClientController extends Controller {
         if (empty($model)) {
             throw new NotFoundHttpException('Нет здесь ничего такого, проходите, гражданин!');
         }
-        
+
         if (($model->id === 2) && (Yii::$app->user->identity->id !== 76)) {
             throw new NotFoundHttpException('Редактирование этого аккаунта отключено во имя Луны!');
         }
 
-        if (($model->organization_id === 1) && (Yii::$app->user->identity->id !== 76)) {
-            throw new NotFoundHttpException('Добавление пользователей в эту организацию отключено во имя Луны!');
-        }
-
         try {
-            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if ($model->load(Yii::$app->request->post())) {
+                if (($model->organization_id === 1) && (Yii::$app->user->identity->id !== 76)) {
+                    throw new NotFoundHttpException('Добавление пользователей в эту организацию отключено во имя Луны!');
+                }
+                $model->save();
                 return $this->redirect(['view', 'id' => $model->id]);
             } else {
                 return $this->render('update', [

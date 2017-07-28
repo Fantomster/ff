@@ -62,8 +62,10 @@ class RkAgent extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'fid' => 'FID',
-            'token' => 'Token',
-            'Nonce' => 'Nonce'
+            'rid' => 'RID Store House',
+            'denom' => 'Наименование Store House',
+            'updated_at' => 'Обновлено',
+
         ];
     }
     

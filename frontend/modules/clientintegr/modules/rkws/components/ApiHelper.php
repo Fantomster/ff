@@ -135,7 +135,7 @@ class ApiHelper  {
                    exit;
         }
     
-    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restr->fid])->andwhere('sysdate() between fd and td')->one();
+    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('status=1')->one();
     
     if (!$sess) {
                  echo "SendCurl. Session is not found :((";
@@ -176,7 +176,7 @@ class ApiHelper  {
     $myXML   = simplexml_load_string($data);
     
    // echo "&&&&&&&&&&&&&<br>";
-   // var_dump ($myXML);
+   // var_dump($data,true);
     
     foreach ($myXML->OBJECTINFO as $obj) {
      
@@ -243,7 +243,7 @@ class ApiHelper  {
    // var_dump($objectinfo);
    // echo ('------<br>');
    // var_dump($respcode);
-   // 
+    
   //  exit;
     
     return ['resp' => $objectinfo, 'respcode' => $respcode];

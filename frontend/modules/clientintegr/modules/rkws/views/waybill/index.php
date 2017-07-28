@@ -74,10 +74,22 @@ use api\common\models\RkWaybill;
                                                                },
                                                      'label' => 'Статус',
                                                   ],
-                                                'updated_at',
-                                                'positionCount',
-                                                'total_price',
-                                                                                                                       [
+                                                [
+                                                    'attribute' => 'updated_at',
+                                                    'label' => 'Обновлено',   
+                                                    'format'=>'date',
+                                                ],
+                                                [
+                                                    'attribute' => 'positionCount',
+                                                    'label' => 'Кол-во позиций',   
+                                                    'format'=>'raw',
+                                                ],                       
+                                                [
+                                                    'attribute' => 'total_price',
+                                                    'label' => 'Итоговая сумма',   
+                                                    'format'=>'raw',
+                                                ],
+                                                [
                                                     'class'=>'kartik\grid\ExpandRowColumn',
                                                     'width'=>'50px',
                                                     'value'=>function ($model, $key, $index, $column) {

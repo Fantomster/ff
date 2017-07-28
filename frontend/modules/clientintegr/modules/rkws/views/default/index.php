@@ -40,7 +40,7 @@ use api\common\models\RkAccess;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    СПРАВОЧНИКИ:
+    
 </section>
 
 <section class="content-header">
@@ -50,7 +50,7 @@ use api\common\models\RkAccess;
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
                                     
-                                <p> Состояние лицензии: Активна.
+                                    <p> Состояние лицензии: <strong>Активна</strong> ID: 199990046 ( 01.06.2017 - 31.10.2017)
                                 </p>    
                             
                           
@@ -58,7 +58,7 @@ use api\common\models\RkAccess;
                             </div>
             </div>
         </div>    
-                                
+  СПРАВОЧНИКИ:                              
 </section>
 <section class="content-header">
     

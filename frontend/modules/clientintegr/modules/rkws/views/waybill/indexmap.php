@@ -148,6 +148,10 @@ GridView::widget([
     ],
 ]);
 ?> 
+                        <?= Html::a('Вернуться',
+            ['index'],
+            ['class' => 'btn btn-success btn-export']);
+        ?>
                     </div>
                 </div>    
             </div>

@@ -32,6 +32,8 @@
                                         'columns' => [
                                                 'id',
                                                 'order_id',
+                                                'text_code',
+                                                'num_code',
                                                 [
                                                     'attribute' => 'corr_rid',
                                                     'value'=>function ($model) {

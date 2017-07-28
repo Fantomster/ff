@@ -113,7 +113,7 @@ GridView::widget([
                 [
                 'attribute' => 'product_rid',
                 'value' => function ($model) {
-                    return $model->product->denom;
+                    return $model->product->denom ? $model->product->denom : 'Не задано';
                 },
                 'format' => 'raw',
                 'label' => 'Наименование StoreHouse', 
@@ -121,7 +121,7 @@ GridView::widget([
                 [
                 'attribute' => 'munit_rid',
                 'value' => function ($model) {
-                    return $model->product->unitname;
+                    return $model->product->unitname ? $model->product->unitname : 'Не задано'  ;
                 },
                 'format' => 'raw',
                 'label' => 'Ед.изм. StoreHouse',         

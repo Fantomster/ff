@@ -126,7 +126,11 @@ GridView::widget([
                 [
                 'attribute' => 'munit_rid',
                 'value' => function ($model) {
-                    return $model->product->unitname ? $model->product->unitname : 'Не задано'  ;
+                    if (!empty($model->product)) {
+                         
+                         return $model->product->unitname;
+                     }                   
+                    return 'Не задано';
                 },
                 'format' => 'raw',
                 'label' => 'Ед.изм. StoreHouse',         

@@ -67,7 +67,7 @@
                                                                                             [
                                                 'class' => 'yii\grid\ActionColumn',
                                                 'contentOptions'=>['style'=>'width: 6%;'],
-                                                'template'=>'{view}&nbsp;{update}&nbsp;{map}&nbsp;{export}',
+                                                'template'=>'{update}&nbsp;{map}&nbsp;{export}',
                                                     'visibleButtons' => [
      
                                                         'update' => function ($model, $key, $index) {

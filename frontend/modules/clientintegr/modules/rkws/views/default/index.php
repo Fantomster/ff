@@ -120,6 +120,12 @@ use api\common\models\RkAccess;
                                                     ],
                 
                                                 'buttons'=>[
+                                                    
+                                                       'view' =>  function ($url, $model) {
+                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\\'.$model->dictype->contr.'\view', 'id'=>$model->id]);
+                                                        return \yii\helpers\Html::a( '<i class="fa fa-eye" aria-hidden="true"></i>', $customurl,
+                                                                     ['title' => Yii::t('backend', 'Просмотр'), 'data-pjax'=>"0"]);
+                                                           },
                 
                                                         'update' =>  function ($url, $model) {
                                                       //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
@@ -130,7 +136,7 @@ use api\common\models\RkAccess;
                                                         'getws' =>  function ($url, $model) {
                                                         $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\\'.$model->dictype->contr.'\getws', 'id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-download" aria-hidden="true"></i>', $customurl,
-                                                                     ['title' => Yii::t('backend', 'Update'), 'data-pjax'=>"0"]);
+                                                                     ['title' => Yii::t('backend', 'Загрузка'), 'data-pjax'=>"0"]);
                                                            },     
                                                       //  'map' =>  function ($url, $model) {
                                                       //  return \yii\helpers\Html::a( '<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,

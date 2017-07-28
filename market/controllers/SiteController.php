@@ -897,19 +897,15 @@ class SiteController extends Controller {
             $params_suppliers = [
                 'filtered' => [
                     'query' => [
-                        'more_like_this' => [
-                                'fields'=>['supplier_name'],
-                                'like' => $search,
-                                'min_term_freq' => 1,
-                                'min_doc_freq' => 1,
-                                'max_query_terms' => 12,
-                        ],
-                        /*'match' => [
+                        'match' => [
                             'supplier_name' => [
                                 'query' => $search,
-                                'fuzziness' => 'AUTO',
+                                'fuzziness' => 2,
+                                'prefix_length'=>2,
+                                'max_expansions'=>100
                             ]   
-                        ]*/
+                        ],
+                        /**/
                     ],
                     
                     'filter' => [
@@ -946,7 +942,7 @@ class SiteController extends Controller {
                               ]
                               ]) */
                             ->limit(4)->asArray()->all();
-            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->orderBy(['supplier_rating'=>SORT_DESC])
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
                             ->limit(4)->asArray()->all();
         }
 

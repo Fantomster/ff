@@ -6,7 +6,7 @@ use Yii;
 use yii\web\Controller;
 use Aws\Sns\MessageValidator\Message;
 use Aws\Sns\MessageValidator\MessageValidator;
-use Aws\Sns\Exception\SnsException;
+use Aws\Sns\MessageValidator\Exception\SnsMessageValidatorException;
 
 /**
  * Description of SnsEndpointController
@@ -24,9 +24,8 @@ class SnsEndpointController extends \yii\rest\Controller {
         try {
             $validator->validate($message);
         } catch (SnsException $ex) {
-            http_response_code(404);
             Yii::error($ex->getMessage());
-            die();
+            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
         }
         // Check the type of the message and handle the subscription.
         if ($message->get('Type') === 'SubscriptionConfirmation') {

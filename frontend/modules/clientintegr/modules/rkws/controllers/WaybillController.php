@@ -171,7 +171,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $res = new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper();
         $res->sendWaybill($waybill_id);
         
-        $this->redirect('\clientintegr\rkws\default');
+        $this->redirect('\clientintegr\rkws\waybill\index');
                 
             
     }

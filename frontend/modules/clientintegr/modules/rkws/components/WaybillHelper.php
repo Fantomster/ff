@@ -40,7 +40,7 @@ class WaybillHelper extends AuthHelper {
     
    $recs = \api\common\models\RkWaybilldata::find()->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();
    
-   var_dump($recs);
+   // var_dump($recs);
    
     foreach($recs as $rec) {
        
@@ -52,11 +52,9 @@ class WaybillHelper extends AuthHelper {
     $xml .= '</DOC>'.PHP_EOL.
             '</RQ>';
     
-    var_dump($xml);
-   
+    // var_dump($xml);
     
-    
-    
+    /*
     $xml2 = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
@@ -68,7 +66,9 @@ class WaybillHelper extends AuthHelper {
     
     var_dump($xml2);
     exit;
-          
+     * 
+     */
+    
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
     // var_dump($res);

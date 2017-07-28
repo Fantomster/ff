@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use Yii;
 use yii\web\Controller;
+use yii\data\ActiveDataProvider;
 // use yii\mongosoft\soapserver\Action;
 
 /**
@@ -32,6 +33,13 @@ class ProductController extends\frontend\modules\clientintegr\controllers\Defaul
         }     
         
     }
+    
+            public function actionView($id)
+    {
+        return $this->render('view', [
+            'dataProvider' => $this->findModel($id),
+        ]);
+    }
      
     public function actionGetws() {
         
@@ -44,96 +52,22 @@ class ProductController extends\frontend\modules\clientintegr\controllers\Defaul
             
     }
     
-
-/*
-    public function actions()
-{
-    return [
-        'hello' => [
-            'class' => 'mongosoft\soapserver\Action',
-            'serviceOptions' => [
-                'disableWsdlMode' => false,
-            ]
-        ],
-        'error' => [
-                'class' => 'yii\web\ErrorAction',
-            ],
-    ];
-}
-*/
-    
-/**
-* @param string $login
-* @param string $pass
-* @return string 
-* @soap
-*/
- 
-    
-    public function getHello($login,$pass) 
+     protected function findModel($id)
     {
-        return 'Hello ' . $login.'/'.$pass.'/ Date:'.date("Y-m-d H:i:s") ;
-    }
-
-
-   
-/**
-   * Soap authorization
-   * @return mixed result of auth
-   * @soap
-   */
-   
-  public function OpenSession() {
-      
-    if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($this->username)) 
-    {
-    header('WWW-Authenticate: Basic realm="f-keeper.ru"');
-    header('HTTP/1.0 401 Unauthorized');
-    header('Warning: WSS security in not provided in SOAP header');
-    exit;
-   
-    } else { 
-        
-    // $identity = new UserIdentity($this->username, $this->password);    
-   
-        if (($this->username != 'cyborg') || ($this->password != 'mypass')) 
-        {
-            return 'Auth error. Login or password is not correct.';
-        } else {
-    
-            $sessionId = Yii::$app->getSecurity()->generateRandomString();
-            // $sessionId = md5(uniqid(rand(),1));
-          
-            return 'OK_SOPENED:'.$sessionId;
-        }
-       
-    }  
-    
-  }
-  
-    public function security($header) {
-    
-       
-        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($header->UsernameToken->Username)) // Проверяем послали ли нам данные авторизации (BASIC)
-        {
-            header('WWW-Authenticate: Basic realm="fkeeper.ru"'); // если нет, даем отлуп - пришлите авторизацию
-            header('HTTP/1.0 401 Unauthorized');
-            exit;
-   
-        } else {
+        if (($dmodel = \api\common\models\RkDic::findOne($id)) !== null) {
             
-        $this->username = $header->UsernameToken->Username;
-        $this->password = $header->UsernameToken->Password;
-         
-    //     $this->username =  Yii::$app->request->getAuthUser();
-    //     $this->password =  Yii::$app->request->getAuthPassword();
-         
-         return $header;
-         
-                     
+            $model = \api\common\models\RkProduct::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
+            
+            $dataProvider = new ActiveDataProvider([
+                                        'query' => $model,
+                                        'sort' => false ]);
+            
+            return $dataProvider;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
 
-  }  
-  
    
 }

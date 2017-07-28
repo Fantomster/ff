@@ -113,7 +113,12 @@ GridView::widget([
                 [
                 'attribute' => 'product_rid',
                 'value' => function ($model) {
-                    return $model->product->denom ? $model->product->denom : 'Не задано';
+                     if (!empty($model->product)) {
+                         
+                         return $model->product->denom;
+                     }     
+                          
+                    return 'Не задано';
                 },
                 'format' => 'raw',
                 'label' => 'Наименование StoreHouse', 

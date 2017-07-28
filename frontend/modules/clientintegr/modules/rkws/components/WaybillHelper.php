@@ -64,6 +64,8 @@ class WaybillHelper extends AuthHelper {
           
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
+     var_dump($res);
+     
      
      $tmodel = new RkTasks();   
      

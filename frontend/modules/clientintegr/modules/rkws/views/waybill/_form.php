@@ -22,7 +22,17 @@ use yii\helpers\ArrayHelper;
     
   <?php  echo $form->field($model, 'store_rid')->dropDownList(ArrayHelper::map(api\common\models\RkStore::find()->all(), 'rid', 'denom')) ?>  
 
-
+  <?php 
+  
+          if (!$model->doc_date) {
+            $model->doc_date = date('d.m.Y',time());        
+            } else {
+            $rdate = date('d.m.Y',strtotime($model->doc_date));
+          //  var_dump($rdate);
+            // $rdate->format('m/d/y h:i a');    
+            $model->doc_date = $rdate;
+            }
+  ?>
        <?php   echo $form->field($model, 'doc_date')->label('Дата Документа')->
         widget(DatePicker::classname(), [
                 'type' => DatePicker::TYPE_COMPONENT_APPEND,
@@ -32,7 +42,8 @@ use yii\helpers\ArrayHelper;
                 'pluginOptions' => [
                     'autoclose'=>true,
                  //   'format' => 'Y-m-d',
-                    'format' => 'dd.MM.yyyy',
+                     'format' => 'dd.MM.yyyy',
+                 //     'format' => 'yyyy.MM.dd',
                 //    'startDate' => $model->startDate,
                 //    'endDate' => $model->endDate,
                     'todayHighlight' => false,

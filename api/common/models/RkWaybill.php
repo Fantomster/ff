@@ -97,6 +97,20 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }
+    
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+    
+            if ($this->doc_date){
+            $this->doc_date = Yii::$app->formatter->asDate($this->doc_date, 'yyyy-MM-dd');
+            } else {
+            $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd');    
+            }
+            
+            return true;
+        }
+    }    
 
     
     public function afterSave($insert, $changedAttributes) {

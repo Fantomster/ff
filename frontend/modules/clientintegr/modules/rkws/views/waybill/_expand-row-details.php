@@ -48,7 +48,11 @@
                                                                  },
                                                                     
                                                 ],  
-                                                'doc_date',
+                                                [
+                                                    'attribute' =>'doc_date',
+                                                    'format' => 'date',
+                                                    
+                                                ],
                                                 'note', 
                                                 [
                                                 'attribute'=>'readytoexport',

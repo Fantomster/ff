@@ -915,26 +915,13 @@ class SiteController extends Controller {
                     'query' => [
                         'match' => [
                             'supplier_name' => [
-                               'query' => $search,
-                               'fuzziness' => 'auto',
-                               'operator' =>  'and'
-                            ]
-                        ]
-                        /*'fuzzy' => [
-                            'supplier_name' => [
-                                'value' => $search,
-                                'fuzziness' => 20, // этот параметр для вашей задачи нужно выставлять повыше
-                                'prefix_length' => 2, // будет равняться кол-ву уже введенных символов
-                                "max_expansions"=> 100 // также выставляется повыше
-                            ]
-                        ]*/
-                    ],
-                    'highlight' => [
-                        'pre_tags' => ['<em>'],
-                        'post_tags' => ['</em>'],
-                        'fields' => [
-                            'supplier_name'
-                        ]
+                                'query' => $search,
+                                'fuzziness' => 2,
+                                'prefix_length'=>2,
+                                'max_expansions'=>100
+                            ]   
+                        ],
+                        /**/
                     ],
                     'filter' => [
                         'bool' => [
@@ -950,7 +937,7 @@ class SiteController extends Controller {
                             ]
                         ]*/
                     ]
-                ]
+                ],
             ];
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();
@@ -971,7 +958,11 @@ class SiteController extends Controller {
                               ]) */
                             ->limit(4)->asArray()->all();
             $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->orderBy(['supplier_rating'=>SORT_DESC])
-                            ->limit(4)->asArray()->all();
+                    ->highlight([
+                    'pre_tags' => ['<em>'],
+                    'post_tags' => ['</em>'],
+                    'fields' => ['supplier_name' => new \stdClass()]
+                ])->limit(4)->asArray()->all();
         }
 
         return $this->renderAjax('main/_search_form', compact(

@@ -64,7 +64,7 @@ class WaybillHelper extends AuthHelper {
           
      $res = ApiHelper::sendCurl($xml,$this->restr);
      
-     var_dump($res);
+    // var_dump($res);
      
      
      $tmodel = new RkTasks();   
@@ -164,7 +164,7 @@ class WaybillHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение контрагентов
-        
+        /*
         $icount =0;    
       
         foreach ($array as $a)   {
@@ -184,7 +184,7 @@ class WaybillHelper extends AuthHelper {
             $icount++;
          
         }
-        
+        */
     }
     
     // Обновление словаря RkDic
@@ -237,9 +237,9 @@ class WaybillHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
+ //   file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',print_r($er2,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',print_r($er3,true) , FILE_APPEND);  
+ //   file_put_contents('runtime/logs/callback.log',print_r($er3,true) , FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
  //   file_put_contents('runtime/logs/callback.log',PHP_EOL.$tmodel->guid.PHP_EOL,FILE_APPEND);            
     }

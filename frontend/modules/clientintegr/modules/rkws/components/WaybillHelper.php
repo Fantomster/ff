@@ -36,23 +36,28 @@ class WaybillHelper extends AuthHelper {
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y.m.d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store_rid.'" active="0"'
-            . ' duedate="1" note="'.$wmodel->note.'" textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'">';           
+            . ' duedate="1" note="'.$wmodel->note.'" textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'">'.PHP_EOL;           
     
    $recs = \api\common\models\RkWaybilldata::find()->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();
    
+   var_dump($recs);
+   
     foreach($recs as $rec) {
        
-       $xml .='<ITEM rid="'.$rec["product_rid"].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*1000).'" vatrate="1800" />';
+       $xml .='<ITEM rid="'.$rec["product_rid"].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*1000).'" vatrate="1800" />'.PHP_EOL;
     }
    
    // var_dump($recs);
        
-    $xml .= '</DOC>'
-            . '</RQ>';
+    $xml .= '</DOC>'.PHP_EOL.
+            '</RQ>';
+    
+    var_dump($xml);
+   
     
     
-    /*
-    $xml = '<?xml version="1.0" encoding="utf-8"?>
+    
+    $xml2 = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     <DOC date="2017-07-12" corr="8" store="3" active="0" duedate="1" note="текст примечания" textcode="fk" numcode="5379">
@@ -60,7 +65,9 @@ class WaybillHelper extends AuthHelper {
     <ITEM rid="3" quant="12345" mu="1" sum="1290000" vatrate="1800" />
     </DOC>
     </RQ>'; 
-    */
+    
+    var_dump($xml2);
+    exit;
           
      $res = ApiHelper::sendCurl($xml,$this->restr);
      

@@ -89,11 +89,41 @@ class StoreHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
+    foreach ($myXML->STOREGROUP as $storegroup) {
+            $gcount++;
+            foreach($storegroup->attributes() as $c => $d) {
+                if ($c == 'rid') $arr[$gcount]['rid'] = strval($d[0]);
+                if ($c == 'name')$arr[$gcount]['name'] = strval($d[0]);
+                if ($c == 'parent') $arr[$gcount]['parent'] = strval($d[0]);
+            }
+            
+            $arr[$gcount]['type'] = 1;
+            $iparent = $gcount;
+                    
+                foreach ($storegroup->STORE as $store) {
+                    $gcount++;
+                          
+                        foreach($store->attributes() as $a => $b) {
+                          $array[$gcount][$a] = strval($b[0]);
+                        }
+                    $arr[$gcount]['type'] = 2;
+                    $arr[$gcount]['parent'] = $iparent;
+                    
+                }
+    }
     
+    return $arr;
+    exit;
+    
+    
+    
+    /* Рабочая версия без дерева
+     * 
     foreach ($myXML->STOREGROUP as $storegroup) {
             foreach($storegroup->attributes() as $c => $d) {
                 if ($c == 'rid') $grid=strval($d[0]);
                 if ($c == 'name') $grname=strval($d[0]);
+            //    if ($c == 'parent') $grparent=strval($d[0]);
             }
                 foreach ($storegroup->STORE as $store) {
                     $gcount++;
@@ -105,6 +135,7 @@ class StoreHelper extends AuthHelper {
                         }
                 }
     }
+    */
     
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 

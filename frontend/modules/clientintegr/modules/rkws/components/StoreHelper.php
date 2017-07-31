@@ -116,7 +116,7 @@ class StoreHelper extends AuthHelper {
     
     foreach ($arr as $key => $value) {
         
-        if ($value['type'] == '1') {
+        if ($value['type'] == '1' and !empty($value['parent'])) {
             
             $sval = $value['parent'];
             

@@ -119,6 +119,8 @@ class StoreHelper extends AuthHelper {
         if ($value['type'] == '1' and !empty($value['parent'])) {
             
             $sval = $value['parent'];
+           
+            file_put_contents('runtime/logs/callback.log', $sval = $value['parent'].PHP_EOL, FILE_APPEND); 
             
             $skey = array_search(array('type'=>'1','rid'=>$sval),$arr); 
             $value['parent']=$skey;

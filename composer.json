@@ -60,7 +60,8 @@
         "bower-asset/svg4everybody": "*",
         "yiisoft/yii2-jui": "~2.0.0",
         "understeam/yii2-fcm": "~0.1",
-        "ofat/yii2-yashop-ses": "*"
+        "ofat/yii2-yashop-ses": "*",
+        "kartik-v/yii2-tree-manager": "@dev"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

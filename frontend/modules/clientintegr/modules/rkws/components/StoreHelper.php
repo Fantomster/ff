@@ -124,7 +124,7 @@ class StoreHelper extends AuthHelper {
            
             file_put_contents('runtime/logs/callback.log',$key.':'.$sval.PHP_EOL, FILE_APPEND); 
             
-            $value['parent']=$ridarray[$value['rid']];
+            $value['parent']=$ridarray[$sval];
             
             file_put_contents('runtime/logs/callback.log',':'.print_r( $value['parent'],true).PHP_EOL, FILE_APPEND); 
             

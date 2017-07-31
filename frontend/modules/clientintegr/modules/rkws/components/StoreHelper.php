@@ -112,7 +112,7 @@ class StoreHelper extends AuthHelper {
                 }
     }
     
-    return $arr;
+    return print_r($arr,true);
     exit;
     
     

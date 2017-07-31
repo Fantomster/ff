@@ -112,7 +112,9 @@ class StoreHelper extends AuthHelper {
                 }
     }
     
-    return print_r($arr,true);
+    file_put_contents('runtime/logs/callback.log','+++++++++++++++++++++++' , FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',print_r($arr,true) , FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log','+++++++++++++++++++++++' , FILE_APPEND); 
     exit;
     
     

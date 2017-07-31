@@ -120,7 +120,7 @@ class StoreHelper extends AuthHelper {
             
             $sval = $value['parent'];
            
-            file_put_contents('runtime/logs/callback.log', $sval = $value['parent'].PHP_EOL, FILE_APPEND); 
+            file_put_contents('runtime/logs/callback.log',$key.':'.$sval = $value['parent'].PHP_EOL, FILE_APPEND); 
             
             $skey = array_search(array('type'=>'1','rid'=>$sval),$arr); 
             $value['parent']=$skey;

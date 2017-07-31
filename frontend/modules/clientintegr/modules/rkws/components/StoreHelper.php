@@ -104,7 +104,7 @@ class StoreHelper extends AuthHelper {
                     $gcount++;
                           
                         foreach($store->attributes() as $a => $b) {
-                          $array[$gcount][$a] = strval($b[0]);
+                          $arr[$gcount][$a] = strval($b[0]);
                         }
                     $arr[$gcount]['type'] = 2;
                     $arr[$gcount]['parent'] = $iparent;

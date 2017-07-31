@@ -112,6 +112,22 @@ class StoreHelper extends AuthHelper {
                 }
     }
     
+    $arr2=$arr;
+    
+    foreach ($arr as $key => $value) {
+        
+        if ($value['type'] == '1') {
+            
+            $sval = $value['parent'];
+            
+            $skey = array_search(array('type'=>'1','rid'=>$sval),$arr); 
+            $value['parent']=$skey;
+        }
+        
+    }
+    
+    file_put_contents('runtime/logs/callback.log','+++++++++++++++++++++++' , FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',print_r($arr2,true) , FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log','+++++++++++++++++++++++' , FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',print_r($arr,true) , FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log','+++++++++++++++++++++++' , FILE_APPEND); 

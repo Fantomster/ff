@@ -9,6 +9,8 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkStore;
+use api\common\models\RkStoretree;
+use creocoder\nestedsets\NestedSetsBehavior;
 use api\common\models\RkDic;
 
 /* 
@@ -88,6 +90,14 @@ class StoreHelper extends AuthHelper {
     
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
+    $acc = 3243;
+    
+    $streee = new RkStoretree(['name'=>'Склады']);
+    // $stree = new RkStoretree(['name' => 'Склады']);
+    $streee->makeRoot();
+    $streee->save(false);
+    
+    exit();
     
     foreach ($myXML->STOREGROUP as $storegroup) {
             $gcount++;
@@ -168,7 +178,7 @@ class StoreHelper extends AuthHelper {
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 
     
-    if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
+    if (!empty($arr) && !empty($cmdguid) && !empty($posid))  {
         
      // Заполнение tasks
              $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
@@ -194,7 +204,7 @@ class StoreHelper extends AuthHelper {
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         
         $acc= $tmodel->acc;
-        if (!$acc) $acc = 3243;
+
         
             if (!$tmodel->save()) {
                 $er2 = $tmodel->getErrors();
@@ -312,7 +322,7 @@ class StoreHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',print_r($arr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 

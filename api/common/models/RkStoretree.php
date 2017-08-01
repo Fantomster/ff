@@ -40,16 +40,27 @@ class RkStoretree extends \kartik\tree\models\Tree
     {
         return 'rk_storetree';
     }
+    
+    
 
+        public function rules()
+    {
+        $rules = parent::rules();
+        $rules[] = [['type','denom','fid','acc','version'], 'safe'];
+        return $rules;
+    }
+    
+    /*
     /**
      * @inheritdoc
      */
+    /*
     public function rules()
     {
         return [
             [['acc','rid','denom'], 'required'],
             [['acc','rid'], 'integer'],
-            [['comment'], 'string', 'max' => 255],
+          //  [['comment'], 'string', 'max' => 255],
             [['id','root', 'rid', 'lft', 'rgt', 'lvl', 'acc','rid','denom',
             'prnt','denom','icon','icon_type','active','selected','disabled','readonly',
             'visible','collapsed','movable_u','movable_d','movable_l','movable_r',
@@ -57,6 +68,7 @@ class RkStoretree extends \kartik\tree\models\Tree
             
         ];
     }
+    */
 
     /**
      * @inheritdoc

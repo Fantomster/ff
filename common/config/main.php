@@ -133,5 +133,11 @@ return [
             'class' => 'frontend\modules\vendorintegr\Module',
             'layout' => '@frontend/views/layouts/main-vendor.php',
         ],
+        'treemanager' =>  [
+        'class' => '\kartik\tree\Module',
+        // enter other module properties if needed
+        // for advanced/personalized configuration
+        // (refer module properties available below)
+    ]
     ],
 ];

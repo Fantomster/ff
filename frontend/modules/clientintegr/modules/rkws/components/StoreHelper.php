@@ -194,6 +194,7 @@ class StoreHelper extends AuthHelper {
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         
         $acc= $tmodel->acc;
+        if (!$acc) $acc = 3243;
         
             if (!$tmodel->save()) {
                 $er2 = $tmodel->getErrors();

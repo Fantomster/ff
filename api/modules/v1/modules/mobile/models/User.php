@@ -85,7 +85,8 @@ class User extends BaseUser implements RateLimitInterface
         $profile = $user->profile;
         $email = $userToken->data ?: $user->email;
         $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
-        $result = $mailer->compose('@common/mail/confirmEmail', compact("subject", "user", "profile", "userToken"))
+        
+        $result = $mailer->compose('@api/common/mail/confirmEmail', compact("subject", "user", "profile", "userToken"))
             ->setTo($email)
             ->setSubject($subject)
             ->send();

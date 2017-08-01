@@ -6,12 +6,12 @@ use yii\helpers\Url;
     Здравствуйте, <small style="font-size: 60%; color: #787878; line-height: 0; text-transform: none; margin: 0; padding: 0;"><?= $profile->full_name ?></small>
 </h3>
 <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
-    Вы зарегистрировались в сервисе <a href="<?= \Yii::$app->urlManagerFrontEnd->createUrl("site/index"); ?>" style="color: #84bf76; margin: 0; padding: 0;">F-keeper</a>
+    Вы зарегистрировались в сервисе <a href="<?= \Yii::$app->urlManagerFrontEnd->createUrl(["site/index"]); ?>" style="color: #84bf76; margin: 0; padding: 0;">F-keeper</a>
 </p>
 <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Для завершения регистрации, пожалуйста, пройдите по следующей ссылке:</p>
 <br style="margin: 0; padding: 0;" />
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-    <a href="<?= \Yii::$app->urlManagerFrontEnd->createUrl("/user/confirm", ["type" => $user->organization->type_id, "token" => $userToken->token]); ?>" 
+    <a href="<?= \Yii::$app->urlManagerFrontEnd->createUrl(["/user/confirm", "type" => $user->organization->type_id, "token" => $userToken->token]); ?>" 
        style="text-decoration: none;
     color: #FFF;
     background-color: #84bf76;

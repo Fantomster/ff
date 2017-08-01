@@ -63,7 +63,10 @@ class RkStore extends \yii\db\ActiveRecord
             'id' => 'ID',
             'fid' => 'FID',
             'token' => 'Token',
-            'Nonce' => 'Nonce'
+            'Nonce' => 'Nonce',
+            'rid' => 'RID Store House',
+            'denom' => 'Наименование Store House',
+            'updated_at' => 'Обновлено',
         ];
     }
     

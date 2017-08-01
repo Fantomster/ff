@@ -57,7 +57,26 @@ class ProductHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-   //  var_dump($res);
+        // Обновление словаря RkDic
+    
+        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 3')->one();
+    
+        if (!$rmodel) {
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+
+        } else {
+            
+            $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
+            $rmodel->dicstatus_id= 2;
+            $rmodel->obj_count = 0;
+    
+            if (!$rmodel->save()) {
+                $er3 = $rmodel->getErrors();
+            } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
+        }
+     
+    // var_dump($res);
      
      return true;
     
@@ -173,16 +192,29 @@ class ProductHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение номенклатуры
-            
+           
              $icount =0; 
      
         foreach ($array as $a)   {
             
-            $amodel = new RkProduct();
+
             
+                $checks = RkProduct::find()->andWhere('acc = :acc',[':acc' => $acc])
+                                           ->andWhere('rid = :rid',[':rid' => $a['product_rid']])
+                                           ->andWhere('unit_rid = :unit_rid',[':unit_rid' => $a['unit_rid']])
+                                           ->one();
+                if (!$checks) {
+                    
+            $amodel = new RkProduct();
+                    
             $amodel->acc = $acc; 
-            $amodel->rid = $a['rid'];
-            $amodel->denom = $a['name'];
+            $amodel->rid = $a['product_rid'];
+            $amodel->denom = $a['product_name'];
+            $amodel->unit_rid = $a['unit_rid'];
+            $amodel->unitname = $a['unit_name'];
+            $amodel->group_rid = $a['group_rid'];
+            $amodel->group_name = $a['group_name'];
+            
         //    $amodel->agent_type = $a['type'];
             $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
             
@@ -190,12 +222,13 @@ class ProductHelper extends AuthHelper {
                 $er = $amodel->getErrors();
             } else $er = "Данные продуктов успешно сохранены.(ID:".$amodel->id." )";
             
-           $icount++;
+                }
+           $icount++;          
         }
      
     }
     
-        
+       
     // Обновление словаря RkDic
     
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 3')->one();
@@ -215,8 +248,7 @@ class ProductHelper extends AuthHelper {
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
         
-    
-   
+      
   //  $array = ApiHelper::xml2array($myXML);
   //  
   //  $array = json_decode(json_encode((array) $myXML), 1);

@@ -9,6 +9,7 @@ use yii\web\Controller;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use api\common\models\RkStoreSearch;
 use api\common\models\RkStore;
+use yii\data\ActiveDataProvider;
 
 // use yii\mongosoft\soapserver\Action;
 
@@ -40,6 +41,13 @@ class StoreController extends\frontend\modules\clientintegr\controllers\DefaultC
         
     }
     
+        public function actionView($id)
+    {
+        return $this->render('view', [
+            'dataProvider' => $this->findModel($id),
+        ]);
+    }
+    
     public function actionGetws() {
         
     $res = new \frontend\modules\clientintegr\modules\rkws\components\StoreHelper();
@@ -49,6 +57,22 @@ class StoreController extends\frontend\modules\clientintegr\controllers\DefaultC
             $this->redirect('\clientintegr\rkws\default');
         }
             
+    }
+    
+            protected function findModel($id)
+    {
+        if (($dmodel = \api\common\models\RkDic::findOne($id)) !== null) {
+            
+            $model = RkStore::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
+            
+            $dataProvider = new ActiveDataProvider([
+                                        'query' => $model,
+                                        'sort' => false ]);
+            
+            return $dataProvider;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
     }
       
     

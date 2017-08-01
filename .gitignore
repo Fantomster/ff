@@ -44,3 +44,5 @@ phpunit.phar
 /instant/port.js
 /api/config/main-local.php
 /api/config/params-local.php
+/api/common/runtime/
+/api/web/assets/

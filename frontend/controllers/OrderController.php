@@ -1157,6 +1157,7 @@ class OrderController extends DefaultController {
             $newMessage->recipient_id = $order->client_id;
         }
         $newMessage->save();
+ 
         $name = $user->profile->full_name;
 
         $body = $this->renderPartial('_chat-message', [

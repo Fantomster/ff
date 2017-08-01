@@ -40,7 +40,7 @@ use api\common\models\RkAccess;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-
+    
 </section>
 
 <section class="content-header">
@@ -50,7 +50,7 @@ use api\common\models\RkAccess;
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
                                     
-                                <p> Состояние лицензии: Активна.
+                                    <p> Состояние лицензии: <strong>Активна</strong> ID: 199990046 ( 01.06.2017 - 31.10.2017)
                                 </p>    
                             
                           
@@ -58,7 +58,7 @@ use api\common\models\RkAccess;
                             </div>
             </div>
         </div>    
-                                
+  СПРАВОЧНИКИ:                              
 </section>
 <section class="content-header">
     
@@ -74,6 +74,7 @@ use api\common\models\RkAccess;
                                         'pjax' => true, // pjax is set to always true for this demo
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
+                                        'layout' => '{items}',
                                         'columns' => [
                                             'id',
                                             [
@@ -101,7 +102,7 @@ use api\common\models\RkAccess;
                                             [
                                                 'class' => 'yii\grid\ActionColumn',
                                                 'contentOptions'=>['style'=>'width: 6%;'],
-                                                'template'=>'{view}&nbsp;{update}&nbsp;{getws}&nbsp;{map}',
+                                                'template'=>'{view}&nbsp;{getws}&nbsp;{map}',
                                                     'visibleButtons' => [
      
                                                         'update' => function ($model, $key, $index) {
@@ -112,13 +113,19 @@ use api\common\models\RkAccess;
                                                         // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
                                                         return true;     
                                                         },                   
-                                                        'map' => function ($model, $key, $index) {
-                                                        // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
-                                                        return true;     
-                                                        },                           
+                                                    //    'map' => function ($model, $key, $index) {
+                                                    //    // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                                                    //    return true;     
+                                                    //    },                           
                                                     ],
                 
                                                 'buttons'=>[
+                                                    
+                                                       'view' =>  function ($url, $model) {
+                                                        $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\\'.$model->dictype->contr.'\view', 'id'=>$model->id]);
+                                                        return \yii\helpers\Html::a( '<i class="fa fa-eye" aria-hidden="true"></i>', $customurl,
+                                                                     ['title' => Yii::t('backend', 'Просмотр'), 'data-pjax'=>"0"]);
+                                                           },
                 
                                                         'update' =>  function ($url, $model) {
                                                       //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
@@ -129,7 +136,7 @@ use api\common\models\RkAccess;
                                                         'getws' =>  function ($url, $model) {
                                                         $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\\'.$model->dictype->contr.'\getws', 'id'=>$model->id]);
                                                         return \yii\helpers\Html::a( '<i class="fa fa-download" aria-hidden="true"></i>', $customurl,
-                                                                     ['title' => Yii::t('backend', 'Update'), 'data-pjax'=>"0"]);
+                                                                     ['title' => Yii::t('backend', 'Загрузка'), 'data-pjax'=>"0"]);
                                                            },     
                                                       //  'map' =>  function ($url, $model) {
                                                       //  return \yii\helpers\Html::a( '<i class="fa fa-chain" aria-hidden="true"></i>', $customurl,

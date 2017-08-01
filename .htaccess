@@ -1,0 +1,44 @@
+Options +FollowSymLinks
+IndexIgnore /
+RewriteEngine on
+ 
+# if request begins with /admin remove admin and ad /backend/web/
+#RewriteCond %{REQUEST_URI} ^/admin
+#RewriteRule ^admin/?(.*) /backend/web/$1 [NC,L,QSA]
+
+# if request begins with /api remove api and ad /api/web/
+#RewriteCond %{REQUEST_URI} ^/api
+#RewriteRule ^api/?(.*) /api/web/$1 [NC,L,QSA]
+
+# if request begins with /api remove api and ad /api/web/
+RewriteCond %{REQUEST_URI} ^/hello
+RewriteRule ^hello/?(.*) /site/hello/$1 [NC,L,QSA]
+
+#RewriteCond %{REQUEST_URI} ^/v1
+#RewriteRule ^v1/?(.*) /v1/default/$1 [NC,L,QSA]
+
+#RewriteRule ^(.+)$ api/web/index.php/$1 [NC,L,QSA]
+
+RewriteRule ^(.*)$ api/web/index.php/$1 [NC,L,QSA]
+
+# other requests add /frontend/web/$1
+#RewriteCond %{REQUEST_URI} !^/(frontend/web|api/web|backend/web|admin)
+#RewriteRule (.*) /api/web/$1
+ 
+# if frontend request 
+RewriteCond %{REQUEST_URI} ^/frontend/web
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /frontend/web/index.php 
+ 
+# if backend request
+RewriteCond %{REQUEST_URI} ^/backend/web
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /backend/web/index.php 
+
+# if api request
+RewriteCond %{REQUEST_URI} ^/api/web
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /api/web/index.php

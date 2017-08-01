@@ -386,9 +386,12 @@ class CronController extends Controller {
             }
         }
     }
+    
     public function actionSendMailNewRequests() {
-      
-        
-        
+        //
+    }
+    
+    public function actionUpdateBlacklist() {
+        Organization::updateAll(["blacklisted" => true], "blacklisted = 0 AND (name LIKE '% test%' OR name LIKE '% тест%')");
     }
 }

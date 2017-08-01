@@ -21,7 +21,7 @@ class WaybillHelper extends AuthHelper {
     
     const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
     
-    public function sendWaybill () {
+    public function sendWaybill ($id) {
     if (!$this->Authorizer()) {
        
       echo "Can't perform authorization";
@@ -29,8 +29,33 @@ class WaybillHelper extends AuthHelper {
     }    
     
     $guid = UUID::uuid4();
-          
+    
+    $wmodel = \api\common\models\RkWaybill::findOne(['id' => $id]);
+    
     $xml = '<?xml version="1.0" encoding="utf-8"?>
+    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
+    <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store_rid.'" active="0"'
+            . ' duedate="1" note="'.$wmodel->note.'" textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'">'.PHP_EOL;           
+    
+   $recs = \api\common\models\RkWaybilldata::find()->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();
+   
+   // var_dump($recs);
+   
+    foreach($recs as $rec) {
+       
+       $xml .='<ITEM rid="'.$rec["product_rid"].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*1000).'" vatrate="1800" />'.PHP_EOL;
+    }
+   
+   // var_dump($recs);
+       
+    $xml .= '</DOC>'.PHP_EOL.
+            '</RQ>';
+    
+    // var_dump($xml);
+    
+    /*
+    $xml2 = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     <DOC date="2017-07-12" corr="8" store="3" active="0" duedate="1" note="текст примечания" textcode="fk" numcode="5379">
@@ -38,8 +63,15 @@ class WaybillHelper extends AuthHelper {
     <ITEM rid="3" quant="12345" mu="1" sum="1290000" vatrate="1800" />
     </DOC>
     </RQ>'; 
-       
+    
+    var_dump($xml2);
+    exit;
+     * 
+     */
+    
      $res = ApiHelper::sendCurl($xml,$this->restr);
+     
+    // var_dump($res);
      
      
      $tmodel = new RkTasks();   
@@ -60,9 +92,15 @@ class WaybillHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
-     var_dump($res);
-     
      // Обновление статуса выгрузки накладной 
+     
+     $wmodel->status_id = 2;
+     
+     if (!$wmodel->save(false)) {
+         echo "Не могу сохранить статус выгрузки накладной";
+         exit;
+     }
+    
      
      return true;
     
@@ -139,7 +177,7 @@ class WaybillHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение контрагентов
-        
+        /*
         $icount =0;    
       
         foreach ($array as $a)   {
@@ -159,7 +197,7 @@ class WaybillHelper extends AuthHelper {
             $icount++;
          
         }
-        
+        */
     }
     
     // Обновление словаря RkDic
@@ -212,9 +250,9 @@ class WaybillHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
+ //   file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',print_r($er2,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',print_r($er3,true) , FILE_APPEND);  
+ //   file_put_contents('runtime/logs/callback.log',print_r($er3,true) , FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
  //   file_put_contents('runtime/logs/callback.log',PHP_EOL.$tmodel->guid.PHP_EOL,FILE_APPEND);            
     }

@@ -135,7 +135,7 @@ class ApiHelper  {
                    exit;
         }
     
-    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restr->fid])->andwhere('sysdate() between fd and td')->one();
+    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('status=1')->one();
     
     if (!$sess) {
                  echo "SendCurl. Session is not found :((";
@@ -176,7 +176,7 @@ class ApiHelper  {
     $myXML   = simplexml_load_string($data);
     
    // echo "&&&&&&&&&&&&&<br>";
-   // var_dump ($myXML);
+   // var_dump($data,true);
     
     foreach ($myXML->OBJECTINFO as $obj) {
      
@@ -243,7 +243,7 @@ class ApiHelper  {
    // var_dump($objectinfo);
    // echo ('------<br>');
    // var_dump($respcode);
-   // 
+    
   //  exit;
     
     return ['resp' => $objectinfo, 'respcode' => $respcode];
@@ -320,6 +320,45 @@ class ApiHelper  {
 */
     
     public static function xml2array($xml) {
+
+        $arr = array();
+
+        foreach ($xml->children() as $k => $r) {
+
+            if (count($r->children()) == 0) {
+            //    if ($xml->$k->count() == 1) {
+            //        $arr[$r->getName()] = strval($r);
+                    
+            //        $atts_object = $r->attributes();
+            //        $atts_array = (array) $atts_object;
+            //        $arr[$r->getName()][]=$atts_array;
+                    
+                  //  foreach ($r->attributes as $a => $b) {
+                  //   $arr[$r->getName()]['@attributes'] = [$a => $b]; 
+                  //  }    
+                    
+            //    } else {
+                    $arr[$r->getName()][] = strval($r);
+                    
+                    $atts_object = $r->attributes();
+                    $atts_array = (array) $atts_object;
+                    $arr[$r->getName()][][]=$atts_array;
+            //    }//Endif
+            } else {
+          
+                $atts_object = $r->attributes();
+                $atts_array = (array) $atts_object;
+                $arr[$r->getName()][]=$atts_array;
+                
+                $arr[$r->getName()][] = self::xml2array($r);
+            }//Endif
+            
+        }//Endofreach
+
+        return $arr;
+    }
+    
+    public static function xml2array2($xml) {
 
         $arr = array();
 

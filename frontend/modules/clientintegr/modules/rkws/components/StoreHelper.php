@@ -9,6 +9,8 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkStore;
+use api\common\models\RkStoretree;
+use creocoder\nestedsets\NestedSetsBehavior;
 use api\common\models\RkDic;
 
 /* 
@@ -55,6 +57,25 @@ class StoreHelper extends AuthHelper {
          var_dump($tmodel->getErrors());
      }
      
+          // Обновление словаря RkDic
+    
+        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 2')->one();
+    
+        if (!$rmodel) {
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+
+        } else {
+            
+            $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
+            $rmodel->dicstatus_id= 2;
+            $rmodel->obj_count = 0;
+    
+            if (!$rmodel->save()) {
+                $er3 = $rmodel->getErrors();
+            } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
+        }
+     
     // var_dump($res);
      
      return true;
@@ -69,12 +90,71 @@ class StoreHelper extends AuthHelper {
     
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
+    $acc = 3243;
+    
+    foreach ($myXML->STOREGROUP as $storegroup) {
+            $gcount++;
+            foreach($storegroup->attributes() as $c => $d) {
+                if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);  
+                if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]); 
+                if ($c == 'parent')  $arr[$gcount]['parent'] = strval($d[0]); 
+            }
+            
+            $arr[$gcount]['type'] = 1;
+            $iparent = $gcount;
+            
+            $ridarray[$arr[$gcount]['rid']] = $gcount;
+                    
+                foreach ($storegroup->STORE as $store) {
+                    $gcount++;
+                          
+                        foreach($store->attributes() as $a => $b) {
+                          $arr[$gcount][$a] = strval($b[0]);
+                        }
+                    $arr[$gcount]['type'] = 2;
+                    $arr[$gcount]['parent'] = $iparent;
+                    
+                }
+    }
+    
+    // $arr2=$arr;
+    
+    foreach ($arr as $key => $value) {
+        
+        if ($value['type'] == '1' and ($value['parent']) != '') {
+            
+            $sval = $value['parent'];
+           
+            file_put_contents('runtime/logs/callback.log',$key.':'.$sval.PHP_EOL, FILE_APPEND); 
+            
+            // $value['parent']=$ridarray[$sval];
+            $arr[$key]['parent'] = $ridarray[$sval];
+            
+            file_put_contents('runtime/logs/callback.log',':'.print_r($arr[$key]['parent'],true).PHP_EOL, FILE_APPEND); 
+            
+           
+        }
+        
+    }
+    
+    //file_put_contents('runtime/logs/callback.log','++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log',print_r($arr2,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log','++++++++++A1++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log',print_r($arr,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log',print_r($ridarray,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //exit;
     
     
+    
+    /* Рабочая версия без дерева
+     * 
     foreach ($myXML->STOREGROUP as $storegroup) {
             foreach($storegroup->attributes() as $c => $d) {
                 if ($c == 'rid') $grid=strval($d[0]);
                 if ($c == 'name') $grname=strval($d[0]);
+            //    if ($c == 'parent') $grparent=strval($d[0]);
             }
                 foreach ($storegroup->STORE as $store) {
                     $gcount++;
@@ -86,11 +166,12 @@ class StoreHelper extends AuthHelper {
                         }
                 }
     }
+    */
     
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 
     
-    if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
+    if (!empty($arr) && !empty($cmdguid) && !empty($posid))  {
         
      // Заполнение tasks
              $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
@@ -116,17 +197,57 @@ class StoreHelper extends AuthHelper {
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         
         $acc= $tmodel->acc;
+
         
             if (!$tmodel->save()) {
                 $er2 = $tmodel->getErrors();
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
-        
             
-     // Заполнение складов
+            
+     // Заполнение складов с деревом
             
         $icount =0;     
        
+        foreach ($arr as $key => $a)   {
+                       
+            $amodel = new RkStoretree();
+            
+            $amodel->acc = $acc;
+            $amodel->rid = $a['rid'];
+            $amodel->denom = $a['name'];
+            $amodel->prnt = $a['parent'];
+            $amodel->type = $a['type'];
+            $amodel->fid = $key;
+            $amodel->version = 1;
+            
+            
+            
+        //    $amodel->agent_type = $a['type'];
+            $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
+            
+            if (!$amodel->save()) {
+                $er = $amodel->getErrors();
+            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
+            
+            
+                
+            $icount++;
+         
+        }
+            
+       
+            
+     // Заполнение складов
+     /* Заполнение складов рабочая версия без дерева       
+      * 
+        $icount =0;     
+       
         foreach ($array as $a)   {
+            
+                    $checks = RkStore::find()->andWhere('acc = :acc',[':acc' => $acc])
+                                        ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
+                                        ->one();
+                if (!$checks) {
             
             $amodel = new RkStore();
             
@@ -140,10 +261,12 @@ class StoreHelper extends AuthHelper {
                 $er = $amodel->getErrors();
             } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
             
+                }
+                
             $icount++;
          
         }
-       
+       */
     }
     
      // Обновление словаря RkDic
@@ -192,7 +315,7 @@ class StoreHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',print_r($arr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 

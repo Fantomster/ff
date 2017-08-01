@@ -78,6 +78,28 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
     
+    public function afterSave($insert, $changedAttributes) {
+        if ($insert) {
+            $emailNotification = new notifications\EmailNotification();
+            $emailNotification->user_id = $this->id;
+            $emailNotification->active = true;
+            $emailNotification->orders = true;
+            $emailNotification->requests = true;
+            $emailNotification->changes = true;
+            $emailNotification->invites = true;
+            $emailNotification->save();
+            $smsNotification = new notifications\SmsNotification();
+            $smsNotification->user_id = $this->id;
+            $smsNotification->active = true;
+            $smsNotification->orders = true;
+            $smsNotification->requests = true;
+            $smsNotification->changes = true;
+            $smsNotification->invites = true;
+            $smsNotification->save();
+        }
+        parent::afterSave($insert, $changedAttributes);
+    }
+    
     /**
      * Set organization id
      * @param int $orgId
@@ -252,7 +274,9 @@ class User extends \amnah\yii2\user\models\User {
                 ->setTo($this->email)
                 ->setSubject($subject)
                 ->send();
-
+        
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
+                
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
         return $result;

@@ -8,6 +8,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use common\models\User;
 use api\common\models\RkTasks;
+use yii\helpers\VarDumper;
 
 use yii\base\Object;
 
@@ -29,9 +30,15 @@ class AuthHelper extends Object {
        
     } 
     
-    public function Authorizer ()
+    public function Authorizer ()           
+            
     {
+       //  $auth = $this->sendAuth();
+        
         if (!$check = $this->checkAuthBool()) {
+            
+     //     echo "Проверка авторизации провалена. Перехожу к попытке авторизации";
+    //    exit;
        
         $auth = $this->sendAuth();
         
@@ -58,16 +65,25 @@ class AuthHelper extends Object {
         
         $res = ApiHelper::sendCurl($xml,$this->restr);
         
-      if ($res['respcode']['code'] == '0') 
+      //  echo "Checkauthbool<br>";
+      //  var_dump($res);
+      //  echo "dsf";
+      //  var_dump($res['respcode']['code']);
+        
+     //   throw new Exception(print_r($res,true));
+        
+      if ($res['respcode']['code'] == '0') {
               file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
               file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:SUCCESS'.PHP_EOL, FILE_APPEND);   
               file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
           return true;
-      } 
+      } else {
             file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==START================='.PHP_EOL,FILE_APPEND);  
             file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':CHECKAUTHBOLL:FAILED'.PHP_EOL, FILE_APPEND);   
             file_put_contents('runtime/logs/auth.log',PHP_EOL.'========EVENT==END==================='.PHP_EOL,FILE_APPEND); 
       return false;
+            }
+    }
     }  
  
     public function sendAuth() {
@@ -84,7 +100,7 @@ class AuthHelper extends Object {
     $usrReq = base64_encode($rlogin.';'.strtolower(md5($rlogin.$rpass)).';'.strtolower(md5($rtoken)));
     
     var_dump($usrReq);
-    exit;
+    // exit;
     
     $xml ='<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="'.$licReq.'" usr="'.$usrReq.'"/>';
    
@@ -127,6 +143,9 @@ class AuthHelper extends Object {
     $array = json_decode(json_encode((array) $myXML), 1);
     $array = array($myXML->getName() => $array);
     
+   // var_dump($myXML);
+   // var_dump($cook);
+      
     $respcode = $array['Error']['@attributes']['code'];
     
     if (!$respcode === null) {
@@ -140,19 +159,23 @@ class AuthHelper extends Object {
             file_put_contents('runtime/logs/auth.log', PHP_EOL.date("Y-m-d H:i:s").':SENDAUTH OK RECEIVED'.PHP_EOL, FILE_APPEND);   
          
         
-    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restrModel->fid])->andwhere('sysdate() between fd and td')->one();
-    
-    $sessmax = RkSession::find()->max('fid');   
+    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('status = 1')->one();
+        
+   // $sessmax = RkSession::find()->max('fid');   
     
     $newsess = new RkSession();
     
         $newsess->cook = $cook;
-        $newsess->fd= Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd H:i:s');    
+        $newsess->fd= Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');    
         $newsess->td= Yii::$app->formatter->asDate('2030-01-01 23:59:59', 'yyyy-MM-dd HH:mm:ss');
-        $newsess->acc = $restrModel->fid;
+        $newsess->acc = 1;
         $newsess->status = 1;
                   
         if ($sess) {
+          
+     //       echo "sess есть";
+     //       var_dump($newsess);
+     //      exit;
         
             $sess->td = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
             $sess->status = 0;     
@@ -175,8 +198,12 @@ class AuthHelper extends Object {
                 }
         
         } else {
-           $newsess->fid = $sessmax +1;
+           $newsess->fid = 1;
            $newsess->ver =1; 
+           $newsess->status =1;
+           
+       //    var_dump($newsess);
+       //    exit;
            
             if (!$newsess->save(false)) {
                 var_dump($newsess->getErrors());
@@ -193,6 +220,11 @@ class AuthHelper extends Object {
         
         }
         
+    } else {
+        
+        echo "Auth not successful";
+        exit;
+        return false;
     }        
 
     if(curl_errno($ch))

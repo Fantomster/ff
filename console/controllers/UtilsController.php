@@ -37,6 +37,10 @@ class UtilsController extends Controller {
             }
         }
     }
+    
+    public function actionCreateNotifications() {
+        
+    }
 
     public function actionCheckProductPictures() {
         $products = \common\models\CatalogBaseGoods::find()->where("image is not null")->andWhere("deleted = 0")->all();

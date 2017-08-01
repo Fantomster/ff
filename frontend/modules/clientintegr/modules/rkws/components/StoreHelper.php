@@ -92,14 +92,22 @@ class StoreHelper extends AuthHelper {
     $gcount = 0;        
     $acc = 3243;
     
-    $streee = new RkStoretree(['name'=>'Склады']);
-   // $streee->
+    $rtreee = new RkStoretree(['name'=>'Склады']);
+    $rtreee->makeRoot();
     
-  //  $streee->initDefaults();
-    // $stree = new RkStoretree(['name' => 'Склады']);
-    $streee->makeRoot();
-  //  $streee->save(false);
-    
+    $ntree = new RkStoretree();
+    $ntree->name = 'Тестовый 15';
+    $ntree->type = 3;
+        
+    $ntree->prependTo($rtree);
+
+    $ntree = new RkStoretree();
+    $ntree->name = 'Тестовый 19';
+    $ntree->type = 1;
+        
+    $ntree->prependTo($rtree);
+
+        
     exit();
     
     foreach ($myXML->STOREGROUP as $storegroup) {

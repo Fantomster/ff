@@ -9,6 +9,7 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkStore;
+use api\common\models\RkStoretree;
 use api\common\models\RkDic;
 
 /* 

@@ -48,13 +48,6 @@ return [
                 'charset' => 'UTF-8',
             ],
         ],
-        'mailqueue' => [
-            'class' => 'nterms\mailqueue\MailQueue',
-            'table' => '{{%mail_queue}}',
-            'mailsPerRound' => 15,
-            'maxAttempts' => 1,
-            'viewPath' => '@common/mail',
-        ],
         'urlManager' => [
             'class' => 'yii\web\UrlManager',
             // Hide index.php

@@ -313,11 +313,6 @@ class User extends \amnah\yii2\user\models\User {
         $email = $userToken->data ?: $user->email;
         $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
         
-//        $result = Yii::$app->mailqueue->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
-        
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
             ->setTo($email)
             ->setSubject($subject)

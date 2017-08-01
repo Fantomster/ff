@@ -1323,10 +1323,6 @@ class OrderController extends DefaultController {
 
         foreach ($order->vendor->users as $recipient) {
 
-//        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
             $email = $recipient->email;
             $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
                     ->setTo($email)
@@ -1353,10 +1349,6 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
         $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -1378,10 +1370,6 @@ class OrderController extends DefaultController {
 
         foreach ($recipientOrg->users as $recipient) {
             $email = $recipient->email;
-//            Yii::$app->mailqueue->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
             $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                     ->setTo($email)
                     ->setSubject($subject)
@@ -1409,10 +1397,6 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
         $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -1431,10 +1415,6 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
         if ($recipient instanceof Organization) {
             foreach ($recipient->users as $user) {
                 $email = $user->email;

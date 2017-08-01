@@ -1,6 +1,6 @@
 <?php
 
-namespace common\models;
+namespace common\models\notifications;
 
 use Yii;
 
@@ -16,7 +16,7 @@ use Yii;
  * @property integer $invites
  * @property integer $last_fail
  *
- * @property EmailFails[] $emailFails
+ * @property EmailFails $lastFail
  * @property User $user
  */
 class EmailNotification extends \yii\db\ActiveRecord
@@ -61,9 +61,9 @@ class EmailNotification extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEmailFails()
+    public function getLastFail()
     {
-        return $this->hasMany(EmailFails::className(), ['email_notification_id' => 'id']);
+        return $this->hasOne(EmailFails::className(), ['id' => 'last_fail']);
     }
 
     /**

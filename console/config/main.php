@@ -20,10 +20,6 @@ return [
                 ],
             ],
         ],
-        'mailqueue' => [
-            'class' => 'nterms\mailqueue\MailQueue',
-            'table' => '{{%mail_queue}}',
-        ],
     ],
     'aliases' => [
           '@baseUrl'=>'https://f-keeper.ru'

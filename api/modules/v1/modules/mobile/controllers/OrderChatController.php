@@ -71,33 +71,58 @@ class OrderChatController extends ActiveController {
     {
         $params = new OrderChat();
         $query = OrderChat::find();
-        
+
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         $filters = [];
-        $user = Yii::$app->user->getIdentity();
+       // $user = Yii::$app->user->getIdentity();
         
-        $filters['sent_by_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT) ? $user->id : $params->sent_by_id;
-        $filters['recipient_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) ? $user->organization_id : $params->recipient_id;
-          
-        
+        /*$filters['sent_by_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT) ? $user->id : $params->sent_by_id;
+        $filters['recipient_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) ? $user->organization_id : $params->recipient_id;*/
+         
+        $query->select(
+                'order_chat.*,profile.full_name, '
+              . 'organization.name, organization.picture')
+            ->from('order_chat')
+            ->innerJoin('user', 'user.id = order_chat.sent_by_id')
+            ->innerJoin('user as sender', 'sender.id = '.Yii::$app->user->id)
+            ->innerJoin('profile', 'profile.user_id = order_chat.sent_by_id')
+            ->innerJoin('organization', 'organization.id = user.organization_id')
+            ->innerJoin('order', 'order.id = order_chat.order_id')
+            ->andWhere('`order`.client_id = sender.organization_id OR `order`.vendor_id = sender.organization_id');
+         
+         
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            $query->andFilterWhere($filters);
             return $dataProvider;
         }
-  
-       
-            $filters['id'] = $params->id; 
-            $filters['order_id'] = $params->order_id; 
-            $filters['is_system'] = $params->is_system;
-            $filters['message'] = $params->message;
-            $filters['created_at'] = $params->created_at;
-            $filters['viewed'] = $params->viewed;
-            $filters['recipient_id'] = $params->recipient_id;
-            $filters['danger'] = $params->danger;
+        
+        if($params->type == OrderChat::TYPE_DIALOGS)
+            $query->groupBy('order_chat.order_id');
+        else 
+            $query->orderBy(['created_at' => SORT_DESC]);
 
-            $query->andFilterWhere($filters);
+        if(isset($params->count))
+        {
+        $query->limit($params->count);
+            if(isset($params->page))
+            {
+                $offset = ($params->page * $params->count) - $params->count;
+                $query->offset($offset);
+            }
+        }
+        
+        $filters['id'] = $params->id; 
+        $filters['order_id'] = $params->order_id; 
+        $filters['is_system'] = $params->is_system;
+        $filters['message'] = $params->message;
+        $filters['created_at'] = $params->created_at;
+        $filters['viewed'] = $params->viewed;
+        $filters['recipient_id'] = $params->recipient_id;
+        $filters['danger'] = $params->danger;
+
+        $query->andFilterWhere($filters);
   
         return $dataProvider;
     }
@@ -113,7 +138,7 @@ class OrderChatController extends ActiveController {
             throw new \yii\web\BadRequestHttpException(Yii::t('yii', 'Unable to verify your data submission.'));
         }
     }
-    
+
     public function actionViewed() {
         if (Yii::$app->request->post() && Yii::$app->request->post('message_id')) {
             $message = OrderChat::findOne(['id'=>Yii::$app->request->post('message_id')]);

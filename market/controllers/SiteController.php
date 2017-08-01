@@ -915,19 +915,13 @@ class SiteController extends Controller {
                     'query' => [
                         'match' => [
                             'supplier_name' => [
-                               'query' => $search,
-                               'fuzziness' => 'auto',
-                               'operator' =>  'and'
-                            ]
-                        ]
-                        /*'fuzzy' => [
-                            'supplier_name' => [
-                                'value' => $search,
-                                'fuzziness' => 20, // этот параметр для вашей задачи нужно выставлять повыше
-                                'prefix_length' => 2, // будет равняться кол-ву уже введенных символов
-                                "max_expansions"=> 100 // также выставляется повыше
-                            ]
-                        ]*/
+                                'query' => $search,
+                                'fuzziness' => 2,
+                                'prefix_length'=>2,
+                                'max_expansions'=>100
+                            ]   
+                        ],
+                        /**/
                     ],
                     'highlight' => [
                         'pre_tags' => ['<em>'],
@@ -970,7 +964,7 @@ class SiteController extends Controller {
                               ]
                               ]) */
                             ->limit(4)->asArray()->all();
-            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->orderBy(['supplier_rating'=>SORT_DESC])
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
                             ->limit(4)->asArray()->all();
         }
 

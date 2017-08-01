@@ -134,7 +134,7 @@ class UserController extends ActiveController {
     {
         /** @var \amnah\yii2\user\models\UserToken $userToken */
         $userToken = new UserToken();
-
+        
         // determine userToken type to see if we need to send email
         $userTokenType = null;
         if ($user->status == $user::STATUS_INACTIVE) {

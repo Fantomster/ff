@@ -211,7 +211,7 @@ class StoreHelper extends AuthHelper {
             $amodel->acc = $acc;
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
-            $amodel->parent = $a['parent'];
+            $amodel->prnt = $a['parent'];
             $amodel->type = $a['type'];
             $amodel->fid = $key;
             $amodel->version = 1;

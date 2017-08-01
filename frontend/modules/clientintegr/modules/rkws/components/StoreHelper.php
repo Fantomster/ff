@@ -9,6 +9,8 @@ use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkStore;
+use api\common\models\RkStoretree;
+use creocoder\nestedsets\NestedSetsBehavior;
 use api\common\models\RkDic;
 
 /* 
@@ -88,13 +90,14 @@ class StoreHelper extends AuthHelper {
     
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
+    $acc = 3243;
     
     foreach ($myXML->STOREGROUP as $storegroup) {
             $gcount++;
             foreach($storegroup->attributes() as $c => $d) {
-                if ($c == 'rid') $arr[$gcount]['rid'] = strval($d[0]);
-                if ($c == 'name')$arr[$gcount]['name'] = strval($d[0]);
-                if ($c == 'parent') $arr[$gcount]['parent'] = strval($d[0]);
+                if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);  
+                if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]); 
+                if ($c == 'parent')  $arr[$gcount]['parent'] = strval($d[0]); 
             }
             
             $arr[$gcount]['type'] = 1;
@@ -114,7 +117,7 @@ class StoreHelper extends AuthHelper {
                 }
     }
     
-    $arr2=$arr;
+    // $arr2=$arr;
     
     foreach ($arr as $key => $value) {
         
@@ -134,14 +137,14 @@ class StoreHelper extends AuthHelper {
         
     }
     
-    file_put_contents('runtime/logs/callback.log','++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',print_r($arr2,true).PHP_EOL , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log','++++++++++A1++++++++++++'.PHP_EOL , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',print_r($arr,true).PHP_EOL , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',print_r($ridarray,true).PHP_EOL , FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
-    exit;
+    //file_put_contents('runtime/logs/callback.log','++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log',print_r($arr2,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log','++++++++++A1++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log',print_r($arr,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log',print_r($ridarray,true).PHP_EOL , FILE_APPEND); 
+    //file_put_contents('runtime/logs/callback.log','++++++++++EX++++++++++++'.PHP_EOL , FILE_APPEND); 
+    //exit;
     
     
     
@@ -168,7 +171,7 @@ class StoreHelper extends AuthHelper {
     $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 
     
-    if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
+    if (!empty($arr) && !empty($cmdguid) && !empty($posid))  {
         
      // Заполнение tasks
              $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
@@ -194,14 +197,49 @@ class StoreHelper extends AuthHelper {
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
         
         $acc= $tmodel->acc;
+
         
             if (!$tmodel->save()) {
                 $er2 = $tmodel->getErrors();
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
-        
+            
+            
+     // Заполнение складов с деревом
+            
+        $icount =0;     
+       
+        foreach ($arr as $key => $a)   {
+                       
+            $amodel = new RkStoretree();
+            
+            $amodel->acc = $acc;
+            $amodel->rid = $a['rid'];
+            $amodel->denom = $a['name'];
+            $amodel->prnt = $a['parent'];
+            $amodel->type = $a['type'];
+            $amodel->fid = $key;
+            $amodel->version = 1;
+            
+            
+            
+        //    $amodel->agent_type = $a['type'];
+            $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
+            
+            if (!$amodel->save()) {
+                $er = $amodel->getErrors();
+            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
+            
+            
+                
+            $icount++;
+         
+        }
+            
+       
             
      // Заполнение складов
-            
+     /* Заполнение складов рабочая версия без дерева       
+      * 
         $icount =0;     
        
         foreach ($array as $a)   {
@@ -228,7 +266,7 @@ class StoreHelper extends AuthHelper {
             $icount++;
          
         }
-       
+       */
     }
     
      // Обновление словаря RkDic
@@ -277,7 +315,7 @@ class StoreHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+    file_put_contents('runtime/logs/callback.log',print_r($arr,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 

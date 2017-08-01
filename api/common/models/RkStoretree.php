@@ -53,7 +53,7 @@ class RkStoretree extends \kartik\tree\models\Tree
             [['id','root', 'rid', 'lft', 'rgt', 'lvl', 'acc','rid','denom',
             'prnt','denom','icon','icon_type','active','selected','disabled','readonly',
             'visible','collapsed','movable_u','movable_d','movable_l','movable_r',
-                'removable','removable_all','created_at','store_type','updated_at'],'safe']
+                'removable','removable_all','created_at','store_type','updated_at','type','fid','acc', 'version'],'safe']
             
         ];
     }

@@ -231,7 +231,7 @@ class StoreHelper extends AuthHelper {
          
         }
             
-       exit; 
+       
             
      // Заполнение складов
      /* Заполнение складов рабочая версия без дерева       

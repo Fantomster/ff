@@ -44,6 +44,15 @@ class Module extends \yii\base\Module
                     ]
                 );
         
+        Yii::$app->set(
+                'urlManagerFrontEnd', [
+                        'class' => 'yii\web\urlManager',
+                        'baseUrl' => Yii::$app->params['maindUrl'],
+                        'enablePrettyUrl' => true,
+                        'showScriptName' => false,
+                    ]
+                );
+        
          $this->controllerBehaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
             'only' => ['index', 'view', 'options', 'auth','complete-registration', 'refresh-fcm-token', 'send', 'create', 'viewed'],

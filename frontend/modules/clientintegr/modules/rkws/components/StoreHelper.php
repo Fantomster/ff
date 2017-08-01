@@ -93,7 +93,7 @@ class StoreHelper extends AuthHelper {
     $acc = 3243;
     
     $streee = new RkStoretree();
-    $streee->name = 'Склады';
+    $streee->initDefaults();
     // $stree = new RkStoretree(['name' => 'Склады']);
     $streee->makeRoot();
     $streee->save(false);

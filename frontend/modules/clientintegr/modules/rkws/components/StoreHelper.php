@@ -10,6 +10,7 @@ use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkStore;
 use api\common\models\RkStoretree;
+use creocoder\nestedsets\NestedSetsBehavior;
 use api\common\models\RkDic;
 
 /* 

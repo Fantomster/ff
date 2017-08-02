@@ -129,13 +129,16 @@ class StoreHelper extends AuthHelper {
                 $rtree->makeRoot();
             } else {
                     ${'rid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
-                    
+                    ${'rid'.$arr[$gcount]['rid']}->type = 1;
+                    ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                    ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
+                    ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
+                   
                     if ($arr[$gcount]['parent'] === '0') { // Цепляем к корню
                         ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
                     } else { // Дети некорня
                         ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
                     }
-                
             }
                     
                 foreach ($storegroup->STORE as $store) {

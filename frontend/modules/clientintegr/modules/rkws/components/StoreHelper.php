@@ -91,7 +91,8 @@ class StoreHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     $acc = 3243;
-    
+  
+    /*
     $rtree = new RkStoretree(['name'=>'Склады']);
     $rtree->makeRoot();
     
@@ -106,12 +107,13 @@ class StoreHelper extends AuthHelper {
     $ntree->type = 1;
         
     $ntree->prependTo($rtree);
-
+*/
         
-    exit();
+  
     
     foreach ($myXML->STOREGROUP as $storegroup) {
             $gcount++;
+                                               
             foreach($storegroup->attributes() as $c => $d) {
                 if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);  
                 if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]); 
@@ -120,8 +122,21 @@ class StoreHelper extends AuthHelper {
             
             $arr[$gcount]['type'] = 1;
             $iparent = $gcount;
-            
             $ridarray[$arr[$gcount]['rid']] = $gcount;
+            
+            if ($arr[$gcount]['parent'] === '') { // Корень дерева
+                $rtree = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                $rtree->makeRoot();
+            } else {
+                    ${'rid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                    
+                    if ($arr[$gcount]['parent'] === '0') { // Цепляем к корню
+                        ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
+                    } else { // Дети некорня
+                        ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
+                    }
+                
+            }
                     
                 foreach ($storegroup->STORE as $store) {
                     $gcount++;
@@ -134,8 +149,12 @@ class StoreHelper extends AuthHelper {
                     
                 }
     }
+  
+    exit();
     
     // $arr2=$arr;
+    
+    /*
     
     foreach ($arr as $key => $value) {
         
@@ -154,6 +173,7 @@ class StoreHelper extends AuthHelper {
         }
         
     }
+    */
     
     //file_put_contents('runtime/logs/callback.log','++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
     //file_put_contents('runtime/logs/callback.log',print_r($arr2,true).PHP_EOL , FILE_APPEND); 

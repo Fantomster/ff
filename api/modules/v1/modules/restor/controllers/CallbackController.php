@@ -29,7 +29,20 @@ class CallbackController extends Controller {
     }
     
     public function actionAgent() {
-        \frontend\modules\clientintegr\modules\rkws\components\AgentHelper::callback();
+        (new \frontend\modules\clientintegr\modules\rkws\components\AgentHelper())->callback();
+    }
+    
+        
+    public function actionStore() {
+        (new \frontend\modules\clientintegr\modules\rkws\components\StoreHelper())->callback();
+    }
+    
+    public function actionProduct() {
+        (new \frontend\modules\clientintegr\modules\rkws\components\ProductHelper())->callback();
+    }
+    
+    public function actionWaybill() {
+        (new \frontend\modules\clientintegr\modules\rkws\components\WaybillHelper())->callback();
     }
 
 }

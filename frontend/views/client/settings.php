@@ -235,6 +235,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
 <?= Html::activeHiddenInput($organization, 'lng'); //долгота ?>
 <?= Html::activeHiddenInput($organization, 'country'); //страна ?> 
 <?= Html::activeHiddenInput($organization, 'locality'); //Город ?>
+<?= Html::activeHiddenInput($organization, 'administrative_area_level_1'); //область ?>
 <?= Html::activeHiddenInput($organization, 'route'); //улица ?>
 <?= Html::activeHiddenInput($organization, 'street_number'); //дом ?>
 <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>

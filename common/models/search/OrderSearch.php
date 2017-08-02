@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Order;
+use common\models\User;
 use common\models\Organization;
 use common\models\Profile;
 
@@ -162,6 +163,29 @@ class OrderSearch extends Order {
         $query->andFilterWhere(['client_id' => $this->client_id]);
 
         return $dataProvider;
+    }  
+    
+     /**
+     * Creates data provider instance with search query applied for waybill controller (Integration)
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchWaybill($params) {
+       
+        $query = Order::find()->andWhere(['status' => Order::STATUS_DONE])
+                ->andWhere(['client_id' => User::findOne(Yii::$app->user->id)->organization_id]);
+        
+        $this->load($params);
+        
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
+        ]);
+        
+        return $dataProvider;
+        
     }
 
 }

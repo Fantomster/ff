@@ -20,7 +20,9 @@ $this->title = "Успешная регистрация!";
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
         <h1>Онлайн-сервис для автоматизации закупок</h1>
         <div class="present__media clearfix">
-            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div><a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a><a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>
+            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div>
+<!--            <a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a>
+            <a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>-->
         </div>
     </div>
 </div>

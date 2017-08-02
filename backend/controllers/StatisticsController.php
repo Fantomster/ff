@@ -22,8 +22,6 @@ use common\models\CatalogBaseGoods;
  */
 class StatisticsController extends Controller {
     
-    private $blacklist = '(1,2,3,5,16,63,88,99,100,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037)'; //1,2,5,16,63,88,99,106,108,111,114,116,272,284,333,440,449,526,673,784,824,1037
-
     public function behaviors() {
         return [
             'access' => [
@@ -64,12 +62,12 @@ class StatisticsController extends Controller {
 
         $clientTotalCount = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT])
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT, "$orgTable.blacklisted" => false])
                 ->groupBy(["$orgTable.id"])
                 ->count();
         $vendorTotalCount = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER, "$orgTable.blacklisted" => false])
                 ->groupBy(["$orgTable.id"])
                 ->count();
         $allTimeCount = $clientTotalCount + $vendorTotalCount;
@@ -81,13 +79,13 @@ class StatisticsController extends Controller {
         
         $clientCountThisMonth = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT])
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT, "$orgTable.blacklisted" => false])
                 ->andWhere([">=", "$orgTable.created_at", $thisMonthStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
         $vendorCountThisMonth = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER, "$orgTable.blacklisted" => false])
                 ->andWhere([">=", "$orgTable.created_at", $thisMonthStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
@@ -97,13 +95,13 @@ class StatisticsController extends Controller {
 
         $clientCountThisDay = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT])
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_RESTAURANT, "$orgTable.blacklisted" => false])
                 ->andWhere([">=", "$orgTable.created_at", $thisDayStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
         $vendorCountThisDay = Organization::find()
                 ->leftJoin($userTable, "$orgTable.id = $userTable.organization_id")
-                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER])
+                ->where(["$userTable.status" => User::STATUS_ACTIVE, "$orgTable.type_id" => Organization::TYPE_SUPPLIER, "$orgTable.blacklisted" => false])
                 ->andWhere([">=", "$orgTable.created_at", $thisDayStart])
                 ->groupBy(["$orgTable.id"])
                 ->count();
@@ -126,7 +124,7 @@ class StatisticsController extends Controller {
                 . "SUM(CASE WHEN organization.type_id=1 THEN 1 ELSE 0 END) AS clients, SUM(CASE WHEN organization.type_id=2 THEN 1 ELSE 0 END) AS vendors, "
                 . "YEAR($orgTable.created_at) AS year, MONTH($orgTable.created_at) AS month, DAY($orgTable.created_at) AS day FROM $orgTable "
                 . "LEFT JOIN $userTable ON $orgTable.id = $userTable.organization_id "
-                . "WHERE ($userTable.status=1) AND ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) "
+                . "WHERE ($userTable.status=1) AND ($orgTable.created_at BETWEEN :dateFrom AND :dateTo) AND $orgTable.blacklisted = 0 "
                 . "GROUP BY YEAR($orgTable.created_at), MONTH($orgTable.created_at), DAY($orgTable.created_at)";
         $command = Yii::$app->db->createCommand($sql, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $clientsByDay = $command->queryAll();
@@ -179,6 +177,7 @@ class StatisticsController extends Controller {
     public function actionOrders() {
         $orderTable = Order::tableName();
         $userTable = User::tableName();
+        $orgTable = Organization::tableName();
 
         $today = new \DateTime();
         $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
@@ -205,7 +204,7 @@ class StatisticsController extends Controller {
             $colorsTotal[] = $colorsList[$status];
         }
         
-        $query = "select " . $select . " from `$orderTable` where client_id not in ".$this->blacklist." and status <> " . Order::STATUS_FORMING;
+        $query = "select " . $select . " from `$orderTable` left join $orgTable on $orderTable.client_id=$orgTable.id where $orgTable.blacklisted = 0 and $orderTable.status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStat = $command->queryAll()[0];
         
@@ -215,24 +214,28 @@ class StatisticsController extends Controller {
         $thisMonthStart = $today->format('Y-m-01 00:00:00');
         $thisDayStart = $today->format('Y-m-d 00:00:00');
         
-        $query = "select " . $select . " from `$orderTable` "
-                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisMonthStart'"." and status <> " . Order::STATUS_FORMING;
+        $query = "select " . $select . " from `$orderTable` left join $orgTable on $orderTable.client_id=$orgTable.id "
+                . "where $orgTable.blacklisted = 0 and `$orderTable`.created_at > '$thisMonthStart'"." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisMonth = $command->queryAll()[0];
         
         $totalCountThisMonth = $ordersStatThisMonth["count"];
         unset($ordersStatThisMonth["count"]);
 
-        $query = "select " . $select . " from `$orderTable` "
-                . "where client_id not in ".$this->blacklist." and `$orderTable`.created_at > '$thisDayStart'"." and status <> " . Order::STATUS_FORMING;
+        $query = "select " . $select . " from `$orderTable` left join $orgTable on $orderTable.client_id=$orgTable.id "
+                . "where $orgTable.blacklisted = 0 and `$orderTable`.created_at > '$thisDayStart'"." and status <> " . Order::STATUS_FORMING;
         $command = Yii::$app->db->createCommand($query);
         $ordersStatThisDay = $command->queryAll()[0];
 
         $totalCountThisDay = $ordersStatThisDay["count"];
         unset($ordersStatThisDay["count"]);
         
+//        $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
+//            from (SELECT count(id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order where client_id not in ".$this->blacklist." and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
+//            left outer join (select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day from (select * from `f-keeper`.order a where a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)) bb
+//            on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
         $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
-            from (SELECT count(id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day FROM `f-keeper`.order where client_id not in ".$this->blacklist." and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
+            from (SELECT count($orderTable.id) as count,year($orderTable.created_at) as year, month($orderTable.created_at) as month, day($orderTable.created_at) as day FROM `f-keeper`.order left join $orgTable on $orderTable.client_id=$orgTable.id where $orgTable.blacklisted=0 and $orderTable.status <> 7 and $orderTable.created_at BETWEEN :dateFrom AND :dateTo group by year($orderTable.created_at), month($orderTable.created_at), day($orderTable.created_at)) aa 
             left outer join (select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day from (select * from `f-keeper`.order a where a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)) bb
             on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
@@ -288,6 +291,7 @@ class StatisticsController extends Controller {
     public function actionTurnover() {
         $orderTable = Order::tableName();
         $userTable = User::tableName();
+        $orgTable = Organization::tableName();
 
         $today = new \DateTime();
         $dateFilterFrom = !empty(Yii::$app->request->post("date")) ? Yii::$app->request->post("date") : "01.12.2016";
@@ -298,10 +302,10 @@ class StatisticsController extends Controller {
         $end = $dtEnd->add(new \DateInterval('P1D'));
         $date = $dt->format('Y-m-d');       
         
-        $query = "SELECT truncate(sum(total_price),1) as spent,truncate(sum(total_price)/count(id),1) as cheque, year(created_at) as year, month(created_at) as month, day(created_at) as day "
-                . "FROM `f-keeper`.order "
-                . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and client_id not in ".$this->blacklist." and created_at between :dateFrom and :dateTo "
-                . "group by year(created_at), month(created_at), day(created_at)";
+        $query = "SELECT truncate(sum($orderTable.total_price),1) as spent,truncate(sum($orderTable.total_price)/count($orderTable.id),1) as cheque, year($orderTable.created_at) as year, month($orderTable.created_at) as month, day($orderTable.created_at) as day "
+                . "FROM `f-keeper`.order LEFT JOIN $orgTable ON $orderTable.client_id = $orgTable.id "
+                . "where $orderTable.status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and $orgTable.blacklisted = 0 and $orderTable.created_at between :dateFrom and :dateTo "
+                . "group by year($orderTable.created_at), month($orderTable.created_at), day($orderTable.created_at)";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];
@@ -315,9 +319,10 @@ class StatisticsController extends Controller {
             $dayCheque[] = $order["cheque"];
         }
         
-        $query = "SELECT truncate(sum(total_price),1) as total_month, truncate(sum(total_price)/count(distinct client_id),1) as spent,truncate(sum(total_price)/count(id),1) as cheque, year(created_at) as year, month(created_at) as month FROM `f-keeper`.order "
-                . "where status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and client_id not in ".$this->blacklist." "
-                . "group by year(created_at), month(created_at)";
+        $query = "SELECT truncate(sum($orderTable.total_price),1) as total_month, truncate(sum($orderTable.total_price)/count(distinct $orderTable.client_id),1) as spent,truncate(sum($orderTable.total_price)/count($orderTable.id),1) as cheque, year($orderTable.created_at) as year, month($orderTable.created_at) as month "
+                . "FROM `f-keeper`.order LEFT JOIN $orgTable ON $orderTable.client_id = $orgTable.id "
+                . "where $orderTable.status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") and $orgTable.blacklisted = 0 "
+                . "group by year($orderTable.created_at), month($orderTable.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $money = $command->queryAll();
         $monthLabels = [];
@@ -386,7 +391,7 @@ class StatisticsController extends Controller {
                 . "left join $userTable on $orgTable.id=$userTable.organization_id "
                 . "left join `$orderTable` on `$orderTable`.client_id = $orgTable.id "
                 . "where type_id=1 and $userTable.status=1 and `$orderTable`.status in (".Order::STATUS_PROCESSING.",".Order::STATUS_DONE.",".Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT.",".Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR.") "
-                    . "and $orgTable.id not in $this->blacklist and $orgTable.created_at between :dateFrom and :dateTo group by $orgTable.id";
+                    . "and $orgTable.blacklisted = 0 and $orgTable.created_at between :dateFrom and :dateTo group by $orgTable.id";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $clientsWithOrders = $command->queryAll();
         $clientsWithOrdersCount = count($clientsWithOrders);
@@ -424,7 +429,7 @@ class StatisticsController extends Controller {
         }
         
         $query = "select count(org_id) from (select $orgTable.id as org_id from $orgTable left join $cbgTable on $orgTable.id = $cbgTable.supp_org_id "
-                . "where $cbgTable.deleted = 0 and $orgTable.created_at between :dateFrom and :dateTo group by $orgTable.id) as tmp";
+                . "where $orgTable.blacklisted=0 and $cbgTable.deleted = 0 and $orgTable.created_at between :dateFrom and :dateTo group by $orgTable.id) as tmp";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $vendorsWithGoodsCount = $command->queryScalar();
         

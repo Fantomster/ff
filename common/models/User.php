@@ -168,7 +168,7 @@ class User extends \amnah\yii2\user\models\User {
 		// send email
         $restaurant = $this->organization->name;
         $userToken = $this->module->model("UserToken");
-        $userToken = $userToken::generate($vendor->id, $userToken::TYPE_EMAIL_ACTIVATE);
+        $userToken = $userToken::generate($vendor->id, $userToken::TYPE_PASSWORD_RESET);
         $email = $vendor->email;
         $subject = "Приглашение на f-keeper";
         $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "vendor", "userToken", "restaurant"))
@@ -252,7 +252,9 @@ class User extends \amnah\yii2\user\models\User {
                 ->setTo($this->email)
                 ->setSubject($subject)
                 ->send();
-
+        
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
+                
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
         return $result;

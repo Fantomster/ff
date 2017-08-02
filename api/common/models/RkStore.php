@@ -47,9 +47,10 @@ class RkStore extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['login','fid','password','token','lic','org'], 'required'],
-            [['id','fid','org','ver'], 'integer'],
-            [['token','login','password','salespoint'], 'string', 'max' => 255],
+            [['acc','rid','denom'], 'required'],
+            [['acc','rid'], 'integer'],
+            [['comment'], 'string', 'max' => 255],
+            [['acc','rid','denom','store_type','updated_at'],'safe']
         ];
     }
 
@@ -62,7 +63,10 @@ class RkStore extends \yii\db\ActiveRecord
             'id' => 'ID',
             'fid' => 'FID',
             'token' => 'Token',
-            'Nonce' => 'Nonce'
+            'Nonce' => 'Nonce',
+            'rid' => 'RID Store House',
+            'denom' => 'Наименование Store House',
+            'updated_at' => 'Обновлено',
         ];
     }
     

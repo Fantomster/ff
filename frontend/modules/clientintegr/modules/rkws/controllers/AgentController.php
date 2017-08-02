@@ -7,6 +7,7 @@ use yii\web\Controller;
 use api\common\models\RkAgent;
 use api\common\models\RkAgentSearch;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
+use yii\data\ActiveDataProvider;
 // use yii\mongosoft\soapserver\Action;
 
 /**
@@ -37,16 +38,39 @@ class AgentController extends \frontend\modules\clientintegr\controllers\Default
         
     }
     
+    public function actionView($id)
+    {
+        return $this->render('view', [
+            'dataProvider' => $this->findModel($id),
+        ]);
+    }
+    
     public function actionGetws() {
         
    //  $resres = ApiHelper::getAgents();     
         
         $res = new \frontend\modules\clientintegr\modules\rkws\components\AgentHelper();
         $res->getAgents();
+        
+            $this->redirect('\clientintegr\rkws\default');
             
     }
       
-    
+        protected function findModel($id)
+    {
+        if (($dmodel = \api\common\models\RkDic::findOne($id)) !== null) {
+            
+            $model = RkAgent::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
+            
+            $dataProvider = new ActiveDataProvider([
+                                        'query' => $model,
+                                        'sort' => false ]);
+            
+            return $dataProvider;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
 
   
    

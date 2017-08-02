@@ -106,7 +106,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return [
             
             [['cat_id', 'price', 'product', 'ed','article'], 'required'],
-            [['cat_id', 'category_id', 'supp_org_id', 'status', 'market_place', 'deleted', 'mp_show_price', 'rating'], 'integer'],
+            [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             [['article'], 'required', 'on' => 'uniqueArticle'],
             [['article'], 'string', 'max' => 50],
@@ -141,9 +141,13 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     }
     public function uniqueArticle($attribute, $params, $validator)
     {
-        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])->exists()) {
-            $this->addError($attribute, 'Такой артикул уже существует в каталоге');
+        empty($this->id)?$where= "true":$where = "id <> $this->id";
+        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
+                    ->andWhere($where)
+                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
+                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
         }
+        
     }
     /**
      * @inheritdoc

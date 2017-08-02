@@ -125,6 +125,9 @@ class ApiHelper  {
     */
     public static function sendCurl($xml,$restr) {
         
+    $objectinfo = [];
+    $respcode = [];
+        
     $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Cmd";
     
         if (empty($restr)) {
@@ -132,7 +135,14 @@ class ApiHelper  {
                    exit;
         }
     
-    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>$restr->fid])->andwhere('sysdate() between fd and td')->one();
+    $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('status=1')->one();
+    
+    if (!$sess) {
+                 echo "SendCurl. Session is not found :((";
+                 exit;
+    }
+    
+    
     $cook = $sess->cook;
     
         if (empty($cook)) {
@@ -164,25 +174,77 @@ class ApiHelper  {
     $info = curl_getinfo($ch);
        
     $myXML   = simplexml_load_string($data);
-   // $array = $this->XML2Array($myXML);
-    $array = json_decode(json_encode((array) $myXML), 1);
-    $array = array($myXML->getName() => $array);
     
-    if ($array['Error']) {
+   // echo "&&&&&&&&&&&&&<br>";
+   // var_dump($data,true);
+    
+    foreach ($myXML->OBJECTINFO as $obj) {
+     
+        foreach($obj->attributes() as $a => $b) {
+                $objectinfo[$a] = strval($b[0]);
+        }
+  
+    }
+
+    if (!empty($objectinfo)) {
         
-    $objectinfo = ['Статус'=>'Ошибка'];        
+        $respcode['taskguid'] = strval($myXML['taskguid']);
+        $respcode['code'] = strval($myXML['code']);
+        $respcode['version'] = strval($myXML['version']);
+        
+    } else {
+        
+        if (isset($myXML->Error)) {
+           $objectinfo = ['Статус'=>'Ошибка'];         
+           
+           foreach($myXML->Error->attributes() as $a => $b) {
+                $respcode[$a] = strval($b[0]);
+            }
+    
+        } else {
+           
+        $objectinfo['taskguid'] = strval($myXML['taskguid']);
+        $objectinfo['code'] = strval($myXML['code']);
+        $objectinfo['version'] = strval($myXML['version']);
+        
+        $respcode = $objectinfo;
+            
+        }
+        
+    }
+   
+   // $array = $this->XML2Array($myXML);
+   // $array = json_decode(json_encode((array) $myXML), 1);
+   // $array = array($myXML->getName() => $array);
+    /*
+    if (!empty($array['Error'])) {
+        
+    
     $respcode = $array['Error']['@attributes'];
     
     } else {
+    
+    // print_r($myXML);
+  //  var_dump($objectinfo);
+  //  var_dump($respcode);
+  //  exit;    
         
     $objectinfo = $array['RP']['OBJECTINFO']['@attributes'];    
     $respcode = $array['RP']['@attributes'];
     }
-        
+    */
+    
     if(curl_errno($ch))
     print curl_error($ch);
     else
     curl_close($ch);
+    
+   // echo ('*******<br>');
+   // var_dump($objectinfo);
+   // echo ('------<br>');
+   // var_dump($respcode);
+    
+  //  exit;
     
     return ['resp' => $objectinfo, 'respcode' => $respcode];
         
@@ -257,7 +319,85 @@ class ApiHelper  {
     }
 */
     
+    public static function xml2array($xml) {
 
+        $arr = array();
+
+        foreach ($xml->children() as $k => $r) {
+
+            if (count($r->children()) == 0) {
+            //    if ($xml->$k->count() == 1) {
+            //        $arr[$r->getName()] = strval($r);
+                    
+            //        $atts_object = $r->attributes();
+            //        $atts_array = (array) $atts_object;
+            //        $arr[$r->getName()][]=$atts_array;
+                    
+                  //  foreach ($r->attributes as $a => $b) {
+                  //   $arr[$r->getName()]['@attributes'] = [$a => $b]; 
+                  //  }    
+                    
+            //    } else {
+                    $arr[$r->getName()][] = strval($r);
+                    
+                    $atts_object = $r->attributes();
+                    $atts_array = (array) $atts_object;
+                    $arr[$r->getName()][][]=$atts_array;
+            //    }//Endif
+            } else {
+          
+                $atts_object = $r->attributes();
+                $atts_array = (array) $atts_object;
+                $arr[$r->getName()][]=$atts_array;
+                
+                $arr[$r->getName()][] = self::xml2array($r);
+            }//Endif
+            
+        }//Endofreach
+
+        return $arr;
+    }
+    
+    public static function xml2array2($xml) {
+
+        $arr = array();
+
+        foreach ($xml->children() as $k => $r) {
+
+            if (count($r->children()) == 0) {
+            //    if ($xml->$k->count() == 1) {
+            //        $arr[$r->getName()] = strval($r);
+                    
+            //        $atts_object = $r->attributes();
+            //        $atts_array = (array) $atts_object;
+            //        $arr[$r->getName()][]=$atts_array;
+                    
+                  //  foreach ($r->attributes as $a => $b) {
+                  //   $arr[$r->getName()]['@attributes'] = [$a => $b]; 
+                  //  }    
+                    
+            //    } else {
+                    $arr[$r->getName()][] = strval($r);
+                    
+                    $atts_object = $r->attributes();
+                    $atts_array = (array) $atts_object;
+                    $arr[$r->getName()][][]=$atts_array;
+            //    }//Endif
+            } else {
+          
+                $atts_object = $r->attributes();
+                $atts_array = (array) $atts_object;
+                $arr[$r->getName()][]=$atts_array;
+                
+                $arr[$r->getName()][] = self::xml2array($r);
+            }//Endif
+            
+        }//Endofreach
+
+        return $arr;
+    }
+    
     
 }
+
 

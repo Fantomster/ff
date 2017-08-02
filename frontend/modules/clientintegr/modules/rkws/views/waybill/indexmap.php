@@ -16,7 +16,11 @@ use yii\web\JsExpression;
 
 
 ?>
+<?php 
 
+$productDesc = empty($model->product_rid) ? '' : $model->product->denom;
+
+?>
 
 <style>
     .bg-default{background:#555} p{margin: 0;} #map{width:100%;height:200px;}
@@ -85,6 +89,7 @@ GridView::widget([
         'inputType'=>\kartik\editable\Editable::INPUT_SELECT2,
         //'widgetClass'=> 'kartik\datecontrol\DateControl',
         'options'=>[
+             'initValueText' => $productDesc,
 
        //     'data' => $data,
             'options' => ['placeholder' => 'Выберите продукт из списка',           

@@ -234,50 +234,14 @@ class CronController extends Controller {
                 ->leftJoin($fraTable, "$orgTable.id = $fraTable.organization_id")
                 ->where('(`country` is not null and `country` <>"undefined" and `country` <>"") 
     and locality <>"Москва" and `locality` <>"Московская область" and `franchisee_associate`.id is null')
-                ->limit(1500)->all();
+                ->limit(500)->all();
 
             foreach($organizations as $organization)
             {
-                if(empty($organization->administrative_area_level_1) && !empty($organization->lat) && !empty($organization->lng)){
-                    $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.Yii::$app->params['google-api']['key-id'].'&latlng=' . $organization->lat . ',' . $organization->lng . '&language=ru&sensor=false';
-                    $address_json = json_decode(file_get_contents($address_url));
-                    if(!empty($address_json->results[0]->address_components)){
-                        $address_data = $address_json->results[0]->address_components;
-                        $location = array();
-                        $location['locality'] = '';
-                        $location['admin_1'] = '';
-                        $location['country'] = '';
-                            foreach ($address_data as $component) {
-                              switch ($component->types) {
-                                case in_array('locality', $component->types):
-                                  $location['locality'] = $component->long_name;
-                                  break;
-                                case in_array('administrative_area_level_1', $component->types):
-                                  $location['admin_1'] = $component->long_name;
-                                  break;
-                                case in_array('country', $component->types):
-                                  $location['country'] = $component->long_name;
-                                  break;
-                              }
-
-                            }  
-                        $country = $location['country'];
-                        $locality = $location['locality'];
-                        $administrative_area_level_1 = $location['admin_1'];
-
-                        $model = Organization::findOne($organization->id);
-                        if(empty($model->locality) || $model->locality == 'undefined'){
-                        $model->locality = $locality;    
-                        }
-                        $model->administrative_area_level_1 = $administrative_area_level_1;
-                        $model->save();
-                    }
-                }
                 //Есть ли франшиза с этой страной?
                 if(\common\models\FranchiseeGeo::find()->where(['country'=>$organization->country])->exists()){
                     //если есть
                     //есть ли франшиза с этим городом?
-                        $flag = 0;
                         if(\Yii::$app->db->createCommand("select count(*) from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where LENGTH(locality)>2 and country = '" . $organization->country . "' and 
@@ -287,12 +251,12 @@ class CronController extends Controller {
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where LENGTH(locality)>2 and country = '" . $organization->country . "' and 
                           locality = '" . $organization->locality . "' order by type_id desc")->queryAll();
-                         ;
+                    
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
-                        $flag = 1;
+                        continue;
                     }
                     //А есть ли франшиза с этой областью? 
-                    if($flag == 0 && \Yii::$app->db->createCommand("select count(*) from franchisee f
+                    if(\Yii::$app->db->createCommand("select count(*) from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where LENGTH(administrative_area_level_1)>2 and country = '" . $organization->country . "' and 
       administrative_area_level_1 = '" . $organization->administrative_area_level_1 . "' order by type_id desc")->queryScalar()>0){
@@ -307,9 +271,9 @@ class CronController extends Controller {
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                         
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
-                        $flag = 1;
+                        continue;
                     }//А есть ли франшиза с этой страной? 
-                    if($flag == 0 && \Yii::$app->db->createCommand("select count(*) from franchisee f
+                    if(\Yii::$app->db->createCommand("select count(*) from franchisee f
                     join `franchisee_geo` fg on (f.`id` = fg.`franchisee_id`)
                     where country = '" . $organization->country . "' and 
     (locality ='' or locality is null) and 
@@ -326,14 +290,20 @@ class CronController extends Controller {
                     //сохранение по приоритам: 1 - спонсор, 2 - предприниматель, 3 startup
                     
                         self::setTypeFranchiseeAndSaveAssoc($pullFranchisees,$organization);
-                        
+                        continue;
                     }
-                }else{
+                    
+                }
+                $franchiseeAssociate = new \common\models\FranchiseeAssociate();
+                $franchiseeAssociate->franchisee_id = 1;
+                $franchiseeAssociate->organization_id = $organization->id;
+                $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
+                $franchiseeAssociate->save();
                 // нет подходящего франча / в не отсортированные
                 $organization_model = Organization::findOne($organization->id);
                 $organization_model->franchisee_sorted = 0;
-                $organization_model->save();
-                }
+                $organization_model->save();    
+                
             }
         }
     }

@@ -109,7 +109,106 @@ class StoreHelper extends AuthHelper {
     $ntree->prependTo($rtree);
 */
         
-  
+  $cmdguid = $myXML['cmdguid']; 
+    $posid = $myXML['posid']; 
+    
+    if (!empty($arr) && !empty($cmdguid) && !empty($posid))  {
+        
+     // Заполнение tasks
+             $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
+        
+        if (!$tmodel) {
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
+        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+        file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+        exit;
+        }
+        
+        $tmodel->intstatus_id = 3;
+        $tmodel->isactive = 0;
+        $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        
+        $acc= $tmodel->acc;
+
+        
+            if (!$tmodel->save()) {
+                $er2 = $tmodel->getErrors();
+            } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
+            
+            
+     // Заполнение складов с деревом
+         /*   
+        $icount =0;     
+       
+        foreach ($arr as $key => $a)   {
+                       
+            $amodel = new RkStoretree();
+            
+            $amodel->acc = $acc;
+            $amodel->rid = $a['rid'];
+            $amodel->denom = $a['name'];
+            $amodel->prnt = $a['parent'];
+            $amodel->type = $a['type'];
+            $amodel->fid = $key;
+            $amodel->version = 1;
+            
+            
+            
+        //    $amodel->agent_type = $a['type'];
+            $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
+            
+            if (!$amodel->save()) {
+                $er = $amodel->getErrors();
+            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
+            
+            
+                
+            $icount++;
+         
+        }
+            
+       */
+            
+     // Заполнение складов
+     /* Заполнение складов рабочая версия без дерева       
+      * 
+        $icount =0;     
+       
+        foreach ($array as $a)   {
+            
+                    $checks = RkStore::find()->andWhere('acc = :acc',[':acc' => $acc])
+                                        ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
+                                        ->one();
+                if (!$checks) {
+            
+            $amodel = new RkStore();
+            
+            $amodel->acc = $acc;
+            $amodel->rid = $a['rid'];
+            $amodel->denom = $a['name'];
+        //    $amodel->agent_type = $a['type'];
+            $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
+            
+            if (!$amodel->save()) {
+                $er = $amodel->getErrors();
+            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
+            
+                }
+                
+            $icount++;
+         
+        }
+       */
+    }
     
     foreach ($myXML->STOREGROUP as $storegroup) {
             $gcount++;
@@ -127,6 +226,8 @@ class StoreHelper extends AuthHelper {
             
             if ($arr[$gcount]['parent'] === '') { // Корень дерева
                 $rtree = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                $rtree->disabled =1;
+                $rtree->acc = $acc;
                 $rtree->makeRoot();
             } else {
                     ${'rid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
@@ -134,6 +235,7 @@ class StoreHelper extends AuthHelper {
                     ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
                     ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
                     ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
+                    ${'rid'.$arr[$gcount]['rid']}->acc = $acc;
                     
                   
                    
@@ -158,6 +260,7 @@ class StoreHelper extends AuthHelper {
                     ${'srid'.$arr[$gcount]['rid']}->prnt = $spar;
                     ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
                     ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
+                    ${'srid'.$arr[$gcount]['rid']}->acc = $acc;
                     
                     if ($spar === '0' || $spar === '') {
                         ${'srid'.$arr[$gcount]['rid']}->appendTo($rtree);
@@ -168,8 +271,7 @@ class StoreHelper extends AuthHelper {
                 }
     }
   
-    exit();
-    
+        
     // $arr2=$arr;
     
     /*
@@ -224,106 +326,7 @@ class StoreHelper extends AuthHelper {
     }
     */
     
-    $cmdguid = $myXML['cmdguid']; 
-    $posid = $myXML['posid']; 
     
-    if (!empty($arr) && !empty($cmdguid) && !empty($posid))  {
-        
-     // Заполнение tasks
-             $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
-        
-        if (!$tmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
-        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
-        exit;
-        }
-        
-        $tmodel->intstatus_id = 3;
-        $tmodel->isactive = 0;
-        $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-        
-        $acc= $tmodel->acc;
-
-        
-            if (!$tmodel->save()) {
-                $er2 = $tmodel->getErrors();
-            } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
-            
-            
-     // Заполнение складов с деревом
-            
-        $icount =0;     
-       
-        foreach ($arr as $key => $a)   {
-                       
-            $amodel = new RkStoretree();
-            
-            $amodel->acc = $acc;
-            $amodel->rid = $a['rid'];
-            $amodel->denom = $a['name'];
-            $amodel->prnt = $a['parent'];
-            $amodel->type = $a['type'];
-            $amodel->fid = $key;
-            $amodel->version = 1;
-            
-            
-            
-        //    $amodel->agent_type = $a['type'];
-            $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
-            
-            if (!$amodel->save()) {
-                $er = $amodel->getErrors();
-            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
-            
-            
-                
-            $icount++;
-         
-        }
-            
-       
-            
-     // Заполнение складов
-     /* Заполнение складов рабочая версия без дерева       
-      * 
-        $icount =0;     
-       
-        foreach ($array as $a)   {
-            
-                    $checks = RkStore::find()->andWhere('acc = :acc',[':acc' => $acc])
-                                        ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
-                                        ->one();
-                if (!$checks) {
-            
-            $amodel = new RkStore();
-            
-            $amodel->acc = $acc;
-            $amodel->rid = $a['rid'];
-            $amodel->denom = $a['name'];
-        //    $amodel->agent_type = $a['type'];
-            $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
-            
-            if (!$amodel->save()) {
-                $er = $amodel->getErrors();
-            } else $er = "Данные складов успешно сохранены.(ID:".$amodel->id." )";
-            
-                }
-                
-            $icount++;
-         
-        }
-       */
-    }
     
      // Обновление словаря RkDic
     

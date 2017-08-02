@@ -898,7 +898,10 @@ class SiteController extends Controller {
                                 'query' => $search,
                             ]   
                         ],
+                        
                     ],
+                        
+                    
                     'filter' => [
                         'bool' => [
                             'must_not' => [
@@ -909,6 +912,11 @@ class SiteController extends Controller {
                         ],
                     ]
                 ],
+//                'highlight' => [
+//                        'fields' => [
+//                          'supplier_name' => [] 
+//                        ]
+//                    ],
             ];
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();

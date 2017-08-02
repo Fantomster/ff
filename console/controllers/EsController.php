@@ -161,7 +161,7 @@ class EsController extends Controller
                             "supplier_id" : {"type" : "long"},
                             "supplier_name" : { 
                                 "type" : "string", 
-                                "analyzer" : "ru"
+                                "analyzer" : "ru",
                             },
                             "supplier_image" : {"type" : "string"},
                             "supplier_rating" : {"type" : "long"},

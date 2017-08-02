@@ -316,6 +316,10 @@ class StoreHelper extends AuthHelper {
     
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 2')->one();
     
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.print_r($rmodel,true).PHP_EOL,FILE_APPEND); 
+            
+        exit;
+        
         if (!$rmodel) {
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 

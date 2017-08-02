@@ -133,10 +133,12 @@ class StoreHelper extends AuthHelper {
                     ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
                     ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
                     ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
+                    
+                    $spar = $arr[$gcount]['parent'];
                    
                     if ($arr[$gcount]['parent'] === '0') { // Цепляем к корню
                         ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
-                    } else { // Дети некорня
+                        } else { // Дети некорня
                         ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
                     }
             }
@@ -150,11 +152,11 @@ class StoreHelper extends AuthHelper {
                     $arr[$gcount]['type'] = 2;
                     $arr[$gcount]['parent'] = $iparent;
                     
-                    ${'rid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
-                    ${'rid'.$arr[$gcount]['rid']}->type = 2;
-                    ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
-                    ${'rid'.$arr[$gcount]['rid']}->disabled = 0;
-                    ${'rid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$iparent});
+                    ${'srid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                    ${'srid'.$arr[$gcount]['rid']}->type = 2;
+                    ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                    ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
+                    ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$iparent});
                     
                 }
     }

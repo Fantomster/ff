@@ -51,8 +51,8 @@ use api\common\models\RkStoretree;
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
-                                    <?=
-                                    GridView::widget([
+                                    <?php /*
+                                    echo GridView::widget([
                                         'dataProvider' => $dataProvider,
                                         'pjax' => false, // pjax is set to always true for this demo
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
@@ -62,9 +62,9 @@ use api\common\models\RkStoretree;
                                             'denom',
                                             'updated_at',
                                                                                     ],
-                                        /* 'rowOptions' => function ($data, $key, $index, $grid) {
-                                          return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
-                                          }, */
+                                        // 'rowOptions' => function ($data, $key, $index, $grid) {
+                                        //  return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];
+                                        //  },
                                         'options' => ['class' => 'table-responsive'],
                                         'tableOptions' => ['class' => 'table table-bordered table-striped dataTable', 'role' => 'grid'],
                                         'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => ''],
@@ -77,12 +77,9 @@ use api\common\models\RkStoretree;
                                         'export' => [
                                             'fontAwesome' => true,
                                         ],
-                                    ]);
+                                    ]); */
                                     ?> 
-                                    <?= Html::a('Вернуться',
-            ['/clientintegr/rkws/default'],
-            ['class' => 'btn btn-success btn-export']);
-        ?>
+
                                 </div>
                             </div>    
                 </div>
@@ -92,7 +89,25 @@ use api\common\models\RkStoretree;
                 <div class="box-header with-border">
                             <div class="panel-body">
                                     <div class="box-body table-responsive no-padding">
-                                     <?=
+                                    <?=    
+                                    TreeViewInput::widget([
+                                    // single query fetch to render the tree
+                                    // use the Product model you have in the previous step
+                                    'query' => RkStoretree::find()->addOrderBy('root, lft'), 
+                                    'headingOptions'=>['label'=>'Склады'],
+                                    'name' => 'kv-product', // input name
+                                    'value' => '1,2,3',     // values selected (comma separated for multiple select)
+                                    'asDropdown' => true,   // will render the tree input widget as a dropdown.
+                                    'multiple' => false,     // set to false if you do not need multiple selection
+                                    'fontAwesome' => true,  // render font awesome icons
+                                    'rootOptions' => [
+                                    'label'=>'<i class="fa fa-tree"></i>',  // custom root label
+                                    'class'=>'text-success'
+                                                    ], 
+                                    //'options'=>['disabled' => true],
+                                    ]); 
+                                    ?>
+                                    <?=
                                          TreeView::widget([
                                         // single query fetch to render the tree
                                         // use the Product model you have in the previous step
@@ -108,6 +123,10 @@ use api\common\models\RkStoretree;
                                         ]);
                                      
                                      ?>
+                <?= Html::a('Вернуться',
+            ['/clientintegr/rkws/default'],
+            ['class' => 'btn btn-success btn-export']);
+        ?>
                                     </div>
                              </div>    
                  </div>

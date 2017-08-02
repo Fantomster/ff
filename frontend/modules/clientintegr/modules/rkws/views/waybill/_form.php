@@ -33,12 +33,12 @@ use kartik\tree\TreeViewInput;
              echo $form->field($model, 'store_rid')->widget(TreeViewInput::classname(),
                                                     [
                                                         'name' => 'store_rid',
-                                                      //  'value' => 'true', // preselected values
+                                                        'value' => 'true', // preselected values
                                                         'query' => api\common\models\RkStoretree::find()->addOrderBy('root, lft'),
-                                                        'headingOptions' => ['label' => 'Склады'],
-                                                        'rootOptions' => ['label'=>''],
+                                                      //  'headingOptions' => ['label' => 'Склады'],
+                                                        'rootOptions' => ['label'=>'Корень'],
                                                         'fontAwesome' => true,
-                                                        'asDropdown' => false,
+                                                        'asDropdown' => true,
                                                         'multiple' => false,
                                                         'options' => ['disabled' => false]
                                                     ]);

@@ -128,6 +128,8 @@ class StoreHelper extends AuthHelper {
                 $er2 = $tmodel->getErrors();
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
             
+        $icount =0;  
+            
             
      // Заполнение складов с деревом
          /*   
@@ -228,6 +230,8 @@ class StoreHelper extends AuthHelper {
                         } else { // Дети некорня
                         ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
                     }
+                    
+                    $icount++;
             }
                     
                 foreach ($storegroup->STORE as $store) {
@@ -251,6 +255,8 @@ class StoreHelper extends AuthHelper {
                     } else {
                         ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
                     }
+                    
+                    $icount++;
                     
                 }
     }
@@ -316,9 +322,7 @@ class StoreHelper extends AuthHelper {
     
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 2')->one();
     
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.print_r($rmodel,true).PHP_EOL,FILE_APPEND); 
-            
-        exit;
+
         
         if (!$rmodel) {
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
@@ -329,6 +333,10 @@ class StoreHelper extends AuthHelper {
             $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
             $rmodel->dicstatus_id= 6;
             $rmodel->obj_count = $icount;
+            
+        //    file_put_contents('runtime/logs/callback.log',PHP_EOL.print_r($rmodel,true).PHP_EOL,FILE_APPEND); 
+            
+        //    exit;
     
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
@@ -350,6 +358,7 @@ class StoreHelper extends AuthHelper {
         
     }
    */
+    /*    
     if (empty($cmdguid)) $cmdguid = 'пусто';     
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
@@ -368,7 +377,7 @@ class StoreHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
-              
+      */        
     }
 
 }

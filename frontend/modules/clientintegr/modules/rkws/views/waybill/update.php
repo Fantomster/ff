@@ -49,7 +49,7 @@ use api\common\models\RkWaybill;
     	<div class="box box-info">            
             <div class="box-header with-border">
                             <div class="panel-body">
-                                <div class="box-body table-responsive no-padding" style="overflow-x:visible;">
+                                <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y: scroll;">
                                     
     
     <?php echo $this->render('_form', [

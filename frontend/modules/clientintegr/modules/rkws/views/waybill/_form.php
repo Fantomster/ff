@@ -30,6 +30,7 @@ use yii\bootstrap\Dropdown;
     
   <?php  // echo $form->field($model, 'store_rid')->dropDownList(ArrayHelper::map(api\common\models\RkStore::find()->all(), 'rid', 'denom')) ?>  
     
+   <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y: scroll;"> 
     <?php 
              echo $form->field($model, 'store_rid')->widget(TreeViewInput::classname(),
                                                     [
@@ -45,7 +46,7 @@ use yii\bootstrap\Dropdown;
                                                     ]);
     
     ?>
-
+   </div>
   <?php 
   
           if (!$model->doc_date) {

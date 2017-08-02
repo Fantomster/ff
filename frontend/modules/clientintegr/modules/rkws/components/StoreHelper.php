@@ -157,7 +157,13 @@ class StoreHelper extends AuthHelper {
                     ${'srid'.$arr[$gcount]['rid']}->type = 2;
                     ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
                     ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
-                    ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
+                    
+                    if ($spar === '0') {
+                        ${'srid'.$arr[$gcount]['rid']}->appendTo($rktree);
+                    } else {
+                        ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
+                    }
+                    
                     
                 }
     }

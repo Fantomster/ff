@@ -91,19 +91,29 @@ class StoreHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     $acc = 3243;
+  
+    /*
+    $rtree = new RkStoretree(['name'=>'Склады']);
+    $rtree->makeRoot();
     
-    $streee = new RkStoretree(['name'=>'Склады']);
-   // $streee->
-    
-  //  $streee->initDefaults();
-    // $stree = new RkStoretree(['name' => 'Склады']);
-    $streee->makeRoot();
-  //  $streee->save(false);
-    
-    exit();
+    $ntree = new RkStoretree();
+    $ntree->name = 'Тестовый 15';
+    $ntree->type = 3;
+        
+    $ntree->prependTo($rtree);
+
+    $ntree = new RkStoretree();
+    $ntree->name = 'Тестовый 19';
+    $ntree->type = 1;
+        
+    $ntree->prependTo($rtree);
+*/
+        
+  
     
     foreach ($myXML->STOREGROUP as $storegroup) {
             $gcount++;
+                                               
             foreach($storegroup->attributes() as $c => $d) {
                 if ($c == 'rid')  $arr[$gcount]['rid'] = strval($d[0]);  
                 if ($c == 'name') $arr[$gcount]['name'] = strval($d[0]); 
@@ -112,8 +122,27 @@ class StoreHelper extends AuthHelper {
             
             $arr[$gcount]['type'] = 1;
             $iparent = $gcount;
-            
             $ridarray[$arr[$gcount]['rid']] = $gcount;
+            $spar = $arr[$gcount]['rid'];
+            
+            if ($arr[$gcount]['parent'] === '') { // Корень дерева
+                $rtree = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                $rtree->makeRoot();
+            } else {
+                    ${'rid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                    ${'rid'.$arr[$gcount]['rid']}->type = 1;
+                    ${'rid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                    ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
+                    ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
+                    
+                  
+                   
+                    if ($arr[$gcount]['parent'] === '0') { // Цепляем к корню
+                        ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
+                        } else { // Дети некорня
+                        ${'rid'.$arr[$gcount]['rid']}->prependTo(${'rid'.$arr[$gcount]['parent']});
+                    }
+            }
                     
                 foreach ($storegroup->STORE as $store) {
                     $gcount++;
@@ -124,10 +153,26 @@ class StoreHelper extends AuthHelper {
                     $arr[$gcount]['type'] = 2;
                     $arr[$gcount]['parent'] = $iparent;
                     
+                    ${'srid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                    ${'srid'.$arr[$gcount]['rid']}->type = 2;
+                    ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                    ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
+                    
+                    if ($spar === '0') {
+                        ${'srid'.$arr[$gcount]['rid']}->appendTo($rktree);
+                    } else {
+                        ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
+                    }
+                    
+                    
                 }
     }
+  
+    exit();
     
     // $arr2=$arr;
+    
+    /*
     
     foreach ($arr as $key => $value) {
         
@@ -146,6 +191,7 @@ class StoreHelper extends AuthHelper {
         }
         
     }
+    */
     
     //file_put_contents('runtime/logs/callback.log','++++++++++A2++++++++++++'.PHP_EOL, FILE_APPEND); 
     //file_put_contents('runtime/logs/callback.log',print_r($arr2,true).PHP_EOL , FILE_APPEND); 

@@ -155,6 +155,7 @@ class StoreHelper extends AuthHelper {
                     
                     ${'srid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
                     ${'srid'.$arr[$gcount]['rid']}->type = 2;
+                    ${'srid'.$arr[$gcount]['rid']}->prnt = $spar;
                     ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
                     ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
                     

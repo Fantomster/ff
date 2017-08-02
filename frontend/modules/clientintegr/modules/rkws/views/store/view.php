@@ -10,6 +10,8 @@ use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
+use kartik\tree\TreeView;
+use api\common\models\RkStoretree;
 
 
 ?>
@@ -84,8 +86,37 @@ use api\common\models\RkAccess;
                                 </div>
                             </div>    
                 </div>
-            </div>        
+            </div>  
+        
+            <div class="box box-info">            
+                <div class="box-header with-border">
+                            <div class="panel-body">
+                                    <div class="box-body table-responsive no-padding">
+                                     <?=
+                                         TreeView::widget([
+                                        // single query fetch to render the tree
+                                        // use the Product model you have in the previous step
+                                        'query' => RkStoretree::find()->addOrderBy('root, lft'), 
+                                        'headingOptions' => ['label' => 'Categories'],
+                                        'fontAwesome' => false,     // optional
+                                        'isAdmin' => false,         // optional (toggle to enable admin mode)
+                                        'displayValue' => 1,        // initial display value
+                                        'softDelete' => true,       // defaults to true
+                                        'cacheSettings' => [        
+                                                'enableCache' => true   // defaults to true
+                                        ]
+                                        ]);
+                                     
+                                     ?>
+                                    </div>
+                             </div>    
+                 </div>
+             </div>    
+                                
     </div>            
 </section>
+
+
+
 
 

@@ -92,27 +92,11 @@ class StoreHelper extends AuthHelper {
     $gcount = 0;        
     $acc = 3243;
   
-    /*
-    $rtree = new RkStoretree(['name'=>'Склады']);
-    $rtree->makeRoot();
-    
-    $ntree = new RkStoretree();
-    $ntree->name = 'Тестовый 15';
-    $ntree->type = 3;
         
-    $ntree->prependTo($rtree);
-
-    $ntree = new RkStoretree();
-    $ntree->name = 'Тестовый 19';
-    $ntree->type = 1;
-        
-    $ntree->prependTo($rtree);
-*/
-        
-  $cmdguid = $myXML['cmdguid']; 
+    $cmdguid = $myXML['cmdguid']; 
     $posid = $myXML['posid']; 
     
-    if (!empty($arr) && !empty($cmdguid) && !empty($posid))  {
+    if (!empty($cmdguid) && !empty($posid))  {
         
      // Заполнение tasks
              $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();

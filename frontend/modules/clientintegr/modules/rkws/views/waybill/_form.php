@@ -12,6 +12,8 @@ use kartik\tree\TreeViewInput;
 ?>
 
 <div class="dict-agent-form">
+    
+    <?php  if(empty($model->store_rid)) $model->store_rid = 1; ?>
 
     <?php $form = ActiveForm::begin(); ?>
 
@@ -31,7 +33,7 @@ use kartik\tree\TreeViewInput;
              echo $form->field($model, 'store_rid')->widget(TreeViewInput::classname(),
                                                     [
                                                         'name' => 'store_rid',
-                                                        'value' => 'true', // preselected values
+                                                      //  'value' => 'true', // preselected values
                                                         'query' => api\common\models\RkStoretree::find()->addOrderBy('root, lft'),
                                                         'headingOptions' => ['label' => 'Склады'],
                                                         'rootOptions' => ['label'=>''],

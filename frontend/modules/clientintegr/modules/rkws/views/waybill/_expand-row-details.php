@@ -45,7 +45,7 @@
                                                 [
                                                     'attribute' => 'store_rid',
                                                     'value'=>function ($model) {
-                                                              return $model->store->denom;
+                                                              return $model->store->name;
 
                                                                  },
                                                                     

@@ -153,17 +153,16 @@ class StoreHelper extends AuthHelper {
                     $arr[$gcount]['type'] = 2;
                     $arr[$gcount]['parent'] = $iparent;
                     
-               //     ${'srid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
-               //     ${'srid'.$arr[$gcount]['rid']}->type = 2;
-               //     ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
-               //     ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
+                    ${'srid'.$arr[$gcount]['rid']} = new RkStoretree(['name'=>$arr[$gcount]['name']]);
+                    ${'srid'.$arr[$gcount]['rid']}->type = 2;
+                    ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
+                    ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
                     
-               //     if ($spar === '0') {
-               //         ${'srid'.$arr[$gcount]['rid']}->appendTo($rktree);
-               //     } else {
-               //         ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
-               //     }
-                    
+                    if ($spar === '0' || $spar === '') {
+                        ${'srid'.$arr[$gcount]['rid']}->appendTo($rktree);
+                    } else {
+                        ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
+                    }
                     
                 }
     }

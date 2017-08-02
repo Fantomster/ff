@@ -59,7 +59,7 @@ use api\common\models\RkStoretree;
                                     'query' => RkStoretree::find()->addOrderBy('root, lft'), 
                                     'headingOptions'=>['label'=>'Склады'],
                                     'name' => 'kv-product', // input name
-                                    'value' => '1,2,3',     // values selected (comma separated for multiple select)
+                                    // 'value' => '1,2,3',     // values selected (comma separated for multiple select)
                                     'asDropdown' => true,   // will render the tree input widget as a dropdown.
                                     'multiple' => false,     // set to false if you do not need multiple selection
                                     'fontAwesome' => true,  // render font awesome icons

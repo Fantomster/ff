@@ -134,7 +134,7 @@ class StoreHelper extends AuthHelper {
                     ${'rid'.$arr[$gcount]['rid']}->prnt = $arr[$gcount]['parent'];
                     ${'rid'.$arr[$gcount]['rid']}->disabled = 1;
                     
-                    $spar = $arr[$gcount]['parent'];
+                    $spar = $arr[$gcount]['rid'];
                    
                     if ($arr[$gcount]['parent'] === '0') { // Цепляем к корню
                         ${'rid'.$arr[$gcount]['rid']}->prependTo($rtree);
@@ -156,7 +156,7 @@ class StoreHelper extends AuthHelper {
                     ${'srid'.$arr[$gcount]['rid']}->type = 2;
                     ${'srid'.$arr[$gcount]['rid']}->rid = $arr[$gcount]['rid'];
                     ${'srid'.$arr[$gcount]['rid']}->disabled = 0;
-                    ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$iparent});
+                    ${'srid'.$arr[$gcount]['rid']}->appendTo(${'rid'.$spar});
                     
                 }
     }

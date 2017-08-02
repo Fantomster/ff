@@ -118,10 +118,36 @@ class CronController extends Controller {
         }
         
     }
-    
+    public function actionUpdateCategory() {
+        $model = \common\models\MpCategory::find()->where('parent is not null')->all();
+        foreach ($model as $name) {
+            $category = new \common\models\ES\Category();
+            $category_id = $name->parent;
+            $category_sub_id = $name->id;
+            $category_name = $name->name;
+            if(\common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])){
+            $category = \common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])->one();   
+            $category->attributes = [
+                "category_id" => $category_id,
+                "category_sub_id" => $category_sub_id,
+                "category_name" => $category_name
+            ];
+            $category->save();    
+            }else{
+            $category->attributes = [
+                "category_id" => $category_id,
+                "category_sub_id" => $category_sub_id,
+                "category_name" => $category_name
+            ];
+            $category->save();    
+            }
+        }
+    }
     public function actionUpdateSuppliers() {
         $suppliers = Organization::find()
-                ->where(['type_id'=>  Organization::TYPE_SUPPLIER])
+                ->where([
+                    'type_id' => Organization::TYPE_SUPPLIER,
+                    'white_list' => Organization::WHITE_LIST_ON])
                 ->andWhere(['in','es_status',[
                     Organization::ES_UPDATED,
                     Organization::ES_DELETED
@@ -208,7 +234,7 @@ class CronController extends Controller {
                 ->leftJoin($fraTable, "$orgTable.id = $fraTable.organization_id")
                 ->where('(`country` is not null and `country` <>"undefined" and `country` <>"") 
     and locality <>"Москва" and `locality` <>"Московская область" and `franchisee_associate`.id is null')
-                ->limit(500)->all();
+                ->limit(1500)->all();
 
             foreach($organizations as $organization)
             {

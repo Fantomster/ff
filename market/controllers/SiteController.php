@@ -196,9 +196,7 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
-                            'analyzer' => "ru",
-                        //'type' =>'phrase_prefix',
-                        //'max_expansions' =>6
+                            //'analyzer' => "ru",
                         ]
                     ]
                 ],
@@ -248,9 +246,7 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
-                            'analyzer' => "ru",
-                        //'type' =>'phrase_prefix',
-                        //'max_expansions' =>6
+                            //'analyzer' => "ru",
                         ]
                     ]
                 ],
@@ -301,33 +297,25 @@ class SiteController extends Controller {
         $params = [
             'filtered' => [
                 'query' => [
-                    /*'match' => [
+                     'match' => [
                         'supplier_name' => [
-                           'query' => $search,
-                           'fuzziness' => 10,
-                        ]
-                    ]*/
-                    'fuzzy' => [
-                        'supplier_name' => [
-                            'value' => '$search',
-                            'fuzziness' => 10, // этот параметр для вашей задачи нужно выставлять повыше
-                            'prefix_length' => 2, // будет равняться кол-ву уже введенных символов
-                            "max_expansions"=> 100 // также выставляется повыше
+                            'query' => $search,
+                            //'analyzer' => "ru",
                         ]
                     ]
                 ],
-                'highlight'=>[
-                    'fields'=>[
-                      'supplier_name'=>[
-                        'post_tags'=>[
-                          "</span>"
-                        ],
-                        'pre_tags'=>[
-                          '<span class=\"vulners-highlight\">'
-                        ]
-                      ]
-                    ]
-                ],
+//                'highlight'=>[
+//                    'fields'=>[
+//                      'supplier_name'=>[
+//                        'post_tags'=>[
+//                          "</span>"
+//                        ],
+//                        'pre_tags'=>[
+//                          '<span class=\"vulners-highlight\">'
+//                        ]
+//                      ]
+//                    ]
+//                ],
                 'filter' => [
                     'bool' => [
                         'must_not' => [
@@ -374,9 +362,6 @@ class SiteController extends Controller {
                     'match' => [
                         'supplier_name' => [
                             'query' => $search,
-                            //'analyzer' =>"ru",
-                        //'type' =>'phrase_prefix',
-                        //'max_expansions' =>6
                         ]
                     ]
                 ],
@@ -551,7 +536,6 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
                 ->count();
@@ -599,7 +583,6 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
                 ->andWhere($addwhere)
-                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
                 ->count();
@@ -791,7 +774,6 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                     ->andWhere($addwhere)
-                    ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(6)
                     ->count();
@@ -894,8 +876,6 @@ class SiteController extends Controller {
                             'product_name' => [
                                 'query' => $search,
                                 'analyzer' => "ru",
-                                
-                            //'max_expansions' =>6
                             ]
                         ]
                     ],
@@ -915,27 +895,13 @@ class SiteController extends Controller {
                     'query' => [
                         'match' => [
                             'supplier_name' => [
-                               'query' => $search,
-                               'fuzziness' => 'auto',
-                               'operator' =>  'and'
-                            ]
-                        ]
-                        /*'fuzzy' => [
-                            'supplier_name' => [
-                                'value' => $search,
-                                'fuzziness' => 20, // этот параметр для вашей задачи нужно выставлять повыше
-                                'prefix_length' => 2, // будет равняться кол-ву уже введенных символов
-                                "max_expansions"=> 100 // также выставляется повыше
-                            ]
-                        ]*/
+                                'query' => $search,
+                            ]   
+                        ],
+                        
                     ],
-                    'highlight' => [
-                        'pre_tags' => ['<em>'],
-                        'post_tags' => ['</em>'],
-                        'fields' => [
-                            'supplier_name'
-                        ]
-                    ],
+                        
+                    
                     'filter' => [
                         'bool' => [
                             'must_not' => [
@@ -944,13 +910,13 @@ class SiteController extends Controller {
                                 ]
                             ]
                         ],
-                        /*'regexp' => [
-                            'supplier_name' => [
-                                'value' =>'.*'
-                            ]
-                        ]*/
                     ]
-                ]
+                ],
+//                'highlight' => [
+//                        'fields' => [
+//                          'supplier_name' => [] 
+//                        ]
+//                    ],
             ];
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();
@@ -958,20 +924,11 @@ class SiteController extends Controller {
                             ->limit(10000)->count();
             $search_suppliers_count = \common\models\ES\Supplier::find()->query($params_suppliers)
                             ->limit(10000)->count();
-
             $search_categorys = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->asArray()->all();
-            $search_products = \common\models\ES\Product::find()->query($params_products)->orderBy(['product_rating'=>SORT_DESC])
-                            /* ->highlight([
-                              "pre_tags"  => "<em>",
-                              "post_tags" => "</em>",
-                              'fields'    => [
-                              'product_name' => new \stdClass()
-                              ]
-                              ]) */
+            $search_products = \common\models\ES\Product::find()->query($params_products)
                             ->limit(4)->asArray()->all();
-            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->orderBy(['supplier_rating'=>SORT_DESC])
-                            ->limit(4)->asArray()->all();
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->limit(4)->asArray()->all();
         }
 
         return $this->renderAjax('main/_search_form', compact(

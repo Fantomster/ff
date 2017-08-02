@@ -15,7 +15,6 @@ use Aws\Sns\MessageValidator\Exception\SnsMessageValidatorException;
  */
 class SnsEndpointController extends \yii\rest\Controller {
 
-    //put your code here
     public function actionBounce() {
         //
         $message = Message::fromRawPostData();
@@ -32,6 +31,33 @@ class SnsEndpointController extends \yii\rest\Controller {
             // Confirm the subscription by sending a GET request to the SubscribeURL
             Yii::error($message->get('SubscribeURL'));
             file_get_contents($message->get('SubscribeURL'));
+        }
+        
+        if ($message->get('Type') === 'Notification' && $message->data['Message']['notificationType'] === 'Bounce') {
+            //process bounce
+        }
+    }
+
+    public function actionComplaint() {
+        //
+        $message = Message::fromRawPostData();
+        $validator = new MessageValidator();
+
+        try {
+            $validator->validate($message);
+        } catch (SnsException $ex) {
+            Yii::error($ex->getMessage());
+            throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+        }
+        // Check the type of the message and handle the subscription.
+        if ($message->get('Type') === 'SubscriptionConfirmation') {
+            // Confirm the subscription by sending a GET request to the SubscribeURL
+            Yii::error($message->get('SubscribeURL'));
+            file_get_contents($message->get('SubscribeURL'));
+        }
+        
+        if ($message->get('Type') === 'Notification' && $message->data['Message']['notificationType'] === 'Complaint') {
+            //process complaint
         }
     }
 

@@ -9,7 +9,6 @@ use Yii;
  *
  * @property integer $id
  * @property integer $user_id
- * @property integer $active
  * @property integer $orders
  * @property integer $requests
  * @property integer $changes

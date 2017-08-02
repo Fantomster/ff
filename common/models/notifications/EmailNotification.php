@@ -9,14 +9,11 @@ use Yii;
  *
  * @property integer $id
  * @property integer $user_id
- * @property integer $active
  * @property integer $orders
  * @property integer $requests
  * @property integer $changes
  * @property integer $invites
- * @property integer $last_fail
  *
- * @property EmailFails $lastFail
  * @property User $user
  */
 class EmailNotification extends \yii\db\ActiveRecord
@@ -56,14 +53,6 @@ class EmailNotification extends \yii\db\ActiveRecord
             'invites' => Yii::t('app', 'Invites'),
             'last_fail' => Yii::t('app', 'Last Fail'),
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getLastFail()
-    {
-        return $this->hasOne(EmailFails::className(), ['id' => 'last_fail']);
     }
 
     /**

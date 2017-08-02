@@ -52,6 +52,24 @@ use api\common\models\RkStoretree;
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
+                                    <?=    
+                                    TreeViewInput::widget([
+                                    // single query fetch to render the tree
+                                    // use the Product model you have in the previous step
+                                    'query' => RkStoretree::find()->addOrderBy('root, lft'), 
+                                    'headingOptions'=>['label'=>'Склады'],
+                                    'name' => 'kv-product', // input name
+                                    'value' => '1,2,3',     // values selected (comma separated for multiple select)
+                                    'asDropdown' => true,   // will render the tree input widget as a dropdown.
+                                    'multiple' => false,     // set to false if you do not need multiple selection
+                                    'fontAwesome' => true,  // render font awesome icons
+                                    'rootOptions' => [
+                                    'label'=>'<i class="fa fa-tree"></i>',  // custom root label
+                                    'class'=>'text-success'
+                                                    ], 
+                                    //'options'=>['disabled' => true],
+                                    ]); 
+                                    ?>
                                     <?php /*
                                     echo GridView::widget([
                                         'dataProvider' => $dataProvider,
@@ -90,24 +108,6 @@ use api\common\models\RkStoretree;
                 <div class="box-header with-border">
                             <div class="panel-body">
                                     <div class="box-body table-responsive no-padding">
-                                    <?=    
-                                    TreeViewInput::widget([
-                                    // single query fetch to render the tree
-                                    // use the Product model you have in the previous step
-                                    'query' => RkStoretree::find()->addOrderBy('root, lft'), 
-                                    'headingOptions'=>['label'=>'Склады'],
-                                    'name' => 'kv-product', // input name
-                                    'value' => '1,2,3',     // values selected (comma separated for multiple select)
-                                    'asDropdown' => true,   // will render the tree input widget as a dropdown.
-                                    'multiple' => false,     // set to false if you do not need multiple selection
-                                    'fontAwesome' => true,  // render font awesome icons
-                                    'rootOptions' => [
-                                    'label'=>'<i class="fa fa-tree"></i>',  // custom root label
-                                    'class'=>'text-success'
-                                                    ], 
-                                    //'options'=>['disabled' => true],
-                                    ]); 
-                                    ?>
                                     <?=
                                          TreeView::widget([
                                         // single query fetch to render the tree

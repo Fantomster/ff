@@ -1,9 +1,7 @@
 <?php
+
 $params = array_merge(
-    require(__DIR__ . '/../../common/config/params.php'),
-    require(__DIR__ . '/../../common/config/params-local.php'),
-    require(__DIR__ . '/params.php'),
-    require(__DIR__ . '/params-local.php')
+        require(__DIR__ . '/../../common/config/params.php'), require(__DIR__ . '/../../common/config/params-local.php'), require(__DIR__ . '/params.php'), require(__DIR__ . '/params-local.php')
 );
 
 return [
@@ -24,22 +22,24 @@ return [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
+                    'file' => [
+                        'class' => 'yii\log\FileTarget',
+                        'levels' => ['error', 'warning'],
+                    ],
                 ],
             ],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
-        'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'rules' => [
-            ],
-        ],
-        */
+    /*
+      'urlManager' => [
+      'enablePrettyUrl' => true,
+      'showScriptName' => false,
+      'rules' => [
+      ],
+      ],
+     */
     ],
     'params' => $params,
 //    'modules' => [
@@ -54,20 +54,19 @@ return [
 //            ],
 //        ],
 //    ],
-    /*
-    'on beforeAction' => function ($event) {
-        if (Yii::$app->user->isGuest) {
-            if ($event->action->id !== 'login') {
-                $event->isValid = false;
-                Yii::$app->response->redirect(['/user/default/login']);
-            }
-            return;
-        }
-        if (!Yii::$app->user->can('observe')) {
-            $event->isValid = false;
-            Yii::$app->response->statusCode = 403;
-        }
-    },
-    */
-
+        /*
+          'on beforeAction' => function ($event) {
+          if (Yii::$app->user->isGuest) {
+          if ($event->action->id !== 'login') {
+          $event->isValid = false;
+          Yii::$app->response->redirect(['/user/default/login']);
+          }
+          return;
+          }
+          if (!Yii::$app->user->can('observe')) {
+          $event->isValid = false;
+          Yii::$app->response->statusCode = 403;
+          }
+          },
+         */
 ];

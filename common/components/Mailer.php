@@ -8,6 +8,8 @@
 
 namespace common\components;
 
+use common\models\notifications\EmailBlacklist;
+
 /**
  * Description of Mailer
  *
@@ -15,7 +17,12 @@ namespace common\components;
  */
 class Mailer extends \yashop\ses\Mailer {
     public function beforeSend($message) {
-        parent::beforeSend($message);
+        $result = parent::beforeSend($message);
         //check blacklist
+        if (EmailBlacklist::find()->where(['email' => $message->getTo()])) {
+            \Yii::error('blacklisted! ' . $message->getTo());
+            return false;
+        }
+        return $result;
     }
 }

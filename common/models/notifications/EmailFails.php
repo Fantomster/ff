@@ -15,6 +15,10 @@ use Yii;
  */
 class EmailFails extends \yii\db\ActiveRecord
 {
+    
+    const TYPE_BOUNCE = 1;
+    const TYPE_COMPLAINT = 2;
+    
     /**
      * @inheritdoc
      */

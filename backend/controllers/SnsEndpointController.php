@@ -37,7 +37,7 @@ class SnsEndpointController extends \yii\rest\Controller {
             file_get_contents($message->get('SubscribeURL'));
         }
         
-        if ($message->get('Type') === 'Notification' && $message->data['Message']['notificationType'] === 'Bounce') {
+        if ($message->get('Type') === 'Notification' && $message->get('notificationType') === 'Bounce') {
             Yii::error('bounce!');
         }
     }

@@ -38,13 +38,14 @@ class WaybillHelper extends AuthHelper {
     <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store->rid.'" active="0"'
             . ' duedate="1" note="'.$wmodel->note.'" textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'">'.PHP_EOL;           
     
-   $recs = \api\common\models\RkWaybilldata::find()->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();
+   $recs = \api\common\models\RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.rid as prid')->leftJoin('rk_product','rk_product.id = product_rid')
+           ->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();
    
    // var_dump($recs);
    
     foreach($recs as $rec) {
        
-       $xml .='<ITEM rid="'.$rec->product->rid.'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*1000).'" vatrate="1800" />'.PHP_EOL;
+       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*1000).'" vatrate="1800" />'.PHP_EOL;
     }
    
    // var_dump($recs);

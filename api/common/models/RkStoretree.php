@@ -46,7 +46,7 @@ class RkStoretree extends \kartik\tree\models\Tree
         public function rules()
     {
         $rules = parent::rules();
-        $rules[] = [['type','denom','fid','acc','version'], 'safe'];
+        $rules[] = [['type', 'fid','acc','version'], 'safe'];
         return $rules;
     }
     

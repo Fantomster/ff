@@ -35,7 +35,7 @@ class WaybillHelper extends AuthHelper {
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
-    <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store_rid.'" active="0"'
+    <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store->rid.'" active="0"'
             . ' duedate="1" note="'.$wmodel->note.'" textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'">'.PHP_EOL;           
     
    $recs = \api\common\models\RkWaybilldata::find()->andWhere('waybill_id = :wid',[':wid' => $id])->asArray(true)->all();

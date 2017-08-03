@@ -11,38 +11,28 @@ class EsController extends Controller
     public function actionCreateIndexes() {
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
-
-    $url = 'curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/category\' -d \'{
+    
+    $host = Yii::$app->elasticsearch->nodes[0]['http_address'];
+    $url = 'curl -XPUT \'http://' . $host . '/category\' -d \'{
     "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
 		"analysis": {
 			"analyzer": {
 				"ru": {
 					"type": "custom",
-					"tokenizer": "whitespace",
-					"filter": ["lowercase", "russian_morphology", "ru_stopwords"]
+					"tokenizer": "lowercase",
+					"filter": ["lowercase", "russian_morphology", "ru_stopwords"],
 				}
 			},
 			"filter": {
 				"ru_stopwords": {
 					"type": "stop",
-					"stopwords": "
-                                        а,более,бы,был,была,были,было,быть,в,вам, 
-                                        во,вот,всего,да,даже,до,если,еще,же,за,и,из,
-                                        или,им,их,к,как,ко, кто,ли,либо,мне,может,
-                                        на,надо,не,ни,них,но,ну,о,об,от, по,под,при,
-                                        с,со,так,также,те,тем,то,того,тоже,той,том,
-                                        у,уже,хотя, чье,чья,эта,эти,a,an,and,are,
-                                        as,at,be,but,by,for,if,in,into,is,it,no,not,
-                                        of,on,or,such,that,the,their,then,there,these,
-                                        they,this,to,was,will,with"
+					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
 				}
 			}
 		}
 	}
     }\' && echo
-    curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/category/category/_mapping\' -d \'{
+    curl -XPUT \'http://' . $host . '/category/category/_mapping\' -d \'{
             "category": {
                 "properties" : {
                         "category_id" : {"type" : "long"},
@@ -58,34 +48,25 @@ class EsController extends Controller
     '; 
     $res = shell_exec($url);  
     
-    $url = 'curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product\' -d \'{
+    $url = 'curl -XPUT \'http://' . $host . '/product\' -d \'{
     "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
 		"analysis": {
 			"analyzer": {
 				"ru": {
 					"type": "custom",
-					"tokenizer": "whitespace",
+					"tokenizer": "lowercase",
 					"filter": ["lowercase", "russian_morphology", "ru_stopwords"]
 				}
 			},
 			"filter": {
 				"ru_stopwords": {
-					"type": "stop",
-					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам, 
-                                        во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,
-                                        к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,
-                                        о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,
-                                        той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,
-                                        be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,
-                                        the,their,then,there,these,they,this,to,was,will,with"
+					"type": "stop","stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко,кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от,по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя,чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
 				}
 			}
 		}
 	}
     }\' && echo
-    curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/product/_mapping\' -d \'{
+    curl -XPUT \'http://' . $host . '/product/product/_mapping\' -d \'{
             "product": {
                 "properties" : {
                         "product_id"  :{"type" : "long"},
@@ -113,28 +94,26 @@ class EsController extends Controller
     $res = shell_exec($url); 
     
     
-    $url = 'curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/supplier\' -d \'{
+    $url = 'curl -XPUT \'http://' . $host . '/supplier\' -d \'{
     "settings": {
-                "number_of_shards": 1,
-                "number_of_replicas": 0,
 		"analysis": {
 			"analyzer": {
 				"ru": {
 					"type": "custom",
-					"tokenizer": "whitespace",
+					"tokenizer": "lowercase",
 					"filter": ["lowercase", "russian_morphology", "ru_stopwords"]
 				}
 			},
 			"filter": {
 				"ru_stopwords": {
 					"type": "stop",
-					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам, во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко,кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от,по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя,чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
 				}
 			}
 		}
 	}
     }\' && echo
-    curl -XPUT \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/supplier/supplier/_mapping\' -d \'{
+    curl -XPUT \'http://' . $host . '/supplier/supplier/_mapping\' -d \'{
             "supplier": {
                 "properties" : {
                         "supplier_id" : {"type" : "long"},
@@ -152,7 +131,133 @@ class EsController extends Controller
     '; 
     $res = shell_exec($url);
     }
-    
+    public function actionCreateAndMappingSuppliers(){
+        ini_set("max_execution_time", "180");
+        ini_set('memory_limit', '128M');
+
+        $host = Yii::$app->elasticsearch->nodes[0]['http_address'];
+        $url = 'curl -XPUT \'http://' . $host . '/supplier\' -d \'{
+        "settings": {
+                    "analysis": {
+                            "analyzer": {
+                                    "ru": {
+                                            "type": "custom",
+                                            "tokenizer": "lowercase",
+                                            "filter": ["lowercase", "russian_morphology", "ru_stopwords"]
+                                    }
+                            },
+                            "filter": {
+                                    "ru_stopwords": {
+                                            "type": "stop",
+                                            "stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко,кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от,по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя,чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+                                    }
+                            }
+                    }
+            }
+        }\' && echo
+        curl -XPUT \'http://' . $host . '/supplier/supplier/_mapping\' -d \'{
+                "supplier": {
+                    "properties" : {
+                            "supplier_id" : {"type" : "long"},
+                            "supplier_name" : { 
+                                "type" : "string", 
+                                "analyzer" : "ru",
+                            },
+                            "supplier_image" : {"type" : "string"},
+                            "supplier_rating" : {"type" : "long"},
+                            "supplier_partnership" : {"type" : "long"}
+                    }
+                }
+        }\'
+        '; 
+        $res = shell_exec($url);    
+    }
+    public function actionCreateAndMappingCategory(){
+        ini_set("max_execution_time", "180");
+        ini_set('memory_limit', '128M');
+
+        $host = Yii::$app->elasticsearch->nodes[0]['http_address'];
+        $url = 'curl -XPUT \'http://' . $host . '/category\' -d \'{
+        "settings": {
+                    "analysis": {
+                            "analyzer": {
+                                    "ru": {
+                                            "type": "custom",
+                                            "tokenizer": "lowercase",
+                                            "filter": ["lowercase", "russian_morphology", "ru_stopwords"]
+                                    }
+                            },
+                            "filter": {
+                                    "ru_stopwords": {
+                                            "type": "stop",
+                                            "stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко,кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от,по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя,чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+                                    }
+                            }
+                    }
+            }
+        }\' && echo
+        curl -XPUT \'http://' . $host . '/category/category/_mapping\' -d \'{
+                "category": {
+                    "properties" : {
+                            "category_id" : {"type" : "long"},
+                            "category_name" : { 
+                                "type" : "string"
+                            },
+                            "category_sub_id" : {"type" : "long"}
+                    }
+                }
+        }\'
+        '; 
+        $res = \shell_exec($url);   
+    }
+    public function actionCreateAndMappingProduct(){
+        ini_set("max_execution_time", "180");
+        ini_set('memory_limit', '128M');
+
+        $host = Yii::$app->elasticsearch->nodes[0]['http_address'];
+        $url = 'curl -XPUT \'http://' . $host . '/product\' -d \'{
+        "settings": {
+                    "analysis": {
+                            "analyzer": {
+                                    "ru": {
+                                            "type": "custom",
+                                            "tokenizer": "lowercase",
+                                            "filter": ["lowercase", "russian_morphology", "ru_stopwords"]
+                                    }
+                            },
+                            "filter": {
+                                    "ru_stopwords": {
+                                            "type": "stop","stopwords": "а,более,бы,был,была,были,было,быть,в,вам,во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко,кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от,по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя,чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+                                    }
+                            }
+                    }
+            }
+        }\' && echo
+        curl -XPUT \'http://' . $host . '/product/product/_mapping\' -d \'{
+                "product": {
+                    "properties" : {
+                            "product_id"  :{"type" : "long"},
+                            "product_name" : { 
+                                "type" : "string", 
+                            },
+                            "product_supp_id" : {"type" : "long"},
+                            "product_supp_name" : {"type" : "string"},
+                            "product_image" : {"type" : "string"},
+                            "product_price" : {"type" : "string"},
+                            "product_category_id" : {"type" : "long"},
+                            "product_category_sub_id" : {"type" : "long"},
+                            "product_category_name" : {"type" : "string"},
+                            "product_category_sub_name" : {"type" : "string"},
+                            "product_created_at" : {"type" : "string"},
+                            "product_show_price" : {"type" : "long"},
+                            "product_rating" : {"type" : "long"},
+                            "product_partnership" : {"type" : "long"}
+                    }
+                }
+        }\'
+        '; 
+        $res = shell_exec($url);    
+    }
     public function actionUpdateCategory() {
     ini_set("max_execution_time", "180");
     ini_set('memory_limit', '128M');
@@ -176,7 +281,7 @@ class EsController extends Controller
     
     }
     public function actionTest(){
-    $url = 'curl -XPOST \'http://' . Yii::$app->elasticsearch->nodes[0]['http_address'] . '/product/_open\' ';
+    $url = 'curl -XPOST \'http://' . $host . '/product/_open\' ';
     $res = shell_exec($url);
     }
 }

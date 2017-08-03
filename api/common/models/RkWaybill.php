@@ -85,7 +85,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
     public function getStore() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        return RkStore::find()->andWhere('rid = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => Yii::$app->user->identity->organization_id])->one();
+        return RkStoretree::find()->andWhere('id = :store_rid and acc = :acc', [':store_rid' => $this->store_rid, ':acc' => Yii::$app->user->identity->organization_id])->one();
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
     }

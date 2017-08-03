@@ -53,6 +53,8 @@ class ServiceHelper extends AuthHelper {
         $nmodel->address = $obj['address'] ? $obj['address'] : 'Не задано';
     //    $nmodel->phone = $obj['phone'] ? $obj['phone'] : 'Не задано';
         $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
+        $nmodel->status_id=1;
+        
         
         if (!$nmodel->save()) {
             echo "Can't save the service model";

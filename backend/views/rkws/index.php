@@ -15,11 +15,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
             'id',
-            'org',
+          'code',
+          'name',
             'fd',
             'td',
     'status_id',
-    'object_id',
+    'org',    
 ];
 
 /*

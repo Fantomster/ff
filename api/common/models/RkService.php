@@ -60,9 +60,12 @@ class RkService extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'fid' => 'FID',
-            'token' => 'Token',
-            'Nonce' => 'Nonce'
+            'code' => 'ID Объекта',
+            'name' => 'Название из R-keeper',
+            'fd' => 'Активно с',
+            'td' => 'Активно по',
+            'status_id' => 'Статус',
+            'org' => 'Организация R-keeper',
         ];
     }
     

@@ -32,7 +32,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                'modelClass' => RkWaybilldata::className(),                // the update model class
                'outputValue' => function ($model, $attribute, $key, $index) {
                     $value = $model->$attribute;                 // your attribute value
-                    if ($attribute === 'product_rid') {   
+                    if ($attribute === 'pdenom') {   
                         
                         $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
                         $model->product_rid = $rkProd->rid;

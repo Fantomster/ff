@@ -122,10 +122,8 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                     
                     if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3346))  {
                         $menuItems = array_merge($menuItems,[
-                            
-                                                    ['label' => 'Заказы', 'url' => ['/order/index']],
                         [
-                            'label' => 'Сервисы',
+                            'label' => 'Интеграция',
                             'items' => [
                                 [
                                     'label' => 'R-keeper White Server',

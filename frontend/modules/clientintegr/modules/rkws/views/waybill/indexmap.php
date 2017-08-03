@@ -78,10 +78,10 @@ GridView::widget([
         [
             'class' => 'kartik\grid\EditableColumn',
             'attribute' => 'pdenom',
-                      'value' => function ($model) {
-                      $model->pdenom = $model->product->denom;
-                      return $model->pdenom;
-                      },
+               //       'value' => function ($model) {
+               //       $model->pdenom = $model->product->denom;
+               //       return $model->pdenom;
+               //       },
             'label' => 'RID в Store House',
           //  'pageSummary' => 'Total',
             'vAlign' => 'middle',

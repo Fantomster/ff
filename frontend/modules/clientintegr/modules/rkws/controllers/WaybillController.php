@@ -78,7 +78,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     
     public function actionMap($waybill_id) {
         
-     $records = RkWaybilldata::find()->select('rk_waybilldata.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product','rk_product.id = product_rid');
+     $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product','rk_product.id = product_rid');
      
      $dataProvider = new ActiveDataProvider([           'query' => $records,
                                         'sort' => false,

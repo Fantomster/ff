@@ -77,6 +77,9 @@ GridView::widget([
         [
             'class' => 'kartik\grid\EditableColumn',
             'attribute' => 'product_rid',
+                      'value' => function ($model) {
+                      return $model->product->denom;
+                      },
             'label' => 'RID в Store House',
           //  'pageSummary' => 'Total',
             'vAlign' => 'middle',

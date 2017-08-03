@@ -20,6 +20,9 @@ class SnsEndpointController extends \yii\rest\Controller {
         $message = Message::fromRawPostData();
         $validator = new MessageValidator();
 
+        Yii::error("yay!");
+        Yii::error($message->get('Message'));
+        
         try {
             $validator->validate($message);
         } catch (SnsException $ex) {

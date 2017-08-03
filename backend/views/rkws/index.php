@@ -26,7 +26,7 @@ $gridColumns = [
                                                     'label' => 'Организация F-keeper',    
                                                     'value'=>function ($model) {
                                                               if (isset($model)) 
-                                                                  return $model->organization ? $model->organization->name : '' ;
+                                                                  return $model->organization ? $model->organization->name : null;
 
                                                                  },
                                                                     

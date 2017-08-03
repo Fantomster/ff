@@ -106,6 +106,9 @@ $gridColumns = [
             </div>
             </div>
             </div> 
+                        <div class="catalog-index">
+            <div class="box-header with-border">
+              <div class="box-title pull-right">
             <?=
             GridView::widget([
                 'dataProvider' => $dataProvider,
@@ -113,4 +116,7 @@ $gridColumns = [
                 'columns' => $gridColumns,
             ]);
             ?>
+                        </div>
+            </div>
+            </div>       
             <?php Pjax::end(); ?></div>

@@ -3,10 +3,8 @@
 namespace backend\controllers;
 
 use Yii;
-use yii\web\Controller;
 use Aws\Sns\MessageValidator\Message;
 use Aws\Sns\MessageValidator\MessageValidator;
-use Aws\Sns\MessageValidator\Exception\SnsMessageValidatorException;
 use yii\helpers\Json;
 use common\models\notifications\EmailBlacklist;
 use common\models\notifications\EmailFails;

@@ -1,0 +1,79 @@
+<?php
+
+namespace common\models\guides;
+
+use Yii;
+
+/**
+ * This is the model class for table "guide".
+ *
+ * @property integer $id
+ * @property integer $client_id
+ * @property integer $type
+ * @property string $name
+ * @property integer $deleted
+ * @property string $created_at
+ * @property string $updated_at
+ *
+ * @property Organization $client
+ * @property GuideProduct[] $guideProducts
+ */
+class Guide extends \yii\db\ActiveRecord
+{
+    const TYPE_FAVORITE = 1;
+    const TYPE_GUIDE = 2;
+    
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'guide';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['client_id', 'type', 'name'], 'required'],
+            [['client_id', 'type', 'deleted'], 'integer'],
+            [['created_at', 'updated_at'], 'safe'],
+            [['name'], 'string', 'max' => 255],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => Yii::t('app', 'ID'),
+            'client_id' => Yii::t('app', 'Client ID'),
+            'type' => Yii::t('app', 'Type'),
+            'name' => Yii::t('app', 'Name'),
+            'deleted' => Yii::t('app', 'Deleted'),
+            'created_at' => Yii::t('app', 'Created At'),
+            'updated_at' => Yii::t('app', 'Updated At'),
+        ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClient()
+    {
+        return $this->hasOne(Organization::className(), ['id' => 'client_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getGuideProducts()
+    {
+        return $this->hasMany(GuideProduct::className(), ['guide_id' => 'id']);
+    }
+}

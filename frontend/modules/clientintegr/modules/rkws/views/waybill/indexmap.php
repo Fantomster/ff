@@ -94,7 +94,9 @@ GridView::widget([
         'options'=>[
           //   'initValueText' => $productDesc,
 
-       //     'data' => $data,
+            'data' => function ($model) {
+                      return $model->product->denom;
+                      },
             'options' => ['placeholder' => 'Выберите продукт из списка',           
                 ],
              'pluginOptions' => [

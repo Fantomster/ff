@@ -7,6 +7,7 @@ use yii\web\Controller;
 use Aws\Sns\MessageValidator\Message;
 use Aws\Sns\MessageValidator\MessageValidator;
 use Aws\Sns\MessageValidator\Exception\SnsMessageValidatorException;
+use yii\helpers\Json;
 
 /**
  * Description of SnsEndpointController
@@ -37,8 +38,9 @@ class SnsEndpointController extends \yii\rest\Controller {
             file_get_contents($message->get('SubscribeURL'));
         }
         
-        if ($message->get('Type') === 'Notification' && $message->get('notificationType') === 'Bounce') {
-            Yii::error('bounce!');
+        $data = Json::decode($message->get('Message'), true);
+        if ($message->get('Type') === 'Notification') {
+            Yii::error('bounce! ' . $data['notificationType']);
         }
     }
 

@@ -14,6 +14,16 @@ $this->title = 'Доступы R-keeper White Server';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
+            'id',
+            'org',
+            'fd',
+            'td',
+    'status_id',
+    'object_id',
+];
+
+/*
+$gridColumns = [
     'id',
     [
         'attribute' => 'type_id',
@@ -63,6 +73,7 @@ $gridColumns = [
                 // 'updated_at',
                 // 'step',
         ];
+    */
         ?>
         <div class="organization-index">
 

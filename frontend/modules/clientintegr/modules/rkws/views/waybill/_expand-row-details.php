@@ -70,7 +70,7 @@
                                                     return $model->status->denom;
                                                          },    
                                                 ],                   
-                                                                                            [
+                                                [
                                                 'class' => 'yii\grid\ActionColumn',
                                                 'contentOptions'=>['style'=>'width: 6%;'],
                                                 'template'=>'{update}&nbsp;{map}&nbsp;{export}',

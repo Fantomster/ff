@@ -78,7 +78,7 @@ class RkService extends \yii\db\ActiveRecord
     }
 
     public function getOrganization() {
-           return $this->hasOne(Organization_api::className(), ['id' => 'org']);          
+           return $this->hasOne(Organization::className(), ['id' => 'org']);          
            
     }
     
@@ -88,6 +88,23 @@ class RkService extends \yii\db\ActiveRecord
     return $org ? $org->name : 'no';
 }
     
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+    
+            if ($this->fd){
+            $this->fd = Yii::$app->formatter->asDate($this->fd, 'yyyy-MM-dd');
+            } else {            
+            }
+            
+            if ($this->td){
+            $this->td = Yii::$app->formatter->asDate($this->td, 'yyyy-MM-dd');
+            } else {            
+            }
+            
+            return true;
+        }
+    }   
     
     public static function getDb()
     {

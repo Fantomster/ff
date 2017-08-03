@@ -99,7 +99,7 @@ class AuthHelper extends Object {
                   
     $usrReq = base64_encode($rlogin.';'.strtolower(md5($rlogin.$rpass)).';'.strtolower(md5($rtoken)));
     
-    var_dump($usrReq);
+    // var_dump($usrReq);
     // exit;
     
     $xml ='<?xml version="1.0" encoding="UTF-8"?><AUTHCMD key="'.$licReq.'" usr="'.$usrReq.'"/>';

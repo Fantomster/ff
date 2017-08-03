@@ -11,6 +11,8 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
+use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
+//use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
 
 /**
  * OrganizationController implements the CRUD actions for Organization model.
@@ -35,7 +37,7 @@ class RkwsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', ],
+                        'actions' => ['index', 'view', 'getws'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -77,6 +79,17 @@ class RkwsController extends Controller {
         return $this->render('view', [
                     'model' => $this->findModel($id),
         ]);
+    }
+    
+    public function actionGetws() {
+        
+   //  $resres = ApiHelper::getAgents();     
+        
+        $res = new ServiceHelper();
+        $res->getObjects();
+        
+        $this->redirect('index');
+            
     }
 
 //    /**

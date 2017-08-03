@@ -7,6 +7,7 @@ use yii\base\Model;
 use yii\swiftmailer\Mailer;
 use yii\swiftmailer\Message;
 use amnah\yii2\user\models\forms\ForgotForm as BaseForm;
+use common\models\UserToken;
 
 /**
  * Forgot password form
@@ -32,7 +33,7 @@ class ForgotForm extends BaseForm
             $expireTime = $this->module->resetExpireTime;
             $expireTime = $expireTime ? gmdate("Y-m-d H:i:s", strtotime($expireTime)) : null;
 
-            $userToken = \common\models\UserToken::generate($user->id, $userToken::TYPE_PASSWORD_RESET, null, $expireTime);
+            $userToken = UserToken::generate($user->id, UserToken::TYPE_PASSWORD_RESET, null, $expireTime);
 
             // modify view path to module views
             $mailer = Yii::$app->mailer;

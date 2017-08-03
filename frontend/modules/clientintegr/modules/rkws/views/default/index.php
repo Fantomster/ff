@@ -50,6 +50,7 @@ use api\common\models\RkAccess;
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
                                     
+                                    <?php var_dump('!'.$lic); ?>
                                     <p> Состояние лицензии: <strong>Активна</strong> ID: 199990046 ( 01.06.2017 - 31.10.2017)
                                 </p>    
                             

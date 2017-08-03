@@ -75,6 +75,13 @@ $gridColumns = [
         ];
     */
         ?>
+    <div class="catalog-index">
+            <div class="box-header with-border">
+              <div class="box-title pull-left">
+                 <?= Html::a('<i class="fa fa-sign-in"></i> Отправить запрос', ['check'],['class'=>'btn btn-md fk-button']) ?>
+              </div>
+            </div>
+    </div>  
         <div class="organization-index">
 
             <h1><?= Html::encode($this->title) ?></h1>

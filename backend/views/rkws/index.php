@@ -75,19 +75,20 @@ $gridColumns = [
         ];
     */
         ?>
-    <div class="catalog-index">
-            <div class="box-header with-border">
-              <div class="box-title pull-left">
-                 <?= Html::a('<i class="fa fa-sign-in"></i> Отправить запрос', ['check'],['class'=>'btn btn-md fk-button']) ?>
-              </div>
-            </div>
-    </div>  
+
         <div class="organization-index">
 
             <h1><?= Html::encode($this->title) ?></h1>
             <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
             
             <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>    
+            <div class="catalog-index">
+            <div class="box-header with-border">
+              <div class="box-title pull-left">
+                 <?= Html::a('<i class="fa fa-sign-in"></i> Отправить запрос', ['check'],['class'=>'btn btn-md fk-button']) ?>
+              </div>
+            </div>
+            </div>  
             <?php
             echo ExportMenu::widget([
                 'dataProvider' => $dataProvider,

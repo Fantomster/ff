@@ -32,6 +32,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
+    
+    public $pdenom;
       
     
     /**

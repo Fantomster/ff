@@ -108,7 +108,7 @@ $gridColumns = [
             </div> 
                         <div class="catalog-index">
             <div class="box-header with-border">
-              <div class="box-title pull-right">
+              <div class="box-title pull-left">
             <?=
             GridView::widget([
                 'dataProvider' => $dataProvider,

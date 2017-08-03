@@ -85,10 +85,13 @@ $gridColumns = [
             <div class="catalog-index">
             <div class="box-header with-border">
               <div class="box-title pull-left">
-                 <?= Html::a('<i class="fa fa-sign-in"></i> Отправить запрос', ['check'],['class'=>'btn btn-md fk-button']) ?><br>&nbsp<br>
+                 <?= Html::a('<i class="fa fa-sign-in"></i> Отправить запрос', ['check'],['class'=>'btn btn-md fk-button']) ?>
               </div>
             </div>
             </div>  
+            <div class="catalog-index">
+            <div class="box-header with-border">
+              <div class="box-title pull-right">
             <?php
             echo ExportMenu::widget([
                 'dataProvider' => $dataProvider,
@@ -100,6 +103,9 @@ $gridColumns = [
                 ],
             ]);
             ?>
+            </div>
+            </div>
+            </div> 
             <?=
             GridView::widget([
                 'dataProvider' => $dataProvider,

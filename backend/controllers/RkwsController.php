@@ -59,7 +59,7 @@ class RkwsController extends Controller {
      * @return mixed
      */
     public function actionIndex() {
-        $searchModel = new OrganizationSearch();
+        $searchModel = new \api\common\models\RkServiceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

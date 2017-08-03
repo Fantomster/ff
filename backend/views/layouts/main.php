@@ -120,7 +120,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                         ],
                     ]);
                     
-                    if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3346))  {
+                    if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529))  {
                         $menuItems = array_merge($menuItems,[
                         [
                             'label' => 'Интеграция',

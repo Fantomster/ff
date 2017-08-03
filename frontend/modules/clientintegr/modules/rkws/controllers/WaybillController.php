@@ -35,7 +35,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     if ($attribute === 'pdenom') {   
                         
                         $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
-                        $model->product_rid = $rkProd->rid;
+                        $model->product_rid = $rkProd->id;
                         $model->munit_rid = $rkProd->unit_rid;
                         $model->save(false);
                         return $rkProd->denom;       // return formatted value if desired

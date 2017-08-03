@@ -19,7 +19,7 @@ use yii\web\JsExpression;
 <?php 
 
 // $productDesc = empty($model->product_rid) ? '' : $model->product->denom;
-$model->pdenom = $model->product->denom;
+
 
 ?>
 
@@ -78,12 +78,10 @@ GridView::widget([
         [
             'class' => 'kartik\grid\EditableColumn',
             'attribute' => 'pdenom',
-                   //   'value' => function ($model) {
-                   //       
-                   //   $denom = $model->product->denom;
-                   //   $model->product_rid = [1 => "Тест"];
-                   //   return $denom;
-                   //   },
+                      'value' => function ($model) {
+                      $model->pdenom = $model->product->denom;
+                      return $model->pdenom;
+                      },
             'label' => 'RID в Store House',
           //  'pageSummary' => 'Total',
             'vAlign' => 'middle',
@@ -98,7 +96,7 @@ GridView::widget([
         'options'=>[
           //   'initValueText' => $productDesc,
 
-            'data' => $pdenom,
+            //'data' => $pdenom,
             'options' => ['placeholder' => 'Выберите продукт из списка',           
                 ],
              'pluginOptions' => [

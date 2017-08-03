@@ -34,8 +34,8 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     $value = $model->$attribute;                 // your attribute value
                     if ($attribute === 'pdenom') { 
                         
-                        if(!$model->validate('pdenom'))
-                          return '';  
+                        if(!is_numeric($model->pdenom))
+                        return '';  
                         
                         $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
                         $model->product_rid = $rkProd->id;

@@ -34,7 +34,7 @@ class SnsEndpointController extends \yii\rest\Controller {
         }
         
         if ($message->get('Type') === 'Notification' && $message->data['Message']['notificationType'] === 'Bounce') {
-            //process bounce
+            Yii::error('bounce!');
         }
     }
 

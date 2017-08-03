@@ -51,7 +51,7 @@ use api\common\models\RkStoretree;
     	<div class="box box-info">            
             <div class="box-header with-border">
                             <div class="panel-body">
-                                <div class="box-body table-responsive no-padding">
+                                <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
                                   <?php /*
                                     echo GridView::widget([
                                         'dataProvider' => $dataProvider,

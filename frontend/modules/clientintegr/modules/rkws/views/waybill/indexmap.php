@@ -82,7 +82,7 @@ GridView::widget([
                //       $model->pdenom = $model->product->denom;
                //       return $model->pdenom;
                //       },
-            'label' => 'RID в Store House',
+            'label' => 'Наименование в Store House',
           //  'pageSummary' => 'Total',
             'vAlign' => 'middle',
             'width' => '210px',
@@ -120,7 +120,7 @@ GridView::widget([
             
         ]
         ]],
-                [
+             /*   [
                 'attribute' => 'product_rid',
                 'value' => function ($model) {
                      if (!empty($model->product)) {
@@ -132,7 +132,7 @@ GridView::widget([
                 },
                 'format' => 'raw',
                 'label' => 'Наименование StoreHouse', 
-                ],
+                ], */
                 [
                 'attribute' => 'munit_rid',
                 'value' => function ($model) {

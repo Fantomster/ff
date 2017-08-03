@@ -18,13 +18,9 @@ class SnsEndpointController extends \yii\rest\Controller {
 
     public function actionBounce() {
 
-        Yii::error("yay!");
-
         $message = Message::fromRawPostData();
         $validator = new MessageValidator();
 
-        Yii::error($message->get('Message'));
-        
         try {
             $validator->validate($message);
         } catch (SnsException $ex) {
@@ -39,7 +35,7 @@ class SnsEndpointController extends \yii\rest\Controller {
         }
         
         $data = Json::decode($message->get('Message'), true);
-        if ($message->get('Type') === 'Notification') {
+        if (($message->get('Type') === 'Notification') && ($data['notificationType'] === 'Bounce')) {
             Yii::error('bounce! ' . $data['notificationType']);
         }
     }

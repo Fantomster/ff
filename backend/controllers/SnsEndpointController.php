@@ -16,11 +16,12 @@ use Aws\Sns\MessageValidator\Exception\SnsMessageValidatorException;
 class SnsEndpointController extends \yii\rest\Controller {
 
     public function actionBounce() {
-        //
+
+        Yii::error("yay!");
+
         $message = Message::fromRawPostData();
         $validator = new MessageValidator();
 
-        Yii::error("yay!");
         Yii::error($message->get('Message'));
         
         try {

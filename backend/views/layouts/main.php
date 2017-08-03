@@ -125,7 +125,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             
                                                     ['label' => 'Заказы', 'url' => ['/order/index']],
                         [
-                            'label' => 'Интеграция',
+                            'label' => 'Сервисы',
                             'items' => [
                                 [
                                     'label' => 'R-keeper White Server',

@@ -119,6 +119,27 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             ],
                         ],
                     ]);
+                    
+                    if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3346))  {
+                        $menuItems = array_merge($menuItems,[
+                            
+                                                    ['label' => 'Заказы', 'url' => ['/order/index']],
+                        [
+                            'label' => 'Интеграция',
+                            'items' => [
+                                [
+                                    'label' => 'R-keeper White Server',
+                                    'url' => ['/rkws/index'],
+                                ],
+                              //  [
+                              //      'label' => 'Загруженные каталоги',
+                              //      'url' => ['/goods/uploaded-catalogs'],
+                              //  ],
+                            ],
+                        ],
+                        ]);
+                        
+                    }
                 }
                 $menuItems[] = '<li>'
                         . Html::beginForm(['/site/logout'], 'post')

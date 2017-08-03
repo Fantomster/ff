@@ -86,7 +86,7 @@ GridView::widget([
           //  'pageSummary' => 'Total',
             'vAlign' => 'middle',
             'width' => '210px',
-          //  'refreshGrid' => true,
+            'refreshGrid' => true,
             'editableOptions'=>[
                  'formOptions' => ['action' => ['edit']],
         'header'=>'Продукт R-keeper', 

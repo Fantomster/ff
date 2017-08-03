@@ -23,6 +23,7 @@ class Mailer extends \yashop\ses\Mailer {
             \Yii::error('blacklisted! ' . $message->getTo());
             return false;
         }
+        \Yii::error('wtf');
         return true;
     }
 }

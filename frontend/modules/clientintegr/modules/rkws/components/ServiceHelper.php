@@ -48,10 +48,10 @@ class ServiceHelper extends AuthHelper {
         
         $nmodel = new RkService();
         
-        $nmodel->code = $obj['code'];
-        $nmodel->name = $obj['name'];  
-        $nmodel->address = $obj['address'];
-        $nmodel->phone = $obj['phone'];
+        $nmodel->code = $obj['code'] ? $obj['code'] : 0;
+        $nmodel->name = $obj['name'] ? $obj['name'] : 'Не задано';  
+        $nmodel->address = $obj['address'] ? $obj['address'] : 'Не задано';
+        $nmodel->phone = $obj['phone'] ? $obj['phone'] : 'Не задано';
         $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
         
         if (!$nmodel->save()) {

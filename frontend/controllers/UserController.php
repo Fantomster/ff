@@ -304,8 +304,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             return ActiveForm::validate($model);
         }
 
-        if ($model->load($post) && $model->sendForgotEmail()) {
-
+        if ($model->load($post)) {
+            $model->sendForgotEmail();
             // set flash (which will show on the current page)
             Yii::$app->session->setFlash("Forgot-success", Yii::t("user", "Instructions to reset your password have been sent"));
         }

@@ -20,10 +20,8 @@ class Mailer extends \yashop\ses\Mailer {
         $result = parent::beforeSend($message);
         //check blacklist
         if (EmailBlacklist::find()->where(['email' => $message->getTo()])->exists()) {
-            \Yii::error('blacklisted! ' . $message->getTo());
             return false;
         }
-        \Yii::error('wtf');
         return $result;
     }
 }

@@ -25,7 +25,8 @@ $gridColumns = [
                                                     'attribute' => 'org',
                                                     'label' => 'Организация F-keeper',    
                                                     'value'=>function ($model) {
-                                                              if (!empty($model)) return $model->organization->name;
+                                                              if (isset($model)) 
+                                                                  return $model->organization->name;
 
                                                                  },
                                                                     

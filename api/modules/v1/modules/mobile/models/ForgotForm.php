@@ -54,4 +54,17 @@ class ForgotForm extends BaseForm
 
         return false;
     }
+    
+     /**
+     * Get user based on email
+     * @return \amnah\yii2\user\models\User|null
+     */
+    public function getUser()
+    {
+        // get and store user
+        if ($this->user === false) {
+            $this->user = \common\models\User::findOne(["email" => $this->email]);
+        }
+        return $this->user;
+    }
 }

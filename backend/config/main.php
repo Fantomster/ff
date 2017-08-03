@@ -21,11 +21,9 @@ return [
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
-                [
-                    'file' => [
-                        'class' => 'yii\log\FileTarget',
-                        'levels' => ['error', 'warning'],
-                    ],
+                'file' => [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['error', 'warning'],
                 ],
             ],
         ],

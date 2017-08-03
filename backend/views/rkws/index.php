@@ -25,7 +25,7 @@ $gridColumns = [
                                                     'attribute' => 'org',
                                                     'label' => 'Организация F-keeper',    
                                                     'value'=>function ($model) {
-                                                              return $model->organization->name;
+                                                              if ($model) return $model->organization->name;
 
                                                                  },
                                                                     
@@ -33,7 +33,7 @@ $gridColumns = [
                 [
               'attribute' => 'status_id',
               'value'=>function ($model) {
-                    return ($model->status_id == 1) ? 'Неактивно' : 'Активно';
+                    if($model) return ($model->status_id == 1) ? 'Неактивно' : 'Активно';
 
                 },
               

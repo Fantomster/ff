@@ -6,6 +6,7 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
+use common\models\guides\Guide;
 
 /**
  * This is the model class for table "organization".
@@ -51,6 +52,8 @@ use Imagine\Image\ManipulatorInterface;
  * @property FranchiseeAssociate $franchiseeAssociate
  * @property RelationSuppRest $associates
  * @property integer $managersCount
+ * @property Guide $favorite
+ * @property Guide[] $guides
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -634,5 +637,19 @@ class Organization extends \yii\db\ActiveRecord {
             return User::find()->where(['organization_id' => $this->id, 'role_id' => Role::ROLE_SUPPLIER_MANAGER])->count();
         }
         return 0;
+    }
+    
+    public function getFavorite() {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return null;
+        }
+        return $this->hasOne(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_FAVORITE]);
+    }
+    
+    public function getGuides() {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+            return null;
+        }
+        return $this->hasMany(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_GUIDE]);
     }
 }

@@ -91,7 +91,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     public function getProduct() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        $rprod = RkProduct::find()->andWhere('rid = :rid and unit_rid = :urid',[':rid' =>$this->product_rid,':urid' => $this->munit_rid]);
+        $rprod = RkProduct::find()->andWhere('id = :id',[':id' =>$this->product_rid]);
         
         return $rprod;
 

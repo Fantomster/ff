@@ -41,7 +41,7 @@ class RkServiceSearch extends RkAccess
      */
     public function search($params)
     {
-        $query = RkProduct::find();
+        $query = RkService::find();
 
         // add conditions that should always apply here
 

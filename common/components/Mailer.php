@@ -17,12 +17,12 @@ use common\models\notifications\EmailBlacklist;
  */
 class Mailer extends \yashop\ses\Mailer {
     public function beforeSend($message) {
-        $result = parent::beforeSend($message);
+        parent::beforeSend($message);
         //check blacklist
         if (EmailBlacklist::find()->where(['email' => $message->getTo()])) {
             \Yii::error('blacklisted! ' . $message->getTo());
             return false;
         }
-        return $result;
+        return true;
     }
 }

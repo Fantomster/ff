@@ -51,7 +51,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         return [
             [['waybill_id','product_id'], 'required'],
-         //   [['acc','rid'], 'integer'],
+            [['pdenom'], 'integer'],
          //   [['comment'], 'string', 'max' => 255],
             [['waybill_id','product_rid','product_id','munit_rid','updated_at','quant','sum','vat','pdenom'],'safe']
         ];

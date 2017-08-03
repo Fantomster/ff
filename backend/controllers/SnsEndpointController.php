@@ -19,7 +19,6 @@ use common\models\notifications\EmailFails;
 class SnsEndpointController extends \yii\rest\Controller {
 
     public function actionBounce() {
-
         $message = Message::fromRawPostData();
         $validator = new MessageValidator();
 
@@ -54,7 +53,6 @@ class SnsEndpointController extends \yii\rest\Controller {
     }
 
     public function actionComplaint() {
-        //
         $message = Message::fromRawPostData();
         $validator = new MessageValidator();
 
@@ -71,8 +69,21 @@ class SnsEndpointController extends \yii\rest\Controller {
             file_get_contents($message->get('SubscribeURL'));
         }
 
-        if ($message->get('Type') === 'Notification' && $message->data['Message']['notificationType'] === 'Complaint') {
-            //process complaint
+        $data = Json::decode($message->get('Message'), true);
+        if (($message->get('Type') === 'Notification') && ($data['notificationType'] === 'Complaint')) {
+            $complainedRecipients = $data["bounce"]["complainedRecipients"];
+            foreach ($complainedRecipients as $recipient) {
+                if (!EmailBlacklist::find()->where(['email' => $recipient['emailAddress']])->exists()) {
+                    $newBlacklisted = new EmailBlacklist();
+                    $newBlacklisted->email = $recipient['emailAddress'];
+                    $newBlacklisted->save();
+                }
+                $newFail = new EmailFails();
+                $newFail->type = EmailFails::TYPE_COMPLAINT;
+                $newFail->email = $recipient['emailAddress'];
+                $newFail->body = $message->get('Message');
+                $newFail->save();
+            }
         }
     }
 

@@ -3,6 +3,7 @@
 namespace common\models\notifications;
 
 use Yii;
+use common\models\User;
 
 /**
  * This is the model class for table "sms_notification".
@@ -33,7 +34,7 @@ class SmsNotification extends \yii\db\ActiveRecord
     {
         return [
             [['user_id'], 'required'],
-            [['user_id', 'active', 'orders', 'requests', 'changes', 'invites'], 'integer'],
+            [['user_id', 'orders', 'requests', 'changes', 'invites'], 'integer'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
@@ -46,7 +47,6 @@ class SmsNotification extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app', 'ID'),
             'user_id' => Yii::t('app', 'User ID'),
-            'active' => Yii::t('app', 'Active'),
             'orders' => Yii::t('app', 'Orders'),
             'requests' => Yii::t('app', 'Requests'),
             'changes' => Yii::t('app', 'Changes'),

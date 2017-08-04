@@ -7,15 +7,15 @@ use yii\helpers\Url;
 $user = Yii::$app->user->identity;
 
 $franchiseeManager = $user->organization->getFranchiseeManagerInfo();
-if($franchiseeManager && $franchiseeManager->phone_manager){
-    if($franchiseeManager->additional_number_manager){
-      $phoneUrl = $franchiseeManager->phone_manager . "p" . $franchiseeManager->additional_number_manager; 
-      $phone = $franchiseeManager->phone_manager . " доб. " . $franchiseeManager->additional_number_manager;
-    }else{
-      $phoneUrl = $franchiseeManager->phone_manager;
-      $phone = $franchiseeManager->phone_manager;
+if ($franchiseeManager && $franchiseeManager->phone_manager) {
+    if ($franchiseeManager->additional_number_manager) {
+        $phoneUrl = $franchiseeManager->phone_manager . "p" . $franchiseeManager->additional_number_manager;
+        $phone = $franchiseeManager->phone_manager . " доб. " . $franchiseeManager->additional_number_manager;
+    } else {
+        $phoneUrl = $franchiseeManager->phone_manager;
+        $phone = $franchiseeManager->phone_manager;
     }
-}else{
+} else {
     $phoneUrl = "+7-499-404-10-18p202";
     $phone = "+7-499-404-10-18 доб. 202";
 }
@@ -46,7 +46,7 @@ $menuItems = [
     ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/vendor/tutorial', 'video' => 'video']],
     //['label' => 'Мои акции', 'icon' => 'ticket', 'url' => ['vendor/events']],
     ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.f-keeper.ru?news', 'options' => ['class' => 'hidden-xs']],
-    //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],
+        //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],
 ];
 if (Yii::$app->user->can('manage')) {
     $menuItems[] = [
@@ -56,8 +56,9 @@ if (Yii::$app->user->can('manage')) {
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
             ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
-         //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
+            //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
             ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
         ]
     ];
@@ -90,7 +91,7 @@ $menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;">
-                <p><a href="<?=$phoneUrl?>"><i class="fa fa-phone"></i> <?=$phone?></a></p>
+                <p><a href="<?= $phoneUrl ?>"><i class="fa fa-phone"></i> <?= $phone ?></a></p>
             </div>
         </ul>
     </section>

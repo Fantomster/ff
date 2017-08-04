@@ -7,15 +7,15 @@ use yii\helpers\Url;
 $user = Yii::$app->user->identity;
 
 $franchiseeManager = $user->organization->getFranchiseeManagerInfo();
-if($franchiseeManager && $franchiseeManager->phone_manager){
-    if($franchiseeManager->additional_number_manager){
-      $phoneUrl = $franchiseeManager->phone_manager . "p" . $franchiseeManager->additional_number_manager; 
-      $phone = $franchiseeManager->phone_manager . " доб. " . $franchiseeManager->additional_number_manager;
-    }else{
-      $phoneUrl = $franchiseeManager->phone_manager;
-      $phone = $franchiseeManager->phone_manager;
+if ($franchiseeManager && $franchiseeManager->phone_manager) {
+    if ($franchiseeManager->additional_number_manager) {
+        $phoneUrl = $franchiseeManager->phone_manager . "p" . $franchiseeManager->additional_number_manager;
+        $phone = $franchiseeManager->phone_manager . " доб. " . $franchiseeManager->additional_number_manager;
+    } else {
+        $phoneUrl = $franchiseeManager->phone_manager;
+        $phone = $franchiseeManager->phone_manager;
     }
-}else{
+} else {
     $phoneUrl = "+7-499-404-10-18p202";
     $phone = "+7-499-404-10-18 доб. 202";
 }
@@ -54,7 +54,6 @@ $cartCount = $user->organization->getCartCount();
 //                            'url' => ['client/messages'],
 //                            ],
                         ['label' => 'F-MARKET', 'icon' => 'shopping-cart', 'url' => 'https://market.f-keeper.ru', 'options' => ['class' => 'l-fmarket']],
-                        
                         ['label' => 'Заявки', 'icon' => 'paper-plane', 'url' => ['/request/list'], 'options' => ['class' => 'l-fmarket']],
                         ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/client/analytics'], 'options' => ['class' => 'hidden-xs']],
                         ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/client/tutorial', 'video' => 'video']],
@@ -67,8 +66,9 @@ $cartCount = $user->organization->getCartCount();
                             'options' => ['class' => "treeview hidden-xs"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
-                             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default']],
+                                //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default']],
                                 ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
+                                ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],
@@ -92,7 +92,7 @@ $cartCount = $user->organization->getCartCount();
             <div style="text-align: center; color: #d8d7d7;padding-top:10px">
                 <p>
                     <a href="tel:<?php echo $phoneUrl; ?>">
-                        <i class="fa fa-phone"></i> <?php echo $phone;?>
+                        <i class="fa fa-phone"></i> <?php echo $phone; ?>
                     </a>
                 </p>
             </div>

@@ -20,6 +20,32 @@ class UtilsController extends Controller {
         }
     }
 
+    public function actionAddNotifications() {
+        $users = \common\models\User::find()
+                ->leftJoin('email_notification', 'user.id = email_notification.user_id')
+                ->leftJoin('sms_notification', 'user.id = sms_notification.user_id')
+                ->where('email_notification.id IS NULL')
+                ->andWhere('sms_notification.id IS NULL')
+                ->limit(500)
+                ->all();
+        foreach ($users as $user) {
+            $emailNotification = new \common\models\notifications\EmailNotification();
+            $emailNotification->user_id = $user->id;
+            $emailNotification->orders = true;
+            $emailNotification->requests = true;
+            $emailNotification->changes = true;
+            $emailNotification->invites = true;
+            $emailNotification->save();
+            $smsNotification = new \common\models\notifications\SmsNotification();
+            $smsNotification->user_id = $user->id;
+            $smsNotification->orders = true;
+            $smsNotification->requests = true;
+            $smsNotification->changes = true;
+            $smsNotification->invites = true;
+            $smsNotification->save();
+        }
+    }
+
     public function actionFillChatRecipient() {
         $emptyRecipientMessages = \common\models\OrderChat::find()
                 ->where(['recipient_id' => 0])
@@ -37,7 +63,7 @@ class UtilsController extends Controller {
             }
         }
     }
-    
+
     public function actionCreateNotifications() {
         
     }

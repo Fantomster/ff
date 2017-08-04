@@ -1157,7 +1157,7 @@ class OrderController extends DefaultController {
             $newMessage->recipient_id = $order->client_id;
         }
         $newMessage->save();
- 
+
         $name = $user->profile->full_name;
 
         $body = $this->renderPartial('_chat-message', [
@@ -1303,10 +1303,12 @@ class OrderController extends DefaultController {
         $dataProvider->pagination = false;
 
         $email = $recipient->email;
-        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+        if ($recipient->emailNotification->orders) {
+            $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+        }
     }
 
     private function sendOrderChangeAll($sender, $order) {
@@ -1325,10 +1327,12 @@ class OrderController extends DefaultController {
         foreach ($order->vendor->users as $recipient) {
 
             $email = $recipient->email;
-            $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
+            if ($recipient->emailNotification->orders) {
+                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
         }
     }
 
@@ -1350,10 +1354,12 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+        if ($recipient->emailNotification->orders) {
+            $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+        }
     }
 
     private function sendOrderCreated($sender, $recipientOrg, $order) {
@@ -1371,10 +1377,12 @@ class OrderController extends DefaultController {
 
         foreach ($recipientOrg->users as $recipient) {
             $email = $recipient->email;
-            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
+            if ($recipient->emailNotification->orders) {
+                $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                 $text = $senderOrg->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
@@ -1398,10 +1406,12 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+        if ($recipient->emailNotification->orders) {
+            $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
+                    ->setTo($email)
+                    ->setSubject($subject)
+                    ->send();
+        }
     }
 
     private function sendOrderCanceled($senderOrg, $recipient, $order) {
@@ -1419,17 +1429,21 @@ class OrderController extends DefaultController {
         if ($recipient instanceof Organization) {
             foreach ($recipient->users as $user) {
                 $email = $user->email;
+                if ($user->emailNotification->orders) {
+                    $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                }
+            }
+        } else {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->orders) {
                 $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-        } else {
-            $email = $recipient->email;
-            $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
         }
     }
 

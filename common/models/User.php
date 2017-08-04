@@ -82,7 +82,6 @@ class User extends \amnah\yii2\user\models\User {
         if ($insert) {
             $emailNotification = new notifications\EmailNotification();
             $emailNotification->user_id = $this->id;
-            $emailNotification->active = true;
             $emailNotification->orders = true;
             $emailNotification->requests = true;
             $emailNotification->changes = true;
@@ -90,7 +89,6 @@ class User extends \amnah\yii2\user\models\User {
             $emailNotification->save();
             $smsNotification = new notifications\SmsNotification();
             $smsNotification->user_id = $this->id;
-            $smsNotification->active = true;
             $smsNotification->orders = true;
             $smsNotification->requests = true;
             $smsNotification->changes = true;
@@ -156,14 +154,14 @@ class User extends \amnah\yii2\user\models\User {
      * @return \yii\db\ActiveQuery
      */
     public function getEmailNotification() {
-        return $this->hasOne(EmailNotification::className(), ['user_id' => 'id']);
+        return $this->hasOne(notifications\EmailNotification::className(), ['user_id' => 'id']);
     }
     
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getSmsNotification() {
-        return $this->hasOne(SmsNotification::className(), ['user_id' => 'id']);
+        return $this->hasOne(notifications\SmsNotification::className(), ['user_id' => 'id']);
     }
     
     /**

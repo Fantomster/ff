@@ -32,10 +32,13 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                'modelClass' => RkWaybilldata::className(),                // the update model class
                'outputValue' => function ($model, $attribute, $key, $index) {
                     $value = $model->$attribute;                 // your attribute value
-                    if ($attribute === 'product_rid') {   
+                    if ($attribute === 'pdenom') { 
+                        
+                        if(!is_numeric($model->pdenom))
+                        return '';  
                         
                         $rkProd = \api\common\models\RkProduct::findOne(['id' => $value]);
-                        $model->product_rid = $rkProd->rid;
+                        $model->product_rid = $rkProd->id;
                         $model->munit_rid = $rkProd->unit_rid;
                         $model->save(false);
                         return $rkProd->denom;       // return formatted value if desired
@@ -78,7 +81,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     
     public function actionMap($waybill_id) {
         
-     $records = RkWaybilldata::find()->andWhere(['waybill_id' => $waybill_id]);
+     $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product','rk_product.id = product_rid');
      
      $dataProvider = new ActiveDataProvider([           'query' => $records,
                                         'sort' => false,

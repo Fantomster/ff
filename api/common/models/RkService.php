@@ -47,9 +47,9 @@ class RkService extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['org','fd','td','object_id','status_id'], 'required'],
-            [['id','fid','org','ver'], 'integer'],
-            [['created_at','updated_at','is_deleted','user_id'], 'safe'],
+        //    [['org','fd','td','object_id','status_id'], 'required'],
+        //    [['id','fid','org','ver'], 'integer'],
+            [['created_at','updated_at','is_deleted','user_id','org','fd','td','status_id','is_deleted','code','name','address','phone'], 'safe'],
         ];
     }
 
@@ -60,9 +60,12 @@ class RkService extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'fid' => 'FID',
-            'token' => 'Token',
-            'Nonce' => 'Nonce'
+            'code' => 'ID Объекта',
+            'name' => 'Название из R-keeper',
+            'fd' => 'Активно с',
+            'td' => 'Активно по',
+            'status_id' => 'Статус',
+            'org' => 'Организация R-keeper',
         ];
     }
     
@@ -75,7 +78,7 @@ class RkService extends \yii\db\ActiveRecord
     }
 
     public function getOrganization() {
-           return $this->hasOne(Organization_api::className(), ['id' => 'org']);          
+           return $this->hasOne(Organization::className(), ['id' => 'org']);          
            
     }
     
@@ -85,6 +88,23 @@ class RkService extends \yii\db\ActiveRecord
     return $org ? $org->name : 'no';
 }
     
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+    
+            if ($this->fd){
+            $this->fd = Yii::$app->formatter->asDate($this->fd, 'yyyy-MM-dd');
+            } else {            
+            }
+            
+            if ($this->td){
+            $this->td = Yii::$app->formatter->asDate($this->td, 'yyyy-MM-dd');
+            } else {            
+            }
+            
+            return true;
+        }
+    }   
     
     public static function getDb()
     {

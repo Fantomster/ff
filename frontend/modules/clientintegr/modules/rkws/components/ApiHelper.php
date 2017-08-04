@@ -175,6 +175,8 @@ class ApiHelper  {
        
     $myXML   = simplexml_load_string($data);
     
+    if(!isset($myXML->OBJECTS)) {
+    
    // echo "&&&&&&&&&&&&&<br>";
    // var_dump($data,true);
     
@@ -210,6 +212,23 @@ class ApiHelper  {
         $respcode = $objectinfo;
             
         }
+        
+    }
+    
+    } else { // Запрос о списке объектов
+        $rcount = 0;        
+        foreach ($myXML->OBJECTS->OBJECT as $obj) {
+            
+                $rcount++;    
+                 foreach($obj->attributes() as $c => $d) {
+                    $objectinfo[$rcount][$c] = strval($d[0]);                
+                }
+            
+        }
+        
+        $respcode['taskguid'] = strval($myXML['taskguid']);
+        $respcode['code'] = strval($myXML['code']);
+        $respcode['version'] = strval($myXML['version']);
         
     }
    

@@ -5,12 +5,12 @@ namespace api\common\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use api\common\models\RkProduct;
+use api\common\models\RkSession;
 
 /**
  * RkAccessSearch represents the model behind the search form about `api\common\models\RkAccess`.
  */
-class RkServiceSearch extends RkService
+class RkWaybilldataSearch extends RkSession
 {
     /**
      * @inheritdoc
@@ -18,9 +18,8 @@ class RkServiceSearch extends RkService
     public function rules()
     {
         return [
-        //    [['org','fd','td','object_id','status_id'], 'required'],
-        //    [['id','fid','org','ver'], 'integer'],
-            [['created_at','updated_at','is_deleted','user_id','org','fd','td','status_id','is_deleted','code','name','address','phone'], 'safe'],
+            [['id', 'fid', 'acc', 'ver', 'status'], 'integer'],
+            [['acc', 'cook', 'ip', 'fid', 'fd', 'td', 'extime', 'comment'], 'safe'],
         ];
     }
 
@@ -42,7 +41,7 @@ class RkServiceSearch extends RkService
      */
     public function search($params)
     {
-        $query = RkService::find();
+        $query = RkSession::find();
 
         // add conditions that should always apply here
 
@@ -61,20 +60,20 @@ class RkServiceSearch extends RkService
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'name' => $this->name,
-            'org' => $this->org,
+            'fid' => $this->fid,
+            'acc' => $this->acc,
             'fd' => $this->fd,
             'td' => $this->td,
-            'code' => $this->code,
-            'status_id' => $this->status_id,
+            'ver' => $this->ver,
+            'status' => $this->status,
         ]);
 
-        $query->andFilterWhere(['like', 'code', $this->code])
-              ->andFilterWhere(['like', 'name', $this->name]);
-          //  ->andFilterWhere(['like', 'token', $this->token])
-          //  ->andFilterWhere(['like', 'lic', $this->lic])
-          //  ->andFilterWhere(['like', 'usereq', $this->usereq])
-          //  ->andFilterWhere(['like', 'comment', $this->comment]);
+        $query->andFilterWhere(['like', 'ip', $this->ip]);
+        //    ->andFilterWhere(['like', 'password', $this->password])
+        //    ->andFilterWhere(['like', 'token', $this->token])
+        //    ->andFilterWhere(['like', 'lic', $this->lic])
+        //    ->andFilterWhere(['like', 'usereq', $this->usereq])
+        //    ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;
     }

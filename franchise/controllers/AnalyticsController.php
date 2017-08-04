@@ -247,9 +247,9 @@ class AnalyticsController extends DefaultController {
         unset($ordersStatThisDay["count"]);
 
         $query = "select aa.count as total, bb.first as first, aa.year as year, aa.month as month, aa.day as day 
-            from (SELECT count(`$orderTable`.id) as count,year(created_at) as year, month(created_at) as month, day(created_at) as day 
+            from (SELECT count(`$orderTable`.id) as count,year(`$orderTable`.created_at) as year, month(`$orderTable`.created_at) as month, day(`$orderTable`.created_at) as day 
                 FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id
-                where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and status <> 7 and created_at BETWEEN :dateFrom AND :dateTo group by year(created_at), month(created_at), day(created_at)) aa 
+                where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and `$orderTable`.status <> 7 and `$orderTable`.created_at BETWEEN :dateFrom AND :dateTo group by year(`$orderTable`.created_at), month(`$orderTable`.created_at), day(`$orderTable`.created_at)) aa 
             left outer join (
                 select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day 
                 from (select a.* 
@@ -299,10 +299,10 @@ class AnalyticsController extends DefaultController {
         $end = $dtEnd->add(new \DateInterval('P1D'));
         $date = $dt->format('Y-m-d');
 
-        $query = "SELECT truncate(sum(total_price),1) as spent,truncate(sum(total_price)/count(`$orderTable`.id),1) as cheque, year(created_at) as year, month(created_at) as month, day(created_at) as day "
+        $query = "SELECT truncate(sum(`$orderTable`.total_price),1) as spent,truncate(sum(`$orderTable`.total_price)/count(`$orderTable`.id),1) as cheque, year(`$orderTable`.created_at) as year, month(`$orderTable`.created_at) as month, day(`$orderTable`.created_at) as day "
                 . "FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id "
-                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") and created_at between :dateFrom and :dateTo "
-                . "group by year(created_at), month(created_at), day(created_at)";
+                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and `$orderTable`.status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") and `$orderTable`.created_at between :dateFrom and :dateTo "
+                . "group by year(`$orderTable`.created_at), month(`$orderTable`.created_at), day(`$orderTable`.created_at)";
         $command = Yii::$app->db->createCommand($query, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];
@@ -316,10 +316,10 @@ class AnalyticsController extends DefaultController {
             $dayCheque[] = $order["cheque"];
         }
 
-        $query = "SELECT truncate(sum(total_price),1) as total_month, truncate(sum(total_price)/count(distinct client_id),1) as spent,truncate(sum(total_price)/count(`$orderTable`.id),1) as cheque, year(created_at) as year, month(created_at) as month "
+        $query = "SELECT truncate(sum(`$orderTable`.total_price),1) as total_month, truncate(sum(`$orderTable`.total_price)/count(distinct `$orderTable`.client_id),1) as spent,truncate(sum(`$orderTable`.total_price)/count(`$orderTable`.id),1) as cheque, year(`$orderTable`.created_at) as year, month(`$orderTable`.created_at) as month "
                 . "FROM `$orderTable` left join $fraTable on $fraTable.organization_id=`$orderTable`.vendor_id "
-                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
-                . "group by year(created_at), month(created_at)";
+                . "where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and `$orderTable`.status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
+                . "group by year(`$orderTable`.created_at), month(`$orderTable`.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $money = $command->queryAll();
         $monthLabels = [];

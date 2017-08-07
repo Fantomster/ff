@@ -350,7 +350,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $user->status = \common\models\User::STATUS_ACTIVE;
             $user->save();
             $success = true;
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionForgot($user);
+            //\api\modules\v1\modules\mobile\components\NotificationHelper::actionForgot($user);
         }
 
         return $this->render('reset', compact("user", "success"));

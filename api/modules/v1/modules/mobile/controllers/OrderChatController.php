@@ -90,8 +90,8 @@ class OrderChatController extends ActiveController {
             ->innerJoin('user as sender', 'sender.id = '.Yii::$app->user->id)
             ->innerJoin('profile', 'profile.user_id = order_chat.sent_by_id')
             ->innerJoin('organization', 'organization.id = user.organization_id')
-            ->innerJoin('order', '`order`.id = order_chat.order_id and `order`.client_id = sender.organization_id OR `order`.vendor_id = sender.organization_id');
-         
+            ->innerJoin('order', '`order`.id = order_chat.order_id and `order`.client_id = sender.organization_id OR `order`.vendor_id = sender.organization_id')
+            ->orderBy(['created_at' => SORT_DESC]);
          
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
@@ -105,8 +105,6 @@ class OrderChatController extends ActiveController {
                           SELECT order_id, MAX(created_at) AS created_at
                           FROM order_chat GROUP BY order_id
                         ) AS max USING (order_id, created_at))');
-        else 
-            $query->orderBy(['created_at' => SORT_DESC]);
 
         if(isset($params->count))
         {

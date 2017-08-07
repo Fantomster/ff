@@ -91,7 +91,9 @@ class SiteController extends Controller {
     }
     public function actionSetLocationUser() {
         $session = Yii::$app->session;
-        $session->add('user_location',array('locality' => 3, 'region'=>4, 'country'=>4));
+        $session->set('locality', '1');
+        $session->set('region', '2');
+        $session->set('country', '3');
         
     }
     public function actionIndex() {

@@ -30,16 +30,20 @@ class DefaultController extends \frontend\modules\clientintegr\controllers\Defau
         
         $searchModel = new RkDicSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        
+        $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one();
                 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('index',[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'lic' => $lic,    
         ]);
         } else {
             return $this->render('index',[
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'lic' => $lic,    
         ]);
         }   
         

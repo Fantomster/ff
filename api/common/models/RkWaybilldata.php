@@ -32,6 +32,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     
     const STATUS_UNLOCKED = 0;
     const STATUS_LOCKED = 1;
+    
+    public $pdenom;
       
     
     /**
@@ -49,9 +51,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         return [
             [['waybill_id','product_id'], 'required'],
-         //   [['acc','rid'], 'integer'],
+         //   [['pdenom'], 'integer'],
          //   [['comment'], 'string', 'max' => 255],
-            [['waybill_id','product_rid','product_id','munit_rid','updated_at','quant','sum','vat'],'safe']
+            [['waybill_id','product_rid','product_id','munit_rid','updated_at','quant','sum','vat','pdenom'],'safe']
         ];
     }
 
@@ -89,7 +91,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     public function getProduct() {
 
         //  return RkAgent::findOne(['rid' => 'corr_rid','acc'=> 3243]);
-        $rprod = RkProduct::find()->andWhere('rid = :rid and unit_rid = :urid',[':rid' =>$this->product_rid,':urid' => $this->munit_rid]);
+        $rprod = RkProduct::find()->andWhere('id = :id',[':id' =>$this->product_rid]);
         
         return $rprod;
 

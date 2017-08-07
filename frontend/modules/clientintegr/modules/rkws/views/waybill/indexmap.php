@@ -20,6 +20,7 @@ use yii\web\JsExpression;
 
 // $productDesc = empty($model->product_rid) ? '' : $model->product->denom;
 
+
 ?>
 
 <style>
@@ -76,11 +77,12 @@ GridView::widget([
 
         [
             'class' => 'kartik\grid\EditableColumn',
-            'attribute' => 'product_rid',
-                      'value' => function ($model) {
-                      return $model->product->denom;
-                      },
-            'label' => 'RID в Store House',
+            'attribute' => 'pdenom',
+               //       'value' => function ($model) {
+               //       $model->pdenom = $model->product->denom;
+               //       return $model->pdenom;
+               //       },
+            'label' => 'Наименование в Store House',
           //  'pageSummary' => 'Total',
             'vAlign' => 'middle',
             'width' => '210px',
@@ -94,7 +96,7 @@ GridView::widget([
         'options'=>[
           //   'initValueText' => $productDesc,
 
-       //     'data' => $data,
+            //'data' => $pdenom,
             'options' => ['placeholder' => 'Выберите продукт из списка',           
                 ],
              'pluginOptions' => [
@@ -118,7 +120,7 @@ GridView::widget([
             
         ]
         ]],
-                [
+             /*   [
                 'attribute' => 'product_rid',
                 'value' => function ($model) {
                      if (!empty($model->product)) {
@@ -130,7 +132,7 @@ GridView::widget([
                 },
                 'format' => 'raw',
                 'label' => 'Наименование StoreHouse', 
-                ],
+                ], */
                 [
                 'attribute' => 'munit_rid',
                 'value' => function ($model) {

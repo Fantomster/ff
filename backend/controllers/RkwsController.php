@@ -11,6 +11,8 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
+use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
+//use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
 
 /**
  * OrganizationController implements the CRUD actions for Organization model.
@@ -35,7 +37,7 @@ class RkwsController extends Controller {
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', ],
+                        'actions' => ['index', 'view', 'getws','autocomplete'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -78,6 +80,17 @@ class RkwsController extends Controller {
                     'model' => $this->findModel($id),
         ]);
     }
+    
+    public function actionGetws() {
+        
+   //  $resres = ApiHelper::getAgents();     
+        
+        $res = new ServiceHelper();
+        $res->getObjects();
+        
+        $this->redirect('index');
+            
+    }
 
 //    /**
 //     * Creates a new Organization model.
@@ -107,12 +120,35 @@ class RkwsController extends Controller {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+         //   return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['index']);
         } else {
             return $this->render('update', [
                         'model' => $model,
             ]);
         }
+    }
+    
+        public function actionAutocomplete($term = null) {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+       // $out = ['results' => ['id' => '0', 'text' => 'Создать контрагента']];
+        if (!is_null($term)) {
+            $query = new \yii\db\Query;
+
+           // $query->select("`id`, CONCAT(`inn`,`denom`) AS `text`")
+              $query->select(['id'=>'id','text' => 'CONCAT("(ID:",`id`,") ",`name`)']) 
+                    ->from('organization')
+                    ->where('type_id = 1')  
+                    ->andwhere("id like :id or `name` like :name",[':id' => '%'.$term.'%', ':name' => '%'.$term.'%'])
+                    ->limit(20);
+
+            $command = $query->createCommand();
+         //   $command->db = Yii::$app->db_api;
+            $data = $command->queryAll();
+            $out['results'] = array_values($data);
+        } 
+        // $out['results'][] = ['id' => '0', 'text' => 'Создать контрагента'];
+        return $out;
     }
 
 //    /**
@@ -136,7 +172,7 @@ class RkwsController extends Controller {
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id) {
-        if (($model = Organization::findOne($id)) !== null) {
+        if (($model = \api\common\models\RkService::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

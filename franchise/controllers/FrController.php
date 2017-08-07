@@ -30,6 +30,7 @@ class FrController extends \yii\rest\Controller {
     public function actionPost() {
         if (Yii::$app->request->post('FIELDS')) {
             $fields = Yii::$app->request->post('FIELDS');
+            $sitepage = isset($fields['sitepage']) ? Html::encode($fields['sitepage']) : '';
             $cname = Html::encode($fields['name']);
             $cphone = Html::encode($fields['phone']);
             $cemail = isset($fields['email']) ? Html::encode($fields['email']) : '';
@@ -52,11 +53,16 @@ class FrController extends \yii\rest\Controller {
             if ($lpartner == '199894' || $lpartner == '199896') {
                 $lead_status_id = 465726; //643219; //id этапа продаж, куда помещать сделку
             }
+            
             if (!empty($type) && $type == 'restaurant'){
                 $lpartner = '';
                 $lead_name = 'Заявка ресторана';
                 $responsible_user_id = 1427371;
                 $lead_status_id = 465729;
+            }
+            if($sitepage == "franch"){
+                $lead_status_id = 465726;
+                $responsible_user_id = 1515736;
             }
             $contact_name = $cname; //Название добавляемого контакта
             $contact_phone = $cphone; //Телефон контакта

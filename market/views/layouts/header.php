@@ -122,14 +122,14 @@ $this->registerJs("
 <?php
 
 $this->registerJs("
-  function initAutocomplete() {
+function initAutocomplete() {
     var acInputs = document.getElementsByClassName('autocomplete');
     var options = {
       types: ['(cities)'],
       //componentRestrictions: {country: 'ru'}
      };
     var geocoder = new google.maps.Geocoder;
-    ",yii\web\View::POS_END);
+",yii\web\View::POS_HEAD);
 if (empty(Yii::$app->session->get('locality')) || empty(Yii::$app->session->get('country'))) {
 $this->registerJs("
     if (navigator.geolocation) {
@@ -138,23 +138,23 @@ $this->registerJs("
                 lng: parseFloat(position.coords.longitude)};
                 geocodeLatLng(geocoder, pos);
         },
-                function (failure) {
-                    $.getJSON('https://ipinfo.io/geo', function (response) {
-                        var loc = response.loc.split(',');
-                        var pos = {lat: parseFloat(loc[0]),
-                            lng: parseFloat(loc[1])};
-                        geocodeLatLng(geocoder, pos);
-                    });
-                });
+        function (failure) {
+            $.getJSON('https://ipinfo.io/geo', function (response) {
+                var loc = response.loc.split(',');
+                var pos = {lat: parseFloat(loc[0]),
+                    lng: parseFloat(loc[1])};
+                geocodeLatLng(geocoder, pos);
+            });
+        });
     } else {
-                $.getJSON('https://ipinfo.io/geo', function (response) {
-                    var loc = response.loc.split(',');
-                    var pos = {lat: parseFloat(loc[0]),
-                        lng: parseFloat(loc[1])};
-                    geocodeLatLng(geocoder, pos);
-                });
+        $.getJSON('https://ipinfo.io/geo', function (response) {
+            var loc = response.loc.split(',');
+            var pos = {lat: parseFloat(loc[0]),
+                lng: parseFloat(loc[1])};
+            geocodeLatLng(geocoder, pos);
+        });
     }
-",yii\web\View::POS_END);
+",yii\web\View::POS_HEAD);
 }
 $this->registerJs("
     for (var i = 0; i < acInputs.length; i++) {
@@ -194,43 +194,45 @@ $this->registerJs("
 
         });
     }
+}
+function geocodeLatLng(geocoder, latlng) {
+  geocoder.geocode({'location': latlng}, function(results, status) {
+  if (status === 'OK') {
+    if (results[1]) {
+    var setCountry;
+    var setLocality;
+    var setRegion;
+        for (var i = 0; i < results[1].address_components.length; i++)
+        {
+            var addr = results[1].address_components[i];
+            if (addr.types[0] == 'country')
+            setCountry = addr.long_name;
+            if(setCountry=='undefined'){setCountry = '';}
+            if (addr.types[0] == 'locality')
+            setLocality = addr.long_name;
+            if(setLocality=='undefined'){setLocality = '';}
+            if (addr.types[0] == 'administrative_area_level_1')
+            setRegion = addr.long_name;
+            if(setRegion=='undefined'){setRegion = '';}
+
+        }            
+        document.getElementById('setLocality').innerHTML = setLocality;
+        document.getElementById('locHeader').innerHTML = setLocality;
+
+        document.getElementById('country').value = setCountry;
+        document.getElementById('locality').value = setLocality;
+        document.getElementById('administrative_area_level_1').value = setRegion;
+    } else {
+      console.log('No results found');
+    }
+  } else {
+    console.log('Geocoder failed due to: ' + status);
   }
-  function geocodeLatLng(geocoder, latlng) {
-        geocoder.geocode({'location': latlng}, function(results, status) {
-          if (status === 'OK') {
-            if (results[1]) {
-            var setCountry;
-            var setLocality;
-            var setRegion;
-                for (var i = 0; i < results[1].address_components.length; i++)
-                {
-                    var addr = results[1].address_components[i];
-                    if (addr.types[0] == 'country')
-                    setCountry = addr.long_name;
-                    if(setCountry=='undefined'){setCountry = '';}
-                    if (addr.types[0] == 'locality')
-                    setLocality = addr.long_name;
-                    if(setLocality=='undefined'){setLocality = '';}
-                    if (addr.types[0] == 'administrative_area_level_1')
-                    setRegion = addr.long_name;
-                    if(setRegion=='undefined'){setRegion = '';}
-                    
-                }            
-                document.getElementById('setLocality').innerHTML = setLocality;
-                document.getElementById('locHeader').innerHTML = setLocality;
-                
-                document.getElementById('country').value = setCountry;
-                document.getElementById('locality').value = setLocality;
-                document.getElementById('administrative_area_level_1').value = setRegion;
-            } else {
-              console.log('No results found');
-            }
-          } else {
-            console.log('Geocoder failed due to: ' + status);
-          }
-        });
-      }	
-",yii\web\View::POS_END);
+});
+}	
+",yii\web\View::POS_HEAD);
+
+
 $gpJsLink= 'https://maps.googleapis.com/maps/api/js?' . http_build_query(array(
     'libraries' => 'places',
     'key'=>Yii::$app->params['google-api']['key-id'],

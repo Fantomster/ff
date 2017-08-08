@@ -1,9 +1,7 @@
 <?php
-use yii\bootstrap\ActiveForm;
+use yii\widgets\ActiveForm;
 use yii\helpers\Html;
-use yii\web\View;
 use yii\helpers\Url;
-use yii\widgets\Breadcrumbs;
 ?>
 <style>
 .loc-block{padding:15px;text-align: center; position: relative; margin: 0 auto;z-index:99999}
@@ -21,20 +19,29 @@ $this->registerJs('
         var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null); 
         if ((evt.keyCode == 13) && (node.type=="text")) {return false;} 
     } 
-    
-    document.onkeypress = stopRKey; 
-    $("#data-modal").length>0&&$("#data-modal").modal({backdrop: "static", keyboard: false});
-',yii\web\View::POS_READY);
+    document.onkeypress = stopRKey;',
+yii\web\View::POS_READY);
 ?>
 <div id="data-modal" class="modal fade data-modal">
     <div class="modal-dialog" style="margin-top: 25%;">
         <button type="button" data-dismiss="modal" class="close hidden"></button>
         <div class="modal-content">
             <div class="loc-block">
-                    <h3>ВАШ ГОРОД <span id="setLocality" class="loc-h-city"></span>?</h3>
+                <?php
+                $form = ActiveForm::begin([
+                            'id' => 'user-location',
+                            'action' => Url::to('/site/location-user'),
+                ]);
+                ?>
+                    <h3><i class="fa fa-location-arrow"></i> ВАШ ГОРОД <span id="setLocality" class="loc-h-city"><?=Yii::$app->session->get('locality')?></span>?</h3>
                     <h5>Если мы определили не верно Ваш город, пожалуйста, найдите его самостоятельно</h5>
                     <input type="text" class="form-control autocomplete" id="search_out" name="search_out" placeholder="Поиск">
-                    <button type="button" class="btn btn-md btn-success loc-submit">Подтвердить</button>
+                    <input type="hidden" id="country" name="country" value="<?=Yii::$app->session->get('country')?>">
+                    <input type="hidden" id="administrative_area_level_1" name="administrative_area_level_1" value="<?=Yii::$app->session->get('region')?>">
+                    <input type="hidden" id="locality" name="locality" value="<?=Yii::$app->session->get('locality')?>">
+                    <input type="hidden" id="currentUrl" name="currentUrl" value="<?=Yii::$app->getRequest()->getUrl()?>">
+                    <button type="submit" class="btn btn-md btn-success loc-submit">Подтвердить</button>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>
@@ -55,6 +62,9 @@ $this->registerJs("
       //componentRestrictions: {country: 'ru'}
      };
     var geocoder = new google.maps.Geocoder;
+    ",yii\web\View::POS_END);
+if (empty(Yii::$app->session->get('locality')) || empty(Yii::$app->session->get('country'))) {
+$this->registerJs("
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
             var pos = {lat: parseFloat(position.coords.latitude),
@@ -77,7 +87,9 @@ $this->registerJs("
                     geocodeLatLng(geocoder, pos);
                 });
     }
-    
+",yii\web\View::POS_END);
+}
+$this->registerJs("
     for (var i = 0; i < acInputs.length; i++) {
     
         var autocomplete = new google.maps.places.Autocomplete(acInputs[i], options);
@@ -94,18 +106,24 @@ $this->registerJs("
                 if(address_components[j].types[0]=='country')
                 {
                     setCountry = address_components[j].long_name;
+                    if(setCountry=='undefined'){setCountry = '';}
                 }
                 if(address_components[j].types[0]=='locality')
                 {
                     setLocality = address_components[j].long_name;
+                    if(setLocality=='undefined'){setLocality = '';}
                     document.getElementById('setLocality').innerHTML = setLocality;
                     document.getElementById('locHeader').innerHTML = setLocality;
                 } 
                 if(address_components[j].types[0]=='administrative_area_level_1')
                 {
                     setRegion = address_components[j].long_name; 
+                    if(setRegion=='undefined'){setRegion = '';}
                 }   
            }
+           document.getElementById('country').value = setCountry;
+           document.getElementById('locality').value = setLocality;
+           document.getElementById('administrative_area_level_1').value = setRegion;
 
         });
     }
@@ -122,14 +140,21 @@ $this->registerJs("
                     var addr = results[1].address_components[i];
                     if (addr.types[0] == 'country')
                     setCountry = addr.long_name;
+                    if(setCountry=='undefined'){setCountry = '';}
                     if (addr.types[0] == 'locality')
                     setLocality = addr.long_name;
+                    if(setLocality=='undefined'){setLocality = '';}
                     if (addr.types[0] == 'administrative_area_level_1')
                     setRegion = addr.long_name;
+                    if(setRegion=='undefined'){setRegion = '';}
                     
                 }            
                 document.getElementById('setLocality').innerHTML = setLocality;
                 document.getElementById('locHeader').innerHTML = setLocality;
+                
+                document.getElementById('country').value = setCountry;
+                document.getElementById('locality').value = setLocality;
+                document.getElementById('administrative_area_level_1').value = setRegion;
             } else {
               console.log('No results found');
             }

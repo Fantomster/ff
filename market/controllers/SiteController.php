@@ -76,7 +76,32 @@ class SiteController extends Controller {
      *
      * @return string
      */
+    public function beforeAction($action)
+    {
+        $session = Yii::$app->session;
+        if (!$session->has('userLocation') && Yii::$app->controller->module->requestedRoute != 'site/index'){
+            return $this->redirect(['/site/index']);
+        }else{
+           
+        }
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+        return true;
+    }
+    public function actionSetLocationUser() {
+        $session = Yii::$app->session;
+        $session->set('locality', '1');
+        $session->set('region', '2');
+        $session->set('country', '3');
+        
+    }
     public function actionIndex() {
+        $userLocation = "";
+        $session = Yii::$app->session;
+        if ($session->has('userLocation')){
+            $userLocation = $session->has('userLocation');
+        }
         $relationSuppliers = [];
         if (\Yii::$app->user->isGuest) {
             
@@ -134,7 +159,7 @@ class SiteController extends Controller {
 
         
         
-        return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
+        return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount', 'userLocation'));
     }
 
     public function actionProduct($id) {
@@ -167,7 +192,6 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
     }
-    
     public function actionSendService($id) {
         return $this->renderAjax('/site/restaurant/_formSendService', compact('id'));
     }
@@ -891,33 +915,17 @@ class SiteController extends Controller {
                 ]
             ];
             $params_suppliers = [
-                'filtered' => [
-                    'query' => [
-                        'match' => [
-                            'supplier_name' => [
-                                'query' => $search,
-                            ]   
-                        ],
-                        
-                    ],
-                        
-                    
-                    'filter' => [
-                        'bool' => [
-                            'must_not' => [
-                                'terms' => [
-                                    'supplier_id' => $filterNotIn
-                                ]
-                            ]
-                        ],
+                "query" => [
+                        "query_string" => [
+                          "query" => $search . "*",
+                          "fields" => [
+                            "supplier_name",
+                          ],
+                          "default_operator" => "AND"
+                        ]
                     ]
-                ],
-//                'highlight' => [
-//                        'fields' => [
-//                          'supplier_name' => [] 
-//                        ]
-//                    ],
-            ];
+                  ];
+                    
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();
             $search_products_count = \common\models\ES\Product::find()->query($params_products)

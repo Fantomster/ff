@@ -16,7 +16,8 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru', 'https://tmp.f-keeper.ru',
+                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
+                        'https://franch.f-keeper.dev','http://franch.f-keeper.dev','https://franch.f-keeper.ru','http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
                                  'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
@@ -30,6 +31,7 @@ class FrController extends \yii\rest\Controller {
     public function actionPost() {
         if (Yii::$app->request->post('FIELDS')) {
             $fields = Yii::$app->request->post('FIELDS');
+            $sitepage = isset($fields['sitepage']) ? Html::encode($fields['sitepage']) : '';
             $cname = Html::encode($fields['name']);
             $cphone = Html::encode($fields['phone']);
             $cemail = isset($fields['email']) ? Html::encode($fields['email']) : '';
@@ -52,11 +54,16 @@ class FrController extends \yii\rest\Controller {
             if ($lpartner == '199894' || $lpartner == '199896') {
                 $lead_status_id = 465726; //643219; //id этапа продаж, куда помещать сделку
             }
+            
             if (!empty($type) && $type == 'restaurant'){
                 $lpartner = '';
                 $lead_name = 'Заявка ресторана';
                 $responsible_user_id = 1427371;
                 $lead_status_id = 465729;
+            }
+            if($sitepage == "franch"){
+                $lead_status_id = 465726;
+                $responsible_user_id = 1515736;
             }
             $contact_name = $cname; //Название добавляемого контакта
             $contact_phone = $cphone; //Телефон контакта

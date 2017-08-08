@@ -58,6 +58,15 @@ if (!Yii::$app->user->isGuest) {
         border:none;
     }
   }
+  #locHeader{
+    font-size: 19px;
+    color: #84bf76;
+    position: absolute;
+    margin-top: 20px;
+    margin-left: 5px;
+    line-height: 18px;
+    border-bottom: 1px dotted;    
+  }
 </style>
 <section>
     <nav class="navbar navbar-inverse navbar-static-top example6 shadow-bottom">
@@ -71,7 +80,7 @@ if (!Yii::$app->user->isGuest) {
                 </button>
                 <a class="navbar-brand text-hide" href="<?= Url::home(); ?>">f-keeper</a>
             </div>
-            <div id="navbar6" class="navbar-collapse collapse">
+            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader"></span>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>

@@ -3,11 +3,12 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use yii\bootstrap\Modal;
 
-//market\assets\AppAsset::register($this);
 
 $this->title = 'F-MARKET главная';
 ?>
+
 <div class="row">
   <div class="col-md-12 min-padding">
     <h3>Популярные товары</h3>  
@@ -126,9 +127,16 @@ $this->title = 'F-MARKET главная';
   </div> 
 </div> 
 <?php 
+if (!$userLocation) {
+    //\frontend\assets\GoogleMapsAsset::register($this);
+    echo $this->render("main/_userLocation");
+}
+?>
+
+<?php 
 $productMoreUrl = Url::to(['site/ajax-product-more']);
 $supplierMore = Url::to(['site/ajax-supplier-more']);
-
+$userLocation = Url::to(['site/set-location-user']);
 $customJs = <<< JS
 var num = 6;
 $('#product-more').on("click", function (e) {
@@ -151,6 +159,23 @@ $('#product-more').on("click", function (e) {
        }
     });
 });
+$(document).on("click",'.loc-submit', function (e) {
+    e.preventDefault();
+    $.ajax({
+      url: "$userLocation",
+      type: "GET",
+      data: {"num": num},
+      cache: false,
+      success: function(response){
+          if(response == 0){
+             //alert("Больше нет записей");
+          }else{
+             $("#supplier-block").append(response);
+             num = num + 6;
+          }
+       }
+    });    
+});
 $('#supplier-more').on("click", function (e) {
     e.preventDefault();
     console.log('supplier click more');
@@ -168,7 +193,7 @@ $('#supplier-more').on("click", function (e) {
           }
        }
     });
-});       
+});
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

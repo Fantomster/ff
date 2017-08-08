@@ -2,7 +2,10 @@
 use yii\helpers\Html;
 use common\models\Organization;
 use common\models\CatalogBaseGoods;
-
+$locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
 $count_products_from_mp = CatalogBaseGoods::find()
                 ->joinWith('vendor')
                 ->where([
@@ -10,6 +13,7 @@ $count_products_from_mp = CatalogBaseGoods::find()
                     'market_place'=>CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                ->andWhere($locationWhere)
                 ->andWhere('category_id is not null')
                 ->count();
 $left_menu_categorys = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();

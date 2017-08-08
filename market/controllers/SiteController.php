@@ -76,7 +76,43 @@ class SiteController extends Controller {
      *
      * @return string
      */
+    public function beforeAction($action)
+    {
+        $session = Yii::$app->session;
+        if ((!$session->has('locality') || !$session->has('region')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
+            return $this->redirect(['/site/index']);
+        }else{
+           
+        }
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+        return true;
+    }
+    public function actionLocationUser() {
+        $request = Yii::$app->request;
+        $locality = $request->post('locality');
+        $region = $request->post('administrative_area_level_1');
+        $country = $request->post('country');
+        $currentUrl = $request->post('currentUrl');
+        
+        Yii::$app->session->set('locality', $locality);
+        Yii::$app->session->set('region', $region);
+        Yii::$app->session->set('country', $country);
+        
+        return $this->redirect([$currentUrl]);
+    }
+    public function actionClearSession() {
+        var_dump(Yii::$app->session->get('locality'));
+        Yii::$app->session->remove('locality');
+        Yii::$app->session->remove('region');
+        Yii::$app->session->remove('country');
+        
+    }
     public function actionIndex() {
+        $userLocation = "";
+        $session = Yii::$app->session;
+        
         $relationSuppliers = [];
         if (\Yii::$app->user->isGuest) {
             
@@ -91,12 +127,17 @@ class SiteController extends Controller {
                         ->all();  
             }
         }
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         $topSuppliers = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere(['not in', 'id', $relationSuppliers])
+                ->andWhere($locationWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)
                 ->all();
@@ -106,6 +147,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
+                ->andWhere($locationWhere)
                 ->andWhere(['not in', 'id', $relationSuppliers])
                 ->count();
         
@@ -117,6 +159,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
+                ->andWhere($locationWhere)
                 ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)
@@ -129,12 +172,13 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
+                ->andWhere($locationWhere)
                 ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
                 ->count();
 
         
         
-        return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
+        return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount', 'userLocation'));
     }
 
     public function actionProduct($id) {
@@ -167,12 +211,15 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
     }
-    
     public function actionSendService($id) {
         return $this->renderAjax('/site/restaurant/_formSendService', compact('id'));
     }
     
     public function actionSearchProducts($search) {
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         if (\Yii::$app->user->isGuest) {
             $filterNotIn = [];
         } else {
@@ -605,11 +652,16 @@ class SiteController extends Controller {
         }
     }
     public function actionRestaurants() {
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         $restaurants = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
+                ->andWhere($locationWhere)
                 //->orderBy(['rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
@@ -618,18 +670,23 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
+                ->andWhere($locationWhere)
                 ->limit(12)
                 ->count();
 
         return $this->render('restaurants', compact('restaurants', 'restaurantsCount'));
     }
     public function actionAjaxRestaurantsMore($num) {
-        
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         $count = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
+                ->andWhere($locationWhere)
                 ->limit(6)->offset($num)
                 ->count();
         if ($count > 0) {
@@ -638,12 +695,17 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_RESTAURANT,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
+                ->andWhere($locationWhere)
                 ->limit(6)->offset($num)
                 ->all();
             return $this->renderPartial('/site/main/_ajaxRestaurantMore', compact('restaurants'));
         }
     }
     public function actionAjaxSupplierMore($num) {
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
         } else {
@@ -666,6 +728,7 @@ class SiteController extends Controller {
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere($addwhere)
+                ->andWhere($locationWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)->offset($num)
                 ->count();
@@ -676,6 +739,7 @@ class SiteController extends Controller {
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere($addwhere)
+                ->andWhere($locationWhere)
                 ->orderBy(['rating'=>SORT_DESC]) 
                 ->limit(6)->offset($num)
                 ->all();
@@ -685,6 +749,10 @@ class SiteController extends Controller {
     }
 
     public function actionCategory($id) {
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
         } else {
@@ -709,6 +777,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
+                ->andWhere($locationWhere)
                 ->andWhere($addwhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC]) 
                 ->limit(12)
@@ -722,6 +791,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
+                ->andWhere($locationWhere)
                 ->andWhere($addwhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)
@@ -748,6 +818,10 @@ class SiteController extends Controller {
     }
     
     public function actionAjaxProductCatLoader($num, $category) {
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         $cbgTable = CatalogBaseGoods::tableName();
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
@@ -773,6 +847,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                    ->andWhere($locationWhere)
                     ->andWhere($addwhere)
                     ->offset($num)
                     ->limit(6)
@@ -787,6 +862,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
+                    ->andWhere($locationWhere)
                     ->andWhere($addwhere)
                     ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
@@ -891,33 +967,17 @@ class SiteController extends Controller {
                 ]
             ];
             $params_suppliers = [
-                'filtered' => [
-                    'query' => [
-                        'match' => [
-                            'supplier_name' => [
-                                'query' => $search,
-                            ]   
-                        ],
-                        
-                    ],
-                        
-                    
-                    'filter' => [
-                        'bool' => [
-                            'must_not' => [
-                                'terms' => [
-                                    'supplier_id' => $filterNotIn
-                                ]
-                            ]
-                        ],
+                "query" => [
+                        "query_string" => [
+                          "query" => $search . "*",
+                          "fields" => [
+                            "supplier_name",
+                          ],
+                          "default_operator" => "AND"
+                        ]
                     ]
-                ],
-//                'highlight' => [
-//                        'fields' => [
-//                          'supplier_name' => [] 
-//                        ]
-//                    ],
-            ];
+                  ];
+                    
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();
             $search_products_count = \common\models\ES\Product::find()->query($params_products)

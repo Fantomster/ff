@@ -3,8 +3,7 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
-
-//market\assets\AppAsset::register($this);
+use yii\bootstrap\Modal;
 
 $this->title = 'F-MARKET главная';
 ?>
@@ -125,7 +124,10 @@ $this->title = 'F-MARKET главная';
     </div>
   </div> 
 </div> 
+
+
 <?php 
+        
 $productMoreUrl = Url::to(['site/ajax-product-more']);
 $supplierMore = Url::to(['site/ajax-supplier-more']);
 
@@ -134,7 +136,6 @@ var num = 6;
 $('#product-more').on("click", function (e) {
     e.preventDefault();
     $('#product-more').addClass('disabled');
-    console.log('product click more');
     $.ajax({
       url: "$productMoreUrl",
       type: "GET",
@@ -168,7 +169,7 @@ $('#supplier-more').on("click", function (e) {
           }
        }
     });
-});       
+});      
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

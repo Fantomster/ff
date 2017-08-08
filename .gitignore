@@ -46,3 +46,4 @@ phpunit.phar
 /api/config/params-local.php
 /api/common/runtime/
 /api/web/assets/
+/api/runtime/

@@ -11,6 +11,9 @@ class NotificationHelper {
     public static function actionConfirm($user)
     {
         $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->one();
+        
+        if($fcm == null)
+            return;
       
         $message = Yii::$app->fcm->createMessage();
         $message->addRecipient(new Device($fcm->token));
@@ -25,9 +28,31 @@ class NotificationHelper {
         //var_dump($response->getStatusCode());
     }
     
+    public static function actionForgot($user)
+    {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->one();
+        
+        if($fcm == null)
+            return;
+      
+        $message = Yii::$app->fcm->createMessage();
+        $message->addRecipient(new Device($fcm->token));
+        $message->setData(['action' => 'forgot',
+                        'title' => 'Здравствуйте, '.$user->email,
+                        'body' => 
+'Пароль Вашей учетной записи в системе f-keeper изменен. '
+.'Теперь Вы можете авторизоваться с новым паролем.']);
+
+        $response = Yii::$app->fcm->send($message);
+        //var_dump($response->getStatusCode());*/
+    }
+    
     public static function actionComplete($user)
     {
         $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+        
+        if($fcm == null)
+            return;
       
         foreach ($fcm as $row)
         {

@@ -55,9 +55,7 @@ class GuideSearch extends Guide {
         ]);
         
         // grid filtering conditions
-        $query->andFilterWhere([
-            'updated_at' => $this->updated_at,
-        ]);
+        $query->andFilterWhere(['like', 'name', $this->searchString]);
 
         return $dataProvider;
     }

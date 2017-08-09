@@ -11,6 +11,9 @@ class NotificationHelper {
     public static function actionConfirm($user)
     {
         $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->one();
+        
+        if($fcm == null)
+            return;
       
         $message = Yii::$app->fcm->createMessage();
         $message->addRecipient(new Device($fcm->token));
@@ -25,9 +28,31 @@ class NotificationHelper {
         //var_dump($response->getStatusCode());
     }
     
+    public static function actionForgot($user)
+    {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->one();
+        
+        if($fcm == null)
+            return;
+      
+        $message = Yii::$app->fcm->createMessage();
+        $message->addRecipient(new Device($fcm->token));
+        $message->setData(['action' => 'forgot',
+                        'title' => 'Здравствуйте, '.$user->email,
+                        'body' => 
+'Пароль Вашей учетной записи в системе f-keeper изменен. '
+.'Теперь Вы можете авторизоваться с новым паролем.']);
+
+        $response = Yii::$app->fcm->send($message);
+        //var_dump($response->getStatusCode());*/
+    }
+    
     public static function actionComplete($user)
     {
         $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+        
+        if($fcm == null)
+            return;
       
         foreach ($fcm as $row)
         {
@@ -42,23 +67,30 @@ class NotificationHelper {
         }
     }
     
-    public static function actionSendMessage($recipient_id, $message_id)
+    public static function actionSendMessage($message_id)
     {
-        $users = \common\models\User::find()->where(['organization_id' => $recipient_id])->all();
+        
         $message_data = \common\models\OrderChat::findOne(['id' => $message_id]);
-        foreach ($users as $recipient)
+        
+        $order = \common\models\Order::findOne(['id' => $message_data->order_id]);
+        
+        
+
+        $users = \common\models\User::find('organization_id = :client OR organization_id = :vendor', [':client' => $order->client_id, ':vendor' => $order->vendor_id])->all();
+        
+        foreach ($users as $user)
         {
-            $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $recipient->id])->all();
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
 
             foreach ($fcm as $row)
             {
                 $message = Yii::$app->fcm->createMessage();
                 $message->addRecipient(new Device($row->token));
-                $message->setData(['action' => 'forgot',
-                            'title' => 'Здравствуйте, '.$row->email,
-                            'body' => 'Пароль Вашей учетной записи в системе f-keeper изменен.',
-                            'action' => 'new_message',
-                            'message' => Json::encode($message_data->attributes)]);
+                $message->setData(['action' => 'new_message',
+                            'title' => 'Новое сообщение по заказу #'.$message_data->order_id,
+                            'body' => $message_data->message,
+                            'message' => Json::encode($message_data->attributes),
+                            'activity' => "Work"]);
 
                 $response = Yii::$app->fcm->send($message);
                 //var_dump($response->getStatusCode());

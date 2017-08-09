@@ -80,7 +80,7 @@ if (!Yii::$app->user->isGuest) {
                 </button>
                 <a class="navbar-brand text-hide" href="<?= Url::home(); ?>">f-keeper</a>
             </div>
-            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader"></span>
+            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader"><?=Yii::$app->session->get('locality')?></span>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>
@@ -110,4 +110,23 @@ if (!Yii::$app->user->isGuest) {
         </div>
         <!--/.container -->
     </nav>
-</section> 
+</section>
+<?php 
+//\frontend\assets\GoogleMapsAsset::register($this);
+if (empty(Yii::$app->session->get('locality')) || empty(Yii::$app->session->get('country'))) {
+$this->registerJs("
+  $(\"#data-modal\").length>0&&$(\"#data-modal\").modal({backdrop: \"static\", keyboard: false});
+",yii\web\View::POS_END);    
+}
+?>
+<?php
+\market\assets\GoogleMapsAsset::register($this);
+echo $this->render("../site/main/_userLocation");
+$userLocation = Url::to(['/site/location-user']);
+$customJs = <<< JS
+$(document).on("click","#locHeader", function () { 
+    $("#data-modal").length>0&&$("#data-modal").modal({backdrop: "static", keyboard: false});
+});       
+JS;
+$this->registerJs($customJs, View::POS_READY);
+?>

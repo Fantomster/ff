@@ -463,6 +463,22 @@ class OrderController extends DefaultController {
             }
         }
     }
+    
+    public function actionAjaxCreateGuide() {
+        //
+    }
+    
+    public function actionAjaxDeleteGuide() {
+        //
+    }
+    
+    public function actionAjaxAddToGuide() {
+        //
+    }
+    
+    public function actionAjaxRemoveFromGuide() {
+        //
+    }
 
     public function actionRefreshCart() {
         $client = $this->currentUser->organization;

@@ -118,6 +118,9 @@ $this->registerJs("
   $(\"#data-modal\").length>0&&$(\"#data-modal\").modal({backdrop: \"static\", keyboard: false});
 ",yii\web\View::POS_END);    
 }
+?>
+<?php
+\market\assets\GoogleMapsAsset::register($this);
 echo $this->render("../site/main/_userLocation");
 $userLocation = Url::to(['/site/location-user']);
 $customJs = <<< JS

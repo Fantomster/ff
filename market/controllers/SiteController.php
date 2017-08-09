@@ -95,11 +95,16 @@ class SiteController extends Controller {
         $region = $request->post('administrative_area_level_1');
         $country = $request->post('country');
         $currentUrl = $request->post('currentUrl');
-        
+        if($locality == '' || $locality == 'undefined'){
+        Yii::$app->session->addFlash("warning","");
+        Yii::$app->session->set('locality', 0);
+        Yii::$app->session->set('region', 0);
+        Yii::$app->session->set('country', 0);    
+        }else{
         Yii::$app->session->set('locality', $locality);
         Yii::$app->session->set('region', $region);
         Yii::$app->session->set('country', $country);
-        
+        }
         return $this->redirect([$currentUrl]);
     }
     public function actionClearSession() {

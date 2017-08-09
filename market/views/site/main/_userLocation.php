@@ -33,6 +33,12 @@ yii\web\View::POS_READY);
                             'action' => Url::to('/site/location-user'),
                 ]);
                 ?>
+                  <?php if (Yii::$app->session->hasFlash('warning')): ?>
+                <div class="alert alert-danger">
+                <strong>Ошибка!</strong> Извините, данный город не поддерживается системой F-keeper!<br>
+                    Обратитесь в службу поддержки и мы обязательно вам поможем!
+                </div>
+                  <?php endif; ?>
                     <h3><i class="fa fa-location-arrow"></i> ВАШ ГОРОД <span id="setLocality" class="loc-h-city"><?=Yii::$app->session->get('locality')?></span>?</h3>
                     <h5>Если мы определили не верно Ваш город, пожалуйста, найдите его самостоятельно</h5>
                     <input type="text" class="form-control autocomplete" id="search_out" name="search_out" placeholder="Поиск">

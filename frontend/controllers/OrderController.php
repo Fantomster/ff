@@ -712,16 +712,16 @@ class OrderController extends DefaultController {
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                         if ($position['quantity'] == 0) {
-                            $message .= "<br/>удалил $product->product_name из заказа";
+                            $message .= "<br/> удалил $product->product_name из заказа";
                         } else {
                             $oldQuantity = $product->quantity + 0;
                             $newQuantity = $position["quantity"] + 0;
-                            $message .= "<br/>изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                            $message .= "<br/> изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
                         }
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб";
+                        $message .= "<br/> изменил цену $product->product_name с $product->price руб на $position[price] руб";
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();
@@ -767,17 +767,17 @@ class OrderController extends DefaultController {
                     $order->discount = $order->discount_type ? abs($discount['discount']) : null;
                     $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
-                        $message = $order->discount . " руб";
+                        $discountValue = $order->discount . " руб";
                     } else {
-                        $message = $order->discount . "%";
+                        $discountValue = $order->discount . "%";
                     }
-                    //$this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
-                    //$this->sendOrderChange($order->client, $order);
+                    $message .= "<br/> сделал скидку на заказ №$order->id в размере: $discountValue";
+                    $orderChanged = 1;
                 }
             } else {
                 if ($order->discount > 0) {
-                    //$this->sendSystemMessage($user, $order->id, $order->vendor->name . ' отменил скидку на заказ №' . $order->id);
-                    //$this->sendOrderChange($order->vendor, $order);
+                    $message .= "<br/> отменил скидку на заказ №$order->id";
+                    $orderChanged = 1;
                 }
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 $order->discount = null;
@@ -788,11 +788,6 @@ class OrderController extends DefaultController {
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->vendor->users as $recipient) {
-                    /* $email = $recipient->email;
-                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                      ->setTo($email)
-                      ->setSubject($subject)
-                      ->send(); */
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
@@ -812,11 +807,6 @@ class OrderController extends DefaultController {
                 $this->sendOrderChange($order->vendor, $order);
                 $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->client->users as $recipient) {
-                    /* $email = $recipient->email;
-                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                      ->setTo($email)
-                      ->setSubject($subject)
-                      ->send(); */
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                         $text = $subject;
                         $target = $recipient->profile->phone;

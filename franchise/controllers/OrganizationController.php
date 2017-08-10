@@ -32,10 +32,10 @@ class OrganizationController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'clients', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent'],
+                'only' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'clients', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
+                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -67,7 +67,7 @@ class OrganizationController extends DefaultController {
 
     /**
      * Displays clients list
-     * 
+     *
      * @return mixed
      */
     public function actionClients() {
@@ -186,7 +186,7 @@ class OrganizationController extends DefaultController {
 
     /**
      * Displays vendors list
-     * 
+     *
      * @return mixed
      */
     public function actionVendors() {
@@ -212,11 +212,11 @@ class OrganizationController extends DefaultController {
 
     /**
      * Displays vendors list
-     * 
+     *
      * @return mixed
      */
     public function actionAgent() {
-        
+
         return $this->render('agent', compact('dataProvider'));
     }
 
@@ -320,7 +320,7 @@ class OrganizationController extends DefaultController {
 
     /**
      * Adds organization to franchisee
-     * 
+     *
      * @return bool
      */
     private function addOrganization($organization) {
@@ -328,6 +328,31 @@ class OrganizationController extends DefaultController {
         $associate->organization_id = $organization->id;
         $associate->franchisee_id = $this->currentFranchisee->id;
         return $associate->save();
+    }
+
+
+    /**
+     * Updates franchisee_id to 1 for vendor or deletes association if exists
+     *
+     * @return bool
+     */
+    public function actionDelete($id) {
+        $associate = FranchiseeAssociate::findOne($id);
+        if(!empty($associate)){
+            $organizationsCount = FranchiseeAssociate::find()->where(['organization_id'=>$associate->organization_id, 'franchisee_id'=>1])->count();
+            if($organizationsCount){
+                $associate->delete();
+            }else{
+                $associate->franchisee_id = 1;
+                $associate->save();
+            }
+            if(Yii::$app->request->isPjax){
+                return 'success';
+            }else{
+                return $this->actionVendors();
+            }
+        }
+        return $this->actionVendors();
     }
 
 }

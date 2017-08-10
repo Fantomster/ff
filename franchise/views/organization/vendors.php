@@ -39,10 +39,21 @@ $this->registerJs('
                 document.location = $(this).find("a").attr("href");
                 return false;
             }
+            
             var url = $(this).parent("tr").data("url");
-            if (url !== undefined) {
+            if (url !== undefined && !$(this).find("a").hasClass("f-delete")) {
                 $("#vendorInfo").modal({backdrop:"static",toggle:"modal"}).load(url);
             }
+        });
+        $("body").on("click", ".f-delete", function(e){
+            e.preventDefault();
+            var url = $(this).attr("url");
+            var obj = $(this);
+            $.ajax({
+              url: url,
+            }).done(function() {
+              obj.parent("td").parent("tr").fadeOut("fast", function() {});
+            });
         });
     });
         ');
@@ -239,6 +250,17 @@ $this->registerCss("
                                     return Html::a('<i class="fa fa-signal"></i>', ['analytics/vendor-stats', 'id' => $data["id"]], ['class' => 'stats']);
                                 },
                                     ],
+                            [
+                                'class' => 'yii\grid\ActionColumn',
+                                'template' => '{delete}',
+                                'buttons' => [
+                                    'delete' => function ($url, $data) {
+                                        return Html::a(
+                                            '<span class="glyphicon glyphicon-trash text-red" title="Удалить"></span>',
+                                            null, ['data-pjax'=>'0', 'class' => 'f-delete', 'url'=>Url::to(['organization/delete', 'id' => $data["franchisee_associate_id"]])]);
+                                    },
+                                ],
+                            ],
                                 ],
                                 'rowOptions' => function ($model, $key, $index, $grid) {
                             return ['data-url' => Url::to(['organization/ajax-show-vendor', 'id' => $model["id"]])];

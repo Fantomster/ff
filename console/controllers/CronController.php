@@ -303,7 +303,6 @@ class CronController extends Controller {
                 $organization_model = Organization::findOne($organization->id);
                 $organization_model->franchisee_sorted = 0;
                 $organization_model->save();    
-                
             }
         }
     }

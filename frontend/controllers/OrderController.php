@@ -372,25 +372,17 @@ class OrderController extends DefaultController {
             $this->saveCartChanges($content);
             if (!Yii::$app->request->post('all')) {
                 $order_id = Yii::$app->request->post('id');
-                $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-                if ($order) {
-                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                    $order->created_by_id = $this->currentUser->id;
-                    $order->created_at = gmdate("Y-m-d H:i:s");
-                    $order->save();
-                    $this->sendNewOrder($order->vendor);
-                    $this->sendOrderCreated($this->currentUser, $order);
-                }
+                $orders[] = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-                foreach ($orders as $order) {
-                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                    $order->created_by_id = $this->currentUser->id;
-                    $order->created_at = gmdate("Y-m-d H:i:s");
-                    $order->save();
-                    $this->sendNewOrder($order->vendor);
-                    $this->sendOrderCreated($this->currentUser, $order);
-                }
+            }
+            foreach ($orders as $order) {
+                $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $order->created_by_id = $this->currentUser->id;
+                $order->created_at = gmdate("Y-m-d H:i:s");
+                $order->save();
+                $this->sendNewOrder($order->vendor);
+                $this->sendOrderCreated($this->currentUser, $order);
             }
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
@@ -941,14 +933,14 @@ class OrderController extends DefaultController {
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . ' подтвердил заказ!';
-                        $this->sendOrderProcessing($order->createdBy, $order);
+                        $this->sendOrderProcessing($order->client, $order);
                         $edit = true;
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $systemMessage = $order->vendor->name . ' подтвердил заказ!';
                         $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
                         $edit = true;
-                        $this->sendOrderProcessing($order->createdBy, $order);
+                        $this->sendOrderProcessing($order->vendor, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
@@ -1308,6 +1300,12 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
+            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                $text = $order->vendor->name . " выполнил заказ в системе f-keeper №" . $order->id;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
+            }
         }
     }
 
@@ -1338,8 +1336,10 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
+        }
+        foreach ($order->vendor->users as $recipient) {
             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                $text = $senderOrg->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
+                $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1350,15 +1350,14 @@ class OrderController extends DefaultController {
     /**
      * Sends mail informing both sides that vendor confirmed order
      * 
-     * @param User $sender
+     * @param Organization $senderOrg
      * @param Order $order
      */
-    private function sendOrderProcessing($sender, $order) {
+    private function sendOrderProcessing($senderOrg, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $senderOrg = $sender->organization;
         $subject = "f-keeper: заказ №" . $order->id . " подтвержден!";
 
         $searchModel = new OrderContentSearch();
@@ -1373,6 +1372,12 @@ class OrderController extends DefaultController {
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
+            }
+            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                $text = $order->vendor->name . " приступил к выполнению заказа в системе f-keeper №" . $order->id;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
             }
         }
     }
@@ -1402,6 +1407,12 @@ class OrderController extends DefaultController {
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
+            }
+            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
             }
         }
     }

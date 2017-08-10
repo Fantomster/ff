@@ -34,22 +34,6 @@ class OrderController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-//                'only' => [
-//                    'index',
-//                    'view',
-//                    'edit',
-//                    'create',
-//                    'checkout',
-//                    'send-message',
-//                    'refresh-cart',
-//                    'ajax-add-to-cart',
-//                    'ajax-delete-order',
-//                    'ajax-make-order',
-//                    'ajax-order-action',
-//                    'ajax-change-quantity',
-//                    'ajax-refresh-buttons',
-//                    'ajax-remove-position',
-//                ],
                 'rules' => [
                     [
                         'actions' => [
@@ -222,7 +206,6 @@ class OrderController extends DefaultController {
             $position->article = $article;
             $position->save();
         }
-        //$orders = $client->getCart();
         $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);

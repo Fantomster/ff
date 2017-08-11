@@ -27,11 +27,11 @@ return [
                 ],
                 'email' => [
                     'class' => 'yii\log\EmailTarget',
-                    'except' => ['yii\web\HttpException:404'],
+                    'except' => ['yii\web\HttpException:404','yii\web\HttpException:403'],
                     'levels' => ['error'],
                     'message' => [
                         'from' => 'noreply@f-keeper.ru', 
-                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com'], 
+                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com','xsupervisor@f-keeper.ru'], 
                         'subject' => 'Error message',
                     ],
                     'mailer' => 'mailer',

@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\controllers;
 
 use Yii;
 use yii\web\Controller;
+use common\models\Organization;
 // use yii\mongosoft\soapserver\Action;
 
 /**
@@ -12,7 +13,7 @@ use yii\web\Controller;
  * Author: R.Smirnov
  */
 
-class DefaultController extends Controller {
+class DefaultController extends \frontend\controllers\DefaultController {
     
     public $enableCsrfValidation = false;
     
@@ -49,6 +50,17 @@ class DefaultController extends Controller {
      
         echo "tabson";
         
+    }
+    
+    protected function setLayout($orgType) {
+        switch ($orgType) {
+                case Organization::TYPE_RESTAURANT:
+                    $this->layout = '@frontend/views/layouts/main-client.php';
+                    break;
+                case Organization::TYPE_SUPPLIER:
+                    $this->layout = 'main-vendor';
+                    break;
+            }
     }
     
     

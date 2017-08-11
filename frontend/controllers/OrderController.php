@@ -34,22 +34,6 @@ class OrderController extends DefaultController {
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-//                'only' => [
-//                    'index',
-//                    'view',
-//                    'edit',
-//                    'create',
-//                    'checkout',
-//                    'send-message',
-//                    'refresh-cart',
-//                    'ajax-add-to-cart',
-//                    'ajax-delete-order',
-//                    'ajax-make-order',
-//                    'ajax-order-action',
-//                    'ajax-change-quantity',
-//                    'ajax-refresh-buttons',
-//                    'ajax-remove-position',
-//                ],
                 'rules' => [
                     [
                         'actions' => [
@@ -126,8 +110,6 @@ class OrderController extends DefaultController {
 
         if (isset($params['OrderCatalogSearch'])) {
             $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int) $params['OrderCatalogSearch']['selectedVendor'] : null;
-            //$selectedVendor = ($selectedCategory == $params['OrderCatalogSearch']['selectedCategory']) ? $params['OrderCatalogSearch']['selectedVendor'] : '';
-            //$selectedCategory = $params['OrderCatalogSearch']['selectedCategory'];
         }
 
         $vendors = $client->getSuppliers($selectedCategory);
@@ -224,7 +206,6 @@ class OrderController extends DefaultController {
             $position->article = $article;
             $position->save();
         }
-        //$orders = $client->getCart();
         $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);
@@ -345,9 +326,9 @@ class OrderController extends DefaultController {
                 $danger = true;
                 $order->save();
                 if ($initiator->type_id == Organization::TYPE_RESTAURANT) {
-                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
+                    $this->sendOrderCanceled($order->client, $order);
                 } else {
-                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
+                    $this->sendOrderCanceled($order->vendor, $order);
                 }
                 $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
                 Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -391,25 +372,17 @@ class OrderController extends DefaultController {
             $this->saveCartChanges($content);
             if (!Yii::$app->request->post('all')) {
                 $order_id = Yii::$app->request->post('id');
-                $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-                if ($order) {
-                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                    $order->created_by_id = $this->currentUser->id;
-                    $order->created_at = gmdate("Y-m-d H:i:s");
-                    $order->save();
-                    $this->sendNewOrder($order->vendor);
-                    $this->sendOrderCreated($this->currentUser, $order->vendor, $order);
-                }
+                $orders[] = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             } else {
                 $orders = Order::findAll(['client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
-                foreach ($orders as $order) {
-                    $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                    $order->created_by_id = $this->currentUser->id;
-                    $order->created_at = gmdate("Y-m-d H:i:s");
-                    $order->save();
-                    $this->sendNewOrder($order->vendor);
-                    $this->sendOrderCreated($this->currentUser, $order->vendor, $order);
-                }
+            }
+            foreach ($orders as $order) {
+                $order->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+                $order->created_by_id = $this->currentUser->id;
+                $order->created_at = gmdate("Y-m-d H:i:s");
+                $order->save();
+                $this->sendNewOrder($order->vendor);
+                $this->sendOrderCreated($this->currentUser, $order);
             }
             $cartCount = $client->getCartCount();
             $this->sendCartChange($client, $cartCount);
@@ -615,9 +588,9 @@ class OrderController extends DefaultController {
                 $systemMessage = $initiator . ' отменил заказ!';
                 $this->sendSystemMessage($user, $order->id, $systemMessage, true);
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
-                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
+                    $this->sendOrderCanceled($order->client, $order);
                 } else {
-                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
+                    $this->sendOrderCanceled($order->vendor, $order);
                 }
             }
             if (($discount['discount_type']) && ($discount['discount'])) {
@@ -640,16 +613,12 @@ class OrderController extends DefaultController {
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
-                if (isset($order->accepted_by_id)) {
-                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
-                } else {
-                    $this->sendOrderChangeAll($order->createdBy, $order);
-                }
+                $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                $this->sendOrderChange($order->vendor, $order);
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -657,7 +626,7 @@ class OrderController extends DefaultController {
                     $systemMessage = $order->client->name . ' получил заказ!';
                     $order->status = Order::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
-                    $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order);
+                    $this->sendOrderDone($order->acceptedBy, $order);
                 }
             }
         }
@@ -718,16 +687,16 @@ class OrderController extends DefaultController {
                     if ($quantityChanged) {
                         $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                         if ($position['quantity'] == 0) {
-                            $message .= "<br/>удалил $product->product_name из заказа";
+                            $message .= "<br/> удалил $product->product_name из заказа";
                         } else {
                             $oldQuantity = $product->quantity + 0;
                             $newQuantity = $position["quantity"] + 0;
-                            $message .= "<br/>изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                            $message .= "<br/> изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
                         }
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<br/>изменил цену $product->product_name с $product->price руб на $position[price] руб";
+                        $message .= "<br/> изменил цену $product->product_name с $product->price руб на $position[price] руб";
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();
@@ -761,9 +730,9 @@ class OrderController extends DefaultController {
                 $systemMessage = $initiator . ' отменил заказ!';
                 $this->sendSystemMessage($user, $order->id, $systemMessage, true);
                 if ($organizationType == Organization::TYPE_RESTAURANT) {
-                    $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
+                    $this->sendOrderCanceled($order->client, $order);
                 } else {
-                    $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
+                    $this->sendOrderCanceled($order->vendor, $order);
                 }
             }
             if (($discount['discount_type']) && ($discount['discount'])) {
@@ -773,17 +742,17 @@ class OrderController extends DefaultController {
                     $order->discount = $order->discount_type ? abs($discount['discount']) : null;
                     $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
-                        $message = $order->discount . " руб";
+                        $discountValue = $order->discount . " руб";
                     } else {
-                        $message = $order->discount . "%";
+                        $discountValue = $order->discount . "%";
                     }
-                    $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' сделал скидку на заказ №' . $order->id . " в размере:$message");
-                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                    $message .= "<br/> сделал скидку на заказ №$order->id в размере: $discountValue";
+                    $orderChanged = 1;
                 }
             } else {
                 if ($order->discount > 0) {
-                    $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' отменил скидку на заказ №' . $order->id);
-                    $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                    $message .= "<br/> отменил скидку на заказ №$order->id";
+                    $orderChanged = 1;
                 }
                 $order->discount_type = Order::DISCOUNT_NO_DISCOUNT;
                 $order->discount = null;
@@ -794,11 +763,6 @@ class OrderController extends DefaultController {
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->vendor->users as $recipient) {
-                    /* $email = $recipient->email;
-                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                      ->setTo($email)
-                      ->setSubject($subject)
-                      ->send(); */
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
@@ -808,25 +772,16 @@ class OrderController extends DefaultController {
                 }
                 $order->calculateTotalPrice();
                 $order->save();
-                if (isset($order->accepted_by_id)) {
-                    $this->sendOrderChange($order->createdBy, $order->acceptedBy, $order);
-                } else {
-                    $this->sendOrderChangeAll($order->createdBy, $order);
-                }
+                $this->sendOrderChange($order->client, $order);
             } elseif (($orderChanged > 0) && ($organizationType == Organization::TYPE_SUPPLIER)) {
                 $order->status = $order->status == Order::STATUS_PROCESSING ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT;
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
-                $this->sendOrderChange($order->acceptedBy, $order->createdBy, $order);
+                $this->sendOrderChange($order->vendor, $order);
                 $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->client->users as $recipient) {
-                    /* $email = $recipient->email;
-                      $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                      ->setTo($email)
-                      ->setSubject($subject)
-                      ->send(); */
                     if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
@@ -841,7 +796,7 @@ class OrderController extends DefaultController {
                     $systemMessage = $order->client->name . ' получил заказ!';
                     $order->status = Order::STATUS_DONE;
                     $this->sendSystemMessage($user, $order->id, $systemMessage);
-                    $this->sendOrderDone($order->acceptedBy, $order->createdBy, $order);
+                    $this->sendOrderDone($order->acceptedBy, $order);
                 }
             }
             $order->save();
@@ -964,9 +919,9 @@ class OrderController extends DefaultController {
                     $systemMessage = $initiator . ' отменил заказ!';
                     $danger = true;
                     if ($organizationType == Organization::TYPE_RESTAURANT) {
-                        $this->sendOrderCanceled($order->client, isset($order->accepted_by_id) ? $order->acceptedBy : $order->vendor, $order);
+                        $this->sendOrderCanceled($order->client, $order);
                     } else {
-                        $this->sendOrderCanceled($order->vendor, $order->createdBy, $order);
+                        $this->sendOrderCanceled($order->vendor, $order);
                     }
                     break;
                 case 'confirm':
@@ -974,23 +929,23 @@ class OrderController extends DefaultController {
                         $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-                        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order);
+                        $this->sendOrderDone($order->createdBy, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
                         $order->status = Order::STATUS_PROCESSING;
                         $systemMessage = $order->client->name . ' подтвердил заказ!';
-                        $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order);
+                        $this->sendOrderProcessing($order->client, $order);
                         $edit = true;
                     } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
                         $systemMessage = $order->vendor->name . ' подтвердил заказ!';
                         $order->accepted_by_id = $user_id;
                         $order->status = Order::STATUS_PROCESSING;
                         $edit = true;
-                        $this->sendOrderProcessing($order->createdBy, $order->acceptedBy, $order);
+                        $this->sendOrderProcessing($order->vendor, $order);
                     } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
                         $systemMessage = $order->client->name . ' получил заказ!';
                         $order->status = Order::STATUS_DONE;
                         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-                        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order);
+                        $this->sendOrderDone($order->createdBy, $order);
                     }
                     break;
             }
@@ -1015,7 +970,7 @@ class OrderController extends DefaultController {
         $systemMessage = $order->client->name . ' получил заказ!';
         $order->status = Order::STATUS_DONE;
         $order->actual_delivery = gmdate("Y-m-d H:i:s");
-        $this->sendOrderDone($order->createdBy, $order->acceptedBy, $order);
+        $this->sendOrderDone($order->createdBy, $order);
         if ($order->save()) {
             $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, false);
             $this->redirect(['order/view', 'id' => $id]);
@@ -1157,6 +1112,7 @@ class OrderController extends DefaultController {
             $newMessage->recipient_id = $order->client_id;
         }
         $newMessage->save();
+
         $name = $user->profile->full_name;
 
         $body = $this->renderPartial('_chat-message', [
@@ -1288,12 +1244,17 @@ class OrderController extends DefaultController {
         return true;
     }
 
-    private function sendOrderChange($sender, $recipient, $order) {
+    /**
+     * Sends email informing both sides about order change details
+     *
+     * @param Organization $senderOrg
+     * @param Order $order
+     */
+    private function sendOrderChange($senderOrg, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $senderOrg = $sender->organization;
         $subject = "f-keeper: измененения в заказе №" . $order->id;
 
         $searchModel = new OrderContentSearch();
@@ -1301,51 +1262,29 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-        $email = $recipient->email;
-        $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
-    }
-
-    private function sendOrderChangeAll($sender, $order) {
-        /** @var Mailer $mailer */
-        /** @var Message $message */
-        $mailer = Yii::$app->mailer;
-        // send email
-        $senderOrg = $sender->organization;
-        $subject = "f-keeper: измененения в заказе №" . $order->id;
-
-        $searchModel = new OrderContentSearch();
-        $params['OrderContentSearch']['order_id'] = $order->id;
-        $dataProvider = $searchModel->search($params);
-        $dataProvider->pagination = false;
-
-        foreach ($order->vendor->users as $recipient) {
-
-//        Yii::$app->mailqueue->compose('orderChange', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
+        foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
+            if ($recipient->emailNotification->orders) {
+                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
         }
     }
 
-    private function sendOrderDone($sender, $recipient, $order) {
+    /**
+     * Sends mail informing both sides that order is delivered and accepted
+     * 
+     * @param User $sender
+     * @param Order $order
+     */
+    private function sendOrderDone($sender, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        if (empty($recipient)) {
-            return;
-        }
-
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order->id . " выполнен!";
 
         $searchModel = new OrderContentSearch();
@@ -1353,17 +1292,30 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderDone', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
-        $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->orders) {
+                $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                $text = $order->vendor->name . " выполнил заказ в системе f-keeper №" . $order->id;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
+            }
+        }
     }
 
-    private function sendOrderCreated($sender, $recipientOrg, $order) {
+    /**
+     * Sends mail informing both sides about new order
+     * 
+     * @param Organization $sender
+     * @param Order $order
+     */
+    private function sendOrderCreated($sender, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -1376,18 +1328,18 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-        foreach ($recipientOrg->users as $recipient) {
+        foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-//            Yii::$app->mailqueue->compose('orderCreated', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
-            $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
+            if ($recipient->emailNotification->orders) {
+                $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+        }
+        foreach ($order->vendor->users as $recipient) {
             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                $text = $senderOrg->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
+                $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1395,13 +1347,17 @@ class OrderController extends DefaultController {
         }
     }
 
-    private function sendOrderProcessing($sender, $recipient, $order) {
+    /**
+     * Sends mail informing both sides that vendor confirmed order
+     * 
+     * @param Organization $senderOrg
+     * @param Order $order
+     */
+    private function sendOrderProcessing($senderOrg, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $senderOrg = $sender->organization;
-        $email = $recipient->email;
         $subject = "f-keeper: заказ №" . $order->id . " подтвержден!";
 
         $searchModel = new OrderContentSearch();
@@ -1409,17 +1365,30 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderProcessing', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
-        $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
-                ->setTo($email)
-                ->setSubject($subject)
-                ->send();
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->orders) {
+                $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                $text = "Заказ в системе f-keeper №" . $order->id . " согласован.";
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
+            }
+        }
     }
 
-    private function sendOrderCanceled($senderOrg, $recipient, $order) {
+    /**
+     * Sends mail informing both sides about cancellation of order
+     * 
+     * @param Organization $senderOrg
+     * @param Order $order
+     */
+    private function sendOrderCanceled($senderOrg, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -1431,24 +1400,20 @@ class OrderController extends DefaultController {
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
-//        Yii::$app->mailqueue->compose('orderCanceled', compact("subject", "senderOrg", "order_id", "dataProvider"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
-        if ($recipient instanceof Organization) {
-            foreach ($recipient->users as $user) {
-                $email = $user->email;
-                $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->orders) {
+                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-        } else {
-            $email = $recipient->email;
-            $result = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
-                    ->setTo($email)
-                    ->setSubject($subject)
-                    ->send();
+            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
+            }
         }
     }
 

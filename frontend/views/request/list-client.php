@@ -15,6 +15,7 @@ use delocker\animate\AnimateAssetBundle;
 AnimateAssetBundle::register($this);
 yii2assets\fullscreenmodal\FullscreenModalAsset::register($this);
 $request = new \common\models\Request();
+$this->title = 'Заявки';
 ?>
 <style>
     .req-items{

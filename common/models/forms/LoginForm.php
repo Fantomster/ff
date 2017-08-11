@@ -45,4 +45,28 @@ class LoginForm extends \amnah\yii2\user\models\forms\LoginForm {
             $this->addError("email", 'Учетная запись не активирована!');
         }
     }
+    
+    /**
+     * Get user based on email and/or username
+     * @return \amnah\yii2\user\models\User|null
+     */
+    public function getUser()
+    {
+        // check if we need to get user
+        if ($this->user === false) {
+
+            // build query based on email and/or username login properties
+            $user = new \api\modules\v1\modules\mobile\models\User();
+            $user = $user::find();
+            if ($this->module->loginEmail) {
+                $user->orWhere(["email" => $this->email]);
+            }
+            if ($this->module->loginUsername) {
+                $user->orWhere(["username" => $this->email]);
+            }
+            $this->user = $user->one();
+        }
+        return $this->user;
+    }
+
 }

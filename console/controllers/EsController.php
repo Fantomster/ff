@@ -27,7 +27,16 @@ class EsController extends Controller
 			"filter": {
 				"ru_stopwords": {
 					"type": "stop",
-					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам, во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+					"stopwords": "
+                                        а,более,бы,был,была,были,было,быть,в,вам, 
+                                        во,вот,всего,да,даже,до,если,еще,же,за,и,из,
+                                        или,им,их,к,как,ко, кто,ли,либо,мне,может,
+                                        на,надо,не,ни,них,но,ну,о,об,от, по,под,при,
+                                        с,со,так,также,те,тем,то,того,тоже,той,том,
+                                        у,уже,хотя, чье,чья,эта,эти,a,an,and,are,
+                                        as,at,be,but,by,for,if,in,into,is,it,no,not,
+                                        of,on,or,such,that,the,their,then,there,these,
+                                        they,this,to,was,will,with"
 				}
 			}
 		}
@@ -64,7 +73,13 @@ class EsController extends Controller
 			"filter": {
 				"ru_stopwords": {
 					"type": "stop",
-					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам, во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,the,their,then,there,these,they,this,to,was,will,with"
+					"stopwords": "а,более,бы,был,была,были,было,быть,в,вам, 
+                                        во,вот,всего,да,даже,до,если,еще,же,за,и,из,или,им,их,
+                                        к,как,ко, кто,ли,либо,мне,может,на,надо,не,ни,них,но,ну,
+                                        о,об,от, по,под,при,с,со,так,также,те,тем,то,того,тоже,
+                                        той,том,у,уже,хотя, чье,чья,эта,эти,a,an,and,are,as,at,
+                                        be,but,by,for,if,in,into,is,it,no,not,of,on,or,such,that,
+                                        the,their,then,there,these,they,this,to,was,will,with"
 				}
 			}
 		}

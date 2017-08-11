@@ -439,7 +439,7 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
                             overlayMode: 'all',
                             selector: 'html',
                             width: '450px',
-                            height: '460px',
+                            height: '380px',
                     },
                     {
                             title: '&nbsp;',

@@ -1374,7 +1374,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                $text = $order->vendor->name . " приступил к выполнению заказа в системе f-keeper №" . $order->id;
+                $text = "Заказ в системе f-keeper №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

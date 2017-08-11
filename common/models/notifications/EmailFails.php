@@ -1,6 +1,6 @@
 <?php
 
-namespace common\models;
+namespace common\models\notifications;
 
 use Yii;
 
@@ -8,15 +8,17 @@ use Yii;
  * This is the model class for table "email_fails".
  *
  * @property integer $id
- * @property integer $email_notification_id
  * @property integer $type
  * @property string $email
  * @property string $body
  *
- * @property EmailNotification $emailNotification
  */
 class EmailFails extends \yii\db\ActiveRecord
 {
+    
+    const TYPE_BOUNCE = 1;
+    const TYPE_COMPLAINT = 2;
+    
     /**
      * @inheritdoc
      */
@@ -31,11 +33,9 @@ class EmailFails extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['email_notification_id', 'email', 'body'], 'required'],
-            [['email_notification_id', 'type'], 'integer'],
+            [['email', 'body'], 'required'],
             [['body'], 'string'],
             [['email'], 'string', 'max' => 255],
-            [['email_notification_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailNotification::className(), 'targetAttribute' => ['email_notification_id' => 'id']],
         ];
     }
 
@@ -46,18 +46,9 @@ class EmailFails extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
-            'email_notification_id' => Yii::t('app', 'Email Notification ID'),
             'type' => Yii::t('app', 'Type'),
             'email' => Yii::t('app', 'Email'),
             'body' => Yii::t('app', 'Body'),
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEmailNotification()
-    {
-        return $this->hasOne(EmailNotification::className(), ['id' => 'email_notification_id']);
     }
 }

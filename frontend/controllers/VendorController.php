@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use yii\helpers\Json;
+use yii\helpers\Html;
 use common\models\User;
 use common\models\Order;
 use common\models\Organization;
@@ -599,12 +600,14 @@ class VendorController extends DefaultController {
                 $data_update = "";
                 $cbgTable = CatalogBaseGoods::tableName();
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
-                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
-                    $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
-                    $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
-                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
-                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row));  //Комментарий
+                    
+                    
+                    $row_article = Html::encode(trim($worksheet->getCellByColumnAndRow(0, $row))) ; //артикул
+                    $row_product = Html::encode(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
+                    $row_units = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row)))); //количество
+                    $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row)))); //цена
+                    $row_ed = Html::encode(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
+                    $row_note = Html::encode(trim($worksheet->getCellByColumnAndRow(5, $row)));  //Комментарий
                     if (!empty($row_article && $row_product && $row_price && $row_ed)) {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
@@ -620,7 +623,8 @@ class VendorController extends DefaultController {
                                 `price` = $row_price,
                                 `ed` = '$row_ed',
                                 `note` = '$row_note' 
-                                 where cat_id=$id and article='{$row_article}'; \n";
+                                 where cat_id=$id and article='{$row_article}';";
+                                 
                         } else {
                             $data_insert[] = [
                                 $id, 

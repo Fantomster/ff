@@ -322,8 +322,8 @@ class ClientController extends DefaultController {
                     exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
-                if (count($arrCatalog) > 300) {
-                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>300</strong> позиций, пожалуйста свяжитесь с нами '
+                if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
+                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>'.CatalogBaseGoods::MAX_INSERT_FROM_XLS.'</strong> позиций, пожалуйста свяжитесь с нами '
                         . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
                     return $result;
                     exit;

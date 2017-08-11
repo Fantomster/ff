@@ -17,8 +17,9 @@ class FrController extends \yii\rest\Controller {
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
                     'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
-                        'https://franch.f-keeper.dev','http://franch.f-keeper.dev','https://franch.f-keeper.ru','http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
-                                 'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],
+                        'https://franch.f-keeper.dev','http://franch.f-keeper.dev','https://franch.f-keeper.ru',
+                        'http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
+                        'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,
@@ -133,14 +134,10 @@ class FrController extends \yii\rest\Controller {
             }
 
             //// Проверка на уже существующий контакт
-            if($sitepage == "client"){
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;     
-            }
-            if($type == "restaurant"){
+            if($type == 'restaurant' || $sitepage == "client"){
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;    
-            }
-            if($type != "restaurant" && $sitepage != "client"){
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;    
+            }else{
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
             }
             $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
             #Устанавливаем необходимые опции для сеанса cURL

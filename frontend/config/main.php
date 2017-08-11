@@ -27,7 +27,7 @@ return [
                 ],
                 'email' => [
                     'class' => 'yii\log\EmailTarget',
-                    'except' => ['yii\web\HttpException:404'],
+                    'except' => ['yii\web\HttpException:404','yii\web\HttpException:403'],
                     'levels' => ['error'],
                     'message' => [
                         'from' => 'noreply@f-keeper.ru', 

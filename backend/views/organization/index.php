@@ -47,18 +47,18 @@ $gridColumns = [
             }
         }
     ],
-    'address',
-//    [
-//        'attribute' => 'place_id',
-//        'label' => 'У франшизы',
-//        'format' => 'raw',
-//        'value' => function ($data) {
-//            if(\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$data->id])->exists()){
-//              return '<span class="text-success">Да</span>';
-//            }
-//            return '';
-//        }
-//    ],
+//    'address',
+    [
+        'attribute' => 'place_id',
+        'label' => 'У франшизы',
+        'format' => 'raw',
+        'value' => function ($data) {
+            if(\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$data->id])->exists()){
+              return '<span class="text-success">Да</span>';
+            }
+            return '';
+        }
+    ],
 //    'website',
                 // 'created_at',
                 // 'updated_at',

@@ -40,6 +40,7 @@ return [
         'mailer' => [
             'viewPath' => '@common/mail',
             'class' => 'common\components\Mailer',
+            'useFileTransport' => false,
             'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
             'secret_key' => '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',
             'host' => 'email.eu-west-1.amazonaws.com',

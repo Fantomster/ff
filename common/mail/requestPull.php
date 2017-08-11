@@ -84,7 +84,7 @@ use yii\helpers\Url;
 			</tr>
 			<tr>
 				<td style="padding: 10px 30px; padding-bottom: 40px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 16px; mso-height-rule: exactly; line-height: 16px; color: #555;">
-					<a href="<?= Url::toRoute(["/request/list"], true) ?>" style="background-color: #66BC75; padding: 10px 30px; border-radius: 30px; color: #fff; text-decoration: none; cursor: pointer;">Просмотреть все заявки</a>
+					<a href="https://f-keeper.ru/request/list" style="background-color: #66BC75; padding: 10px 30px; border-radius: 30px; color: #fff; text-decoration: none; cursor: pointer;">Просмотреть все заявки</a>
 					<br><br>
 					
 				</td>

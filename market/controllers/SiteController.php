@@ -301,15 +301,31 @@ class SiteController extends Controller {
         $params = [
             'filtered' => [
                 'query' => [
-                    'match' => [
+                    /*'match' => [
                         'supplier_name' => [
                            'query' => $search,
-                           'fuzziness' => 'auto',
-                           /*'type' =>'text_phrase',
-                           'max_expansions' =>20,
-                           'prefix_length' => 0,
-                           'fuzziness' => 0.8,*/
+                           'fuzziness' => 10,
                         ]
+                    ]*/
+                    'fuzzy' => [
+                        'supplier_name' => [
+                            'value' => '$search',
+                            'fuzziness' => 10, // этот параметр для вашей задачи нужно выставлять повыше
+                            'prefix_length' => 2, // будет равняться кол-ву уже введенных символов
+                            "max_expansions"=> 100 // также выставляется повыше
+                        ]
+                    ]
+                ],
+                'highlight'=>[
+                    'fields'=>[
+                      'supplier_name'=>[
+                        'post_tags'=>[
+                          "</span>"
+                        ],
+                        'pre_tags'=>[
+                          '<span class=\"vulners-highlight\">'
+                        ]
+                      ]
                     ]
                 ],
                 'filter' => [
@@ -907,7 +923,13 @@ class SiteController extends Controller {
                         ],
                         /**/
                     ],
-                    
+                    'highlight' => [
+                        'pre_tags' => ['<em>'],
+                        'post_tags' => ['</em>'],
+                        'fields' => [
+                            'supplier_name'
+                        ]
+                    ],
                     'filter' => [
                         'bool' => [
                             'must_not' => [

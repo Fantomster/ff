@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use common\models\Role;
 
 /**
  * This is the model class for table "franchisee".
@@ -182,5 +183,20 @@ class Franchisee extends \yii\db\ActiveRecord {
     
     public function getPictureUrl() {
         return $this->picture_manager ? $this->getThumbUploadUrl('picture', 'picture') : self::DEFAULT_AVATAR;
+    }
+    
+    public static function limitedDropdown()
+    {
+        // get all records from database and generate
+        static $dropdown;
+        if ($dropdown === null) {
+                $models = Role::findAll(['organization_type' => Organization::TYPE_FRANCHISEE]);
+            foreach ($models as $model) {
+                if ($model->id !== Role::ROLE_FRANCHISEE_AGENT) {
+                    $dropdown[$model->id] = $model->name;
+                }
+            }
+        }
+        return $dropdown;
     }
 }

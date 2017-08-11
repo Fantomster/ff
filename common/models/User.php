@@ -20,6 +20,8 @@ use Yii;
  * @property Organization $organization
  * @property FranchiseeUser $franchiseeUser
  * @property ManagerAssociate $associated
+ * @property EmailNotification $emailNotification
+ * @property SmsNotification $smsNotification
  */
 class User extends \amnah\yii2\user\models\User {
 
@@ -76,6 +78,26 @@ class User extends \amnah\yii2\user\models\User {
         return $rules;
     }
     
+    public function afterSave($insert, $changedAttributes) {
+        if ($insert) {
+            $emailNotification = new notifications\EmailNotification();
+            $emailNotification->user_id = $this->id;
+            $emailNotification->orders = true;
+            $emailNotification->requests = true;
+            $emailNotification->changes = true;
+            $emailNotification->invites = true;
+            $emailNotification->save();
+            $smsNotification = new notifications\SmsNotification();
+            $smsNotification->user_id = $this->id;
+            $smsNotification->orders = true;
+            $smsNotification->requests = true;
+            $smsNotification->changes = true;
+            $smsNotification->invites = true;
+            $smsNotification->save();
+        }
+        parent::afterSave($insert, $changedAttributes);
+    }
+    
     /**
      * Set organization id
      * @param int $orgId
@@ -128,6 +150,20 @@ class User extends \amnah\yii2\user\models\User {
         return $this->hasMany(ManagerAssociate::className(), ['manager_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailNotification() {
+        return $this->hasOne(notifications\EmailNotification::className(), ['user_id' => 'id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSmsNotification() {
+        return $this->hasOne(notifications\SmsNotification::className(), ['user_id' => 'id']);
+    }
+    
     /**
      * Check if user account is active
      * 
@@ -236,7 +272,9 @@ class User extends \amnah\yii2\user\models\User {
                 ->setTo($this->email)
                 ->setSubject($subject)
                 ->send();
-
+        
+        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
+                
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
         return $result;
@@ -296,11 +334,6 @@ class User extends \amnah\yii2\user\models\User {
         $profile = $user->profile;
         $email = $userToken->data ?: $user->email;
         $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
-        
-//        $result = Yii::$app->mailqueue->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-//                ->setTo($email)
-//                ->setSubject($subject)
-//                ->queue();
         
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
             ->setTo($email)

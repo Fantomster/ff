@@ -26,7 +26,7 @@ foreach($suppliers as $row){
           </a>
       </div>
       <div class="supplier-category">
-        <h5><?=!empty($row->city) ? $row->city : '&nbsp;';?></h5>
+        <h5><?php if(empty($row->locality)){echo '&nbsp;';}else{echo $row->locality;}?></h5>
       </div>
     </div>
     <div class="col-md-12">

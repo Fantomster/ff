@@ -914,6 +914,7 @@ class SiteController extends Controller {
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere($addwhere)
+                ->andWhere($locationWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->count();
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));

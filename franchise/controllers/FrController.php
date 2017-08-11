@@ -65,6 +65,10 @@ class FrController extends \yii\rest\Controller {
                 $lead_status_id = 465726;
                 $responsible_user_id = 1515736;
             }
+            if($sitepage == "client"){
+                $lead_status_id = 465729;
+                $responsible_user_id = 1427371;
+            }
             $contact_name = $cname; //Название добавляемого контакта
             $contact_phone = $cphone; //Телефон контакта
             $contact_email = $cemail; //Емейл контакта

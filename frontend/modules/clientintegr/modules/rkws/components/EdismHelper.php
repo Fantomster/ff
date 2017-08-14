@@ -158,7 +158,7 @@ class EdismHelper extends AuthHelper {
                 $er2 = $tmodel->getErrors();
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
-     // Заполнение контрагентов
+     // Заполнение units
         
         $icount =0;    
       
@@ -180,8 +180,11 @@ class EdismHelper extends AuthHelper {
             // $amodel->ratio = $a['type'];
             $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
             
+           file_put_contents('runtime/logs/callback.log','model:'.print_r($amodel,true).PHP_EOL,FILE_APPEND);  
+            
             if (!$amodel->save()) {
                 $er = $amodel->getErrors();
+                 file_put_contents('runtime/logs/callback.log','!!!'.$er.PHP_EOL,FILE_APPEND); 
             } else $er = "Данные MUNITS успешно сохранены.(ID:".$amodel->id." )";
             
                 }

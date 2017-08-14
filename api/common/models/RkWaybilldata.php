@@ -65,7 +65,7 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'fid' => 'FID',
-            'sum' => 'Цена',
+            'sum' => 'Сумма б/н',
             'quant' => 'Количество',
             'product_id' => 'ID в F-keeper',            
 

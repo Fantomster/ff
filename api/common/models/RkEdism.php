@@ -65,6 +65,7 @@ class RkEdism extends \yii\db\ActiveRecord
             'rid' => 'RID Store House',
             'denom' => 'Наименование Store House',
             'updated_at' => 'Обновлено',
+            'groupname' => 'Вид',
 
         ];
     }

@@ -56,6 +56,7 @@ use api\common\models\RkAccess;
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                         'columns' => [
+                                            'group_name',
                                             'rid',
                                             'denom',
                                             'updated_at',

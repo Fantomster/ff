@@ -200,7 +200,7 @@ class EdismHelper extends AuthHelper {
             // $amodel->ratio = $a['type'];
             $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
             
-           file_put_contents('runtime/logs/callback.log','model:'.print_r($amodel,true).PHP_EOL,FILE_APPEND);  
+        //   file_put_contents('runtime/logs/callback.log','model:'.print_r($amodel,true).PHP_EOL,FILE_APPEND);  
             
             if (!$amodel->save()) {
                 $er = $amodel->getErrors();
@@ -216,7 +216,7 @@ class EdismHelper extends AuthHelper {
     }
     
     // Обновление словаря RkDic
-    /*
+    
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 4')->one();
     
         if (!$rmodel) {
@@ -234,7 +234,7 @@ class EdismHelper extends AuthHelper {
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
         
-    */
+    
    
   //  $array = ApiHelper::xml2array($myXML);
   //  

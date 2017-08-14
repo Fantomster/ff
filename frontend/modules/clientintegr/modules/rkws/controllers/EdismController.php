@@ -8,6 +8,7 @@ use api\common\models\RkAgent;
 use api\common\models\RkAgentSearch;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use yii\data\ActiveDataProvider;
+use api\common\models\RkEdism;
 // use yii\mongosoft\soapserver\Action;
 
 /**

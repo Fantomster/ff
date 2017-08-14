@@ -182,14 +182,14 @@ class EdismHelper extends AuthHelper {
       
         foreach ($array as $a)   {
             
-                            $checks = RkEdism::find()->andWhere('acc = :acc',[':acc' => $acc])
-                                           ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
-                                           ->one();
-                if (!$checks) {
+        //                    $checks = RkEdism::find()->andWhere('acc = :acc',[':acc' => $acc])
+        //                                   ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
+        //                                   ->one();
+        //        if (!$checks) {
             
             $amodel = new RkEdism();
             
-            $amodel->acc = $acc; // $tmodel->acc; 
+            $amodel->acc = 3243; // $acc; // $tmodel->acc; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->group_rid = $a['group_rid'];
@@ -205,7 +205,7 @@ class EdismHelper extends AuthHelper {
                  file_put_contents('runtime/logs/callback.log','!!!'.$er.PHP_EOL,FILE_APPEND); 
             } else $er = "Данные MUNITS успешно сохранены.(ID:".$amodel->id." )";
             
-                }
+       //         }
                 
             $icount++;
          

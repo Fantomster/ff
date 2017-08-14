@@ -95,6 +95,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'url' => ['/organization/index'],
                                 ],
                                 [
+                                    'label' => 'Регионы доставки - поставщик',
+                                    'url' => ['/delivery-regions/index'],
+                                ],
+                                [
                                     'label' => 'Одобренные для f-market',
                                     'url' => ['/buisiness-info/index'],
                                 ],

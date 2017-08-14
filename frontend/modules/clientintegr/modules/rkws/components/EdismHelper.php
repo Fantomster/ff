@@ -56,7 +56,7 @@ class EdismHelper extends AuthHelper {
      
                // Обновление словаря RkDic
     
-        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 1')->one();
+        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 4')->one();
     
         if (!$rmodel) {
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
@@ -194,7 +194,7 @@ class EdismHelper extends AuthHelper {
     
     // Обновление словаря RkDic
     
-    $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 1')->one();
+    $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 4')->one();
     
         if (!$rmodel) {
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 

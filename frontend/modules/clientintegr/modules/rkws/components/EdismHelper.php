@@ -139,7 +139,8 @@ class EdismHelper extends AuthHelper {
         file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);   
          file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-       
+        
+        
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'*****************ddd***********************'.PHP_EOL,FILE_APPEND); 
     
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
@@ -174,6 +175,8 @@ class EdismHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
         
      // Заполнение units
+            
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Start arrange units model.'.PHP_EOL,FILE_APPEND);     
         
         $icount =0;    
       
@@ -211,7 +214,7 @@ class EdismHelper extends AuthHelper {
     }
     
     // Обновление словаря RkDic
-    
+    /*
     $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 4')->one();
     
         if (!$rmodel) {
@@ -229,7 +232,7 @@ class EdismHelper extends AuthHelper {
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
         
-    
+    */
    
   //  $array = ApiHelper::xml2array($myXML);
   //  

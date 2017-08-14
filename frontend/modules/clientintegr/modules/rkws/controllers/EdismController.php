@@ -60,7 +60,7 @@ class EdismController extends \frontend\modules\clientintegr\controllers\Default
     {
         if (($dmodel = \api\common\models\RkDic::findOne($id)) !== null) {
             
-            $model = RkAgent::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
+            $model = RkEdism::find()->andWhere('acc = :acc',[':acc' => $dmodel->org_id]);
             
             $dataProvider = new ActiveDataProvider([
                                         'query' => $model,

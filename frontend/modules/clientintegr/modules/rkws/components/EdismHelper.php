@@ -8,8 +8,10 @@ use api\common\models\RkSession;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use common\models\User;
 use api\common\models\RkTasks;
-use api\common\models\RkAgent;
 use api\common\models\RkDic;
+use api\common\models\RkEdism;
+use api\common\models\RkEdismSearch;
+
 
 /* 
  * To change this license header, choose License Headers in Project Properties.
@@ -182,14 +184,14 @@ class EdismHelper extends AuthHelper {
       
         foreach ($array as $a)   {
             
-        //                    $checks = RkEdism::find()->andWhere('acc = :acc',[':acc' => $acc])
-        //                                   ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
-        //                                   ->one();
-        //        if (!$checks) {
+                            $checks = RkEdism::find()->andWhere('acc = :acc',[':acc' => $acc])
+                                           ->andWhere('rid = :rid',[':rid' => $a['rid']])                                           
+                                           ->one();
+                if (!$checks) {
             
-            $amodel = new RkEdism();
+            $amodel = new \api\common\models\RkEdism();
             
-            $amodel->acc = 3243; // $acc; // $tmodel->acc; 
+            $amodel->acc = $acc; // $tmodel->acc; 
             $amodel->rid = $a['rid'];
             $amodel->denom = $a['name'];
             $amodel->group_rid = $a['group_rid'];
@@ -205,7 +207,7 @@ class EdismHelper extends AuthHelper {
                  file_put_contents('runtime/logs/callback.log','!!!'.$er.PHP_EOL,FILE_APPEND); 
             } else $er = "Данные MUNITS успешно сохранены.(ID:".$amodel->id." )";
             
-       //         }
+                }
                 
             $icount++;
          

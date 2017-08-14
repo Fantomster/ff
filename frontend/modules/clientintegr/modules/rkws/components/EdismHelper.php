@@ -136,8 +136,11 @@ class EdismHelper extends AuthHelper {
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
         file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);   
+         file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
+       
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*****************ddd***********************'.PHP_EOL,FILE_APPEND); 
     
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
         

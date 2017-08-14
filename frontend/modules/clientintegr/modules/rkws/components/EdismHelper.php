@@ -88,6 +88,15 @@ class EdismHelper extends AuthHelper {
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
        
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======EDISM==EVENT==START================='.PHP_EOL,FILE_APPEND);  
+        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
+        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
+        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND); 
+        
     foreach ($myXML->ITEM as $itemgroup) {
             foreach($itemgroup->attributes() as $c => $d) {
                // $array[$gcount][$c] = strval($d[0]);
@@ -110,14 +119,7 @@ class EdismHelper extends AuthHelper {
             }
     }
     
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======EDISM==EVENT==START================='.PHP_EOL,FILE_APPEND);  
-        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);  
+ 
     
     
     /*

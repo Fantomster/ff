@@ -83,13 +83,13 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         
      $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product','rk_product.id = product_rid');
      
-     $dataProvider = new ActiveDataProvider([           'query' => $records,
-                                        'sort' => false,
+     $dataProvider = new ActiveDataProvider([ 'query' => $records,
+                                              'sort' => false,
                            ]);
                 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('indexmap',[
-            'dataProvider' => $records,
+            'dataProvider' => $dataProvider,
         ]);
         } else {
             return $this->render('indexmap',[

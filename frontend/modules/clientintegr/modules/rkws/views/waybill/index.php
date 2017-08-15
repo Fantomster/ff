@@ -94,7 +94,7 @@ use api\common\models\RkWaybill;
                                                                    
                                                      $nacl = RkWaybill::findOne(['order_id' => $data->id]); 
                                                      
-                                                     var_dump($nacl->id);                                                    
+                                                 //    var_dump($nacl->id);                                                    
                                                              return $nacl ? $nacl->status->denom : 'Не сформирована';  
                                                                },
                                                      'label' => 'Статус накладной', 

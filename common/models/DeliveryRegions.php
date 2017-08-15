@@ -50,12 +50,12 @@ class DeliveryRegions extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'supplier_id' => 'Supplier ID',
-            'country' => 'Country',
-            'locality' => 'Locality',
-            'administrative_area_level_1' => 'Administrative Area Level 1',
-            'exception' => 'Exception',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'country' => 'Страна',
+            'locality' => 'Город',
+            'exception' => 'Исключение',
+            'administrative_area_level_1' => 'Область',
+            'created_at' => 'Создано',
+            'updated_at' => 'Обновлено',
         ];
     }
 

@@ -13,6 +13,7 @@ use common\models\Role;
 use common\models\Organization;
 use common\models\BuisinessInfo;
 use common\models\FranchiseeAssociate;
+use yii\web\HttpException;
 
 /**
  * Description of OrganizationController

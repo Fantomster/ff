@@ -96,7 +96,7 @@ $this->registerJs($script);
                                                 'contentOptions'=>['style'=>'width: 10%;']        
                                             ],
                                      
-                                            'created_at',
+                                           // 'created_at',
                                             'updated_at',
                                             'obj_count',
                                         //    'obj_mapcount',

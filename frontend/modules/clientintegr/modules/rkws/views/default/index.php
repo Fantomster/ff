@@ -12,7 +12,14 @@ use kartik\editable\Editable;
 use api\common\models\RkAccess;
 
 
-
+$script = <<< JS
+$("document").ready(function() {
+    setInterval(function() {     
+       $.pjax.reload({container:"#dics_pjax",timeout: 16000});
+    }, 10000); 
+});
+JS;
+$this->registerJs($script);
 ?>
 
 
@@ -68,10 +75,13 @@ use api\common\models\RkAccess;
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
+                                <?php                                Pjax::begin(['id'=>'dics_pjax']); ?>    
                                     <?=
                                     GridView::widget([
                                         'dataProvider' => $dataProvider,
-                                        'pjax' => true, // pjax is set to always true for this demo
+                                        'pjax' => false, // pjax is set to always true for this demo
+                                        'id' => 'dics_grid',                                        
+                                        //
                                     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                                         'filterPosition' => false,
                                         'layout' => '{items}',
@@ -165,6 +175,7 @@ use api\common\models\RkAccess;
                                         ],
                                     ]);
                                     ?> 
+                                <?php Pjax::end(); ?>    
                                 </div>
                             </div>    
                 </div>

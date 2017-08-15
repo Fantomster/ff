@@ -95,7 +95,7 @@ class WaybillHelper extends AuthHelper {
      
      // Обновление статуса выгрузки накладной 
      
-     $wmodel->status_id = 2;
+     $wmodel->status_id = 4;
      
      if (!$wmodel->save(false)) {
          echo "Не могу сохранить статус выгрузки накладной";

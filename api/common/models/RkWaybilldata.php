@@ -51,9 +51,9 @@ class RkWaybilldata extends \yii\db\ActiveRecord
     {
         return [
             [['waybill_id','product_id'], 'required'],
-         //   [['pdenom'], 'integer'],
+            [['koef'], 'number'],
          //   [['comment'], 'string', 'max' => 255],
-            [['waybill_id','product_rid','product_id','munit_rid','updated_at','quant','sum','vat','pdenom'],'safe']
+            [['waybill_id','product_rid','product_id','munit_rid','updated_at','quant','sum','vat','pdenom','koef'],'safe']
         ];
     }
 
@@ -67,7 +67,8 @@ class RkWaybilldata extends \yii\db\ActiveRecord
             'fid' => 'FID',
             'sum' => 'Сумма б/н',
             'quant' => 'Количество',
-            'product_id' => 'ID в F-keeper',            
+            'product_id' => 'ID в F-keeper',   
+            'koef' => 'Коэфф.',
 
         ];
     }
@@ -106,6 +107,31 @@ class RkWaybilldata extends \yii\db\ActiveRecord
         return $rprod;
 
         //    return $this->hasOne(RkAgent::className(), ['rid' => 'corr_rid','acc'=> 3243]);          
+    }
+    
+    public function beforeSave($insert) {
+        
+         if (parent::beforeSave($insert)) {
+                       
+          if(!$insert) {  // Обновление
+          
+            if ($this->attributes['koef'] != $this->oldAttributes['koef']) {
+                
+                if (!$this->koef)
+                $this->koef = 1;
+          
+                $this->quant = round($this->defquant*$this->koef,10);   
+            }  
+          
+          } else { // Создание
+          $this->koef = 1;    
+          }
+            
+   
+          return true;
+        } else {
+            return false;
+        }
     }
     
         public function afterSave($insert, $changedAttributes) {

@@ -879,6 +879,10 @@ class SiteController extends Controller {
     }
     
     public function actionSuppliers() {
+        $locationWhere = [];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        }
         if (\Yii::$app->user->isGuest) {
             $addwhere = [];
         } else {
@@ -900,6 +904,7 @@ class SiteController extends Controller {
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere($addwhere)
+                ->andWhere($locationWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
@@ -909,6 +914,7 @@ class SiteController extends Controller {
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere($addwhere)
+                ->andWhere($locationWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->count();
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));

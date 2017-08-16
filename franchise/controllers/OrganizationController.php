@@ -2,7 +2,9 @@
 
 namespace franchise\controllers;
 
+use common\models\UserToken;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -13,6 +15,7 @@ use common\models\Role;
 use common\models\Organization;
 use common\models\BuisinessInfo;
 use common\models\FranchiseeAssociate;
+use yii\web\HttpException;
 
 /**
  * Description of OrganizationController
@@ -96,13 +99,29 @@ class OrganizationController extends DefaultController {
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->one();
+        $showEditButton = true;
+        if (empty($client)) {
+            $client = Organization::find()
+                ->where(['organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
+                ->one();
+            $showEditButton = false;
+        }
         if (empty($client->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
             $buisinessInfo->setOrganization($client);
             $client->refresh();
         }
-        return $this->renderAjax("_ajax-show-client", compact('client'));
+        return $this->renderAjax("_ajax-show-client", compact('client', 'showEditButton'));
     }
+
+
+    /**
+     * Show one restaurant
+     */
+    public function actionShowClient($id) {
+        return $this->getOrganizationData($id, Yii::$app->params['client_type_string']);
+    }
+
 
     /**
      * Add new restaurant
@@ -127,6 +146,10 @@ class OrganizationController extends DefaultController {
                     try {
                         //$user->setRegisterAttributes(Role::ROLE_RESTAURANT_MANAGER, User::STATUS_ACTIVE)->save();
                         $user->save();
+                        // send email
+                        $model = new Organization();
+                        $model->sendGenerationPasswordEmail($user);
+
                         $profile->setUser($user->id)->save();
                         $client->save();
                         $user->setOrganization($client);
@@ -220,18 +243,33 @@ class OrganizationController extends DefaultController {
         return $this->render('agent', compact('dataProvider'));
     }
 
+
     public function actionAjaxShowVendor($id) {
         $vendor = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
+        $showEditButton = true;
+        if (empty($vendor)) {
+            $vendor = Organization::find()
+                ->where(['organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
+                ->one();
+            $showEditButton = false;
+        }
         if (empty($vendor->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
             $buisinessInfo->setOrganization($vendor);
             $vendor->refresh();
         }
-        $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $vendor->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
-        return $this->renderAjax("_ajax-show-vendor", compact('vendor', 'catalog'));
+        return $this->renderAjax("_ajax-show-vendor", compact('vendor', 'showEditButton'));
+    }
+
+
+    /**
+     * Show one vendor
+     */
+    public function actionShowVendor($id) {
+        return $this->getOrganizationData($id);
     }
 
     /**
@@ -343,16 +381,40 @@ class OrganizationController extends DefaultController {
             if($organizationsCount){
                 $associate->delete();
             }else{
-                $associate->franchisee_id = 1;
+                $associate->franchisee_id = Yii::$app->params['franchisee_id'];
                 $associate->save();
             }
-            if(Yii::$app->request->isPjax){
-                return 'success';
-            }else{
-                return $this->actionVendors();
-            }
         }
-        return $this->actionVendors();
+        return 'success';
     }
 
+
+    private function getOrganizationData($id, $type='vendor') {
+        $organization = Organization::find()
+            ->joinWith("franchiseeAssociate")
+            ->where(['organization.id' => $id, 'organization.type_id' => ($type=='vendor') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT])
+            ->one();
+        $showButton = false;
+        if (empty($organization->buisinessInfo)) {
+            $buisinessInfo = new BuisinessInfo();
+            $buisinessInfo->setOrganization($organization);
+            $organization->refresh();
+        }
+
+        $searchModel = ($type=='vendor') ? new \franchise\models\ClientSearch() : new \franchise\models\VendorSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, $id);
+        $model = Organization::get_value($id);
+        $managersDataProvider = $model->getOrganizationManagersDataProvider();
+
+        if(isset($organization->franchiseeAssociate->franchisee_id) && $organization->franchiseeAssociate->franchisee_id == $this->currentFranchisee->id){
+            $showButton = true;
+            $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $organization->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
+        }
+
+        return $this->render("show-".$type, compact('organization','dataProvider', 'managersDataProvider', 'catalog', 'showButton'));
+    }
 }

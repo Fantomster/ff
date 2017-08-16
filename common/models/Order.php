@@ -34,6 +34,7 @@ use Yii;
  * @property string $statusText
  * @property bool $isObsolete
  * @property string $rawPrice
+ * @property User[] $recipientsList
  */
 class Order extends \yii\db\ActiveRecord {
 
@@ -310,4 +311,16 @@ class Order extends \yii\db\ActiveRecord {
         }
     }
 
+    /**
+     * @return User[] 
+     */
+    public function getRecipientsList() {
+        $recipients[] = $this->createdBy;
+        if (isset($this->accepted_by_id)) {
+            $recipients[] = $this->acceptedBy;
+        } else {
+            $recipients = array_merge($recipients, $this->vendor->users);
+        }
+        return $recipients;
+    }
 }

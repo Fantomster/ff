@@ -2,9 +2,11 @@
 use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use kartik\checkbox\CheckboxX;
+kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 <style>
-.loc-block{padding:15px;text-align: center; position: relative; margin: 0 auto;z-index:99999}
+.loc-block{padding:15px;position: relative; margin: 0 auto;z-index:99999}
 .loc-h-city{font-family: sans-serif;text-transform: uppercase;color: #77a267;border-bottom: 1px dotted;}
 .loc-list-cityes{text-align: center;margin-top: 20px}
 .loc-submit{margin-top:20px}
@@ -41,6 +43,22 @@ yii\web\View::POS_READY);
                   <?php endif; ?>
                     <h3><i class="fa fa-location-arrow"></i> ВАШ ГОРОД <span id="setLocality" class="loc-h-city"><?=Yii::$app->session->get('locality')?></span>?</h3>
                     <h5>Если мы определили не верно Ваш город, пожалуйста, найдите его самостоятельно</h5>
+                    <?php
+//                    echo CheckboxX::widget([
+//                        'name'=>'s_11',
+//                        'readonly'=>false, 
+//                        'options'=>['id'=>'s_11'], 
+//                        'pluginOptions'=>[
+//                                'threeState'=>false,
+//                                'enclosedLabel' => false,
+//                                'size'=>'lg',
+//                        ]
+//                    ]);
+//                    echo '<label class="cbx-label" for="s_11" class="text-muted"> '
+//                    . 'Включая <span id="viewRegion" class="loc-h-city">' . 
+//                      Yii::$app->session->get('region') 
+//                    . '</span>?</label>';
+                    ?>
                     <input type="text" class="form-control autocomplete" id="search_out" name="search_out" placeholder="Поиск">
                     <input type="hidden" id="country" name="country" value="<?=Yii::$app->session->get('country')?>">
                     <input type="hidden" id="administrative_area_level_1" name="administrative_area_level_1" value="<?=Yii::$app->session->get('region')?>">

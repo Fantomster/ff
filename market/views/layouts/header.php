@@ -4,7 +4,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use common\models\Organization;
-
 if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
@@ -80,7 +79,7 @@ if (!Yii::$app->user->isGuest) {
                 </button>
                 <a class="navbar-brand text-hide" href="<?= Url::home(); ?>">f-keeper</a>
             </div>
-            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader"><?=Yii::$app->session->get('locality')?></span>
+            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader" style="cursor:pointer"><?=Yii::$app->session->get('locality')?></span>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>

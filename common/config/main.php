@@ -99,9 +99,9 @@ return [
         ],
         //Google firebase cloud messaging
         'fcm' => [
-        'class' => 'understeam\fcm\Client',
-        'apiKey' => 'AAAADvq3Ss8:APA91bFB5zGZpz01LtWYpMS5wwMDSjnmlv4bWYLJgJHBmQauzW24bHDG__ECgMGElVZqFV_I2MTPG2aCsV7HXshwq4yjupX1xGbuShGAyxtf7fIiepmHhFkLpxfkA4cKcCEufA3H7_Bb', // Server API Key (you can get it here: https://firebase.google.com/docs/server/setup#prerequisites) 
-    ],
+            'class' => 'understeam\fcm\Client',
+            'apiKey' => 'AAAADvq3Ss8:APA91bFB5zGZpz01LtWYpMS5wwMDSjnmlv4bWYLJgJHBmQauzW24bHDG__ECgMGElVZqFV_I2MTPG2aCsV7HXshwq4yjupX1xGbuShGAyxtf7fIiepmHhFkLpxfkA4cKcCEufA3H7_Bb', // Server API Key (you can get it here: https://firebase.google.com/docs/server/setup#prerequisites)
+        ],
     ],
     'modules' => [
         'user' => [
@@ -134,10 +134,10 @@ return [
             'layout' => '@frontend/views/layouts/main-vendor.php',
         ],
         'treemanager' =>  [
-        'class' => '\kartik\tree\Module',
-        // enter other module properties if needed
-        // for advanced/personalized configuration
-        // (refer module properties available below)
-    ]
+            'class' => '\kartik\tree\Module',
+            // enter other module properties if needed
+            // for advanced/personalized configuration
+            // (refer module properties available below)
+        ]
     ],
 ];

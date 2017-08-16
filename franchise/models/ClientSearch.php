@@ -43,7 +43,7 @@ class ClientSearch extends Organization {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $franchisee_id) {
+    public function search($params, $franchisee_id, $vendor_id = null) {
         $this->load($params);
 
         $searchString = "%$this->searchString%";
@@ -71,6 +71,10 @@ class ClientSearch extends Organization {
                 LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id
                 WHERE fa.franchisee_id = $franchisee_id and org.type_id=1 and org.created_at between :dateFrom and :dateTo
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
+
+        if($vendor_id){
+            $query = parent::getOrganizationQuery($vendor_id, 'rest');
+        }
 
         $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());
 

@@ -122,6 +122,11 @@ class RkWaybilldata extends \yii\db\ActiveRecord
           
                 $this->quant = round($this->defquant*$this->koef,10);   
             }  
+            
+            if ($this->attributes['quant'] != $this->oldAttributes['quant']) {
+                
+                $this->koef = round($this->quant/$this->defquant,10);   
+            }  
           
           } else { // Создание
           $this->koef = 1;    

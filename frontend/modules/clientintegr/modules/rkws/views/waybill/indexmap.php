@@ -152,7 +152,12 @@ GridView::widget([
                 },
                 'format' => 'raw',
                 'label' => 'Ед.изм. StoreHouse',         
-                ],   
+                ],  
+                [
+                'attribute' => 'defquant',                
+                'format' => 'raw',
+                'label' => 'Кол-во в Заказе',                   
+                ],           
                 [
                 'class'=>'kartik\grid\EditableColumn',
                 'attribute'=>'koef',

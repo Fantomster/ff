@@ -155,7 +155,7 @@ class FranchiseeController extends Controller
                     $profile->setUser($user->id)->save();
                     $user->setFranchisee($fr_id);
                     $model = new Organization();
-                    $model->sendGenerationPasswordEmail($user);
+                    $model->sendGenerationPasswordEmail($user, true);
                     return $this->redirect(['franchisee/users', 'id' => $fr_id]);
                 }
             }

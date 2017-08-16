@@ -86,6 +86,12 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
         ],
+        'urlManagerFranchise' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//partner.f-keeper.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+        ],
         'assetManager' => [
             'bundles' => [
                 'dosamigos\google\maps\MapAsset' => [

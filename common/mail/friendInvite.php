@@ -54,9 +54,9 @@ use yii\helpers\Url;
         </th>
     </tr>
     <tr align="center">
-        <td><img src="http://f-keeper.ru/img/ico1-1.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico2-1.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico3-1.png" /></td>
+        <td><img src="https://f-keeper.ru/img/ico1-1.png" alt="" /></td>
+        <td><img src="https://f-keeper.ru/img/ico2-1.png" alt="" /></td>
+        <td><img src="https://f-keeper.ru/img/ico3-1.png" alt="" /></td>
     </tr>
 
 
@@ -76,9 +76,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="http://f-keeper.ru/img/ico4-1.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico5-1.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico2.png" /></td>
+        <td><img src="https://f-keeper.ru/img/ico4-1.png" alt="" /></td>
+        <td><img src="https://f-keeper.ru/img/ico5-1.png" alt="" /></td>
+        <td><img src="https://f-keeper.ru/img/ico2.png" alt="" /></td>
     </tr>
 
 
@@ -98,9 +98,9 @@ use yii\helpers\Url;
         </td>
     </tr>
     <tr align="center">
-        <td><img src="http://f-keeper.ru/img/ico4.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico8.png" /></td>
-        <td><img src="http://f-keeper.ru/img/ico9.png" /></td>
+        <td><img src="https://f-keeper.ru/img/ico4.png" alt="" /></td>
+        <td><img src="https://f-keeper.ru/img/ico8.png" alt="" /></td>
+        <td><img src="https://f-keeper.ru/img/ico9.png" alt="" /></td>
     </tr>
 
 </table>

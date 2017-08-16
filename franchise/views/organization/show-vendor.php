@@ -74,10 +74,9 @@ $this->registerCss("
                 <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">Поставщик</a></li>
                 <?php if($showButton): ?>
                 <li class=""><a href="#tab_2" data-toggle="tab" aria-expanded="false">Реквизиты</a></li>
-                <li class=""><a href="#tab_3" data-toggle="tab" aria-expanded="false">Список ресторанов поставщика</a>
-                </li>
-                <li class=""><a href="#tab_4" data-toggle="tab" aria-expanded="false">Список сотрудников поставщика</a></li>
+                <li class=""><a href="#tab_3" data-toggle="tab" aria-expanded="false">Список ресторанов поставщика</a></li>
                 <?php endif; ?>
+                <li class=""><a href="#tab_4" data-toggle="tab" aria-expanded="false">Список сотрудников поставщика</a></li>
             </ul>
             <div class="modal-content tab-content" style="box-shadow: 0 2px 3px rgba(0,0,0,0.125);">
                 <div class="modal-body tab-pane active" id="tab_1">

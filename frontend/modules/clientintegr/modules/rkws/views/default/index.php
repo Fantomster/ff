@@ -15,7 +15,7 @@ use api\common\models\RkAccess;
 $script = <<< JS
 $("document").ready(function() {
     setInterval(function() {     
-       $.pjax.reload({container:"#dics_grid"});
+       $.pjax.reload({container:"#dics_pjax",timeout: 16000});
     }, 10000); 
 });
 JS;
@@ -75,6 +75,7 @@ $this->registerJs($script);
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
+                                <?php                                Pjax::begin(['id'=>'dics_pjax']); ?>    
                                     <?=
                                     GridView::widget([
                                         'dataProvider' => $dataProvider,
@@ -95,7 +96,7 @@ $this->registerJs($script);
                                                 'contentOptions'=>['style'=>'width: 10%;']        
                                             ],
                                      
-                                            'created_at',
+                                           // 'created_at',
                                             'updated_at',
                                             'obj_count',
                                         //    'obj_mapcount',
@@ -174,6 +175,7 @@ $this->registerJs($script);
                                         ],
                                     ]);
                                     ?> 
+                                <?php Pjax::end(); ?>    
                                 </div>
                             </div>    
                 </div>

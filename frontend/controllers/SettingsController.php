@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
+use common\models\Role;
 
 /**
  * Description of SettingsController
@@ -68,7 +69,15 @@ class SettingsController extends DefaultController {
     }
 
     public function actionNotifications() {
-        return $this->render('notifications');
+        $emailNotification = $this->currentUser->emailNotification;
+        $smsNotification = $this->currentUser->smsNotification;
+        if ($emailNotification->load(Yii::$app->request->post()) && $smsNotification->load(Yii::$app->request->post())) {
+            if ($emailNotification->validate() && $smsNotification->validate()) {
+                $emailNotification->save();
+                $smsNotification->save();
+            }
+        }
+        return $this->render('notifications', compact('emailNotification', 'smsNotification'));
     }
 
 }

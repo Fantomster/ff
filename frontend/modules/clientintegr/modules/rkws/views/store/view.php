@@ -48,7 +48,7 @@ use api\common\models\RkStoretree;
 <section class="content">
     <div class="catalog-index">
 
-    	<div class="box box-info">            
+    <!--	<div class="box box-info">            
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding" style="overflow-x:visible; overflow-y:visible;">
@@ -85,7 +85,7 @@ use api\common\models\RkStoretree;
                             </div>    
                 </div>
             </div>  
-        
+        -->
             <div class="box box-info">            
                 <div class="box-header with-border">
                             <div class="panel-body">
@@ -95,13 +95,23 @@ use api\common\models\RkStoretree;
                                         // single query fetch to render the tree
                                         // use the Product model you have in the previous step
                                         'query' => RkStoretree::find()->addOrderBy('root, lft'), 
-                                        'headingOptions' => ['label' => 'Categories'],
+                                        'headingOptions' => ['label' => 'Склады'],
                                         'fontAwesome' => false,     // optional
                                         'isAdmin' => false,         // optional (toggle to enable admin mode)
                                         'displayValue' => 1,        // initial display value
                                         'softDelete' => true,       // defaults to true
+                                        'toolbar' => [
+                                                         TreeView::BTN_CREATE => false,
+                                                         TreeView::BTN_CREATE_ROOT => false,
+                                                         TreeView::BTN_REMOVE => false,
+                                                         TreeView::BTN_SEPARATOR => false,
+                                                         TreeView::BTN_MOVE_UP => false,
+                                                         TreeView::BTN_MOVE_DOWN => false,
+                                                         TreeView::BTN_MOVE_LEFT => false,
+                                                         TreeView::BTN_MOVE_RIGHT => false,
+                                                     ],     
                                         'cacheSettings' => [        
-                                                'enableCache' => true   // defaults to true
+                                                'enableCache' => false   // defaults to true
                                         ]
                                         ]);
                                      

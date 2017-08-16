@@ -523,10 +523,10 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function getPictureUrl() {
         if ($this->type_id == self::TYPE_SUPPLIER) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['client-noavatar'];
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['vendor-noavatar'];
         }
         if ($this->type_id == self::TYPE_RESTAURANT) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['vendor-noavatar'];
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['client-noavatar'];
         }
         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['org-noavatar'];
     }

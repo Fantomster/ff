@@ -115,13 +115,13 @@ class SiteController extends Controller {
         
     }
     public function actionIndex() {
-        $userLocation = "";
         $session = Yii::$app->session;
-        
         $relationSuppliers = [];
-        if (\Yii::$app->user->isGuest) {
-            
-        } else {
+        $supplierRegion = [];
+        $oWhere = [];
+        $cbgWhere = [];
+        
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
@@ -132,17 +132,34 @@ class SiteController extends Controller {
                         ->all();  
             }
         }
-        $locationWhere = [];
-        if(Yii::$app->session->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
+        
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id as id, supplier_id as supp_org_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->asArray()
+                            ->all();
+            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $oWhere = ['in', 'id', $r];
+                $cbgWhere = ['in', 'supp_org_id', $r];
+            }else{
+                $oWhere = ['in', 'id', $supplierRegion];
+                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
+            }
         }
+        
         $topSuppliers = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere(['not in', 'id', $relationSuppliers])
-                ->andWhere($locationWhere)
+                ->andWhere($oWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)
                 ->all();
@@ -152,8 +169,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($locationWhere)
-                ->andWhere(['not in', 'id', $relationSuppliers])
+                ->andWhere($oWhere)
                 ->count();
         
         $topProducts = CatalogBaseGoods::find()
@@ -164,8 +180,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($locationWhere)
-                ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
+                ->andWhere($cbgWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)
                 ->all();
@@ -177,13 +192,12 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($locationWhere)
-                ->andWhere(['not in', 'supp_org_id', $relationSuppliers])
+                ->andWhere($cbgWhere)
                 ->count();
 
         
         
-        return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount', 'userLocation'));
+        return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
     }
 
     public function actionProduct($id) {
@@ -221,13 +235,8 @@ class SiteController extends Controller {
     }
     
     public function actionSearchProducts($search) {
-        $locationWhere = [];
-        if(Yii::$app->session->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
-        }
+        $where = [];
         if (\Yii::$app->user->isGuest) {
-            $filterNotIn = [];
-        } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             $filterNotIn = [];
@@ -236,10 +245,30 @@ class SiteController extends Controller {
                         ->select('supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->all();
-                $filterNotIn = [];
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
                 }
+            }
+        }
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->all();
+            $regions = [];
+            foreach ($supplierRegion AS $region) {
+                    $regions[] = $region->supplier_id;
+                }
+            if(!empty($regions) && !empty($filterNotIn)){
+                $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $where = $r;
+            }else{
+                $where = $regions;
             }
         }
         $params = [
@@ -248,15 +277,14 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
-                            //'analyzer' => "ru",
                         ]
                     ]
                 ],
                 'filter' => [
                     'bool' => [
-                        'must_not' => [
+                        'must' => [
                             'terms' => [
-                                'product_supp_id' => $filterNotIn
+                                'product_supp_id' => $where
                             ]
                         ]
                     ]
@@ -275,9 +303,8 @@ class SiteController extends Controller {
     }
 
     public function actionAjaxEsProductMore($num, $search) {
+        $where = [];
         if (\Yii::$app->user->isGuest) {
-            $filterNotIn = [];
-        } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             $filterNotIn = [];
@@ -286,10 +313,30 @@ class SiteController extends Controller {
                         ->select('supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->all();
-                $filterNotIn = [];
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
                 }
+            }
+        }
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->all();
+            $regions = [];
+            foreach ($supplierRegion AS $region) {
+                    $regions[] = $region->supplier_id;
+                }
+            if(!empty($regions) && !empty($filterNotIn)){
+                $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $where = $r;
+            }else{
+                $where = $regions;
             }
         }
         $params = [
@@ -304,9 +351,9 @@ class SiteController extends Controller {
                 ],
                 'filter' => [
                     'bool' => [
-                        'must_not' => [
+                        'must' => [
                             'terms' => [
-                                'product_supp_id' => $filterNotIn
+                                'product_supp_id' => $where
                             ]
                         ]
                     ]
@@ -329,9 +376,8 @@ class SiteController extends Controller {
     }
 
     public function actionSearchSuppliers($search) {
+        $where = [];
         if (\Yii::$app->user->isGuest) {
-            $filterNotIn = [];
-        } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             $filterNotIn = [];
@@ -340,40 +386,47 @@ class SiteController extends Controller {
                         ->select('supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->all();
-                $filterNotIn = [];
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
                 }
             }
         }
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->all();
+            $regions = [];
+            foreach ($supplierRegion AS $region) {
+                    $regions[] = $region->supplier_id;
+                }
+            if(!empty($regions) && !empty($filterNotIn)){
+                $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $where = $r;
+            }else{
+                $where = $regions;
+            }
+        }
         $params = [
-            'filtered' => [
-                'query' => [
-                     'match' => [
-                        'supplier_name' => [
-                            'query' => $search,
-                            //'analyzer' => "ru",
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        'query_string' => [
+                            'query' => $search . "*",
+                            'fields' => [
+                            'supplier_name',
+                            ],
+                        'default_operator' => 'AND'
                         ]
-                    ]
-                ],
-//                'highlight'=>[
-//                    'fields'=>[
-//                      'supplier_name'=>[
-//                        'post_tags'=>[
-//                          "</span>"
-//                        ],
-//                        'pre_tags'=>[
-//                          '<span class=\"vulners-highlight\">'
-//                        ]
-//                      ]
-//                    ]
-//                ],
-                'filter' => [
-                    'bool' => [
-                        'must_not' => [
-                            'terms' => [
-                                'supplier_id' => $filterNotIn
-                            ]
+                    ],
+                    'filter' => [
+                        'terms' => [
+                            'supplier_id' => $where
                         ]
                     ]
                 ]
@@ -391,9 +444,8 @@ class SiteController extends Controller {
     }
 
     public function actionAjaxEsSupplierMore($num, $search) {
+        $where = [];
         if (\Yii::$app->user->isGuest) {
-            $filterNotIn = [];
-        } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             $filterNotIn = [];
@@ -402,27 +454,47 @@ class SiteController extends Controller {
                         ->select('supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->all();
-                $filterNotIn = [];
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
                 }
             }
         }
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->all();
+            $regions = [];
+            foreach ($supplierRegion AS $region) {
+                    $regions[] = $region->supplier_id;
+                }
+            if(!empty($regions) && !empty($filterNotIn)){
+                $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $where = $r;
+            }else{
+                $where = $regions;
+            }
+        }
         $params = [
-            'filtered' => [
-                'query' => [
-                    'match' => [
-                        'supplier_name' => [
-                            'query' => $search,
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        'query_string' => [
+                            'query' => $search . "*",
+                            'fields' => [
+                            'supplier_name',
+                            ],
+                        'default_operator' => 'AND'
                         ]
-                    ]
-                ],
-                'filter' => [
-                    'bool' => [
-                        'must_not' => [
-                            'terms' => [
-                                'supplier_id' => $filterNotIn
-                            ]
+                    ],
+                    'filter' => [
+                        'terms' => [
+                            'supplier_id' => $where
                         ]
                     ]
                 ]
@@ -563,19 +635,42 @@ class SiteController extends Controller {
         }
     }
     public function actionAjaxProductMore($num) {
-        if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-        } else {
+        $session = Yii::$app->session;
+        $relationSuppliers = [];
+        $supplierRegion = [];
+        $oWhere = [];
+        $cbgWhere = [];
+        
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
+                $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();  
+            }
+        }
+        
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id as id, supplier_id as supp_org_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->asArray()
+                            ->all();
+            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $oWhere = ['in', 'id', $r];
+                $cbgWhere = ['in', 'supp_org_id', $r];
+            }else{
+                $oWhere = ['in', 'id', $supplierRegion];
+                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         $cbgTable = CatalogBaseGoods::tableName();
@@ -587,7 +682,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere($cbgWhere)
                 ->offset($num)
                 ->limit(6)
                 ->count();
@@ -600,7 +695,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere($cbgWhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
@@ -609,19 +704,42 @@ class SiteController extends Controller {
         }
     }
     public function actionAjaxSuppProductMore($num,$supp_org_id) {
-        if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-        } else {
+        $session = Yii::$app->session;
+        $relationSuppliers = [];
+        $supplierRegion = [];
+        $oWhere = [];
+        $cbgWhere = [];
+        
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
+                $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();  
+            }
+        }
+        
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id as id, supplier_id as supp_org_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->asArray()
+                            ->all();
+            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $oWhere = ['in', 'id', $r];
+                $cbgWhere = ['in', 'supp_org_id', $r];
+            }else{
+                $oWhere = ['in', 'id', $supplierRegion];
+                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         $cbgTable = CatalogBaseGoods::tableName();
@@ -634,7 +752,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere($cbgWhere)
                 ->offset($num)
                 ->limit(6)
                 ->count();
@@ -648,7 +766,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere('category_id is not null')
-                ->andWhere($addwhere)
+                ->andWhere($cbgWhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->offset($num)
                 ->limit(6)
@@ -707,23 +825,42 @@ class SiteController extends Controller {
         }
     }
     public function actionAjaxSupplierMore($num) {
-        $locationWhere = [];
-        if(Yii::$app->session->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
-        }
-        if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-        } else {
+        $session = Yii::$app->session;
+        $relationSuppliers = [];
+        $supplierRegion = [];
+        $oWhere = [];
+        $cbgWhere = [];
+        
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
+                $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id])
+                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'id', $relationSupplier];
+                        ->all();  
+            }
+        }
+        
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id as id, supplier_id as supp_org_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->asArray()
+                            ->all();
+            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $oWhere = ['in', 'id', $r];
+                $cbgWhere = ['in', 'supp_org_id', $r];
+            }else{
+                $oWhere = ['in', 'id', $supplierRegion];
+                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         
@@ -732,8 +869,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhere)
-                ->andWhere($locationWhere)
+                ->andWhere($oWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(6)->offset($num)
                 ->count();
@@ -743,8 +879,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhere)
-                ->andWhere($locationWhere)
+                ->andWhere($oWhere)
                 ->orderBy(['rating'=>SORT_DESC]) 
                 ->limit(6)->offset($num)
                 ->all();
@@ -754,23 +889,42 @@ class SiteController extends Controller {
     }
 
     public function actionCategory($id) {
-        $locationWhere = [];
-        if(Yii::$app->session->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
-        }
-        if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-        } else {
+        $session = Yii::$app->session;
+        $relationSuppliers = [];
+        $supplierRegion = [];
+        $oWhere = [];
+        $cbgWhere = [];
+        
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
+                $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id])
+                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();  
+            }
+        }
+        
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id as id, supplier_id as supp_org_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->asArray()
+                            ->all();
+            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $oWhere = ['in', 'id', $r];
+                $cbgWhere = ['in', 'supp_org_id', $r];
+            }else{
+                $oWhere = ['in', 'id', $supplierRegion];
+                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         $cbgTable = CatalogBaseGoods::tableName();
@@ -782,8 +936,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
-                ->andWhere($locationWhere)
-                ->andWhere($addwhere)
+                ->andWhere($cbgWhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC]) 
                 ->limit(12)
                 ->count();
@@ -796,8 +949,7 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
-                ->andWhere($locationWhere)
-                ->andWhere($addwhere)
+                ->andWhere($cbgWhere)
                 ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
@@ -823,24 +975,42 @@ class SiteController extends Controller {
     }
     
     public function actionAjaxProductCatLoader($num, $category) {
-        $locationWhere = [];
-        if(Yii::$app->session->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
-        }
+        $session = Yii::$app->session;
+        $relationSuppliers = [];
+        $supplierRegion = [];
+        $oWhere = [];
+        $cbgWhere = [];
         $cbgTable = CatalogBaseGoods::tableName();
-        if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-        } else {
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
+                $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'supp_org_id', $relationSupplier];
+                        ->all();  
+            }
+        }
+        
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id as id, supplier_id as supp_org_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->asArray()
+                            ->all();
+            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $oWhere = ['in', 'id', $r];
+                $cbgWhere = ['in', 'supp_org_id', $r];
+            }else{
+                $oWhere = ['in', 'id', $supplierRegion];
+                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         if (Yii::$app->request->isAjax) {
@@ -852,8 +1022,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                    ->andWhere($locationWhere)
-                    ->andWhere($addwhere)
+                    ->andWhere($cbgWhere)
                     ->offset($num)
                     ->limit(6)
                     ->count();
@@ -867,8 +1036,7 @@ class SiteController extends Controller {
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                    ->andWhere($locationWhere)
-                    ->andWhere($addwhere)
+                    ->andWhere($cbgWhere)
                     ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
                         ->limit(6)
@@ -879,23 +1047,42 @@ class SiteController extends Controller {
     }
     
     public function actionSuppliers() {
-        $locationWhere = [];
-        if(Yii::$app->session->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
-        }
-        if (\Yii::$app->user->isGuest) {
-            $addwhere = [];
-        } else {
+        $session = Yii::$app->session;
+        $relationSuppliers = [];
+        $supplierRegion = [];
+        $oWhere = [];
+        $cbgWhere = [];
+        
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $addwhere = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSupplier = RelationSuppRest::find()
+                $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->asArray()
-                        ->all();
-                $addwhere = ['not in', 'id', $relationSupplier];
+                        ->all();  
+            }
+        }
+        
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id as id, supplier_id as supp_org_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->asArray()
+                            ->all();
+            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $oWhere = ['in', 'id', $r];
+                $cbgWhere = ['in', 'supp_org_id', $r];
+            }else{
+                $oWhere = ['in', 'id', $supplierRegion];
+                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         $suppliers = Organization::find()
@@ -903,8 +1090,7 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhere)
-                ->andWhere($locationWhere)
+                ->andWhere($oWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->limit(12)
                 ->all();
@@ -913,28 +1099,46 @@ class SiteController extends Controller {
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
-                ->andWhere($addwhere)
-                ->andWhere($locationWhere)
+                ->andWhere($oWhere)
                 ->orderBy(['rating'=>SORT_DESC])
                 ->count();
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
     }
     public function actionView() {
+        $where = [];
         if (\Yii::$app->user->isGuest) {
-            $filterNotIn = [];
-        } else {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
-                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                        ->select('supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
                         ->all();
-                $filterNotIn = [];
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
                 }
+            }
+        }
+        if(!empty(Yii::$app->session->get('locality'))){
+            $supplierRegion = \common\models\DeliveryRegions::find()
+                            ->select('supplier_id')
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
+                                    . 'length(locality)<1)')
+                            ->andWhere(['exception'=>0])
+                            ->all();
+            $regions = [];
+            foreach ($supplierRegion AS $region) {
+                    $regions[] = $region->supplier_id;
+                }
+            if(!empty($regions) && !empty($filterNotIn)){
+                $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
+                return $a['id'] - $b['id'];
+                });
+                $where = $r;
+            }else{
+                $where = $regions;
             }
         }
         $search = "";
@@ -944,15 +1148,17 @@ class SiteController extends Controller {
         $search_categorys = "";
         $search_products = "";
         $search_suppliers = "";
-        if (isset($_POST['searchText'])) {
+        if (isset($_POST['searchText']) && strlen($_POST['searchText'])>2) {
             $search = $_POST['searchText'];
             $params_categorys = [
-                'query' => [
-                    'match' => [
-                        'category_name' => [
-                            'query' => $search,
-                            'analyzer' => "ru",
-                        ],   
+                'filtered' => [
+                    'query' => [
+                        'match' => [
+                            'category_name' => [
+                                'query' => $search,
+                                'analyzer' => "ru",
+                            ] 
+                        ]
                     ]
                 ]
             ];
@@ -965,30 +1171,30 @@ class SiteController extends Controller {
                                 'analyzer' => "ru",
                             ]
                         ]
-                    ],
-                    'filter' => [
-                        'bool' => [
-                            'must_not' => [
-                                'terms' => [
-                                    'product_supp_id' => $filterNotIn
-                                ]
-                            ]
-                        ]
                     ]
                 ]
             ];
             $params_suppliers = [
-                "query" => [
-                        "query_string" => [
-                          "query" => $search . "*",
-                          "fields" => [
-                            "supplier_name",
-                          ],
-                          "default_operator" => "AND"
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                'query_string' => [
+                                    'query' => $search . "*",
+                                    'fields' => [
+                                    'supplier_name',
+                                    ],
+                                'default_operator' => 'AND'
+                                ]
+                            ],
+                            'filter' => [
+                                'terms' => [
+                                    'supplier_id' => $where
+                                ]
+                            ]
                         ]
                     ]
-                  ];
-                    
+                ];
+                  
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();
             $search_products_count = \common\models\ES\Product::find()->query($params_products)
@@ -1000,6 +1206,7 @@ class SiteController extends Controller {
             $search_products = \common\models\ES\Product::find()->query($params_products)
                             ->limit(4)->asArray()->all();
             $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->limit(4)->asArray()->all();
+            
         }
 
         return $this->renderAjax('main/_search_form', compact(

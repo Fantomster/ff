@@ -297,6 +297,7 @@ class OrganizationController extends DefaultController {
                         $user->save();
                         $profile->setUser($user->id)->save();
                         $vendor->save();
+                        // send email
                         $model = new Organization();
                         $model->sendGenerationPasswordEmail($user);
                         $catalog->name = \common\models\Catalog::CATALOG_BASE_NAME;

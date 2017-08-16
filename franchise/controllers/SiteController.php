@@ -319,6 +319,9 @@ class SiteController extends DefaultController {
                     $profile->setUser($user->id)->save();
                     $user->setFranchisee($this->currentFranchisee->id);
 //                    $this->currentUser->sendEmployeeConfirmation($user);
+                    // send email
+                    $model = new Organization();
+                    $model->sendGenerationPasswordEmail($user);
                     $message = 'Пользователь добавлен!';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }

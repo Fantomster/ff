@@ -1,7 +1,9 @@
 <?php
 namespace backend\controllers;
 
+use common\models\Catalog;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -31,7 +33,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index'],
+                        'actions' => ['index', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'get-sub-cat'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -103,5 +105,26 @@ class SiteController extends Controller
         Yii::$app->user->logout();
 
         return $this->goHome();
+    }
+
+    public function actionImportFromXls($id){
+        $catalog = Catalog::findOne([
+            'supp_org_id'=>$id
+        ]);
+        $catalogId = $catalog->id;
+
+        return \franchise\controllers\SiteController::actionImportFromXls($id, $catalogId);
+    }
+
+    public function actionAjaxDeleteProduct() {
+        return \franchise\controllers\SiteController::actionAjaxDeleteProduct();
+    }
+
+    public function actionAjaxEditCatalogForm($catalog=null) {
+        return GoodsController::actionAjaxUpdateProductMarketPlace(null);
+    }
+
+    public function actionGetSubCat() {
+        return \franchise\controllers\SiteController::actionGetSubCat();
     }
 }

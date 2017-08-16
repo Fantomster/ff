@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
@@ -651,5 +652,68 @@ class Organization extends \yii\db\ActiveRecord {
             return null;
         }
         return $this->hasMany(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_GUIDE]);
+    }
+
+
+    /**
+     * @return organization managers data provider
+     */
+    public function getOrganizationManagersDataProvider() {
+        $usrTable = User::tableName();
+        $profTable = Profile::tableName();
+        $query = User::find()
+            ->leftJoin("$profTable", "$profTable.user_id = $usrTable.id")
+            ->select(["$usrTable.id as id", "$usrTable.email as email", "$profTable.full_name as name", "$profTable.phone"])
+            ->where(["$usrTable.organization_id" => $this->id])
+            ->orderBy(['name' => SORT_ASC]);
+        $managersDataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'attributes' => [
+                    'id',
+                    'name',
+                ],
+            ],
+        ]);
+        return $managersDataProvider;
+    }
+
+
+    /**
+     * @return organization data query
+     */
+    protected function getOrganizationQuery($organization_id, $type = 'supp'){
+        $type_id = ($type=='supp') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT;
+        $prefix = ($type=='rest') ? 'supp' : 'rest';
+        return "SELECT self_registered, org.id as id, org.name as name,
+                org.created_at as created_at, org.contact_name as contact_name, org.phone as phone, (select count(id) from relation_supp_rest where ".$type."_org_id=org.id) as clientCount, 
+                (select count(id) from relation_supp_rest where ".$type."_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
+                (select count(id) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
+                (select count(id) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
+                (select sum(total_price) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
+                FROM `relation_supp_rest` AS rel
+                LEFT JOIN  `organization` AS org ON org.id = rel.".$type."_org_id
+                LEFT JOIN  `franchisee_associate` AS fa ON rel.".$type."_org_id = fa.organization_id
+                WHERE rel.".$prefix."_org_id = ".$organization_id." and org.type_id=".$type_id;
+    }
+
+
+    public function sendGenerationPasswordEmail($user, $isFranchise = false){
+        $userToken = new UserToken();
+        $userTokenType = $userToken::TYPE_PASSWORD_RESET;
+        if ($userTokenType) {
+            $userToken = $userToken::generate($user->id, $userTokenType);
+        }
+        $mailer = Yii::$app->mailer;
+        $email = $user->email;
+        $subject = Yii::$app->id . " - " . Yii::$app->params['password_generation'];
+        $mailer->compose('changePassword', compact(['userToken', 'isFranchise']))
+            ->setTo($email)
+            ->setSubject($subject)
+            ->send();
     }
 }

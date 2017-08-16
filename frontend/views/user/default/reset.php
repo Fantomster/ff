@@ -89,7 +89,7 @@ if (!empty($success) || !empty($invalidToken)) {
                             ],
                             'fieldConfig' => ['template' => '{input}'],
                 ]);
-                ?>    
+                ?>
                 <div class="auth-sidebar__form-brims">
                     <label>
                         <?=

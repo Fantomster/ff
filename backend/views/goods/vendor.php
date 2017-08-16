@@ -95,11 +95,50 @@ $("#add-product-market-place").on("click", ".edit", function() {
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
+<?php
+Modal::begin([
+    'id' => 'add-product-market-place',
+    'clientOptions' => false,
+    'size' => 'modal-lg',
+]);
+Modal::end();
+?>
 <div class="catalog-base-goods-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]);   ?>
-
+    <div class="col-md-12">
+        <?php if($isEditable): ?>
+            <?=
+            Modal::widget([
+                'id' => 'add-product',
+                'clientOptions' => ['class' => 'pull-right'],
+                'toggleButton' => [
+                    'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
+                    'tag' => 'a',
+                    'data-target' => '#add-product-market-place',
+                    'class' => 'btn btn-fk-success btn-sm pull-right',
+                    'href' => Url::to(['goods/ajax-update-product-market-place', 'id' => 0, 'supp_org_id'=>$id]),
+                ],
+            ])
+            ?>
+            <?=
+            Modal::widget([
+                'id' => 'importToXls',
+                'clientOptions' => false,
+                'size' => 'modal-md',
+                'toggleButton' => [
+                    'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
+                    'tag' => 'a',
+                    'data-target' => '#importToXls',
+                    'class' => 'btn btn-outline-default btn-sm pull-right',
+                    'href' => Url::to(['/site/import-from-xls', 'id' => $id]),
+                    'style' => 'margin-right:10px;',
+                ],
+            ])
+            ?>
+        <?php endif; ?>
+    </div>
     <div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
         <label class="control-label" for="parentCategory">Категория товара</label>
         <?php
@@ -192,6 +231,18 @@ $this->registerJs($customJs, View::POS_READY);
                 // 'region',
                 // 'weight',
                 // ['class' => 'yii\grid\ActionColumn'],
+            [
+                'attribute' => '',
+                'label' => '',
+                'format' => 'raw',
+                'value' => ($isEditable) ? function ($data) {
+                    $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
+                        'class' => 'btn btn-xs btn-danger del-product',
+                        'data' => ['id' => $data['id']],
+                    ]);
+                    return $link;
+                } : '',
+            ],
                 ],
             ]);
             ?>
@@ -204,3 +255,66 @@ $this->registerJs($customJs, View::POS_READY);
         ]);
         Modal::end();
         ?>
+
+<?php
+$catalogUrl = Url::to(['site/catalog', 'id' => $id]);
+$deleteProductUrl = Url::to(['site/ajax-delete-product']);
+
+$customJs = <<< JS
+var timer;
+$('#search').on("keyup", function () {
+window.clearTimeout(timer);
+   timer = setTimeout(function () {
+       $.pjax({
+        type: 'GET',
+        push: true,
+        timeout: 10000,
+        url: '$catalogUrl',
+        container: '#kv-unique-id-1',
+        data: {searchString: $('#search').val()}
+      })
+   }, 700);
+});
+
+$(document).on("click",".del-product", function(e){
+    var id = $(this).attr('data-id');
+		$.ajax({
+	        url: "$deleteProductUrl",
+	        type: "POST",
+	        dataType: "json",
+	        data: {'id' : id},
+	        cache: false,
+	        success: function(response) {
+		        if(response.success){
+			        $.pjax.reload({container: "#kv-unique-id-1"}); 
+			        }else{
+				    console.log('Что-то пошло не так');    
+			        }
+		        }	
+		    });     
+});
+
+$("body").on("hidden.bs.modal", "#add-product-market-place", function() {
+    $(this).data("bs.modal", null);
+})
+$("body").on("show.bs.modal", "#add-product-market-place", function() {
+    $('#add-product-market-place>.modal-dialog').css('margin-top','13px');
+})        
+$(document).on("submit", "#marketplace-product-form", function(e) {
+        e.preventDefault();
+    var form = $("#marketplace-product-form");
+    $('#loader-show').showLoading();
+    $.post(
+        form.attr("action"),
+            form.serialize()
+            )
+            .done(function(result) {
+            $('#loader-show').hideLoading();
+            form.replaceWith(result);
+        $.pjax.reload({container: "#kv-unique-id-1"});
+        });
+        return false;
+    });
+  $('#add-product-market-place').removeAttr('tabindex');
+JS;
+$this->registerJs($customJs, View::POS_READY);

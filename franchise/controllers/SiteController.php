@@ -2,6 +2,7 @@
 
 namespace franchise\controllers;
 
+use common\models\Catalog;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -14,6 +15,7 @@ use common\models\Profile;
 use common\models\Organization;
 use common\models\Order;
 use common\models\CatalogBaseGoods;
+use yii\helpers\VarDumper;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -312,11 +314,13 @@ class SiteController extends DefaultController {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-
-                    $user->setRegisterAttributes($user->role_id)->save();
+                    $user->setRegisterAttributes($user->role_id, User::STATUS_ACTIVE)->save();
                     $profile->setUser($user->id)->save();
                     $user->setFranchisee($this->currentFranchisee->id);
 //                    $this->currentUser->sendEmployeeConfirmation($user);
+                    // send email
+                    $model = new Organization();
+                    $model->sendGenerationPasswordEmail($user, true);
                     $message = 'Пользователь добавлен!';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
@@ -455,14 +459,24 @@ class SiteController extends DefaultController {
                 ],
             ],
         ]);
-        return $this->render('catalog', compact('searchString', 'dataProvider', 'id'));
+        $isEditable = true;
+        $catalog = Catalog::findOne($id);
+        $organizationId = $catalog->supp_org_id;
+        $model = Organization::get_value($organizationId);
+        if($model->hasActiveUsers() && $organizationId!=$currentUser->organization_id){
+            $isEditable = false;
+        }
+        return $this->render('catalog', compact('searchString', 'dataProvider', 'id', 'isEditable'));
     }
 
-    public function actionAjaxEditCatalogForm($catalog = null) {
+    public function actionAjaxEditCatalogForm($catalog = null, $catId = null) {
+        $suppCatalog = $catalog;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $catalog = isset(Yii::$app->request->get()['catalog']) ?
+        if(!$catalog){
+            $catalog = isset(Yii::$app->request->get()['catalog']) ?
                 Yii::$app->request->get()['catalog'] :
                 Yii::$app->request->post()['catalog'];
+        }
         $product_id = isset(Yii::$app->request->get()['product_id']) ?
                 Yii::$app->request->get()['product_id'] :
                 $product_id = null;
@@ -475,6 +489,7 @@ class SiteController extends DefaultController {
                 $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
             }
         } else {
+            if($catId) $catalog = $catId;
             $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);
             $cat = \common\models\Catalog::findOne(['id' => $catalog]);
             $catalogBaseGoods->supp_org_id = $cat->supp_org_id;
@@ -487,6 +502,11 @@ class SiteController extends DefaultController {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
+                if($catId){
+                    $cat = Catalog::findOne($suppCatalog);
+                    $catalogBaseGoods->cat_id = $cat->supp_org_id;
+                    $catalogBaseGoods->supp_org_id = $cat->supp_org_id;
+                }
                 $catalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 if ($post && $catalogBaseGoods->validate()) {
@@ -498,7 +518,7 @@ class SiteController extends DefaultController {
                 }
             }
         }
-        return $this->renderAjax('catalog/_ajaxEditCatalogForm', compact('catalogBaseGoods', 'countrys', 'catalog'));
+        return $this->renderAjax(isset($catId) ? '/goods/_form' : 'catalog/_ajaxEditCatalogForm', compact('catalogBaseGoods', 'countrys', 'catalog'));
     }
 
     public function actionGetSubCat() {
@@ -548,10 +568,11 @@ class SiteController extends DefaultController {
             exit;
         }
     }
-    public function actionImportFromXls($id){
+
+    public function actionImportFromXls($id, $vendor_id = null){
         set_time_limit(180);
         $vendor = \common\models\Catalog::find()->where([
-                    'id' => $id,
+                    'id' => ($vendor_id) ? $vendor_id : $id,
                     'type' => \common\models\Catalog::BASE_CATALOG
                 ])
                 ->one()
@@ -654,7 +675,7 @@ class SiteController extends DefaultController {
                 }
                 $transaction->commit();
                 unlink($path);
-                return $this->redirect(['site/catalog', 'id' => $id]);
+                return $this->redirect([($vendor_id) ? 'goods/vendor' : 'site/catalog', 'id' => $id]);
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();

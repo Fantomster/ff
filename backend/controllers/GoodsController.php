@@ -9,6 +9,7 @@ use common\models\RelationSuppRest;
 use common\models\Catalog;
 use common\models\CatalogGoods;
 use backend\models\CatalogBaseGoodsSearch;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -79,12 +80,17 @@ class GoodsController extends Controller {
         $params = Yii::$app->request->queryParams;
         $dataProvider = $searchModel->search($params);
         $dataProvider->query->andWhere(['supp_org_id' => $id]);
-
-        return $this->render('vendor', compact('id', 'searchModel', 'dataProvider'));
+        $isEditable = true;
+        return $this->render('vendor', compact('id', 'searchModel', 'dataProvider', 'isEditable'));
     }
 
-    public function actionAjaxUpdateProductMarketPlace($id) {
-        $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+
+    public function actionAjaxUpdateProductMarketPlace($id, $supp_org_id = null) {
+        if($id){
+            $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        }else{
+            $catalogBaseGoods = new CatalogBaseGoods();
+        }
         $catalogBaseGoods->scenario = 'marketPlace';
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
@@ -107,8 +113,10 @@ class GoodsController extends Controller {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-
-                //var_dump($catalogBaseGoods);
+                if($supp_org_id){
+                    $catalogBaseGoods->supp_org_id = $supp_org_id;
+                    $catalogBaseGoods->cat_id = $supp_org_id;
+                }
                 if ($catalogBaseGoods->market_place == 1) {
                     if ($post && $catalogBaseGoods->validate()) {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
@@ -128,7 +136,7 @@ class GoodsController extends Controller {
                 }
             }
         }
-        return $this->renderAjax('_form', compact('catalogBaseGoods', 'countrys'));
+        return $this->renderAjax('_form', compact('catalogBaseGoods', 'countrys', 'supp_org_id'));
     }
 
     public function actionMpCountryList($q) {

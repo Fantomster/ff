@@ -146,7 +146,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 <?php
 $form = ActiveForm::begin([
             'id' => 'marketplace-product-form',
-            'action' => Url::toRoute(['ajax-update-product-market-place', 'id' => $catalogBaseGoods->id]),
+            'action' => Url::toRoute(['ajax-update-product-market-place', 'id' => isset($catalogBaseGoods->id) ? $catalogBaseGoods->id : 0, 'supp_org_id' => isset($supp_org_id) ? $supp_org_id : 0]),
         ]);
 ?>
 

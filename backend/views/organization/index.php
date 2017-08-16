@@ -41,9 +41,9 @@ $gridColumns = [
         'format' => 'raw',
         'value' => function ($data) {
             if(empty($data->place_id)){
-            return  Html::a('<span class="text-danger">Добавить адрес</span>', ['update', 'id' => $data->id]);
+                return  Html::a('<span class="text-danger">Добавить адрес</span>', ['update', 'id' => $data->id]);
             }else{
-            return  Html::a('<span class="text-success">Актуализирован</span>', ['update', 'id' => $data->id]);
+                return  Html::a('<span class="text-success">Актуализирован</span>', ['update', 'id' => $data->id]);
             }
         }
     ],
@@ -60,33 +60,33 @@ $gridColumns = [
         }
     ],
 //    'website',
-                // 'created_at',
-                // 'updated_at',
-                // 'step',
-        ];
-        ?>
-        <div class="organization-index">
+    // 'created_at',
+    // 'updated_at',
+    // 'step',
+];
+?>
+<div class="organization-index">
 
-            <h1><?= Html::encode($this->title) ?></h1>
-            <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-            
-            <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>    
-            <?php
-            echo ExportMenu::widget([
-                'dataProvider' => $dataProvider,
-                'columns' => $gridColumns,
-                'target' => ExportMenu::TARGET_SELF,
-                'exportConfig' => [
-                    ExportMenu::FORMAT_PDF => false,
-                    ExportMenu::FORMAT_EXCEL_X => false,
-                ],
-            ]);
-            ?>
-            <?=
-            GridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'columns' => $gridColumns,
-            ]);
-            ?>
-            <?php Pjax::end(); ?></div>
+    <h1><?= Html::encode($this->title) ?></h1>
+    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
+    <?php
+    echo ExportMenu::widget([
+        'dataProvider' => $dataProvider,
+        'columns' => $gridColumns,
+        'target' => ExportMenu::TARGET_SELF,
+        'exportConfig' => [
+            ExportMenu::FORMAT_PDF => false,
+            ExportMenu::FORMAT_EXCEL_X => false,
+        ],
+    ]);
+    ?>
+    <?=
+    GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => $gridColumns,
+    ]);
+    ?>
+    <?php Pjax::end(); ?></div>

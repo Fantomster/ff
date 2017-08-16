@@ -43,7 +43,7 @@ class VendorSearch extends Organization {
      *
      * @return SqlDataProvider
      */
-    public function search($params, $franchisee_id) {
+    public function search($params, $franchisee_id, $client_id = null) {
         $this->load($params);
 
         $searchString = "%{$this->searchString}%";
@@ -69,8 +69,12 @@ class VendorSearch extends Organization {
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
                 FROM `organization` AS org
                 LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id 
-                WHERE fa.franchisee_id = $franchisee_id and org.type_id=2 and (org.created_at between :dateFrom and :dateTo) 
+                WHERE fa.franchisee_id = $franchisee_id and org.type_id=".parent::TYPE_SUPPLIER." and (org.created_at between :dateFrom and :dateTo) 
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
+
+        if($client_id){
+            $query = parent::getOrganizationQuery($client_id);
+        }
 
         $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());
 
@@ -100,5 +104,4 @@ class VendorSearch extends Organization {
 
         return $dataProvider;
     }
-
 }

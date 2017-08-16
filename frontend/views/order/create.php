@@ -136,158 +136,163 @@ $this->registerJs(
                 </a>
             </li>
         </ul>
-    </div>
-    <div class="tab-content">
-        <div class="row">
-            <div class="col-md-12">
-                <?php
-                $form = ActiveForm::begin([
-                            'options' => [
-                                'id' => 'searchForm',
-                                'class' => "navbar-form no-padding no-margin",
-                                'role' => 'search',
-                            ],
-                ]);
-                ?>
-                <?=
-                        $form->field($searchModel, 'searchString', [
-                            'addon' => [
-                                'append' => [
-                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
-                                    'options' => [
-                                        'class' => 'append',
+        <div class="tab-content">
+            <div class="row">
+                <div class="col-md-12">
+                    <?php
+                    $form = ActiveForm::begin([
+                                'options' => [
+                                    'id' => 'searchForm',
+                                    'class' => "navbar-form no-padding no-margin",
+                                    'role' => 'search',
+                                ],
+                    ]);
+                    ?>
+                    <?=
+                            $form->field($searchModel, 'searchString', [
+                                'addon' => [
+                                    'append' => [
+                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                        'options' => [
+                                            'class' => 'append',
+                                        ],
                                     ],
                                 ],
+                                'options' => [
+                                    'class' => "margin-right-15 form-group",
+                                ],
+                            ])
+                            ->textInput([
+                                'id' => 'searchString',
+                                'class' => 'form-control',
+                                'placeholder' => 'Поиск'])
+                            ->label(false)
+                    ?>
+                    <?=
+                            $form->field($searchModel, 'selectedVendor')
+                            ->dropDownList($vendors, ['id' => 'selectedVendor'])
+                            ->label(false)
+                    ?>
+                    <?php ActiveForm::end(); ?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr>	
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <?php
+                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 5000]);
+                    ?>
+                    <div id="products">
+                        <?=
+                        GridView::widget([
+                            'dataProvider' => $dataProvider,
+                            'filterModel' => $searchModel,
+                            'filterPosition' => false,
+                            'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
+                            'summary' => '',
+                            'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+                            'options' => ['class' => 'table-responsive'],
+                            'pager' => [
+                                'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
                             ],
-                            'options' => [
-                                'class' => "margin-right-15 form-group",
+                            'columns' => [
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'product',
+                                    'value' => function($data) {
+                                        $note = ""; //empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
+                                        $productUrl = Html::a($data['product'], Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
+                                                    'data' => [
+                                                        'target' => '#showDetails',
+                                                        'toggle' => 'modal',
+                                                        'backdrop' => 'static',
+                                                    ],
+                                                    'title' => 'Подробности',
+                                        ]);
+                                        return "<div class='grid-prod'>" . $productUrl . "</div>$note<div>Поставщик: "
+                                                . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
+                                                . $data['article'] . "</span></div>";
+                                    },
+                                    'label' => 'Название продукта',
+                                ],
+                                [
+                                    'format' => 'raw',
+                                    'attribute' => 'price',
+                                    'value' => function($data) {
+                                        $unit = empty($data['ed']) ? '' : " / " . $data['ed'];
+                                        return '<b>' . $data['price'] . '</b> <i class="fa fa-fw fa-rub"></i>' . $unit;
+                                    },
+                                    'label' => 'Цена',
+                                    'contentOptions' => ['class' => 'width150'],
+                                    'headerOptions' => ['class' => 'width150']
+                                ],
+                                [
+                                    'attribute' => 'units',
+                                    'value' => 'units',
+                                    'label' => 'Кратность',
+                                ],
+                                [
+                                    'format' => 'raw',
+                                    'value' => function($data) {
+                                        return TouchSpin::widget([
+                                                    'name' => '',
+                                                    'pluginOptions' => [
+                                                        'initval' => 0.100,
+                                                        'min' => (isset($data['units']) && ($data['units'] > 0)) ? $data['units'] : 0.001,
+                                                        'max' => PHP_INT_MAX,
+                                                        'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
+                                                        'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
+                                                        'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
+                                                        'buttonup_class' => 'btn btn-default',
+                                                        'buttondown_class' => 'btn btn-default',
+                                                        'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
+                                                        'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
+                                                    ],
+                                                    'options' => ['class' => 'quantity form-control '],
+                                        ]);
+                                    },
+                                    'label' => 'Количество',
+                                    'contentOptions' => ['class' => 'width150'],
+                                    'headerOptions' => ['class' => 'width150']
+                                ],
+                                //'note',
+                                [
+                                    'format' => 'raw',
+                                    'value' => function ($data) {
+                                        $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i>', '#', [
+                                                    'class' => 'add-note btn btn-default margin-right-5',
+                                                    'data' => [
+                                                        'id' => $data['id'],
+                                                        'cat' => $data['cat_id'],
+                                                        'toggle' => 'tooltip',
+                                                        'original-title' => 'Добавить заметку к товару',
+                                                        'target' => "#changeQuantity",
+                                                        'toggle' => "modal",
+                                                        'backdrop' => "static",
+                                                    ],
+                                        ]);
+                                        $btnAdd = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i>', '#', [
+                                                    'class' => 'add-to-cart btn btn-outline-success',
+                                                    'data-id' => $data['id'],
+                                                    'data-cat' => $data['cat_id'],
+                                                    'title' => 'Добавить в корзину',
+                                        ]);
+                                        return $btnAdd;
+                                    },
+                                    'contentOptions' => ['class' => 'text-center'],
+                                    'headerOptions' => ['style' => 'width: 50px;']
+                                ],
                             ],
                         ])
-                        ->textInput([
-                            'id' => 'searchString',
-                            'class' => 'form-control',
-                            'placeholder' => 'Поиск'])
-                        ->label(false)
-                ?>
-                <?=
-                        $form->field($searchModel, 'selectedVendor')
-                        ->dropDownList($vendors, ['id' => 'selectedVendor'])
-                        ->label(false)
-                ?>
-                <?php ActiveForm::end(); ?>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <?php
-                Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'createOrder', 'timeout' => 5000]);
-                ?>
-                <div id="products">
-                    <?=
-                    GridView::widget([
-                        'dataProvider' => $dataProvider,
-                        'filterModel' => $searchModel,
-                        'filterPosition' => false,
-                        'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
-                        'summary' => '',
-                        'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
-                        'options' => ['class' => 'table-responsive'],
-                        'pager' => [
-                            'maxButtonCount' => 5, // Set maximum number of page buttons that can be displayed            
-                        ],
-                        'columns' => [
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'product',
-                                'value' => function($data) {
-                                    $note = ""; //empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
-                                    $productUrl = Html::a($data['product'], Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
-                                                'data' => [
-                                                    'target' => '#showDetails',
-                                                    'toggle' => 'modal',
-                                                    'backdrop' => 'static',
-                                                ],
-                                                'title' => 'Подробности',
-                                    ]);
-                                    return "<div class='grid-prod'>" . $productUrl . "</div>$note<div>Поставщик: "
-                                            . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
-                                            . $data['article'] . "</span></div>";
-                                },
-                                'label' => 'Название продукта',
-                            ],
-                            [
-                                'format' => 'raw',
-                                'attribute' => 'price',
-                                'value' => function($data) {
-                                    $unit = empty($data['ed']) ? '' : " / " . $data['ed'];
-                                    return '<b>' . $data['price'] . '</b> <i class="fa fa-fw fa-rub"></i>' . $unit;
-                                },
-                                'label' => 'Цена',
-                                'contentOptions' => ['class' => 'width150'],
-                                'headerOptions' => ['class' => 'width150']
-                            ],
-                            [
-                                'attribute' => 'units',
-                                'value' => 'units',
-                                'label' => 'Кратность',
-                            ],
-                            [
-                                'format' => 'raw',
-                                'value' => function($data) {
-                                    return TouchSpin::widget([
-                                                'name' => '',
-                                                'pluginOptions' => [
-                                                    'initval' => 0.100,
-                                                    'min' => (isset($data['units']) && ($data['units'] > 0)) ? $data['units'] : 0.001,
-                                                    'max' => PHP_INT_MAX,
-                                                    'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
-                                                    'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
-                                                    'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
-                                                    'buttonup_class' => 'btn btn-default',
-                                                    'buttondown_class' => 'btn btn-default',
-                                                    'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                                    'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                                                ],
-                                                'options' => ['class' => 'quantity form-control '],
-                                    ]);
-                                },
-                                'label' => 'Количество',
-                                'contentOptions' => ['class' => 'width150'],
-                                'headerOptions' => ['class' => 'width150']
-                            ],
-                            //'note',
-                            [
-                                'format' => 'raw',
-                                'value' => function ($data) {
-                                    $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i>', '#', [
-                                                'class' => 'add-note btn btn-default margin-right-5',
-                                                'data' => [
-                                                    'id' => $data['id'],
-                                                    'cat' => $data['cat_id'],
-                                                    'toggle' => 'tooltip',
-                                                    'original-title' => 'Добавить заметку к товару',
-                                                    'target' => "#changeQuantity",
-                                                    'toggle' => "modal",
-                                                    'backdrop' => "static",
-                                                ],
-                                    ]);
-                                    $btnAdd = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i>', '#', [
-                                                'class' => 'add-to-cart btn btn-outline-success',
-                                                'data-id' => $data['id'],
-                                                'data-cat' => $data['cat_id'],
-                                                'title' => 'Добавить в корзину',
-                                    ]);
-                                    return $btnAdd;
-                                },
-                                'contentOptions' => ['class' => 'text-center'],
-                                'headerOptions' => ['style' => 'width: 50px;']
-                            ],
-                        ],
-                    ])
-                    ?>
+                        ?>
+                    </div>
+                    </form>
+                    <?php Pjax::end(); ?>
                 </div>
-                </form>
-                <?php Pjax::end(); ?>
             </div>
         </div>
     </div>

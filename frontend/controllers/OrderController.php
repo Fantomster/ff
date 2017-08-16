@@ -63,6 +63,8 @@ class OrderController extends DefaultController {
                     [
                         'actions' => [
                             'create',
+                            'guides',
+                            'favorites',
                             'checkout',
                             'repeat',
                             'refresh-cart',
@@ -132,6 +134,14 @@ class OrderController extends DefaultController {
         }
     }
 
+    public function actionGuides() {
+        return $this->render('guides');
+    }
+    
+    public function actionFavorites() {
+        return $this->render('favorites');
+    }
+    
     public function actionPjaxCart() {
         if (Yii::$app->request->isPjax) {
             $client = $this->currentUser->organization;

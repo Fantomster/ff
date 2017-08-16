@@ -314,11 +314,13 @@ class SiteController extends DefaultController {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-
-                    $user->setRegisterAttributes($user->role_id)->save();
+                    $user->setRegisterAttributes($user->role_id, User::STATUS_ACTIVE)->save();
                     $profile->setUser($user->id)->save();
                     $user->setFranchisee($this->currentFranchisee->id);
 //                    $this->currentUser->sendEmployeeConfirmation($user);
+                    // send email
+                    $model = new Organization();
+                    $model->sendGenerationPasswordEmail($user, true);
                     $message = 'Пользователь добавлен!';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }

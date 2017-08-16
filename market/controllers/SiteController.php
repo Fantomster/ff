@@ -236,10 +236,10 @@ class SiteController extends Controller {
     
     public function actionSearchProducts($search) {
         $where = [];
-        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -304,10 +304,10 @@ class SiteController extends Controller {
 
     public function actionAjaxEsProductMore($num, $search) {
         $where = [];
-        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -377,10 +377,10 @@ class SiteController extends Controller {
 
     public function actionSearchSuppliers($search) {
         $where = [];
-        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -445,10 +445,11 @@ class SiteController extends Controller {
 
     public function actionAjaxEsSupplierMore($num, $search) {
         $where = [];
-        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $filterNotIn = [];
+            
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
@@ -1106,10 +1107,10 @@ class SiteController extends Controller {
     }
     public function actionView() {
         $where = [];
-        if (\Yii::$app->user->isGuest) {
+        $filterNotIn = [];
+        if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
-            $filterNotIn = [];
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')

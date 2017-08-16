@@ -80,6 +80,18 @@ return [
                 'reset' => 'user/reset',
             ],
         ],
+        'urlManagerFrontend' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//f-keeper.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+        ],
+        'urlManagerFranchise' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//partner.f-keeper.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+        ],
         'assetManager' => [
             'bundles' => [
                 'dosamigos\google\maps\MapAsset' => [

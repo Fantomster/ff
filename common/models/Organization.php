@@ -702,7 +702,7 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
 
-    public function sendGenerationPasswordEmail($user){
+    public function sendGenerationPasswordEmail($user, $isFranchise = false){
         $userToken = new UserToken();
         $userTokenType = $userToken::TYPE_PASSWORD_RESET;
         if ($userTokenType) {
@@ -711,7 +711,7 @@ class Organization extends \yii\db\ActiveRecord {
         $mailer = Yii::$app->mailer;
         $email = $user->email;
         $subject = Yii::$app->id . " - " . Yii::$app->params['password_generation'];
-        $mailer->compose('changePassword', compact(['userToken']))
+        $mailer->compose('changePassword', compact(['userToken', 'isFranchise']))
             ->setTo($email)
             ->setSubject($subject)
             ->send();

@@ -79,7 +79,7 @@ if (!Yii::$app->user->isGuest) {
                 </button>
                 <a class="navbar-brand text-hide" href="<?= Url::home(); ?>">f-keeper</a>
             </div>
-            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader" style="cursor:pointer"><?=Yii::$app->request->cookies->get('locality')?></span>
+            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader" style="cursor:pointer"><?=Yii::$app->session->get('locality')?></span>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>
@@ -89,7 +89,7 @@ if (!Yii::$app->user->isGuest) {
                             <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/about']) ?>">О&nbsp;нас</a></li>
                             <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/contacts']) ?>">Контакты</a></li>
                         </ul>
-                    </li>
+                      </li>
                     
                     <?php if (Yii::$app->user->isGuest) { ?>
                         <li><a class="btn-navbar" href="<?= Url::to(['/user/login']) ?>">войти / регистрация</a></li>
@@ -102,7 +102,7 @@ if (!Yii::$app->user->isGuest) {
                             </li>
                         <?php } ?>
                         <li><a class="btn-navbar" href="<?= Url::to(['/user/logout']) ?>" data-method="post"><?= $user->profile->full_name ?> [выход]</a></li>
-                    <?php } ?>
+                        <?php } ?>
                 </ul>
             </div>
             <!--/.nav-collapse -->
@@ -112,7 +112,7 @@ if (!Yii::$app->user->isGuest) {
 </section>
 <?php 
 //\frontend\assets\GoogleMapsAsset::register($this);
-if (empty(Yii::$app->request->cookies->get('locality')) || empty(Yii::$app->session->get('country'))) {
+if (!(Yii::$app->session->get('locality') || Yii::$app->session->get('country'))) {
 $this->registerJs("
   $(\"#data-modal\").length>0&&$(\"#data-modal\").modal({backdrop: \"static\", keyboard: false});
 ",yii\web\View::POS_END);    

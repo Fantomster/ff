@@ -41,7 +41,7 @@ yii\web\View::POS_READY);
                     Обратитесь в службу поддержки и мы обязательно вам поможем!
                 </div>
                   <?php endif; ?>
-                    <h3><i class="fa fa-location-arrow"></i> ВАШ ГОРОД <span id="setLocality" class="loc-h-city"><?=Yii::$app->request->cookies->get('locality')?></span>?</h3>
+                    <h3><i class="fa fa-location-arrow"></i> ВАШ ГОРОД <span id="setLocality" class="loc-h-city"><?=Yii::$app->session->get('locality')?></span>?</h3>
                     <h5>Если мы определили не верно Ваш город, пожалуйста, найдите его самостоятельно</h5>
                     <?php
 //                    echo CheckboxX::widget([
@@ -60,9 +60,9 @@ yii\web\View::POS_READY);
 //                    . '</span>?</label>';
                     ?>
                     <input type="text" class="form-control autocomplete" id="search_out" name="search_out" placeholder="Поиск">
-                    <input type="hidden" id="country" name="country" value="<?=Yii::$app->request->cookies->get('country');?>">
-                    <input type="hidden" id="administrative_area_level_1" name="administrative_area_level_1" value="<?=Yii::$app->request->cookies->get('region');?>">
-                    <input type="hidden" id="locality" name="locality" value="<?=Yii::$app->request->cookies->get('locality');?>">
+                    <input type="hidden" id="country" name="country" value="<?=Yii::$app->session->get('country')?>">
+                    <input type="hidden" id="administrative_area_level_1" name="administrative_area_level_1" value="<?=Yii::$app->session->get('region')?>">
+                    <input type="hidden" id="locality" name="locality" value="<?=Yii::$app->session->get('locality')?>">
                     <input type="hidden" id="currentUrl" name="currentUrl" value="<?=Yii::$app->getRequest()->getUrl()?>">
                     <button type="submit" class="btn btn-md btn-success loc-submit">Подтвердить</button>
                 <?php ActiveForm::end(); ?>

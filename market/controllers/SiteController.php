@@ -25,7 +25,6 @@ use common\models\OrderContent;
 use common\components\AccessRule;
 use yii\helpers\Url;
 use yii\helpers\Json;
-use yii\web\Cookie;
 
 //ini_set('xdebug.max_nesting_level', 200);
 /**
@@ -92,33 +91,25 @@ class SiteController extends Controller {
     }
     public function actionLocationUser() {
         $request = Yii::$app->request;
-        $cookies = Yii::$app->response->cookies;
         
         $locality = $request->post('locality');
         $region = $request->post('administrative_area_level_1');
         $country = $request->post('country');
         $currentUrl = $request->post('currentUrl');
         if($locality == '' || $locality == 'undefined'){
-             $cookies->add(new Cookie(['name' => 'locality','value' => 0]));
-             $cookies->add(new Cookie(['name' => 'region','value' => 0]));
-             $cookies->add(new Cookie(['name' => 'country','value' => 0]));
-             Yii::$app->session->addFlash("warning","");
-//            Yii::$app->session->set('locality', 0);
-//            Yii::$app->session->set('region', 0);
-//            Yii::$app->session->set('country', 0);    
-            
+            Yii::$app->session->addFlash("warning","");
+            Yii::$app->session->set('locality', 0);
+            Yii::$app->session->set('region', 0);
+            Yii::$app->session->set('country', 0);    
         }else{
-             $cookies->add(new Cookie(['name' => 'locality','value' => $locality]));
-             $cookies->add(new Cookie(['name' => 'region','value' => $region]));
-             $cookies->add(new Cookie(['name' => 'country','value' => $country]));
-//            Yii::$app->session->set('locality', $locality);
-//            Yii::$app->session->set('region', $region);
-//            Yii::$app->session->set('country', $country);
+            Yii::$app->session->set('locality', $locality);
+            Yii::$app->session->set('region', $region);
+            Yii::$app->session->set('country', $country);
         }
         return $this->redirect([$currentUrl]);
     }
     public function actionClearSession() {
-        var_dump(Yii::$app->request->cookies->get('locality'));
+        var_dump(Yii::$app->session->get('locality'));
         Yii::$app->session->remove('locality');
         Yii::$app->session->remove('region');
         Yii::$app->session->remove('country');
@@ -143,11 +134,11 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->asArray()
@@ -260,11 +251,11 @@ class SiteController extends Controller {
                 }
             }
         }
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->all();
@@ -328,11 +319,11 @@ class SiteController extends Controller {
                 }
             }
         }
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->all();
@@ -401,11 +392,11 @@ class SiteController extends Controller {
                 }
             }
         }
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->all();
@@ -470,11 +461,11 @@ class SiteController extends Controller {
                 }
             }
         }
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->all();
@@ -664,11 +655,11 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->asArray()
@@ -733,11 +724,11 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->asArray()
@@ -787,8 +778,8 @@ class SiteController extends Controller {
     }
     public function actionRestaurants() {
         $locationWhere = [];
-        if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
         }
         $restaurants = Organization::find()
                 ->where([
@@ -812,8 +803,8 @@ class SiteController extends Controller {
     }
     public function actionAjaxRestaurantsMore($num) {
         $locationWhere = [];
-        if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+        if(Yii::$app->session->get('locality')){
+            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->session->get('locality')];
         }
         $count = Organization::find()
                 ->where([
@@ -854,11 +845,11 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->asArray()
@@ -918,11 +909,11 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->asArray()
@@ -1004,11 +995,11 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->asArray()
@@ -1076,11 +1067,11 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->asArray()
@@ -1131,11 +1122,11 @@ class SiteController extends Controller {
                 }
             }
         }
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->session->get('locality'))){
             $supplierRegion = \common\models\DeliveryRegions::find()
                             ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                            ->where('locality = "' . Yii::$app->session->get('locality') . '" || '
+                                    . '(administrative_area_level_1 = "' . Yii::$app->session->get('region') . '" and '
                                     . 'length(locality)<1)')
                             ->andWhere(['exception'=>0])
                             ->all();

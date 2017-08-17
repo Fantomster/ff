@@ -686,6 +686,78 @@ class SiteController extends DefaultController {
         }
         return $this->renderAjax('catalog/_importCatalog', compact('importModel'));
     }
+
+
+    /**
+     * Displays general settings
+     *
+     * @return mixed
+     */
+    public function actionRequests() {
+//        $searchModel = new \franchise\models\OrderSearch();
+//        $today = new \DateTime();
+//        $searchModel->date_to = $today->format('d.m.Y');
+//        $searchModel->date_from = "01.02.2017";
+//
+//        $params = Yii::$app->request->getQueryParams();
+//
+//        if (Yii::$app->request->post("OrderSearch")) {
+//            $params['OrderSearch'] = Yii::$app->request->post("OrderSearch");
+//        }
+//        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+//
+//        if (Yii::$app->request->isPjax) {
+//            return $this->renderPartial('orders', compact('searchModel', 'dataProvider'));
+//        } else {
+//            return $this->render('orders', compact('searchModel', 'dataProvider'));
+//        }
+
+
+
+//        $organization = $this->currentUser->organization;
+//        $profile = $this->currentUser->profile;
+//        $search = ['like','product',\Yii::$app->request->get('search')?:''];
+//        $category = \Yii::$app->request->get('category')?['category' => \Yii::$app->request->get('category')]:[];
+//        dd($category);
+//
+//        if($organization->type_id == Organization::TYPE_RESTAURANT){
+//            $dataListRequest = new ActiveDataProvider([
+//                'query' => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
+//                'pagination' => [
+//                    'pageSize' => 15,
+//                ],
+//            ]);
+//            if (Yii::$app->request->isPjax) {
+//                return $this->renderPartial("list-client", compact('dataListRequest','organization','profile'));
+//            }else{
+//                return $this->render("list-client", compact('dataListRequest','organization','profile'));
+//            }
+//        }
+//        if($organization->type_id == Organization::TYPE_SUPPLIER){
+//            $my = \Yii::$app->request->get('myOnly')==2?['responsible_supp_org_id' => $organization->id]:[];
+//            $rush = \Yii::$app->request->get('rush')==2?['rush_order' => 1]:[];
+//            $dataListRequest = new ActiveDataProvider([
+//                'query' => Request::find()->where(['active_status' => Request::ACTIVE])
+//                    ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
+//                    ->andWhere($search)
+//                    ->andWhere($category)
+//                    ->andWhere($my)
+//                    ->andWhere($rush)
+//                    ->orderBy('id DESC'),
+//                'pagination' => [
+//                    'pageSize' => 15,
+//                ],
+//            ]);
+//            if (Yii::$app->request->isPjax) {
+//                return $this->renderPartial("list-vendor", compact('dataListRequest','organization'));
+//            }else{
+//                return $this->render("list-vendor", compact('dataListRequest','organization'));
+//            }
+//        }
+
+    }
+
+
 //    public function actionImportFromXls($id) {
 //        $vendor = \common\models\Catalog::find()->where([
 //                            'id' => $id,

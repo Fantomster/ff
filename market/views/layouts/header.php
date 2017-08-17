@@ -112,7 +112,7 @@ if (!Yii::$app->user->isGuest) {
 </section>
 <?php 
 //\frontend\assets\GoogleMapsAsset::register($this);
-if (empty(Yii::$app->session->get('locality')) || empty(Yii::$app->session->get('country'))) {
+if (!(Yii::$app->session->get('locality') || Yii::$app->session->get('country'))) {
 $this->registerJs("
   $(\"#data-modal\").length>0&&$(\"#data-modal\").modal({backdrop: \"static\", keyboard: false});
 ",yii\web\View::POS_END);    

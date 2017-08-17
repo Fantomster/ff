@@ -98,28 +98,31 @@ class RkService extends \yii\db\ActiveRecord {
     }
 
     public function afterSave($insert, $changedAttributes) {
-        
-       
+
+
         if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
-            
-            $dics = RkDictype::find()->all();
 
-            foreach ($dics as $dic) {
-                $model = new RkDic;
-                $model->dictype_id = $dic->id;
-                $model->dicstatus_id = 1;
-                $model->obj_count = 0;
-                $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
-                $model->org_id = $this->org;
+            if (!$oldic = RkDic::find()->andWhere('org = :org', [':org' => $this->org])) {
 
-                if (!$model->save()) {
-                    print_r($model->getErrors());
-                    die();
+                $dics = RkDictype::find()->all();
+
+                foreach ($dics as $dic) {
+                    $model = new RkDic;
+                    $model->dictype_id = $dic->id;
+                    $model->dicstatus_id = 1;
+                    $model->obj_count = 0;
+                    $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
+                    $model->org_id = $this->org;
+
+                    if (!$model->save()) {
+                        print_r($model->getErrors());
+                        die();
+                    }
                 }
             }
         }
-        
-        parent::afterSave($insert, $changedAttributes); 
+
+        parent::afterSave($insert, $changedAttributes);
     }
 
     public static function getDb() {

@@ -102,7 +102,7 @@ class RkService extends \yii\db\ActiveRecord {
 
         if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
 
-            if (!$oldic = RkDic::find()->andWhere('org = :org', [':org' => $this->org])) {
+            if (!$oldic = RkDic::find()->andWhere('org = :org', [':org' => $this->org])->all()) {
 
                 $dics = RkDictype::find()->all();
 

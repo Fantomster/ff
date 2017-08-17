@@ -56,9 +56,7 @@ $this->registerJs($script);
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
-                                    
-                                <?php var_dump($lic); die ();?>
-                                
+                              
                                 <p> Состояние лицензии:<?php echo '<strong>Активна</strong> ID: '.$lic->code.' (с '.date("d-m-Y H:i:s",strtotime($lic->fd)).' по '.date("d-m-Y H:i:s",strtotime($lic->td)).') '; ?>
                                     
                                 </p>  

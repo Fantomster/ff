@@ -217,7 +217,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     $t = strtotime(date('Y-m-d H:i:s',time()));
     
     if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
-       $res = 1; 
+       $res = $lic; 
     } else { 
        $res = 0; 
     }

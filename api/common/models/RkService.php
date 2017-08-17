@@ -102,7 +102,7 @@ class RkService extends \yii\db\ActiveRecord {
             echo "<pre>";
             var_dump($changedAttributes);
             var_dump($insert);
-            var_dump(in_array('org', $changedAttributes));            
+            var_dump(array_key_exists('org', $changedAttributes));            
             echo "<?pre>";
             exit();
        

@@ -99,23 +99,10 @@ class RkService extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
         
-            echo "<pre>";
-            var_dump($changedAttributes);
-            var_dump($insert);
-            var_dump(array_key_exists('org', $changedAttributes));            
-            echo "<?pre>";
-            exit();
        
-        if (!$insert && in_array('org', $changedAttributes)) {
+        if (!$insert && array_key_exists('org', $changedAttributes)) {
             
-            echo "<pre>";
-            var_dump($changedAttributes);
-            var_dump($insert);
-            var_dump(array_key_exists('org', $changedAttributes));            
-            echo "<?pre>";
-            exit();
-
-            /* $dics = RkDictype::findAll();
+            $dics = RkDictype::findAll();
             
             echo "<pre>";
             var_dump($dics);
@@ -134,7 +121,7 @@ class RkService extends \yii\db\ActiveRecord {
                     print_r($model->getErrors());
                     die();
                 }
-            } */
+            }
         }
         
         parent::afterSave($insert, $changedAttributes); 

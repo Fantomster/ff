@@ -99,20 +99,15 @@ class RkService extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
         
-            echo "<pre>";
-            var_dump($changedAttributes);
-            echo "</pre>";
-            die();
-        
        
-        if (!$insert && array_key_exists('org', $changedAttributes)) {
+        if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
             
             $dics = RkDictype::find()->all();
             
             echo "<pre>";
             var_dump($dics);
             echo "<?pre>";
-            exit();
+            die();
 
             foreach ($dics as $dic) {
                 $model = new RkDic;

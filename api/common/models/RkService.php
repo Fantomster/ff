@@ -112,6 +112,8 @@ class RkService extends \yii\db\ActiveRecord
         if ($insert) {
             $dics = RkDictype::findAll();
             
+            var_dump($dics);
+            
                 foreach ($dics as $dic) {
                 $model = new RkDic;
                 $model->dictype_id = $dic->id;
@@ -119,8 +121,6 @@ class RkService extends \yii\db\ActiveRecord
                 $model->obj_count = 0;
                 $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
                 $model->org_id = $this->org;
-                
-                var_dump($model);
                 
                 }
                

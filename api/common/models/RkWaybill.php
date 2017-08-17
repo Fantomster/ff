@@ -46,10 +46,10 @@ class RkWaybill extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['order_id', 'doc_date', 'corr_rid', 'store_rid', 'note', 'text_code', 'num_code'], 'required'],
+            [['order_id', 'doc_date', 'corr_rid', 'note', 'text_code', 'num_code'], 'required'],
             [['corr_rid', 'store_rid', 'status_id'], 'integer'],
                 //     [['comment'], 'string', 'max' => 255],
-                //     [['acc','rid','denom','agent_type','updated_at'],'safe']
+            [['store_rid'],'safe']
         ];
     }
 
@@ -135,8 +135,10 @@ class RkWaybill extends \yii\db\ActiveRecord {
 
                     $wdmodel->waybill_id = $this->id;
                     $wdmodel->product_id = $record->product_id;
-                    $wdmodel->quant = $record->quantity;
+                    $wdmodel->quant = $record->quantity;                    
                     $wdmodel->sum = $record->price;
+                    $wdmodel->defquant = $record->quantity;                    
+                    $wdmodel->defsum = $record->price;
                     $wdmodel->vat = 1800;
                     $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
 

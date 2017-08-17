@@ -188,4 +188,10 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     public function getLastOrder() {
         return $this->hasOne(Order::className(), ['vendor_id' => 'supp_org_id', 'client_id' => 'rest_org_id'])->orderBy(["`order`.updated_at" => SORT_DESC]);
     }
+    
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
+    }
 }

@@ -245,4 +245,10 @@ class Request extends \yii\db\ActiveRecord
     {
         return $this->hasMany(RequestCallback::className(), ['request_id' => 'id']);
     }
+    
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
+    }
 }

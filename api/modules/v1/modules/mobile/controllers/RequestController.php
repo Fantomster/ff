@@ -40,6 +40,18 @@ class RequestController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
+            'update' => [
+                'class' => 'yii\rest\UpdateAction',
+                'modelClass' => $this->modelClass,
+                'checkAccess' => [$this, 'checkAccess'],
+                'scenario' => $this->updateScenario,
+            ],
+            'create' => [
+                'class' => 'yii\rest\CreateAction',
+                'modelClass' => $this->modelClass,
+                'checkAccess' => [$this, 'checkAccess'],
+                'scenario' => $this->createScenario,
+            ],
             'view' => [
                 'class' => 'yii\rest\ViewAction',
                 'modelClass' => $this->modelClass,
@@ -84,6 +96,16 @@ class RequestController extends ActiveController {
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
+        
+         if(isset($params->count))
+        {
+            $query->limit($params->count);
+                if(isset($params->page))
+                {
+                    $offset = ($params->page * $params->count) - $params->count;
+                    $query->offset($offset);
+                }
+        }
   
          $query->andFilterWhere([
             'id' => $params->id, 
@@ -104,4 +126,27 @@ class RequestController extends ActiveController {
            ]);
         return $dataProvider;
     }
+    
+    /**
+    * Checks the privilege of the current user.
+    *
+    * This method should be overridden to check whether the current user has the privilege
+    * to run the specified action against the specified data model.
+    * If the user does not have access, a [[ForbiddenHttpException]] should be thrown.
+    *
+    * @param string $action the ID of the action to be executed
+    * @param \yii\base\Model $model the model to be accessed. If `null`, it means no specific model is being accessed.
+    * @param array $params additional parameters
+    * @throws ForbiddenHttpException if the user does not have access
+    */
+   public function checkAccess($action, $model = null, $params = [])
+   {
+       // check if the user can access $action and $model
+       // throw ForbiddenHttpException if access should be denied
+       if ($action === 'update' || $action === 'delete') {
+           $user = Yii::$app->user->identity;
+           if ($model->rest_org_id !== $user->organization_id)
+               throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
+       }
+   }
 }

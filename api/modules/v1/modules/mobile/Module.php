@@ -55,7 +55,7 @@ class Module extends \yii\base\Module
         
          $this->controllerBehaviors['authenticator'] = [
             'class' => CompositeAuth::className(),
-            'only' => ['index', 'view', 'options', 'auth','complete-registration', 'refresh-fcm-token', 'send', 'create', 'viewed'],
+            'only' => ['index', 'view', 'options', 'auth','complete-registration', 'refresh-fcm-token', 'send', 'create', 'viewed', 'update', 'create'],
             'authMethods' => [
                 [
                     'class' => HttpBasicAuth::className(),

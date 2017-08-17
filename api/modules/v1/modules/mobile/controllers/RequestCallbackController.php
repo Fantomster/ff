@@ -79,14 +79,18 @@ class RequestCallbackController extends ActiveController {
         
         $user = Yii::$app->user->getIdentity();
         
-        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-            $query = RequestCallback::find()->where(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
-     
         
-        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
-             $query->andWhere (['supp_org_id' => $user->organization_id]);
                 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+                $query = RequestCallback::find()->where(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
+
+            if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
+                $query->andWhere (['supp_org_id' => $user->organization_id]);
+            
+            $dataProvider =  new ActiveDataProvider(array(
+                'query' => $query,
+                ));
             return $dataProvider;
         }
   

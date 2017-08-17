@@ -1,6 +1,7 @@
 <?php
 
 namespace api\modules\v1\modules\mobile\resources;
+use common\models\OrganizationType;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>

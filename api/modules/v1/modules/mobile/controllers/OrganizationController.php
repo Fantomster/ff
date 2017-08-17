@@ -76,13 +76,7 @@ class OrganizationController extends ActiveController {
         $user = Yii::$app->user->getIdentity();
         
         $query = Organization::find();
-        
-        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-        $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $user->organization_id])]);
-        
-        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
-             $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('rest_org_id')->where(['supp_org_id' => $user->organization_id])]);
-     
+
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
         ));
@@ -90,6 +84,16 @@ class OrganizationController extends ActiveController {
         $filters = [];
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+                $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $user->organization_id])]);
+
+            if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
+                $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('rest_org_id')->where(['supp_org_id' => $user->organization_id])]);
+
+            $dataProvider =  new ActiveDataProvider(array(
+            'query' => $query,
+            ));
+            
             return $dataProvider;
         }
 

@@ -1,6 +1,82 @@
 <?php
 use yii\helpers\Url;
+use yii\widgets\ListView;
+use yii\web\View;
+
+$this->registerJs('
+    $(document).on("click", ".delete-guide, .delete-product", function(e) {
+        e.preventDefault();
+        clicked = $(this);
+        if (clicked.hasClass(".delete-guide")) {
+            title = "Удаление гайда";
+            text = "Вы уверены, что хотите удалить гайд?";
+            success = "Гайд удален!";
+        } else if (clicked.hasClass(".delete-product")){
+            title = "Удаление товара";
+            text = "Вы уверены, что хотите удалить товара из гайда?";
+            success = "Товар удален!";
+        }
+        swal({
+            title: title,
+            text: text,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Да, удалить",
+            cancelButtonText: "Отмена",
+            showLoaderOnConfirm: true,
+            preConfirm: function () {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        clicked.data("url")
+                    ).done(function (result) {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+                })
+            },
+        }).then(function() {
+            swal({title: success, type: "success"});
+        });
+    });
+
+    $(document).on("click", ".create-guide", function(e) {
+        e.preventDefault();
+        var clicked = $(this);
+        title = "Назовите ваш новый гайд";
+        success = "Заказ оформлен!";
+        swal({
+            title: title,
+            text: text,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Да",
+            cancelButtonText: "Отмена",
+            showLoaderOnConfirm: true,
+            preConfirm: function () {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        clicked.data("url"),
+                        form.serialize() + extData
+                    ).done(function (result) {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+                })
+            },
+        }).then(function() {
+            swal({title: success, type: "success"});
+        });
+    });
+', View::POS_READY);
+
 ?>
+
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
@@ -41,125 +117,26 @@ use yii\helpers\Url;
             </div>
             <div class="row">
                 <div class="col-md-12 guid">
-                    <div class="guid_block">
-                        <div class="guid_block_title">
-                            <p>Название гайда</p>
-                        </div>	
-                        <div class="guid_block_comment">
-                            <p>Комментарий: <span>какой-то комментарий к гайду</span></p> 
-                        </div>
-                        <div class="guid_block_counts">
-                            <p>Кол-во товаров: <span>125</span></p> 
-                        </div>
-                        <div class="guid_block_updated">
-                            <p>Изменен: <span>25 июля 2017</span></p> 
-                        </div>
-                        <div class="guid_block_buttons">
-                            <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i> Удалить</button>
-                            <button class="btn btn-sm btn-outline-default"><i class="fa fa-pencil"></i> Редактировать</button> 
-                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-to-cart"><i class="fa fa-shopping-cart"></i> В корзину</button>  
-                        </div>
-                    </div> 
-
-                    <div class="guid_block">
-                        <div class="guid_block_title">
-                            <p>Название гайда</p>
-                        </div>	
-                        <div class="guid_block_comment">
-                            <p>Комментарий: <span>какой-то комментарий к гайду</span></p> 
-                        </div>
-                        <div class="guid_block_counts">
-                            <p>Кол-во товаров: <span>125</span></p> 
-                        </div>
-                        <div class="guid_block_updated">
-                            <p>Изменен: <span>25 июля 2017</span></p> 
-                        </div>
-                        <div class="guid_block_buttons">
-                            <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i> Удалить</button>
-                            <button class="btn btn-sm btn-outline-default"><i class="fa fa-pencil"></i> Редактировать</button> 
-                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-to-cart"><i class="fa fa-shopping-cart"></i> В корзину</button>  
-                        </div>
-                    </div>
-
-                    <div class="guid_block">
-                        <div class="guid_block_title">
-                            <p>Название гайда</p>
-                        </div>	
-                        <div class="guid_block_comment">
-                            <p>Комментарий: <span>какой-то комментарий к гайду</span></p> 
-                        </div>
-                        <div class="guid_block_counts">
-                            <p>Кол-во товаров: <span>125</span></p> 
-                        </div>
-                        <div class="guid_block_updated">
-                            <p>Изменен: <span>25 июля 2017</span></p> 
-                        </div>
-                        <div class="guid_block_buttons">
-                            <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i> Удалить</button>
-                            <button class="btn btn-sm btn-outline-default"><i class="fa fa-pencil"></i> Редактировать</button> 
-                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-to-cart"><i class="fa fa-shopping-cart"></i> В корзину</button>  
-                        </div>
-                    </div>
-
-                    <div class="guid_block">
-                        <div class="guid_block_title">
-                            <p>Название гайда</p>
-                        </div>	
-                        <div class="guid_block_comment">
-                            <p>Комментарий: <span>какой-то комментарий к гайду</span></p> 
-                        </div>
-                        <div class="guid_block_counts">
-                            <p>Кол-во товаров: <span>125</span></p> 
-                        </div>
-                        <div class="guid_block_updated">
-                            <p>Изменен: <span>25 июля 2017</span></p> 
-                        </div>
-                        <div class="guid_block_buttons">
-                            <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i> Удалить</button>
-                            <button class="btn btn-sm btn-outline-default"><i class="fa fa-pencil"></i> Редактировать</button> 
-                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-to-cart"><i class="fa fa-shopping-cart"></i> В корзину</button>  
-                        </div>
-                    </div>
-
-                    <div class="guid_block">
-                        <div class="guid_block_title">
-                            <p>Название гайда</p>
-                        </div>	
-                        <div class="guid_block_comment">
-                            <p>Комментарий: <span>какой-то комментарий к гайду</span></p> 
-                        </div>
-                        <div class="guid_block_counts">
-                            <p>Кол-во товаров: <span>125</span></p> 
-                        </div>
-                        <div class="guid_block_updated">
-                            <p>Изменен: <span>25 июля 2017</span></p> 
-                        </div>
-                        <div class="guid_block_buttons">
-                            <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i> Удалить</button>
-                            <button class="btn btn-sm btn-outline-default"><i class="fa fa-pencil"></i> Редактировать</button> 
-                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-to-cart"><i class="fa fa-shopping-cart"></i> В корзину</button>  
-                        </div>
-                    </div>
-
-                    <div class="guid_block">
-                        <div class="guid_block_title">
-                            <p>Название гайда</p>
-                        </div>	
-                        <div class="guid_block_comment">
-                            <p>Комментарий: <span>какой-то комментарий к гайду</span></p> 
-                        </div>
-                        <div class="guid_block_counts">
-                            <p>Кол-во товаров: <span>125</span></p> 
-                        </div>
-                        <div class="guid_block_updated">
-                            <p>Изменен: <span>25 июля 2017</span></p> 
-                        </div>
-                        <div class="guid_block_buttons">
-                            <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i> Удалить</button>
-                            <button class="btn btn-sm btn-outline-default"><i class="fa fa-pencil"></i> Редактировать</button> 
-                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-to-cart"><i class="fa fa-shopping-cart"></i> В корзину</button>  
-                        </div>
-                    </div> 
+                    <?=
+                                ListView::widget([
+                                    'dataProvider' => $dataProvider,
+                                    'itemView' => function ($model, $key, $index, $widget) {
+                                        return $this->render('guides/_list-view', ['model' => $model]);
+                                    },
+                                            'pager' => [
+                                                'maxButtonCount' => 5,
+                                                'options' => [
+                                                    'class' => 'pagination col-md-12  no-padding'
+                                                ],
+                                            ],
+                                            'options' => [
+                                                'class' => 'col-lg-12 list-wrapper inline no-padding'
+                                            ],
+                                            'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
+                                            'summary' => 'Показано {count} из {totalCount}',
+                                            'emptyText' => 'Список пуст',
+                                        ])
+                                        ?>
                 </div>
             </div>
         </div>

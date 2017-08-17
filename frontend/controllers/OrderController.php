@@ -16,6 +16,10 @@ use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use common\models\ManagerAssociate;
 use common\models\OrderChat;
+use common\models\guides\Guide;
+use common\models\search\GuideSearch;
+use common\models\guides\GuideProduct;
+use common\models\search\GuideProductsSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
@@ -135,7 +139,47 @@ class OrderController extends DefaultController {
     }
 
     public function actionGuides() {
-        return $this->render('guides');
+        $client = $this->currentUser->organization;
+        $searchModel = new GuideSearch();
+        $params = Yii::$app->request->getQueryParams();
+        
+        $dataProvider = $searchModel->search($params, $client->id);
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('guides', compact('dataProvider', 'searchModel'));
+        } else {
+            return $this->render('guides', compact('dataProvider', 'searchModel'));
+        }
+    }
+    
+    public function actionAjaxDeleteGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        if (isset($guide)) {
+            $guide->delete();
+            return true;
+        }
+        return false;
+    }
+    
+    public function actionAjaxCreateGuide() {
+        //
+    }
+    
+    public function actionAjaxEditGuide() {
+        //
+    }
+    
+    public function actionAjaxShowGuide() {
+        //
+    }
+    
+    public function actionAjaxAddToGuide() {
+        //
+    }
+    
+    public function actionAjaxRemoveFromGuide() {
+        //
     }
     
     public function actionFavorites() {
@@ -447,22 +491,6 @@ class OrderController extends DefaultController {
         }
     }
     
-    public function actionAjaxCreateGuide() {
-        //
-    }
-    
-    public function actionAjaxDeleteGuide() {
-        //
-    }
-    
-    public function actionAjaxAddToGuide() {
-        //
-    }
-    
-    public function actionAjaxRemoveFromGuide() {
-        //
-    }
-
     public function actionRefreshCart() {
         $client = $this->currentUser->organization;
         $orders = $client->getCart();

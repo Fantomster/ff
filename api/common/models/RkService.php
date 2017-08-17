@@ -109,11 +109,10 @@ class RkService extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($insert) {
+        if (!$insert && in_array('org',$changedAttributes)) {
+            
             $dics = RkDictype::findAll();
-            
-            var_dump($dics);
-            
+                       
                 foreach ($dics as $dic) {
                 $model = new RkDic;
                 $model->dictype_id = $dic->id;

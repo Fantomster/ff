@@ -164,6 +164,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionUpdate($id) {
         $model = $this->findModel($id);
+        
+        $lic = $this->checkLic();       
+        $vi = $lic ? 'update' : '/default/_nolic';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //  return $this->redirect(['view', 'id' => $model->id]);
@@ -175,7 +178,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
             return $this->redirect(['index']);
         } else {
-            return $this->render('update', [
+            return $this->render($vi, [
                         'model' => $model,
             ]);
         }

@@ -101,13 +101,13 @@ class RkService extends \yii\db\ActiveRecord {
         
             echo "<pre>";
             var_dump($changedAttributes);
-            echo "<?pre>";
-            exit();
+            echo "</pre>";
+            die();
         
        
         if (!$insert && array_key_exists('org', $changedAttributes)) {
             
-            $dics = RkDictype::findAll();
+            $dics = RkDictype::find()->all();
             
             echo "<pre>";
             var_dump($dics);

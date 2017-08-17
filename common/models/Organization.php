@@ -716,4 +716,27 @@ class Organization extends \yii\db\ActiveRecord {
             ->setSubject($subject)
             ->send();
     }
+
+
+    public function getAssociatedClientsList() {
+//        $usrTable = User::tableName();
+//        $profTable = Profile::tableName();
+//        $assocTable = ManagerAssociate::tableName();
+//
+//        $clients = ArrayHelper::map(User::find()
+//            ->joinWith('profile')
+//            ->joinWith('associated')
+//            ->select(["$usrTable.id as id", "$profTable.full_name as name"])
+//            ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
+//            ->orderBy(['name' => SORT_ASC])
+//            ->asArray()
+//            ->all(), 'id', 'name');
+//        $dataListRequest = new ActiveDataProvider([
+//            'query' => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
+//            'pagination' => [
+//                'pageSize' => 15,
+//            ],
+//        ]);
+//        return $managers;
+    }
 }

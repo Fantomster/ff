@@ -718,25 +718,14 @@ class Organization extends \yii\db\ActiveRecord {
     }
 
 
-    public function getAssociatedClientsList() {
-//        $usrTable = User::tableName();
-//        $profTable = Profile::tableName();
-//        $assocTable = ManagerAssociate::tableName();
-//
-//        $clients = ArrayHelper::map(User::find()
-//            ->joinWith('profile')
-//            ->joinWith('associated')
-//            ->select(["$usrTable.id as id", "$profTable.full_name as name"])
-//            ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
-//            ->orderBy(['name' => SORT_ASC])
-//            ->asArray()
-//            ->all(), 'id', 'name');
-//        $dataListRequest = new ActiveDataProvider([
-//            'query' => Request::find()->where(['rest_org_id' => $organization->id])->andWhere($search)->orderBy('id DESC'),
-//            'pagination' => [
-//                'pageSize' => 15,
-//            ],
-//        ]);
-//        return $managers;
+    public function getAssociatedRequestsList($franchisee_id) {
+        $search = ['like','product',\Yii::$app->request->get('search')?:''];
+        $dataListRequest = new ActiveDataProvider([
+            'query' => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id'=>$franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+        ]);
+        return $dataListRequest;
     }
 }

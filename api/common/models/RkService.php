@@ -106,6 +106,30 @@ class RkService extends \yii\db\ActiveRecord
         }
     }   
     
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            $dics = RkDictype::findAll();
+            
+                foreach ($dics as $dic) {
+                $model = new RkDic;
+                $model->dictype_id = $dic->id;
+                $model->dicstatus_id = 1;
+                $model->obj_count = 0;
+                $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
+                
+                }
+               
+                if (!$model->save()) {
+                    print_r($model->getErrors());   
+                    die();
+                }
+             
+            }
+  
+    }
+    
     public static function getDb()
     {
        return \Yii::$app->db_api;

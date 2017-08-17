@@ -82,16 +82,22 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $searchModel = new \common\models\search\OrderSearch();
 
         $dataProvider = $searchModel->searchWaybill(Yii::$app->request->queryParams);
+        
+        $lic = $this->checkLic();       
+        
+        $vi = $lic ? 'index' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('index', [
+            return $this->renderPartial($vi, [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
+                        'lic' => $lic,
             ]);
         } else {
-            return $this->render('index', [
+            return $this->render($vi, [
                         'searchModel' => $searchModel,
                         'dataProvider' => $dataProvider,
+                        'lic' => $lic,
             ]);
         }
     }
@@ -103,13 +109,16 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $dataProvider = new ActiveDataProvider(['query' => $records,
             'sort' => false,
         ]);
+        
+        $lic = $this->checkLic();       
+        $vi = $lic ? 'indexmap' : '/default/_nolic';
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('indexmap', [
+            return $this->renderPartial($vi, [
                         'dataProvider' => $dataProvider,
             ]);
         } else {
-            return $this->render('indexmap', [
+            return $this->render($vi, [
                         'dataProvider' => $dataProvider,
             ]);
         }
@@ -200,6 +209,21 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $res->sendWaybill($waybill_id);
 
         $this->redirect('\clientintegr\rkws\waybill\index');
+    }
+    
+    protected function checkLic() {
+     
+    $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one(); 
+    $t = strtotime(date('Y-m-d H:i:s',time()));
+    
+    if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
+       $res = $lic; 
+    } else { 
+       $res = 0; 
+    }
+    
+    return $res ? $res : null;
+        
     }
 
     protected function findModel($id) {

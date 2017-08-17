@@ -79,7 +79,7 @@ class SiteController extends Controller {
     public function beforeAction($action)
     {
         $session = Yii::$app->session;
-        if ((!$session->has('locality') || !$session->has('region')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
+        if (!(Yii::$app->session->get('country') || Yii::$app->session->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
             return $this->redirect(['/site/index']);
         }else{
            

@@ -301,6 +301,7 @@ class OrganizationController extends DefaultController {
                         $model = new Organization();
                         $model->sendGenerationPasswordEmail($user);
                         $catalog->name = \common\models\Catalog::CATALOG_BASE_NAME;
+                        $catalog->status = 1;
                         $catalog->type = \common\models\Catalog::BASE_CATALOG;
                         $catalog->supp_org_id = $vendor->id;
                         $catalog->save();

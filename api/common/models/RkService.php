@@ -108,6 +108,8 @@ class RkService extends \yii\db\ActiveRecord
     
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
+        
+        var_dump($changedAttributes);
 
         if (!$insert && in_array('org',$changedAttributes)) {
             

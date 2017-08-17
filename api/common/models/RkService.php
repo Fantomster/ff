@@ -118,6 +118,7 @@ class RkService extends \yii\db\ActiveRecord
                 $model->dicstatus_id = 1;
                 $model->obj_count = 0;
                 $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
+                $model->org_id = $this->org;
                 
                 }
                

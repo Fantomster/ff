@@ -99,6 +99,11 @@ class RkService extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
         
+            echo "<pre>";
+            var_dump($changedAttributes);
+            echo "<?pre>";
+            exit();
+        
        
         if (!$insert && array_key_exists('org', $changedAttributes)) {
             

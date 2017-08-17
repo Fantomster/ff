@@ -99,14 +99,14 @@ class RkService extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
        
-        echo "<PRE>";
-        var_dump($changedAttributes);
-        echo "</PRE>";
-        exit();
-
-      /*  if (!$insert && in_array('org', $changedAttributes)) {
+        if (!$insert && in_array('org', $changedAttributes)) {
 
             $dics = RkDictype::findAll();
+            
+            echo "<pre>";
+            var_dump($dics);
+            echo "<?pre>";
+            exit();
 
             foreach ($dics as $dic) {
                 $model = new RkDic;
@@ -122,7 +122,7 @@ class RkService extends \yii\db\ActiveRecord {
                 }
             }
         }
-        */
+        
         parent::afterSave($insert, $changedAttributes); 
     }
 

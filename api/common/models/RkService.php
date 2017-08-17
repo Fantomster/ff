@@ -103,11 +103,6 @@ class RkService extends \yii\db\ActiveRecord {
         if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
             
             $dics = RkDictype::find()->all();
-            
-            echo "<pre>";
-            var_dump($dics);
-            echo "<?pre>";
-            die();
 
             foreach ($dics as $dic) {
                 $model = new RkDic;

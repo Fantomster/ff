@@ -164,6 +164,9 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionUpdate($id) {
         $model = $this->findModel($id);
+        
+        $lic = $this->checkLic();       
+        $vi = $lic ? 'update' : '/default/_nolic';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //  return $this->redirect(['view', 'id' => $model->id]);
@@ -175,7 +178,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
             return $this->redirect(['index']);
         } else {
-            return $this->render('update', [
+            return $this->render($vi, [
                         'model' => $model,
             ]);
         }
@@ -216,11 +219,15 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     $lic = \api\common\models\RkService::find()->andWhere('org = :org',['org' => Yii::$app->user->identity->organization_id])->one(); 
     $t = strtotime(date('Y-m-d H:i:s',time()));
     
-    if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
+    if ($lic) {
+       if ($t >= strtotime($lic->fd) && $t<= strtotime($lic->td) && $lic->status_id === 2 ) { 
        $res = $lic; 
     } else { 
        $res = 0; 
     }
+    } else 
+       $res = 0; 
+    
     
     return $res ? $res : null;
         

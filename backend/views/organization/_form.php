@@ -283,7 +283,7 @@ document.onkeypress = stopRKey;
 
     <?= $form->field($model, 'about')->textarea() ?>
 
-    <?= $form->field($model, 'legal_entity')->dropDownList($franchisees,
+    <?= $form->field($model->franchisee, 'id')->dropDownList($franchisees,
         ['options' =>
             [
                 (isset($model->franchisee->id)) ? $model->franchisee->id : 1 => ['selected' => true]

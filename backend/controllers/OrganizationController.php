@@ -117,7 +117,7 @@ class OrganizationController extends Controller {
                 $franchiseeAssociate = new FranchiseeAssociate();
                 $franchiseeAssociate->organization_id = $id;
             }
-            $franchiseeAssociate->franchisee_id = $post['Organization']['legal_entity'];
+            $franchiseeAssociate->franchisee_id = $post['Franchisee']['id'];
             $franchiseeAssociate->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {

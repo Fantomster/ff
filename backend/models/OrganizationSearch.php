@@ -38,7 +38,7 @@ class OrganizationSearch extends Organization {
      * @return ActiveDataProvider
      */
     public function search($params) {
-        $query = Organization::find()->innerJoinWith('franchisee', true);;
+        $query = Organization::find();
 
         // add conditions that should always apply here
 

@@ -82,7 +82,7 @@ class RkDic extends \yii\db\ActiveRecord
     }
 
     public function getOrganization() {
-           return $this->hasOne(Organization_api::className(), ['id' => 'org']);          
+           return $this->hasOne(Organization::className(), ['id' => 'org']);          
            
     }
     

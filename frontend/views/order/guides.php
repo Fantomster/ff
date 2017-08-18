@@ -3,6 +3,7 @@ use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\web\View;
 use kartik\form\ActiveForm;
+use yii\widgets\Pjax;
 
 $this->registerJs('
     $(document).on("click", ".delete-guide, .delete-product", function(e) {

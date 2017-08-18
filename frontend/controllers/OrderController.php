@@ -187,7 +187,7 @@ class OrderController extends DefaultController {
         $vendorSearchModel = new \common\models\search\VendorSearch();
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         
-        $selectedVendor = isset(Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
+        $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
         $productSearchModel = new OrderCatalogSearch();
         
     }

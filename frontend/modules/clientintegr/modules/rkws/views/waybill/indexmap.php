@@ -166,13 +166,14 @@ GridView::widget([
                 'header'=>':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
                 'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
                 'formOptions' => [
-                              'action' => Url::toRoute('changekoef')
+                              'action' => Url::toRoute('changekoef'),
+                              'enableClientValidation' => false,
                                  ],    
                 ],
                 'hAlign'=>'right',
                 'vAlign'=>'middle',
                 // 'width'=>'100px',
-                'format'=>['decimal'],
+                'format'=>['decimal',6],
                 'pageSummary'=>true
                 ],      
                 [
@@ -183,7 +184,8 @@ GridView::widget([
                 'header'=>':<br><strong>Новое количество равно:&nbsp; &nbsp;</srong>',
                 'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
                 'formOptions' => [
-                              'action' => Url::toRoute('changekoef')
+                              'action' => Url::toRoute('changekoef'),
+                              'enableClientValidation' => false,
                                  ],    
                 ],
                 'hAlign'=>'right',
@@ -200,7 +202,8 @@ GridView::widget([
                 'header'=>'<strong>Новая сумма равна:&nbsp; &nbsp;</srong>',
                 'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
                 'formOptions' => [
-                              'action' => Url::toRoute('changekoef')
+                              'action' => Url::toRoute('changekoef'),
+                              'enableClientValidation' => false,
                                  ],    
                 ],
                 'hAlign'=>'right',
@@ -212,6 +215,7 @@ GridView::widget([
                  [
                 'class'=>'kartik\grid\EditableColumn',
                 'attribute'=>'vat',
+                'label' => 'Ставка НДС',     
                 'value' => function ($model) {
                          return $model->vat/100;
                 },

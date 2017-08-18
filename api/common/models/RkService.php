@@ -5,7 +5,6 @@ namespace api\common\models;
 use Yii;
 use common\models\Organization;
 
-
 /**
  * This is the model class for table "rk_access".
  *
@@ -26,38 +25,32 @@ use common\models\Organization;
  * 
  * 
  */
-class RkService extends \yii\db\ActiveRecord
-{
-    
+class RkService extends \yii\db\ActiveRecord {
     // const STATUS_UNLOCKED = 0;
     // const STATUS_LOCKED = 1;
-      
-    
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'rk_service';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-        //    [['org','fd','td','object_id','status_id'], 'required'],
-        //    [['id','fid','org','ver'], 'integer'],
-            [['created_at','updated_at','is_deleted','user_id','org','fd','td','status_id','is_deleted','code','name','address','phone'], 'safe'],
+            //    [['org','fd','td','object_id','status_id'], 'required'],
+            //    [['id','fid','org','ver'], 'integer'],
+            [['created_at', 'updated_at', 'is_deleted', 'user_id', 'org', 'fd', 'td', 'status_id', 'is_deleted', 'code', 'name', 'address', 'phone'], 'safe'],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'code' => 'ID Объекта',
@@ -68,48 +61,72 @@ class RkService extends \yii\db\ActiveRecord
             'org' => 'Организация R-keeper',
         ];
     }
-    
-    
+
     public static function getStatusArray() {
         return [
-        RkAccess::STATUS_UNLOCKED  => 'Активен',
-        RkAccess::STATUS_LOCKED => 'Отключен',    
+            RkAccess::STATUS_UNLOCKED => 'Активен',
+            RkAccess::STATUS_LOCKED => 'Отключен',
         ];
     }
 
     public function getOrganization() {
-           return $this->hasOne(Organization::className(), ['id' => 'org']);          
-           
-    }
-    
-    public function getOrganizationName()
-{
-    $org = $this->organization;
-    return $org ? $org->name : 'no';
-}
-    
-    public function beforeSave($insert)
-    {
-        if (parent::beforeSave($insert)) {
-    
-            if ($this->fd){
-            $this->fd = Yii::$app->formatter->asDate($this->fd, 'yyyy-MM-dd');
-            } else {            
-            }
-            
-            if ($this->td){
-            $this->td = Yii::$app->formatter->asDate($this->td, 'yyyy-MM-dd');
-            } else {            
-            }
-            
-            return true;
-        }
-    }   
-    
-    public static function getDb()
-    {
-       return \Yii::$app->db_api;
+        return $this->hasOne(Organization::className(), ['id' => 'org']);
     }
 
+    public function getOrganizationName() {
+        $org = $this->organization;
+        return $org ? $org->name : 'no';
+    }
+
+    public function beforeSave($insert) {
+        if (parent::beforeSave($insert)) {
+
+            if ($this->fd) {
+                $this->fd = Yii::$app->formatter->asDate($this->fd, 'yyyy-MM-dd');
+            } else {
+                
+            }
+
+            if ($this->td) {
+                $this->td = Yii::$app->formatter->asDate($this->td, 'yyyy-MM-dd');
+            } else {
+                
+            }
+
+            return true;
+        }
+    }
+
+    public function afterSave($insert, $changedAttributes) {
+
+
+        if (!$insert && ($this->attributes['org'] != $changedAttributes['org'])) {
+
+            if (!$oldic = RkDic::find()->andWhere('org_id = :org', [':org' => $this->org])->all()) {
+
+                $dics = RkDictype::find()->all();
+
+                foreach ($dics as $dic) {
+                    $model = new RkDic;
+                    $model->dictype_id = $dic->id;
+                    $model->dicstatus_id = 1;
+                    $model->obj_count = 0;
+                    $model->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:i:s');
+                    $model->org_id = $this->org;
+
+                    if (!$model->save()) {
+                        print_r($model->getErrors());
+                        die();
+                    }
+                }
+            }
+        }
+
+        parent::afterSave($insert, $changedAttributes);
+    }
+
+    public static function getDb() {
+        return \Yii::$app->db_api;
+    }
 
 }

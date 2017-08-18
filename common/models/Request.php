@@ -245,4 +245,9 @@ class Request extends \yii\db\ActiveRecord
     {
         return $this->hasMany(RequestCallback::className(), ['request_id' => 'id']);
     }
+
+
+    public function getFranchiseeAssociate(){
+        return $this->hasOne(FranchiseeAssociate::className(), ['rest_org_id' => 'organization_id']);
+    }
 }

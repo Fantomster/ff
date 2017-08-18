@@ -57,8 +57,9 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
             'contact_name',
             'about',
             [
-                'attribute' => 'franchisee.legal_entity',
+                'format' => 'raw',
                 'label' => '<i>Юридическое название франшизы</i>',
+                'value' => Html::a($model->franchisee->legal_entity, ['franchisee/view', 'id'=>$model->franchisee->id]),
             ],
             [
                 'attribute' => 'franchisee.signed',

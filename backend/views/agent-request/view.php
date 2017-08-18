@@ -74,21 +74,16 @@ $this->title = "Заявка №" . $model->id;
                             'franchisee.legal_entity',
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'buttons'=>[
-                                    'view'=>function ($url, $organization) use ($model){
-                        //dd($organization->franchisee);
-//                                        if(!empty($organization->franchisee->signed) && !empty($organization->franchisee->legal_entity)){
-//                                            $customUrl=Yii::$app->getUrlManager()->createUrl(['agent-request/link','id'=>$model->id, 'org_id'=>$organization['id']]);
-//                                        return \yii\helpers\Html::a( '<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
-//                                            ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
-//                                        }else{
-                                            $customUrl=Yii::$app->getUrlManager()->createUrl(['agent-request/link','id'=>$model->id, 'org_id'=>$organization['id'], 'franchisee_id'=>$organization->franchisee->id, 'agent_id'=>$model->agent_id]);
-                                            return \yii\helpers\Html::a( '<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
-                                                ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
-                                        //}
+                                'buttons' => [
+                                    'view' => function ($url, $organization) use ($model) {
+
+                                        $customUrl = Yii::$app->getUrlManager()->createUrl(['agent-request/link', 'id' => $model->id, 'org_id' => $organization['id'], 'franchisee_id' => isset($model->franchisee->id) ? $model->franchisee->id : 1, 'agent_id' => $model->agent_id]);
+                                        return \yii\helpers\Html::a('<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
+                                            ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
+
                                     }
                                 ],
-                                'template'=>'{view}',
+                                'template' => '{view}',
                             ],
                         ],
                     ]);

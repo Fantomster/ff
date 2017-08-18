@@ -106,7 +106,7 @@ class AgentRequestController extends Controller
         $model = AgentRequest::findOne($id);
         $model->is_processed = true;
         $model->save();
-        return $this->goBack((!empty(\Yii::$app->request->referrer) ? \Yii::$app->request->referrer : null));
+        return $this->redirect('/agent-request/index');
     }
 
     /**

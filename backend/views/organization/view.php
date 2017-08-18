@@ -27,7 +27,6 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
 <div class="organization-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
-
     <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']) ?>
 
     <?=
@@ -57,6 +56,22 @@ $buisinessInfo = \common\models\BuisinessInfo::findOne(['organization_id' => $mo
             'website',
             'contact_name',
             'about',
+            [
+                'attribute' => 'franchisee.legal_entity',
+                'label' => '<i>Юридическое название франшизы</i>',
+            ],
+            [
+                'attribute' => 'franchisee.signed',
+                'label' => '<i>Подписант франшизы</i>',
+            ],
+            [
+                'attribute' => 'franchisee.legal_email',
+                'label' => '<i>Официальный email франшизы</i>',
+            ],
+            [
+                'attribute' => 'franchisee.phone',
+                'label' => '<i>Официальный телефон франшизы</i>',
+            ],
             [
                 'attribute' => 'created_at',
                 'label' => 'Дата создания',

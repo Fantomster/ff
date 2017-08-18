@@ -2,10 +2,13 @@
 
 namespace backend\controllers;
 
+use common\models\Franchisee;
+use common\models\FranchiseeAssociate;
 use Yii;
 use common\models\Organization;
 use common\models\Role;
 use backend\models\OrganizationSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -105,13 +108,20 @@ class OrganizationController extends Controller {
      */
     public function actionUpdate($id) {
         $model = $this->findModel($id);
-
+        $franchiseesObj = Franchisee::find()->all();
+        $franchisees = ArrayHelper::map($franchiseesObj,'id','legal_entity');
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $post = Yii::$app->request->post();
+            $franchiseeAssociate = FranchiseeAssociate::findOne(['organization_id'=>$id]);
+            if(!$franchiseeAssociate){
+                $franchiseeAssociate = new FranchiseeAssociate();
+                $franchiseeAssociate->organization_id = $id;
+            }
+            $franchiseeAssociate->franchisee_id = $post['Organization']['legal_entity'];
+            $franchiseeAssociate->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            return $this->render('update', [
-                        'model' => $model,
-            ]);
+            return $this->render('update', compact('model', 'franchisees'));
         }
     }
 

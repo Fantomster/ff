@@ -510,6 +510,11 @@ class Organization extends \yii\db\ActiveRecord {
     public function getFranchiseeAssociate() {
         return $this->hasOne(FranchiseeAssociate::className(), ['organization_id' => 'id']);
     }
+
+    public function getFranchisee() {
+        return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
+            ->viaTable('franchisee_associate', ['organization_id' => 'id']);
+    }
     
     public function getFranchiseeManagerInfo() {
         $sql = 'SELECT `franchisee`.* FROM `organization` 
@@ -720,6 +725,8 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function getAssociatedRequestsList($franchisee_id) {
         $search = ['like','product',\Yii::$app->request->get('search')?:''];
+//        $r = Request::find()->getFranchiseeAssociate()->all();
+//        dd($r);
         $dataListRequest = new ActiveDataProvider([
             'query' => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id'=>$franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
             'pagination' => [

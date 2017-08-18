@@ -2,6 +2,7 @@
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\web\View;
+use kartik\form\ActiveForm;
 
 $this->registerJs('
     $(document).on("click", ".delete-guide, .delete-product", function(e) {
@@ -97,12 +98,36 @@ $this->registerJs('
                 <div class="col-md-12">
                     <div class="guid-header">
                         <div class="pull-left">
-                            <div class="form-group">
-                                <div class="icon-addon addon-md">
-                                    <input type="text" placeholder="Поиск по названию" class="form-control" id="email">
-                                    <label for="email" class="glyphicon glyphicon-search" rel="tooltip" title="email"></label>
-                                </div>
-                            </div> 
+                            <?php
+                    $form = ActiveForm::begin([
+                                'options' => [
+                                    'id' => 'searchForm',
+                                    'class' => "navbar-form no-padding no-margin",
+                                    'role' => 'search',
+                                ],
+                    ]);
+                    ?>
+                    <?=
+                            $form->field($searchModel, 'searchString', [
+                                'addon' => [
+                                    'append' => [
+                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                        'options' => [
+                                            'class' => 'append',
+                                        ],
+                                    ],
+                                ],
+                                'options' => [
+                                    'class' => "margin-right-15 form-group",
+                                ],
+                            ])
+                            ->textInput([
+                                'id' => 'searchString',
+                                'class' => 'form-control',
+                                'placeholder' => 'Поиск'])
+                            ->label(false)
+                    ?>
+                    <?php ActiveForm::end(); ?>
                         </div>
                         <div class="pull-right">
                             <a class="btn btn-md btn-outline-success new-guid" href="create.html" data-toggle="tooltip" data-original-title="Создать гайд" data-url="#"><i class="fa fa-plus"></i> Создать гайд</a>
@@ -117,6 +142,9 @@ $this->registerJs('
             </div>
             <div class="row">
                 <div class="col-md-12 guid">
+                    <?php
+                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'guidesList', 'timeout' => 30000]);
+                    ?>
                     <?=
                                 ListView::widget([
                                     'dataProvider' => $dataProvider,
@@ -137,6 +165,7 @@ $this->registerJs('
                                             'emptyText' => 'Список пуст',
                                         ])
                                         ?>
+                    <?php Pjax::end(); ?>
                 </div>
             </div>
         </div>

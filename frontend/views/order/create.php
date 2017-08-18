@@ -139,41 +139,43 @@ $this->registerJs(
         <div class="tab-content">
             <div class="row">
                 <div class="col-md-12">
-                    <?php
-                    $form = ActiveForm::begin([
-                                'options' => [
-                                    'id' => 'searchForm',
-                                    'class' => "navbar-form no-padding no-margin",
-                                    'role' => 'search',
-                                ],
-                    ]);
-                    ?>
-                    <?=
-                            $form->field($searchModel, 'searchString', [
-                                'addon' => [
-                                    'append' => [
-                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
-                                        'options' => [
-                                            'class' => 'append',
+                    <div class="guid-header">
+                        <?php
+                        $form = ActiveForm::begin([
+                                    'options' => [
+                                        'id' => 'searchForm',
+                                        'class' => "navbar-form no-padding no-margin",
+                                        'role' => 'search',
+                                    ],
+                        ]);
+                        ?>
+                        <?=
+                                $form->field($searchModel, 'searchString', [
+                                    'addon' => [
+                                        'append' => [
+                                            'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                            'options' => [
+                                                'class' => 'append',
+                                            ],
                                         ],
                                     ],
-                                ],
-                                'options' => [
-                                    'class' => "margin-right-15 form-group",
-                                ],
-                            ])
-                            ->textInput([
-                                'id' => 'searchString',
-                                'class' => 'form-control',
-                                'placeholder' => 'Поиск'])
-                            ->label(false)
-                    ?>
-                    <?=
-                            $form->field($searchModel, 'selectedVendor')
-                            ->dropDownList($vendors, ['id' => 'selectedVendor'])
-                            ->label(false)
-                    ?>
-                    <?php ActiveForm::end(); ?>
+                                    'options' => [
+                                        'class' => "margin-right-15 form-group",
+                                    ],
+                                ])
+                                ->textInput([
+                                    'id' => 'searchString',
+                                    'class' => 'form-control',
+                                    'placeholder' => 'Поиск'])
+                                ->label(false)
+                        ?>
+                        <?=
+                                $form->field($searchModel, 'selectedVendor')
+                                ->dropDownList($vendors, ['id' => 'selectedVendor'])
+                                ->label(false)
+                        ?>
+                        <?php ActiveForm::end(); ?>
+                    </div>
                 </div>
             </div>
             <div class="row">

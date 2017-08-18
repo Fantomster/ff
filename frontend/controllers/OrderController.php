@@ -142,16 +142,16 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $searchModel = new GuideSearch();
         $params = Yii::$app->request->getQueryParams();
-        
+
         $dataProvider = $searchModel->search($params, $client->id);
-        
+
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('guides', compact('dataProvider', 'searchModel'));
         } else {
             return $this->render('guides', compact('dataProvider', 'searchModel'));
         }
     }
-    
+
     public function actionAjaxDeleteGuide($id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
@@ -161,31 +161,56 @@ class OrderController extends DefaultController {
         }
         return false;
     }
-    
-    public function actionAjaxCreateGuide() {
-        //
+
+    public function actionAjaxCreateGuide($name) {
+        $client = $this->currentUser->organization;
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if ($client->type_id === Organization::TYPE_RESTAURANT) {
+            $guide = new Guide();
+            $guide->client_id;
+            $guide->name = $name;
+            $guide->type = Guide::TYPE_GUIDE;
+            $guide->save();
+            return ['result' => true, 'url' => \yii\helpers\Url::to(['order/edit-guide', 'id' => $guide->id])];
+        } else {
+            return ['result' => false];
+        }
     }
-    
-    public function actionAjaxEditGuide() {
-        //
+
+    public function actionEditGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        
+        $params = Yii::$app->request->getQueryParams();
+        
+        $vendorSearchModel = new \common\models\search\VendorSearch();
+        $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
+        
+        $selectedVendor = isset(Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
+        $productSearchModel = new OrderCatalogSearch();
+        
     }
-    
-    public function actionAjaxShowGuide() {
-        //
+
+    public function actionAjaxShowGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
     }
-    
-    public function actionAjaxAddToGuide() {
-        //
+
+    public function actionAjaxAddToGuide($id, $product_id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
     }
-    
-    public function actionAjaxRemoveFromGuide() {
-        //
+
+    public function actionAjaxRemoveFromGuide($id, $product_id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
     }
-    
+
     public function actionFavorites() {
         return $this->render('favorites');
     }
-    
+
     public function actionPjaxCart() {
         if (Yii::$app->request->isPjax) {
             $client = $this->currentUser->organization;
@@ -490,7 +515,7 @@ class OrderController extends DefaultController {
             }
         }
     }
-    
+
     public function actionRefreshCart() {
         $client = $this->currentUser->organization;
         $orders = $client->getCart();

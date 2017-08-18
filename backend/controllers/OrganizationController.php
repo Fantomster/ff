@@ -111,14 +111,14 @@ class OrganizationController extends Controller {
         $franchiseesObj = Franchisee::find()->all();
         $franchisees = ArrayHelper::map($franchiseesObj,'id','legal_entity');
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $post = Yii::$app->request->post();
-            $franchiseeAssociate = FranchiseeAssociate::findOne(['organization_id'=>$id]);
-            if(!$franchiseeAssociate){
-                $franchiseeAssociate = new FranchiseeAssociate();
-                $franchiseeAssociate->organization_id = $id;
-            }
-            $franchiseeAssociate->franchisee_id = $post['Franchisee']['id'];
-            $franchiseeAssociate->save();
+//            $post = Yii::$app->request->post();
+//            $franchiseeAssociate = FranchiseeAssociate::findOne(['organization_id'=>$id]);
+//            if(!$franchiseeAssociate){
+//                $franchiseeAssociate = new FranchiseeAssociate();
+//                $franchiseeAssociate->organization_id = $id;
+//            }
+//            $franchiseeAssociate->franchisee_id = $post['Organization']['legal_entity'];
+//            $franchiseeAssociate->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('update', compact('model', 'franchisees'));

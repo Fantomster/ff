@@ -283,12 +283,13 @@ document.onkeypress = stopRKey;
 
     <?= $form->field($model, 'about')->textarea() ?>
 
-    <?= $form->field($model->franchisee, 'id')->dropDownList($franchisees,
-        ['options' =>
-            [
-                (isset($model->franchisee->id)) ? $model->franchisee->id : 1 => ['selected' => true]
-            ]
-        ])->label('Название франшизы') ?>
+<!--<?//= $form->field($model, 'id')->dropDownList($franchisees,
+//        ['options' =>
+//            [
+//                (isset($model->franchisee->id)) ? $model->franchisee->id : 1 => ['selected' => true]
+//            ]
+//        ])->label('Название франшизы') ?>
+-->
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

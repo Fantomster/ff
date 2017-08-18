@@ -82,7 +82,7 @@ $this->title = "Заявка №" . $model->id;
 //                                        return \yii\helpers\Html::a( '<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
 //                                            ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
 //                                        }else{
-                                            $customUrl=Yii::$app->getUrlManager()->createUrl(['agent-request/link','id'=>$model->id, 'org_id'=>$organization['id'], 'franchisee_id'=>$model->franchisee->id, 'agent_id'=>$model->agent_id]);
+                                            $customUrl=Yii::$app->getUrlManager()->createUrl(['agent-request/link','id'=>$model->id, 'org_id'=>$organization['id'], 'franchisee_id'=>$organization->franchisee->id, 'agent_id'=>$model->agent_id]);
                                             return \yii\helpers\Html::a( '<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
                                                 ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
                                         //}

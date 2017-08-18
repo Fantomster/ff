@@ -2,11 +2,11 @@
 
 namespace api\common\models;
 
-//use common\models\User;
+use common\models\User;
 
 use Yii;
 use common\models\OrderContent;
-use common\models\User;
+// use common\models\User;
 
 /**
  * This is the model class for table "rk_access".

@@ -827,18 +827,18 @@ table.dataTable thead th, table.dataTable thead td {
     border-bottom-left-radius: 3px;
 }
 @media (min-width: 768px) {
-/*    .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>a>.pull-right-container {
-        float: right;
-        width: auto!important;
-        left: 230px!important;
-        top: 10px!important;
-    }
-    .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>a>span:not(.pull-right), .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>.treeview-menu {
-        display: block !important;
-        position: absolute;
-        width: 210px;
-        left: 50px;
-    }*/
+    /*    .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>a>.pull-right-container {
+            float: right;
+            width: auto!important;
+            left: 230px!important;
+            top: 10px!important;
+        }
+        .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>a>span:not(.pull-right), .sidebar-mini.sidebar-collapse .sidebar-menu>li:hover>.treeview-menu {
+            display: block !important;
+            position: absolute;
+            width: 210px;
+            left: 50px;
+        }*/
     .order-history .info-box-number {
         font-size: 18px;
         .fa-rub {
@@ -978,13 +978,13 @@ a:hover, a:active, a:focus {
     }
 }
 .l-fmarket{
-    
+
 }
 
 .sub-new {
-      bottom: 0.75em; 
-      margin-left:5px;
-      color: @light-green-fk;
+    bottom: 0.75em; 
+    margin-left:5px;
+    color: @light-green-fk;
 }
 @media (min-width:768px){
     .modal-big {
@@ -1044,29 +1044,29 @@ a:hover, a:active, a:focus {
     display: none;
 }
 @font-face {
-  font-family: "Flaticon";
-  src: url("../fonts/Flaticon.eot");
-  src: url("../fonts/Flaticon.eot?#iefix") format("embedded-opentype"),
-       url("../fonts/Flaticon.woff") format("woff"),
-       url("../fonts/Flaticon.ttf") format("truetype"),
-       url("../fonts/Flaticon.svg#Flaticon") format("svg");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "Flaticon";
+    src: url("../fonts/Flaticon.eot");
+    src: url("../fonts/Flaticon.eot?#iefix") format("embedded-opentype"),
+        url("../fonts/Flaticon.woff") format("woff"),
+        url("../fonts/Flaticon.ttf") format("truetype"),
+        url("../fonts/Flaticon.svg#Flaticon") format("svg");
+    font-weight: normal;
+    font-style: normal;
 }
 
 @media screen and (-webkit-min-device-pixel-ratio:0) {
-  @font-face {
-    font-family: "Flaticon";
-    src: url("../fonts/Flaticon.svg#Flaticon") format("svg");
-  }
+    @font-face {
+        font-family: "Flaticon";
+        src: url("../fonts/Flaticon.svg#Flaticon") format("svg");
+    }
 }
 
 [class^="flaticon-"]:before, [class*=" flaticon-"]:before,
 [class^="flaticon-"]:after, [class*=" flaticon-"]:after {   
-  font-family: Flaticon;
-        font-size: 20px;
-font-style: normal;
-margin-left: 20px;
+    font-family: Flaticon;
+    font-size: 20px;
+    font-style: normal;
+    margin-left: 20px;
 }
 
 .flaticon-cross-out:before { content: "\f100"; }
@@ -1092,4 +1092,140 @@ margin-left: 20px;
 }
 .has-success .cbx-label {
     color: #2b542c !important;
+}
+.content-wrapper {
+    background: url(../images/bg.png) repeat !important;
+}
+.nav-tabs-custom {
+    background: none !important;
+}
+.label.bg-yellow{
+    font-weight: 200 !important;
+    letter-spacing: 0.08em !important;;
+}
+/*** иконка внутри input ***/
+.center-block {
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.input-group .icon-addon .form-control {
+    border-radius: 0;
+}
+
+.icon-addon {
+    position: relative;
+    color: #555;
+    display: block;
+}
+
+.icon-addon:after,
+.icon-addon:before {
+    display: table;
+    content: " ";
+}
+
+.icon-addon:after {
+    clear: both;
+}
+.icon-addon.addon-md .glyphicon,
+.icon-addon .glyphicon, 
+.icon-addon.addon-md .fa,
+.icon-addon .fa {
+    position: absolute;
+    z-index: 2;
+    left: 10px;
+    font-size: 14px;
+    width: 20px;
+    margin-left: -2.5px;
+    text-align: center;
+    padding: 10px 0;
+    top: 1px
+}
+
+.icon-addon.addon-lg .form-control {
+    line-height: 1.33;
+    height: 46px;
+    font-size: 18px;
+    padding: 10px 16px 10px 40px;
+}
+
+.icon-addon.addon-sm .form-control {
+    height: 30px;
+    padding: 5px 10px 5px 28px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.icon-addon.addon-lg .fa,
+.icon-addon.addon-lg .glyphicon {
+    font-size: 18px;
+    margin-left: 0;
+    left: 11px;
+    top: 4px;
+}
+
+.icon-addon.addon-md .form-control,
+.icon-addon .form-control {
+    padding-left: 30px;
+    float: left;
+    font-weight: normal;
+}
+
+.icon-addon.addon-sm .fa,
+.icon-addon.addon-sm .glyphicon {
+    margin-left: 0;
+    font-size: 12px;
+    left: 5px;
+    top: -1px
+}
+.icon-addon.addon-md .glyphicon {
+    color: #b7b7b7;
+}
+/*** --/ иконка внутри input ***/
+.g-hr{width:100%;position:relative;padding:2px;border: 1px solid #ccc;}
+.btn-outline-default{
+border: 1px solid #A9ABAD; color: #A9ABAD;	
+}
+.btn-outline-default:hover {
+  color: #fff;
+  background-color: #A9ABAD;
+  border-color: #A9ABAD;
+}
+.guid{padding-bottom: 40px}
+.guid-header{margin-top:10px;}
+.guid_block{
+  border: 1px solid #DEDEDE;border-radius:4px;height: 100%;max-width:390px;position: relative; padding: 24px;display: inline-block;margin-right: 15px;margin-bottom: 20px
+}
+.guid_block_title p{color: #3F3E3E;font-size: 18px; font-style: normal;line-height: 22px;}
+.guid_block_comment p{color: #95989A;font-size: 11px; font-style: normal;line-height: 13px;}
+.guid_block_comment p span{}
+.guid_block_counts p{color: #95989A;font-size: 11px; font-style: normal;line-height: 13px;}
+.guid_block_counts p span{}
+.guid_block_updated p{color: #95989A;font-size: 11px; font-style: normal;line-height: 13px;}
+.guid_block_updated p span{}
+.guid_block_buttons {margin-top: 20px}
+
+.guid_block_create_title p{color: #3F3E3E;font-size: 14px; font-style: normal;line-height: 17px;margin-top: 8px;}
+.guid_block_create_counts p{color: #95989A;font-size: 11px; font-style: normal;line-height: 13px;}
+
+.guid_table_block{border:1px solid #ececec;border-radius: 4px;margin-bottom: 20px}
+
+.guid_table_block .table {
+    margin:0;
+}
+.guid_table_block_title{padding: 25px 7px 43px 9px;}
+.guid_block_title_r{color:#3F3E3E;font-size: 16px;line-height: 19px}
+.guid_block_title_l{color:#84bf76;font-size: 16px;line-height: 19px}
+
+.guid-save{width: 100%;padding: 10px 0;}
+#modal-to-cart .modal-header {
+    background: #fff;
+}
+#modal-to-cart .modal-header .modal-title{
+    color: #84bf76;
+}
+#modal-to-cart .modal-header span{
+    color: #B7B7B7;
 }

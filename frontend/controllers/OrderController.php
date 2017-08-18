@@ -16,6 +16,10 @@ use common\models\search\OrderSearch;
 use common\models\search\OrderContentSearch;
 use common\models\ManagerAssociate;
 use common\models\OrderChat;
+use common\models\guides\Guide;
+use common\models\search\GuideSearch;
+use common\models\guides\GuideProduct;
+use common\models\search\GuideProductsSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
@@ -63,6 +67,8 @@ class OrderController extends DefaultController {
                     [
                         'actions' => [
                             'create',
+                            'guides',
+                            'favorites',
                             'checkout',
                             'repeat',
                             'refresh-cart',
@@ -130,6 +136,79 @@ class OrderController extends DefaultController {
         } else {
             return $this->render('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));
         }
+    }
+
+    public function actionGuides() {
+        $client = $this->currentUser->organization;
+        $searchModel = new GuideSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        $dataProvider = $searchModel->search($params, $client->id);
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('guides', compact('dataProvider', 'searchModel'));
+        } else {
+            return $this->render('guides', compact('dataProvider', 'searchModel'));
+        }
+    }
+
+    public function actionAjaxDeleteGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        if (isset($guide)) {
+            $guide->delete();
+            return true;
+        }
+        return false;
+    }
+
+    public function actionAjaxCreateGuide($name) {
+        $client = $this->currentUser->organization;
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if ($client->type_id === Organization::TYPE_RESTAURANT) {
+            $guide = new Guide();
+            $guide->client_id;
+            $guide->name = $name;
+            $guide->type = Guide::TYPE_GUIDE;
+            $guide->save();
+            return ['result' => true, 'url' => \yii\helpers\Url::to(['order/edit-guide', 'id' => $guide->id])];
+        } else {
+            return ['result' => false];
+        }
+    }
+
+    public function actionEditGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        
+        $params = Yii::$app->request->getQueryParams();
+        
+        $vendorSearchModel = new \common\models\search\VendorSearch();
+        $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
+        
+        $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
+        $productSearchModel = new OrderCatalogSearch();
+        
+    }
+
+    public function actionAjaxShowGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+    }
+
+    public function actionAjaxAddToGuide($id, $product_id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+    }
+
+    public function actionAjaxRemoveFromGuide($id, $product_id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+    }
+
+    public function actionFavorites() {
+        return $this->render('favorites');
     }
 
     public function actionPjaxCart() {
@@ -435,22 +514,6 @@ class OrderController extends DefaultController {
                 return $result;
             }
         }
-    }
-    
-    public function actionAjaxCreateGuide() {
-        //
-    }
-    
-    public function actionAjaxDeleteGuide() {
-        //
-    }
-    
-    public function actionAjaxAddToGuide() {
-        //
-    }
-    
-    public function actionAjaxRemoveFromGuide() {
-        //
     }
 
     public function actionRefreshCart() {

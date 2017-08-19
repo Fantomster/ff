@@ -110,6 +110,121 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 top: 100px;
                 z-index: 99999;
             }
+            .header_callback_btn{
+    color: #6be34f;
+    /* display: block; */
+    font-size: 13px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 8px;
+            }
+        @media (max-width: 620px){
+            .header_callback_btn{
+                display: block;
+            }
+        }
+        /* FORM */
+.callback .input_text {
+  width: 100%;
+  padding: 0 10px;
+  font-size: 16px;
+  height: 50px;
+  border: 1px solid #E0E0E0;
+  color: #343434;
+  @include transition(.3s);
+  &:focus {
+    border: 1px solid #66BC75; } }
+.callback .textarea_form {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #E0E0E0;
+  font-size: 16px;
+  resize: none;
+  color: #333;
+  @include transition(.3s);
+  height: 150px;
+  &:focus {
+    border: 1px solid #66BC75; } }
+.callback .input_file {
+  display: inline-block;
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  user-select: none;
+  background: url("../img/decor_9.png") left center no-repeat;
+  user-select: none;
+.callback input {
+    display: none; }
+.callback span {
+    font-size: 18px;
+    color: #2E8CC7;
+    border-bottom: 2px dotted #2E8CC7; } }
+.callback .input_btn {
+  width: 100%;
+  padding: 10px;
+  height: 45px;
+  font-size: 16px;
+  color: #333;
+  @include transition(.3s);
+  background: #66BC75;
+  color: #fff;
+  &:hover {
+    opacity: .8; } }
+.callback .select__wrap {
+  position: relative;
+  width: 100%;
+  font-size: 16px;
+  height: 50px;
+  border: 1px solid #E0E0E0;
+  color: #95989A;
+  @include transition(.3s);
+  .callback select {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: none;
+    font-size: 14px;
+    padding: 0 10px;
+    color: #95989A; } }
+.callback .select__wrap:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  margin-top: -2px;
+  z-index: 10;
+  display: block;
+  pointer-events: none;
+  border-style: solid;
+  border-width: 5px 5px 0 5px;
+  border-color: #95989A transparent transparent transparent; }
+.callback .contact_us__form__row {
+    margin-bottom: 20px;
+}
+
+  .send-form-callback:hover {
+    background-color: #378a5f;
+    text-decoration: none;
+}
+  .send-form-callback {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 15px 40px;
+    border: 0;
+    width: 100%;
+    border-radius: 3px;
+    background: #84bf76;
+    color: #fff;
+}
+.callback .modal_title, .callback_boyar .modal_title {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 20px;
+    margin-top: 15px;
+    text-align: center;
+}
         </style>
     </head>
     <body>	
@@ -126,6 +241,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <div class="phone__block">
                             <span class="phone__block-number">
                                 <span class="glyphicon glyphicon-phone"></span><a style="color:#fff;text-decoration:none;" href="tel:84994041018">8-499-404-10-18</a>
+                                <span class="header_callback_btn callback_form" data-modal="callback" data-lead="Заказать звонок">заказать звонок</span>
                             </span>
                         </div>
                         <div class="registr-block">
@@ -170,7 +286,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
                                     <li><?= Html::a('Новости', "http://blog.f-keeper.ru?news") ?></li>
-                                    <li><?= Html::a('Для ресторанов', ["/site/restaurant"]) ?></li>
+                                    <li><?= Html::a('Для ресторанов', "https://client.f-keeper.ru") ?></li>
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>
                                     <li><?= Html::a('Контакты', ["/site/contacts"]) ?></li>
@@ -187,16 +303,6 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </ul>
                             </div>	
                         </div>
-                        <?php /*
-                          <div class="col-md-3 col-sm-3">
-                          <div class="footer__menu_block">
-                          <span class="title__menu">ФОТО / видео</span>
-                          <ul class="links">
-                          <li><a href="#">Фото архив</a></li>
-                          <li><a href="#">Видео архив</a></li>
-                          </ul>
-                          </div>
-                          </div> */ ?>
                         <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
                                 <span class="title__menu">Вход / регистрация</span>
@@ -231,11 +337,115 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             </div>
                         </div>	
                     </div>
-
-
-
             </footer><!-- .footer -->
+            <div class="modalOverlay"></div>
+            <div class="modalWindowWrap callback">
+                <div class="modalTable">
+                    <div class="modalCell">
+                        <div class="modalWindow">
+                            <span class="modalWindowClose"></span>
+                            <span class="modal_title">Узнать подробности</span>
+                            <form action="https://partner.f-keeper.ru/fr/post" class="callbackwidget-call-form">
+                                <div class="contact_us__form__row">
+                                    <select class="input_text" name="FIELDS[formtype]" required>
+                                        <option value="1">Франшиза</option>
+                                        <option value="2">Поставщик</option>
+                                        <option value="3">Ресторан</option>
+                                    </select>
+                                </div>
+                                <div class="contact_us__form__row">
+                                    <input type="text" class="input_text" name="FIELDS[name]" placeholder="Имя" required>
+                                </div>
+                                <div class="contact_us__form__row">
+                                    <input type="text" class="input_text user_phone_mask" name="FIELDS[phone]" placeholder="Телефон" required>
+                                </div>
+                                <div class="contact_us__form__row">
+                                    <input type="text" class="input_text" name="FIELDS[email]" placeholder="Почта">
+                                </div>
+                                <div class="contact_us__form__row">
+                                    <input type="text" class="input_text" placeholder="Город" name="FIELDS[city]" required>
+                                </div>
+                                <div class="contact_us__form__row">
+                                    <button type="submit" class="send-form-callback" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Получаем..."><span>Отправить</span></button>
+                                </div>
+                                <input type="hidden" name="FIELDS[sitepage]" value="fkeeper">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+$js = <<<JS
+$("form.callbackwidget-call-form").on("submit", function (h) {
+        var form = $(this);
+        var data = form.serialize();
+        $('button[type="submit"]').button("loading");
+        type = $(this).find(".form_type").val();
+        $.ajax({
+            url: form.attr("action"),
+            data: data,
+            type: "post",
+            xhrFields: {withCredentials: true},
+            crossDomain: true,
+            processData: true,
+            dataType: "json",
+            success: function (response) {
+                modalClose();
+                $('button[type="submit"]').button("reset");
+                if (response.result == "success") {
+		              //yaCounter45202749.reachGoal('rest', function () {}); 
+                    (swal("Заявка успешно отправлена!", "Мы свяжемся с вами в ближайшее время.", "success"), form[0].reset());
+                }
+                if (response.result == "error") {
+                    (swal("Ошибка", "Заявка не отправлена", "error"), a[0].reset());
+                }
+                if (response.result == "errorPhone") {
+                    (swal("Ошибка", "Вы уже отправляли заявку", "error"));
+                }
+            },
+            error: function () {
+                modalClose();
+                $('button[type="submit"]').button("reset");
+                swal("Ошибка", "Заявка не отправлена", "error")
+            }
+        });
+        return false;
+});
+/* modals */
+function modalOpen(modal) {
+    $('.' + modal).slideDown();
+    overlayOpen();
+}
+function modalClose() {
+    $(".modalWindowWrap").slideUp();
+    overlayClose();
+}
+$("*[data-modal]").click(function () {
+    var modal = $(this).attr("data-modal");
+    modalOpen(modal);
+});
+$(".modalWindowClose").click(function () {
+    modalClose();
+});
+$(".modalCell").click(function (event) {
+    if ($(event.target).hasClass('modalCell')) {
+        modalClose();
+    }
+});
 
+/* overlay */
+function overlayOpen() {
+    $(".modalOverlay").fadeIn();
+    $("html, body").addClass('no-scroll');
+}
+function overlayClose() {
+    $(".modalOverlay").fadeOut();
+    $("html, body").removeClass('no-scroll');
+}           
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);
+            ?>
         </div><!-- .wrapper -->
         <?php
         echo $this->render('_yandex');

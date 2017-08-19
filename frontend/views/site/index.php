@@ -9,7 +9,7 @@ $this->title = 'F-keeper';
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <iframe style="min-width: 320px;width: 100%;" id="cartoonVideo" width="560" height="315" src="https://www.youtube.com/embed/4j5Wam9B5mQ" frameborder="0" allowfullscreen></iframe>
+                    <iframe style="min-width: 320px;width: 100%;" id="cartoonVideo" width="560" height="315" src="https://www.youtube.com/embed/-bIw8sXQ9QQ" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@ $this->title = 'F-keeper';
                     <div class="how_its_work">
                         <h3>как это работает</h3>
                         <p>F-keeper это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. F-keeper, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.</p>
-<?= Html::a('Для ресторанов', ["/site/restaurant"]) ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
+<?= Html::a('Для ресторанов', "https://client.f-keeper.ru") ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
                     </div>
                 </div>	
                 <div class="col-md-7">
@@ -134,7 +134,7 @@ $this->title = 'F-keeper';
             <div class="container-fluid">
                 <div class="col-md-12">
                     <div class="how_its_work">
-                        <h3>скоро... Интеграция со всеми системами</h3>
+                        <h3>Интеграция с системами</h3>
                     </div>
                 </div>	
             </div>

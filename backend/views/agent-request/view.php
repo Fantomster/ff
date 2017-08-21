@@ -31,11 +31,25 @@ $this->title = "Заявка №" . $model->id;
                                 'label' => 'Комментарий'
                             ],
                             [
-                                'attribute' => 'is_processed',
-                                'label' => 'Обработано'
+                                'attribute' => 'profile.full_name',
+                                'label' => 'ФИО агента'
                             ],
-                            'franchisee.signed',
-                            'franchisee.legal_entity',
+                            [
+                                'attribute' => 'agent.email',
+                                'label' => 'Email агента'
+                            ],
+                            [
+                                'attribute' => 'profile.phone',
+                                'label' => 'Телефон агента'
+                            ],
+                            [
+                                'attribute' => 'franchisee.legal_entity',
+                                'label' => 'Название франчайзи агента'
+                            ],
+                            [
+                                'attribute' => 'franchisee.signed',
+                                'label' => 'Подписант франчайзи'
+                            ],
                             'created_at',
                         ],
                     ])
@@ -54,7 +68,7 @@ $this->title = "Заявка №" . $model->id;
 <hr>
 <section class="content-header">
     <h2>
-        <i class="fa fa-home"></i> Организации
+        <i class="fa fa-home"></i> Сотрудники организаций
     </h2>
 </section>
 <section class="content">
@@ -68,27 +82,30 @@ $this->title = "Заявка №" . $model->id;
                         'filterModel' => $searchModel,
                         'columns' => [
                             'id',
-                            'name',
+                            [
+                                'format' => 'raw',
+                                'attribute' => 'org_name',
+                                'value' => function ($data) {
+                                    return Html::a($data['organization']['name'], ['organization/view', 'id' => $data['organization_id']]);
+                                },
+                                'label' => 'Название организации',
+                            ],
                             'email',
-                            'franchisee.signed',
-                            'franchisee.legal_entity',
+                            'organization.franchisee.signed',
+                            'organization.franchisee.legal_entity',
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'buttons'=>[
-                                    'view'=>function ($url, $organization) use ($model){
-                        //dd($organization->franchisee);
-//                                        if(!empty($organization->franchisee->signed) && !empty($organization->franchisee->legal_entity)){
-//                                            $customUrl=Yii::$app->getUrlManager()->createUrl(['agent-request/link','id'=>$model->id, 'org_id'=>$organization['id']]);
-//                                        return \yii\helpers\Html::a( '<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
-//                                            ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
-//                                        }else{
-                                            $customUrl=Yii::$app->getUrlManager()->createUrl(['agent-request/link','id'=>$model->id, 'org_id'=>$organization['id'], 'franchisee_id'=>$organization->franchisee->id, 'agent_id'=>$model->agent_id]);
-                                            return \yii\helpers\Html::a( '<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
+                                'buttons' => [
+                                    'view' => function ($url, $user) use ($model) {
+                                        if (isset($user->organization['id'])) {
+                                            $customUrl = Yii::$app->getUrlManager()->createUrl(['agent-request/link', 'id' => $model->id, 'org_id' => $user->organization['id'], 'franchisee_id' => isset($model->franchisee->id) ? $model->franchisee->id : 1, 'agent_id' => $model->agent_id]);
+                                            return \yii\helpers\Html::a('<div class="btn btn-sm btn-danger">Привязать к франчайзи агента</div>', $customUrl,
                                                 ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
-                                        //}
+                                        }
+                                        return 'Пользователь не привязан к организации';
                                     }
                                 ],
-                                'template'=>'{view}',
+                                'template' => '{view}',
                             ],
                         ],
                     ]);

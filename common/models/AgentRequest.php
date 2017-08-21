@@ -78,6 +78,15 @@ class AgentRequest extends \yii\db\ActiveRecord {
         return $this->hasOne(User::className(), ['id' => 'agent_id']);
     }
 
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfile() {
+        return $this->hasOne(Profile::className(), ['user_id' => 'agent_id']);
+    }
+
+
     /**
      * @return \yii\db\ActiveQuery
      */

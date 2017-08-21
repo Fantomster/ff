@@ -37,7 +37,7 @@ return [
 //                    'mailer' => 'mailer',
 //                ],
             ],
-        ],
+        ], 
 //        'assetsAutoCompress' =>
 //        [
 //            'class'         => '\skeeks\yii2\assetsAuto\AssetsAutoCompressComponent',

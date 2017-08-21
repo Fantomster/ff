@@ -2,10 +2,11 @@
 
 namespace api\common\models;
 
-//use common\models\User;
+use common\models\User;
 
 use Yii;
 use common\models\OrderContent;
+// use common\models\User;
 
 /**
  * This is the model class for table "rk_access".
@@ -141,6 +142,14 @@ class RkWaybill extends \yii\db\ActiveRecord {
                     $wdmodel->defsum = $record->price;
                     $wdmodel->vat = 1800;
                     $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+                    $wmodel->org = User::findOne([Yii::$app->user->id])->organization_id; 
+                    
+                    // Check previous
+                    
+                //    $ch = RkWaybilldata::find()
+                //            ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
+                //            ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
+                            
 
                     if (!$wdmodel->save()) {
                         

@@ -16,7 +16,7 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
+                    'Origin' => ['http://fr.f-keeper.dev', 'http://f-keeper.dev', 'https://f-keeper.dev', 'http://f-keeper.ru', 'https://f-keeper.ru', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
                         'https://franch.f-keeper.dev','http://franch.f-keeper.dev','https://franch.f-keeper.ru',
                         'http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
                         'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],
@@ -65,6 +65,27 @@ class FrController extends \yii\rest\Controller {
             if($sitepage == "franch"){
                 $lead_status_id = 465726;
                 $responsible_user_id = 1515736;
+            }
+            if($sitepage == "fkeeper"){
+                if($fields['formtype']==1){
+                $lead_status_id = 465726;
+                $responsible_user_id = 1515736; 
+                    if($lpartner==1){$lead_name = 'fkeeper: Хочет стать партнером 50';}
+                    if($lpartner==2){$lead_name = 'fkeeper: Хочет стать партнером 500';}
+                    if($lpartner==3){$lead_name = 'fkeeper: Хочет стать партнером 900';}
+                }
+                if($fields['formtype']==2){
+                $lead_status_id = 465729;
+                $lpartner = '';
+                $lead_name = 'fkeeper: Ресторан';
+                $responsible_user_id = 1427371;   
+                }
+                if($fields['formtype']==3){
+                $lead_status_id = 463335;
+                $lpartner = '';
+                $lead_name = 'fkeeper: Поставщик';
+                $responsible_user_id = 1427371;   
+                }  
             }
             if($sitepage == "client"){
                 $lead_status_id = 465729;
@@ -134,7 +155,7 @@ class FrController extends \yii\rest\Controller {
             }
 
             //// Проверка на уже существующий контакт
-            if($type == 'restaurant' || $sitepage == "client"){
+            if($type == 'restaurant' || $sitepage == "client" || $sitepage == "fkeeper"){
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;    
             }else{
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;

@@ -347,7 +347,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             <span class="modal_title">Заказать звонок</span>
                             <form action="https://partner.f-keeper.ru/fr/post" class="callbackwidget-call-form">
                                 <div class="contact_us__form__row">
-                                    <select class="input_text type__form" name="FIELDS[formtype]" required>
+                                    <select class="input_text type__form" name="FIELDS[formtype]" id="formtype" required>
                                         <option value="1">Стать партнером</option>
                                         <option selected="true" value="2">Ресторан</option>
                                         <option value="3">Поставщик</option>
@@ -408,7 +408,15 @@ $("form.callbackwidget-call-form").on("submit", function (h) {
                 modalClose();
                 $('button[type="submit"]').button("reset");
                 if (response.result == "success") {
-		              //yaCounter45202749.reachGoal('rest', function () {}); 
+                    if($("#formtype").val() == 1){
+                      yaCounter38868410.reachGoal('franch', function () {});  
+                    }
+                    if($("#formtype").val() == 2){
+                      yaCounter38868410.reachGoal('resto', function () {});  
+                    }
+                    if($("#formtype").val() == 3){
+                      yaCounter38868410.reachGoal('postav', function () {});  
+                    }
                     (swal("Заявка успешно отправлена!", "Мы свяжемся с вами в ближайшее время.", "success"), form.trigger( 'reset' ));
                 }
                 if (response.result == "error") {

@@ -16,7 +16,7 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
+                    'Origin' => ['http://fr.f-keeper.dev', 'http://f-keeper.dev', 'https://f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
                         'https://franch.f-keeper.dev','http://franch.f-keeper.dev','https://franch.f-keeper.ru',
                         'http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
                         'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],

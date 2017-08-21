@@ -58,7 +58,7 @@ if (Yii::$app->user->can('manage')) {
             ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
             ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
-//            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
         ]
     ];
@@ -91,7 +91,7 @@ $menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;">
-                <p><a href="<?= $phoneUrl ?>"><i class="fa fa-phone"></i> <?= $phone ?></a></p>
+                <p><a href="tel:<?= $phoneUrl ?>"><i class="fa fa-phone"></i> <?= $phone ?></a></p>
             </div>
         </ul>
     </section>

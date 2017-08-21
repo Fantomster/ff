@@ -127,8 +127,8 @@ class Organization extends \yii\db\ActiveRecord {
                 'class' => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
                 'scenarios' => ['settings'],
-                'path' => '@app/web/upload/temp/',
-                'url' => '/upload/temp/',
+                'path' => '@app/web/upload/temp',
+                'url' => '/upload/temp',
                 'thumbs' => [
                     'picture' => ['width' => 420, 'height' => 236, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
                 ],

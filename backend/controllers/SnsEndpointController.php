@@ -36,7 +36,7 @@ class SnsEndpointController extends \yii\rest\Controller {
         if (($message->get('Type') === 'Notification') && ($data['notificationType'] === 'Bounce')) {
             $bouncedRecipients = $data["bounce"]["bouncedRecipients"];
             foreach ($bouncedRecipients as $recipient) {
-                if (!EmailBlacklist::find()->where(['email' => $recipient['emailAddress']])->exists()) {
+                if (($data["bounce"]["bounceType"] === 'Permanent') && !EmailBlacklist::find()->where(['email' => $recipient['emailAddress']])->exists()) {
                     $newBlacklisted = new EmailBlacklist();
                     $newBlacklisted->email = $recipient['emailAddress'];
                     $newBlacklisted->save();

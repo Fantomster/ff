@@ -364,7 +364,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                     <input type="text" class="input_text" name="FIELDS[name]" placeholder="Имя" required>
                                 </div>
                                 <div class="contact_us__form__row">
-                                    <input type="text" class="input_text user_phone_mask" name="FIELDS[phone]" placeholder="Телефон" required>
+                                    <input type="text" class="input_text user_phone_mask" minlength="7" name="FIELDS[phone]" placeholder="Телефон" required>
                                 </div>
                                 <div class="contact_us__form__row">
                                     <input type="text" class="input_text" name="FIELDS[email]" placeholder="Почта">

@@ -763,7 +763,7 @@ class OrderController extends DefaultController {
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->vendor->users as $recipient) {
-                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
                         $sms = new \common\components\QTSMS();
@@ -782,7 +782,7 @@ class OrderController extends DefaultController {
                 $this->sendOrderChange($order->vendor, $order);
                 $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->client->users as $recipient) {
-                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
                         $sms = new \common\components\QTSMS();
@@ -1271,12 +1271,12 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                $text = $subject;
-                $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
-            }
+//            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+//                $text = $subject;
+//                $target = $recipient->profile->phone;
+//                $sms = new \common\components\QTSMS();
+//                $sms->post_message($text, $target);
+//            }
         }
     }
 

@@ -283,6 +283,16 @@ document.onkeypress = stopRKey;
 
     <?= $form->field($model, 'about')->textarea() ?>
 
+    <?= $form->field($franchiseeModel, 'franchisee_id')->dropDownList($franchiseeList,
+        ['options' =>
+            [
+                (isset($model->franchisee->id)) ? $model->franchisee->id : null => ['selected' => true]
+            ]
+        ])->label('Название франшизы') ?>
+
+    <?= Html::activeHiddenInput($franchiseeModel, 'organization_id', ['value'=>$model->id]); ?>
+
+
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>

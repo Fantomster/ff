@@ -1,6 +1,9 @@
 # yii console command
 /yii
 
+# ignore local configs
+*.local.php
+
 # phpstorm project files
 .idea
 

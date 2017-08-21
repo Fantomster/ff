@@ -215,6 +215,7 @@ GridView::widget([
                  [
                 'class'=>'kartik\grid\EditableColumn',
                 'attribute'=>'vat',
+                'label' => 'Ставка НДС',     
                 'value' => function ($model) {
                          return $model->vat/100;
                 },

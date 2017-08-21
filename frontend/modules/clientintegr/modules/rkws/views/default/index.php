@@ -56,16 +56,19 @@ $this->registerJs($script);
             <div class="box-header with-border">
                             <div class="panel-body">
                                 <div class="box-body table-responsive no-padding">
+                              
+                                <p> Состояние лицензии:<?php echo '<strong>Активна</strong> ID: '.$lic->code.' (с '.date("d-m-Y H:i:s",strtotime($lic->fd)).' по '.date("d-m-Y H:i:s",strtotime($lic->td)).') '; ?>
                                     
-                                    <p> Состояние лицензии: <strong>Активна</strong> ID: 199990046
-                                </p>    
+                                </p>  
+                                
                             
                           
                                 </div>
                             </div>
             </div>
         </div>    
-  СПРАВОЧНИКИ:                              
+    
+СПРАВОЧНИКИ:                            
 </section>
 <section class="content-header">
     

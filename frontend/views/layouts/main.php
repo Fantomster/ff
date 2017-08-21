@@ -393,6 +393,7 @@ $(".type__form").on("change", function(e){
 $("form.callbackwidget-call-form").on("submit", function (h) {
         var form = $(this);
         var data = form.serialize();
+        console.log(data)
         $('button[type="submit"]').button("loading");
         type = $(this).find(".form_type").val();
         $.ajax({

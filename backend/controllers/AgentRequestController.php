@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\OrganizationSearch;
+use backend\models\UserSearch;
 use common\models\AgentRequest;
 use common\models\FranchiseeAssociate;
 use common\models\Organization;
@@ -78,17 +79,13 @@ class AgentRequestController extends Controller
     public function actionView($id)
     {
         $model = AgentRequest::findOne($id);
-        $dataProvider = null;
-        $query = (new Query())->select(['organization.name AS name', 'organization.id AS id', 'organization.email AS email', 'franchisee.signed AS signed', 'franchisee.legal_entity AS legal_entity', 'franchisee_associate.agent_id AS agent_id', 'franchisee_associate.franchisee_id AS franchisee_id'])
-            ->from('organization')
-            ->leftJoin('franchisee_associate', 'franchisee_associate.organization_id=organization.id')
-            ->leftJoin('franchisee', 'franchisee.id=franchisee_associate.franchisee_id')
-            ->where(['organization.name' => $model->comment])->orWhere(['organization.email' => $model->target_email]);
-        $searchModel = new OrganizationSearch();
-        if(!isset(\Yii::$app->request->queryParams['OrganizationSearch'])){
-            $dataProvider = new ActiveDataProvider([
-                'query' => $query,
-            ]);
+        if(!$model){
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        $searchModel = new UserSearch();
+        if(!isset(\Yii::$app->request->queryParams['UserSearch'])){
+            $params['UserSearch']['email'] = $model->target_email;
+            $dataProvider = $searchModel->search($params);
         }else{
             $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
         }

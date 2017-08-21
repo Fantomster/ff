@@ -2,6 +2,7 @@
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\web\View;
+use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
 
@@ -44,11 +45,11 @@ $this->registerJs('
         });
     });
 
-    $(document).on("click", ".create-guide", function(e) {
+    $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
         title = "Назовите ваш новый гайд";
-        success = "Заказ оформлен!";
+        success = "Давайте соберем ваш новый гайд!";
         swal({
             title: title,
             text: text,
@@ -75,6 +76,7 @@ $this->registerJs('
             swal({title: success, type: "success"});
         });
     });
+    
 ', View::POS_READY);
 
 ?>
@@ -131,7 +133,8 @@ $this->registerJs('
                     <?php ActiveForm::end(); ?>
                         </div>
                         <div class="pull-right">
-                            <a class="btn btn-md btn-outline-success new-guid" href="create.html" data-toggle="tooltip" data-original-title="Создать гайд" data-url="#"><i class="fa fa-plus"></i> Создать гайд</a>
+                            <!--<a class="btn btn-md btn-outline-success new-guid" href="create.html" data-toggle="tooltip" data-original-title="Создать гайд" data-url="#"><i class="fa fa-plus"></i> Создать гайд</a>-->
+                            <?= Html::a('<i class="fa fa-plus"></i> Создать гайд', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
                         </div>
                     </div>
                 </div>

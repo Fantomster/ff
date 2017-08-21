@@ -20,6 +20,7 @@ use common\models\guides\Guide;
 use common\models\search\GuideSearch;
 use common\models\guides\GuideProduct;
 use common\models\search\GuideProductsSearch;
+use common\models\search\VendorSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
@@ -184,12 +185,17 @@ class OrderController extends DefaultController {
         
         $params = Yii::$app->request->getQueryParams();
         
-        $vendorSearchModel = new \common\models\search\VendorSearch();
+        $vendorSearchModel = new VendorSearch();
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         
         $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
         $productSearchModel = new OrderCatalogSearch();
+        $productsDataProvider = $productSearchModel->search($params);
         
+        $guideProducts = new GuideProductsSearch();
+        $guideDataProvider = $guideProducts->search($params, $guide->id);
+        
+        return $this->render('guides/edit-guide', compact('vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productsDataProvider', 'guideProducts', 'guideDataProvider'));
     }
 
     public function actionAjaxShowGuide($id) {

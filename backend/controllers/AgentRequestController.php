@@ -55,10 +55,10 @@ class AgentRequestController extends Controller
      */
     public function actionIndex()
     {
-        $query = (new Query())->select(['agent_request.id AS id', 'agent_request.target_email AS target_email', 'agent_request.comment AS comment', 'agent_request.created_at AS created_at', 'franchisee.signed AS signed', 'franchisee.legal_entity AS legal_entity'])
+        $query = (new Query())->select(['agent_request.id AS id', 'agent_request.target_email AS target_email', 'agent_request.comment AS comment', 'agent_request.created_at AS created_at', 'user.email AS user_email', 'profile.full_name AS full_user_name'])
             ->from('agent_request')
-            ->leftJoin('franchisee_user', 'franchisee_user.user_id=agent_request.agent_id')
-            ->leftJoin('franchisee', 'franchisee.id=franchisee_user.franchisee_id')
+            ->leftJoin('user', 'user.id=agent_request.agent_id')
+            ->leftJoin('profile', 'profile.user_id=agent_request.agent_id')
             ->where(['agent_request.is_processed'=>0])
             ->orderBy('agent_request.id');
         $dataProvider = new ActiveDataProvider([
@@ -85,8 +85,13 @@ class AgentRequestController extends Controller
             ->leftJoin('franchisee', 'franchisee.id=franchisee_associate.franchisee_id')
             ->where(['organization.name' => $model->comment])->orWhere(['organization.email' => $model->target_email]);
         $searchModel = new OrganizationSearch();
-        $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
-
+        if(!isset(\Yii::$app->request->queryParams['OrganizationSearch'])){
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+            ]);
+        }else{
+            $dataProvider = $searchModel->search(\Yii::$app->request->queryParams);
+        }
         return $this->render('view', compact('model', 'searchModel', 'dataProvider'));
     }
 
@@ -98,10 +103,14 @@ class AgentRequestController extends Controller
     public function actionLink($id, $org_id, $franchisee_id=null, $agent_id=null)
     {
         if ($franchisee_id && $agent_id && $org_id) {
-            $franchisee = FranchiseeAssociate::findOne(['organization_id' => $org_id]);
-            $franchisee->agent_id = $agent_id;
-            $franchisee->franchisee_id = $franchisee_id;
-            $franchisee->save();
+            $franchiseeAssociate = FranchiseeAssociate::findOne(['organization_id' => $org_id]);
+            if($franchiseeAssociate==null){
+                $franchiseeAssociate = new FranchiseeAssociate();
+            }
+            $franchiseeAssociate->agent_id = $agent_id;
+            $franchiseeAssociate->franchisee_id = $franchisee_id;
+            $franchiseeAssociate->organization_id = $org_id;
+            $franchiseeAssociate->save();
         }
         $model = AgentRequest::findOne($id);
         $model->is_processed = true;

@@ -31,12 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             ],
                             //'is_processed',
                             [
-                                    'attribute' => 'signed',
-                                    'label' => 'ФИО франчайзи'
+                                    'attribute' => 'full_user_name',
+                                    'label' => 'ФИО агента'
                             ],
                             [
-                                'attribute' => 'legal_entity',
-                                'label' => 'Название франчайзи'
+                                'attribute' => 'user_email',
+                                'label' => 'Email агента'
                             ],
                             'created_at',
                             [

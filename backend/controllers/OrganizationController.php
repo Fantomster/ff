@@ -100,6 +100,8 @@ class OrganizationController extends Controller {
 //        }
 //    }
 //
+
+
     /**
      * Updates an existing Organization model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -108,22 +110,15 @@ class OrganizationController extends Controller {
      */
     public function actionUpdate($id) {
         $model = $this->findModel($id);
-        $franchiseesObj = Franchisee::find()->all();
-        $franchisees = ArrayHelper::map($franchiseesObj,'id','legal_entity');
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-//            $post = Yii::$app->request->post();
-//            $franchiseeAssociate = FranchiseeAssociate::findOne(['organization_id'=>$id]);
-//            if(!$franchiseeAssociate){
-//                $franchiseeAssociate = new FranchiseeAssociate();
-//                $franchiseeAssociate->organization_id = $id;
-//            }
-//            $franchiseeAssociate->franchisee_id = $post['Organization']['legal_entity'];
-//            $franchiseeAssociate->save();
+        $franchiseeModel = $this->findFranchiseeAssociateModel($id);
+        $franchiseeList = ArrayHelper::map(Franchisee::find()->all(),'id','legal_entity');
+        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            return $this->render('update', compact('model', 'franchisees'));
+            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList'));
         }
     }
+
 
 //    /**
 //     * Deletes an existing Organization model.
@@ -151,6 +146,21 @@ class OrganizationController extends Controller {
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+
+
+    /**
+     * Finds the Organization model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return Organization the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findFranchiseeAssociateModel($id) {
+        if (($model = FranchiseeAssociate::findOne(['organization_id'=>$id])) == null) {
+            $model = new FranchiseeAssociate();
+        }
+        return $model;
     }
 
 }

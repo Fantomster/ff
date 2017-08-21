@@ -34,8 +34,18 @@ $this->title = "Заявка №" . $model->id;
                                 'attribute' => 'is_processed',
                                 'label' => 'Обработано'
                             ],
-                            'franchisee.signed',
-                            'franchisee.legal_entity',
+                            [
+                                'attribute' => 'profile.full_name',
+                                'label' => 'ФИО агента'
+                            ],
+                            [
+                                'attribute' => 'agent.email',
+                                'label' => 'Email агента'
+                            ],
+                            [
+                                'attribute' => 'profile.phone',
+                                'label' => 'Телефон агента'
+                            ],
                             'created_at',
                         ],
                     ])

@@ -912,6 +912,7 @@ class OrderController extends DefaultController {
             $organizationType = $this->currentUser->organization->type_id;
             $danger = false;
             $edit = false;
+            $systemMessage = '';
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;

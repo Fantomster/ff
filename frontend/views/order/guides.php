@@ -48,21 +48,26 @@ $this->registerJs('
     $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        title = "Назовите ваш новый гайд";
-        success = "Давайте соберем ваш новый гайд!";
+        var title = "Комментарий к заказу";
         swal({
             title: title,
-            text: text,
-            type: "warning",
+            input: "textarea",
             showCancelButton: true,
-            confirmButtonText: "Да",
-            cancelButtonText: "Отмена",
+            cancelButtonText: "Закрыть",
+            confirmButtonText: "Сохранить",
             showLoaderOnConfirm: true,
-            preConfirm: function () {
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            inputValue: clicked.data("original-title"),
+            onClose: function() {
+                clicked.blur();
+                swal.resetDefaults()
+            },
+            preConfirm: function (text) {
                 return new Promise(function (resolve, reject) {
                     $.post(
                         clicked.data("url"),
-                        form.serialize() + extData
+                        {comment: text}
                     ).done(function (result) {
                         if (result) {
                             resolve(result);
@@ -72,10 +77,20 @@ $this->registerJs('
                     });
                 })
             },
-        }).then(function() {
-            swal({title: success, type: "success"});
+        }).then(function (result) {
+            if (result.type == "success") {
+                clicked.tooltip("hide")
+                    .attr("data-original-title", result.comment)
+                    .tooltip("fixTitle")
+                    .blur();
+                clicked.data("original-title", result.comment);
+                swal(result);
+            } else {
+                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+            }
         });
     });
+
     
 ', View::POS_READY);
 

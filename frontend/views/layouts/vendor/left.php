@@ -62,6 +62,16 @@ if (Yii::$app->user->can('manage')) {
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
         ]
     ];
+} else {
+    $menuItems[] = [
+        'label' => 'Настройки',
+        'icon' => 'gears',
+        'url' => '#',
+        'options' => ['class' => "treeview hidden-xs"],
+        'items' => [
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+        ]
+    ];
 }
 $menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options' => ['class' => 'header']];
 ?>

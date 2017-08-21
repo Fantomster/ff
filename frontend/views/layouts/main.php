@@ -409,10 +409,10 @@ $("form.callbackwidget-call-form").on("submit", function (h) {
                 $('button[type="submit"]').button("reset");
                 if (response.result == "success") {
 		              //yaCounter45202749.reachGoal('rest', function () {}); 
-                    (swal("Заявка успешно отправлена!", "Мы свяжемся с вами в ближайшее время.", "success"), form[0].reset());
+                    (swal("Заявка успешно отправлена!", "Мы свяжемся с вами в ближайшее время.", "success"), form.trigger( 'reset' ));
                 }
                 if (response.result == "error") {
-                    (swal("Ошибка", "Заявка не отправлена", "error"), a[0].reset());
+                    (swal("Ошибка", "Заявка не отправлена", "error"), form.trigger( 'reset' ));
                 }
                 if (response.result == "errorPhone") {
                     (swal("Ошибка", "Вы уже отправляли заявку", "error"));

@@ -344,13 +344,20 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <div class="modalCell">
                         <div class="modalWindow">
                             <span class="modalWindowClose"></span>
-                            <span class="modal_title">Узнать подробности</span>
+                            <span class="modal_title">Заказать звонок</span>
                             <form action="https://partner.f-keeper.ru/fr/post" class="callbackwidget-call-form">
                                 <div class="contact_us__form__row">
-                                    <select class="input_text" name="FIELDS[formtype]" required>
-                                        <option value="1">Франшиза</option>
-                                        <option value="2">Поставщик</option>
-                                        <option value="3">Ресторан</option>
+                                    <select class="input_text type__form" name="FIELDS[formtype]" required>
+                                        <option value="1">Стать партнером</option>
+                                        <option selected="true" value="2">Ресторан</option>
+                                        <option value="3">Поставщик</option>
+                                    </select>
+                                </div>
+                                <div class="contact_us__form__row partner__form" style="display:none">
+                                    <select class="input_text" name="FIELDS[partner]" required>
+                                        <option value="1">Тариф 50 000</option>
+                                        <option value="2">Тариф 500 000</option>
+                                        <option value="3">Тариф 900 000</option>
                                     </select>
                                 </div>
                                 <div class="contact_us__form__row">
@@ -376,6 +383,13 @@ $this->registerJs($js, \yii\web\View::POS_READY);
             </div>
             <?php
 $js = <<<JS
+$(".type__form").on("change", function(e){
+ if($( this ).val() == 1){
+    $(".partner__form").css('display','block');
+ }else{
+    $(".partner__form").css('display','none');
+ }
+})
 $("form.callbackwidget-call-form").on("submit", function (h) {
         var form = $(this);
         var data = form.serialize();

@@ -50,7 +50,8 @@ class VendorController extends DefaultController {
                             'ajax-create-user',
                             'ajax-delete-user',
                             'ajax-update-user',
-                            'ajax-validate-user'
+                            'ajax-validate-user',
+                            'remove-client',
                         ],
                         'allow' => true,
                         // Allow suppliers managers
@@ -87,7 +88,6 @@ class VendorController extends DefaultController {
                             'messages',
                             'mp-country-list',
                             'mycatalogdelcatalog',
-                            'remove-client',
                             'sidebar',
                             'step-1',
                             'step-1-clone',

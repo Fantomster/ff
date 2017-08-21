@@ -319,7 +319,13 @@ class Order extends \yii\db\ActiveRecord {
         if (isset($this->accepted_by_id)) {
             $recipients[] = $this->acceptedBy;
         } else {
-            $recipients = array_merge($recipients, $this->vendor->users);
+            foreach ($this->vendor->users as $user) {
+                if ($user->role_id === Role::ROLE_SUPPLIER_EMPLOYEE && ManagerAssociate::isAssociated($this->client_id, $user->id)) {
+                    $recipients[] = $user;
+                } elseif ($user->role_id !== Role::ROLE_SUPPLIER_EMPLOYEE) {
+                    $recipients[] = $user;
+                }
+            }
         }
         return $recipients;
     }

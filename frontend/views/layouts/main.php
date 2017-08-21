@@ -409,13 +409,13 @@ $("form.callbackwidget-call-form").on("submit", function (h) {
                 $('button[type="submit"]').button("reset");
                 if (response.result == "success") {
                     if($("#formtype").val() == 1){
-                      yaCounter38868410.reachGoal('franch', function () {});  
+                      yaCounter38868410.reachGoal('franch');  
                     }
                     if($("#formtype").val() == 2){
-                      yaCounter38868410.reachGoal('resto', function () {});  
+                      yaCounter38868410.reachGoal('resto');   
                     }
                     if($("#formtype").val() == 3){
-                      yaCounter38868410.reachGoal('postav', function () {});  
+                      yaCounter38868410.reachGoal('postav');  
                     }
                     (swal("Заявка успешно отправлена!", "Мы свяжемся с вами в ближайшее время.", "success"), form.trigger( 'reset' ));
                 }

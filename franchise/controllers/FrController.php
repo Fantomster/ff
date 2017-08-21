@@ -85,8 +85,7 @@ class FrController extends \yii\rest\Controller {
                 $lpartner = '';
                 $lead_name = 'fkeeper: Поставщик';
                 $responsible_user_id = 1427371;   
-                }
-                
+                }  
             }
             if($sitepage == "client"){
                 $lead_status_id = 465729;

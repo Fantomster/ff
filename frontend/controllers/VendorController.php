@@ -1542,16 +1542,18 @@ class VendorController extends DefaultController {
                     $obsoleteAssociatedIds = array_diff($currentAssociatedIds, $postedAssociatedIds);
                     $transaction = Yii::$app->db->beginTransaction();
                     try {
-                        foreach ($newAssociatedIds as $newId) {
-                            $new = new ManagerAssociate();
-                            $new->manager_id = $newId;
-                            $new->organization_id = $client_id;
-                            $new->save();
-                        }
-                        foreach ($obsoleteAssociatedIds as $obsoleteId) {
-                            $obsolete = ManagerAssociate::findOne(['manager_id' => $obsoleteId, 'organization_id' => $client_id]);
-                            if ($obsolete) {
-                                $obsolete->delete();
+                        if (Yii::$app->user->can('manage')) {
+                            foreach ($newAssociatedIds as $newId) {
+                                $new = new ManagerAssociate();
+                                $new->manager_id = $newId;
+                                $new->organization_id = $client_id;
+                                $new->save();
+                            }
+                            foreach ($obsoleteAssociatedIds as $obsoleteId) {
+                                $obsolete = ManagerAssociate::findOne(['manager_id' => $obsoleteId, 'organization_id' => $client_id]);
+                                if ($obsolete) {
+                                    $obsolete->delete();
+                                }
                             }
                         }
                         $relation_supp_rest->update();

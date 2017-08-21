@@ -304,8 +304,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             return ActiveForm::validate($model);
         }
 
-        if ($model->load($post) && $model->sendForgotEmail()) {
-
+        if ($model->load($post)) {
+            $model->sendForgotEmail();
             // set flash (which will show on the current page)
             Yii::$app->session->setFlash("Forgot-success", Yii::t("user", "Instructions to reset your password have been sent"));
         }
@@ -350,6 +350,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $user->status = \common\models\User::STATUS_ACTIVE;
             $user->save();
             $success = true;
+            //\api\modules\v1\modules\mobile\components\NotificationHelper::actionForgot($user);
         }
 
         return $this->render('reset', compact("user", "success"));
@@ -359,10 +360,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $currentUser = Yii::$app->user->identity;
         if (Yii::$app->request->isAjax) {
             $email = Yii::$app->request->post('email');
-            $validator = new \yii\validators\EmailValidator();
+            //$validator = new \yii\validators\EmailValidator();
             Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            if ($validator->validate($email) && $currentUser->sendInviteToFriend($email)) {
-                return [
+            if(preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/",$email)  && $currentUser->sendInviteToFriend($email))
+            {
+               return [
                     'success' => true,
                 ];
             }

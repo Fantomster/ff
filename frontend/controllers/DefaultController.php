@@ -41,7 +41,7 @@ class DefaultController extends Controller {
             $this->loadCurrentUser();
             $organization = $this->currentUser->organization;
             if ($organization->type_id == Organization::TYPE_RESTAURANT) {
-                $this->view->params['orders'] = $orders = $organization->getCart();
+                $this->view->params['orders'] = $organization->getCart();
             }
             $this->setLayout($organization->type_id);
             $isAdmin = in_array($this->currentUser->role_id, [Role::ROLE_ADMIN, Role::ROLE_FKEEPER_MANAGER]);

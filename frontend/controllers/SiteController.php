@@ -180,7 +180,8 @@ class SiteController extends Controller {
             if ($profile->validate() && $organization->validate()) {
                 $profile->save();
                 $organization->save();
-                if($organization->locality == 'Москва'){
+                $organization->refresh();
+                if($organization->locality == 'Москва' || $organization->administrative_area_level_1 == 'Московская область'){
                    $this->SendToAmo($organization, $profile, $user);  
                 }
             }

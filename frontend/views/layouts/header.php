@@ -127,7 +127,7 @@ if (!Yii::$app->user->isGuest) {
         e.preventDefault();
         form = $("#inviteForm");
         swal({
-            title: "Приглашение на mix-cart",
+            title: "Приглашение на f-keeper",
             input: "text",
             showCancelButton: true,
             cancelButtonText: "Отмена",
@@ -138,8 +138,9 @@ if (!Yii::$app->user->isGuest) {
             inputValue: $("#email").val(),
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
-                    var emailRegex = /^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-                    if (emailRegex.test(email)) {
+                    //var emailRegex = /^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/;
+                    //if (emailRegex.test(email)) {
+                    if (email) {
                         resolve();
                     } else {
                         reject('Некорректный email!');
@@ -240,7 +241,7 @@ JS;
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-envelope-o"></i>
-                            <span class="label label-danger unread-messages-count" style="display: <?= count($unreadMessages) ? 'block' : 'none'?>"><?= count($unreadMessages) ?></span>
+                            <span class="label label-danger unread-messages-count" style="display: <?= count($unreadMessages) ? 'block' : 'none' ?>"><?= count($unreadMessages) ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="header">Непрочитанных сообщений: <span class="unread-messages-count"><?= count($unreadMessages) ?></span></li>
@@ -248,21 +249,21 @@ JS;
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-messages">
                                     <?php
-                                        foreach ($unreadMessages as $message) {
-                                            echo $this->render('/order/_header-message', compact('message'));
-                                        }
+                                    foreach ($unreadMessages as $message) {
+                                        echo $this->render('@frontend/views/order/_header-message', compact('message'));
+                                    }
                                     ?>
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-url="<?= Url::to(['order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>">Пометить как прочитанные</a>
                             </li>
                         </ul>
                     </li>
                     <li class="dropdown messages-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-bell-o"></i>
-                            <span class="label label-warning unread-notifications-count" style="display: <?= count($unreadNotifications) ? 'block' : 'none'?>"><?= count($unreadNotifications) ?></span>
+                            <span class="label label-warning unread-notifications-count" style="display: <?= count($unreadNotifications) ? 'block' : 'none' ?>"><?= count($unreadNotifications) ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li class="header">Оповещений: <span class="unread-notifications-count"><?= count($unreadNotifications) ?></span></li>
@@ -270,23 +271,24 @@ JS;
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-notifications">
                                     <?php
-                                        foreach ($unreadNotifications as $message) {
-                                            echo $this->render('/order/_header-message', compact('message'));
-                                        }
+                                    foreach ($unreadNotifications as $message) {
+                                        echo $this->render('@frontend/views/order/_header-message', compact('message'));
+                                    }
                                     ?>
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-url="<?= Url::to(['order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>">Пометить как прочитанные</a>
                             </li>
                         </ul>
                     </li>
-                    <li data-toggle="tooltip" data-placement="bottom" data-original-title="Повторить обучение">
-                        <a href="#" class="repeat-tutorial">
-                            <i class="fa fa-question-circle"></i>
-                        </a>
-                    </li>
-                    <?php //} ?>
+                    <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
+                        <li data-toggle="tooltip" data-placement="bottom" data-original-title="Повторить обучение">
+                            <a href="#" class="repeat-tutorial">
+                                <i class="fa fa-question-circle"></i>
+                            </a>
+                        </li>
+                    <?php } ?>
                     <!-- Tasks: style can be found in dropdown.less -->
                     <li class="dropdown user user-menu">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">

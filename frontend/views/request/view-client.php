@@ -6,6 +6,7 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use yii\web\View;
 use yii\widgets\ListView;
+$this->title = 'Заявка №' . $request->id;
 ?>
 
 <style>

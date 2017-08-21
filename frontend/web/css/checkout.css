@@ -51,7 +51,6 @@
     height: 100%;
     position: relative;
     padding-right: 20px;
-
 }
 
 .basket_tovar_postav_name{
@@ -286,19 +285,14 @@
     outline: none;
     border: none;
     text-align: center;
-
-
 }
 .block_cena{
     padding: 10px;
     position: relative;
     float: right;
     top: 0;
-
-
 }
 .delete_tovar1{
-
     position: absolute;
     top: 0;
     margin-top: 20px;
@@ -374,7 +368,6 @@
     -ms-transform: rotate(180deg);
     -o-transform: rotate(180deg);
     transform: rotate(180deg);
-
 }
 
 

@@ -62,7 +62,25 @@ class ApiSession extends \yii\db\ActiveRecord
   //      return MpCategory::find()->where(["id" => $id])->one()->name;
   //  }
     
-        public static function getDb()
+    public function getAccess() {
+       
+    $acc = RkAccess::findOne('fid = :fid',['fid' => $this->acc]);   
+    return $acc;
+    }
+    
+    public function openSession() {
+    
+    $org = Yii::$app->db->createCommand('select organization_id from user where id ='.Yii::$app->user->id)
+    ->queryScalar();     
+    
+    
+    
+    
+    
+    }
+
+
+    public static function getDb()
     {
        return \Yii::$app->db_api;
     }

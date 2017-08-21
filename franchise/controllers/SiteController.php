@@ -90,11 +90,11 @@ class SiteController extends DefaultController {
     public function actionIndex() {
 
         //---graph start
-        $query = "SELECT truncate(sum(total_price),1) as spent, year(created_at) as year, month(created_at) as month, day(created_at) as day "
+        $query = "SELECT truncate(sum(total_price),1) as spent, year(`order`.created_at) as year, month(`order`.created_at) as month, day(`order`.created_at) as day "
                 . "FROM `order` LEFT JOIN `franchisee_associate` ON `order`.vendor_id = `franchisee_associate`.organization_id "
                 . "where status in (" . Order::STATUS_PROCESSING . "," . Order::STATUS_DONE . "," . Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT . "," . Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR . ") "
-                . "and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " "
-                . "group by year(created_at), month(created_at), day(created_at)";
+                . "and `order`.created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY AND `franchisee_associate`.franchisee_id = " . $this->currentFranchisee->id . " "
+                . "group by year(`order`.created_at), month(`order`.created_at), day(`order`.created_at)";
         $command = Yii::$app->db->createCommand($query);
         $ordersByDay = $command->queryAll();
         $dayLabels = [];
@@ -344,7 +344,7 @@ class SiteController extends DefaultController {
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
-            if ($user->load($post)) {
+            if ($user->load($post) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
@@ -381,7 +381,7 @@ class SiteController extends DefaultController {
                     $message = 'Может воздержимся от удаления себя?';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
-                if ($user && ($usersCount > 1)) {
+                if ($user && ($usersCount > 1) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
                     $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save() && $user->franchiseeUser->delete()) {

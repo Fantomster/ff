@@ -123,8 +123,8 @@ class Organization extends \yii\db\ActiveRecord {
                 'class' => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
                 'scenarios' => ['settings'],
-                'path' => '@app/web/upload/temp/',
-                'url' => '/upload/temp/',
+                'path' => '@app/web/upload/temp',
+                'url' => '/upload/temp',
                 'thumbs' => [
                     'picture' => ['width' => 420, 'height' => 236, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
                 ],
@@ -519,10 +519,10 @@ class Organization extends \yii\db\ActiveRecord {
      */
     public function getPictureUrl() {
         if ($this->type_id == self::TYPE_SUPPLIER) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['client-noavatar'];
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['vendor-noavatar'];
         }
         if ($this->type_id == self::TYPE_RESTAURANT) {
-            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['vendor-noavatar'];
+            return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['client-noavatar'];
         }
         return $this->picture ? $this->getThumbUploadUrl('picture', 'picture') : Yii::$app->params['pictures']['org-noavatar'];
     }

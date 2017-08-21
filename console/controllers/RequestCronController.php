@@ -45,8 +45,8 @@ order by u.organization_id LIMIT 4";//LIMIT на боевом убрать
         // на этом этапе совершаем рассылку по списку манагеров
         foreach($vendors as $vendor){
             $mailer = \Yii::$app->mailer;
-            $email = 'marshal1209448@gmail.com'; //для тестов, на боевом заменить
-            //$email = $vendor['email'];
+            //$email = 'marshal1209448@gmail.com'; //для тестов, на боевом заменить
+            $email = $vendor['email'];
             $subject = "f-keeper.ru - заявки для Вас";
             $mailer->htmlLayout = 'layouts/request';
             $result = $mailer->compose('requestPull', compact("requests","vendor"))

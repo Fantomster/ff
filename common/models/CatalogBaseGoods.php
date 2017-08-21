@@ -49,7 +49,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const STATUS_OFF = 0;
     const MP_SHOW_PRICE = 1;
     const MP_HIDE_PRICE = 0;
-    const MAX_INSERT_FROM_XLS = 2000;
+    const MAX_INSERT_FROM_XLS = 4000;
     const MARKETPLACE_ON = 1;
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;
@@ -144,7 +144,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         empty($this->id)?$where= "true":$where = "id <> $this->id";
         if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
                     ->andWhere($where)
-                    ->exists()) {
+                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
                 $this->addError($attribute, 'Такой артикул уже существует в каталоге');
         }
         

@@ -16,7 +16,8 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru', 'https://tmp.f-keeper.ru',
+                    'Origin' => ['http://fr.f-keeper.dev', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
+                        'https://franch.f-keeper.dev','http://franch.f-keeper.dev','https://franch.f-keeper.ru','http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
                                  'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
@@ -30,6 +31,8 @@ class FrController extends \yii\rest\Controller {
     public function actionPost() {
         if (Yii::$app->request->post('FIELDS')) {
             $fields = Yii::$app->request->post('FIELDS');
+            $sitepage = isset($fields['sitepage']) ? Html::encode($fields['sitepage']) : '';
+            $formtype = isset($fields['formtype']) ? Html::encode($fields['formtype']) : '';
             $cname = Html::encode($fields['name']);
             $cphone = Html::encode($fields['phone']);
             $cemail = isset($fields['email']) ? Html::encode($fields['email']) : '';
@@ -52,11 +55,42 @@ class FrController extends \yii\rest\Controller {
             if ($lpartner == '199894' || $lpartner == '199896') {
                 $lead_status_id = 465726; //643219; //id этапа продаж, куда помещать сделку
             }
+            
             if (!empty($type) && $type == 'restaurant'){
                 $lpartner = '';
                 $lead_name = 'Заявка ресторана';
                 $responsible_user_id = 1427371;
                 $lead_status_id = 465729;
+            }
+            if($sitepage == "franch"){
+                $lead_status_id = 465726;
+                $responsible_user_id = 1515736;
+            }
+            if($sitepage == "fkeeper"){
+                if($fields['formtype']==1){
+                $lead_status_id = 465726;
+                $responsible_user_id = 1515736; 
+                    if($lpartner==1){$lead_name = 'fkeeper: Хочет стать партнером 50';}
+                    if($lpartner==2){$lead_name = 'fkeeper: Хочет стать партнером 500';}
+                    if($lpartner==3){$lead_name = 'fkeeper: Хочет стать партнером 900';}
+                }
+                if($fields['formtype']==2){
+                $lead_status_id = 465729;
+                $lpartner = '';
+                $lead_name = 'fkeeper: Ресторан';}
+                $responsible_user_id = 1427371;   
+                }
+                if($fields['formtype']==3){
+                $lead_status_id = 463335;
+                $lpartner = '';
+                $lead_name = 'fkeeper: Поставщик';
+                $responsible_user_id = 1427371;   
+                }
+                
+            }
+            if($sitepage == "client"){
+                $lead_status_id = 465729;
+                $responsible_user_id = 1427371;
             }
             $contact_name = $cname; //Название добавляемого контакта
             $contact_phone = $cphone; //Телефон контакта
@@ -122,10 +156,14 @@ class FrController extends \yii\rest\Controller {
             }
 
             //// Проверка на уже существующий контакт
-            if($type == 'restaurant'){
+            if($sitepage == "client"){
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;     
+            }
+            if($type == "restaurant"){
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;    
-            }else{
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
+            }
+            if($type != "restaurant" && $sitepage != "client"){
+            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;    
             }
             $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
             #Устанавливаем необходимые опции для сеанса cURL

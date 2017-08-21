@@ -28,9 +28,6 @@ class CronController extends Controller {
         echo "latest:".Yii::$app->formatter->asTime($latest, "php:j M Y, H:i:s").";now:".Yii::$app->formatter->asTime($now, "php:j M Y, H:i:s").";diff:".$interval."\n";
     }
     
-    public function actionSendMail() {
-        Yii::$app->mailqueue->process();
-    }
     //обновление одного продукта (крон запускается каждые 2 минуты)
     public function actionUpdateCollection() {
         $base = CatalogBaseGoods::find()
@@ -308,8 +305,14 @@ class CronController extends Controller {
                 }else{
                 // нет подходящего франча / в не отсортированные
                 $organization_model = Organization::findOne($organization->id);
-                $organization_model->franchisee_sorted = 0;
+                $organization_model->franchisee_sorted = 1;
                 $organization_model->save();
+                
+                $franchiseeAssociate = new \common\models\FranchiseeAssociate();
+                $franchiseeAssociate->franchisee_id = 1;
+                $franchiseeAssociate->organization_id = $organization->id;
+                $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
+                $franchiseeAssociate->save();
                 }
             }
         }
@@ -383,9 +386,12 @@ class CronController extends Controller {
             }
         }
     }
+    
     public function actionSendMailNewRequests() {
-      
-        
-        
+        //
+    }
+    
+    public function actionUpdateBlacklist() {
+        Organization::updateAll(["blacklisted" => true], "blacklisted = 0 AND (name LIKE '% test%' OR name LIKE '% тест%')");
     }
 }

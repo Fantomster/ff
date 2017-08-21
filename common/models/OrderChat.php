@@ -91,4 +91,10 @@ class OrderChat extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::className(), ['id' => 'sent_by_id']);
     }
+    
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionSendMessage(Yii::$app->user->id, $this->id);
+    }
 }

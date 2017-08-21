@@ -9,11 +9,43 @@ $this->title = 'F-keeper';
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <iframe style="min-width: 320px;width: 100%;" id="cartoonVideo" width="560" height="315" src="https://www.youtube.com/embed/4j5Wam9B5mQ" frameborder="0" allowfullscreen></iframe>
+                    <iframe style="min-width: 320px;width: 100%;" id="cartoonVideo" width="560" height="315" src="https://www.youtube.com/embed/-bIw8sXQ9QQ" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
     </div>
+<style>
+    .call_back_button{
+    margin-left: 20px;
+    color: #fff;
+    transition: 0.3s;
+    border: 1px solid #ccc;
+    padding: 10px;border-radius:3px;}
+    .call_back_button:hover{
+    color: #fff;
+    cursor:pointer;
+    background: #84bf76;
+    border: 1px solid #84bf76;}
+    .call_back_button2{
+    border: 1px solid #84bf76;
+    transition: 0.3s;
+    padding: 15px;
+    border-radius: 3px;
+    display: block;
+    line-height: 16px;
+    width: 200px;
+    text-align: center;
+    margin-top: 35px;
+    font-size: 16px;
+    color: #84bf76;
+    }
+    .call_back_button2:hover{
+    color: #fff;
+    cursor:pointer;
+    background: #84bf76;
+    border: 1px solid #84bf76;}    
+    }
+</style>
 <header class="header" style="background-image: url(/images/header-banner.jpg)">
     <div class="inside__block">
         <div class="site__title"> 
@@ -26,8 +58,9 @@ $this->title = 'F-keeper';
             <?= Html::a('<span>для ресторанов</span>', "https://client.f-keeper.ru", ['class' => 'for__restaurants']) ?>
 <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
-            <div class="watch_video">
+            <div class="watch_video" style="max-width: 308px;">
                 <a href="#" data-toggle="modal" data-target="#myModal2" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
+                <span class="callback_form call_back_button" data-modal="callback" data-lead="Оставить заявку">оставить заявку</span>
             </div>
         </div>
     </div>
@@ -43,7 +76,8 @@ $this->title = 'F-keeper';
                     <div class="how_its_work">
                         <h3>как это работает</h3>
                         <p>F-keeper это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. F-keeper, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.</p>
-<?= Html::a('Для ресторанов', ["/site/restaurant"]) ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
+<?= Html::a('Для ресторанов', "https://client.f-keeper.ru") ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
+                    <div class="callback_form call_back_button2" data-modal="callback" data-lead="Оставить заявку">оставить заявку</div>
                     </div>
                 </div>	
                 <div class="col-md-7">
@@ -134,7 +168,7 @@ $this->title = 'F-keeper';
             <div class="container-fluid">
                 <div class="col-md-12">
                     <div class="how_its_work">
-                        <h3>скоро... Интеграция со всеми системами</h3>
+                        <h3>Интеграция с системами</h3>
                     </div>
                 </div>	
             </div>

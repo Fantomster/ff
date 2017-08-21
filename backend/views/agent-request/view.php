@@ -31,10 +31,6 @@ $this->title = "Заявка №" . $model->id;
                                 'label' => 'Комментарий'
                             ],
                             [
-                                'attribute' => 'is_processed',
-                                'label' => 'Обработано'
-                            ],
-                            [
                                 'attribute' => 'profile.full_name',
                                 'label' => 'ФИО агента'
                             ],
@@ -45,6 +41,14 @@ $this->title = "Заявка №" . $model->id;
                             [
                                 'attribute' => 'profile.phone',
                                 'label' => 'Телефон агента'
+                            ],
+                            [
+                                'attribute' => 'franchisee.legal_entity',
+                                'label' => 'Название франчайзи агента'
+                            ],
+                            [
+                                'attribute' => 'franchisee.signed',
+                                'label' => 'Подписант франчайзи'
                             ],
                             'created_at',
                         ],

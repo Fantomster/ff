@@ -43,7 +43,17 @@ $this->title = 'F-keeper';
     color: #fff;
     cursor:pointer;
     background: #84bf76;
-    border: 1px solid #84bf76;}    
+    border: 1px solid #84bf76; 
+    }
+    .error__block{
+    background: none;
+    padding: 20px 0;
+    text-align: center;
+    margin-top: 20px; 
+    }
+    .error__block p a {
+    cursor:pointer;
+    margin-left: 0px;
     }
 </style>
 <header class="header" style="background-image: url(/images/header-banner.jpg)">
@@ -58,9 +68,14 @@ $this->title = 'F-keeper';
             <?= Html::a('<span>для ресторанов</span>', "https://client.f-keeper.ru", ['class' => 'for__restaurants']) ?>
 <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
-            <div class="watch_video" style="max-width: 308px;">
-                <a href="#" data-toggle="modal" data-target="#myModal2" ><span class="glyphicon glyphicon-play-circle"></span><span class="watch__span">посмотреть видео</span></a>
-                <span class="callback_form call_back_button" data-modal="callback" data-lead="Оставить заявку">оставить заявку</span>
+            <div class="watch_video">
+                <a href="#" data-toggle="modal" data-target="#myModal2" >
+                    <span class="glyphicon glyphicon-play-circle"></span>
+                    <span class="watch__span">посмотреть видео</span>
+                </a>
+            </div>
+            <div class="error__block">
+                <p><a class="callback_form" data-modal="callback" data-lead="Оставить заявку">оставить заявку</a></p>
             </div>
         </div>
     </div>

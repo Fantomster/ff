@@ -77,7 +77,7 @@ class FrController extends \yii\rest\Controller {
                 if($fields['formtype']==2){
                 $lead_status_id = 465729;
                 $lpartner = '';
-                $lead_name = 'fkeeper: Ресторан';}
+                $lead_name = 'fkeeper: Ресторан';
                 $responsible_user_id = 1427371;   
                 }
                 if($fields['formtype']==3){
@@ -155,7 +155,7 @@ class FrController extends \yii\rest\Controller {
             }
 
             //// Проверка на уже существующий контакт
-            if($type == 'restaurant' || $sitepage == "client"){
+            if($type == 'restaurant' || $sitepage == "client" || $sitepage == "fkeeper"){
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;    
             }else{
             $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;

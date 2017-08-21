@@ -8,7 +8,6 @@ use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\Request;
 use yii\data\ActiveDataProvider;
 
-
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
@@ -42,13 +41,13 @@ class RequestController extends ActiveController {
             ],
             'update' => [
                 'class' => 'yii\rest\UpdateAction',
-                'modelClass' => $this->modelClass,
+                'modelClass' => 'common\models\Request',
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
             ],
             'create' => [
                 'class' => 'yii\rest\CreateAction',
-                'modelClass' => $this->modelClass,
+                'modelClass' => 'common\models\Request',
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->createScenario,
             ],

@@ -1265,11 +1265,17 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_changed) {
                 $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
+            }
+            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+                $text = $subject;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
             }
         }
     }
@@ -1295,13 +1301,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_done) {
                 $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
                 $text = $order->vendor->name . " выполнил заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
@@ -1331,7 +1337,7 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_created) {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
@@ -1339,7 +1345,7 @@ class OrderController extends DefaultController {
             }
         }
         foreach ($order->vendor->users as $recipient) {
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
                 $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
@@ -1368,13 +1374,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_processing) {
                 $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
                 $text = "Заказ в системе f-keeper №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
@@ -1403,13 +1409,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_canceled) {
                 $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();

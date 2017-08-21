@@ -37,7 +37,7 @@ class SmsNotification extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['user_id'], 'required'],
-            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_procesing', 'order_done'], 'integer'],
+            [['user_id', 'orders', 'requests', 'changes', 'invites', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done'], 'integer'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }

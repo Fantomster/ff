@@ -58,7 +58,7 @@ if (Yii::$app->user->can('manage')) {
             ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
             ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
-//            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
         ]
     ];

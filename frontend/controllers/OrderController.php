@@ -847,8 +847,8 @@ class OrderController extends DefaultController {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
-                foreach ($order->vendor->users as $recipient) {
-                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+                foreach ($order->recipientsList as $recipient) {
+                    if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
                         $sms = new \common\components\QTSMS();
@@ -1428,8 +1428,6 @@ class OrderController extends DefaultController {
                         ->setSubject($subject)
                         ->send();
             }
-        }
-        foreach ($order->vendor->users as $recipient) {
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
                 $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;

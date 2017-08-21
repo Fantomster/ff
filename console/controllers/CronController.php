@@ -55,7 +55,7 @@ class CronController extends Controller {
                 if(!empty($product_image)){$product_rating = $product_rating + 5;}
                 if(!empty($product_show_price)){$product_rating = $product_rating + 5;}
                
-                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted == 0){
+                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted == 0 && $catalogBaseGoods->vendor->white_list == 1){
 
                         if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
 
@@ -100,15 +100,10 @@ class CronController extends Controller {
 
                         }
                 }else{
-                if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
-                    $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-                    $es_product->delete();
-                } 
-                /*if($catalogBaseGoods->es_status == 2 || $catalogBaseGoods->market_place == 0 || $catalogBaseGoods->deleted == 1){
-                        if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
-                                $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-                                $es_product->delete();
-                        }*/
+                    if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
+                        $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
+                        $es_product->delete();
+                    } 
                 }
             
             Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
@@ -303,7 +298,6 @@ class CronController extends Controller {
                 $organization_model = Organization::findOne($organization->id);
                 $organization_model->franchisee_sorted = 0;
                 $organization_model->save();    
-                
             }
         }
     }

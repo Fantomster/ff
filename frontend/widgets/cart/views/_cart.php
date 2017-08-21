@@ -60,7 +60,7 @@ $count = count($orders);
                     </div>
                 </div>
             <?php } ?>
-            <?= Html::a('Оформить заказ', ['order/checkout'], ['class' => 'btn but_zakaz_bask', 'data-pjax' => 0]) ?>
+            <?= Html::a('Перейти к оформлению', ['order/checkout'], ['class' => 'btn but_zakaz_bask', 'data-pjax' => 0]) ?>
         </div>
     <?php } else { ?>
         <div class="block_wrap_dont_tovar">

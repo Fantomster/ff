@@ -41,6 +41,7 @@ class Guide extends \yii\db\ActiveRecord
             [['client_id', 'type', 'deleted'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
+            [['name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
         ];
     }

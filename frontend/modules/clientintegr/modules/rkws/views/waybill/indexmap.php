@@ -72,6 +72,14 @@ GridView::widget([
            'format' => 'raw',
            'label' => 'Наименование F-keeper',                   
          ],
+         [
+           'attribute' => 'product_id',
+           'value' => function ($model) {
+                      return $model->fproductname->ed ? $model->fproductname->ed : 'Не указано';
+                      },
+           'format' => 'raw',
+           'label' => 'Ед. изм. F-keeper',                   
+         ],                     
 
      //   'munit_rid',
 
@@ -144,11 +152,108 @@ GridView::widget([
                 },
                 'format' => 'raw',
                 'label' => 'Ед.изм. StoreHouse',         
-                ],        
-                'quant',
-                'sum',        
-              
-       
+                ],  
+                [
+                'attribute' => 'defquant',                
+                'format' => 'raw',
+                'label' => 'Кол-во в Заказе',                   
+                ],           
+                [
+                'class'=>'kartik\grid\EditableColumn',
+                'attribute'=>'koef',
+                'refreshGrid' => true,
+                'editableOptions'=>[
+                'header'=>':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
+                'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
+                'formOptions' => [
+                              'action' => Url::toRoute('changekoef'),
+                              'enableClientValidation' => false,
+                                 ],    
+                ],
+                'hAlign'=>'right',
+                'vAlign'=>'middle',
+                // 'width'=>'100px',
+                'format'=>['decimal',6],
+                'pageSummary'=>true
+                ],      
+                [
+                'class'=>'kartik\grid\EditableColumn',
+                'attribute'=>'quant',
+                'refreshGrid' => true,
+                'editableOptions'=>[
+                'header'=>':<br><strong>Новое количество равно:&nbsp; &nbsp;</srong>',
+                'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
+                'formOptions' => [
+                              'action' => Url::toRoute('changekoef'),
+                              'enableClientValidation' => false,
+                                 ],    
+                ],
+                'hAlign'=>'right',
+                'vAlign'=>'middle',
+                // 'width'=>'100px',
+                'format'=>['decimal'],
+                'pageSummary'=>true
+                ],  
+                [
+                'class'=>'kartik\grid\EditableColumn',
+                'attribute'=>'sum',
+                'refreshGrid' => true,
+                'editableOptions'=>[
+                'header'=>'<strong>Новая сумма равна:&nbsp; &nbsp;</srong>',
+                'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
+                'formOptions' => [
+                              'action' => Url::toRoute('changekoef'),
+                              'enableClientValidation' => false,
+                                 ],    
+                ],
+                'hAlign'=>'right',
+                'vAlign'=>'middle',
+                // 'width'=>'100px',
+                'format'=>['decimal',2],
+                'pageSummary'=>true
+                ], 
+                 [
+                'class'=>'kartik\grid\EditableColumn',
+                'attribute'=>'vat',
+                'label' => 'Ставка НДС',     
+                'value' => function ($model) {
+                         return $model->vat/100;
+                },
+                'refreshGrid' => true,
+                'editableOptions'=>[
+                'header'=>'<strong>Новая ставка НДС равна:&nbsp; &nbsp;</srong>',
+                'inputType'=>\kartik\editable\Editable::INPUT_DROPDOWN_LIST, 
+                'data' => ['0' => '0', '1000' => '10', '1800' => '18'],    
+                'formOptions' => [
+                              'action' => Url::toRoute('changekoef')
+                                 ],    
+                ],
+                'hAlign'=>'right',
+                'vAlign'=>'middle',
+                // 'width'=>'100px',
+                'format'=>['decimal'],
+                'pageSummary'=>true
+                ],       
+                
+                [        
+                'class' => 'yii\grid\ActionColumn',
+                'contentOptions'=>['style'=>'width: 6%;'],
+                'template'=>'{clear}&nbsp;',
+                'visibleButtons' => [
+                    'clear' => function ($model, $key, $index) {
+                              // return (($model->status_id > 2 && $model->status_id != 8 && $model->status_id !=5) && Yii::$app->user->can('Rcontroller') || (Yii::$app->user->can('Requester') && (($model->status_id === 2) || ($model->status_id === 4))) ) ? true : false;
+                               return true;     
+                                },                 
+                                    ],
+                'buttons'=>[                
+                    'clear' =>  function ($url, $model) {
+                              //  if (Helper::checkRoute('/prequest/default/update', ['id' => $model->id])) {
+                                $customurl=Yii::$app->getUrlManager()->createUrl(['clientintegr\rkws\waybill\cleardata', 'id'=>$model->id]);
+                                return \yii\helpers\Html::a( '<i class="fa fa-sign-in" aria-hidden="true"></i>', $customurl,
+                                ['title' => Yii::t('backend', 'Вернуть начальные данные'), 'data-pjax'=>"0"]);
+                                },                                                     
+                            ]                               
+                ],          
     ],
     /* 'rowOptions' => function ($data, $key, $index, $grid) {
       return ['id' => $data['id'], 'onclick' => "console.log($(this).find(a).first())"];

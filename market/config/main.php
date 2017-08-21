@@ -28,17 +28,17 @@ return [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
-                'email' => [
-                    'class' => 'yii\log\EmailTarget',
-                    'except' => ['yii\web\HttpException:404'],
-                    'levels' => ['error'],
-                    'message' => [
-                        'from' => 'noreply@f-keeper.ru', 
-                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com'], 
-                        'subject' => 'Error message',
-                    ],
-                    'mailer' => 'mailer',
-                ],
+//                'email' => [
+//                    'class' => 'yii\log\EmailTarget',
+//                    'except' => ['yii\web\HttpException:404'],
+//                    'levels' => ['error'],
+//                    'message' => [
+//                        'from' => 'noreply@f-keeper.ru', 
+//                        'to' => ['sharap@f-keeper.ru', 'marshal1209448@gmail.com'], 
+//                        'subject' => 'Error message',
+//                    ],
+//                    'mailer' => 'mailer',
+//                ],
             ],
         ],
 //        'assetsAutoCompress' =>

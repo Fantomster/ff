@@ -39,21 +39,15 @@ return [
         ],
         'mailer' => [
             'viewPath' => '@common/mail',
-//            'class' => 'yashop\ses\Mailer',
-//            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
-//            'secret_key' => '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',
-//            'host' => 'email.eu-west-1.amazonaws.com',
-//            'messageConfig' => [
-//                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
-//                'charset' => 'UTF-8',
-//            ],
-        ],
-        'mailqueue' => [
-            'class' => 'nterms\mailqueue\MailQueue',
-            'table' => '{{%mail_queue}}',
-            'mailsPerRound' => 15,
-            'maxAttempts' => 1,
-            'viewPath' => '@common/mail',
+            'class' => 'common\components\Mailer',
+            'useFileTransport' => false,
+            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
+            'secret_key' => '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',
+            'host' => 'email.eu-west-1.amazonaws.com',
+            'messageConfig' => [
+                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+                'charset' => 'UTF-8',
+            ],
         ],
         'urlManager' => [
             'class' => 'yii\web\UrlManager',
@@ -86,6 +80,18 @@ return [
                 'reset' => 'user/reset',
             ],
         ],
+        'urlManagerFrontend' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//f-keeper.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+        ],
+        'urlManagerFranchise' => [
+            'class' => 'yii\web\urlManager',
+            'baseUrl' => '//partner.f-keeper.ru',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+        ],
         'assetManager' => [
             'bundles' => [
                 'dosamigos\google\maps\MapAsset' => [
@@ -99,9 +105,9 @@ return [
         ],
         //Google firebase cloud messaging
         'fcm' => [
-        'class' => 'understeam\fcm\Client',
-        'apiKey' => 'AAAADvq3Ss8:APA91bFB5zGZpz01LtWYpMS5wwMDSjnmlv4bWYLJgJHBmQauzW24bHDG__ECgMGElVZqFV_I2MTPG2aCsV7HXshwq4yjupX1xGbuShGAyxtf7fIiepmHhFkLpxfkA4cKcCEufA3H7_Bb', // Server API Key (you can get it here: https://firebase.google.com/docs/server/setup#prerequisites) 
-    ],
+            'class' => 'understeam\fcm\Client',
+            'apiKey' => 'AAAADvq3Ss8:APA91bFB5zGZpz01LtWYpMS5wwMDSjnmlv4bWYLJgJHBmQauzW24bHDG__ECgMGElVZqFV_I2MTPG2aCsV7HXshwq4yjupX1xGbuShGAyxtf7fIiepmHhFkLpxfkA4cKcCEufA3H7_Bb', // Server API Key (you can get it here: https://firebase.google.com/docs/server/setup#prerequisites)
+        ],
     ],
     'modules' => [
         'user' => [
@@ -134,10 +140,10 @@ return [
             'layout' => '@frontend/views/layouts/main-vendor.php',
         ],
         'treemanager' =>  [
-        'class' => '\kartik\tree\Module',
-        // enter other module properties if needed
-        // for advanced/personalized configuration
-        // (refer module properties available below)
-    ]
+            'class' => '\kartik\tree\Module',
+            // enter other module properties if needed
+            // for advanced/personalized configuration
+            // (refer module properties available below)
+        ]
     ],
 ];

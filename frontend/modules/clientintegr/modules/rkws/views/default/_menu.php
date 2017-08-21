@@ -10,6 +10,7 @@ use yii\helpers\Html;
             <div class="box-header with-border">
               <h3 class="box-title">Панель управления</h3>
             </div>
+        
             <!-- /.box-header -->
             <div class="box-body">
 
@@ -35,6 +36,7 @@ use yii\helpers\Html;
                     </div>
                 </div>
             </div>
+        
             <!-- /.box-body -->
             <!--div class="box-footer clearfix">
               <span class="pull-right">5 каталогов</span>

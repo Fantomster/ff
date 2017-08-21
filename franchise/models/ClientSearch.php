@@ -43,7 +43,7 @@ class ClientSearch extends Organization {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $franchisee_id) {
+    public function search($params, $franchisee_id, $vendor_id = null) {
         $this->load($params);
 
         $searchString = "%$this->searchString%";
@@ -60,7 +60,7 @@ class ClientSearch extends Organization {
             $t2_f = $to->format('Y-m-d');
         }
 
-        $query = "SELECT self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as vendorCount, 
+        $query = "SELECT fa.id as franchisee_associate_id, self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as vendorCount, 
                 (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as vendorCount_prev30, 
                 (select count(id) from `order` where client_id=org.id and status in (1,2,3,4)) as orderCount,
                 (select count(id) from `order` where client_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as orderCount_prev30,
@@ -71,6 +71,10 @@ class ClientSearch extends Organization {
                 LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id
                 WHERE fa.franchisee_id = $franchisee_id and org.type_id=1 and org.created_at between :dateFrom and :dateTo
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
+
+        if($vendor_id){
+            $query = parent::getOrganizationQuery($vendor_id, 'rest');
+        }
 
         $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());
 

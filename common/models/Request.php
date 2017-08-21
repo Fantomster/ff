@@ -251,4 +251,9 @@ class Request extends \yii\db\ActiveRecord
 
         \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
     }
+
+
+    public function getFranchiseeAssociate(){
+        return $this->hasOne(FranchiseeAssociate::className(), ['rest_org_id' => 'organization_id']);
+    }
 }

@@ -32,6 +32,10 @@ class CallbackController extends Controller {
         (new \frontend\modules\clientintegr\modules\rkws\components\AgentHelper())->callback();
     }
     
+    public function actionEdism() {
+        (new \frontend\modules\clientintegr\modules\rkws\components\EdismHelper())->callback();
+    }
+    
         
     public function actionStore() {
         (new \frontend\modules\clientintegr\modules\rkws\components\StoreHelper())->callback();

@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use common\models\Organization;
 use Yii;
 use common\models\Franchisee;
 use common\models\FranchiseeGeo;
@@ -153,7 +154,8 @@ class FranchiseeController extends Controller
                     $user->setRegisterAttributes($user->role_id, User::STATUS_ACTIVE)->save();
                     $profile->setUser($user->id)->save();
                     $user->setFranchisee($fr_id);
-
+                    $model = new Organization();
+                    $model->sendGenerationPasswordEmail($user, true);
                     return $this->redirect(['franchisee/users', 'id' => $fr_id]);
                 }
             }

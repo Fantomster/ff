@@ -4,7 +4,6 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use common\models\Organization;
-
 if (!Yii::$app->user->isGuest) {
     $user = Yii::$app->user->identity;
     $organization = $user->organization;
@@ -80,7 +79,7 @@ if (!Yii::$app->user->isGuest) {
                 </button>
                 <a class="navbar-brand text-hide" href="<?= Url::home(); ?>">f-keeper</a>
             </div>
-            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader"><?=Yii::$app->session->get('locality')?></span>
+            <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader" style="cursor:pointer"><?=Yii::$app->request->cookies->get('locality')?></span>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>
@@ -113,7 +112,7 @@ if (!Yii::$app->user->isGuest) {
 </section>
 <?php 
 //\frontend\assets\GoogleMapsAsset::register($this);
-if (empty(Yii::$app->session->get('locality')) || empty(Yii::$app->session->get('country'))) {
+if (!(Yii::$app->request->cookies->get('locality') || Yii::$app->request->cookies->get('country'))) {
 $this->registerJs("
   $(\"#data-modal\").length>0&&$(\"#data-modal\").modal({backdrop: \"static\", keyboard: false});
 ",yii\web\View::POS_END);    

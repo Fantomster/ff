@@ -2,10 +2,13 @@
 
 namespace backend\controllers;
 
+use common\models\Franchisee;
+use common\models\FranchiseeAssociate;
 use Yii;
 use common\models\Organization;
 use common\models\Role;
 use backend\models\OrganizationSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -97,6 +100,8 @@ class OrganizationController extends Controller {
 //        }
 //    }
 //
+
+
     /**
      * Updates an existing Organization model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -105,15 +110,15 @@ class OrganizationController extends Controller {
      */
     public function actionUpdate($id) {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        $franchiseeModel = $this->findFranchiseeAssociateModel($id);
+        $franchiseeList = ArrayHelper::map(Franchisee::find()->all(),'id','legal_entity');
+        if ($model->load(Yii::$app->request->post()) && $model->save() && $franchiseeModel->load(Yii::$app->request->post()) && $franchiseeModel->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            return $this->render('update', [
-                        'model' => $model,
-            ]);
+            return $this->render('update', compact('model', 'franchiseeModel', 'franchiseeList'));
         }
     }
+
 
 //    /**
 //     * Deletes an existing Organization model.
@@ -141,6 +146,21 @@ class OrganizationController extends Controller {
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+
+
+    /**
+     * Finds the Organization model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return Organization the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findFranchiseeAssociateModel($id) {
+        if (($model = FranchiseeAssociate::findOne(['organization_id'=>$id])) == null) {
+            $model = new FranchiseeAssociate();
+        }
+        return $model;
     }
 
 }

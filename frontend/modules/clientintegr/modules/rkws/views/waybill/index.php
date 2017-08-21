@@ -72,7 +72,7 @@ use api\common\models\RkWaybill;
                                     
                                                     return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>';  
                                                                },
-                                                     'label' => 'Статус',
+                                                     'label' => 'Статус Заказа',
                                                   ],
                                                 [
                                                     'attribute' => 'updated_at',
@@ -89,6 +89,16 @@ use api\common\models\RkWaybill;
                                                     'label' => 'Итоговая сумма',   
                                                     'format'=>'raw',
                                                 ],
+                                                [
+                                                    'value' => function($data) {
+                                                                   
+                                                     $nacl = RkWaybill::findOne(['order_id' => $data->id]); 
+                                                     
+                                                 //    var_dump($nacl->id);                                                    
+                                                             return $nacl ? $nacl->status->denom : 'Не сформирована';  
+                                                               },
+                                                     'label' => 'Статус накладной', 
+                                                ],                       
                                                 [
                                                     'class'=>'kartik\grid\ExpandRowColumn',
                                                     'width'=>'50px',

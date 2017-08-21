@@ -78,12 +78,32 @@ class AgentRequest extends \yii\db\ActiveRecord {
         return $this->hasOne(User::className(), ['id' => 'agent_id']);
     }
 
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfile() {
+        return $this->hasOne(Profile::className(), ['user_id' => 'agent_id']);
+    }
+
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getAttachments() {
         return $this->hasMany(AgentAttachment::className(), ['agent_request_id' => 'id']);
     }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFranchisee()
+    {
+        return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
+            ->viaTable('franchisee_user', ['user_id' => 'agent_id']);
+    }
+
 
     public function delete() {
         foreach ($this->attachments as $attachment) {

@@ -133,6 +133,14 @@ $this->registerJs('
                             ],
                             [
                                 'format' => 'raw',
+                                'attribute' => 'active_status',
+                                'value' => function ($data) {
+                                    return ($data['active_status'])?'Открыта':'<span style="color: red;">Закрыта</span>';
+                                },
+                                'label' => 'Статус',
+                            ],
+                            [
+                                'format' => 'raw',
                                 'attribute' => 'created_at',
                                 'value' => function ($data) {
                                     $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
@@ -142,11 +150,16 @@ $this->registerJs('
                             ],
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'template' => '{view}',
+                                'template' => '{view} &nbsp; {edit}',
                                 'buttons' => [
                                     'view' => function ($url,$model) {
                                         $customurl=Yii::$app->getUrlManager()->createUrl(['request/view','id'=>$model['id']]);
                                         return \yii\helpers\Html::a( '<span class="glyphicon glyphicon-eye-open"></span>', $customurl,
+                                            ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
+                                    },
+                                    'edit' => function ($url,$model) {
+                                        $customurl=Yii::$app->getUrlManager()->createUrl(['request/update','id'=>$model['id']]);
+                                        return \yii\helpers\Html::a( '<span class="glyphicon glyphicon-pencil"></span>', $customurl,
                                             ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
                                     },
                                 ],

@@ -21,7 +21,7 @@ use yii\widgets\ListView;
             'links' => [
                 [
                     'label' => 'Список заявок',
-                    'url' => ['request/list'],
+                    'url' => ['request/index'],
                 ],
                 'Заявка №' . $request->id,
             ],
@@ -59,6 +59,7 @@ use yii\widgets\ListView;
                             <h6><b>Периодичность заказа:</b> <?=$request->regularName?></h6>
                             <h6><b>Способ оплаты:</b> <?=$request->paymentMethodName ?></h6>
                             <h6><b>Отложенный платеж(дней):</b> <?=$request->deferment_payment ?></h6>
+                            <h5><?=($request->active_status)?'':'<b style="color: red;">Заявка закрыта</b>' ?></h5>
                             <div class="req-respons">Исполнитель:
                                 <?=$request->responsible_supp_org_id ?
                                     '<span style="color:#84bf76;text-decoration:underline">' . $request->vendor->name . '</span>' :

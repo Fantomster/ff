@@ -142,6 +142,14 @@ $this->registerJs('
                                 'label' => 'Дата создания',
                             ],
                             [
+                                'format' => 'raw',
+                                'attribute' => 'active_status',
+                                'value' => function ($data) {
+                                    return ($data['active_status'])?'Открыта':'<span style="color: red;">Закрыта</span>';
+                                },
+                                'label' => 'Статус',
+                            ],
+                            [
                                 'class' => 'yii\grid\ActionColumn',
                                 'template' => '{view} &nbsp; {edit}',
                                 'buttons' => [

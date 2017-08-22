@@ -38,7 +38,7 @@ class RequestController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index', 'view', 'update'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -95,5 +95,26 @@ class RequestController extends Controller
             ],
         ]);
         return $this->render("view", compact('request', 'author', 'dataCallback'));
+    }
+
+    /**
+     * Displays general settings
+     *
+     * @return mixed
+     */
+    public function actionUpdate($id)
+    {
+        $model = Request::findOne($id);
+        if(!$model){
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $id]);
+        } else {
+            return $this->render('/request/update', [
+                'model' => $model,
+            ]);
+        }
     }
 }

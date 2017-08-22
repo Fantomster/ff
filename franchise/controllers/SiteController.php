@@ -4,7 +4,12 @@ namespace franchise\controllers;
 
 use common\models\Catalog;
 use common\models\FranchiseeAssociate;
+use common\models\Request;
+use common\models\RequestCallback;
+use common\models\RequestCounters;
+use common\models\RequestSearch;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\Json;
@@ -17,6 +22,7 @@ use common\models\Organization;
 use common\models\Order;
 use common\models\CatalogBaseGoods;
 use yii\helpers\VarDumper;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -718,15 +724,68 @@ class SiteController extends DefaultController
      */
     public function actionRequests()
     {
-        $model = new Organization();
-        $dataProvider = $model->getAssociatedRequestsList($this->currentFranchisee->id);
-        $searchModel = new \franchise\models\OrderSearch();
+        $searchModel = new RequestSearch();
+        $today = new \DateTime();
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = "01.02.2017";
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("RequestSearch")) {
+            $params['RequestSearch'] = Yii::$app->request->post("RequestSearch");
+        }
+
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial("requests", compact('searchModel', 'dataProvider'));
+            return $this->renderPartial("request/index", compact('searchModel', 'dataProvider'));
         } else {
-            return $this->render("requests", compact('searchModel', 'dataProvider'));
+            return $this->render("request/index", compact('searchModel', 'dataProvider'));
         }
     }
+
+
+    /**
+     * Displays general settings
+     *
+     * @return mixed
+     */
+    public function actionRequest($id)
+    {
+        if (!Request::find()->where(['id' => $id])->exists()) {
+            return $this->redirect("list");
+        }
+        $request = Request::find()->where(['id' => $id])->one();
+        $author = Organization::findOne(['id' => $request->rest_org_id]);
+        $dataCallback = new ActiveDataProvider([
+            'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+        ]);
+        return $this->render("request/view", compact('request', 'author', 'dataCallback'));
+    }
+
+
+    /**
+     * Displays general settings
+     *
+     * @return mixed
+     */
+    public function actionUpdateRequest($id)
+    {
+        $model = Request::find()->rightJoin('franchisee_associate', 'franchisee_associate.organization_id=request.rest_org_id')->where(['request.id'=>$id])->andWhere(['franchisee_associate.franchisee_id'=>$this->currentFranchisee->id])->one();
+        if(!$model){
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['request', 'id' => $id]);
+        } else {
+            return $this->render('request/update', [
+                'model' => $model,
+            ]);
+        }
+    }
+
 
 
 //    public function actionImportFromXls($id) {

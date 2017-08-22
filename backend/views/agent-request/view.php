@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
+use branchonline\lightbox\Lightbox;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\AgentRequest */
@@ -57,7 +58,20 @@ $this->title = "Заявка №" . $model->id;
 
                     <div style="padding-top: 20px;">Приложения:
                         <?php foreach ($model->attachments as $attachment) { ?>
-                            <a href="<?= $attachment->getUploadUrl("attachment") ?>"><?= $attachment->attachment ?></a>
+                            <?php
+                            echo Lightbox::widget([
+                                'files' => [
+                                    [
+                                        'thumbOptions' => [
+                                            'width' => 150
+                                        ],
+                                        'thumb' => $attachment->getUploadUrl("attachment"),
+                                        'original' => $attachment->getUploadUrl("attachment"),
+                                        'title' => $attachment->attachment,
+                                    ],
+                                ]
+                            ]);
+                            ?>
                         <?php } ?>
                     </div>
                 </div>

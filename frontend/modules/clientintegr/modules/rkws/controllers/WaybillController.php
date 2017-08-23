@@ -186,7 +186,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
 
     public function actionCreate($order_id) {
         
-        $ord = \common\models\Order::findOne('id = :id',[':id' => $order_id]);
+        $ord = \common\models\Order::findOne(['id' => $order_id]);
         
         var_dump($ord);
         die();

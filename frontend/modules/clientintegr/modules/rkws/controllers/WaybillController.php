@@ -185,9 +185,13 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     }
 
     public function actionCreate($order_id) {
+        
+        $ord = \common\models\Order::findOne('id = :id',[':id' => $order_id]);
+        
         $model = new RkWaybill();
         $model->order_id = $order_id;
         $model->status_id = 1;
+        $model->org = $ord->client_id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 

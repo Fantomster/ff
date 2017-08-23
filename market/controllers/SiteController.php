@@ -779,7 +779,7 @@ class SiteController extends Controller {
     public function actionRestaurants() {
         $locationWhere = [];
         if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+            $locationWhere = ['country'=>Yii::$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
         }
         $restaurants = Organization::find()
                 ->where([

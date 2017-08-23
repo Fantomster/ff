@@ -78,8 +78,7 @@ class SiteController extends Controller {
      */
     public function beforeAction($action)
     {
-        $session = Yii::$app->session;
-        if (!($app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
+        if (!(Yii::$app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
             return $this->redirect(['/site/index']);
         }else{
            

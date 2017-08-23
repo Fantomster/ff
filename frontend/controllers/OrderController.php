@@ -70,6 +70,7 @@ class OrderController extends DefaultController {
                             'create',
                             'guides',
                             'favorites',
+                            'edit-guide',
                             'checkout',
                             'repeat',
                             'refresh-cart',
@@ -83,6 +84,8 @@ class OrderController extends DefaultController {
                             'ajax-set-note',
                             'ajax-set-delivery',
                             'ajax-show-details',
+                            'ajax-create-guide',
+                            'ajax-edit-guide',
                             'complete-obsolete',
                             'pjax-cart',
                         ],
@@ -169,13 +172,13 @@ class OrderController extends DefaultController {
 
         if ($client->type_id === Organization::TYPE_RESTAURANT) {
             $guide = new Guide();
-            $guide->client_id;
+            $guide->client_id = $client->id;
             $guide->name = $name;
             $guide->type = Guide::TYPE_GUIDE;
             $guide->save();
-            return ['result' => true, 'url' => \yii\helpers\Url::to(['order/edit-guide', 'id' => $guide->id])];
+            return ['type' => 'success', 'url' => \yii\helpers\Url::to(['order/edit-guide', 'id' => $guide->id])];
         } else {
-            return ['result' => false];
+            return ['type' => 'fail'];
         }
     }
 
@@ -187,10 +190,13 @@ class OrderController extends DefaultController {
         
         $vendorSearchModel = new VendorSearch();
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
+        $vendorDataProvider->pagination = [
+                'pageSize' => 8,
+            ];
         
         $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
         $productSearchModel = new OrderCatalogSearch();
-        $productsDataProvider = $productSearchModel->search($params);
+        $productsDataProvider = null;//$productSearchModel->search($params);
         
         $guideProducts = new GuideProductsSearch();
         $guideDataProvider = $guideProducts->search($params, $guide->id);

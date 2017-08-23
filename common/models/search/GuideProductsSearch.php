@@ -3,8 +3,10 @@
 namespace common\models\search;
 
 use Yii;
+use common\models\guides\Guide;
 use common\models\guides\GuideProduct;
 use common\models\CatalogBaseGoods;
+use yii\data\ActiveDataProvider;
 
 /**
  * Description of GuideProductsSearch

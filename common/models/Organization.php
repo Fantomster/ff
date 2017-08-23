@@ -53,6 +53,7 @@ use common\models\guides\Guide;
  * @property FranchiseeAssociate $franchiseeAssociate
  * @property RelationSuppRest $associates
  * @property integer $managersCount
+ * @property integer $productsCount
  * @property Guide $favorite
  * @property Guide[] $guides
  */
@@ -734,5 +735,15 @@ class Organization extends \yii\db\ActiveRecord {
             ],
         ]);
         return $dataListRequest;
+    }
+    
+    /**
+     * @return count of base products
+     */
+    public function getProductsCount() {
+        if ($this->type_id !== self::TYPE_SUPPLIER) {
+            return 0;
+        }
+        return CatalogBaseGoods::find()->where(['supp_org_id' => $this->id, 'status' => CatalogBaseGoods::STATUS_ON, 'deleted' => CatalogBaseGoods::DELETED_OFF])->count();
     }
 }

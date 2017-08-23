@@ -7,10 +7,10 @@
 ?>
 <td>
     <div class="guid_block_create_title">
-        <p>Имя поставщика</p>
+        <p><?= $model->vendor->name ?></p>
     </div>	
     <div class="guid_block_create_counts">
-        <p>Кол-во товаров: <span>125</span></p> 
+        <p>Кол-во товаров: <span><?= $model->vendor->productsCount ?></span></p> 
     </div>     
 </td>
 <td>

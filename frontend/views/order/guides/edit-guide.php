@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Url;
 use yii\widgets\ListView;
+use yii\widgets\Pjax;
 ?>
 <section class="content">
     <div class="nav-tabs-custom">
@@ -39,6 +40,9 @@ use yii\widgets\ListView;
                                                 </div>  
                                             </th>
                                         </tr>
+                                        <?php
+                                        Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendorsList', 'timeout' => 30000]);
+                                        ?>
                                         <?=
                                         ListView::widget([
                                             'dataProvider' => $vendorDataProvider,
@@ -60,14 +64,15 @@ use yii\widgets\ListView;
                                             'emptyText' => 'Список пуст',
                                         ])
                                         ?>
+                                        <?php Pjax::end(); ?>
                                     </tbody>
                                 </table>
-                                <ul class="pagination">
+<!--                                <ul class="pagination">
                                     <li class="prev disabled"><span>«</span></li>
                                     <li class="active"><a href="#">1</a></li>
                                     <li><a href="#">2</a></li>
                                     <li><a href="#">3</a></li>
-                                </ul>
+                                </ul>-->
                             </div>   
                         </div>
                         <div class="col-md-6 col-lg-4">

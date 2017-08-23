@@ -185,7 +185,7 @@ class RequestController extends DefaultController {
                 $requestCounters->request_id = $id;
                 $requestCounters->user_id = $user->id;
                 $requestCounters->save();
-            }  
+            }
             $trueFalseCallback = RequestCallback::find()->where(['request_id' => $id,'supp_org_id'=>$user->organization_id])->exists();
             $dataCallback = new ActiveDataProvider([
                 'query' => RequestCallback::find()->where(['request_id' => $id,'supp_org_id'=>$user->organization_id])->orderBy('id DESC'),

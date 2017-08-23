@@ -188,9 +188,11 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         
         $ord = \common\models\Order::findOne(['id' => $order_id]);
         
-        var_dump($ord);
-        die();
-        
+        if (!$ord) {
+            echo "Can't find order";
+            die();
+        }
+                
         $model = new RkWaybill();
         $model->order_id = $order_id;
         $model->status_id = 1;

@@ -79,7 +79,7 @@ class SiteController extends Controller {
     public function beforeAction($action)
     {
         $session = Yii::$app->session;
-        if (!(Yii::$app->session->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
+        if (!($app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
             return $this->redirect(['/site/index']);
         }else{
            
@@ -804,7 +804,7 @@ class SiteController extends Controller {
     public function actionAjaxRestaurantsMore($num) {
         $locationWhere = [];
         if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+            $locationWhere = ['country'=>$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
         }
         $count = Organization::find()
                 ->where([

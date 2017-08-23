@@ -113,6 +113,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             ],
                         ],
                         ['label' => 'Заказы', 'url' => ['/order/index']],
+                        ['label' => 'Заявки', 'url' => ['/request/index']],
                         [
                             'label' => 'Товары',
                             'items' => [

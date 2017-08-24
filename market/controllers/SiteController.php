@@ -1169,7 +1169,16 @@ class SiteController extends Controller {
                         'match' => [
                             'product_name' => [
                                 'query' => $search,
-                                'analyzer' => "ru",
+                                //'analyzer' => "ru",
+                            ]
+                        ]
+                    ],
+                    'filter' => [
+                        'bool' => [
+                            'must' => [
+                                'terms' => [
+                                    'product_supp_id' => $where
+                                ]
                             ]
                         ]
                     ]
@@ -1206,7 +1215,8 @@ class SiteController extends Controller {
                             ->limit(10000)->asArray()->all();
             $search_products = \common\models\ES\Product::find()->query($params_products)
                             ->limit(4)->asArray()->all();
-            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->limit(4)->asArray()->all();
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
+                    ->limit(4)->asArray()->all();
             
         }
 

@@ -36,6 +36,10 @@ class NetworkController extends Controller {
                 'rules' => [
                     [
                         'actions' => [
+                            'change-form',
+                            'change',
+                            'create-form',
+                            'create'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -48,8 +52,10 @@ class NetworkController extends Controller {
                     ],
                     [
                         'actions' => [
-                            'ajax-change-organization',
-                            'change-organization'
+                            'change-form',
+                            'change',
+                            'create-form',
+                            'create'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -78,7 +84,7 @@ class NetworkController extends Controller {
             ],
         ];
     }
-    public function actionAjaxChangeOrganization(){
+    public function actionChangeForm(){
         $user = User::findIdentity(Yii::$app->user->id);
         if(Organization::find()->where(['id' => $user->organization_id])
                 ->andWhere('parent_id is not null')
@@ -105,17 +111,56 @@ class NetworkController extends Controller {
         ]);
         return $this->renderAjax('_changeForm', compact('user','dataProvider'));
     }
-    public function actionChangeOrganization($id){
+    public function actionChange($id){
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = Organization::findOne(['id'=>$id]);
-        if($organization->type_id == Organization::TYPE_RESTAURANT){
-        $user->role_id = Role::ROLE_RESTAURANT_MANAGER;   
+        
+        $sql = "select distinct count(id) from (
+        select id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
+        union all
+        select id from organization where id = " . $user->organization_id . ")tb where id = $id";
+        if(\Yii::$app->db->createCommand($sql)->queryScalar() && 
+                ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
+                 $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
+                 $user->role_id == Role::ROLE_ADMIN ||
+                 $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
+            if($organization->type_id == Organization::TYPE_RESTAURANT && 
+                    ($user->role_id != Role::ROLE_ADMIN &&
+                     $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
+                
+                $user->role_id = Role::ROLE_RESTAURANT_MANAGER;   
+            }
+            if($organization->type_id == Organization::TYPE_SUPPLIER && 
+                    ($user->role_id != Role::ROLE_ADMIN &&
+                     $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
+                $user->role_id = Role::ROLE_SUPPLIER_MANAGER;   
+            }
+            $user->organization_id = $id;
+            $user->save();
+            return true;
         }
-        if($organization->type_id == Organization::TYPE_SUPPLIER){
-        $user->role_id = Role::ROLE_SUPPLIER_MANAGER;   
+        return false;
+    }
+    
+    public function actionCreateForm(){
+        $organization = new Organization();
+        return $this->renderAjax('_createForm', compact('organization'));
+    }
+    
+    public function actionCreate(){
+        $user = User::findIdentity(Yii::$app->user->id);
+        $sql = "select distinct parent_id from (
+        select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
+        union all
+        select id, parent_id from organization where id = " . $user->organization_id . ")tb";
+        $organization = new Organization();
+        if(\Yii::$app->db->createCommand($sql)->queryScalar()){
+          $parent_id = \Yii::$app->db->createCommand($sql)->queryAll();  
+          
+          
+        }else{
+          $parent_id = $user->organization_id; 
+         
         }
-        $user->organization_id = $id;
-        $user->save();
-        return true;
     }
 }

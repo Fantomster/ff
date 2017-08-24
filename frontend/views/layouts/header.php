@@ -19,7 +19,7 @@ if (!Yii::$app->user->isGuest) {
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
-    $changeNetworkUrl = Url::to(['/network/change-organization']);
+    $changeNetworkUrl = Url::to(['/network/change']);
 //    $("#checkout").on("pjax:complete", function() {
 //        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
 //    });
@@ -324,9 +324,20 @@ JS;
                                     <small><?= $organization->name ?></small>
                                 </p>
                                 <?=
-                                Html::a("Смена бизнеса", ['network/ajax-change-organization'], [
+                                Html::a("Смена бизнеса", ['network/change-form'], [
                                     'data' => [
                                         'target' => '#changeNetOrg',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                    ],
+                                    'class' => 'btn btn-lg btn-gray',
+                                    'style' => 'border-radius:0;width:100%;text-align:center;',
+                                ]);
+                                ?>
+                                <?=
+                                Html::a("Создать бизнес", ['network/create-form'], [
+                                    'data' => [
+                                        'target' => '#createNetwork',
                                         'toggle' => 'modal',
                                         'backdrop' => 'static',
                                     ],
@@ -357,6 +368,13 @@ JS;
 Modal::widget([
     'id' => 'changeNetOrg',
     'size' => 'modal-md',
+    'clientOptions' => false,
+])
+?>
+<?=
+Modal::widget([
+    'id' => 'createNetwork',
+    'size' => 'modal-sm',
     'clientOptions' => false,
 ])
 ?>

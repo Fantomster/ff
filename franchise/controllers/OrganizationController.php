@@ -76,6 +76,9 @@ class OrganizationController extends DefaultController {
     public function actionClients() {
         $searchModel = new \franchise\models\ClientSearch();
         $params = Yii::$app->request->getQueryParams();
+        if(\Yii::$app->request->get('searchString')){
+            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+        }
 
         $today = new \DateTime();
 
@@ -87,10 +90,13 @@ class OrganizationController extends DefaultController {
         }
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 
+        $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
+        $exportColumns = (new Organization())->getClientsExportColumns();
+
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('clients', compact('dataProvider', 'searchModel'));
+            return $this->renderPartial('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
         } else {
-            return $this->render('clients', compact('dataProvider', 'searchModel'));
+            return $this->render('clients', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
         }
     }
 
@@ -214,6 +220,10 @@ class OrganizationController extends DefaultController {
      */
     public function actionVendors() {
         $searchModel = new \franchise\models\VendorSearch();
+        if(\Yii::$app->request->get('searchString')){
+            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+        }
+
         $params = Yii::$app->request->getQueryParams();
 
         $today = new \DateTime();
@@ -226,10 +236,13 @@ class OrganizationController extends DefaultController {
         }
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 
+        $exportFilename = 'vendors_' . date("Y-m-d_H-m-s");
+        $exportColumns = (new Organization())->getVendorsExportColumns();
+
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('vendors', compact('dataProvider', 'searchModel'));
+            return $this->renderPartial('vendors', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
         } else {
-            return $this->render('vendors', compact('dataProvider', 'searchModel'));
+            return $this->render('vendors', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
         }
     }
 
@@ -239,8 +252,30 @@ class OrganizationController extends DefaultController {
      * @return mixed
      */
     public function actionAgent() {
+        $searchModel = new \common\models\OrganizationSearch();
+        $params = Yii::$app->request->getQueryParams();
+        if(\Yii::$app->request->get('searchString')){
+            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+        }
 
-        return $this->render('agent', compact('dataProvider'));
+        $today = new \DateTime();
+
+        $searchModel->date_to = $today->format('d.m.Y');
+        $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
+
+        if (Yii::$app->request->post("ClientSearch")) {
+            $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
+        }
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+
+        $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
+        $exportColumns = (new Organization())->getClientsExportColumns();
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('agent', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
+        } else {
+            return $this->render('agent', compact('dataProvider', 'searchModel', 'exportFilename', 'exportColumns'));
+        }
     }
 
 

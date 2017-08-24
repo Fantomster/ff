@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\bootstrap\Modal;
 use common\models\Organization;
 
 /* @var $this \yii\web\View */
@@ -18,6 +19,7 @@ if (!Yii::$app->user->isGuest) {
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
+    $changeNetworkUrl = Url::to(['/network/change']);
 //    $("#checkout").on("pjax:complete", function() {
 //        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
 //    });
@@ -190,6 +192,22 @@ if (!Yii::$app->user->isGuest) {
                 }
             });
     });
+            
+$("body").on("hidden.bs.modal", "#changeNetOrg", function() {
+    $(this).data("bs.modal", null);
+})
+$(document).on("click",".change-net-org", function(){
+    var id = $(this).attr('data-id'); 
+    $.get(
+        '$changeNetworkUrl',
+        {id : id}
+    ).done(function(result) {
+        if (result) {
+            document.location = "$dashboard";
+        }
+    });
+
+})
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
@@ -305,7 +323,32 @@ JS;
                                     <small><?= $user->email ?></small>
                                     <small><?= $organization->name ?></small>
                                 </p>
+                                <?=
+                                Html::a("Смена бизнеса", ['network/change-form'], [
+                                    'data' => [
+                                        'target' => '#changeNetOrg',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                    ],
+                                    'class' => 'btn btn-lg btn-gray',
+                                    'style' => 'border-radius:0;width:100%;text-align:center;',
+                                ]);
+                                ?>
+                                <?=
+                                Html::a("Создать бизнес", ['network/create-form'], [
+                                    'data' => [
+                                        'target' => '#createNetwork',
+                                        'toggle' => 'modal',
+                                        'backdrop' => 'static',
+                                    ],
+                                    'class' => 'btn btn-lg btn-gray',
+                                    'style' => 'border-radius:0;width:100%;text-align:center;',
+                                ]);
+                                ?>
                             </li>
+                            <!--li class="user-body" style="padding:0;border:0;">
+                               <span class="btn btn-lg btn-gray" style="border-radius:0;width:100%;text-align:center;">смена бизнеса</span> 
+                            </li-->
                             <!-- Menu Body -->
 
                             <!-- Menu Footer-->
@@ -313,11 +356,7 @@ JS;
                         </ul>
                     </li>
                     <li class="dropdown tasks-menu">
-                        <?=
-                        Html::a(
-                                '<i class="fa fa-sign-out"></i> Выход', ['/user/logout'], ['data-method' => 'post']
-                        )
-                        ?>
+                        <?=Html::a('<i class="fa fa-sign-out"></i> Выход', ['/user/logout'], ['data-method' => 'post'])?>
                     </li>
 
                 </ul>
@@ -325,3 +364,17 @@ JS;
         <?php } ?>
     </nav>
 </header>
+<?=
+Modal::widget([
+    'id' => 'changeNetOrg',
+    'size' => 'modal-md',
+    'clientOptions' => false,
+])
+?>
+<?=
+Modal::widget([
+    'id' => 'createNetwork',
+    'size' => 'modal-sm',
+    'clientOptions' => false,
+])
+?>

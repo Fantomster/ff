@@ -78,8 +78,7 @@ class SiteController extends Controller {
      */
     public function beforeAction($action)
     {
-        $session = Yii::$app->session;
-        if (!(Yii::$app->session->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
+        if (!(Yii::$app->request->cookies->get('country') || Yii::$app->request->cookies->get('locality')) && Yii::$app->controller->module->requestedRoute != 'site/index'){
             return $this->redirect(['/site/index']);
         }else{
            
@@ -779,7 +778,7 @@ class SiteController extends Controller {
     public function actionRestaurants() {
         $locationWhere = [];
         if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+            $locationWhere = ['country'=>Yii::$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
         }
         $restaurants = Organization::find()
                 ->where([
@@ -804,7 +803,7 @@ class SiteController extends Controller {
     public function actionAjaxRestaurantsMore($num) {
         $locationWhere = [];
         if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>Yii::$app->session->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+            $locationWhere = ['country'=>$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
         }
         $count = Organization::find()
                 ->where([
@@ -1170,7 +1169,16 @@ class SiteController extends Controller {
                         'match' => [
                             'product_name' => [
                                 'query' => $search,
-                                'analyzer' => "ru",
+                                //'analyzer' => "ru",
+                            ]
+                        ]
+                    ],
+                    'filter' => [
+                        'bool' => [
+                            'must' => [
+                                'terms' => [
+                                    'product_supp_id' => $where
+                                ]
                             ]
                         ]
                     ]
@@ -1207,7 +1215,8 @@ class SiteController extends Controller {
                             ->limit(10000)->asArray()->all();
             $search_products = \common\models\ES\Product::find()->query($params_products)
                             ->limit(4)->asArray()->all();
-            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)->limit(4)->asArray()->all();
+            $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
+                    ->limit(4)->asArray()->all();
             
         }
 

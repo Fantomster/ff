@@ -72,7 +72,7 @@ class EsController extends Controller
                         "product_id"  :{"type" : "long"},
                         "product_name" : { 
                             "type" : "string", 
-                            "analyzer" : "keyword",
+                            "analyzer" : "ru",
                             "term_vector" : "yes"
                         },
                         "product_supp_id" : {"type" : "long"},

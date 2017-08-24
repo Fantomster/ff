@@ -277,6 +277,8 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
+                            'analyzer' => 'ru',
+                            'operator' => 'AND'
                         ]
                     ]
                 ],
@@ -345,7 +347,8 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
-                            //'analyzer' => "ru",
+                            'analyzer' => "ru",
+                            'operator' => 'AND'
                         ]
                     ]
                 ],
@@ -1164,17 +1167,21 @@ class SiteController extends Controller {
                 ]
             ];
             $params_products = [
+            'query' => [
                 'filtered' => [
                     'query' => [
                         'match' => [
                             'product_name' => [
                                 'query' => $search,
-                                'analyzer' => "ru",
-                            ] 
+                                'analyzer' => 'ru',
+                                'operator' => 'AND'
+                            ]
                         ]
+                           
                     ]
                 ]
-            ];
+            ]
+           ];
             $params_suppliers = [
                     'query' => [
                         'bool' => [

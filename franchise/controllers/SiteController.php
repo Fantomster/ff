@@ -179,18 +179,27 @@ class SiteController extends DefaultController
         $today = new \DateTime();
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = "01.02.2017";
-
-        $params = Yii::$app->request->getQueryParams();
-
-        if (Yii::$app->request->post("OrderSearch")) {
-            $params['OrderSearch'] = Yii::$app->request->post("OrderSearch");
+        if(\Yii::$app->request->get('searchString')){
+            $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
         }
+        if(\Yii::$app->request->get('status')){
+            $searchModel['status'] = trim(\Yii::$app->request->get('status'));
+        }
+        if(\Yii::$app->request->get('date_from')){
+            $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));
+        }
+        if(\Yii::$app->request->get('date_to')){
+            $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
+        }
+        $params = Yii::$app->request->getQueryParams();
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
+        $exportFilename = 'orders_' . date("Y-m-d_H-m-s");
+        $exportColumns = (new Order())->getOrdersExportColumns();
 
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('orders', compact('searchModel', 'dataProvider'));
+            return $this->renderPartial('orders', compact('searchModel', 'dataProvider', 'exportFilename', 'exportColumns'));
         } else {
-            return $this->render('orders', compact('searchModel', 'dataProvider'));
+            return $this->render('orders', compact('searchModel', 'dataProvider', 'exportFilename', 'exportColumns'));
         }
     }
 
@@ -730,15 +739,26 @@ class SiteController extends DefaultController
         $searchModel->date_from = "01.02.2017";
         $params = Yii::$app->request->getQueryParams();
 
+        if(\Yii::$app->request->get('searchString')){
+            $searchModel['searchString'] = trim(\Yii::$app->request->get('searchString'));
+        }
+        if(\Yii::$app->request->get('date_from')){
+            $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));
+        }
+        if(\Yii::$app->request->get('date_to')){
+            $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
+        }
         if (Yii::$app->request->post("RequestSearch")) {
             $params['RequestSearch'] = Yii::$app->request->post("RequestSearch");
         }
+        $exportFilename = 'request_' . date("Y-m-d_H-m-s");
+        $exportColumns = (new Request())->getRequestExportColumns();
 
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial("request/index", compact('searchModel', 'dataProvider'));
+            return $this->renderPartial("request/index", compact('searchModel', 'dataProvider', 'exportFilename', 'exportColumns'));
         } else {
-            return $this->render("request/index", compact('searchModel', 'dataProvider'));
+            return $this->render("request/index", compact('searchModel', 'dataProvider', 'exportFilename', 'exportColumns'));
         }
     }
 
@@ -778,7 +798,7 @@ class SiteController extends DefaultController
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['request', 'id' => $id]);
+            return $this->redirect(['request', 'id' => $model->id]);
         } else {
             return $this->render('request/update', [
                 'model' => $model,

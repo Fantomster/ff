@@ -725,8 +725,6 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function getAssociatedRequestsList($franchisee_id) {
         $search = ['like','product',\Yii::$app->request->get('search')?:''];
-//        $r = Request::find()->getFranchiseeAssociate()->all();
-//        dd($r);
         $dataListRequest = new ActiveDataProvider([
             'query' => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id'=>$franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
             'pagination' => [
@@ -734,5 +732,81 @@ class Organization extends \yii\db\ActiveRecord {
             ],
         ]);
         return $dataListRequest;
+    }
+
+
+    public function getClientsExportColumns(){
+        return [
+            [
+                'label' => 'Номер',
+                'value' => 'id',
+            ],
+            [
+                'label' => 'Название',
+                'value' => 'name',
+            ],
+            [
+                'label' => 'Кол-во поставщиков',
+                'value' => 'vendorCount',
+            ],
+            [
+                'label' => 'Кол-во заказов',
+                'value' => 'orderCount',
+            ],
+            [
+                'label' => 'Сумма заказов',
+                'value' => 'orderSum',
+            ],
+            [
+                'label' => 'Дата регистрации',
+                'value' => 'created_at',
+            ],
+            [
+                'label' => 'Контакт',
+                'value' => 'contact_name',
+            ],
+            [
+                'label' => 'Телефон',
+                'value' => 'phone',
+            ],
+        ];
+    }
+
+
+    public function getVendorsExportColumns(){
+        return [
+            [
+                'label' => 'Номер',
+                'value' => 'id',
+            ],
+            [
+                'label' => 'Название',
+                'value' => 'name',
+            ],
+            [
+                'label' => 'Кол-во ресторанов',
+                'value' => 'clientCount',
+            ],
+            [
+                'label' => 'Кол-во заказов',
+                'value' => 'orderCount',
+            ],
+            [
+                'label' => 'Сумма заказов',
+                'value' => 'orderSum',
+            ],
+            [
+                'label' => 'Дата регистрации',
+                'value' => 'created_at',
+            ],
+            [
+                'label' => 'Контакт',
+                'value' => 'contact_name',
+            ],
+            [
+                'label' => 'Телефон',
+                'value' => 'phone',
+            ],
+        ];
     }
 }

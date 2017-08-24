@@ -323,4 +323,44 @@ class Order extends \yii\db\ActiveRecord {
         }
         return $recipients;
     }
+
+
+    public function getOrdersExportColumns(){
+        return [
+            [
+                'label' => 'Номер',
+                'value' => 'id',
+            ],
+            [
+                'label' => 'Ресторан',
+                'value' => 'client.name',
+            ],
+            [
+                'label' => 'Поставщик',
+                'value' => 'vendor.name',
+            ],
+            [
+                'label' => 'Заказ создал',
+                'value' => 'createdByProfile.full_name',
+            ],
+            [
+                'label' => 'Заказ принял',
+                'value' => 'acceptedByProfile.full_name',
+            ],
+            [
+                'label' => 'Сумма',
+                'value' => 'total_price',
+            ],
+            [
+                'label' => 'Дата создания',
+                'value' => 'created_at',
+            ],
+            [
+                'label' => 'Статус',
+                'value' => function($data) {
+                    return Order::statusText($data['status']);
+                },
+            ],
+        ];
+    }
 }

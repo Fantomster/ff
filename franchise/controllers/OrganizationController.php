@@ -76,20 +76,24 @@ class OrganizationController extends DefaultController {
     public function actionClients() {
         $searchModel = new \franchise\models\ClientSearch();
         $params = Yii::$app->request->getQueryParams();
-        if(\Yii::$app->request->get('searchString')){
-            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-        }
-
         $today = new \DateTime();
-
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
+        if(\Yii::$app->request->get('searchString')){
+            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+        }
+        if(\Yii::$app->request->get('date_from')){
+            $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));
+        }
+        if(\Yii::$app->request->get('date_to')){
+            $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
+        }
         if (Yii::$app->request->post("ClientSearch")) {
             $params['ClientSearch'] = Yii::$app->request->post("ClientSearch");
         }
-        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 
+        $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
         $exportFilename = 'clients_' . date("Y-m-d_H-m-s");
         $exportColumns = (new Organization())->getClientsExportColumns();
 
@@ -220,20 +224,24 @@ class OrganizationController extends DefaultController {
      */
     public function actionVendors() {
         $searchModel = new \franchise\models\VendorSearch();
-        if(\Yii::$app->request->get('searchString')){
-            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-        }
-
         $params = Yii::$app->request->getQueryParams();
-
         $today = new \DateTime();
-
         $searchModel->date_to = $today->format('d.m.Y');
         $searchModel->date_from = Yii::$app->formatter->asTime($this->currentFranchisee->getFirstOrganizationDate(), "php:d.m.Y");
 
+        if(\Yii::$app->request->get('searchString')){
+            $searchModel['searchString'] = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
+        }
+        if(\Yii::$app->request->get('date_from')){
+            $searchModel['date_from'] = $searchModel->date_from = trim(\Yii::$app->request->get('date_from'));
+        }
+        if(\Yii::$app->request->get('date_to')){
+            $searchModel['date_to'] = $searchModel->date_to = trim(\Yii::$app->request->get('date_to'));
+        }
         if (Yii::$app->request->post("VendorSearch")) {
             $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
         }
+
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id);
 
         $exportFilename = 'vendors_' . date("Y-m-d_H-m-s");

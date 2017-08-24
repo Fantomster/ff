@@ -19,23 +19,23 @@ $this->registerJs('
         $("#vendorInfo").data("bs.modal", null);
         var justSubmitted = false;
         var timer;
-        $("body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#searchForm").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
-        });
-        $("body").on("change keyup paste cut", "#searchString", function() {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function() {
-                    $("#searchForm").submit();
-                }, 700);
-            });
+//        $("body").on("change", "#dateFrom, #dateTo", function() {
+//            if (!justSubmitted) {
+//                $("#searchForm").submit();
+//                justSubmitted = true;
+//                setTimeout(function() {
+//                    justSubmitted = false;
+//                }, 500);
+//            }
+//        });
+//        $("body").on("change keyup paste cut", "#searchString", function() {
+//                if (timer) {
+//                    clearTimeout(timer);
+//                }
+//                timer = setTimeout(function() {
+//                    $("#searchForm").submit();
+//                }, 700);
+//            });
         $("body").on("hidden.bs.modal", "#vendorInfo", function() {
                 $(this).data("bs.modal", null);
             });
@@ -335,7 +335,7 @@ $this->registerCss("
         <?php Modal::end(); ?>
 </section>
 <?php
-$catalogUrl = Url::to(['organization/vendors']);
+$url = Url::to(['organization/vendors']);
 $customJs = <<< JS
 var timer;
 $('#search').on("keyup", function () {
@@ -345,9 +345,37 @@ $.pjax({
 type: 'GET',
 push: true,
 timeout: 10000,
-url: '$catalogUrl',
+url: '$url',
 container: '#kv-unique-id-1',
-data: {searchString: $('#search').val()}
+data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+$('#dateFrom').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+$('#dateTo').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
 })
 }, 700);
 });

@@ -250,4 +250,44 @@ class Request extends \yii\db\ActiveRecord
     public function getFranchiseeAssociate(){
         return $this->hasOne(FranchiseeAssociate::className(), ['rest_org_id' => 'organization_id']);
     }
+
+
+    public function getRequestExportColumns(){
+        return [
+            [
+                'label' => 'Номер',
+                'value' => 'id',
+            ],
+            [
+                'label' => 'Продукт',
+                'value' => 'product',
+            ],
+            [
+                'label' => 'Количество',
+                'value' => 'amount',
+            ],
+            [
+                'label' => 'Комментарий',
+                'value' => 'comment',
+            ],
+            [
+                'label' => 'Категория',
+                'value' => 'categoryName.name',
+            ],
+            [
+                'attribute' => 'client.name',
+                'label' => 'Название ресторана',
+            ],
+            [
+                'attribute' => 'created_at',
+                'label' => 'Дата создания',
+            ],
+            [
+                'value' => function($data) {
+                return ($data['active_status'])?'Открыта':'Закрыта';
+            },
+                'label' => 'Статус',
+            ],
+        ];
+    }
 }

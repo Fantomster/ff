@@ -3,10 +3,8 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use kartik\grid\GridView;
-use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 use kartik\date\DatePicker;
-use yii\widgets\Breadcrumbs;
 use yii\bootstrap\Modal;
 use common\models\Order;
 use kartik\export\ExportMenu;
@@ -16,38 +14,10 @@ use yii\web\View;
 CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 kartik\select2\Select2Asset::register($this);
-
-$this->registerJs('
-    $("document").ready(function(){
-        var justSubmitted = false;
-        var timer;
-        $("body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#searchForm").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
-        });
-        $(".box-body").on("change", "#statusFilter", function() {
-            $("#searchForm").submit();
-        });
-        $("body").on("change keyup paste cut", "#searchString", function() {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function() {
-                    $("#searchForm").submit();
-                }, 700);
-            });
-    });
-        ');
 ?>
-
     <section class="content-header">
         <h1>
-            <i class="fa fa-home"></i>  Заказы ваших ресторанов
+            <i class="fa fa-home"></i> Заказы ваших ресторанов
             <small>Список заказов подключенных вами ресторанов и их статус</small>
         </h1>
     </section>
@@ -71,7 +41,7 @@ $this->registerJs('
                         <span class="input-group-addon">
                             <i class="fa fa-search"></i>
                         </span>
-                            <?= Html::input('text', 'OrderSearch[search]', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style'=>'width:300px']) ?>
+                            <?= Html::input('text', 'OrderSearch[search]', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style' => 'width:300px']) ?>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-6">
@@ -155,15 +125,15 @@ $this->registerJs('
                                     ]
                                 ],
                             ],
-                            'onRenderSheet' => function($sheet, $grid) {
-                                $i=2;
-                                while($sheet->cellExists("B".$i)){
-                                    $sheet->setCellValue("B".$i, html_entity_decode($sheet->getCell("B".$i)));
+                            'onRenderSheet' => function ($sheet, $grid) {
+                                $i = 2;
+                                while ($sheet->cellExists("B" . $i)) {
+                                    $sheet->setCellValue("B" . $i, html_entity_decode($sheet->getCell("B" . $i)));
                                     $i++;
                                 }
-                                $j=2;
-                                while($sheet->cellExists("C".$j)){
-                                    $sheet->setCellValue("C".$j, html_entity_decode($sheet->getCell("C".$j)));
+                                $j = 2;
+                                while ($sheet->cellExists("C" . $j)) {
+                                    $sheet->setCellValue("C" . $j, html_entity_decode($sheet->getCell("C" . $j)));
                                     $j++;
                                 }
                             }
@@ -214,7 +184,7 @@ $this->registerJs('
                                 [
                                     'format' => 'raw',
                                     'attribute' => 'total_price',
-                                    'value' => function($data) {
+                                    'value' => function ($data) {
                                         return (float)$data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
                                     },
                                     'label' => 'Сумма',
@@ -223,7 +193,7 @@ $this->registerJs('
                                 [
                                     'format' => 'raw',
                                     'attribute' => 'created_at',
-                                    'value' => function($data) {
+                                    'value' => function ($data) {
                                         $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
                                         return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                     },
@@ -231,9 +201,9 @@ $this->registerJs('
                                 ],
                                 [
                                     'attribute' => 'status',
-                                    'label'=>'Статус',
+                                    'label' => 'Статус',
                                     'format' => 'raw',
-                                    'value' => function($data) {
+                                    'value' => function ($data) {
                                         $statusClass = "";
                                         switch ($data['status']) {
                                             case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
@@ -257,7 +227,8 @@ $this->registerJs('
                             ],
                         ]);
                         ?>
-                    </div></div>
+                    </div>
+                </div>
             </div>
             <!-- /.box-body -->
         </div>
@@ -281,7 +252,7 @@ push: true,
 timeout: 10000,
 url: '$url',
 container: '#kv-unique-id-1',
-data: {searchString: $('#search').val(), status: $('#statusFilterID').val()}
+data: {searchString: $('#search').val(), status: $('#statusFilterID').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
 })
 }, 700);
 });
@@ -295,7 +266,35 @@ push: true,
 timeout: 10000,
 url: '$url',
 container: '#kv-unique-id-1',
-data: {status: $('#statusFilterID').val(), searchString: $('#search').val()}
+data: {status: $('#statusFilterID').val(), searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+$('#dateFrom').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {status: $('#statusFilterID').val(), searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+$('#dateTo').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {status: $('#statusFilterID').val(), searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
 })
 }, 700);
 });

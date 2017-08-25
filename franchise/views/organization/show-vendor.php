@@ -220,7 +220,7 @@ $this->registerCss("
                                             }
                                             return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                         },
-                                        'label' => 'Кол-во ресторанов',
+                                        'label' => 'Кол-во поставщиков',
                                     ],
                                     [
                                         'format' => 'raw',

@@ -5,23 +5,20 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\resources\Organization;
+use api\modules\v1\modules\mobile\resources\Order;
 use yii\data\ActiveDataProvider;
-use api\modules\v1\modules\mobile\models\User;
-use common\models\forms\LoginForm;
-use common\models\RelationSuppRest;
-use yii\helpers\Json;
+use api\modules\v1\modules\mobile\resources\Guide;
 
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class OrganizationController extends ActiveController {
+class GuideController extends ActiveController {
 
     /**
      * @var string
      */
-    public $modelClass = 'api\modules\v1\modules\mobile\resources\Organization';
+    public $modelClass = 'api\modules\v1\modules\mobile\resources\Guide';
 
     /**
      * @return array
@@ -29,7 +26,7 @@ class OrganizationController extends ActiveController {
     public function behaviors() {
         $behaviors = parent::behaviors();
 
-       $behaviors = array_merge($behaviors, $this->module->controllerBehaviors);
+        $behaviors = array_merge($behaviors, $this->module->controllerBehaviors);
 
         return $behaviors;
     }
@@ -61,7 +58,7 @@ class OrganizationController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = Organization::findOne($id);
+        $model = Guide::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
@@ -73,43 +70,42 @@ class OrganizationController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new Organization();
-        $user = Yii::$app->user->getIdentity();
+        $params = new Guide();
+        $query = Guide::find();
         
-        $query = Organization::find();
-
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
         ));
-        
         $filters = [];
+        $user = Yii::$app->user->getIdentity();
+        
+        $filters['client_id'] = $user->organization_id;
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-                $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $user->organization_id])]);
-
-            if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
-                $query = Organization::find()->where(['in','id', RelationSuppRest::find()->select('rest_org_id')->where(['supp_org_id' => $user->organization_id])]);
-
-            $dataProvider =  new ActiveDataProvider(array(
-            'query' => $query,
-            ));
-            
+            $query->andFilterWhere($filters);
             return $dataProvider;
         }
         
-            if($params->list != null)
-            $query->andWhere ('id IN('.implode(',', Json::decode($params->list)).')');
-
-             
+        if(isset($params->count))
+        {
+            $query->limit($params->count);
+                if(isset($params->page))
+                {
+                    $offset = ($params->page * $params->count) - $params->count;
+                    $query->offset($offset);
+                }
+        }
+  
+       
             $filters['id'] = $params->id; 
+            $filters['type'] = $params->type; 
             $filters['name'] = $params->name; 
-            $filters['type_id'] = $params->type_id; 
-            
+            $filters['deleted'] = $params->deleted; 
+            $filters['created_at'] = $params->created_at; 
+            $filters['updated_at'] = $params->updated_at; 
+  
             $query->andFilterWhere($filters);
   
         return $dataProvider;
     }
-
-    
 }

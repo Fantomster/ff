@@ -194,14 +194,25 @@ class OrderController extends DefaultController {
                 'pageSize' => 8,
             ];
         
-        $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
+        $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 4;
         $productSearchModel = new OrderCatalogSearch();
-        $productsDataProvider = null;//$productSearchModel->search($params);
+        $vendors = $client->getSuppliers(null);
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
+        $productSearchModel->client = $client;
+        $productSearchModel->catalogs = $catalogs;
+        $productDataProvider = $productSearchModel->search($params);
         
         $guideProducts = new GuideProductsSearch();
         $guideDataProvider = $guideProducts->search($params, $guide->id);
         
-        return $this->render('guides/edit-guide', compact('vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productsDataProvider', 'guideProducts', 'guideDataProvider'));
+        $pjax = Yii::$app->request->get("_pjax");
+        if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
+            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor'));
+        } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
+            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList'));
+        } else {
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productsDataProvider', 'guideProducts', 'guideDataProvider'));
+        }
     }
 
     public function actionAjaxShowGuide($id) {

@@ -1,7 +1,8 @@
 <?php
+
 use yii\helpers\Url;
-use yii\widgets\ListView;
 use yii\widgets\Pjax;
+use kartik\form\ActiveForm;
 ?>
 <section class="content">
     <div class="nav-tabs-custom">
@@ -28,51 +29,42 @@ use yii\widgets\Pjax;
                                     <div class="guid_block_title_r pull-left">Выберите поставщика</div>
                                     <div class="guid_block_title_l pull-right">ШАГ 1</div>
                                 </div>
-                                <table class="table table-hover">
-                                    <tbody>
-                                        <tr>
-                                            <th colspan="2">
-                                                <div class="form-group">
-                                                    <div class="icon-addon addon-md">
-                                                        <input type="text" placeholder="Поиск среди ваших поставщиков" class="form-control" id="email">
-                                                        <label for="email" class="glyphicon glyphicon-search" rel="tooltip" title="email"></label>
-                                                    </div>
-                                                </div>  
-                                            </th>
-                                        </tr>
-                                        <?php
-                                        Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendorsList', 'timeout' => 30000]);
-                                        ?>
-                                        <?=
-                                        ListView::widget([
-                                            'dataProvider' => $vendorDataProvider,
-                                            'itemView' => '_vendor-view',
-                                            'itemOptions' => [
-                                                'tag' => 'tr',
+                                <?php
+                                $form = ActiveForm::begin([
+                                            'options' => [
+                                                'id' => 'searchForm',
+                                                'role' => 'search',
+                                                'style' => 'height:51px;'
                                             ],
-                                            'pager' => [
-                                                'maxButtonCount' => 5,
-                                                'options' => [
-                                                    'class' => 'pagination col-md-12  no-padding'
+                                ]);
+                                ?>
+                                <?=
+                                        $form->field($vendorSearchModel, 'search_string', [
+                                            'addon' => [
+                                                'append' => [
+                                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                    'options' => [
+                                                        'class' => 'append',
+                                                    ],
                                                 ],
                                             ],
                                             'options' => [
-                                                'class' => 'col-lg-12 list-wrapper inline no-padding'
+                                                'class' => "form-group",
+                                                'style' => "padding:8px;border-top:1px solid #f4f4f4;"
                                             ],
-                                            'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
-                                            'summary' => '',
-                                            'emptyText' => 'Список пуст',
                                         ])
-                                        ?>
-                                        <?php Pjax::end(); ?>
-                                    </tbody>
-                                </table>
-<!--                                <ul class="pagination">
-                                    <li class="prev disabled"><span>«</span></li>
-                                    <li class="active"><a href="#">1</a></li>
-                                    <li><a href="#">2</a></li>
-                                    <li><a href="#">3</a></li>
-                                </ul>-->
+                                        ->textInput([
+                                            'id' => 'searchString',
+                                            'class' => 'form-control',
+                                            'placeholder' => 'Поиск среди ваших поставщиков'])
+                                        ->label(false)
+                                ?>
+                                <?php ActiveForm::end(); ?>
+                                <?php
+                                Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendorList', 'timeout' => 30000]);
+                                ?>
+                                <?= $this->render('_vendor-list', compact('vendorDataProvider')) ?>
+                                <?php Pjax::end(); ?>
                             </div>   
                         </div>
                         <div class="col-md-6 col-lg-4">
@@ -171,7 +163,7 @@ use yii\widgets\Pjax;
                         <div class="col-md-12 col-lg-4">
                             <div class="guid_table_block">
                                 <div class="guid_table_block_title">
-                                    <div class="guid_block_title_r pull-left">Гид: Помидорки и укропчег</div>
+                                    <div class="guid_block_title_r pull-left">Гид: <?= $guide->name ?></div>
                                     <div class="guid_block_title_l pull-right">ШАГ 3</div>
                                 </div> 
                                 <table class="table table-hover">

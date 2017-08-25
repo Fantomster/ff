@@ -17,6 +17,7 @@ $form = ActiveForm::begin([
 ?>
 <input type="email" name="fake_email" style="position: absolute; top: -100%;">
 <input type="password" name="fake_pwd" style="position: absolute; top: -100%;">
+<input type="hidden" name="_csrf-fk" value="<?=Yii::$app->request->getCsrfToken()?>" />
 <div class="auth-sidebar__form-radios">
     <?=
             $form->field($organization, 'type_id')

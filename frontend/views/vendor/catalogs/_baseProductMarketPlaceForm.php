@@ -249,7 +249,6 @@ label {
                                 ]
                             ])->label(false);
                             ?>
-                            <?= $catalogBaseGoods->isNewRecord? $form->field($catalogBaseGoods, 'cat_id')->hiddenInput(['value'=> Yii::$app->request->get('id')])->label(false):'' ?>
 			</div>
 		</div>
 	</div>

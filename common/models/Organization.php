@@ -51,6 +51,7 @@ use Imagine\Image\ManipulatorInterface;
  * @property FranchiseeAssociate $franchiseeAssociate
  * @property RelationSuppRest $associates
  * @property integer $managersCount
+ * @property Catalog $baseCatalog
  */
 class Organization extends \yii\db\ActiveRecord {
 
@@ -257,6 +258,13 @@ class Organization extends \yii\db\ActiveRecord {
         $clients[''] = 'Все рестораны';
         ksort($clients);
         return $clients;
+    }
+    
+    /**
+     * get base catalog
+     */
+    public function getBaseCatalog() {
+        return Catalog::findOne(['supp_org_id' => $this->id, 'type' => Catalog::BASE_CATALOG]);
     }
 
     /**

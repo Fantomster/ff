@@ -82,7 +82,7 @@ class RelationSuppRestController extends ActiveController {
         
         $filters['rest_org_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT) ? $user->organization_id : $params->rest_org_id;
         $filters['supp_org_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) ? $user->organization_id : $params->supp_org_id;
-          
+        $filters['deleted'] = 0;  
         
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             $query->andFilterWhere($filters);
@@ -105,5 +105,60 @@ class RelationSuppRestController extends ActiveController {
         return $dataProvider;
     }
 
-    
+    public function actionCreate()
+    {
+            $client = Yii::$app->user->identity;
+            $request_id = Yii::$app->request->post('request_id');
+            $vendor = Organization::findOne(['id'=>Yii::$app->request->post('supp_org_id')]);
+            if(RequestCallback::find()->where(['supp_org_id'=>$vendor->id,'request_id'=>$request_id])->exists()){
+                if(\common\models\RelationSuppRest::find()->where([
+                                'rest_org_id' => $client->organization_id, 
+                                'supp_org_id' => $vendor->id
+                                ])->exists()){
+                $relationSuppRest = \common\models\RelationSuppRest::find()->where([
+                                'rest_org_id' => $client->organization_id, 
+                                'supp_org_id' => $vendor->id
+                                ])->one(); 
+                }else{
+                $relationSuppRest = new \common\models\RelationSuppRest();   
+                }
+                $relationSuppRest->deleted = false;
+                $relationSuppRest->rest_org_id = $client->organization_id;
+                $relationSuppRest->supp_org_id = $vendor->id;
+                $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
+                $relationSuppRest->save(); 
+                $request = Request::findOne(['id'=>$request_id]);
+                
+                $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
+                if($client->email){
+                $mailer = Yii::$app->mailer; 
+                $email = $client->email;
+                //$email = 'marshal1209448@gmail.com';
+                $subject = "f-keeper.ru - заявка №" . $request->id;
+                $mailer->htmlLayout = 'layouts/request';
+                $result = $mailer->compose('requestInviteSupplierMailToRest', compact("request","client"))
+                        ->setTo($email)->setSubject($subject)->send();
+                }
+                foreach($vendorUsers as $user){
+                    if($user->profile->phone && $user->profile->sms_allow){
+                        $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                        $target = $user->profile->phone;
+                        $sms = new \common\components\QTSMS();
+                        $sms->post_message($text, $target); 
+                    }
+                    //$this->sendMail("invite-supplier", $request, $row);
+                    if(!empty($user->email)){
+                    $mailer = Yii::$app->mailer;
+                    $email = $user->email; 
+                    //$email = 'marshal1209448@gmail.com';
+                    $subject = "f-keeper.ru - заявка №" . $request->id;
+                    $mailer->htmlLayout = 'layouts/request';
+                    $result = $mailer->compose('requestInviteSupplier', compact("request","user"))
+                            ->setTo($email)->setSubject($subject)->send();
+                    }
+                }
+                
+                return compact("relationSuppRest");
+            }
+    }
 }

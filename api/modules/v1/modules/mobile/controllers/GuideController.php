@@ -5,20 +5,20 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\resources\RequestCallback;
+use api\modules\v1\modules\mobile\resources\Order;
 use yii\data\ActiveDataProvider;
-use api\modules\v1\modules\mobile\resources\Request;
+use api\modules\v1\modules\mobile\resources\Guide;
 
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class RequestCallbackController extends ActiveController {
+class GuideController extends ActiveController {
 
     /**
      * @var string
      */
-    public $modelClass = 'api\modules\v1\modules\mobile\resources\RequestCallback';
+    public $modelClass = 'api\modules\v1\modules\mobile\resources\Guide';
 
     /**
      * @return array
@@ -58,7 +58,7 @@ class RequestCallbackController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = RequestCallback::findOne($id);
+        $model = Guide::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
@@ -70,39 +70,42 @@ class RequestCallbackController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new RequestCallback();
-        $query = RequestCallback::find();
+        $params = new Guide();
+        $query = Guide::find();
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
         ));
-        
+        $filters = [];
         $user = Yii::$app->user->getIdentity();
         
-        
-                
-        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-                $query = RequestCallback::find()->where(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
+        $filters['client_id'] = $user->organization_id;
 
-            if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
-                $query->andWhere (['supp_org_id' => $user->organization_id]);
-            
-            $dataProvider =  new ActiveDataProvider(array(
-                'query' => $query,
-                ));
+        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
+            $query->andFilterWhere($filters);
             return $dataProvider;
         }
+        
+        if(isset($params->count))
+        {
+            $query->limit($params->count);
+                if(isset($params->page))
+                {
+                    $offset = ($params->page * $params->count) - $params->count;
+                    $query->offset($offset);
+                }
+        }
   
-         $query->andFilterWhere([
-            'id' => $params->id, 
-            'request_id' => $params->request_id, 
-            'supp_org_id' => $params->supp_org_id, 
-            'price' => $params->price, 
-            'comment' => $params->comment, 
-            'created_at' => $params->created_at, 
-            'updated_at' => $params->updated_at
-           ]);
+       
+            $filters['id'] = $params->id; 
+            $filters['type'] = $params->type; 
+            $filters['name'] = $params->name; 
+            $filters['deleted'] = $params->deleted; 
+            $filters['created_at'] = $params->created_at; 
+            $filters['updated_at'] = $params->updated_at; 
+  
+            $query->andFilterWhere($filters);
+  
         return $dataProvider;
     }
 }

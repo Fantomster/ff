@@ -236,6 +236,45 @@ $this->registerJs('
       </div>
       <!-- /.box -->
     </div>
+    <div class="col-md-12">
+        <!-- AREA CHART -->
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Статистика по подключенным ресторанам</h3>
+            </div>
+            <div class="box-body" style="display: block;">
+                <?=
+                ChartJs::widget([
+                    'type' => 'line',
+                    'options' => [
+                        'height' => 400,
+                        'width' => 1200,
+                    ],
+                    'data' => [
+                        'labels' => $clientsDayLabels,
+                        'datasets' => [
+                            [
+                                'label' => 'Все рестораны',
+                                'backgroundColor' => "rgba(54,140,191,.2)",
+                                'borderColor' => "rgba(54,140,191,.8)",
+                                'pointBackgroundColor' => "rgba(54,140,191,1)",
+                                'pointBorderColor' => "rgba(54,140,191,1)",
+                                'pointHoverBackgroundColor' => "rgba(54,140,191,1)",
+                                'pointHoverBorderColor' => "rgba(54,140,191,1)",
+                                'data' => $clientsDayTurnover,
+                                'spanGaps' => true,
+                                'borderJoinStyle' => 'miter',
+                                'fill' => false,
+                            ],
+                        ]
+                    ],
+                ])
+                ?>
+            </div>
+            <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+    </div>
 </div>
 <?php ActiveForm::end(); ?>
 

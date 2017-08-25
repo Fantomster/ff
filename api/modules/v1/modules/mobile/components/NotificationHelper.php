@@ -97,4 +97,108 @@ class NotificationHelper {
             }
         }
     }
+    
+    public static function actionRequest($request_id, $is_new = true)
+    {
+        
+        $request = \common\models\Request::findOne(['id' => $request_id]);
+
+        if($request === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $request->rest_org_id])->all();
+        
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+                if($is_new)
+                {
+                    $message->setData(['action' => 'request',
+                            'title' => 'Новая заявка №'.$request_id.' '.$request->product,
+                            'message' => Json::encode($request->attributes),
+                            'activity' => "Work"]);
+                }
+                else 
+                {
+                    $message->setData(['action' => 'request',
+                            'title' => 'Изменения в заявке №'.$request_id.' '.$request->product,
+                            'message' => Json::encode($request->attributes),
+                            'activity' => "Work"]);
+                }
+                
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
+    
+    public static function actionRequestCallback($requestCallback_id)
+    {
+        
+        $requestC = \common\models\RequestCallback::findOne(['id' => $requestCallback_id]);
+
+        if($requestC === null)
+            return;
+        
+        $request = $requestC->request;
+
+        if($request === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $request->rest_org_id])->all();
+        
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+                if($add)
+                {
+                    $message->setData(['action' => 'requestCallback',
+                            'title' => 'Новый отклик по заявке №'.$request->id.' '.$request->product,
+                            'message' => Json::encode($requestC->attributes),
+                            'activity' => "Work"]);
+                }
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
+    
+    public static function actionRelation($rel_id)
+    {
+        
+        $rel = \common\models\RelationSuppRest::findOne(['id' => $rel_id]);
+
+        if($rel === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $rel->rest_org_id])->all();
+        
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+
+                    $message->setData(['action' => 'relation',
+                            'message' => Json::encode($rel->attributes),
+                            'activity' => "Work"]);
+
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
 }

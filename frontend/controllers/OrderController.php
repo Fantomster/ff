@@ -20,6 +20,7 @@ use common\models\guides\Guide;
 use common\models\search\GuideSearch;
 use common\models\guides\GuideProduct;
 use common\models\search\GuideProductsSearch;
+use common\models\search\BaseProductSearch;
 use common\models\search\VendorSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
@@ -189,10 +190,9 @@ class OrderController extends DefaultController {
         $params = Yii::$app->request->getQueryParams();
         
         $vendorSearchModel = new VendorSearch();
+        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
-        $vendorDataProvider->pagination = [
-                'pageSize' => 8,
-            ];
+        $vendorDataProvider->pagination = ['pageSize' => 8];
         
         $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 4;
         $productSearchModel = new OrderCatalogSearch();
@@ -200,18 +200,27 @@ class OrderController extends DefaultController {
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
+        $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         $productDataProvider = $productSearchModel->search($params);
+        $productDataProvider->pagination = ['pageSize' => 8];
         
-        $guideProducts = new GuideProductsSearch();
-        $guideDataProvider = $guideProducts->search($params, $guide->id);
+        $guideProductList = [4916, 4849, 5035, 4850, 4917, 4851, 4852, 2, 5023, 4968];
+        
+        $guideSearchModel = new BaseProductSearch();
+        $params['BaseProductSearch'] = Yii::$app->request->post("BaseProductSearch");
+        $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
+        $guideDataProvider->pagination = ['pageSize' => 7];
+        
         
         $pjax = Yii::$app->request->get("_pjax");
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
             return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor'));
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
             return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList'));
+        } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
+            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productsDataProvider', 'guideProducts', 'guideDataProvider'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider'));
         }
     }
 

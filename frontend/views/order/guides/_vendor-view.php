@@ -14,5 +14,9 @@
     </div>     
 </td>
 <td>
-    <button class="btn btn-md btn-success pull-right"><i class="fa fa-hand-pointer-o"></i> Выбрать</button>        
+    <?php if ($model->supp_org_id == $selectedVendor) { ?>
+        <button class="btn btn-md btn-gray pull-right"><i class="fa fa-thumbs-o-up"></i> Выбран</button>
+    <?php } else { ?>
+        <button class="btn btn-md btn-success pull-right"><i class="fa fa-hand-pointer-o"></i> Выбрать</button>  
+    <?php } ?>
 </td>

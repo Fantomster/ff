@@ -7,6 +7,8 @@ use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
 
+$this->title = "Список гайдов";
+
 $guideUrl = Url::to(['order/ajax-create-guide']);
 
 $this->registerJs('

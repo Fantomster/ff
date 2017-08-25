@@ -2,28 +2,23 @@
 
 namespace common\models\search;
 
-use Yii;
-use common\models\guides\Guide;
-use common\models\guides\GuideProduct;
 use common\models\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
 
 /**
- * Description of GuideProductsSearch
+ * Description of BaseProductSearch
  *
  * @author elbabuino
  */
-class GuideProductsSearch extends GuideProduct {
-    
+class BaseProductSearch extends \common\models\CatalogBaseGoods {
     public $searchString;
-    public $name;
     
     /**
      * @inheritdoc
      */
     public function rules() {
         return [
-            [['searchString', 'guide_id', 'cbg_id', 'name'], 'safe'],
+            [['searchString', 'id', 'product', 'supp_org_id'], 'safe'],
         ];
     }
     
@@ -31,13 +26,12 @@ class GuideProductsSearch extends GuideProduct {
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     * @param integer $guideId
+     * @param array $guideList
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $guideId) {
-        $query = GuideProduct::find();
-        $query->joinWith(['baseProduct']);
+    public function search($params, $guideList) {
+        $query = CatalogBaseGoods::find();
 
         // add conditions that should always apply here
 
@@ -55,12 +49,11 @@ class GuideProductsSearch extends GuideProduct {
         }
 
         $query->where([
-            'guide_id' => $guideId,
-            'type' => Guide::TYPE_GUIDE,
+            'id' => $guideList,
         ]);
         
         // grid filtering conditions
-        $query->andFilterWhere(['like', 'name', $this->searchString]);
+        $query->andFilterWhere(['like', 'product', $this->searchString]);
 
         return $dataProvider;
     }

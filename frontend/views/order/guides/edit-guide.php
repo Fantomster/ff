@@ -3,6 +3,8 @@
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
+
+$this->title = "Редактирование гайда";
 ?>
 <section class="content">
     <div class="nav-tabs-custom">
@@ -32,7 +34,7 @@ use kartik\form\ActiveForm;
                                 <?php
                                 $form = ActiveForm::begin([
                                             'options' => [
-                                                'id' => 'searchForm',
+                                                'id' => 'searchGuideForm',
                                                 'role' => 'search',
                                                 'style' => 'height:51px;'
                                             ],
@@ -61,9 +63,9 @@ use kartik\form\ActiveForm;
                                 ?>
                                 <?php ActiveForm::end(); ?>
                                 <?php
-                                Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendorList', 'timeout' => 30000]);
+                                Pjax::begin(['formSelector' => '#searchGuideForm', 'enablePushState' => false, 'id' => 'vendorList', 'timeout' => 30000]);
                                 ?>
-                                <?= $this->render('_vendor-list', compact('vendorDataProvider')) ?>
+                                <?= $this->render('_vendor-list', compact('vendorDataProvider', 'selectedVendor')) ?>
                                 <?php Pjax::end(); ?>
                             </div>   
                         </div>
@@ -73,91 +75,40 @@ use kartik\form\ActiveForm;
                                     <div class="guid_block_title_r pull-left">Выберите его продукт</div>
                                     <div class="guid_block_title_l pull-right">ШАГ 2</div>
                                 </div>
-                                <table class="table table-hover">
-                                    <tbody><tr>
-                                            <th colspan="2">
-                                                <div class="form-group">
-                                                    <div class="icon-addon addon-md">
-                                                        <input type="text" placeholder="Поиск по продуктам выбранного поставщика" class="form-control" id="email">
-                                                        <label for="email" class="glyphicon glyphicon-search" rel="tooltip" title="email"></label>
-                                                    </div>
-                                                </div>  
-                                            </th>
-                                        </tr>
-                                        <tr class="active">
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>Ед. измерения: <span>кг</span></p> 
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-md btn-gray pull-right"><i class="fa fa-thumbs-o-up"></i> Продукт добавлен</button>        
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>Ед. измерения: <span>кг</span></p> 
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-md btn-success pull-right"><i class="fa fa-plus"></i> Добавить в гид</button>        
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>Ед. измерения: <span>кг</span></p> 
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-md btn-success pull-right"><i class="fa fa-plus"></i> Добавить в гид</button>        
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>Ед. измерения: <span>кг</span></p> 
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-md btn-success pull-right"><i class="fa fa-plus"></i> Добавить в гид</button>        
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>Ед. измерения: <span>кг</span></p> 
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-md btn-success pull-right"><i class="fa fa-plus"></i> Добавить в гид</button>        
-                                            </td>
-                                        </tr>
-                                    </tbody></table>
-                                <ul class="pagination">
-                                    <li class="prev disabled"><span>«</span></li>
-                                    <li class="active"><a href="#">1</a></li>
-                                    <li><a href="#">2</a></li>
-                                    <li><a href="#">3</a></li>
-                                    <li><a href="#">4</a></li>
-                                    <li class="next"><a href="#">»</a></li>
-                                </ul>
+                                <?php
+                                $form = ActiveForm::begin([
+                                            'options' => [
+                                                'id' => 'searchProductForm',
+                                                'role' => 'search',
+                                                'style' => 'height:51px;'
+                                            ],
+                                ]);
+                                ?>
+                                <?=
+                                        $form->field($productSearchModel, 'searchString', [
+                                            'addon' => [
+                                                'append' => [
+                                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                    'options' => [
+                                                        'class' => 'append',
+                                                    ],
+                                                ],
+                                            ],
+                                            'options' => [
+                                                'class' => "form-group",
+                                                'style' => "padding:8px;border-top:1px solid #f4f4f4;"
+                                            ],
+                                        ])
+                                        ->textInput([
+                                            'id' => 'searchProductString',
+                                            'class' => 'form-control',
+                                            'placeholder' => 'Поиск по продуктам выбранного поставщика'])
+                                        ->label(false)
+                                ?>
+                                <?php ActiveForm::end(); ?>
+                                <?php Pjax::begin(['formSelector' => '#searchProductForm', 'enablePushState' => false, 'id' => 'productList', 'timeout' => 30000]); ?>
+                                <?= $this->render('_product-list', compact('productDataProvider', 'guideProductList')) ?>
+                                <?php Pjax::end(); ?>
                             </div>
                         </div>
                         <div class="col-md-12 col-lg-4">
@@ -166,58 +117,44 @@ use kartik\form\ActiveForm;
                                     <div class="guid_block_title_r pull-left">Гид: <?= $guide->name ?></div>
                                     <div class="guid_block_title_l pull-right">ШАГ 3</div>
                                 </div> 
-                                <table class="table table-hover">
-                                    <tbody><tr>
-                                            <th colspan="2">
-                                                <div class="form-group">
-                                                    <div class="icon-addon addon-md">
-                                                        <input type="text" placeholder="Поиск по набранному гиду" class="form-control" id="gids">
-                                                        <label for="gids" class="glyphicon glyphicon-search" rel="tooltip" title="email"></label>
-                                                    </div>
-                                                </div>  
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>bcpostavshik | Bcrestaran</p>  
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <a class="btn btn-md btn-outline-danger pull-right"><i class="fa fa-trash"></i></a>        
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>bcpostavshik | Bcrestaran</p> 
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <a class="btn btn-md btn-outline-danger pull-right"><i class="fa fa-trash"></i></a>        
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="guid_block_create_title">
-                                                    <p>Какой-то продукт</p>
-                                                </div>	
-                                                <div class="guid_block_create_counts">
-                                                    <p>bcpostavshik | Bcrestaran</p> 
-                                                </div>     
-                                            </td>
-                                            <td>
-                                                <a class="btn btn-md btn-outline-danger pull-right"><i class="fa fa-trash"></i></a>        
-                                            </td>
-                                        </tr>
-                                    </tbody></table>
-                                <button class="btn btn-md btn-success guid-save"><i class="fa fa-save"></i> Сохранить</button>
+                                <?php
+                                $form = ActiveForm::begin([
+                                            'options' => [
+                                                'id' => 'searchGuideProductForm',
+                                                'role' => 'search',
+                                                'style' => 'height:51px;'
+                                            ],
+                                ]);
+                                ?>
+                                <?=
+                                        $form->field($guideSearchModel, 'searchString', [
+                                            'addon' => [
+                                                'append' => [
+                                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                    'options' => [
+                                                        'class' => 'append',
+                                                    ],
+                                                ],
+                                            ],
+                                            'options' => [
+                                                'class' => "form-group",
+                                                'style' => "padding:8px;border-top:1px solid #f4f4f4;"
+                                            ],
+                                        ])
+                                        ->textInput([
+                                            'id' => 'searchGuideString',
+                                            'class' => 'form-control',
+                                            'placeholder' => 'Поиск по набранному гиду'])
+                                        ->label(false)
+                                ?>
+                                <?php ActiveForm::end(); ?>
+                                <?php Pjax::begin(['formSelector' => '#searchGuideProductForm', 'enablePushState' => false, 'id' => 'guideProductList', 'timeout' => 30000]); ?>
+                                <?= $this->render('_guide-product-list', compact('guideDataProvider', 'guideProductList')) ?>
+                                <?php Pjax::end(); ?>
+                                <div style="width:100%;">
+                                    <div style="width:50%;float:left;padding-right:2px;"><button class="btn btn-md btn-success guide-save"><i class="fa fa-save"></i> Сохранить</button></div>
+                                    <div style="width:50%;float:left;padding-left:2px;"><button class="btn btn-md btn-gra guide-cancel"><i class="fa fa-ban"></i> Отменить</button></div>
+                                </div>
                             </div> 
                         </div>
                     </div>

@@ -19,6 +19,10 @@ use yii\helpers\Url;
         'data-url' => Url::to(['/order/ajax-delete-guide', 'id' => $model->id]),
     ])
     ?>
-    <button class="btn btn-sm btn-outline-default"><i class="fa fa-pencil"></i> Редактировать</button> 
+    <?=
+    Html::a('<i class="fa fa-pencil"></i> Редактировать', ['/order/edit-guide', 'id' => $model->id], [
+        'class' => 'btn btn-sm btn-outline-default',
+    ])
+    ?>
     <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-to-cart"><i class="fa fa-shopping-cart"></i> В корзину</button>  
 </div>

@@ -277,6 +277,8 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
+                            'analyzer' => 'ru',
+                            'operator' => 'AND'
                         ]
                     ]
                 ],
@@ -345,7 +347,8 @@ class SiteController extends Controller {
                     'match' => [
                         'product_name' => [
                             'query' => $search,
-                            //'analyzer' => "ru",
+                            'analyzer' => "ru",
+                            'operator' => 'AND'
                         ]
                     ]
                 ],
@@ -1164,26 +1167,21 @@ class SiteController extends Controller {
                 ]
             ];
             $params_products = [
+            'query' => [
                 'filtered' => [
                     'query' => [
                         'match' => [
                             'product_name' => [
                                 'query' => $search,
-                                //'analyzer' => "ru",
+                                'analyzer' => 'ru',
+                                'operator' => 'AND'
                             ]
                         ]
-                    ],
-                    'filter' => [
-                        'bool' => [
-                            'must' => [
-                                'terms' => [
-                                    'product_supp_id' => $where
-                                ]
-                            ]
-                        ]
+                           
                     ]
                 ]
-            ];
+            ]
+           ];
             $params_suppliers = [
                     'query' => [
                         'bool' => [
@@ -1196,11 +1194,6 @@ class SiteController extends Controller {
                                 'default_operator' => 'AND'
                                 ]
                             ],
-                            'filter' => [
-                                'terms' => [
-                                    'supplier_id' => $where
-                                ]
-                            ]
                         ]
                     ]
                 ];
@@ -1208,20 +1201,23 @@ class SiteController extends Controller {
             $search_categorys_count = \common\models\ES\Category::find()->query($params_categorys)
                             ->limit(10000)->count();
             $search_products_count = \common\models\ES\Product::find()->query($params_products)
+            				->andWhere(['in','product_supp_id',$where])
                             ->limit(10000)->count();
             $search_suppliers_count = \common\models\ES\Supplier::find()->query($params_suppliers)
+            				->andWhere(['in','supplier_id',$where])
                             ->limit(10000)->count();
             $search_categorys = \common\models\ES\Category::find()->query($params_categorys)
-                            ->limit(10000)->asArray()->all();
+                            ->limit(200)->asArray()->all();
             $search_products = \common\models\ES\Product::find()->query($params_products)
+            				->andWhere(['in','product_supp_id',$where])
                             ->limit(4)->asArray()->all();
             $search_suppliers = \common\models\ES\Supplier::find()->query($params_suppliers)
-                    ->limit(4)->asArray()->all();
+            				->andWhere(['in','supplier_id',$where])
+							->limit(4)->asArray()->all();
             
         }
 
-        return $this->renderAjax('main/_search_form', compact(
-                                'search_categorys_count', 'search_products_count', 'search_suppliers_count', 'search_categorys', 'search_products', 'search_suppliers', 'search'));
+        return $this->renderAjax('main/_search_form', compact('search_categorys_count', 'search_products_count', 'search_suppliers_count', 'search_categorys', 'search_products', 'search_suppliers', 'search'));
     }
 
     public function actionAjaxAddToCart() {

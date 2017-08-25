@@ -49,7 +49,7 @@ clearTimeout(timeOutVar);
             $('#result').html(response);        
         }
     });               
-   }, 500);
+   }, 1200);
 });
 
 $(document).ready(function(){
@@ -57,8 +57,8 @@ $(document).ready(function(){
                 var obj = $('#search-result');
                 var objs = $('#search_block');
                 var ovr = $('#overlow-search-result');
-                //objs.addClass('shadow-bottom-light');
                 $('#features1-u').addClass('blur');
+                document.body.style.overflow = "hidden";
                 obj.animate({ 
                         zIndex: 100,
                         opacity:1
@@ -73,6 +73,7 @@ $(document).ready(function(){
                 var ovr = $('#overlow-search-result');
                 //objs.removeClass('shadow-bottom-light');
                 $('#features1-u').removeClass('blur');
+                document.body.style.overflow = "auto";
                 obj.animate({ 
                         zIndex: '-1',
                         opacity:0

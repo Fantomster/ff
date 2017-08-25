@@ -282,6 +282,13 @@ $grid = [
                                 ]
                             ],
                         ],
+                        'onRenderSheet' => function($sheet, $grid) {
+                            $i=2;
+                            while($sheet->cellExists("B".$i)){
+                                $sheet->setCellValue("B".$i, html_entity_decode($sheet->getCell("B".$i)));
+                                $i++;
+                            }
+                        }
                     ]);
                     ?>
                     </div>

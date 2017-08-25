@@ -50,7 +50,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
             [['order_id', 'doc_date', 'corr_rid', 'note', 'text_code', 'num_code'], 'required'],
             [['corr_rid', 'store_rid', 'status_id'], 'integer'],
                 //     [['comment'], 'string', 'max' => 255],
-            [['store_rid'],'safe']
+            [['store_rid', 'org'],'safe']
         ];
     }
 
@@ -142,15 +142,24 @@ class RkWaybill extends \yii\db\ActiveRecord {
                     $wdmodel->defsum = $record->price;
                     $wdmodel->vat = 1800;
                     $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-                    $wmodel->org = User::findOne([Yii::$app->user->id])->organization_id; 
+                    $wdmodel->org = $this->org;
+                    $wdmodel->koef = 1;
+                    
                     
                     // Check previous
                     
-                //    $ch = RkWaybilldata::find()
-                //            ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
-                //            ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
-                            
-
+                    $ch = RkWaybilldata::find()
+                            ->andWhere('product_id = :prod',['prod' => $wdmodel->product_id ]) 
+                            ->andWhere('org = :org',['org' => $wdmodel->org]) 
+                            ->andWhere('product_rid is not null')
+                            ->one();
+                    
+                    if ($ch) {
+                        $wdmodel->product_rid = $ch->product_rid;
+                        $wdmodel->munit_rid = $ch->munit_rid;
+                    }
+                    
+               
                     if (!$wdmodel->save()) {
                         
                         var_dump($wdmodel->getErrors());

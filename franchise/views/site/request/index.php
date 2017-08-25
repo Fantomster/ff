@@ -2,40 +2,20 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
 use yii\bootstrap\Modal;
 use common\models\Order;
+use kartik\export\ExportMenu;
+use common\assets\CroppieAsset;
+use yii\web\View;
 
-$this->registerJs('
-    $("document").ready(function(){
-        var justSubmitted = false;
-        var timer;
-        $("body").on("change", "#dateFrom, #dateTo", function() {
-            if (!justSubmitted) {
-                $("#searchForm").submit();
-                justSubmitted = true;
-                setTimeout(function() {
-                    justSubmitted = false;
-                }, 500);
-            }
-        });
-        $(".box-body").on("change", "#statusFilter", function() {
-            $("#searchForm").submit();
-        });
-        $("body").on("change keyup paste cut", "#searchString", function() {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function() {
-                    $("#searchForm").submit();
-                }, 700);
-            });
-    });
-        ');
+CroppieAsset::register($this);
+kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
+kartik\select2\Select2Asset::register($this);
 ?>
 
 <section class="content-header">
@@ -58,24 +38,14 @@ $this->registerJs('
             ]);
             ?>
             <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6">
-                    <?=
-                            $form->field($searchModel, 'searchString', [
-                                'addon' => [
-                                    'prepend' => [
-                                        'content' => '<i class="fa fa-search"></i>',
-                                    ],
-                                ],
-                                'options' => [
-                                    'class' => "margin-right-15 form-group",
-                                ],
-                            ])
-                            ->textInput([
-                                'id' => 'searchString',
-                                'class' => 'form-control',
-                                'placeholder' => 'Поиск'])
-                            ->label('Поиск', ['style' => 'color:#555'])
-                    ?>
+                <div class="col-lg-3 col-md-3 col-sm-6">
+                    <?= Html::label('Поиск', null, ['style' => 'color:#555']) ?>
+                    <div class="input-group  pull-left">
+                        <span class="input-group-addon">
+                            <i class="fa fa-search"></i>
+                        </span>
+                        <?= Html::input('text', 'search', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style' => 'width:300px']) ?>
+                    </div>
                 </div>
                 <div class="col-lg-5 col-md-6 col-sm-6">
                         <?= Html::label('Начальная дата / Конечная дата', null, ['style' => 'color:#555']) ?>
@@ -98,11 +68,75 @@ $this->registerJs('
                         ?>
                     </div>
                 </div>
+                <?php
+                ActiveForm::end();
+                ?>
+                <div class="pull-right" style="margin-top: 30px; margin-right: 10px;">
+                    <?= ExportMenu::widget([
+                        'dataProvider' => $dataProvider,
+                        'columns' => $exportColumns,
+                        'fontAwesome' => true,
+                        'filename' => 'Заявки- ' . date('Y-m-d'),
+                        'encoding' => 'UTF-8',
+                        'target' => ExportMenu::TARGET_SELF,
+                        'showConfirmAlert' => false,
+                        'showColumnSelector' => false,
+                        'dropdownOptions' => [
+                            'label' => '<span class="text-label">Скачать список</span>',
+                            'class' => ['btn btn-outline-default btn-sm'],
+                            'style' => 'margin-right:10px;',
+                        ],
+                        'exportConfig' => [
+                            ExportMenu::FORMAT_HTML => false,
+                            ExportMenu::FORMAT_TEXT => false,
+                            ExportMenu::FORMAT_EXCEL => false,
+                            ExportMenu::FORMAT_PDF => false,
+                            ExportMenu::FORMAT_CSV => false,
+                            ExportMenu::FORMAT_EXCEL_X => [
+                                'label' => Yii::t('kvexport', 'Excel'),
+                                'icon' => 'file-excel-o',
+                                'iconOptions' => ['class' => 'text-success'],
+                                'linkOptions' => [],
+                                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'extension' => 'xlsx',
+                                'writer' => 'Excel2007',
+                                'styleOptions' => [
+                                    'font' => [
+                                        'bold' => true,
+                                        'color' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                    ],
+                                    'fill' => [
+                                        'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                        'startcolor' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                        'endcolor' => [
+                                            'argb' => 'FFFFFFFF',
+                                        ],
+                                    ],
+                                ]
+                            ],
+                        ],
+                        'onRenderSheet' => function ($sheet, $grid) {
+                            $i = 2;
+                            while ($sheet->cellExists("B" . $i)) {
+                                $sheet->setCellValue("B" . $i, html_entity_decode($sheet->getCell("B" . $i)));
+                                $i++;
+                            }
+                            $j = 2;
+                            while ($sheet->cellExists("C" . $j)) {
+                                $sheet->setCellValue("C" . $j, html_entity_decode($sheet->getCell("C" . $j)));
+                                $j++;
+                            }
+                        }
+                    ]);
+                    ?>
             </div>
-            <?php
-            ActiveForm::end();
-            Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
-            ?>
+            </div>
             <div class="row">
                 <div class="col-md-12">
                     <?=
@@ -112,6 +146,8 @@ $this->registerJs('
                         'formatter' => ['class' => 'yii\i18n\Formatter', 'nullDisplay' => '-'],
                         'filterModel' => $searchModel,
                         'filterPosition' => false,
+                        'pjax' => true,
+                        'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
                         'summary' => '',
                         'options' => ['class' => 'table-responsive'],
                         'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
@@ -169,8 +205,6 @@ $this->registerJs('
                     ]);
                     ?>
                 </div></div>
-<?php Pjax::end() ?>
-            <!-- /.table-responsive -->
         </div>
         <!-- /.box-body -->
     </div>
@@ -181,3 +215,54 @@ $this->registerJs('
     ?>
 <?php Modal::end(); ?>
 </section>
+
+<?php
+$url = Url::to(['site/requests']);
+$customJs = <<< JS
+var timer;
+$('#search').on("keyup", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {searchString: $('#search').val(), status: $('#statusFilterID').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+
+$('#dateFrom').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {status: $('#statusFilterID').val(), searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+$('#dateTo').on("change", function () {
+window.clearTimeout(timer);
+timer = setTimeout(function () {
+$.pjax({
+type: 'GET',
+push: true,
+timeout: 10000,
+url: '$url',
+container: '#kv-unique-id-1',
+data: {status: $('#statusFilterID').val(), searchString: $('#search').val(), date_from: $('#dateFrom').val(), date_to: $('#dateTo').val()}
+})
+}, 700);
+});
+
+JS;
+$this->registerJs($customJs, View::POS_READY);
+

@@ -497,7 +497,19 @@ class AnalyticsController extends DefaultController {
             $dayTurnover[] = $order["spent"];
         }
         //---turnover by day end
-        
+
+        //---clients count by day
+        $clientsQuery = "SELECT COUNT(*) AS clients_count, YEAR(created_at) AS year, MONTH(created_at) AS month, DAY(created_at) AS day FROM relation_supp_rest WHERE supp_org_id=".$id." AND created_at IS NOT NULL  AND created_at BETWEEN :dateFrom AND :dateTo GROUP BY YEAR(created_at), MONTH(created_at), DAY(created_at)";
+        $clientsCommand = Yii::$app->db->createCommand($clientsQuery, [':dateFrom' => $dt->format('Y-m-d'), ':dateTo' => $end->format('Y-m-d')]);
+        $clientsByDay = $clientsCommand->queryAll();
+        $clientsDayLabels = [];
+        $clientsDayTurnover = [];
+        foreach ($clientsByDay as $client) {
+            $clientsDayLabels[] = $client["day"] . " " . date('M', strtotime("2000-$client[month]-01")) . " " . $client["year"];
+            $clientsDayTurnover[] = $client["clients_count"];
+        }
+        //---clients count by day end
+
         //---turnover by client start
         $query = "SELECT TRUNCATE(SUM(total_price),1) AS client_turnover, `$orgTable`.name AS name "
                 . "FROM `$orderTable` LEFT JOIN `$orgTable` ON `$orderTable`.client_id=`$orgTable`.id "
@@ -530,11 +542,11 @@ class AnalyticsController extends DefaultController {
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('vendor-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor', 'clientsDayLabels', 'clientsDayTurnover'
             ));
         } else {
             return $this->render('vendor-stats', compact(
-                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor'
+                                    'headerStats', 'dateFilterFrom', 'dateFilterTo', 'dayTurnover', 'dayLabels', 'clientsTurnover', 'topGoodsDP', 'vendor', 'clientsDayLabels', 'clientsDayTurnover'
             ));
         }
     }

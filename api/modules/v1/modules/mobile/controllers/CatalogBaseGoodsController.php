@@ -9,6 +9,7 @@ use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
 use common\models\CatalogGoods;
 use common\models\RelationSuppRest;
+use yii\helpers\Json;
 
 
 /**
@@ -95,7 +96,12 @@ class CatalogBaseGoodsController extends ActiveController {
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
-  
+ 
+        if($params->list != null)
+        {
+            $query->andWhere ('id IN('.implode(',', Json::decode($params->list)).')');
+        }
+
         $query->andFilterWhere([
             'id' => $params->id, 
             'cat_id' => $params->cat_id, 
@@ -117,6 +123,14 @@ class CatalogBaseGoodsController extends ActiveController {
             'rating' => $params->rating
            ]);
         return $dataProvider;
+    }
+    
+    public function actionTest()
+    {
+        $val = "1,2,3";
+        var_dump($val);
+        $val = explode(",", $val);
+        var_dump($val);
     }
 
     

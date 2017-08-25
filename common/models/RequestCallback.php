@@ -71,4 +71,10 @@ class RequestCallback extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
+    
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequestCallback($this->id);
+    }
 }

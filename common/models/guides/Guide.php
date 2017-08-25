@@ -17,40 +17,52 @@ use Yii;
  *
  * @property Organization $client
  * @property GuideProduct[] $guideProducts
+ * @property integer $productCount
  */
-class Guide extends \yii\db\ActiveRecord
-{
+class Guide extends \yii\db\ActiveRecord {
+
     const TYPE_FAVORITE = 1;
     const TYPE_GUIDE = 2;
-    
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'guide';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['client_id', 'type', 'name'], 'required'],
             [['client_id', 'type', 'deleted'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
             [['name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => \common\models\Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
         ];
     }
 
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function behaviors() {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels() {
         return [
             'id' => Yii::t('app', 'ID'),
             'client_id' => Yii::t('app', 'Client ID'),
@@ -65,16 +77,21 @@ class Guide extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getClient()
-    {
+    public function getClient() {
         return $this->hasOne(Organization::className(), ['id' => 'client_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getGuideProducts()
-    {
+    public function getGuideProducts() {
         return $this->hasMany(GuideProduct::className(), ['guide_id' => 'id']);
+    }
+
+    /**
+     * @return integer
+     */
+    public function getProductCount() {
+        return count($this->guideProducts);
     }
 }

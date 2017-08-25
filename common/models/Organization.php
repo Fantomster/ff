@@ -53,6 +53,7 @@ use common\models\guides\Guide;
  * @property FranchiseeAssociate $franchiseeAssociate
  * @property RelationSuppRest $associates
  * @property integer $managersCount
+ * @property integer $productsCount
  * @property Guide $favorite
  * @property Guide[] $guides
  */
@@ -127,8 +128,8 @@ class Organization extends \yii\db\ActiveRecord {
                 'class' => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
                 'scenarios' => ['settings'],
-                'path' => '@app/web/upload/temp/',
-                'url' => '/upload/temp/',
+                'path' => '@app/web/upload/temp',
+                'url' => '/upload/temp',
                 'thumbs' => [
                     'picture' => ['width' => 420, 'height' => 236, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
                 ],
@@ -809,5 +810,15 @@ class Organization extends \yii\db\ActiveRecord {
                 'value' => 'phone',
             ],
         ];
+    }
+    
+    /**
+     * @return count of base products
+     */
+    public function getProductsCount() {
+        if ($this->type_id !== self::TYPE_SUPPLIER) {
+            return 0;
+        }
+        return CatalogBaseGoods::find()->where(['supp_org_id' => $this->id, 'status' => CatalogBaseGoods::STATUS_ON, 'deleted' => CatalogBaseGoods::DELETED_OFF])->count();
     }
 }

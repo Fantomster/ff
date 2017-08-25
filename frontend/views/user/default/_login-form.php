@@ -17,6 +17,7 @@ $form = ActiveForm::begin([
             'fieldConfig' => ['template' => '{input}'],
         ]);
 ?>    
+<input type="hidden" name="_csrf-fk" value="<?=Yii::$app->request->getCsrfToken()?>" />
 <div class="auth-sidebar__form-brims">
     <label>
         <?=

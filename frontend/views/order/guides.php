@@ -1,9 +1,13 @@
 <?php
+
 use yii\helpers\Url;
 use yii\widgets\ListView;
 use yii\web\View;
+use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
+
+$guideUrl = Url::to(['order/ajax-create-guide']);
 
 $this->registerJs('
     $(document).on("click", ".delete-guide, .delete-product", function(e) {
@@ -44,24 +48,27 @@ $this->registerJs('
         });
     });
 
-    $(document).on("click", ".create-guide", function(e) {
+    $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        title = "Назовите ваш новый гайд";
-        success = "Заказ оформлен!";
+        var title = "Назовите ваш новый гайд";
         swal({
             title: title,
-            text: text,
-            type: "warning",
+            input: "text",
             showCancelButton: true,
-            confirmButtonText: "Да",
             cancelButtonText: "Отмена",
+            confirmButtonText: "Принять",
             showLoaderOnConfirm: true,
-            preConfirm: function () {
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            onClose: function() {
+                clicked.blur();
+                swal.resetDefaults()
+            },
+            preConfirm: function (text) {
                 return new Promise(function (resolve, reject) {
                     $.post(
-                        clicked.data("url"),
-                        form.serialize() + extData
+                        "' . $guideUrl . '?name=" + text,
                     ).done(function (result) {
                         if (result) {
                             resolve(result);
@@ -71,12 +78,17 @@ $this->registerJs('
                     });
                 })
             },
-        }).then(function() {
-            swal({title: success, type: "success"});
+        }).then(function (result) {
+            if (result.type == "success") {
+                document.location = result.url;
+            } else {
+                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+            }
         });
     });
-', View::POS_READY);
 
+    
+', View::POS_READY);
 ?>
 
 <section class="content">
@@ -100,38 +112,39 @@ $this->registerJs('
                     <div class="guid-header">
                         <div class="pull-left">
                             <?php
-                    $form = ActiveForm::begin([
-                                'options' => [
-                                    'id' => 'searchForm',
-                                    'class' => "navbar-form no-padding no-margin",
-                                    'role' => 'search',
-                                ],
-                    ]);
-                    ?>
-                    <?=
-                            $form->field($searchModel, 'searchString', [
-                                'addon' => [
-                                    'append' => [
-                                        'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                            $form = ActiveForm::begin([
                                         'options' => [
-                                            'class' => 'append',
+                                            'id' => 'searchForm',
+                                            'class' => "navbar-form no-padding no-margin",
+                                            'role' => 'search',
                                         ],
-                                    ],
-                                ],
-                                'options' => [
-                                    'class' => "margin-right-15 form-group",
-                                ],
-                            ])
-                            ->textInput([
-                                'id' => 'searchString',
-                                'class' => 'form-control',
-                                'placeholder' => 'Поиск'])
-                            ->label(false)
-                    ?>
-                    <?php ActiveForm::end(); ?>
+                            ]);
+                            ?>
+                            <?=
+                                    $form->field($searchModel, 'searchString', [
+                                        'addon' => [
+                                            'append' => [
+                                                'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                'options' => [
+                                                    'class' => 'append',
+                                                ],
+                                            ],
+                                        ],
+                                        'options' => [
+                                            'class' => "margin-right-15 form-group",
+                                        ],
+                                    ])
+                                    ->textInput([
+                                        'id' => 'searchString',
+                                        'class' => 'form-control',
+                                        'placeholder' => 'Поиск'])
+                                    ->label(false)
+                            ?>
+                            <?php ActiveForm::end(); ?>
                         </div>
                         <div class="pull-right">
-                            <a class="btn btn-md btn-outline-success new-guid" href="create.html" data-toggle="tooltip" data-original-title="Создать гайд" data-url="#"><i class="fa fa-plus"></i> Создать гайд</a>
+                            <!--<a class="btn btn-md btn-outline-success new-guid" href="create.html" data-toggle="tooltip" data-original-title="Создать гайд" data-url="#"><i class="fa fa-plus"></i> Создать гайд</a>-->
+                            <?= Html::a('<i class="fa fa-plus"></i> Создать гайд', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
                         </div>
                     </div>
                 </div>
@@ -147,25 +160,27 @@ $this->registerJs('
                     Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'guidesList', 'timeout' => 30000]);
                     ?>
                     <?=
-                                ListView::widget([
-                                    'dataProvider' => $dataProvider,
-                                    'itemView' => function ($model, $key, $index, $widget) {
-                                        return $this->render('guides/_list-view', ['model' => $model]);
-                                    },
-                                            'pager' => [
-                                                'maxButtonCount' => 5,
-                                                'options' => [
-                                                    'class' => 'pagination col-md-12  no-padding'
-                                                ],
-                                            ],
-                                            'options' => [
-                                                'class' => 'col-lg-12 list-wrapper inline no-padding'
-                                            ],
-                                            'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
-                                            'summary' => 'Показано {count} из {totalCount}',
-                                            'emptyText' => 'Список пуст',
-                                        ])
-                                        ?>
+                    ListView::widget([
+                        'dataProvider' => $dataProvider,
+                        'itemView' => 'guides/_guide-view',
+                        'itemOptions' => [
+                            'tag' => 'div',
+                            'class' => 'guid_block',
+                        ],
+                        'pager' => [
+                            'maxButtonCount' => 5,
+                            'options' => [
+                                'class' => 'pagination col-md-12  no-padding'
+                            ],
+                        ],
+                        'options' => [
+                            'class' => 'col-lg-12 list-wrapper inline no-padding'
+                        ],
+                        'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
+                        'summary' => '',
+                        'emptyText' => 'Список пуст',
+                    ])
+                    ?>
                     <?php Pjax::end(); ?>
                 </div>
             </div>

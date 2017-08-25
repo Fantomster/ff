@@ -714,7 +714,7 @@ margin: 0;padding: 0
 	    -webkit-filter: blur(8px);
 	    -moz-filter: blur(8px);
 	    filter: blur(8px);
-	    filter: url('fmarket/images/blur.svg#blur'); /* путь к svg */
+	    filter: url('../images/blur.svg#blur'); /* путь к svg */
 	    
 	}
 }

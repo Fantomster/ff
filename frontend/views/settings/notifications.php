@@ -35,10 +35,10 @@ $this->title = 'Уведомления';
             <div class="row">
                 <div class="col-md-6">
                     <?=
-                    $form->field($emailNotification, 'orders')->widget(CheckboxX::classname(), [
+                    $form->field($emailNotification, 'order_created')->widget(CheckboxX::classname(), [
                         'autoLabel' => true,
                         'model' => $emailNotification,
-                        'attribute' => 'orders',
+                        'attribute' => 'order_created',
                         'pluginOptions' => [
                             'threeState' => false,
                             'theme' => 'krajee-flatblue',
@@ -46,17 +46,17 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Информация о заказах по email',
+                            'label' => 'Уведомление о новом заказе по email',
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
                     ])->label(false)
                     ?>
                     <?=
-                    $form->field($emailNotification, 'requests')->widget(CheckboxX::classname(), [
+                    $form->field($emailNotification, 'order_canceled')->widget(CheckboxX::classname(), [
                         'autoLabel' => true,
                         'model' => $emailNotification,
-                        'attribute' => 'orders',
+                        'attribute' => 'order_canceled',
                         'pluginOptions' => [
                             'threeState' => false,
                             'theme' => 'krajee-flatblue',
@@ -64,19 +64,91 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Информация о заявках по email',
+                            'label' => 'Уведомление об отмене заказа по email',
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
                     ])->label(false)
+                    ?>
+                    <?=
+                    $form->field($emailNotification, 'order_changed')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $emailNotification,
+                        'attribute' => 'order_changed',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => 'Уведомление об изменениях в заказе по email',
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+                    <?=
+                    $form->field($emailNotification, 'order_processing')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $emailNotification,
+                        'attribute' => 'order_processing',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => 'Уведомление о начале выполнения заказа по email',
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+                    <?=
+                    $form->field($emailNotification, 'order_done')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $emailNotification,
+                        'attribute' => 'order_done',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => 'Уведомление о завершении заказа по email',
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+                    <?= ''
+//                    $form->field($emailNotification, 'requests')->widget(CheckboxX::classname(), [
+//                        'autoLabel' => true,
+//                        'model' => $emailNotification,
+//                        'attribute' => 'requests',
+//                        'pluginOptions' => [
+//                            'threeState' => false,
+//                            'theme' => 'krajee-flatblue',
+//                            'enclosedLabel' => false,
+//                            'size' => 'md',
+//                        ],
+//                        'labelSettings' => [
+//                            'label' => 'Информация о заявках по email',
+//                            'position' => CheckboxX::LABEL_RIGHT,
+//                            'options' => ['style' => '']
+//                        ]
+//                    ])->label(false)
                     ?>
                 </div>
                 <div class="col-md-6">
                     <?=
-                    $form->field($smsNotification, 'orders')->widget(CheckboxX::classname(), [
+                    $form->field($smsNotification, 'order_created')->widget(CheckboxX::classname(), [
                         'autoLabel' => true,
                         'model' => $smsNotification,
-                        'attribute' => 'orders',
+                        'attribute' => 'order_created',
                         'pluginOptions' => [
                             'threeState' => false,
                             'theme' => 'krajee-flatblue',
@@ -84,17 +156,17 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Информация о заказах по sms',
+                            'label' => 'Уведомление о новом заказе по sms',
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
                     ])->label(false)
                     ?>
                     <?=
-                    $form->field($smsNotification, 'requests')->widget(CheckboxX::classname(), [
+                    $form->field($smsNotification, 'order_canceled')->widget(CheckboxX::classname(), [
                         'autoLabel' => true,
                         'model' => $smsNotification,
-                        'attribute' => 'orders',
+                        'attribute' => 'order_canceled',
                         'pluginOptions' => [
                             'threeState' => false,
                             'theme' => 'krajee-flatblue',
@@ -102,11 +174,83 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Информация о заявках по sms',
+                            'label' => 'Уведомление об отмене заказа по sms',
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
                     ])->label(false)
+                    ?>
+                    <?=
+                    $form->field($smsNotification, 'order_changed')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $smsNotification,
+                        'attribute' => 'order_changed',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => 'Уведомление об изменениях в заказе по sms',
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+                    <?=
+                    $form->field($smsNotification, 'order_processing')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $smsNotification,
+                        'attribute' => 'order_processing',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => 'Уведомление о начале выполнения заказа по sms',
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+                    <?=
+                    $form->field($smsNotification, 'order_done')->widget(CheckboxX::classname(), [
+                        'autoLabel' => true,
+                        'model' => $smsNotification,
+                        'attribute' => 'order_done',
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => false,
+                            'size' => 'md',
+                        ],
+                        'labelSettings' => [
+                            'label' => 'Уведомление о завершении заказа по sms',
+                            'position' => CheckboxX::LABEL_RIGHT,
+                            'options' => ['style' => '']
+                        ]
+                    ])->label(false)
+                    ?>
+                    <?= ''
+//                    $form->field($smsNotification, 'requests')->widget(CheckboxX::classname(), [
+//                        'autoLabel' => true,
+//                        'model' => $smsNotification,
+//                        'attribute' => 'requests',
+//                        'pluginOptions' => [
+//                            'threeState' => false,
+//                            'theme' => 'krajee-flatblue',
+//                            'enclosedLabel' => false,
+//                            'size' => 'md',
+//                        ],
+//                        'labelSettings' => [
+//                            'label' => 'Информация о заявках по sms',
+//                            'position' => CheckboxX::LABEL_RIGHT,
+//                            'options' => ['style' => '']
+//                        ]
+//                    ])->label(false)
                     ?>
                 </div>
             </div>

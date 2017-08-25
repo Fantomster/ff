@@ -115,15 +115,15 @@ class OrderSearch extends Order {
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            'order.id' => $this->id,
             'client_id' => $this->client_id,
             'vendor_id' => $this->vendor_id,
             'created_by_id' => $this->created_by_id,
             'accepted_by_id' => $this->accepted_by_id,
             'status' => $this->status,
             'total_price' => $this->total_price,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'order.created_at' => $this->created_at,
+            'order.updated_at' => $this->updated_at,
             'requested_delivery' => $this->requested_delivery,
             'actual_delivery' => $this->actual_delivery,
             'discount' => $this->discount,

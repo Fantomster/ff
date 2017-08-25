@@ -147,7 +147,7 @@ class CronController extends Controller {
                     Organization::ES_UPDATED,
                     Organization::ES_DELETED
                     ]])
-                ->limit(200)
+                ->limit(20)
                 ->all();
         foreach($suppliers as $supplier){
             $rating = 0;

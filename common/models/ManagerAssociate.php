@@ -64,4 +64,17 @@ class ManagerAssociate extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Organization::className(), ['id' => 'organization_id']);
     }
+    
+    /**
+     * checks if manager is associated with client
+     * 
+     * @param integer $client_id
+     * @param integer $vendor_id
+     * @param integer $manager_id
+     * 
+     * @return boolean
+     */
+    public static function isAssociated($client_id, $manager_id) {
+        return self::find()->where(['manager_id' => $manager_id, 'organization_id' => $client_id])->exists();
+    }
 }

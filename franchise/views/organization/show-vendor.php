@@ -202,7 +202,7 @@ $this->registerCss("
                                             }
                                             return $data['name'];
                                         },
-                                        'label' => 'Имя поставщика',
+                                        'label' => 'Имя ресторана',
                                     ],
                                     [
                                         'format' => 'raw',

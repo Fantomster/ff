@@ -23,7 +23,7 @@
                 'class' => 'col-lg-12 list-wrapper inline no-padding'
             ],
             'layout' => "{items}<tr><td>{pager}</td></tr>",
-            'emptyText' => 'Список пуст',
+            'emptyText' => '<tr><td>Список пуст</td></tr>',
         ])
         ?>
     </tbody>

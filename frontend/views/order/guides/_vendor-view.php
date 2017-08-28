@@ -1,9 +1,6 @@
 <?php
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+use yii\helpers\Html;
+use yii\helpers\Url;
 ?>
 <td>
     <div class="guid_block_create_title">
@@ -14,9 +11,17 @@
     </div>     
 </td>
 <td>
-    <?php if ($model->supp_org_id == $selectedVendor) { ?>
-        <button class="btn btn-md btn-gray pull-right"><i class="fa fa-thumbs-o-up"></i> Выбран</button>
-    <?php } else { ?>
-        <button class="btn btn-md btn-success pull-right"><i class="fa fa-hand-pointer-o"></i> Выбрать</button>  
-    <?php } ?>
+    <?php if ($model->supp_org_id == $selectedVendor) { 
+        //<button class="btn btn-md btn-gray pull-right"><i class="fa fa-thumbs-o-up"></i> Выбран</button>
+        echo Html::button('<i class="fa fa-thumbs-o-up"></i> Выбран', [
+            'class' => 'btn btn-md btn-gray pull-right disabled',
+            'data-url' => Url::to(['/order/ajax-add-to-guide', 'id' => $model->supp_org_id]),
+        ]);
+    } else {
+        //<button class="btn btn-md btn-success pull-right"><i class="fa fa-hand-pointer-o"></i> Выбрать</button>  
+        echo Html::button('<i class="fa fa-hand-pointer-o"></i> Выбрать', [
+            'class' => 'btn btn-md btn-success pull-right',
+            'data-url' => Url::to(['/order/ajax-add-to-guide', 'id' => $model->supp_org_id]),
+        ]);
+    } ?>
 </td>

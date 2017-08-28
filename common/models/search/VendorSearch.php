@@ -25,7 +25,7 @@ class VendorSearch extends RelationSuppRest {
     public function rules()
     {
         return [
-            [['id', 'rest_org_id', 'invite', 'catalog_status'], 'integer'],
+            [['id', 'supp_org_id', 'invite', 'catalog_status'], 'integer'],
             [['vendor_name', 'search_string'], 'safe'],
         ];
     }
@@ -69,6 +69,7 @@ class VendorSearch extends RelationSuppRest {
         
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['supp_org_id'=>SORT_ASC]],
             'pagination' => [
                 'pageSize' => 10,
             ],

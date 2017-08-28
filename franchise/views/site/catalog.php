@@ -150,7 +150,7 @@ $grid = [
                 'label' => '',
                 'format' => 'raw',
                 'headerOptions' => ['style' => 'width:40px'],
-                'value' => ($isEditable) ? function ($data) {
+                'value' => function ($data) {
             $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/site/ajax-edit-catalog-form',
                         'product_id' => $data['id'], 'catalog' => $data['cat_id']], [
                         'data' => [
@@ -161,20 +161,20 @@ $grid = [
                         'class' => 'btn btn-xs btn-default'
             ]);
             return $link;
-        } : '',
+        },
     ],
     [
         'attribute' => '',
         'label' => '',
         'format' => 'raw',
         'contentOptions' => ['style' => 'width:50px;'],
-        'value' => ($isEditable) ? function ($data) {
+        'value' => function ($data) {
             $link = Html::button('<i class="fa fa-trash m-r-xs"></i>', [
                         'class' => 'btn btn-xs btn-danger del-product',
                         'data' => ['id' => $data['id']],
             ]);
             return $link;
-        } : '',
+        },
     ],
 ];
 ?> 
@@ -202,7 +202,6 @@ $grid = [
                         </span>
                         <?= Html::input('text', 'search', $searchString, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style'=>'width:300px']) ?>
                     </div>
-                    <?php if($isEditable): ?>
                     <?=
                     Modal::widget([
                         'id' => 'add-product',
@@ -231,7 +230,6 @@ $grid = [
                         ],
                     ])
                     ?>
-                    <?php endif; ?>
                     <div class="pull-right">
                     <?=ExportMenu::widget([
                         'dataProvider' => $dataProvider,

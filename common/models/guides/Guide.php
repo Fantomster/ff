@@ -3,6 +3,7 @@
 namespace common\models\guides;
 
 use Yii;
+use common\models\Organization;
 
 /**
  * This is the model class for table "guide".
@@ -18,6 +19,7 @@ use Yii;
  * @property Organization $client
  * @property GuideProduct[] $guideProducts
  * @property integer $productCount
+ * @property integer[] $guideProductsIds
  */
 class Guide extends \yii\db\ActiveRecord {
 
@@ -41,7 +43,7 @@ class Guide extends \yii\db\ActiveRecord {
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
             [['name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
-            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => \common\models\Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
+            [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['client_id' => 'id']],
         ];
     }
 
@@ -89,9 +91,22 @@ class Guide extends \yii\db\ActiveRecord {
     }
 
     /**
+     * @return integer[]
+     */
+    public function getGuideProductsIds() {
+        $result = GuideProduct::find()->where(['guide_id' => $this->id])->select('cbg_id')->asArray()->all();
+        return \yii\helpers\ArrayHelper::getColumn($result, 'cbg_id');
+    }
+
+    /**
      * @return integer
      */
     public function getProductCount() {
         return count($this->guideProducts);
+    }
+    
+    public function delete() {
+        GuideProduct::deleteAll(['guide_id' => $this->id]);
+        parent::delete();
     }
 }

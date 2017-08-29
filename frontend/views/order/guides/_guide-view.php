@@ -15,7 +15,7 @@ use yii\helpers\Url;
 <div class="guid_block_buttons">
     <?=
     Html::button('<i class="fa fa-trash"></i> Удалить', [
-        'class' => 'btn btn-sm btn-outline-danger',
+        'class' => 'btn btn-sm btn-outline-danger delete-guide',
         'data-url' => Url::to(['/order/ajax-delete-guide', 'id' => $model->id]),
     ])
     ?>

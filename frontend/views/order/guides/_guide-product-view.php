@@ -12,11 +12,11 @@ use yii\helpers\Url;
     </div>     
 </td>
 <td>
-    <a class="btn btn-md btn-outline-danger pull-right"><i class="fa fa-trash"></i></a>     
     <?=
     Html::button('<i class="fa fa-trash"></i>', [
-        'class' => 'btn btn-md btn-outline-danger pull-right',
-        'data-url' => Url::to(['/order/edit-guide', 'id' => $model->id]),
+        'class' => 'btn btn-md btn-outline-danger pull-right remove-from-guide',
+        'data-url' => Url::to(['/order/ajax-remove-from-guide', 'id' => $model->id]),
+        'data-target-id' => 'product' . $model->id,
     ])
     ?>
 </td>

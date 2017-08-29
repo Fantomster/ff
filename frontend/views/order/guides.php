@@ -12,18 +12,12 @@ $this->title = "Список гайдов";
 $guideUrl = Url::to(['order/ajax-create-guide']);
 
 $this->registerJs('
-    $(document).on("click", ".delete-guide, .delete-product", function(e) {
+    $(document).on("click", ".delete-guide", function(e) {
         e.preventDefault();
         clicked = $(this);
-        if (clicked.hasClass(".delete-guide")) {
-            title = "Удаление гайда";
-            text = "Вы уверены, что хотите удалить гайд?";
-            success = "Гайд удален!";
-        } else if (clicked.hasClass(".delete-product")){
-            title = "Удаление товара";
-            text = "Вы уверены, что хотите удалить товара из гайда?";
-            success = "Товар удален!";
-        }
+        title = "Удаление гайда";
+        text = "Вы уверены, что хотите удалить гайд?";
+        success = "Гайд удален!";
         swal({
             title: title,
             text: text,
@@ -39,6 +33,7 @@ $this->registerJs('
                     ).done(function (result) {
                         if (result) {
                             resolve(result);
+                            $.pjax.reload("#guidesList", {timeout:30000});
                         } else {
                             resolve(false);
                         }
@@ -159,7 +154,7 @@ $this->registerJs('
             <div class="row">
                 <div class="col-md-12 guid">
                     <?php
-                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'guidesList', 'timeout' => 30000]);
+                    Pjax::begin(['formSelector' => '#searchForm', 'enablePushState' => false, 'id' => 'guidesList', 'timeout' => 30000]);
                     ?>
                     <?=
                     ListView::widget([

@@ -3,6 +3,7 @@
 namespace common\models\guides;
 
 use Yii;
+use common\models\CatalogBaseGoods;
 
 /**
  * This is the model class for table "guide_product".

@@ -25,13 +25,13 @@ $grid = [
     
     return  Html::a('<i class="fa fa-toggle-on" aria-hidden="true"></i>', '#', [
                 'class' => 'disabled pull-right',
-                'style' => 'font-size:26px;color:#555;padding-right:25px;'
+                'style' => 'font-size:26px;color:#84bf76;padding-right:25px;'
             ]);}
     return  Html::a('<i class="fa fa-toggle-on" aria-hidden="true"></i>', '#', [
                 'class' => 'change-net-org pull-right',
-                'style' => 'font-size:26px;color:#84bf76;padding-right:25px;',
+                'style' => 'font-size:26px;color:#ccc;padding-right:25px;',
                 'data' => ['id' => $data['id']],
-            ]);        
+            ]);         
         },
     ], 
 ];

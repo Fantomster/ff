@@ -21,18 +21,6 @@ use yii\helpers\Url;
                         'action' => Url::to('/network/create'),
             ]);
             ?>
-            <?php /* 
-            <?= Html::activeHiddenInput($organization, 'lat'); //широта ?>
-            <?= Html::activeHiddenInput($organization, 'lng'); //долгота ?>
-            <?= Html::activeHiddenInput($organization, 'country'); //страна ?> 
-            <?= Html::activeHiddenInput($organization, 'locality'); //Город ?>
-            <?= Html::activeHiddenInput($organization, 'route'); //улица ?>
-            <?= Html::activeHiddenInput($organization, 'street_number'); //дом ?>
-            <?= Html::activeHiddenInput($organization, 'administrative_area_level_1'); //область ?>
-            <?= Html::activeHiddenInput($organization, 'place_id'); //уникальный индификатор места ?>
-            <?= Html::activeHiddenInput($organization, 'formatted_address'); //полный адрес ?>
-             */ ?>
-             
             <?=
                     $form->field($organization, 'type_id')
                     ->radioList(
@@ -58,17 +46,7 @@ use yii\helpers\Url;
                     ->label(false)
                     ->textInput(['class' => 'form-control', 'placeholder' => 'Название организации']);
             ?>
-            <hr>
-            <?php /*
-            <?=
-                    $form->field($organization, 'address')
-                    ->label(false)
-                    ->textInput(['class' => 'form-control', ' onsubmit' => 'return false', 'placeholder' => 'Адрес'])
-            ?>
-             */?>
-            
             </div>
-            <!--div id="map" class="modal-map"></div-->
             <button type="submit" class="but btn-success create-network">Создать</button>
             <?php ActiveForm::end(); ?>
         </div>     

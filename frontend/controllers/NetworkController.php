@@ -86,39 +86,57 @@ class NetworkController extends Controller {
     }
     public function actionChangeForm(){
         $user = User::findIdentity(Yii::$app->user->id);
-        if(Organization::find()->where(['id' => $user->organization_id])
-                ->andWhere('parent_id is not null')
-                ->exists()){
-            $parent = Organization::find()->where(['id' => $user->organization_id])->one()->parent_id;
-            
-            $networks1 = Organization::find()->where(['parent_id' => $parent]);
-            
-            $networks2 = Organization::find()->where(['id' => $parent]);
-            
-            $networks1->union($networks2, false);
-            
-            $sql = $networks1->createCommand()->getRawSql();
-            
-            $networks = Organization::findBySql($sql);
-            
-        }elseif(Organization::find()->where(['parent_id' => $user->organization_id])->exists()){
-            $networks = Organization::find()->where(['parent_id' => $user->organization_id]);  
-        }else{
-        $networks = Organization::find()->where(['id' => $user->organization_id]);    
-        }
-        $dataProvider = new ActiveDataProvider([
-            'query' => $networks,
+        $organization = new Organization();
+        $sql = "
+        select distinct id as `id`,`name`,`type_id` from (
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select `parent_id`,
+        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
+        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
+        from `organization` o where id = " . $user->organization_id . "
+        )tb where id is not null";
+        $sql2 = "
+        select count(*) from (
+        select distinct id as `id`,`name`,`type_id` from (
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select `parent_id`,
+        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
+        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
+        from `organization` o where id = " . $user->organization_id . "
+        )tb where id is not null)tb2";
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => \Yii::$app->db->createCommand($sql)->sql,
+            'totalCount' => \Yii::$app->db->createCommand($sql2)->queryScalar(),
+            'pagination' => [
+                'pageSize' => 4,
+            ],
         ]);
-        return $this->renderAjax('_changeForm', compact('user','dataProvider'));
+        return $this->renderAjax('_changeForm', compact('user','dataProvider','organization'));
     }
     public function actionChange($id){
         $user = User::findIdentity(Yii::$app->user->id);
         $organization = Organization::findOne(['id'=>$id]);
         
-        $sql = "select distinct count(id) from (
-        select id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
+        $sql = "
+        select distinct id as `id`,`name` from (
+        select id,`name` from organization where parent_id = (select id from organization where id = " . $user->organization_id . ")
         union all
-        select id from organization where id = " . $user->organization_id . ")tb where id = $id";
+        select id,`name` from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
+        union all
+        select id,`name` from organization where id = " . $user->organization_id . "
+        union all
+        select parent_id,(select `name` from organization where id = o.parent_id) as name from organization o where id = " . $user->organization_id . "
+        )tb where id = " . $id;
         if(\Yii::$app->db->createCommand($sql)->queryScalar() && 
                 ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
                  $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
@@ -142,25 +160,24 @@ class NetworkController extends Controller {
         return false;
     }
     
-    public function actionCreateForm(){
-        $organization = new Organization();
-        return $this->renderAjax('_createForm', compact('organization'));
-    }
-    
     public function actionCreate(){
         $user = User::findIdentity(Yii::$app->user->id);
-        $sql = "select distinct parent_id from (
+        $sql = "select distinct parent_id as `parent_id` from (
         select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
         union all
         select id, parent_id from organization where id = " . $user->organization_id . ")tb";
-        $organization = new Organization();
-        if(\Yii::$app->db->createCommand($sql)->queryScalar()){
-          $parent_id = \Yii::$app->db->createCommand($sql)->queryAll();  
-          
-          
+        if(!empty(Organization::findBySql($sql)->one()->parent_id)){
+          $parent_id = Organization::findBySql($sql)->one()->parent_id;   
         }else{
           $parent_id = $user->organization_id; 
-         
+        }
+        $organization = new Organization();
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($organization->load($post)) {
+            $organization->parent_id = $parent_id;
+            $organization->save();
+            }
         }
     }
 }

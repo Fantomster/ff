@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
 use common\models\Organization;
+use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
@@ -196,7 +197,8 @@ if (!Yii::$app->user->isGuest) {
 $("body").on("hidden.bs.modal", "#changeNetOrg", function() {
     $(this).data("bs.modal", null);
 })
-$(document).on("click",".change-net-org", function(){
+$(document).on("click",".change-net-org", function(e){
+    e.preventDefault();
     var id = $(this).attr('data-id'); 
     $.get(
         '$changeNetworkUrl',
@@ -206,11 +208,80 @@ $(document).on("click",".change-net-org", function(){
             document.location = "$dashboard";
         }
     });
-
 })
+$(document).on("click", ".new-network", function(e) { 
+    e.preventDefault();        
+    var form = $("#create-network-form");
+    $.ajax({
+        url: form.attr('action'),
+        type: 'post',
+        data: form.serialize(),
+        success: function (response) {  
+          $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:30000, async: false, url: "/network/change-form"});
+          $("#create-network-form")[0].reset();
+        },
+        error: function(jqXHR, errMsg) { 
+            // handle error
+        }
+    });
+    return false;
+});      
 JS;
     $this->registerJs($js, \yii\web\View::POS_READY)
     ?>
+<?php $this->registerCss("
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background-color: #fff;
+    border-left: 1px solid #eee;
+}
+::-webkit-scrollbar-thumb {
+    border-radius:4px;
+    background-color: #84bf76;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #88bd36;
+}
+    .network-modal{
+        padding:20px 30px 20px 30px;
+    }
+    .network-modal h5, .network-modal h4, .network-modal h3, .network-modal h2{
+     font-family: 'Circe-Bold';  
+     letter-spacing: 0.05em;
+    }
+    .network-modal h3, .network-modal h3 span{
+     font-family: 'Circe-Bold';
+     letter-spacing: 0.05em;
+     font-size:28px;
+    }
+    .network-modal a, .network-modal div, .network-modal p, .network-modal span{
+     font-family: 'Circe-Regular';
+     letter-spacing: 0.05em;
+     font-size:14px;
+    }
+    .network-modal .network-list{
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom:20px
+    }
+    .network-modal .new-network{
+        height:40px;
+        border-radius: 50px;
+        font-size: 19px;
+        width:100%;
+        margin-top:20px;
+        
+    }
+    #changeNetOrg .modal-content{
+        background-color:rgba(255, 255, 255, 0);
+    }
+    .network-modal{
+        border-radius:4px;
+    }
+");
+?>
     <script type="text/javascript">
         var socket;
         var dataEdited = 0;
@@ -324,20 +395,9 @@ JS;
                                     <small><?= $organization->name ?></small>
                                 </p>
                                 <?=
-                                Html::a("Смена бизнеса", ['network/change-form'], [
+                                Html::a("БИЗНЕСЫ", ['network/change-form'], [
                                     'data' => [
                                         'target' => '#changeNetOrg',
-                                        'toggle' => 'modal',
-                                        'backdrop' => 'static',
-                                    ],
-                                    'class' => 'btn btn-lg btn-gray',
-                                    'style' => 'border-radius:0;width:100%;text-align:center;',
-                                ]);
-                                ?>
-                                <?=
-                                Html::a("Создать бизнес", ['network/create-form'], [
-                                    'data' => [
-                                        'target' => '#createNetwork',
                                         'toggle' => 'modal',
                                         'backdrop' => 'static',
                                     ],
@@ -364,17 +424,11 @@ JS;
         <?php } ?>
     </nav>
 </header>
+
 <?=
 Modal::widget([
     'id' => 'changeNetOrg',
-    'size' => 'modal-md',
-    'clientOptions' => false,
-])
-?>
-<?=
-Modal::widget([
-    'id' => 'createNetwork',
-    'size' => 'modal-sm',
-    'clientOptions' => false,
+    'size' => 'modal-lg',
+    'clientOptions' => false
 ])
 ?>

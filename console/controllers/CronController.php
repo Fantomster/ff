@@ -147,6 +147,7 @@ class CronController extends Controller {
                     Organization::ES_UPDATED,
                     Organization::ES_DELETED
                     ]])
+                ->andWhere('locality is not null and locality <> \'undefined\'')
                 ->limit(20)
                 ->all();
         foreach($suppliers as $supplier){

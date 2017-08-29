@@ -33,17 +33,17 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             'access' => [
                 'class' => AccessControl::className(),
                 'rules' => [[
-                'actions' => ['confirm', 'resend', 'logout'],
+                'actions' => ['confirm','resend', 'logout','business'],
                 'allow' => true,
                 'roles' => ['?', '@'],
                     ],
                     [
-                        'actions' => ['login', 'register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite', 'ajax-register'],
+                        'actions' => ['login','register', 'forgot', 'reset', 'login-email', 'login-callback', 'accept-restaurants-invite', 'ajax-register'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'profile', 'account', 'cancel', 'resend-change'],
+                        'actions' => ['index','business','profile', 'account', 'cancel', 'resend-change'],
                         'allow' => false,
                     ],
                     [
@@ -269,8 +269,28 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         }
 
         if ($model->load($post) && $model->validate()) {
+            $user = $model->getUser();
+            $sql = "
+            select count(*) from (
+            select distinct id as `id`,`name`,`type_id` from (
+            select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+            union all
+            select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+            union all
+            select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+            union all
+            select `parent_id`,
+            (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
+            (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
+            from `organization` o where id = " . $user->organization_id . "
+            )tb where id is not null)tb2";
+            if(\Yii::$app->db->createCommand($sql)->queryScalar()>1){
+               Yii::$app->user->login($user, 1);
+               return $this->redirect(['business']); 
+            }
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
             return $this->redirect($returnUrl);
+            
         }
 
 //        if ($model->hasErrors()) {
@@ -286,7 +306,45 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
         $registerFirst = false;
         return $this->render('login', compact("model", "user", "profile", "organization", "registerFirst"));
     }
-
+    public function actionBusiness()
+    {
+        $user = User::findIdentity(Yii::$app->user->id);
+        $sql = "
+        select distinct id as `id`,`name`,`type_id` from (
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select `parent_id`,
+        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
+        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
+        from `organization` o where id = " . $user->organization_id . "
+        )tb where id is not null";
+        $sql2 = "
+        select count(*) from (
+        select distinct id as `id`,`name`,`type_id` from (
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `parent_id` = (select `parent_id` from `organization` where `id` = " . $user->organization_id . ")
+        union all
+        select id,`name`,`type_id` from `organization` where `id` = " . $user->organization_id . "
+        union all
+        select `parent_id`,
+        (select `name` from `organization` where `id` = o.`parent_id`) as `name`, 
+        (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
+        from `organization` o where id = " . $user->organization_id . "
+        )tb where id is not null)tb2";
+        $dataProvider = new \yii\data\SqlDataProvider([
+            'sql' => \Yii::$app->db->createCommand($sql)->sql,
+            'totalCount' => \Yii::$app->db->createCommand($sql2)->queryScalar(),
+            'pagination' => [
+                'pageSize' => 4,
+            ],
+        ]);
+        return $this->render('business', compact('user','dataProvider'));
+    }
     /**
      * Forgot password
      */

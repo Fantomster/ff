@@ -264,7 +264,6 @@ JS;
     .network-modal .network-list{
         max-height: 300px;
         overflow-y: auto;
-        margin-bottom:20px
     }
     .network-modal .new-network{
         height:40px;

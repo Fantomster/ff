@@ -37,7 +37,7 @@ $this->title = 'Заявки';
     .req-created{font-size:12px;color:#757575}
     .req-visits{font-size:12px;color:#757575}
     .req-comments{font-size:12px;color:#757575}
-    .modal.fade .modal-dialog {
+    #create .modal.fade .modal-dialog {
         -webkit-transform: scale(0.1);
         -moz-transform: scale(0.1);
         -ms-transform: scale(0.1);
@@ -49,7 +49,7 @@ $this->title = 'Заявки';
         transition: all 0.3s;
     }
 
-    .modal.fade.in .modal-dialog {
+    #create .modal.fade.in .modal-dialog {
         -webkit-transform: scale(1);
         -moz-transform: scale(1);
         -ms-transform: scale(1);

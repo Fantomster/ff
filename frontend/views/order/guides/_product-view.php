@@ -16,14 +16,16 @@ use yii\helpers\Url;
     if (in_array($model["id"], $guideProductList)) {
         //<button class="btn btn-md btn-gray pull-right"><i class="fa fa-thumbs-o-up"></i> Продукт добавлен</button>
         echo Html::button('<i class="fa fa-thumbs-o-up"></i> Продукт добавлен', [
-            'class' => 'btn btn-md btn-gray pull-right disabled',
+            'class' => 'btn btn-md btn-gray pull-right disabled in-guide',
+            'id' => 'product' . $model['id'],
             'data-url' => Url::to(['/order/ajax-add-to-guide', 'id' => $model["id"]]),
         ]);
     } else {
         //<button class="btn btn-md btn-success pull-right"><i class="fa fa-plus"></i> Добавить в гид</button> 
         echo Html::button('<i class="fa fa-plus"></i> Добавить в гид', [
-            'class' => 'btn btn-md btn-success pull-right',
-            'data-url' => Url::to(['/order/ajax-remove-from-guide', 'id' => $model["id"]]),
+            'class' => 'btn btn-md btn-success pull-right add-to-guide',
+            'id' => 'product' . $model['id'],
+            'data-url' => Url::to(['/order/ajax-add-to-guide', 'id' => $model["id"]]),
         ]);
     }
     ?>

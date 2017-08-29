@@ -1,10 +1,77 @@
 <?php
 
 use yii\helpers\Url;
+use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 
 $this->title = "Редактирование гайда";
+
+$this->registerJs('
+    $(document).on("click", ".select-vendor", function() {
+        var clicked = $(this);
+        var url = clicked.data("url");
+        $.post(
+            url
+        ).done(function(result) {
+            if (result) {
+                $(".selected-vendor")
+                    .removeClass("selected-vendor")
+                    .addClass("select-vendor")
+                    .removeClass("disabled")
+                    .removeClass("btn-gray")
+                    .addClass("btn-success")
+                    .html(\'<i class="fa fa-hand-pointer-o"></i> Выбрать\');
+                clicked
+                    .addClass("selected-vendor")
+                    .removeClass("select-vendor")
+                    .addClass("disabled")
+                    .removeClass("btn-success")
+                    .addClass("btn-gray")
+                    .html(\'<i class="fa fa-thumbs-o-up"></i> Выбран\');
+                $.pjax.reload("#productList", {timeout:30000});
+            }
+        });
+    });
+    
+    $(document).on("click", ".add-to-guide", function() {
+        var clicked = $(this);
+        var url = clicked.data("url");
+        $.post(
+            url
+        ).done(function(result) {
+            if (result) {
+                clicked
+                    .addClass("in-guide")
+                    .removeClass("add-to-guide")
+                    .addClass("disabled")
+                    .removeClass("btn-success")
+                    .addClass("btn-gray")
+                    .html(\'<i class="fa fa-thumbs-o-up"></i> Продукт добавлен\');
+                $.pjax.reload("#guideProductList", {timeout:30000});
+            }
+        });
+    });
+    
+    $(document).on("click", ".remove-from-guide", function() {
+        var clicked = $(this);
+        var url = clicked.data("url");
+        $.post(
+            url
+        ).done(function(result) {
+            if (result) {
+                clicked.parent().parent().hide();
+                $("#" + clicked.data("target-id"))
+                    .removeClass("in-guide")
+                    .addClass("add-to-guide")
+                    .removeClass("disabled")
+                    .removeClass("btn-gray")
+                    .addClass("btn-success")
+                    .html(\'<i class="fa fa-plus"></i> Добавить в гид\');
+            }
+        });
+    });
+    ', \yii\web\View::POS_READY);
 ?>
 <section class="content">
     <div class="nav-tabs-custom">
@@ -152,8 +219,12 @@ $this->title = "Редактирование гайда";
                                 <?= $this->render('_guide-product-list', compact('guideDataProvider', 'guideProductList')) ?>
                                 <?php Pjax::end(); ?>
                                 <div style="width:100%;">
-                                    <div style="width:50%;float:left;padding-right:2px;"><button class="btn btn-md btn-success guide-save"><i class="fa fa-save"></i> Сохранить</button></div>
-                                    <div style="width:50%;float:left;padding-left:2px;"><button class="btn btn-md btn-gra guide-cancel"><i class="fa fa-ban"></i> Отменить</button></div>
+                                    <div style="width:50%;float:left;padding-right:2px;">
+                                        <?= Html::a('<i class="fa fa-save"></i> Сохранить', ['order/save-guide', 'id' => $guide->id], ['class' => 'btn btn-md btn-success guide-save']) ?>
+                                    </div>
+                                    <div style="width:50%;float:left;padding-left:2px;">
+                                        <?= Html::a('<i class="fa fa-ban"></i> Отменить', ['order/reset-guide'], ['class' => 'btn btn-md btn-gray guide-cancel']) ?>
+                                    </div>
                                 </div>
                             </div> 
                         </div>

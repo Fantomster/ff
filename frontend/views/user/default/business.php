@@ -52,7 +52,6 @@ a, span, div, p{
     background: #fff;
     margin-top: 20%;
     width: 100%;
-    height: 480px;
     padding:25px;
     -webkit-box-shadow: 0px -1px 12px -3px rgba(112,112,112,1);
 -moz-box-shadow: 0px -1px 12px -3px rgba(112,112,112,1);
@@ -105,11 +104,11 @@ $grid = [
     'value'=>function ($data) {
             if($data['id'] == \common\models\User::findIdentity(Yii::$app->user->id)->organization_id){
     
-    return  Html::a('<i class="fa fa-toggle-on" aria-hidden="true"></i>', '#', [
+    return  Html::a('<i class="fa fa-toggle-on"  style="margin-top:5px;"></i>', '#', [
                 'class' => 'disabled pull-right',
                 'style' => 'font-size:26px;color:#84bf76;padding-right:25px;'
             ]);}
-    return  Html::a('<i class="fa fa-toggle-on" aria-hidden="true"></i>', '#', [
+    return  Html::a('<i class="fa fa-toggle-on" style="transform: scale(-1, 1);margin-top:5px;"></i>', '#', [
                 'class' => 'change-net-org pull-right',
                 'style' => 'font-size:26px;color:#ccc;padding-right:25px;',
                 'data' => ['id' => $data['id']],

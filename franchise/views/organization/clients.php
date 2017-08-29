@@ -51,6 +51,9 @@ $this->registerJs('
         });
         $("body").on("click", ".f-delete", function(e){
             e.preventDefault();
+            if(!confirm("Вы уверены, что хотите удалить ресторан?")){
+                return false;
+            }
             var url = $(this).attr("url");
             var obj = $(this);
             $.ajax({

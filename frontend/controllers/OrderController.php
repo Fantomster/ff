@@ -20,6 +20,8 @@ use common\models\guides\Guide;
 use common\models\search\GuideSearch;
 use common\models\guides\GuideProduct;
 use common\models\search\GuideProductsSearch;
+use common\models\search\BaseProductSearch;
+use common\models\search\VendorSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
 use yii\filters\AccessControl;
@@ -69,6 +71,7 @@ class OrderController extends DefaultController {
                             'create',
                             'guides',
                             'favorites',
+                            'edit-guide',
                             'checkout',
                             'repeat',
                             'refresh-cart',
@@ -82,6 +85,8 @@ class OrderController extends DefaultController {
                             'ajax-set-note',
                             'ajax-set-delivery',
                             'ajax-show-details',
+                            'ajax-create-guide',
+                            'ajax-edit-guide',
                             'complete-obsolete',
                             'pjax-cart',
                         ],
@@ -168,28 +173,56 @@ class OrderController extends DefaultController {
 
         if ($client->type_id === Organization::TYPE_RESTAURANT) {
             $guide = new Guide();
-            $guide->client_id;
+            $guide->client_id = $client->id;
             $guide->name = $name;
             $guide->type = Guide::TYPE_GUIDE;
             $guide->save();
-            return ['result' => true, 'url' => \yii\helpers\Url::to(['order/edit-guide', 'id' => $guide->id])];
+            return ['type' => 'success', 'url' => \yii\helpers\Url::to(['order/edit-guide', 'id' => $guide->id])];
         } else {
-            return ['result' => false];
+            return ['type' => 'fail'];
         }
     }
 
     public function actionEditGuide($id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $session = Yii::$app->session;
+        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+                //(Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 4;
         
         $params = Yii::$app->request->getQueryParams();
         
-        $vendorSearchModel = new \common\models\search\VendorSearch();
+        $vendorSearchModel = new VendorSearch();
+        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
+        $vendorDataProvider->pagination = ['pageSize' => 8];
         
-        $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 0;
         $productSearchModel = new OrderCatalogSearch();
+        $vendors = $client->getSuppliers(null);
+        $test = array_keys($vendors);
+        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : array_keys($vendors)[1];
+        $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
+        $productSearchModel->client = $client;
+        $productSearchModel->catalogs = $catalogs;
+        $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        $productDataProvider = $productSearchModel->search($params);
+        $productDataProvider->pagination = ['pageSize' => 8];
         
+        $guideSearchModel = new BaseProductSearch();
+        $params['BaseProductSearch'] = Yii::$app->request->post("BaseProductSearch");
+        $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
+        $guideDataProvider->pagination = ['pageSize' => 7];
+        
+        $pjax = Yii::$app->request->get("_pjax");
+        if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
+            return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor'));
+        } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
+            return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList'));
+        } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
+            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList'));
+        } else {
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider'));
+        }
     }
 
     public function actionAjaxShowGuide($id) {
@@ -197,14 +230,40 @@ class OrderController extends DefaultController {
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
     }
 
+    public function actionAjaxSelectVendor($id) {
+        $session = Yii::$app->session;
+        $session['selectedVendor'] = $id;
+        return true;
+    }
+    
     public function actionAjaxAddToGuide($id, $product_id) {
         $client = $this->currentUser->organization;
-        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $session = Yii::$app->session;
+        
+        $product = $client->getProductIfAvailable($product_id);
+        
+        if ($product) {
+            $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+            if (!in_array($product->id, $guideProductList)) {
+                $guideProductList[] = $product->id;
+                $session['guideProductList'] =  $guideProductList;
+            }
+        }
+        
+        return isset($product);
     }
 
-    public function actionAjaxRemoveFromGuide($id, $product_id) {
+    public function actionAjaxRemoveFromGuide($product_id) {
         $client = $this->currentUser->organization;
-        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $session = Yii::$app->session;
+        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+        $positionInGuide = array_search($product_id, $guideProductList);
+        if ($positionInGuide) {
+            unset($guideProductList[$positionInGuide]);
+            $session['guideProductList'] =  $guideProductList;
+            return true;
+        }
+        return false;
     }
 
     public function actionFavorites() {
@@ -841,8 +900,8 @@ class OrderController extends DefaultController {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
-                foreach ($order->vendor->users as $recipient) {
-                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                foreach ($order->recipientsList as $recipient) {
+                    if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
                         $sms = new \common\components\QTSMS();
@@ -861,7 +920,7 @@ class OrderController extends DefaultController {
                 $this->sendOrderChange($order->vendor, $order);
                 $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
                 foreach ($order->client->users as $recipient) {
-                    if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
                         $sms = new \common\components\QTSMS();
@@ -991,6 +1050,7 @@ class OrderController extends DefaultController {
             $organizationType = $this->currentUser->organization->type_id;
             $danger = false;
             $edit = false;
+            $systemMessage = '';
             switch (Yii::$app->request->post('action')) {
                 case 'cancel':
                     $order->status = ($organizationType == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
@@ -1343,12 +1403,18 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_changed) {
                 $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
+//            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+//                $text = $subject;
+//                $target = $recipient->profile->phone;
+//                $sms = new \common\components\QTSMS();
+//                $sms->post_message($text, $target);
+//            }
         }
     }
 
@@ -1373,13 +1439,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_done) {
                 $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
                 $text = $order->vendor->name . " выполнил заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
@@ -1409,15 +1475,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_created) {
                 $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-        }
-        foreach ($order->vendor->users as $recipient) {
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
                 $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
@@ -1446,13 +1510,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_processing) {
                 $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
                 $text = "Заказ в системе f-keeper №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
@@ -1481,13 +1545,13 @@ class OrderController extends DefaultController {
 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
-            if ($recipient->emailNotification->orders) {
+            if ($recipient->emailNotification->order_canceled) {
                 $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->profile->sms_allow) {
+            if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();

@@ -22,5 +22,6 @@ class MainAsset extends AssetBundle {
         'yii\bootstrap\BootstrapThemeAsset',
         'yii\bootstrap\BootstrapPluginAsset',
         '\rmrevin\yii\fontawesome\AssetBundle',
+        'common\assets\SweetAlertAsset',
     ];
 }

@@ -28,13 +28,6 @@ $this->title = 'Вопросы / ответы';
                         Для того, что бы начать работать прямо сейчас в f-keeper, вам нужно сделать несколько простых шагов. <br/>
                         <?= Html::a('Зарегистрируйтесь', ["/user/register"]) ?>, загрузите каталоги продуктов своих поставщиков, и пригласите их в f-keeper, одним кликом. Вы так же можете выбрать новых поставщиков. С этого момента все ваши закупки вы можете делать в f-keeper.
                     </div>
-                    <div class="quest__block" data-toggle="collapse" data-target="#collapseExample2">
-                        Сколько это стоит? 
-                        <span class="str"></span>
-                    </div>
-                    <div class="ser__block collapse" id="collapseExample2">
-                        Бесплатно! В настоящий момент, основной функционал f-keeper, для ресторанов - бесплатный.
-                    </div>
                     <div class="quest__block" data-toggle="collapse" data-target="#collapseExample3">
                         Как пригласить своих поставщиков в f-keeper?
                         <span class="str"></span>
@@ -145,13 +138,6 @@ $this->title = 'Вопросы / ответы';
                     </div>
                     <div class="ser__block collapse" id="collapseExample16">
                         <?= Html::a('Зарегистрируйтесь', ["/user/register"]) ?>, перейдите в раздел "мои каталоги" и создайте свой первый каталог с товарами, далее перейдите в раздел "мои клиенты", введите контактные данные своих клиентов и пригласите их в систему.
-                    </div>
-                    <div class="quest__block" data-toggle="collapse" data-target="#collapseExample17">
-                        Сколько это стоит?
-                        <span class="str"></span>
-                    </div>
-                    <div class="ser__block collapse" id="collapseExample17">
-                        До 1 января для поставщиков, система f-keeper бесплатна.
                     </div>
                     <div class="quest__block" data-toggle="collapse" data-target="#collapseExample18">
                         Как мне найти новых клиентов в f-keeper?

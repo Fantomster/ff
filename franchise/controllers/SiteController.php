@@ -119,6 +119,7 @@ class SiteController extends DefaultController
             $dayTurnover[] = $order["spent"];
             $total += $order["spent"];
         }
+        //dd($ordersByDay);
         //---graph end
 
         $clientsCount = $client = Organization::find()
@@ -147,7 +148,7 @@ class SiteController extends DefaultController
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
 
         $franchiseeType = $this->currentFranchisee->type;
-
+        //dd($vendorsStats30);
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType'));
     }
 
@@ -492,15 +493,14 @@ class SiteController extends DefaultController
                 ],
             ],
         ]);
-        $isEditable = true;
         $catalog = Catalog::findOne($id);
         $organizationId = $catalog->supp_org_id;
         $model = Organization::get_value($organizationId);
         $org = FranchiseeAssociate::findOne(['organization_id'=>$organizationId]);
-        if ($model->hasActiveUsers() || $this->currentFranchisee->id != $org->franchisee_id) {
-            $isEditable = false;
-        }
-        return $this->render('catalog', compact('searchString', 'dataProvider', 'id', 'isEditable'));
+//        if ($model->hasActiveUsers() || $this->currentFranchisee->id != $org->franchisee_id) {
+//            $isEditable = false;
+//        }
+        return $this->render('catalog', compact('searchString', 'dataProvider', 'id'));
     }
 
     public function actionAjaxEditCatalogForm($catalog = null, $catId = null)

@@ -1,6 +1,7 @@
 <?php
-
 use yii\helpers\Url;
+
+$this->title = "Часто заказываемые товары";
 ?>
 <section class="content">
     <div class="nav-tabs-custom">

@@ -53,6 +53,7 @@ use common\models\guides\Guide;
  * @property FranchiseeAssociate $franchiseeAssociate
  * @property RelationSuppRest $associates
  * @property integer $managersCount
+ * @property integer $productsCount
  * @property Guide $favorite
  * @property Guide[] $guides
  */
@@ -127,8 +128,8 @@ class Organization extends \yii\db\ActiveRecord {
                 'class' => ImageUploadBehavior::className(),
                 'attribute' => 'picture',
                 'scenarios' => ['settings'],
-                'path' => '@app/web/upload/temp/',
-                'url' => '/upload/temp/',
+                'path' => '@app/web/upload/temp',
+                'url' => '/upload/temp',
                 'thumbs' => [
                     'picture' => ['width' => 420, 'height' => 236, 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND],
                 ],
@@ -693,13 +694,14 @@ class Organization extends \yii\db\ActiveRecord {
     protected function getOrganizationQuery($organization_id, $type = 'supp'){
         $type_id = ($type=='supp') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT;
         $prefix = ($type=='rest') ? 'supp' : 'rest';
+        $name = ($type=='rest') ? 'client' : 'vendor';
         return "SELECT self_registered, org.id as id, org.name as name,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone, (select count(id) from relation_supp_rest where ".$type."_org_id=org.id) as clientCount, 
                 (select count(id) from relation_supp_rest where ".$type."_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
-                (select count(id) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderCount,
-                (select count(id) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                (select sum(total_price) from `order` where vendor_id=org.id and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
+                (select count(id) from `order` where ".$name."_id=org.id and status in (1,2,3,4)) as orderCount,
+                (select count(id) from `order` where ".$name."_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
+                (select sum(total_price) from `order` where ".$name."_id=org.id and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from `order` where ".$name."_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
                 FROM `relation_supp_rest` AS rel
                 LEFT JOIN  `organization` AS org ON org.id = rel.".$type."_org_id
                 LEFT JOIN  `franchisee_associate` AS fa ON rel.".$type."_org_id = fa.organization_id
@@ -808,5 +810,70 @@ class Organization extends \yii\db\ActiveRecord {
                 'value' => 'phone',
             ],
         ];
+    }
+    
+    /**
+     * 
+     * return count of products
+     * 
+     * @return integer
+     */
+    public function getProductsCount() {
+        if ($this->type_id !== self::TYPE_SUPPLIER) {
+            return 0;
+        }
+        return CatalogBaseGoods::find()->where(['supp_org_id' => $this->id, 'status' => CatalogBaseGoods::STATUS_ON, 'deleted' => CatalogBaseGoods::DELETED_OFF])->count();
+    }
+    
+    /**
+     * return product if it is available to client
+     * 
+     * @return CatalogBaseGoods
+     */
+    public function getProductIfAvailable($product_id) {
+        if ($this->type_id !== self::TYPE_RESTAURANT) {
+            return null;
+        }
+        
+        $cgTable = CatalogGoods::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+        $orgTable = Organization::tableName();
+        $rsrTable = RelationSuppRest::tableName();
+        $catTable = Catalog::tableName();
+        
+        $product = CatalogGoods::find()
+                ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.deleted" => false,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.rest_org_id" => $this->id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $product_id,
+                ])
+                ->one();
+        if ($product) {
+            return CatalogBaseGoods::findOne(['id' => $product_id]);
+        }
+        $product = CatalogBaseGoods::find()
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cbgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.deleted" => false,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.rest_org_id" => $this->id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $product_id,
+                ])
+                ->one();
+        if ($product) {
+            return $product;
+        }
+        return null;
     }
 }

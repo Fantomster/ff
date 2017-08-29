@@ -3,8 +3,10 @@
 namespace common\models\search;
 
 use Yii;
+use common\models\guides\Guide;
 use common\models\guides\GuideProduct;
 use common\models\CatalogBaseGoods;
+use yii\data\ActiveDataProvider;
 
 /**
  * Description of GuideProductsSearch
@@ -29,10 +31,11 @@ class GuideProductsSearch extends GuideProduct {
      * Creates data provider instance with search query applied
      *
      * @param array $params
+     * @param integer $guideId
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $guide_id) {
+    public function search($params, $guideId) {
         $query = GuideProduct::find();
         $query->joinWith(['baseProduct']);
 
@@ -52,7 +55,7 @@ class GuideProductsSearch extends GuideProduct {
         }
 
         $query->where([
-            'guide_id' => $guide_id,
+            'guide_id' => $guideId,
             'type' => Guide::TYPE_GUIDE,
         ]);
         

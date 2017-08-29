@@ -144,6 +144,7 @@ $(window).resize(function(){
 var save = document.getElementById('save'), hot, originalColWidths = [], colWidths = [];         
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
+  //clickBeginsEditing : true,
   colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Индивидуальная цена', 'Ед. измерения','Скидка в рублях','Скидка %','Итоговая цена'],
   search: true,
   renderAllRows: false,
@@ -185,6 +186,9 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   startRows: 1,
   autoWrapRow: true,
   height: height,
+  /*afterOnCellMouseDown: function (changes, source) {
+    afterBeginEditing();
+ },*/
   beforeChangeRender: function (changes, source) {
       if(source !== 'sum'){
           var a, b, c, sum, i, value;

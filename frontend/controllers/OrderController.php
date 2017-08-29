@@ -293,6 +293,8 @@ class OrderController extends DefaultController {
     public function actionAjaxShowGuide($id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        
+        return $this->renderAjax('/order/guides/_view');
     }
 
     public function actionAjaxSelectVendor($id) {

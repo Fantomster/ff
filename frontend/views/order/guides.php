@@ -6,6 +6,7 @@ use yii\web\View;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
+use yii\bootstrap\Modal;
 
 $this->title = "Список гайдов";
 
@@ -184,3 +185,9 @@ $this->registerJs('
         </div>
     </div>
 </section>
+<?php
+Modal::begin([
+    'id' => 'guideModal',
+]);
+?>
+<?php Modal::end(); ?>

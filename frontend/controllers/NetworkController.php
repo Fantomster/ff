@@ -38,7 +38,6 @@ class NetworkController extends Controller {
                         'actions' => [
                             'change-form',
                             'change',
-                            'create-form',
                             'create'
                         ],
                         'allow' => true,
@@ -54,7 +53,6 @@ class NetworkController extends Controller {
                         'actions' => [
                             'change-form',
                             'change',
-                            'create-form',
                             'create'
                         ],
                         'allow' => true,
@@ -151,7 +149,7 @@ class NetworkController extends Controller {
             if($organization->type_id == Organization::TYPE_SUPPLIER && 
                     ($user->role_id != Role::ROLE_ADMIN &&
                      $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
-                $user->role_id = Role::ROLE_SUPPLIER_MANAGER;   
+                     $user->role_id = Role::ROLE_SUPPLIER_MANAGER;   
             }
             $user->organization_id = $id;
             $user->save();
@@ -172,11 +170,16 @@ class NetworkController extends Controller {
           $parent_id = $user->organization_id; 
         }
         $organization = new Organization();
-        if (Yii::$app->request->isAjax) {
+        if (Yii::$app->request->isAjax && 
+                ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
+                 $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
+                 $user->role_id == Role::ROLE_ADMIN ||
+                 $user->role_id == Role::ROLE_FKEEPER_MANAGER))
+        {
             $post = Yii::$app->request->post();
             if ($organization->load($post)) {
-            $organization->parent_id = $parent_id;
-            $organization->save();
+                $organization->parent_id = $parent_id;
+                $organization->save();
             }
         }
     }

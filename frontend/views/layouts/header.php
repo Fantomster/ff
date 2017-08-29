@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
 use common\models\Organization;
+use common\models\Role;
 use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
@@ -291,7 +292,6 @@ JS;
     </script>
 <?php } ?>
 <header class="main-header">
-
     <?= Html::a('<span class="logo-mini"><b>f</b>k</span><span class="logo-lg"><b>f</b>-keeper</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
@@ -393,16 +393,22 @@ JS;
                                     <small><?= $user->email ?></small>
                                     <small><?= $organization->name ?></small>
                                 </p>
-                                <?=
-                                Html::a("БИЗНЕСЫ", ['network/change-form'], [
-                                    'data' => [
-                                        'target' => '#changeNetOrg',
-                                        'toggle' => 'modal',
-                                        'backdrop' => 'static',
-                                    ],
-                                    'class' => 'btn btn-lg btn-gray',
-                                    'style' => 'border-radius:0;width:100%;text-align:center;',
-                                ]);
+                                <?php
+                                if($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
+                                   $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
+                                   $user->role_id == Role::ROLE_ADMIN ||
+                                   $user->role_id == Role::ROLE_FKEEPER_MANAGER)
+                                {
+                                    echo Html::a("БИЗНЕСЫ", ['network/change-form'], [
+                                        'data' => [
+                                            'target' => '#changeNetOrg',
+                                            'toggle' => 'modal',
+                                            'backdrop' => 'static',
+                                        ],
+                                        'class' => 'btn btn-lg btn-gray',
+                                        'style' => 'border-radius:0;width:100%;text-align:center;',
+                                    ]);
+                                }
                                 ?>
                             </li>
                             <!--li class="user-body" style="padding:0;border:0;">
@@ -423,7 +429,6 @@ JS;
         <?php } ?>
     </nav>
 </header>
-
 <?=
 Modal::widget([
     'id' => 'changeNetOrg',

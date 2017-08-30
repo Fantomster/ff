@@ -285,13 +285,15 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             (select `type_id` from `organization` where `id` = o.`parent_id`) as `type_id`
             from `organization` o where id = " . $user->organization_id . "
             )tb where id is not null)tb2";
-            if(\Yii::$app->db->createCommand($sql)->queryScalar()>1 && 
-                  ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
-                   $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
-                   $user->role_id == Role::ROLE_ADMIN ||
-                   $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
-               Yii::$app->user->login($user, 1);
-               return $this->redirect(['business']); 
+            if(!empty($user->organization_id)){
+                if(\Yii::$app->db->createCommand($sql)->queryScalar()>1 && 
+                      ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
+                       $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
+                       $user->role_id == Role::ROLE_ADMIN ||
+                       $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
+                   Yii::$app->user->login($user, 1);
+                   return $this->redirect(['business']); 
+                }
             }
             $returnUrl = $this->performLogin($model->getUser(), $model->rememberMe);
             return $this->redirect($returnUrl);

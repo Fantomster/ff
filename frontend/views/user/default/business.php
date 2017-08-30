@@ -84,6 +84,20 @@ a.btn-continue:hover{
     background: #69C178;
     color: #fff;
 }
+.pagination>li>a {
+    background: #fafafa;
+    color: #666;
+}
+.pagination > li > a, .pagination > li > span {
+    color: #666;
+    background-color: #fafafa;
+    border: 1px solid #ссс;
+}
+.pagination > li > a:hover, .pagination > li > span:hover, .pagination > li > a:focus, .pagination > li > span:focus {
+    color: #666;
+    background-color: #eee;
+    border-color: #ddd;
+}
 ');
 ?>
 <?php 

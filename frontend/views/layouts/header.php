@@ -263,7 +263,6 @@ JS;
      font-size:14px;
     }
     .network-modal .network-list{
-        max-height: 300px;
         overflow-y: auto;
     }
     .network-modal .new-network{

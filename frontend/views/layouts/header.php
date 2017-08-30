@@ -279,6 +279,15 @@ JS;
     .network-modal{
         border-radius:4px;
     }
+    .btn-business{
+    background-color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    box-shadow: 0,0,10px rgba(0,0,0, 0.4);
+    box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    width:100%;
+    text-align:center;
+    }
 ");
 ?>
     <script type="text/javascript">
@@ -404,8 +413,7 @@ JS;
                                             'toggle' => 'modal',
                                             'backdrop' => 'static',
                                         ],
-                                        'class' => 'btn btn-lg btn-gray',
-                                        'style' => 'border-radius:0;width:100%;text-align:center;',
+                                        'class' => 'btn btn-lg btn-business',
                                     ]);
                                 }
                                 ?>

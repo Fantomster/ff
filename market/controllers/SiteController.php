@@ -806,7 +806,7 @@ class SiteController extends Controller {
     public function actionAjaxRestaurantsMore($num) {
         $locationWhere = [];
         if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+            $locationWhere = ['country'=>Yii::$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
         }
         $count = Organization::find()
                 ->where([

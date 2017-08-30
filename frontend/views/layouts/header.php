@@ -21,7 +21,7 @@ if (!Yii::$app->user->isGuest) {
     $dashboard = Url::to(['/site/index']);
     $unreadMessages = $organization->unreadMessages;
     $unreadNotifications = $organization->unreadNotifications;
-    $changeNetworkUrl = Url::to(['/network/change']);
+    $changeNetworkUrl = Url::to(['/user/change']);
 //    $("#checkout").on("pjax:complete", function() {
 //        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
 //    });
@@ -218,7 +218,7 @@ $(document).on("click", ".new-network", function(e) {
         type: 'post',
         data: form.serialize(),
         success: function (response) {  
-          $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:30000, async: false, url: "/network/change-form"});
+          $.pjax.reload({container: '#pjax-network-list', push:false, replace:false, timeout:30000, async: false, url: "/user/default/change-form"});
           $("#create-network-form")[0].reset();
         },
         error: function(jqXHR, errMsg) { 
@@ -278,6 +278,15 @@ JS;
     }
     .network-modal{
         border-radius:4px;
+    }
+    .btn-business{
+    background-color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    box-shadow: 0,0,10px rgba(0,0,0, 0.4);
+    box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    width:100%;
+    text-align:center;
     }
 ");
 ?>
@@ -398,14 +407,13 @@ JS;
                                    $user->role_id == Role::ROLE_ADMIN ||
                                    $user->role_id == Role::ROLE_FKEEPER_MANAGER)
                                 {
-                                    echo Html::a("БИЗНЕСЫ", ['network/change-form'], [
+                                    echo Html::a("БИЗНЕСЫ", ['user/change-form'], [
                                         'data' => [
                                             'target' => '#changeNetOrg',
                                             'toggle' => 'modal',
                                             'backdrop' => 'static',
                                         ],
-                                        'class' => 'btn btn-lg btn-gray',
-                                        'style' => 'border-radius:0;width:100%;text-align:center;',
+                                        'class' => 'btn btn-lg btn-business',
                                     ]);
                                 }
                                 ?>

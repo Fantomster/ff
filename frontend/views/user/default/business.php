@@ -13,7 +13,7 @@ frontend\assets\AppAsset::register($this);
  */
 $this->title = "Вход / регистрация";
 $dashboard = Url::to(['/site/index']);
-$changeNetworkUrl = Url::to(['/network/change']);
+$changeNetworkUrl = Url::to(['/user/change']);
 $js = <<<JS
     $(document).on("click",".change-net-org", function(e){
     e.preventDefault();

@@ -77,7 +77,7 @@ $grid = [
             <?php
             $form = ActiveForm::begin([
                         'id' => 'create-network-form',
-                        'action' => Url::to('/network/create'),
+                        'action' => Url::to('/user/default/create'),
             ]);
             ?>
             <?=

@@ -56,11 +56,10 @@ class GuideProductsSearch extends GuideProduct {
 
         $query->where([
             'guide_id' => $guideId,
-            'type' => Guide::TYPE_GUIDE,
         ]);
         
         // grid filtering conditions
-        $query->andFilterWhere(['like', 'name', $this->searchString]);
+        $query->andFilterWhere(['like', 'catalog_base_goods.product', $this->searchString]);
 
         return $dataProvider;
     }

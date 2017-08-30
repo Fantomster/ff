@@ -185,9 +185,10 @@ $this->registerJs('
         </div>
     </div>
 </section>
-<?php
-Modal::begin([
+<?=
+Modal::widget([
     'id' => 'guideModal',
-]);
+    'clientOptions' => false,
+    'size' => Modal::SIZE_LARGE,
+])
 ?>
-<?php Modal::end(); ?>

@@ -77,6 +77,7 @@ $this->registerJs(
                     //$("#loader-show").hideLoading();
                 });
             });
+            
             $(document).on("change keyup paste cut", "#searchString", function() {
                 $("#hiddenSearchString").val($("#searchString").val());
                 if (timer) {

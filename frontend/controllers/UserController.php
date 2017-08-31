@@ -34,7 +34,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             'access' => [
                 'class' => AccessControl::className(),
                 'rules' => [[
-                'actions' => ['confirm','resend', 'logout','business','change-form','change','create'],
+                'actions' => ['confirm','resend', 'logout'],
                 'allow' => true,
                 'roles' => ['?', '@'],
                     ],
@@ -44,11 +44,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index','business','profile', 'account', 'cancel', 'resend-change'],
+                        'actions' => ['index','profile', 'account', 'cancel', 'resend-change'],
                         'allow' => false,
                     ],
                     [
-                        'actions' => ['ajax-invite-friend'],
+                        'actions' => ['ajax-invite-friend', 'business','change-form','change','create'],
                         'allow' => true,
                         'roles' => ['@'],
                     ]

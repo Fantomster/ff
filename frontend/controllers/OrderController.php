@@ -210,7 +210,6 @@ class OrderController extends DefaultController {
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
 
-        $test = $guide->guideProductsIds;
         $params = Yii::$app->request->getQueryParams();
 
         $vendorSearchModel = new VendorSearch();
@@ -294,7 +293,18 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
         
-        return $this->renderAjax('/order/guides/_view');
+        $params = Yii::$app->request->getQueryParams();
+
+        $guideSearchModel = new GuideProductsSearch();
+        $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
+        $guideDataProvider = $guideSearchModel->search($params, $guide->id);
+        $guideDataProvider->pagination = ['pageSize' => 8];
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+        } else {
+            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+        }
     }
 
     public function actionAjaxSelectVendor($id) {

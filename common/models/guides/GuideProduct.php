@@ -16,6 +16,8 @@ use common\models\CatalogBaseGoods;
  *
  * @property CatalogBaseGoods $baseProduct
  * @property Guide $guide
+ * @property string $price
+ * @property strin $note
  */
 class GuideProduct extends \yii\db\ActiveRecord
 {
@@ -69,5 +71,22 @@ class GuideProduct extends \yii\db\ActiveRecord
     public function getGuide()
     {
         return $this->hasOne(Guide::className(), ['id' => 'guide_id']);
+    }
+    
+    public function getPrice() {
+        $product = \common\models\CatalogGoods::find()->where(['base_goods_id' => $this->cbg_id])->one();
+        if (empty($product)) {
+            $product = CatalogBaseGoods::find()->where(['id' => $this->cbg_id])->one();
+        }
+        if (empty($product)) {
+            return 0;
+        } else {
+            return $product->price;
+        }
+    }
+    
+    public function  getNote() {
+        $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->cbg_id, 'rest_org_id' => $this->guide->client_id]);
+        return isset($note) ? $note->note : '';
     }
 }

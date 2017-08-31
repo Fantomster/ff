@@ -184,7 +184,7 @@ $this->registerJs('
 
 ', View::POS_READY);
 ?>
-
+<img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">

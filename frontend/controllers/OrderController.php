@@ -178,7 +178,7 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if ($client->type_id === Organization::TYPE_RESTAURANT) {
+        if ($name && $client->type_id === Organization::TYPE_RESTAURANT) {
             $guide = new Guide();
             $guide->client_id = $client->id;
             $guide->name = $name;
@@ -206,7 +206,6 @@ class OrderController extends DefaultController {
         }
         $session['currentGuide'] = $id;
 
-        $test = $session['guideProductList'];
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
 
@@ -219,8 +218,7 @@ class OrderController extends DefaultController {
 
         $productSearchModel = new OrderCatalogSearch();
         $vendors = $client->getSuppliers(null);
-        $test = array_keys($vendors);
-        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : array_keys($vendors)[1];
+        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;

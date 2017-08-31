@@ -68,7 +68,7 @@ class FrController extends \yii\rest\Controller {
                 $responsible_user_id = 1515736;
             }
             if ($sitepage == "fkeeper") {
-                if ($fields['formtype'] == 1) {
+                if ($formtype == 1) {
                     $lead_status_id = 465726;
                     $responsible_user_id = 1515736;
                     if ($lpartner == 1) {
@@ -81,14 +81,14 @@ class FrController extends \yii\rest\Controller {
                         $lead_name = 'fkeeper: Хочет стать партнером 900';
                     }
                 }
-                if ($fields['formtype'] == 2) {
+                if ($formtype == 2) {
                     $lead_status_id = 465729;
                     $lpartner = '';
                     $lead_name = 'fkeeper: Ресторан';
                 }
                 $responsible_user_id = 1427371;
             }
-            if ($fields['formtype'] == 3) {
+            if ($formtype == 3) {
                 $lead_status_id = 463335;
                 $lpartner = '';
                 $lead_name = 'fkeeper: Поставщик';

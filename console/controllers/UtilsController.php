@@ -99,7 +99,7 @@ class UtilsController extends Controller {
     }
 
     public function actionTestRedis() {
-        Yii::$app->redis->executeCommand('PUBLISH', [
+        \Yii::$app->redis->executeCommand('PUBLISH', [
                 'channel' => 'test',
                 'message' => 'ololo!'
             ]);

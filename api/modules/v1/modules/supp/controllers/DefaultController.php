@@ -1041,7 +1041,13 @@ class DefaultController extends Controller {
       ->queryScalar();   
       
       $baseCat = Yii::$app->db->createCommand('select id from catalog where supp_org_id ='.$org.' and type = 1')
-      ->queryScalar();   
+       ->queryScalar(); 
+      
+      if (!$baseCat) {
+        $res = $this->save_action(__FUNCTION__, $sessionId, 0,'Base catalog is not found',$this->ip);       
+        return 'Base catalog error. Catalog is not found.';   
+        exit;
+      }
       
       $clearProduct = "'".str_replace('"','`',$product)."'";
       

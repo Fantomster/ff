@@ -146,6 +146,7 @@ class RequestController extends DefaultController {
                     ->andWhere($category)
                     ->andWhere($my)
                     ->andWhere($rush)
+                    //->andWhere('responsible_supp_org_id is null or responsible_suspp_org_id = ' . $organization->id)
                     ->orderBy('id DESC'),
                 'pagination' => [
                     'pageSize' => 15,

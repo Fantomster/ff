@@ -20,6 +20,7 @@ use common\models\guides\Guide;
 use common\models\search\GuideSearch;
 use common\models\guides\GuideProduct;
 use common\models\search\GuideProductsSearch;
+use common\models\search\BaseProductSearch;
 use common\models\search\VendorSearch;
 use common\components\AccessRule;
 use kartik\mpdf\Pdf;
@@ -71,6 +72,8 @@ class OrderController extends DefaultController {
                             'guides',
                             'favorites',
                             'edit-guide',
+                            'reset-guide',
+                            'save-guide',
                             'checkout',
                             'repeat',
                             'refresh-cart',
@@ -85,7 +88,11 @@ class OrderController extends DefaultController {
                             'ajax-set-delivery',
                             'ajax-show-details',
                             'ajax-create-guide',
-                            'ajax-edit-guide',
+                            'ajax-add-to-guide',
+                            'ajax-delete-guide',
+                            'ajax-remove-from-guide',
+                            'ajax-show-guide',
+                            'ajax-select-vendor',
                             'complete-obsolete',
                             'pjax-cart',
                         ],
@@ -146,7 +153,8 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $searchModel = new GuideSearch();
         $params = Yii::$app->request->getQueryParams();
-
+        $params['GuideSearch'] = Yii::$app->request->post("GuideSearch");
+        
         $dataProvider = $searchModel->search($params, $client->id);
 
         if (Yii::$app->request->isPjax) {
@@ -185,49 +193,154 @@ class OrderController extends DefaultController {
     public function actionEditGuide($id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-        
+
+        if (empty($guide)) {
+            return $this->redirect(['order/guides']);
+        }
+
+        $session = Yii::$app->session;
+
+        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
+            unset($session['guideProductList']);
+            unset($session['selectedVendor']);
+        }
+        $session['currentGuide'] = $id;
+
+        $test = $session['guideProductList'];
+        $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
+        $session['guideProductList'] = $guideProductList;
+
         $params = Yii::$app->request->getQueryParams();
-        
+
         $vendorSearchModel = new VendorSearch();
+        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
-        $vendorDataProvider->pagination = [
-                'pageSize' => 8,
-            ];
-        
-        $selectedVendor = (Yii::$app->request->post("selectedVendor")) ? (int)Yii::$app->request->post("selectedVendor") : 4;
+        $vendorDataProvider->pagination = ['pageSize' => 8];
+
         $productSearchModel = new OrderCatalogSearch();
         $vendors = $client->getSuppliers(null);
+        $test = array_keys($vendors);
+        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : array_keys($vendors)[1];
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
+        $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         $productDataProvider = $productSearchModel->search($params);
-        
-        $guideProducts = new GuideProductsSearch();
-        $guideDataProvider = $guideProducts->search($params, $guide->id);
-        
+        $productDataProvider->pagination = ['pageSize' => 8];
+
+        $guideSearchModel = new BaseProductSearch();
+        $params['BaseProductSearch'] = Yii::$app->request->post("BaseProductSearch");
+        $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
+        $guideDataProvider->pagination = ['pageSize' => 7];
+
         $pjax = Yii::$app->request->get("_pjax");
         if (Yii::$app->request->isPjax && $pjax == '#vendorList') {
             return $this->renderPartial('guides/_vendor-list', compact('vendorDataProvider', 'selectedVendor'));
         } elseif (Yii::$app->request->isPjax && $pjax == '#productList') {
             return $this->renderPartial('guides/_product-list', compact('productDataProvider', 'guideProductList'));
+        } elseif (Yii::$app->request->isPjax && $pjax == '#guideProductList') {
+            return $this->renderPartial('guides/_guide-product-list', compact('guideDataProvider', 'guideProductList'));
         } else {
-            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productsDataProvider', 'guideProducts', 'guideDataProvider'));
+            return $this->render('guides/edit-guide', compact('guide', 'selectedVendor', 'guideProductList', 'guideProductList', 'vendorSearchModel', 'vendorDataProvider', 'productSearchModel', 'productDataProvider', 'guideSearchModel', 'guideDataProvider'));
         }
+    }
+
+    public function actionSaveGuide($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $session = Yii::$app->session;
+
+        if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
+            return $this->redirect(['order/guides']);
+        }
+        
+        $guideProductList = $session['guideProductList'];
+
+        foreach ($guide->guideProducts as $guideProduct) {
+            if (!in_array($guideProduct->cbg_id, $guideProductList)) {
+                $guideProduct->delete();
+            } else {
+                $position = array_search($guideProduct->cbg_id, $guideProductList);
+                if ($position !== FALSE) {
+                    unset($guideProductList[$position]);
+                }
+            }
+        }
+
+        foreach ($guideProductList as $newProductId) {
+            $newProduct = new GuideProduct();
+            $newProduct->guide_id = $id;
+            $newProduct->cbg_id = $newProductId;
+            $newProduct->save();
+        }
+
+        unset($session['guideProductList']);
+        unset($session['selectedVendor']);
+        unset($session['currentGuide']);
+
+        return $this->redirect(['order/guides']);
+    }
+
+    public function actionResetGuide() {
+        $session = Yii::$app->session;
+        unset($session['guideProductList']);
+        unset($session['selectedVendor']);
+        unset($session['currentGuide']);
+        return $this->redirect(['order/guides']);
     }
 
     public function actionAjaxShowGuide($id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        
+        $params = Yii::$app->request->getQueryParams();
+
+        $guideSearchModel = new GuideProductsSearch();
+        $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
+        $guideDataProvider = $guideSearchModel->search($params, $guide->id);
+        $guideDataProvider->pagination = ['pageSize' => 8];
+
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+        } else {
+            return $this->renderAjax('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
+        }
     }
 
-    public function actionAjaxAddToGuide($id, $product_id) {
-        $client = $this->currentUser->organization;
-        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+    public function actionAjaxSelectVendor($id) {
+        $session = Yii::$app->session;
+        $session['selectedVendor'] = $id;
+        return true;
     }
 
-    public function actionAjaxRemoveFromGuide($id, $product_id) {
+    public function actionAjaxAddToGuide($id) {
         $client = $this->currentUser->organization;
-        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+        $session = Yii::$app->session;
+
+        $product = $client->getProductIfAvailable($id);
+
+        if ($product) {
+            $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : [];
+            if (!in_array($product->id, $guideProductList)) {
+                $guideProductList[] = $product->id;
+                $session['guideProductList'] = $guideProductList;
+            }
+        }
+
+        return isset($product);
+    }
+
+    public function actionAjaxRemoveFromGuide($id) {
+        $client = $this->currentUser->organization;
+        $session = Yii::$app->session;
+        $guideProductList = $session['guideProductList'];
+        $positionInGuide = array_search($id, $guideProductList);
+        if ($positionInGuide !== FALSE) {
+            unset($guideProductList[$positionInGuide]);
+            $session['guideProductList'] = $guideProductList;
+            return true;
+        }
+        return false;
     }
 
     public function actionFavorites() {

@@ -194,8 +194,6 @@ class SiteController extends Controller {
                 ->andWhere('category_id is not null')
                 ->andWhere($cbgWhere)
                 ->count();
-
-        
         
         return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
     }
@@ -806,7 +804,7 @@ class SiteController extends Controller {
     public function actionAjaxRestaurantsMore($num) {
         $locationWhere = [];
         if(Yii::$app->request->cookies->get('locality')){
-            $locationWhere = ['country'=>$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
+            $locationWhere = ['country'=>Yii::$app->request->cookies->get('country'),'locality'=>Yii::$app->request->cookies->get('locality')];
         }
         $count = Organization::find()
                 ->where([

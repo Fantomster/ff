@@ -813,12 +813,67 @@ class Organization extends \yii\db\ActiveRecord {
     }
     
     /**
-     * @return count of base products
+     * 
+     * return count of products
+     * 
+     * @return integer
      */
     public function getProductsCount() {
         if ($this->type_id !== self::TYPE_SUPPLIER) {
             return 0;
         }
         return CatalogBaseGoods::find()->where(['supp_org_id' => $this->id, 'status' => CatalogBaseGoods::STATUS_ON, 'deleted' => CatalogBaseGoods::DELETED_OFF])->count();
+    }
+    
+    /**
+     * return product if it is available to client
+     * 
+     * @return CatalogBaseGoods
+     */
+    public function getProductIfAvailable($product_id) {
+        if ($this->type_id !== self::TYPE_RESTAURANT) {
+            return null;
+        }
+        
+        $cgTable = CatalogGoods::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+        $orgTable = Organization::tableName();
+        $rsrTable = RelationSuppRest::tableName();
+        $catTable = Catalog::tableName();
+        
+        $product = CatalogGoods::find()
+                ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.deleted" => false,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.rest_org_id" => $this->id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $product_id,
+                ])
+                ->one();
+        if ($product) {
+            return CatalogBaseGoods::findOne(['id' => $product_id]);
+        }
+        $product = CatalogBaseGoods::find()
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cbgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.deleted" => false,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.rest_org_id" => $this->id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $product_id,
+                ])
+                ->one();
+        if ($product) {
+            return $product;
+        }
+        return null;
     }
 }

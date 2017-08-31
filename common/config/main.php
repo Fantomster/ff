@@ -73,6 +73,7 @@ return [
                 'supplier' => 'site/supplier',
                 'restaurant' => 'site/restaurant',
                 'login' => 'user/login',
+                'business' => 'user/default/business',
                 'logout' => 'user/logout',
                 'register' => 'user/register',
                 'forgot' => 'user/forgot',

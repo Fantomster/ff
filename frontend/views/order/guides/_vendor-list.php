@@ -3,7 +3,9 @@
         <?=
         \yii\widgets\ListView::widget([
             'dataProvider' => $vendorDataProvider,
-            'itemView' => '_vendor-view',
+            'itemView' => function ($model, $key, $index, $widget) use ($selectedVendor) {
+                return $this->render('_vendor-view', compact('model', 'selectedVendor'));
+            },
             'itemOptions' => [
                 'tag' => 'tr',
             ],
@@ -17,7 +19,7 @@
                 'class' => 'col-lg-12 list-wrapper inline no-padding'
             ],
             'layout' => "{items}<tr><td>{pager}</td></tr>",
-            'emptyText' => 'Список пуст',
+            'emptyText' => '<tr><td>Список пуст</td></tr>',
         ])
         ?>
     </tbody>

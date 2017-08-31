@@ -6,22 +6,21 @@ use yii\web\View;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
+use yii\bootstrap\Modal;
+
+$this->title = "Список гайдов";
+
+yii\jui\JuiAsset::register($this);
 
 $guideUrl = Url::to(['order/ajax-create-guide']);
 
 $this->registerJs('
-    $(document).on("click", ".delete-guide, .delete-product", function(e) {
+    $(document).on("click", ".delete-guide", function(e) {
         e.preventDefault();
         clicked = $(this);
-        if (clicked.hasClass(".delete-guide")) {
-            title = "Удаление гайда";
-            text = "Вы уверены, что хотите удалить гайд?";
-            success = "Гайд удален!";
-        } else if (clicked.hasClass(".delete-product")){
-            title = "Удаление товара";
-            text = "Вы уверены, что хотите удалить товара из гайда?";
-            success = "Товар удален!";
-        }
+        title = "Удаление гайда";
+        text = "Вы уверены, что хотите удалить гайд?";
+        success = "Гайд удален!";
         swal({
             title: title,
             text: text,
@@ -37,6 +36,7 @@ $this->registerJs('
                     ).done(function (result) {
                         if (result) {
                             resolve(result);
+                            $.pjax.reload("#guidesList", {timeout:30000});
                         } else {
                             resolve(false);
                         }
@@ -86,11 +86,105 @@ $this->registerJs('
             }
         });
     });
-
     
+    $(document).on("click", ".add-note", function(e) {
+        e.preventDefault();
+        var clicked = $(this);
+        var title = "Комментарий к товару";
+        fixBootstrapModal();
+        swal({
+            title: title,
+            input: "textarea",
+            showCancelButton: true,
+            cancelButtonText: "Закрыть",
+            confirmButtonText: "Сохранить",
+            showLoaderOnConfirm: true,
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            inputValue: clicked.data("original-title"),
+            onClose: function() {
+                clicked.blur();
+                swal.resetDefaults();
+                restoreBootstrapModal();
+            },
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        clicked.data("url"),
+                        {comment: text}
+                    ).done(function (result) {
+                        if (result) {
+                            resolve(result);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
+            if (result.type == "success") {
+                clicked.tooltip("hide")
+                    .attr("data-original-title", result.comment)
+                    .tooltip("fixTitle")
+                    .blur();
+                clicked.data("original-title", result.comment);
+                swal(result);
+            } else {
+                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+            }
+        });
+    });
+
+    $(document).on("click", ".add-to-cart", function(e) {
+        e.preventDefault();
+        quantity = $(this).parent().parent().find(".quantity").val();
+        var cart = $(".basket_a");
+        var imgtodrag = $("#cart-image");
+        if (imgtodrag) {
+            var imgclone = imgtodrag.clone()
+                .offset({
+                top: $(this).offset().top - 30,
+                left: $(this).offset().left + 60
+            })
+                .css({
+                "opacity": "0.5",
+                    "position": "absolute",
+                    "height": "60px",
+                    "width": "60px",
+                    "z-index": "10000"
+            })
+                .appendTo($("body"))
+                .animate({
+                "top": cart.offset().top,
+                    "left": cart.offset().left,
+                    "width": 60,
+                    "height": 60
+            }, 1000, "easeInOutExpo");
+
+            setTimeout(function () {
+                cart.parent().effect("highlight", {
+                    times: 2,
+                    color: "#6ea262"
+                }, 350);
+            }, 1000);
+
+            imgclone.animate({
+                "width": 0,
+                    "height": 0
+            }, function () {
+                $(this).detach()
+            });
+        }
+        $.post(
+            "' . Url::to(['/order/ajax-add-to-cart']) . '",
+            {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
+        ).done(function(result) {
+        });
+    });
+
 ', View::POS_READY);
 ?>
-
+<img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
@@ -157,7 +251,7 @@ $this->registerJs('
             <div class="row">
                 <div class="col-md-12 guid">
                     <?php
-                    Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'guidesList', 'timeout' => 30000]);
+                    Pjax::begin(['formSelector' => '#searchForm', 'enablePushState' => false, 'id' => 'guidesList', 'timeout' => 30000]);
                     ?>
                     <?=
                     ListView::widget([
@@ -187,3 +281,10 @@ $this->registerJs('
         </div>
     </div>
 </section>
+<?=
+Modal::widget([
+    'id' => 'guideModal',
+    'clientOptions' => false,
+    'size' => Modal::SIZE_LARGE,
+])
+?>

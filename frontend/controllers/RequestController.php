@@ -137,25 +137,38 @@ class RequestController extends DefaultController {
             }    
         }
         if($organization->type_id == Organization::TYPE_SUPPLIER){
-            $my = \Yii::$app->request->get('myOnly')==2?['responsible_supp_org_id' => $organization->id]:[];
-            $rush = \Yii::$app->request->get('rush')==2?['rush_order' => 1]:[];
-            $dataListRequest = new ActiveDataProvider([
-                'query' => Request::find()->where(['active_status' => Request::ACTIVE])
-                    ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
-                    ->andWhere($search)
-                    ->andWhere($category)
-                    ->andWhere($my)
-                    ->andWhere($rush)
-                    //->andWhere('responsible_supp_org_id is null or responsible_suspp_org_id = ' . $organization->id)
-                    ->orderBy('id DESC'),
-                'pagination' => [
-                    'pageSize' => 15,
-                ],
-            ]);
-            if (Yii::$app->request->isPjax) {
-                return $this->renderPartial("list-vendor", compact('dataListRequest','organization'));
+            if(\common\models\DeliveryRegions::find()->where(['supplier_id'=>$organization->id])->exists()){
+                $deliveryRegions = \common\models\DeliveryRegions::find()
+                        ->select('administrative_area_level_1, locality')
+                        ->where(['supplier_id'=>$organization->id])
+                        ->asArray()
+                        ->all();
+                $my = \Yii::$app->request->get('myOnly')==2?['responsible_supp_org_id' => $organization->id]:[];
+                $rush = \Yii::$app->request->get('rush')==2?['rush_order' => 1]:[];
+                $dataListRequest = new ActiveDataProvider([
+                    'query' => Request::find()->where(['active_status' => Request::ACTIVE])
+                        ->joinWith('client')
+                        ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
+                        ->andWhere($search)
+                        ->andWhere($category)
+                        ->andWhere($my)
+                        ->andWhere($rush)
+                        ->andWhere(['OR',
+                            ['IN','administrative_area_level_1',$deliveryRegions],
+                            ['IN','locality',$deliveryRegions],
+                            ])
+                        ->orderBy('id DESC'),
+                    'pagination' => [
+                        'pageSize' => 15,
+                    ],
+                ]);
+                if (Yii::$app->request->isPjax) {
+                    return $this->renderPartial("list-vendor", compact('dataListRequest','organization'));
+                }else{
+                    return $this->render("list-vendor", compact('dataListRequest','organization'));
+                }    
             }else{
-                return $this->render("list-vendor", compact('dataListRequest','organization'));
+               return $this->render("delivery-vendor"); 
             }
         }
     }

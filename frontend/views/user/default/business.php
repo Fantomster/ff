@@ -71,7 +71,7 @@ text-align:center;
 a.btn-continue{
     font-size: 24px;
     font-family: \'Circe-Bold\';
-    text-align: -webkit-center;
+    text-align: center;
     margin-top: 20px;
     display: block;
     width: 100%;

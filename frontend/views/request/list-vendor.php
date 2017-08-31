@@ -195,7 +195,7 @@ $this->title = 'Заявки';
                     ],
                     'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
                     'summary' => 'Показано {count} из {totalCount}',
-                    'emptyText' => 'Список пуст',
+                    'emptyText' => '<h5 class="text-center" style="padding-top:17px;">По текущим параметрам поиска, новых заявок нет</h5>',
                 ])?>
               <?php Pjax::end(); ?>
             </div>

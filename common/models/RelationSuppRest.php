@@ -192,6 +192,6 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
-        \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
+        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
     }
 }

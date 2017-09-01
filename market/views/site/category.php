@@ -11,20 +11,28 @@ $this->title = 'F-MARKET фильтр поиска';
 
 ?>
 <style>
-    .filter-price{
+    .filter{
     margin: 24px 0 12px 0;
     color:#76aa69;
-    display:table;
     border-bottom: 1px dotted;
     float: right;
+    margin-left:15px;
     }  
     @media (max-width: 767px){
-        .filter-price{
+        .filter{
         margin: -10px 0 15px 0;
         float: none;
         }     
     }
-    .filter-price:hover,.filter-price:focus{text-decoration:none;color:#84bf76;}
+    .filter:hover,.filter:focus{text-decoration:none;color:#84bf76;}
+    .caret.down {
+        border-bottom: 4px dashed;
+        border-top:0;
+    }
+    .caret.up {
+        border-top: 4px dashed;
+        border-bottom:0;
+    }
 </style>
 <div class="row">
       <div class="col-xs-12 col-md-6 col-sm-6 min-padding">
@@ -41,9 +49,17 @@ $this->title = 'F-MARKET фильтр поиска';
         ])
       ?>
     </div>
-    <!--div class="col-xs-12 col-md-6 col-sm-6 min-padding">
-        <a href="#" class="filter-price">Сортировка по цене <span class="caret"></span></a>
-    </div-->
+    <div class="col-xs-12 col-md-6 col-sm-6 min-padding">
+        <?php
+        $caretRating = "down"; $caretPrice = "down";
+        if($filter == 'rating-up'){$caretRating = "up"; $caretPrice = "up";}
+        if($filter == 'rating-down'){$caretRating = "down"; $caretPrice = "up";}
+        if($filter == 'price-up'){$caretRating = "up"; $caretPrice = "up";}
+        if($filter == 'price-down'){$caretRating = "up"; $caretPrice = "down";}
+        echo "<a href=" . Url::to(['/site/category', 'id' => $id, 'filter' => 'rating-' . $caretRating]) . " class='filter'>Рейтинг <span class='caret " . $caretRating . "'></span></a>";
+        echo "<a href=" . Url::to(['/site/category', 'id' => $id, 'filter' => 'price-' . $caretPrice]) . " class='filter'>Цена <span class='caret " . $caretPrice . "'></span></a>";
+        ?>
+    </div>
 </div>
 <div class="row">
   <div class="col-md-12">

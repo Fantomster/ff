@@ -894,7 +894,20 @@ class SiteController extends Controller {
         $supplierRegion = [];
         $oWhere = [];
         $cbgWhere = [];
-        
+        $filter = "rating-up";
+        $filterWhere = "rating desc";
+        if(Yii::$app->request->get('filter') == "price-up"){
+             $filter = "price-down"; $filterWhere = "price ASC";
+        }
+        if(Yii::$app->request->get('filter') == "price-down"){
+             $filter = "price-up"; $filterWhere = "price DESC";
+        }
+        if(Yii::$app->request->get('filter') == "rating-up"){
+             $filter = "rating-down"; $filterWhere = "rating  ASC";
+        }
+        if(Yii::$app->request->get('filter') == "rating-down"){
+             $filter = "rating-up"; $filterWhere = "rating DESC";
+        }
         if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
@@ -937,7 +950,6 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
                 ->andWhere($cbgWhere)
-                ->orderBy([$cbgTable.'.rating'=>SORT_DESC]) 
                 ->limit(12)
                 ->count();
         $products = CatalogBaseGoods::find()
@@ -950,13 +962,13 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
                 ->andWhere($cbgWhere)
-                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                ->orderBy($filterWhere)
                 ->limit(12)
                 ->all();
         
         $category = \common\models\MpCategory::find()->where(['slug' => $id])->one();
         if ($products) {
-            return $this->render('category', compact('products', 'count', 'category'));
+            return $this->render('category', compact('products', 'id', 'count', 'category','filter'));
         } else {
             $title ='F-MARKET категории';
             $breadcrumbs = \yii\widgets\Breadcrumbs::widget([

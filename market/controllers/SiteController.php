@@ -954,9 +954,9 @@ class SiteController extends Controller {
                 ->limit(12)
                 ->all();
         
-        $category = \common\models\MpCategory::find()->where(['id' => $id])->one();
+        $category = \common\models\MpCategory::find()->where(['slug' => $id])->one();
         if ($products) {
-            return $this->render('category', compact('products', 'id', 'count', 'category'));
+            return $this->render('category', compact('products', 'count', 'category'));
         } else {
             $title ='F-MARKET категории';
             $breadcrumbs = \yii\widgets\Breadcrumbs::widget([

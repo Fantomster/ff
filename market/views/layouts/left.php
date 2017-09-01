@@ -19,9 +19,10 @@ $count_products_from_mp = CatalogBaseGoods::find()
 $left_menu_categorys     = \common\models\MpCategory::getDb()->cache(function ($db) {
     return \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
 });
-$left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($db) {
-    return \common\models\MpCategory::find()->select('id,name,parent,')->where('parent is not null')->asArray()->all();
-});
+//$left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($db) {
+//    return \common\models\MpCategory::find()->where('parent is not null')->all();
+//});
+$left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is not null')->all();
 ?>
 <style>
 .panel-group {margin-bottom: 0px;overflow: hidden;}  
@@ -68,14 +69,14 @@ $left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($
             <div id="coll<?= $i ?>" class="panel-collapse collapse">
                 <?php
                 foreach($left_menu_categorys_sub as $row2){
-                    if($row['id'] == $row2['parent']){
+                    if($row['id'] == $row2->parent){
                 ?>
                 <div class="panel-body">
                     <table class="table">
                         <tr>
                             <td>
-                                <a href="<?= \yii\helpers\Url::to(['site/category', 'id' => $row2['id']]) ?>" title="<?=$row2['name']?>">
-                                <span><?=$row2['name']?></span>
+                                <a href="<?= \yii\helpers\Url::to(['site/category', 'id' => $row2->slug ]) ?>" title="<?=$row2->name ?>">
+                                <span><?=$row2->name ?></span>
                               </a>
                             </td>
                         </tr>

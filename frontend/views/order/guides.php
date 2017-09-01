@@ -182,6 +182,51 @@ $this->registerJs('
         });
     });
 
+    $(document).on("click", ".add-guide-to-cart", function(e) {
+        e.preventDefault();
+        var cart = $(".basket_a");
+        var imgtodrag = $("#cart-image");
+        if (imgtodrag) {
+            var imgclone = imgtodrag.clone()
+                .offset({
+                top: $(this).offset().top - 30,
+                left: $(this).offset().left + 60
+            })
+                .css({
+                "opacity": "0.5",
+                    "position": "absolute",
+                    "height": "60px",
+                    "width": "60px",
+                    "z-index": "10000"
+            })
+                .appendTo($("body"))
+                .animate({
+                "top": cart.offset().top,
+                    "left": cart.offset().left,
+                    "width": 60,
+                    "height": 60
+            }, 1000, "easeInOutExpo");
+
+            setTimeout(function () {
+                cart.parent().effect("highlight", {
+                    times: 2,
+                    color: "#6ea262"
+                }, 350);
+            }, 1000);
+
+            imgclone.animate({
+                "width": 0,
+                    "height": 0
+            }, function () {
+                $(this).detach()
+            });
+        }
+        $.post(
+            "' . Url::to(['/order/ajax-add-guide-to-cart']) . '?id=" + $(this).data("id")
+        ).done(function(result) {
+        });
+    });
+
 ', View::POS_READY);
 ?>
 <img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">

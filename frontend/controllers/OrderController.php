@@ -154,7 +154,7 @@ class OrderController extends DefaultController {
         $searchModel = new GuideSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['GuideSearch'] = Yii::$app->request->post("GuideSearch");
-        
+
         $dataProvider = $searchModel->search($params, $client->id);
 
         if (Yii::$app->request->isPjax) {
@@ -208,7 +208,7 @@ class OrderController extends DefaultController {
 
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
-        
+
         $test = $session['selectedVendor'];
         $test2 = $session['guideProductList'];
 
@@ -258,7 +258,7 @@ class OrderController extends DefaultController {
         if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
             return $this->redirect(['order/guides']);
         }
-        
+
         $guideProductList = $session['guideProductList'];
 
         foreach ($guide->guideProducts as $guideProduct) {
@@ -297,7 +297,7 @@ class OrderController extends DefaultController {
     public function actionAjaxShowGuide($id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-        
+
         $params = Yii::$app->request->getQueryParams();
 
         $guideSearchModel = new GuideProductsSearch();
@@ -348,16 +348,74 @@ class OrderController extends DefaultController {
         return false;
     }
 
+    public function actionAjaxAddGuideToCart($id) {
+        $client = $this->currentUser->organization;
+        $orders = $client->getCart();
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+
+        foreach ($guide->guideProducts as $guideProduct) {
+
+            $product_id = $guideProduct->cbg_id;
+            $price = $guideProduct->price;
+            $product_name = $guideProduct->baseProduct->product;
+            $vendor = $guideProduct->baseProduct->vendor;
+            $units = $guideProduct->baseProduct->units;
+            $article = $guideProduct->baseProduct->article;
+            $quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
+            $isNewOrder = true;
+
+            foreach ($orders as $order) {
+                if ($order->vendor_id == $vendor->id) {
+                    $isNewOrder = false;
+                    $alteringOrder = $order;
+                }
+            }
+            if ($isNewOrder) {
+                $newOrder = new Order();
+                $newOrder->client_id = $client->id;
+                $newOrder->vendor_id = $vendor->id;
+                $newOrder->status = Order::STATUS_FORMING;
+                $newOrder->save();
+                $alteringOrder = $newOrder;
+            }
+
+            $isNewPosition = true;
+            foreach ($alteringOrder->orderContent as $position) {
+                if ($position->product_id == $product_id) {
+                    $position->quantity += $quantity;
+                    $position->save();
+                    $isNewPosition = false;
+                }
+            }
+            if ($isNewPosition) {
+                $position = new OrderContent();
+                $position->order_id = $alteringOrder->id;
+                $position->product_id = $product_id;
+                $position->quantity = $quantity;
+                $position->price = $price;
+                $position->product_name = $product_name;
+                $position->units = $units;
+                $position->article = $article;
+                $position->save();
+            }
+        }
+        $alteringOrder->calculateTotalPrice();
+        $cartCount = $client->getCartCount();
+        $this->sendCartChange($client, $cartCount);
+
+        return true; //$this->renderPartial('_orders', compact('orders'));
+    }
+
     public function actionFavorites() {
         $client = $this->currentUser->organization;
-        
+
         $params = Yii::$app->request->getQueryParams();
         $params['FavoriteSearch'] = Yii::$app->request->post("FavoriteSearch");
-        
+
         $searchModel = new \common\models\search\FavoriteSearch();
         $dataProvider = $searchModel->search($params, $client->id);
         $dataProvider->pagination = ['pageSize' => 10];
-        
+
         return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }
 

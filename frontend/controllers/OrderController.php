@@ -208,6 +208,9 @@ class OrderController extends DefaultController {
 
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
+        
+        $test = $session['selectedVendor'];
+        $test2 = $session['guideProductList'];
 
         $params = Yii::$app->request->getQueryParams();
 
@@ -218,7 +221,11 @@ class OrderController extends DefaultController {
 
         $productSearchModel = new OrderCatalogSearch();
         $vendors = $client->getSuppliers(null);
-        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+        $selectedVendor = $session['selectedVendor'];
+        if (empty($selectedVendor)) {
+            $selectedVendor = isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+        }
+        //isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;

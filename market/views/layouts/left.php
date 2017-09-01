@@ -16,8 +16,12 @@ $count_products_from_mp = CatalogBaseGoods::find()
                 ->andWhere($locationWhere)
                 ->andWhere('category_id is not null')
                 ->count();
-$left_menu_categorys = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
-$left_menu_categorys_sub = \common\models\MpCategory::find()->select('id,name,parent,')->where('parent is not null')->asArray()->all();
+$left_menu_categorys     = \common\models\MpCategory::getDb()->cache(function ($db) {
+    return \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
+});
+$left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($db) {
+    return \common\models\MpCategory::find()->select('id,name,parent,')->where('parent is not null')->asArray()->all();
+});
 ?>
 <style>
 .panel-group {margin-bottom: 0px;overflow: hidden;}  

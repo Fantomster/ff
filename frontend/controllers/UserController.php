@@ -251,7 +251,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      */
     public function actionLogin() {
         //$this->layout = '@app/views/layouts/main-login';
-
         /** @var \amnah\yii2\user\models\forms\LoginForm $model */
         $model = $this->module->model("LoginForm");
 

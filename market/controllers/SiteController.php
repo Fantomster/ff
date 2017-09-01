@@ -115,7 +115,6 @@ class SiteController extends Controller {
         
     }
     public function actionIndex() {
-        $session = Yii::$app->session;
         $relationSuppliers = [];
         $supplierRegion = [];
         $oWhere = [];
@@ -127,7 +126,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -153,7 +152,6 @@ class SiteController extends Controller {
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
-        
         $topSuppliers = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_SUPPLIER,
@@ -208,7 +206,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();   
             }
@@ -241,7 +239,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -262,7 +260,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -311,7 +309,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -332,7 +330,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -385,7 +383,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -406,7 +404,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -454,7 +452,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -475,7 +473,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -527,7 +525,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();   
             }
@@ -649,7 +647,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -718,7 +716,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -839,7 +837,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -903,7 +901,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -989,7 +987,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -1061,7 +1059,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -1115,7 +1113,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -1136,7 +1134,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{

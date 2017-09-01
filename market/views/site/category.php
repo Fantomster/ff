@@ -10,8 +10,24 @@ use yii\widgets\Breadcrumbs;
 $this->title = 'F-MARKET фильтр поиска';
 
 ?>
+<style>
+    .filter-price{
+    margin: 24px 0 12px 0;
+    color:#76aa69;
+    display:table;
+    border-bottom: 1px dotted;
+    float: right;
+    }  
+    @media (max-width: 767px){
+        .filter-price{
+        margin: -10px 0 15px 0;
+        float: none;
+        }     
+    }
+    .filter-price:hover,.filter-price:focus{text-decoration:none;color:#84bf76;}
+</style>
 <div class="row">
-    <div class="col-md-12 no-padding">
+      <div class="col-xs-12 col-md-6 col-sm-6 min-padding">
       <?=
         Breadcrumbs::widget([
             'options' => [
@@ -25,6 +41,9 @@ $this->title = 'F-MARKET фильтр поиска';
         ])
       ?>
     </div>
+    <!--div class="col-xs-12 col-md-6 col-sm-6 min-padding">
+        <a href="#" class="filter-price">Сортировка по цене <span class="caret"></span></a>
+    </div-->
 </div>
 <div class="row">
   <div class="col-md-12">

@@ -226,6 +226,10 @@ $this->registerJs('
         ).done(function(result) {
         });
     });
+    
+    $(document).on("hidden.bs.modal", "#guideModal", function() {
+        $(this).data("bs.modal", null);
+    });
 
 ', View::POS_READY);
 ?>

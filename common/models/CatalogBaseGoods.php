@@ -295,4 +295,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function getRatingPercent() {
         return number_format(((($this->rating) / (self::MAX_RATING / 5)) / 5 * 100), 1);
     }
+    
+    public function getClientNote($clientId) {
+        $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->id, 'rest_org_id' => $clientId]);
+        return isset($note) ? $note->note : '';
+    }
 }

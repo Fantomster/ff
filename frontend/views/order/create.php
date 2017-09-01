@@ -77,6 +77,7 @@ $this->registerJs(
                     //$("#loader-show").hideLoading();
                 });
             });
+            
             $(document).on("change keyup paste cut", "#searchString", function() {
                 $("#hiddenSearchString").val($("#searchString").val());
                 if (timer) {
@@ -121,6 +122,7 @@ $this->registerJs(
         });'
 );
 ?>
+<img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">

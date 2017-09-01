@@ -122,17 +122,19 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
       } */
 
     public function search($params, $currentUser, $const) {
+        $vendor_id = Yii::$app->request->get('vendor_id');
+        $org_id = !empty($vendor_id) ? $vendor_id : $currentUser->organization_id;
         if ($const == RelationSuppRest::PAGE_CLIENTS) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $currentUser->organization_id]);
+                    ->where(['supp_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_SUPPLIERS) {
             $query = RelationSuppRest::find()
-                    ->where(['rest_org_id' => $currentUser->organization_id]);
+                    ->where(['rest_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_CATALOG) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $currentUser->organization_id])
+                    ->where(['supp_org_id' => $org_id])
                     ->andWhere(['invite' => RelationSuppRest::INVITE_ON]);
         }
         $dataProvider = new ActiveDataProvider([
@@ -153,6 +155,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         }
         return $dataProvider;
     }
+
 
     public static function row_count($id) {
         $count = RelationSuppRest::find()

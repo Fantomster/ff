@@ -88,7 +88,7 @@ $this->registerCss("
                             <img style="max-width: 100%;" src="<?= $organization->pictureUrl ?>">
                             <?php if ($showButton): ?>
                                 <div class="btn-edite">
-                                    <?= isset($catalog->id) ? Html::a('Базовый прайс-лист', ['site/catalog', 'id' => $catalog->id], ['class' => 'btn btn-green btn-block']) : '' ?>
+                                    <?= isset($catalog->id) ? Html::a('Прайс-листы поставщика', ['catalog/index', 'vendor_id' => $organization->id], ['class' => 'btn btn-green btn-block']) : '' ?>
                                 </div>
                             <?php endif; ?>
                         </div>

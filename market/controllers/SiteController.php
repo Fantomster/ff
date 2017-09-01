@@ -194,8 +194,6 @@ class SiteController extends Controller {
                 ->andWhere('category_id is not null')
                 ->andWhere($cbgWhere)
                 ->count();
-
-        
         
         return $this->render('/site/index', compact('topProducts', 'topSuppliers', 'topProductsCount', 'topSuppliersCount'));
     }

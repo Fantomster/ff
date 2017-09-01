@@ -290,6 +290,7 @@ $grid = [
                     ]);
                     ?>
                     </div>
+                    <a class="btn btn-outline-default btn-sm pull-right" href="/upload/template.xlsx" style="margin-right: 10px;;"><i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span></a>
                 </div>
             </div>
             <div class="row">

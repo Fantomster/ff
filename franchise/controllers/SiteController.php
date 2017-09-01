@@ -4,6 +4,7 @@ namespace franchise\controllers;
 
 use common\models\Catalog;
 use common\models\FranchiseeAssociate;
+use common\models\RelationSuppRest;
 use common\models\Request;
 use common\models\RequestCallback;
 use common\models\RequestCounters;
@@ -119,7 +120,6 @@ class SiteController extends DefaultController
             $dayTurnover[] = $order["spent"];
             $total += $order["spent"];
         }
-        //dd($ordersByDay);
         //---graph end
 
         $clientsCount = $client = Organization::find()
@@ -148,7 +148,6 @@ class SiteController extends DefaultController
         $dataProvider = $searchModel->search($params, $this->currentFranchisee->id, true);
 
         $franchiseeType = $this->currentFranchisee->type;
-        //dd($vendorsStats30);
         return $this->render('index', compact('dataProvider', 'dayLabels', 'dayTurnover', 'total30Count', 'totalCount', 'clientsCount', 'vendorsCount', 'vendorsStats30', 'vendorsStats', 'franchiseeType'));
     }
 
@@ -441,67 +440,6 @@ class SiteController extends DefaultController
         return $this->render('promotion');
     }
 
-    public function actionCatalog($id)
-    {
-        $currentUser = User::findIdentity(Yii::$app->user->id);
-        $searchString = "";
-        if (!empty(trim(\Yii::$app->request->get('searchString')))) {
-            $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
-//            
-//            $count = \common\models\CatalogBaseGoods::find()
-//            ->where([
-//            'cat_id'=>$id, 
-//            'deleted'=>\common\models\CatalogBaseGoods::DELETED_OFF
-//            ])
-//            ->andWhere(['like','product',$searchString])
-//            ->count();
-//            
-            $sql = "SELECT id,cat_id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                . "WHERE cat_id = $id AND "
-                . "deleted=0 AND (product LIKE :product or article LIKE :article)";
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $id AND "
-                . "deleted=" . CatalogBaseGoods::DELETED_OFF . " AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
-        } else {
-            $sql = "SELECT id,article,cat_id,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                . "WHERE cat_id = $id AND "
-                . "deleted=" . CatalogBaseGoods::DELETED_OFF;
-            $query = \Yii::$app->db->createCommand($sql);
-            $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                . "WHERE cat_id = $id AND "
-                . "deleted=" . CatalogBaseGoods::DELETED_OFF, [':article' => $searchString, ':product' => $searchString])->queryScalar();
-        }
-        $dataProvider = new \yii\data\SqlDataProvider([
-            'sql' => $query->sql,
-            'totalCount' => $totalCount,
-            'params' => [':article' => $searchString, ':product' => $searchString],
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'attributes' => [
-                    'article',
-                    'product',
-                    'units',
-                    'category_id',
-                    'price',
-                    'ed',
-                    'note',
-                    'status',
-                    'cat_id'
-                ],
-            ],
-        ]);
-        $catalog = Catalog::findOne($id);
-        $organizationId = $catalog->supp_org_id;
-        $model = Organization::get_value($organizationId);
-        $org = FranchiseeAssociate::findOne(['organization_id'=>$organizationId]);
-//        if ($model->hasActiveUsers() || $this->currentFranchisee->id != $org->franchisee_id) {
-//            $isEditable = false;
-//        }
-        return $this->render('catalog', compact('searchString', 'dataProvider', 'id'));
-    }
 
     public function actionAjaxEditCatalogForm($catalog = null, $catId = null)
     {
@@ -609,12 +547,12 @@ class SiteController extends DefaultController
     public function actionImportFromXls($id, $vendor_id = null)
     {
         set_time_limit(180);
-        $vendor = \common\models\Catalog::find()->where([
-            'id' => ($vendor_id) ? $vendor_id : $id,
+        $cat = \common\models\Catalog::find()->where([
+            'id' => $id,
             'type' => \common\models\Catalog::BASE_CATALOG
-        ])
-            ->one()
-            ->vendor;
+        ])->one();
+
+        $vendor = $cat->vendor;
         $importModel = new \common\models\upload\UploadForm();
         if (Yii::$app->request->isPost) {
             $unique = 'article'; //уникальное поле
@@ -713,7 +651,7 @@ class SiteController extends DefaultController
                 }
                 $transaction->commit();
                 unlink($path);
-                return $this->redirect([($vendor_id) ? 'goods/vendor' : 'site/catalog', 'id' => $id]);
+                return $this->redirect(['catalog/basecatalog', 'vendor_id'=>$vendor_id, 'id' => $id]);
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();
@@ -722,7 +660,7 @@ class SiteController extends DefaultController
                     . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
             }
         }
-        return $this->renderAjax('catalog/_importCatalog', compact('importModel'));
+        return $this->renderAjax('catalog/_importCatalog', compact('importModel', 'vendor_id'));
     }
 
 
@@ -805,8 +743,6 @@ class SiteController extends DefaultController
             ]);
         }
     }
-
-
 
 //    public function actionImportFromXls($id) {
 //        $vendor = \common\models\Catalog::find()->where([

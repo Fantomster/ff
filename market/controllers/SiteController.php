@@ -152,7 +152,6 @@ class SiteController extends Controller {
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
-        
         $topSuppliers = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_SUPPLIER,
@@ -261,7 +260,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -331,7 +330,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -405,7 +404,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -474,7 +473,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -1135,7 +1134,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{

@@ -17,7 +17,7 @@ use common\models\CatalogBaseGoods;
  * @property CatalogBaseGoods $baseProduct
  * @property Guide $guide
  * @property string $price
- * @property strin $note
+ * @property string $note
  */
 class GuideProduct extends \yii\db\ActiveRecord
 {
@@ -85,7 +85,7 @@ class GuideProduct extends \yii\db\ActiveRecord
         }
     }
     
-    public function  getNote() {
+    public function getNote() {
         $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->cbg_id, 'rest_org_id' => $this->guide->client_id]);
         return isset($note) ? $note->note : '';
     }

@@ -342,7 +342,15 @@ class OrderController extends DefaultController {
     }
 
     public function actionFavorites() {
-        return $this->render('favorites');
+        $client = $this->currentUser->organization;
+        
+        $params = Yii::$app->request->getQueryParams();
+        $params['FavoriteSearch'] = Yii::$app->request->post("FavoriteSearch");
+        
+        $searchModel = new \common\models\search\FavoriteSearch();
+        $dataProvider = $searchModel->search($params, $client->id);
+        
+        return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }
 
     public function actionPjaxCart() {

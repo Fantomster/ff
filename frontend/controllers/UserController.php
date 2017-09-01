@@ -251,9 +251,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      */
     public function actionLogin() {
         //$this->layout = '@app/views/layouts/main-login';
-        $cookies = Yii::$app->response->cookies;
-        $cookies->remove('username');
-        unset($cookies['username']);
         /** @var \amnah\yii2\user\models\forms\LoginForm $model */
         $model = $this->module->model("LoginForm");
 

@@ -37,7 +37,7 @@ class MpCategory extends \yii\db\ActiveRecord {
         return [
             'slug' => [
                 'class' => SluggableBehavior::className(),
-                'attribute' => ['id', 'name'],
+                'attribute' => 'name',
                 'slugAttribute' => 'slug',
                 'transliterator' => 'Russian-Latin/BGN; NFKD',
                 //Set this to true, if you want to update a slug when source attribute has been changed

@@ -5,6 +5,8 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Breadcrumbs;
 
+common\assets\ReadMoreAsset::register($this);
+
 $this->title = $category->title;
 $this->registerMetaTag([
     'name' => 'description',
@@ -64,6 +66,11 @@ $this->registerMetaTag([
         echo "<a href=" . Url::to(['/site/category', 'id' => $category->slug, 'filter' => 'rating-' . $caretRating]) . " class='filter'>Рейтинг <span class='caret " . $caretRating . "'></span></a>";
         echo "<a href=" . Url::to(['/site/category', 'id' => $category->slug, 'filter' => 'price-' . $caretPrice]) . " class='filter'>Цена <span class='caret " . $caretPrice . "'></span></a>";
         ?>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="category-text"><?= $category->text ?></div>
     </div>
 </div>
 <div class="row">
@@ -178,6 +185,12 @@ $('#product-more').on("click", function (e) {
        }
     });
 });       
+$('.category-text').readmore({
+    speed: 75,
+    lessLink: '<a href="#" class="category-text-read-more">Свернуть</a>',
+    moreLink: '<a href="#" class="category-text-read-more">Читать дальше</a>',
+    collapsedHeight: 60,
+});        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -98,6 +98,19 @@ a.btn-continue:hover{
     background-color: #eee;
     border-color: #ddd;
 }
+@media (max-width: 600px){
+.table {
+    overflow-x: scroll;
+    display: table;
+}
+}
+@media (max-width: 480px){
+.table a{float:none !important;padding: 0 !important;}
+.kv-table-wrap tr > td{border:0 !important;}   
+.kv-table-wrap tr > td:last-child{border-bottom: 1px solid #ccc !important;;}
+.kv-table-wrap tr:last-child > td:last-child{border-bottom: 0 !important;} 
+.kv-table-wrap th, .kv-table-wrap td {width: inherit !important; }
+}
 ');
 ?>
 <?php 
@@ -145,8 +158,8 @@ $grid = [
                                     'dataProvider' => $dataProvider,
                                     'filterPosition' => false,
                                     'columns' => $grid, 
-                                    'options' => ['class' => 'table-responsive'],
-                                    'tableOptions' => ['class' => 'table dataTable', 'role' => 'grid'],
+                                    'options' => [],
+                                    'tableOptions' => ['class' => 'table'],
                                     'bordered' => false,
                                     'striped' => false,
                                     'summary' => false,

@@ -30,7 +30,7 @@ use yii\helpers\Html;
                         <div style="max-width: 570px; display: block; background-color: #fff; margin: 0 auto; padding: 15px;">
                             <table style="display: table; border-spacing: 0px; width: 570px; margin: 0; padding: 0;">
                                 <tr style="margin: 0; padding: 0;">
-                                    <td style="margin: 0; padding: 0;text-align:center;"><img src="https://f-keeper.ru/img/logo.png" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" alt="" /></td>
+                                    <td style="margin: 0; padding: 0;text-align:center;"><img src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" alt="" /></td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:center; padding-top:20px; color: #787878;"><small>Революция в работе с поставщиками.

@@ -365,7 +365,7 @@ Modal::end();
                                             ],
                                             'class' => 'btn btn-sm btn-outline-success'
                                         ]) :
-                                        $link = Html::a('<font style="font-weight:700;color:#555;">F</font>-MARKET', ['/vendor/ajax-update-product-market-place',
+                                        $link = Html::a('ИЗМЕНИТЬ', ['/vendor/ajax-update-product-market-place',
                                             'id' => $data['id']], [
                                             'data' => [
                                                 'target' => '#add-product-market-place',

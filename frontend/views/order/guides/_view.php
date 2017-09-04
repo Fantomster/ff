@@ -132,7 +132,7 @@ use kartik\form\ActiveForm;
             ]);
             ?>
             <?php Pjax::end(); ?>
-            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right"><i class="fa fa-paper-plane-o"></i> Добавить все</button> 
+            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right add-guide-to-cart" data-id="<?=$guide->id ?>"><i class="fa fa-paper-plane-o"></i> Добавить все</button> 
         </div>
     </div>
 </div>

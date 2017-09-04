@@ -61,8 +61,8 @@ $this->registerMetaTag([
         if($filter == 'rating-down'){$caretRating = "down"; $caretPrice = "up";}
         if($filter == 'price-up'){$caretRating = "up"; $caretPrice = "up";}
         if($filter == 'price-down'){$caretRating = "up"; $caretPrice = "down";}
-        echo "<a href=" . Url::to(['/site/category', 'id' => $category->id, 'filter' => 'rating-' . $caretRating]) . " class='filter'>Рейтинг <span class='caret " . $caretRating . "'></span></a>";
-        echo "<a href=" . Url::to(['/site/category', 'id' => $category->id, 'filter' => 'price-' . $caretPrice]) . " class='filter'>Цена <span class='caret " . $caretPrice . "'></span></a>";
+        echo "<a href=" . Url::to(['/site/category', 'id' => $category->slug, 'filter' => 'rating-' . $caretRating]) . " class='filter'>Рейтинг <span class='caret " . $caretRating . "'></span></a>";
+        echo "<a href=" . Url::to(['/site/category', 'id' => $category->slug, 'filter' => 'price-' . $caretPrice]) . " class='filter'>Цена <span class='caret " . $caretPrice . "'></span></a>";
         ?>
     </div>
 </div>

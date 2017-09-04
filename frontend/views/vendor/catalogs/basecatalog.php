@@ -348,6 +348,19 @@ Modal::end();
                                 return $link;
                             },
                         ],
+                                    [
+                            'attribute' => '',
+                            'label' => 'F-MARKET',
+                            'format' => 'raw',
+                            'contentOptions' => ['style' => 'width:70px'],
+                            'headerOptions' => ['class' => 'text-center'],
+                            'value' => function ($data) {
+                                $data['market_place'] == 0 ?
+                                        $res = '' :
+                                        $res = '<center><i style="font-size: 28px;color:#84bf76;" class="fa fa-check-square-o"></i></center>';
+                                return $res;
+                            },
+                        ],
                         [
                             'attribute' => '',
                             'label' => '',

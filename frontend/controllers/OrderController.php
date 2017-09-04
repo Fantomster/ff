@@ -78,6 +78,7 @@ class OrderController extends DefaultController {
                             'repeat',
                             'refresh-cart',
                             'ajax-add-to-cart',
+                            'ajax-add-guide-to-cart',
                             'ajax-delete-order',
                             'ajax-make-order',
                             'ajax-change-quantity',
@@ -350,10 +351,11 @@ class OrderController extends DefaultController {
 
     public function actionAjaxAddGuideToCart($id) {
         $client = $this->currentUser->organization;
-        $orders = $client->getCart();
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
         foreach ($guide->guideProducts as $guideProduct) {
+            
+            $orders = $client->getCart();
 
             $product_id = $guideProduct->cbg_id;
             $price = $guideProduct->price;

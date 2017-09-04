@@ -71,6 +71,10 @@ $this->registerJs('
             }
         });
     });
+    
+    $(document).on("click", ".btnSubmit", function() {
+        $($(this).data("target-form")).submit();
+    });
     ', \yii\web\View::POS_READY);
 ?>
 <section class="content">
@@ -111,7 +115,7 @@ $this->registerJs('
                                         $form->field($vendorSearchModel, 'search_string', [
                                             'addon' => [
                                                 'append' => [
-                                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                    'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchGuideForm"><i class="fa fa-search"></i></a>',
                                                     'options' => [
                                                         'class' => 'append',
                                                     ],
@@ -155,7 +159,7 @@ $this->registerJs('
                                         $form->field($productSearchModel, 'searchString', [
                                             'addon' => [
                                                 'append' => [
-                                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                    'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchProductForm"><i class="fa fa-search"></i></a>',
                                                     'options' => [
                                                         'class' => 'append',
                                                     ],
@@ -197,7 +201,7 @@ $this->registerJs('
                                         $form->field($guideSearchModel, 'searchString', [
                                             'addon' => [
                                                 'append' => [
-                                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                    'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchGuideProductForm"><i class="fa fa-search"></i></a>',
                                                     'options' => [
                                                         'class' => 'append',
                                                     ],

@@ -133,7 +133,7 @@ if($(window).scrollTop() + $(window).height() >= $(document).height() - 200 && !
       $.ajax({
         url: "$productCatLoaderUrl",
         type: "GET",
-        data: {"num": num, "category":$id},
+        data: {"num": num, "category":$category->id},
         beforeSend: function() {
         inProgress = true;},
         cache: false,
@@ -159,7 +159,7 @@ $('#product-more').on("click", function (e) {
     $.ajax({
       url: "$productCatLoaderUrl",
       type: "GET",
-      data: {"num": num, "category":$id},
+      data: {"num": num, "category":$category->id},
       cache: false,
       success: function(response){
           if(response == 0){

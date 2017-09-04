@@ -104,4 +104,11 @@ class UtilsController extends Controller {
                 'message' => 'ololo!'
             ]);
     }
+    
+    public function actionUpdateMpCategories() {
+        $categories = \common\models\MpCategory::find()->all();
+        foreach ($categories as $category) {
+            $category->update();
+        }
+    }
 }

@@ -1049,7 +1049,6 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                     ->andWhere($cbgWhere)
-                    ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
                         ->limit(6)
                         ->all();

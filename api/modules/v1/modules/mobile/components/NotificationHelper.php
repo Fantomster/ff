@@ -201,4 +201,204 @@ class NotificationHelper {
             }
         }
     }
+    
+    public static function actionOrder($order_id, $is_new = true)
+    {
+        
+        $order = \common\models\Order::findOne(['id' => $order_id]);
+
+        if($order === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+        
+        $content = $order->orderContent;
+
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+                if($is_new)
+                {
+                    $message->setData(['action' => 'order',
+                            'title' => 'Новый заказ №'.$order_id,
+                            'message' => $order->id,
+                            'activity' => "Work"]);
+                }
+                else 
+                {
+                    $message->setData(['action' => 'order',
+                            'title' => 'Изменения в заказе №'.$order_id,
+                            'message' => $order->id,
+                            'activity' => "Work"]);
+                }
+                
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
+    
+    public static function actionOrderContent($order_content_id, $is_new = true)
+    {
+        $orderContent = \common\models\OrderContent::findOne(['id' => $order_content_id]);
+        
+        if($orderContent === null)
+            return;
+        
+        $order = $orderContent->order;
+
+        if($order === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+                if($is_new)
+                {
+                    $message->setData(['action' => 'orderContent',
+                            'title' => 'Новая позиция в заказе №'.$order->id,
+                            'message' => $order->id,
+                            'activity' => "Work"]);
+                }
+                else 
+                {
+                    $message->setData(['action' => 'orderContent',
+                            'title' => 'Изменения в позиции '.$orderContent->product_name.', заказ №'.$order->id,
+                            'message' => $order->id,
+                            'activity' => "Work"]);
+                }
+                
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
+    
+    public static function actionOrderContentDelete($orderContent)
+    {
+        if($orderContent === null)
+            return;
+        
+        $order = $orderContent->order;
+
+        if($order === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+        
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+                if($is_new)
+                {
+                    $message->setData(['action' => 'orderContentDelete',
+                            'title' => 'Удалена позиция в заказе №'.$order->id,
+                            'message' => $orderContent->id,
+                            'activity' => "Work"]);
+                }
+
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
+    
+     public static function actionGuide($guide_id, $is_new = true)
+    {
+        
+        $guide = \common\models\guides\Guide::findOne(['id' => $guide_id]);
+
+        if($guide === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $guide->client_id])->all();
+        
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+                if($is_new)
+                {
+                    $message->setData(['action' => 'guide',
+                            'title' => 'Новый гайд '.$guide->name,
+                            'message' => $guide->id,
+                            'activity' => "Work"]);
+                }
+                else 
+                {
+                    $message->setData(['action' => 'guide',
+                            'title' => 'Изменения в гайде '.$guide->name,
+                            'message' => $guide->id,
+                            'activity' => "Work"]);
+                }
+                
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
+    
+    public static function actionGuideProduct($guide_product_id, $is_new = true)
+    {
+        $guideProduct = \common\models\guides\GuideProduct::findOne(['id' => $guide_product_id]);
+        
+        if($guideProduct === null)
+            return;
+        
+        $guide = $guideProduct->order;
+
+        if($guide === null)
+            return;
+        
+        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+        
+        foreach ($users as $user)
+        {
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+
+            foreach ($fcm as $row)
+            {
+                $message = Yii::$app->fcm->createMessage();
+                $message->addRecipient(new Device($row->token));
+                if($is_new)
+                {
+                    $message->setData(['action' => 'guideProduct',
+                            'title' => 'Новая позиция в гайде '.$guide->name,
+                            'message' => $guide->id,
+                            'activity' => "Work"]);
+                }
+                else 
+                {
+                    $message->setData(['action' => 'guideProduct',
+                            'title' => 'Изменения в позиции '.$guideProduct->baseProduct->product.', гайд '.$guide->name,
+                            'message' => $guide->id,
+                            'activity' => "Work"]);
+                }
+                
+                $response = Yii::$app->fcm->send($message);
+                //var_dump($response->getStatusCode());
+            }
+        }
+    }
 }

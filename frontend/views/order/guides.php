@@ -8,7 +8,7 @@ use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
-$this->title = "Список гайдов";
+$this->title = "Список гидов";
 
 yii\jui\JuiAsset::register($this);
 
@@ -18,9 +18,9 @@ $this->registerJs('
     $(document).on("click", ".delete-guide", function(e) {
         e.preventDefault();
         clicked = $(this);
-        title = "Удаление гайда";
-        text = "Вы уверены, что хотите удалить гайд?";
-        success = "Гайд удален!";
+        title = "Удаление гида";
+        text = "Вы уверены, что хотите удалить гид?";
+        success = "Гид удален!";
         swal({
             title: title,
             text: text,
@@ -51,7 +51,7 @@ $this->registerJs('
     $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "Назовите ваш новый гайд";
+        var title = "Назовите ваш новый гид";
         swal({
             title: title,
             input: "text",
@@ -245,12 +245,12 @@ $this->registerJs('
             <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
             <li class="active">
                 <a href="#">
-                    Гайды заказов <small class="label bg-yellow">new</small>
+                    Гиды заказов <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Избранные <small class="label bg-yellow">new</small>
+                    Фавориты <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -291,8 +291,7 @@ $this->registerJs('
                             <?php ActiveForm::end(); ?>
                         </div>
                         <div class="pull-right">
-                            <!--<a class="btn btn-md btn-outline-success new-guid" href="create.html" data-toggle="tooltip" data-original-title="Создать гайд" data-url="#"><i class="fa fa-plus"></i> Создать гайд</a>-->
-                            <?= Html::a('<i class="fa fa-plus"></i> Создать гайд', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
+                            <?= Html::a('<i class="fa fa-plus"></i> Создать гид', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
                         </div>
                     </div>
                 </div>

@@ -889,6 +889,11 @@ class SiteController extends Controller {
     }
 
     public function actionCategory($id) {
+        $category = \common\models\MpCategory::find()->where(['slug'=>$id])->one();
+        if(empty($category)){
+          throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+        }
+        $id = $category->id;
         $session = Yii::$app->session;
         $relationSuppliers = [];
         $supplierRegion = [];
@@ -966,7 +971,6 @@ class SiteController extends Controller {
                 ->limit(12)
                 ->all();
         
-        $category = \common\models\MpCategory::find()->where(['slug' => $id])->one();
         if ($products) {
             return $this->render('category', compact('products', 'id', 'count', 'category','filter'));
         } else {

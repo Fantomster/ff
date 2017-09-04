@@ -974,7 +974,7 @@ class SiteController extends Controller {
         if ($products) {
             return $this->render('category', compact('products', 'id', 'count', 'category','filter'));
         } else {
-            $title ='F-MARKET категории';
+            //$title = $category->title;//'F-MARKET категории';
             $breadcrumbs = \yii\widgets\Breadcrumbs::widget([
                 'options' => [
                     'class' => 'breadcrumb',
@@ -985,8 +985,8 @@ class SiteController extends Controller {
                 \common\models\MpCategory::getCategory($category->id),
                 ],
             ]);
-            $message = 'В данной категории, товаров нет';
-            return $this->render('not-found', compact('title','breadcrumbs','message','products','category'));
+            $message = 'В данной категории товаров нет';
+            return $this->render('not-found', compact('breadcrumbs','message','products','category'));
         }
     }
     

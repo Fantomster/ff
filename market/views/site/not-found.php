@@ -4,7 +4,7 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Breadcrumbs;
 
-$this->title = $title;
+$this->title = $category->title;
 ?>
 <div class="row">
     <div class="col-md-12 no-padding">

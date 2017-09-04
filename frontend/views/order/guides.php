@@ -227,6 +227,10 @@ $this->registerJs('
         });
     });
     
+    $(document).on("click", ".btnSubmit", function() {
+        $($(this).data("target-form")).submit();
+    });
+
     $(document).on("hidden.bs.modal", "#guideModal", function() {
         $(this).data("bs.modal", null);
     });
@@ -267,7 +271,7 @@ $this->registerJs('
                                     $form->field($searchModel, 'searchString', [
                                         'addon' => [
                                             'append' => [
-                                                'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
                                                 'options' => [
                                                     'class' => 'append',
                                                 ],

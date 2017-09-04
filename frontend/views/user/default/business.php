@@ -105,21 +105,11 @@ a.btn-continue:hover{
 }
 }
 @media (max-width: 480px){
-.table a{
-    float:none !important;
-    padding: 0 !important;
-}
-}
-@media screen and (max-width: 480px){
-.kv-table-wrap tr > td{
-    border: 0;
-}
-}
-@media screen and (max-width: 480px)
-{
-.kv-table-wrap th, .kv-table-wrap td {
-    width: inherit !important; 
-}
+.table a{float:none !important;padding: 0 !important;}
+.kv-table-wrap tr > td{border:0 !important;}   
+.kv-table-wrap tr > td:last-child{border-bottom: 1px solid #ccc !important;;}
+.kv-table-wrap tr:last-child > td:last-child{border-bottom: 0 !important;} 
+.kv-table-wrap th, .kv-table-wrap td {width: inherit !important; }
 }
 ');
 ?>
@@ -169,7 +159,7 @@ $grid = [
                                     'filterPosition' => false,
                                     'columns' => $grid, 
                                     'options' => [],
-                                    'tableOptions' => ['class' => 'table dataTable', 'role' => 'grid'],
+                                    'tableOptions' => ['class' => 'table'],
                                     'bordered' => false,
                                     'striped' => false,
                                     'summary' => false,

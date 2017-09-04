@@ -117,12 +117,12 @@ $this->registerJs('
             <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
             <li>
                 <a href="<?= Url::to(['order/guides']) ?>">
-                    Гайды заказов <small class="label bg-yellow">new</small>
+                    Гиды заказов <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li class="active">
                 <a href="#">
-                    Избранные <small class="label bg-yellow">new</small>
+                    Фавориты <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>

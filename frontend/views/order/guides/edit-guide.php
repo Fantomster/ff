@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 
-$this->title = "Редактирование гайда";
+$this->title = "Редактирование гида";
 
 $this->registerJs('
     $(document).on("click", ".select-vendor", function() {
@@ -83,12 +83,12 @@ $this->registerJs('
             <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
             <li class="active">
                 <a href="#">
-                    Гайды заказов <small class="label bg-yellow">new</small>
+                    Гиды заказов <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Избранные <small class="label bg-yellow">new</small>
+                    Фавориты <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>

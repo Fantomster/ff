@@ -168,7 +168,7 @@ $grid = [
                                     'dataProvider' => $dataProvider,
                                     'filterPosition' => false,
                                     'columns' => $grid, 
-                                    'options' => ['class' => 'table-responsive'],
+                                    'options' => [],
                                     'tableOptions' => ['class' => 'table dataTable', 'role' => 'grid'],
                                     'bordered' => false,
                                     'striped' => false,

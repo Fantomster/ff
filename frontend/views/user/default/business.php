@@ -98,6 +98,29 @@ a.btn-continue:hover{
     background-color: #eee;
     border-color: #ddd;
 }
+@media (max-width: 600px){
+.table {
+    overflow-x: scroll;
+    display: table;
+}
+}
+@media (max-width: 480px){
+.table a{
+    float:none !important;
+    padding: 0 !important;
+}
+}
+@media screen and (max-width: 480px){
+.kv-table-wrap tr > td{
+    border: 0;
+}
+}
+@media screen and (max-width: 480px)
+{
+.kv-table-wrap th, .kv-table-wrap td {
+    width: inherit !important; 
+}
+}
 ');
 ?>
 <?php 

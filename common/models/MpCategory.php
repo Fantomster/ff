@@ -11,6 +11,10 @@ use common\behaviors\SluggableBehavior;
  *
  * @property integer $id
  * @property string $name
+ * @property string $title
+ * @property string $text
+ * @property string $description
+ * @property string $keywords
  * @property integer $parent
  */
 class MpCategory extends \yii\db\ActiveRecord {
@@ -29,7 +33,8 @@ class MpCategory extends \yii\db\ActiveRecord {
         return [
             [['name'], 'required'],
             [['parent'], 'integer'],
-            [['name'], 'string', 'max' => 255],
+            [['name', 'title'], 'string', 'max' => 255],
+            [['name', 'title', 'text', 'description', 'keywords'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
         ];
     }
 

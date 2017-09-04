@@ -16,7 +16,6 @@ $this->registerJs('
         e.preventDefault();
         var clicked = $(this);
         var title = "Комментарий к товару";
-        fixBootstrapModal();
         swal({
             title: title,
             input: "textarea",
@@ -30,7 +29,6 @@ $this->registerJs('
             onClose: function() {
                 clicked.blur();
                 swal.resetDefaults();
-                restoreBootstrapModal();
             },
             preConfirm: function (text) {
                 return new Promise(function (resolve, reject) {
@@ -222,8 +220,8 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function($data) use ($client) {
-                            return Html::button('<i class="fa fa-comment"> Комментарий</i>', [
-                                        'class' => 'add-note btn btn-md btn-gray pull-right',
+                            return Html::button('<i class="fa fa-comment"> <span class="circe_font">Комментарий</span></i>', [
+                                        'class' => 'add-note btn btn-md btn-gray pull-right circe_font',
                                         'data' => [
                                             'id' => $data->id,
                                             'url' => Url::to(['order/ajax-set-note', 'product_id' => $data->id]),
@@ -238,8 +236,8 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> В корзину</i>', [
-                                        'class' => 'add-to-cart btn btn-md btn-success pull-right',
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">В корзину</span></i>', [
+                                        'class' => 'add-to-cart btn btn-md btn-success pull-right circe_font',
                                         'data-id' => $data->id,
                                         'data-cat' => $data->cat_id,
                                         'title' => 'Добавить в корзину',

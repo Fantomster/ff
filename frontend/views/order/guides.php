@@ -92,6 +92,7 @@ $this->registerJs('
         var clicked = $(this);
         var title = "Комментарий к товару";
         fixBootstrapModal();
+        fixBootstrapModal();
         swal({
             title: title,
             input: "textarea",

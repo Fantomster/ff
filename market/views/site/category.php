@@ -4,11 +4,16 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Breadcrumbs;
-?>
 
-<?php
-$this->title = 'F-MARKET фильтр поиска';
-
+$this->title = $category->title;
+$this->registerMetaTag([
+    'name' => 'description',
+    'content' => $category->description,
+]);
+$this->registerMetaTag([
+    'name' => 'keywords',
+    'content' => $category->keywords,
+]);
 ?>
 <style>
     .filter{

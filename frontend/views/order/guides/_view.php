@@ -103,7 +103,7 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function($data) {
-                            return Html::button('<i class="fa fa-comment"> Комментарий</i>', [
+                            return Html::button('<i class="fa fa-comment"> <span class="circe_font">Комментарий</span></i>', [
                                         'class' => 'add-note btn btn-md btn-gray pull-right',
                                         'data' => [
                                             'id' => $data->cbg_id,
@@ -119,7 +119,7 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> В корзину</i>', [
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">В корзину</span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right',
                                         'data-id' => $data->cbg_id,
                                         'data-cat' => $data->baseProduct->cat_id,

@@ -56,13 +56,15 @@ return [
             // Use pretty URLs
             'enablePrettyUrl' => true,
             'rules' => [
-                '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
-                '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
                 'product/<id:\d+>' => 'site/product',
+                'restaurant/<id:\d+>' => 'site/restaurant',
+                'supplier/<id:\d+>' => 'site/supplier',
                 'category/<slug:[a-z0-9_-]+>' => 'site/category',
                 '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>/<id:\d+>' => '<controller>/<action>',
                 '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>' => '<controller>/<action>',
+                '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
+                '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
                 '/' => 'site/index',
                 'client' => 'client/index',
                 'vendor' => 'vendor/index',

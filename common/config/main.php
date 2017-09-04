@@ -59,11 +59,9 @@ return [
                 '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
                 '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
                 '<controller:\w+>/<id:\d+>' => '<controller>/view',
-                '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
+                '<controller:\w+>/<action:\w+>/<id:\w+>' => '<controller>/<action>',
+                'category/<slug:[a-z0-9_\-]+>' => 'site/category',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
-            ],
-            //'enableStrictParsing' => true,
-            'rules' => [
                 '/' => 'site/index',
                 'client' => 'client/index',
                 'vendor' => 'vendor/index',

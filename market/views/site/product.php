@@ -72,7 +72,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             Html::decode($product->mainCategory->name),
             [
                 'label' => Html::decode($product->category->name),
-                'url' => ['site/category', 'id' => $product->category->slug],
+                'url' => ['site/category', 'slug' => $product->category->slug],
             ],
             [
             'label' => Html::decode($product->product, ['style'=>'text-overflow: ellipsis']),

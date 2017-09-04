@@ -1116,6 +1116,7 @@ class SiteController extends Controller {
                 ->count();
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
     }
+    
     public function actionView() {
         $where = [];
         $filterNotIn = [];

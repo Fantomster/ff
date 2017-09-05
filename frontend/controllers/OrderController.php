@@ -131,7 +131,7 @@ class OrderController extends DefaultController {
         $selected = Yii::$app->request->get('selected');
         if(!empty($selected)){
             $model = \Yii::$app->db->createCommand("
-                select ord.id, o.name,cbg.product,quantity  
+                select ord.id as id, o.name as name, cbg.product as product, quantity
                 from `order_content` oc 
                 left join `order` ord on oc.`order_id` = ord.`id`
                 left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
@@ -156,7 +156,7 @@ class OrderController extends DefaultController {
                 $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo['id']); 
                 $objPHPExcel->getActiveSheet()->setCellValue('B'.$row,$foo['name']);
                 $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['product']);
-                $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['quantity']);
+                $objPHPExcel->getActiveSheet()->setCellValue('D'.$row,$foo['quantity']);
                 $row++;
             }
             header('Content-Type: application/vnd.ms-excel');

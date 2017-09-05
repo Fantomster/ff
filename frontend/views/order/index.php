@@ -31,12 +31,15 @@ $this->registerJs('
             }
         });
         $(".box-body").on("click", "td", function (e) {
+            if($(this).find("input").hasClass("checkbox-export")){
+                return true;
+            }
             if ($(this).find("a").hasClass("reorder") || 
-                $(this).find("a").hasClass("complete") || 
-                $(this).find("input").hasClass("checkbox-export")
+                $(this).find("a").hasClass("complete")
             ){
                 return true;
             }
+            
             var url = $(this).parent("tr").data("url");
             if (url !== undefined) {
                 location.href = url;
@@ -187,7 +190,9 @@ $this->registerCss("
                 </div>
             </div>
             <?php ActiveForm::end(); ?>
+            <?php if($organization->type_id == Organization::TYPE_SUPPLIER ){ ?>
             <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> отчет xls', ['class' => 'btn btn-success export-to-xls']) ?>
+            <?php }?>
             <div class="row">
                 <div class="col-md-12">
                     <?=

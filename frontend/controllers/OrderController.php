@@ -54,25 +54,13 @@ class OrderController extends DefaultController {
                             'ajax-refresh-stats',
                             'ajax-set-comment',
                             'pdf',
+                            'export-to-xls'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
                         'roles' => [
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_RESTAURANT_EMPLOYEE,
-                            Role::ROLE_SUPPLIER_MANAGER,
-                            Role::ROLE_SUPPLIER_EMPLOYEE,
-                            Role::ROLE_FKEEPER_MANAGER,
-                            Role::ROLE_ADMIN,
-                        ],
-                    ],
-                    [
-                        'actions' => [
-                            'export-to-xls',
-                        ],
-                        'allow' => true,
-                        // Allow suppliers
-                        'roles' => [
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,

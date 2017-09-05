@@ -1612,7 +1612,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: измененения в заказе №" . $order->id;
+        $subject = "MixCart: измененения в заказе №" . $order->id;
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1648,7 +1648,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: заказ №" . $order->id . " выполнен!";
+        $subject = "MixCart: заказ №" . $order->id . " выполнен!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1684,7 +1684,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: новый заказ №" . $order->id . "!";
+        $subject = "MixCart: новый заказ №" . $order->id . "!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1719,7 +1719,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " подтвержден!";
+        $subject = "MixCart: заказ №" . $order->id . " подтвержден!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1735,7 +1735,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
-                $text = "Заказ в системе f-keeper №" . $order->id . " согласован.";
+                $text = "Заказ в системе MixCart №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1754,7 +1754,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " отменен!";
+        $subject = "MixCart: заказ №" . $order->id . " отменен!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1770,7 +1770,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $text = $senderOrg->name . " отменил заказ в системе MixCart №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

@@ -188,7 +188,7 @@ $this->registerCss("
                 </div>
             </div>
             <?php ActiveForm::end(); ?>
-            <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> Отчет в xls', ['class' => 'btn btn-success export-to-xls']) ?>
+            <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> отчет xls', ['class' => 'btn btn-success export-to-xls']) ?>
             <div class="row">
                 <div class="col-md-12">
                     <?=

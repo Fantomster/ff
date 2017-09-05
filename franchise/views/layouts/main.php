@@ -43,6 +43,20 @@ if (Yii::$app->controller->action->id === 'login') {
                     echo $this->render(
                             'left-agent.php', ['directoryAsset' => $directoryAsset]
                     );
+                } elseif (Yii::$app->user->identity->role_id === common\models\Role::ROLE_FRANCHISEE_OPERATOR) {
+                    echo $this->render(
+                        'header.php', ['directoryAsset' => $directoryAsset]
+                    );
+                    echo $this->render(
+                        'left-operator.php', ['directoryAsset' => $directoryAsset]
+                    );
+                } elseif (Yii::$app->user->identity->role_id === common\models\Role::ROLE_FRANCHISEE_ACCOUNTANT) {
+                    echo $this->render(
+                        'header-agent.php', ['directoryAsset' => $directoryAsset]
+                    );
+                    echo $this->render(
+                        'left-buh.php', ['directoryAsset' => $directoryAsset]
+                    );
                 } else {
                     echo $this->render(
                             'header.php', ['directoryAsset' => $directoryAsset]

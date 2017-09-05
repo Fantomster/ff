@@ -58,10 +58,11 @@ class CatalogController extends DefaultController
                         'allow' => true,
                         // Allow suppliers managers
                         'roles' => [
-                            Role::ROLE_SUPPLIER_MANAGER,
-                            Role::ROLE_SUPPLIER_EMPLOYEE,
-                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_FRANCHISEE_OWNER,
+                            Role::ROLE_FRANCHISEE_OPERATOR,
+                            Role::ROLE_FRANCHISEE_ACCOUNTANT,
                             Role::ROLE_ADMIN,
+
                         ],
                     ],
                 ],

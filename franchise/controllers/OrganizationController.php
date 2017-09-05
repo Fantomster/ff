@@ -181,6 +181,8 @@ class OrganizationController extends DefaultController {
      * Update restaurant
      */
     public function actionUpdateClient($id) {
+        $user = new User();
+        $managersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id, true);
         $client = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
@@ -214,7 +216,7 @@ class OrganizationController extends DefaultController {
             }
         }
 
-        return $this->render('update-client', compact('client', 'buisinessInfo'));
+        return $this->render('update-client', compact('client', 'buisinessInfo', 'managersArray'));
     }
 
     /**

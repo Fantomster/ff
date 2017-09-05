@@ -119,7 +119,7 @@ class OrderController extends DefaultController {
         $selected = Yii::$app->request->get('selected');
         if(!empty($selected)){
             $model = \Yii::$app->db->createCommand("
-                select ord.id as id, o.name as name, cbg.product as product, quantity
+                select ord.id as id, o.name as name, cbg.product as product, quantity, cbg.ed
                 from `order_content` oc 
                 left join `order` ord on oc.`order_id` = ord.`id`
                 left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
@@ -134,17 +134,20 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
             $objPHPExcel->getActiveSheet()->setTitle('отчет')
                 ->setCellValue('A1', '№ заказа')
                 ->setCellValue('B1', 'Закупщик')
                 ->setCellValue('C1', 'Наименование товара')
-                ->setCellValue('D1', 'Кол-во');
+                ->setCellValue('D1', 'Кол-во')
+                ->setCellValue('E1', 'Единица измерения');
             $row=2;
             foreach ($model as $foo) {
                 $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo['id']); 
                 $objPHPExcel->getActiveSheet()->setCellValue('B'.$row,$foo['name']);
                 $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['product']);
                 $objPHPExcel->getActiveSheet()->setCellValue('D'.$row,$foo['quantity']);
+                $objPHPExcel->getActiveSheet()->setCellValue('E'.$row,$foo['ed']);
                 $row++;
             }
             header('Content-Type: application/vnd.ms-excel');

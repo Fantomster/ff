@@ -119,13 +119,24 @@ class OrderController extends DefaultController {
         $selected = Yii::$app->request->get('selected');
         if(!empty($selected)){
             $model = \Yii::$app->db->createCommand("
-                select ord.id as id, o.name as name, cbg.product as product, quantity, cbg.ed
-                from `order_content` oc 
-                left join `order` ord on oc.`order_id` = ord.`id`
-                left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
-                left join `organization` o on ord.`client_id` = o.`id`
-                where ord.id in ($selected)
-                order by ord.id")->queryAll();
+select 
+ord.id as id, 
+o.name as name, 
+cbg.product as product, 
+quantity, 
+cbg.ed,
+cbg.price,
+(cbg.price*quantity) as total_price,
+cbg.article,
+gn.note
+from `order_content` oc 
+left join `order` ord on oc.`order_id` = ord.`id`
+left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+left join `organization` o on ord.`client_id` = o.`id`
+left join `goods_notes` gn on cbg.id = gn.catalog_base_goods_id
+where ord.id in ($selected)
+union all
+select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` where id in ($selected)),' ',' '")->queryAll();
             
             $objPHPExcel = new \PHPExcel();
             $sheet=0;
@@ -135,12 +146,20 @@ class OrderController extends DefaultController {
             $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
             $objPHPExcel->getActiveSheet()->setTitle('отчет')
                 ->setCellValue('A1', '№ заказа')
                 ->setCellValue('B1', 'Закупщик')
                 ->setCellValue('C1', 'Наименование товара')
                 ->setCellValue('D1', 'Кол-во')
-                ->setCellValue('E1', 'Единица измерения');
+                ->setCellValue('E1', 'Единица измерения')
+                ->setCellValue('F1', 'Стоимость за ед-цу')
+                ->setCellValue('G1', 'Сумма итого')
+                ->setCellValue('H1', 'Артикул')
+                ->setCellValue('I1', 'Комментарий');
             $row=2;
             foreach ($model as $foo) {
                 $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo['id']); 
@@ -148,6 +167,10 @@ class OrderController extends DefaultController {
                 $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['product']);
                 $objPHPExcel->getActiveSheet()->setCellValue('D'.$row,$foo['quantity']);
                 $objPHPExcel->getActiveSheet()->setCellValue('E'.$row,$foo['ed']);
+                $objPHPExcel->getActiveSheet()->setCellValue('F'.$row,$foo['price']);
+                $objPHPExcel->getActiveSheet()->setCellValue('G'.$row,$foo['total_price']);
+                $objPHPExcel->getActiveSheet()->setCellValue('H'.$row,$foo['article']);
+                $objPHPExcel->getActiveSheet()->setCellValue('I'.$row,$foo['note']);
                 $row++;
             }
             header('Content-Type: application/vnd.ms-excel');

@@ -68,6 +68,19 @@ class OrderController extends DefaultController {
                     ],
                     [
                         'actions' => [
+                            'export-to-xls',
+                        ],
+                        'allow' => true,
+                        // Allow suppliers
+                        'roles' => [
+                            Role::ROLE_SUPPLIER_MANAGER,
+                            Role::ROLE_SUPPLIER_EMPLOYEE,
+                            Role::ROLE_FKEEPER_MANAGER,
+                            Role::ROLE_ADMIN,
+                        ],
+                    ],
+                    [
+                        'actions' => [
                             'create',
                             'guides',
                             'favorites',
@@ -113,7 +126,47 @@ class OrderController extends DefaultController {
             ],
         ];
     }
-
+    
+    public function actionExportToXls() {
+        $selected = Yii::$app->request->get('selected');
+        if(!empty($selected)){
+            $model = \Yii::$app->db->createCommand("
+                select ord.id, o.name,cbg.product,quantity  
+                from `order_content` oc 
+                left join `order` ord on oc.`order_id` = ord.`id`
+                left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+                left join `organization` o on ord.`client_id` = o.`id`
+                where ord.id in ($selected)
+                order by ord.id")->queryAll();
+            
+            $objPHPExcel = new \PHPExcel();
+            $sheet=0;
+            $objPHPExcel->setActiveSheetIndex($sheet);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->setTitle('отчет')
+                ->setCellValue('A1', '№ заказа')
+                ->setCellValue('B1', 'Закупщик')
+                ->setCellValue('C1', 'Наименование товара')
+                ->setCellValue('D1', 'Кол-во');
+            $row=2;
+            foreach ($model as $foo) {
+                $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo['id']); 
+                $objPHPExcel->getActiveSheet()->setCellValue('B'.$row,$foo['name']);
+                $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['product']);
+                $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['quantity']);
+                $row++;
+            }
+            header('Content-Type: application/vnd.ms-excel');
+            $filename = "otchet_".date("d-m-Y-His").".xls";
+            header('Content-Disposition: attachment;filename='.$filename .' ');
+            header('Cache-Control: max-age=0');
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            $objWriter->save('php://output');
+        }
+    }
     public function actionCreate() {
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
@@ -1710,7 +1763,6 @@ class OrderController extends DefaultController {
             }
         }
     }
-
     private function saveCartChanges($content) {
         foreach ($content as $position) {
             $product = OrderContent::findOne(['id' => $position['id']]);

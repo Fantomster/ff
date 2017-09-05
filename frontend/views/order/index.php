@@ -11,6 +11,7 @@ use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
 
 $this->title = 'Заказы';
+$urlExport = Url::to(['/order/export-to-xls']);
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
@@ -30,7 +31,10 @@ $this->registerJs('
             }
         });
         $(".box-body").on("click", "td", function (e) {
-            if ($(this).find("a").hasClass("reorder") || $(this).find("a").hasClass("complete")) {
+            if ($(this).find("a").hasClass("reorder") || 
+                $(this).find("a").hasClass("complete") || 
+                $(this).find("input").hasClass("checkbox-export")
+            ){
                 return true;
             }
             var url = $(this).parent("tr").data("url");
@@ -54,12 +58,16 @@ $this->registerJs('
             });
         });
     });
-        ');
+    $(document).on("click", ".export-to-xls", function(e) {
+        if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
+            window.location.href = "' . $urlExport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows");  
+        }
+    });
+');
 $this->registerCss("
     tr:hover{cursor: pointer;}
         ");
 ?>
-
 <section class="content-header">
     <h1>
         <i class="fa fa-history"></i>  Заказы
@@ -122,6 +130,7 @@ $this->registerCss("
             <?php
             Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
             $form = ActiveForm::begin([
+                        'action' =>['order/create'],
                         'options' => [
                             'data-pjax' => true,
                             'id' => 'search-form',
@@ -174,8 +183,12 @@ $this->registerCss("
                         ?>
                     </div>
                 </div>
+                <div class="col-lg-5 col-md-6 col-sm-6">
+                    
+                </div>
             </div>
-<?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
+            <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> Отчет в xls', ['class' => 'btn btn-success export-to-xls']) ?>
             <div class="row">
                 <div class="col-md-12">
                     <?=
@@ -189,6 +202,13 @@ $this->registerCss("
                         'options' => ['class' => 'table-responsive'],
                         'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                         'columns' => [
+                            [
+                                'visible'=> ( $organization->type_id == Organization::TYPE_SUPPLIER ) ? true : false,
+                                'class' => 'yii\grid\CheckboxColumn',
+                                'checkboxOptions' => function($model, $key, $index, $widget){
+                                    return ['value' => $model['id'],'class'=>'checkbox-export'];
+                                }
+                            ],
                             [
                                 'attribute' => 'id',
                                 'value' => 'id',

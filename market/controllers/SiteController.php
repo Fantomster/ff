@@ -888,8 +888,8 @@ class SiteController extends Controller {
          
     }
 
-    public function actionCategory($id) {
-        $category = \common\models\MpCategory::find()->where(['slug'=>$id])->one();
+    public function actionCategory($slug) {
+        $category = \common\models\MpCategory::find()->where(['slug'=>$slug])->one();
         if(empty($category)){
           throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
         }

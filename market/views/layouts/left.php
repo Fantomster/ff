@@ -75,7 +75,7 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is n
                     <table class="table">
                         <tr>
                             <td>
-                                <a href="<?= \yii\helpers\Url::to(['site/category', 'id' => $row2->slug ]) ?>" title="<?=$row2->name ?>">
+                                <a href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row2->slug ]) ?>" title="<?=$row2->name ?>">
                                 <span><?=$row2->name ?></span>
                               </a>
                             </td>

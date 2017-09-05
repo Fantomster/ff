@@ -178,7 +178,7 @@ Pjax::begin([
                 <i class="flaticon-cross-out form-close" data-dismiss="modal" style="top: 10px;"></i>
 		<div style="display: inline-block;position: absolute;left:0">
 		<h4 class="f-title">Разместить заявку</h4>
-		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы F-keeper! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!">Что такое разместить заявку?</h4>
+		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы MixCart! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!">Что такое разместить заявку?</h4>
 		</div>
 	</div>
 	<!-- progressbar -->
@@ -301,9 +301,9 @@ $(this).next().toggle(Boolean($(this).val()));
     ['template'=>'{input}{error}'])->
     textInput(['placeholder' => '7 дней']) ?>
             
-		<!--h5>Поделиться заявкой в группах f-keeper</h5-->
+		<!--h5>Поделиться заявкой в группах MixCart</h5-->
                 <div style="color:#ccc;font-size:13px;margin-top: 32px;margin-bottom: -32px;">
-                    * Заявка будет существовать в системе f-keeper один месяц, или пока вы ее не закроете
+                    * Заявка будет существовать в системе MixCart один месяц, или пока вы ее не закроете
                 </div>
                 <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
                 <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>

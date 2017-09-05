@@ -46,7 +46,7 @@ class User extends \amnah\yii2\user\models\User {
             
             // email rules invite client
             [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message'=>'Введите эл.почту партнера'],
-            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message'=>'Пользователь с таким Email уже работает в системе f-keeper, пожалуйста, свяжитесь с ним для сотрудничества!'],
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'],
             
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
@@ -190,7 +190,7 @@ class User extends \amnah\yii2\user\models\User {
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($vendor->id, $userToken::TYPE_PASSWORD_RESET);
         $email = $vendor->email;
-        $subject = "Приглашение на f-keeper";
+        $subject = "Приглашение на MixCart";
         $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "vendor", "userToken", "restaurant"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -216,7 +216,7 @@ class User extends \amnah\yii2\user\models\User {
 		// send email
         $vendor = $this->organization->name;
         $email = $client->email;
-        $subject = "Приглашение на f-keeper";
+        $subject = "Приглашение на MixCart";
         $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -241,7 +241,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $this->module->emailViewPath;
 		// send email
         $we = $this->organization->name;
-        $subject = "Приглашение на f-keeper";
+        $subject = "Приглашение на MixCart";
         $result = $mailer->compose('friendInvite', compact("subject", "we"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -267,7 +267,7 @@ class User extends \amnah\yii2\user\models\User {
 		// send email
         $type = $this->organization->type_id;
         $name = $this->profile->full_name;
-        $subject = "Добро пожаловать на  f-keeper";
+        $subject = "Добро пожаловать на  MixCart";
         $result = $mailer->compose('welcome', compact("subject", "type", "name"))
                 ->setTo($this->email)
                 ->setSubject($subject)
@@ -298,7 +298,7 @@ class User extends \amnah\yii2\user\models\User {
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;
-        $subject = "Подтвердите аккаунт на f-keeper";
+        $subject = "Подтвердите аккаунт на MixCart";
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
                 ->setTo($email)
                 ->setSubject($subject)

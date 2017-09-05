@@ -37,7 +37,7 @@ yii\web\View::POS_READY);
                 ?>
                   <?php if (Yii::$app->session->hasFlash('warning')): ?>
                 <div class="alert alert-danger">
-                <strong>Ошибка!</strong> Извините, данный город не поддерживается системой F-keeper!<br>
+                <strong>Ошибка!</strong> Извините, данный город не поддерживается системой MixCart!<br>
                     Обратитесь в службу поддержки и мы обязательно вам поможем!
                 </div>
                   <?php endif; ?>

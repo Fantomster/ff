@@ -559,7 +559,7 @@ class VendorController extends DefaultController {
             if (!is_readable($path)) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
                         . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -585,13 +585,13 @@ class VendorController extends DefaultController {
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $transaction = Yii::$app->db->beginTransaction();
@@ -655,7 +655,7 @@ class VendorController extends DefaultController {
                 $transaction->rollback();
                 Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
                         . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             }
         }
 
@@ -672,7 +672,7 @@ class VendorController extends DefaultController {
             if (!is_readable($path)) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
                         . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -686,7 +686,7 @@ class VendorController extends DefaultController {
             if ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше 1000 позиций (Новых позиций), обратитесь к нам и мы вам поможем'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $xlsArray = [];
@@ -697,7 +697,7 @@ class VendorController extends DefaultController {
             if (max(array_count_values($xlsArray)) > 1) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $transaction = Yii::$app->db->beginTransaction();
@@ -751,7 +751,7 @@ class VendorController extends DefaultController {
                 $transaction->rollback();
                 Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
                         . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             }
         }
         return $this->renderAjax('catalogs/_importCreateBaseForm', compact('importModel'));
@@ -1074,7 +1074,7 @@ class VendorController extends DefaultController {
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                 foreach ($rows as $row) {
                     if ($row->profile->phone && $row->profile->sms_allow) {
-                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе mixcart.ru';
                         $target = $row->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target);
@@ -1454,7 +1454,7 @@ class VendorController extends DefaultController {
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе mixcart.ru';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
@@ -1529,7 +1529,7 @@ class VendorController extends DefaultController {
                     if ($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)) {
                         foreach ($organization->users as $recipient) {
                             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                                $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                                $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе mixcart.ru';
                                 $target = $recipient->profile->phone;
                                 $sms = new \common\components\QTSMS();
                                 $sms->post_message($text, $target);

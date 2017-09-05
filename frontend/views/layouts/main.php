@@ -262,9 +262,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 'options' => ['class' => 'nav_menu'],
                                 'items' => [
                                     ['label' => 'Главная', 'url' => ['/site/index']],
-                                    ['label' => 'F-MARKET', 'url' => 'https://market.f-keeper.ru'],
-                                    ['label' => 'Франшиза', 'url' => 'http://fr.f-keeper.ru'],
-                                    ['label' => 'Новости', 'url' => 'http://blog.f-keeper.ru?news'],
+                                    ['label' => 'F-MARKET', 'url' => 'https://market.mixcart.ru'],
+                                    ['label' => 'Франшиза', 'url' => 'http://fr.mixcart.ru'],
+                                    ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
                                     ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
                                     ['label' => 'О компании', 'url' => ['/site/about']],
                                     ['label' => 'Контакты', 'url' => ['/site/contacts']],
@@ -285,8 +285,8 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             <div class="footer__menu_block">
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
-                                    <li><?= Html::a('Новости', "http://blog.f-keeper.ru?news") ?></li>
-                                    <li><?= Html::a('Для ресторанов', "https://client.f-keeper.ru") ?></li>
+                                    <li><?= Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>
+                                    <li><?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?></li>
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>
                                     <li><?= Html::a('Контакты', ["/site/contacts"]) ?></li>
@@ -298,7 +298,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 <span class="title__menu">связаться с нами</span>
                                 <ul class="contacts">
                                     <li><span class="phone"><span class="glyphicon glyphicon-phone"></span> 8-499-404-10-18</span></li>
-                                    <li><a href="mailto:info@f-keeper.ru"><span class="email"><span class="glyphicon glyphicon-envelope"></span>info@f-keeper.ru</span></a></li>
+                                    <li><a href="mailto:info@mixcart.ru"><span class="email"><span class="glyphicon glyphicon-envelope"></span>info@mixcart.ru</span></a></li>
                                     <li><span class="address"><span class="glyphicon glyphicon-map-marker"></span>Москва, ул.Привольная, 70</li>
                                 </ul>
                             </div>	
@@ -322,7 +322,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="copy">
-                                        <span>© <?= date('Y') ?> f-keeper — ООО «Онлайн Маркет» </span>
+                                        <span>© <?= date('Y') ?> MixCart — ООО «Онлайн Маркет» </span>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-sm-4">
@@ -345,7 +345,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <div class="modalWindow">
                             <span class="modalWindowClose"></span>
                             <span class="modal_title">Заказать звонок</span>
-                            <form action="https://partner.f-keeper.ru/fr/post" class="callbackwidget-call-form">
+                            <form action="https://partner.mixcart.ru/fr/post" class="callbackwidget-call-form">
                                 <div class="contact_us__form__row">
                                     <select class="input_text type__form" name="FIELDS[formtype]" id="formtype" required>
                                         <option value="1">Стать партнером</option>

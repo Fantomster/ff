@@ -99,7 +99,7 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
                 <?php ActiveForm::end(); ?>
                 <div class="auth-sidebar__contacts">
                     <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>
-                    <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@f-keeper.ru">info@f-keeper.ru</a></div>
+                    <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@mixcart.ru">info@mixcart.ru</a></div>
                 </div>
             </div>
         </div>

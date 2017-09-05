@@ -4,6 +4,7 @@ namespace franchise\controllers;
 
 use common\models\Catalog;
 use common\models\FranchiseeAssociate;
+use common\models\RelationManagerLeader;
 use common\models\RelationSuppRest;
 use common\models\Request;
 use common\models\RequestCallback;
@@ -70,10 +71,10 @@ class SiteController extends DefaultController
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                'only' => ['index', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'setting', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                        'actions' => ['index', 'setting', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -343,7 +344,7 @@ class SiteController extends DefaultController
                 $profile->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-                    $user->setRegisterAttributes($user->role_id, User::STATUS_ACTIVE)->save();
+                    $user->setRegisterAttributes($user->role_id, $post['User']['status'])->save();
                     $profile->setUser($user->id)->save();
                     $user->setFranchisee($this->currentFranchisee->id);
 //                    $this->currentUser->sendEmployeeConfirmation($user);
@@ -375,24 +376,32 @@ class SiteController extends DefaultController
         $user->setScenario("manage");
         $profile = $user->profile;
         $organizationType = Organization::TYPE_FRANCHISEE;
-
+        $rel = RelationManagerLeader::findOne(['manager_id'=>$id]);
+        if(!$rel){
+            $rel = new RelationManagerLeader();
+        }
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($user->load($post) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
+                $user->setRegisterAttributes($post['User']['role_id'], $post['User']['status'])->save();
                 $profile->load($post);
-
+                $rel->load($post);
                 if ($user->validate() && $profile->validate()) {
-
                     $user->save();
                     $profile->save();
-
+                    if(empty($post['RelationManagerLeader']['leader_id'])){
+                        $rel->delete();
+                    }else{
+                        $rel->save();
+                    }
                     $message = 'Пользователь обновлен!';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
         }
+        $leadersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id);
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType', 'rel', 'leadersArray'));
     }
 
     /*

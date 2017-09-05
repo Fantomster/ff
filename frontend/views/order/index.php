@@ -133,7 +133,6 @@ $this->registerCss("
             <?php
             Pjax::begin(['enablePushState' => false, 'id' => 'order-list',]);
             $form = ActiveForm::begin([
-                        'action' =>['order/create'],
                         'options' => [
                             'data-pjax' => true,
                             'id' => 'search-form',

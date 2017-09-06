@@ -23,7 +23,7 @@ $gridColumns = [
     'td',
                                                     [
                                                     'attribute' => 'org',
-                                                    'label' => 'Организация F-keeper',    
+                                                    'label' => 'Организация MixCart',    
                                                     'value'=>function ($model) {
                                                               if (isset($model)) 
                                                                   return $model->organization ? $model->organization->name : null;

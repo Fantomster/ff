@@ -39,7 +39,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
         <div class="wrap">
             <?php
             NavBar::begin([
-                'brandLabel' => 'f-keeper',
+                'brandLabel' => 'MixCart',
                 'brandUrl' => Yii::$app->homeUrl,
                 'options' => [
                     'class' => 'navbar-inverse navbar-fixed-top',
@@ -91,7 +91,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'url' => ['/client/index'],
                                 ],
                                 [
-                                    'label' => 'Менеджеры f-keeper',
+                                    'label' => 'Менеджеры MixCart',
                                     'url' => ['/client/managers'],
                                 ],
                             ],
@@ -189,7 +189,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
 
         <footer class="footer">
             <div class="container">
-                <p class="pull-left">&copy; f-keeper <?= date('Y') ?></p>
+                <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
 
                 <p class="pull-right">Работает, оно работает!</p>
             </div>

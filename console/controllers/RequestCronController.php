@@ -47,7 +47,7 @@ order by u.organization_id LIMIT 4";//LIMIT на боевом убрать
             $mailer = \Yii::$app->mailer;
             //$email = 'marshal1209448@gmail.com'; //для тестов, на боевом заменить
             $email = $vendor['email'];
-            $subject = "f-keeper.ru - заявки для Вас";
+            $subject = "MixCart.ru - заявки для Вас";
             $mailer->htmlLayout = 'layouts/request';
             $result = $mailer->compose('requestPull', compact("requests","vendor"))
                         ->setTo($email)->setSubject($subject)->send();

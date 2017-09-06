@@ -1664,7 +1664,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
-                $text = $order->vendor->name . " выполнил заказ в системе f-keeper №" . $order->id;
+                $text = $order->vendor->name . " выполнил заказ в системе MixCart №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1700,7 +1700,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
-                $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
+                $text = $order->client->name . " сформировал для Вас заказ в системе MixCart №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

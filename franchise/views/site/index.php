@@ -76,7 +76,7 @@ use dosamigos\chartjs\ChartJs;
                             <div class="description-block border-right">
                                 <span class="description-percentage text-yellow"><?= 100 - $franchiseeType->share ?>%</span>
                                 <h5 class="description-header"><?= number_format($vendorsStats30['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> руб.</h5>
-                                <span class="description-text">Роялти f-keeper</span>
+                                <span class="description-text">Роялти MixCart</span>
                             </div>
                             <!-- /.description-block -->
                         </div>
@@ -127,11 +127,11 @@ use dosamigos\chartjs\ChartJs;
                                     <td style="text-align: right; font-size: 18px; color: rgba(51, 54, 59, 0.8); font-weight: bold;"><?= number_format($vendorsStats['turnoverCut'], 2, '.', ' ') ?> руб.</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align: left;">F-keeper Мне:</td>
+                                    <td style="text-align: left;">MixCart Мне:</td>
                                     <td style="text-align: right; font-size: 18px; color: #7EBC59; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-plus"></i></span> 0 руб.</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align: left;">Я F-keeper'у:</td>
+                                    <td style="text-align: left;">Я MixCart'у:</td>
                                     <td style="text-align: right; font-size: 18px; color: #FB3640; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-minus"></i></span> <?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> руб.</td>
                                 </tr>
                                 <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">

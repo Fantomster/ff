@@ -69,16 +69,16 @@ class VendorSearch extends Organization {
                 (select sum(total_price) from `order` where vendor_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30,
                 org.created_at as created_at, org.contact_name as contact_name, org.phone as phone
                 FROM `organization` AS org
-                LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id";
-        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
-            //$query.=" and org.manager_id=".Yii::$app->user->id;
-        }
-
-        $query.=" WHERE fa.franchisee_id = $franchisee_id and org.type_id=".parent::TYPE_SUPPLIER." and (org.created_at between :dateFrom and :dateTo) 
+                LEFT JOIN  `franchisee_associate` AS fa ON org.id = fa.organization_id 
+                WHERE fa.franchisee_id = $franchisee_id and org.type_id=".parent::TYPE_SUPPLIER." and (org.created_at between :dateFrom and :dateTo) 
                 and (org.name like :searchString or org.contact_name like :searchString or org.phone like :searchString)";
 
         if($client_id){
             $query = parent::getOrganizationQuery($client_id);
+        }
+
+        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
+            //$query.=" and org.manager_id = any(select manager_id from relation_manager_leader where leader_id=".Yii::$app->user->id.")";
         }
 
         if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER){

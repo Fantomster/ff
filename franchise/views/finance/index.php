@@ -132,13 +132,13 @@ use yii\widgets\Breadcrumbs;
                                 'format' => 'raw',
                                 'attribute' => 'fromFkeeper',
                                 'value' => 'fromFkeeper',
-                                'label' => 'F-keeper мне',
+                                'label' => 'MixCart мне',
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'toFkeeper',
                                 'value' => 'toFkeeper',
-                                'label' => 'Я F-keeper\'у',
+                                'label' => 'Я MixCart\'у',
                             ],
                             [
                                 'format' => 'raw',

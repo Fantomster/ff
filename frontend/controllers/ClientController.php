@@ -550,7 +550,7 @@ class ClientController extends DefaultController {
                         $currentOrganization->save();
 
                         if (!empty($profile->phone)) {
-                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему mixcart.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему';
                             $target = $profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
@@ -733,7 +733,7 @@ class ClientController extends DefaultController {
                         $currentOrganization->save();
 
                         if (!empty($profile->phone)) {
-                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему mixcart.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему';
                             $target = $profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
@@ -836,13 +836,13 @@ class ClientController extends DefaultController {
 
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе mixcart.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
                         }
                         $email = $row->email;
-                        $subject = "Ресторан " . $currentOrganization->name . " приглашает вас в систему mixcart.ru";
+                        $subject = "Ресторан " . $currentOrganization->name . " приглашает вас в систему";
                         $mailer->htmlLayout = 'layouts/html';
                         $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
                                 ->setTo($email)->setSubject($subject)->send();
@@ -928,7 +928,7 @@ class ClientController extends DefaultController {
             foreach ($organization->users as $recipient) {
                 $currentUser->sendInviteToVendor($recipient);
                 if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                    $text = "Повторное приглашение в систему MixCart от " . $currentUser->organization->name;
+                    $text = "Повторное приглашение в систему от " . $currentUser->organization->name;
                     $target = $recipient->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target);

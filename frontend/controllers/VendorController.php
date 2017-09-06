@@ -1074,7 +1074,7 @@ class VendorController extends DefaultController {
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                 foreach ($rows as $row) {
                     if ($row->profile->phone && $row->profile->sms_allow) {
-                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе mixcart.ru';
+                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе';
                         $target = $row->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target);
@@ -1454,7 +1454,7 @@ class VendorController extends DefaultController {
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе mixcart.ru';
+                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
@@ -1529,13 +1529,14 @@ class VendorController extends DefaultController {
                     if ($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)) {
                         foreach ($organization->users as $recipient) {
                             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                                $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе mixcart.ru';
+                                $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе';
                                 $target = $recipient->profile->phone;
                                 $sms = new \common\components\QTSMS();
                                 $sms->post_message($text, $target);
                             }
                         }
                     }
+                    
                     $postedAssociatedIds = Yii::$app->request->post("associatedManagers") ? Yii::$app->request->post("associatedManagers") : [];
                     $currentAssociatedIds = array_keys($organization->getAssociatedManagersList($vendor->id));
                     $newAssociatedIds = array_diff($postedAssociatedIds, $currentAssociatedIds);

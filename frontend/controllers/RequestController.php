@@ -237,7 +237,7 @@ class RequestController extends DefaultController {
             $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
             foreach($rows as $row){
                 if($row->profile->phone && $row->profile->sms_allow){
-                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе mixcart.ru';
+                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе';
                     $target = $row->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target); 
@@ -318,7 +318,7 @@ class RequestController extends DefaultController {
                 }
                 foreach($vendorUsers as $user){
                     if($user->profile->phone && $user->profile->sms_allow){
-                        $text = $client->organization->name . ' хочет работать с Вами в системе mixcart.ru';
+                        $text = $client->organization->name . ' хочет работать с Вами в системе';
                         $target = $user->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target); 

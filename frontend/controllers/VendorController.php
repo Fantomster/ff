@@ -1536,6 +1536,7 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
+                    
                     $postedAssociatedIds = Yii::$app->request->post("associatedManagers") ? Yii::$app->request->post("associatedManagers") : [];
                     $currentAssociatedIds = array_keys($organization->getAssociatedManagersList($vendor->id));
                     $newAssociatedIds = array_diff($postedAssociatedIds, $currentAssociatedIds);

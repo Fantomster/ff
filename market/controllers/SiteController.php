@@ -277,22 +277,15 @@ class SiteController extends Controller {
                             'operator' => 'AND'
                         ]
                     ]
-                ],
-                'filter' => [
-                    'bool' => [
-                        'must' => [
-                            'terms' => [
-                                'product_supp_id' => $where
-                            ]
-                        ]
-                    ]
                 ]
             ]
         ];
         $count = \common\models\ES\Product::find()->query($params)
+                        ->where(['in','product_supp_id',$where])
                         ->limit(10000)->count();
         if (!empty($count)) {
             $products = \common\models\ES\Product::find()->query($params)
+                            ->where(['in','product_supp_id',$where])
                             ->orderBy(['product_rating'=>SORT_DESC])->limit(12)->all();
             return $this->render('/site/search-products', compact('count', 'products', 'search'));
         } else {
@@ -347,25 +340,18 @@ class SiteController extends Controller {
                             'operator' => 'AND'
                         ]
                     ]
-                ],
-                'filter' => [
-                    'bool' => [
-                        'must' => [
-                            'terms' => [
-                                'product_supp_id' => $where
-                            ]
-                        ]
-                    ]
                 ]
             ]
         ];
         $count = \common\models\ES\Product::find()->query($params)
+                ->where(['in','product_supp_id',$where])
                 ->offset($num)
                 ->limit(12)
                 ->count();
 
         if ($count > 0) {
             $pr = \common\models\ES\Product::find()->query($params)
+                    ->where(['in','product_supp_id',$where])
                     ->orderBy(['product_rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(12)

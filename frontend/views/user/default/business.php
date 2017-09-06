@@ -41,7 +41,7 @@ a, span, div, p{
      font-size:14px;
     }
 .section{
-    background: url(images/tmp_file/flowers.png) bottom center no-repeat;
+    background: url(/images/tmp_file/flowers.png) bottom center no-repeat;
     height: 100%;
     position: absolute;
     width: 100%;

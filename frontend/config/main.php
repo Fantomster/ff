@@ -5,8 +5,8 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'f-keeper',
-    'name' => 'f-keeper',
+    'id' => 'mixcart',
+    'name' => 'mixcart',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log',], // 'assetsAutoCompress'
     'controllerNamespace' => 'frontend\controllers',
@@ -51,7 +51,7 @@ return [
         ],
         'urlManagerFranchise' => [
             'class' => 'yii\web\urlManager',
-            'baseUrl' => '//partner.f-keeper.ru',
+            'baseUrl' => '//partner.mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
         ],

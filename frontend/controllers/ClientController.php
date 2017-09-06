@@ -928,7 +928,7 @@ class ClientController extends DefaultController {
             foreach ($organization->users as $recipient) {
                 $currentUser->sendInviteToVendor($recipient);
                 if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                    $text = "Повторное приглашение в систему F-keeper от " . $currentUser->organization->name;
+                    $text = "Повторное приглашение в систему MixCart от " . $currentUser->organization->name;
                     $target = $recipient->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target);

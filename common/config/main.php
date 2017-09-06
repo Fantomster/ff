@@ -45,7 +45,8 @@ return [
             'secret_key' => 'WGEfuqlvBXUSITrLYLfXDuiCueSmr0smMUziAQRe',
             'host' => 'email.eu-west-1.amazonaws.com',
             'messageConfig' => [
-                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+//                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+                'from' => ['noreply@mixcart.ru' => 'noreply@mixcart.ru'],
                 'charset' => 'UTF-8',
             ],
         ],

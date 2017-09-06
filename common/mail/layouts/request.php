@@ -149,7 +149,7 @@ use yii\helpers\Url;
 		}
 		</style>
 	</head>
-	<body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; background-image: url('http://f-keeper.ru/img/pattern.png'); margin: 0; padding: 0;">
+	<body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; background-image: url('https://mixcart.ru/img/pattern.png'); margin: 0; padding: 0;">
             <?php $this->beginBody() ?>
             <div style="width: 600px; box-shadow: 0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -webkit-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; -moz-box-shadow:0px 0px 18px 0px rgba(0, 0, 0, 0.32) !important; margin: 40px auto; padding: 15px;border: 1px solid #e4e4e4;background:#ffffff">
 		<!-- Visually Hidden Preheader Text : BEGIN -->

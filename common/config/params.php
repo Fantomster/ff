@@ -10,5 +10,5 @@ return [
         'vendor-noavatar' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/vendor-noavatar.gif',
         'bill-logo' => 'https://s3-eu-west-1.amazonaws.com/static.f-keeper.ru/logo-mix.png',
     ],
-    'password_generation' => 'Создание пароля для входа в систему f-keeper'
+    'password_generation' => 'Создание пароля для входа в систему MixCart'
 ];

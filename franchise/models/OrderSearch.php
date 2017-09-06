@@ -2,6 +2,7 @@
 
 namespace franchise\models;
 
+use common\models\Role;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -145,6 +146,13 @@ class OrderSearch extends Order {
             ['like', 'createdByProfile.full_name', $this->searchString],
             ['like', 'acceptedByProfile.full_name', $this->searchString],
             ]);
+
+        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER){
+            $query->andFilterWhere(['or',
+                ['client.manager_id'=>Yii::$app->user->id],
+                ['vendor.manager_id'=>Yii::$app->user->id],
+            ]);
+        }
 
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,

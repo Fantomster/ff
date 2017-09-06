@@ -80,6 +80,8 @@ class SiteController extends DefaultController
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_FRANCHISEE_MANAGER,
+                            Role::ROLE_FRANCHISEE_LEADER,
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -337,15 +339,21 @@ class SiteController extends DefaultController
         $user = new User(['scenario' => 'manageNew']);
         $profile = new Profile();
         $organizationType = Organization::TYPE_FRANCHISEE;
+        $rel = new RelationManagerLeader();
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($user->load($post)) {
                 $profile->load($post);
+                $rel->load($post);
 
                 if ($user->validate() && $profile->validate()) {
                     $user->setRegisterAttributes($user->role_id, $post['User']['status'])->save();
                     $profile->setUser($user->id)->save();
+                    if ($user->role_id==Role::ROLE_FRANCHISEE_MANAGER){
+                        $rel->manager_id=$user->id;
+                        $rel->save();
+                    }
                     $user->setFranchisee($this->currentFranchisee->id);
 //                    $this->currentUser->sendEmployeeConfirmation($user);
                     // send email
@@ -356,8 +364,9 @@ class SiteController extends DefaultController
                 }
             }
         }
+        $leadersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id);
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType', 'rel', 'leadersArray'));
     }
 
     /*

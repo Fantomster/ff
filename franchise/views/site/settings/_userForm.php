@@ -67,7 +67,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
             <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown())->label('Роль') ?>
 
-            <div style="display: <?= ($user->role->id == Role::ROLE_FRANCHISEE_MANAGER) ? 'block' : 'none' ?>" class="alLeaderChoose">
+            <div style="display: <?= (Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER) ? 'block' : 'none' ?>" class="alLeaderChoose">
 
             <?= $form->field($rel, 'leader_id')->dropDownList($leadersArray, ['prompt'=>'Выберите руководителя для менеджера'])->label('Руководитель') ?>
 

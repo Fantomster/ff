@@ -35,6 +35,9 @@ use common\models\Organization;
                     <?= $form->field($organization, 'email')->textInput()->label("Email контактного лица") ?>
                     <?= $form->field($organization, 'website')->textInput() ?>
                     <?= $form->field($organization, 'about')->textarea(['rows' => 6, 'style' => 'height: 96px;']) ?>
+
+                    <?= $form->field($organization, 'manager_id')->dropDownList($managersArray, ['prompt'=>'Выберите менеджера'])->label('Менеджер') ?>
+
                     <br>
                     <?php if (isset($user)) { ?>
                         <fieldset>

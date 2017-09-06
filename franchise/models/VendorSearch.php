@@ -2,6 +2,7 @@
 
 namespace franchise\models;
 
+use common\models\Role;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -74,6 +75,10 @@ class VendorSearch extends Organization {
 
         if($client_id){
             $query = parent::getOrganizationQuery($client_id);
+        }
+
+        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER){
+            $query.=" and org.manager_id=".Yii::$app->user->id;
         }
 
         $count = count(Yii::$app->db->createCommand($query, [':searchString' => $searchString, ':dateFrom' => $t1_f, 'dateTo' => $t2_f])->queryAll());

@@ -205,6 +205,7 @@ class NotificationHelper {
     public static function actionOrder($order_id, $is_new = true)
     {
         
+        $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
         $order = \common\models\Order::findOne(['id' => $order_id]);
 
         if($order === null)
@@ -216,7 +217,7 @@ class NotificationHelper {
 
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id])->all();
+        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -225,15 +226,15 @@ class NotificationHelper {
                 if($is_new)
                 {
                     $message->setData(['action' => 'order',
-                            'title' => 'Новый заказ №'.$order_id,
-                            'message' => $order->id,
+                            'title' => "MixCart: новый заказ №" . $order->id . "!",
+                            'data' => $order->id,
                             'activity' => "Work"]);
                 }
                 else 
                 {
                     $message->setData(['action' => 'order',
                             'title' => 'Изменения в заказе №'.$order_id,
-                            'message' => $order->id,
+                            'data' => $order->id,
                             'activity' => "Work"]);
                 }
                 

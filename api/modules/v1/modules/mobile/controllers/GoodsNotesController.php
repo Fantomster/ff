@@ -9,6 +9,7 @@ use api\modules\v1\modules\mobile\resources\CatalogGoods;
 use api\modules\v1\modules\mobile\resources\GoodsNotes;
 use yii\data\ActiveDataProvider;
 use common\models\RelationSuppRest;
+use yii\helpers\Json;
 
 
 /**
@@ -90,6 +91,7 @@ class GoodsNotesController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         
         if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
@@ -98,6 +100,9 @@ class GoodsNotesController extends ActiveController {
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
+        
+        if($params->list != null)
+            $query->andWhere ('catalog_base_goods_id IN('.implode(',', Json::decode($params->list)).')');
   
         $query->andFilterWhere([
             'id' => $params->id, 

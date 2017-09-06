@@ -9,6 +9,7 @@ use api\modules\v1\modules\mobile\resources\OrderContent;
 use api\modules\v1\modules\mobile\resources\Order;
 use yii\data\ActiveDataProvider;
 use common\models\RelationSuppRest;
+use yii\helpers\Json;
 
 
 /**
@@ -95,6 +96,7 @@ class OrderContentController extends ActiveController {
      
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         
         
@@ -103,6 +105,9 @@ class OrderContentController extends ActiveController {
             return $dataProvider;
         }
   
+        if($params->list != null)
+            $query->andWhere ('order_id IN('.implode(',', Json::decode($params->list)).')');
+        
         $query->andFilterWhere([
             'id' => $params->id, 
             'order_id' => $params->order_id,

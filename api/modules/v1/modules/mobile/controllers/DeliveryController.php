@@ -5,20 +5,20 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\resources\CatalogGoods;
 use yii\data\ActiveDataProvider;
-use common\models\RelationSuppRest;
+use api\modules\v1\modules\mobile\resources\Delivery;
+use yii\helpers\Json;
 
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class CatalogGoodsController extends ActiveController {
+class DeliveryController extends ActiveController {
 
     /**
      * @var string
      */
-    public $modelClass = 'api\modules\v1\modules\mobile\resources\CatalogGoods';
+    public $modelClass = 'api\modules\v1\modules\mobile\resources\Delivery';
 
     /**
      * @return array
@@ -58,7 +58,7 @@ class CatalogGoodsController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = CatalogGoods::findOne($id);
+        $model = Delivery::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
@@ -70,39 +70,51 @@ class CatalogGoodsController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new CatalogGoods();
-        $user = Yii::$app->user->getIdentity();
+        $params = new Delivery();
+        $query = Delivery::find();
         
-        $query = CatalogGoods::find();
-        
-        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-        $query = CatalogGoods::find()->where(['in','cat_id', RelationSuppRest::find()->select('cat_id')->where(['rest_org_id' => $user->organization_id])]);
-        
-        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
-             $query = CatalogGoods::find()->where(['in','cat_id', RelationSuppRest::find()->select('cat_id')->where(['supp_org_id' => $user->organization_id])]);
-     
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
-        
-        
+        $user = Yii::$app->user->getIdentity();
         
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
-
+        
+        if(isset($params->count))
+        {
+            $query->limit($params->count);
+                if(isset($params->page))
+                {
+                    $offset = ($params->page * $params->count) - $params->count;
+                    $query->offset($offset);
+                }
+        }
+  
+       
+        if($params->list != null)
+            $query->andWhere ('vendor_id IN('.implode(',', Json::decode($params->list)).')');
+        
         $query->andFilterWhere([
             'id' => $params->id, 
-            'base_goods_id' => $params->base_goods_id, 
+            'vendor_id' => $params->vendor_id,
+            'delivery_charge' => $params->delivery_charge, 
+            'min_free_delivery_charge' => $params->min_free_delivery_charge, 
+            'mon' => $params->mon, 
+            'tue' => $params->tue, 
+            'wed' => $params->wed, 
+            'thu' => $params->thu, 
+            'fri' => $params->fri, 
+            'sat' => $params->sat, 
+            'sun' => $params->sun, 
+            'min_order_price' => $params->min_order_price, 
             'created_at' => $params->created_at, 
             'updated_at' => $params->updated_at, 
-            'discount_percent' => $params->discount_percent, 
-            'discount' => $params->discount, 
-            'discount_fixed' => $params->discount_fixed, 
-            'price' => $params->price 
+            
            ]);
+  
         return $dataProvider;
     }
-
-    
 }

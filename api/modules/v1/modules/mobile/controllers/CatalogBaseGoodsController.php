@@ -92,11 +92,13 @@ class CatalogBaseGoodsController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
+        
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
- 
+        
         if($params->list != null)
         {
             $query->andWhere ('id IN('.implode(',', Json::decode($params->list)).')');

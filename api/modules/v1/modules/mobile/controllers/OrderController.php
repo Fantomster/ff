@@ -144,6 +144,7 @@ class OrderController extends ActiveController {
                     {
                         $notes = new \common\models\GoodsNotes();
                         $notes->attributes = $note;
+                        $notes->catalog_base_goods_id = intval(catalog_base_goods_id);
                         $notes->rest_org_id =  $user->organization_id;
                         unset($notes->id);
                     }
@@ -153,7 +154,7 @@ class OrderController extends ActiveController {
                         $notes->created_at = $note['created_at'];
                         $notes->updated_at = $note['updated_at'];
                     }
-                    
+
                     if (!$notes->save()) 
                     {
                         var_dump($notes->getErrors());
@@ -201,6 +202,7 @@ class OrderController extends ActiveController {
                     'OrderContents' => compact('OrderContents'),
                     'GoodsNotes' => compact('GoodsNotes')
             ]*/
+        $this->sendOrderCreated($user, $Order);
         return compact('Order', 'OrderContents', 'GoodsNotes');
     }
     
@@ -227,5 +229,35 @@ class OrderController extends ActiveController {
                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
        }
    }
+   
+    private function sendOrderCreated($sender, $order) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $subject = "MixCart: новый заказ №" . $order->id . "!";
+
+        $searchModel = new \common\models\search\OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->order_created) {
+                $result = $mailer->compose('orderCreated', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+            if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
+                $text = $order->client->name . " сформировал для Вас заказ в системе MixCart №" . $order->id;
+                $target = $recipient->profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
+            }
+        }
+    }
 
 }

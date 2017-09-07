@@ -101,7 +101,7 @@ use yii\helpers\Html;
                                 <tr style="margin: 0; padding: 0;">
                                     <td align="center" style="margin: 0; padding: 0;">
                                         <p style="font-size: 11px; font-weight: normal; line-height: 1.6; margin: 0 0 10px; padding: 0;">
-                                            © 2016 F-Keeper — ООО «Онлайн Маркет»
+                                            © 2016 MixCart — ООО «Онлайн Маркет»
                                         </p>
                                     </td>
                                 </tr>

@@ -38,11 +38,11 @@ yii\web\View::POS_READY);
                   <?php if (Yii::$app->session->hasFlash('warning')): ?>
                 <div class="alert alert-danger">
                 <strong>Ошибка!</strong> Извините, данный город не поддерживается системой MixCart!<br>
-                    Обратитесь в службу поддержки и мы обязательно вам поможем!
+                    Обратитесь в службу поддержки, и мы обязательно вам поможем!
                 </div>
                   <?php endif; ?>
                     <h3><i class="fa fa-location-arrow"></i> ВАШ ГОРОД <span id="setLocality" class="loc-h-city"><?=Yii::$app->request->cookies->get('locality')?></span>?</h3>
-                    <h5>Если мы определили не верно Ваш город, пожалуйста, найдите его самостоятельно</h5>
+                    <h5>Если мы неверно определили Ваш город, пожалуйста, найдите его самостоятельно</h5>
                     <?php
 //                    echo CheckboxX::widget([
 //                        'name'=>'s_11',

@@ -43,7 +43,7 @@ $menuItems = [
         'template' => '<a href="{url}">{icon}{label}<span class="pull-right-container"><span class="label bg-yellow pull-right">' . ($newClientCount ? $newClientCount : '') . '</span></span></a>',
     ],
     ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
-    ['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/vendor/tutorial', 'video' => 'video']],
+    //['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/vendor/tutorial', 'video' => 'video']],
     //['label' => 'Мои акции', 'icon' => 'ticket', 'url' => ['vendor/events']],
     ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
         //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],

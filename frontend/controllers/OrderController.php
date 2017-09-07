@@ -1691,6 +1691,8 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
+        $test = $order->recipientsList;
+        
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_created) {

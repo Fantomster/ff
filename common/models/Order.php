@@ -282,7 +282,7 @@ class Order extends \yii\db\ActiveRecord {
     public function getRawPrice() {
         return OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
     }
-    
+
     public function calculateTotalPrice() {
         $total_price = OrderContent::find()->select('SUM(quantity*price)')->where(['order_id' => $this->id])->scalar();
         if ($this->discount && ($this->discount_type == self::DISCOUNT_FIXED)) {
@@ -319,19 +319,21 @@ class Order extends \yii\db\ActiveRecord {
         if (isset($this->accepted_by_id)) {
             $recipients[] = $this->acceptedBy;
         } else {
-            foreach ($this->vendor->users as $user) {
-                if ($user->role_id === Role::ROLE_SUPPLIER_EMPLOYEE && ManagerAssociate::isAssociated($this->client_id, $user->id)) {
-                    $recipients[] = $user;
-                } elseif ($user->role_id !== Role::ROLE_SUPPLIER_EMPLOYEE) {
-                    $recipients[] = $user;
+            $associatedManagers = $this->client->getAssociatedManagers($this->vendor_id);
+            if (empty($associatedManagers)) {
+                foreach ($this->vendor->users as $user) {
+                    if ($user->role_id !== Role::ROLE_SUPPLIER_EMPLOYEE) {
+                        $recipients[] = $user;
+                    }
                 }
+            } else {
+                $recipients = array_merge($recipients, $associatedManagers);
             }
         }
         return $recipients;
     }
 
-
-    public function getOrdersExportColumns(){
+    public function getOrdersExportColumns() {
         return [
             [
                 'label' => 'Номер',
@@ -369,4 +371,5 @@ class Order extends \yii\db\ActiveRecord {
             ],
         ];
     }
+
 }

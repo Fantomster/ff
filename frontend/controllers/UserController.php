@@ -514,6 +514,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     
     public function actionCreate(){
         $user = User::findIdentity(Yii::$app->user->id);
+        $currentOrganziation = $user->organization;
         $sql = "select distinct parent_id as `parent_id` from (
         select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
         union all
@@ -534,6 +535,25 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             if ($organization->load($post)) {
                 $organization->parent_id = $parent_id;
                 $organization->save();
+                
+                if($currentOrganziation->type_id == Organization::TYPE_RESTAURANT && 
+                    $organization->type_id == Organization::TYPE_SUPPLIER){
+                    $relationSuppRest = new \common\models\RelationSuppRest();
+                    $relationSuppRest->rest_org_id = $currentOrganziation->id;
+                    $relationSuppRest->supp_org_id = $organization->id;
+                    $relationSuppRest->status = 1;
+                    $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
+                    $relationSuppRest->save();
+                }
+                if($currentOrganziation->type_id == Organization::TYPE_SUPPLIER && 
+                    $organization->type_id == Organization::TYPE_RESTAURANT){
+                    $relationSuppRest = new \common\models\RelationSuppRest();
+                    $relationSuppRest->rest_org_id = $organization->id;
+                    $relationSuppRest->supp_org_id = $currentOrganziation->id;
+                    $relationSuppRest->status = 1;
+                    $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
+                    $relationSuppRest->save();
+                }
             }
         }
     }

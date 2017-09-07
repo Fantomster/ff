@@ -77,14 +77,14 @@ if (!Yii::$app->user->isGuest) {
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand text-hide" href="<?= Url::home(); ?>">f-keeper</a>
+                <a class="navbar-brand text-hide" href="<?= Url::home(); ?>">MixCart</a>
             </div>
             <div id="navbar6" class="navbar-collapse collapse"><span id="locHeader" style="cursor:pointer"><?=Yii::$app->request->cookies->get('locality')?></span>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="<?= Url::to(['site/restaurants']) ?>">РЕСТОРАНЫ</a></li>
                     <li><a href="<?= Url::to(['site/suppliers']) ?>">ПОСТАВЩИКИ</a></li>
                     <li class="dropdown">
-                        <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/index']); ?>" class="dropdown-toggle">F-KEEPER <span class="caret"></span></a>
+                        <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/index']); ?>" class="dropdown-toggle">MIXCART <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/about']) ?>">О&nbsp;нас</a></li>
                             <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/contacts']) ?>">Контакты</a></li>

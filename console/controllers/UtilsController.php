@@ -102,4 +102,17 @@ class UtilsController extends Controller {
         }
     }
 
+    public function actionTestRedis() {
+        \Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'test',
+                'message' => 'ololo!'
+            ]);
+    }
+    
+    public function actionUpdateMpCategories() {
+        $categories = \common\models\MpCategory::find()->all();
+        foreach ($categories as $category) {
+            $category->update();
+        }
+    }
 }

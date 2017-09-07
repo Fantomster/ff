@@ -71,7 +71,7 @@ $this->title = 'Заявки';
 <section class="content-header">
     <h1>
         <i class="fa fa-paper-plane"></i> Список заявок
-        <small>Разместите заявку и ее увидят все поставщики системы f-keeper</small>
+        <small>Разместите заявку и ее увидят все поставщики системы MixCart</small>
     </h1>   
     <?=
     Breadcrumbs::widget([
@@ -171,7 +171,7 @@ Modal::end();
                     </div>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 hidden-xs hidden-sm">
-        <?= Html::a('<img src="/images/banners/240х400_Restorating.ru.gif" >', "https://www.restorating.ru/promo-msk/?utm_source=f-keeper&utm_medium=banner&utm_campaign=test_pack", ['class' => 'img-responsive', 'style' => 'margin-bottom:15px']) ?>
+        <?= Html::a('<img src="/images/banners/240х400_Restorating.ru.gif" >', "https://www.restorating.ru/promo-msk/?utm_source=MixCart&utm_medium=banner&utm_campaign=test_pack", ['class' => 'img-responsive', 'style' => 'margin-bottom:15px']) ?>
         <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive']) ?>
                 </div>
         </section>

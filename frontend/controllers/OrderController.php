@@ -54,6 +54,7 @@ class OrderController extends DefaultController {
                             'ajax-refresh-stats',
                             'ajax-set-comment',
                             'pdf',
+                            'export-to-xls'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -78,6 +79,7 @@ class OrderController extends DefaultController {
                             'repeat',
                             'refresh-cart',
                             'ajax-add-to-cart',
+                            'ajax-add-guide-to-cart',
                             'ajax-delete-order',
                             'ajax-make-order',
                             'ajax-change-quantity',
@@ -112,7 +114,73 @@ class OrderController extends DefaultController {
             ],
         ];
     }
-
+    
+    public function actionExportToXls() {
+        $selected = Yii::$app->request->get('selected');
+        if(!empty($selected)){
+            $model = \Yii::$app->db->createCommand("
+select 
+ord.id as id, 
+o.name as name, 
+cbg.product as product, 
+quantity, 
+cbg.ed,
+cbg.price,
+(cbg.price*quantity) as total_price,
+cbg.article,
+gn.note
+from `order_content` oc 
+left join `order` ord on oc.`order_id` = ord.`id`
+left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+left join `organization` o on ord.`client_id` = o.`id`
+left join `goods_notes` gn on cbg.id = gn.catalog_base_goods_id
+where ord.id in ($selected)
+union all
+select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` where id in ($selected)),' ',' '")->queryAll();
+            
+            $objPHPExcel = new \PHPExcel();
+            $sheet=0;
+            $objPHPExcel->setActiveSheetIndex($sheet);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->setTitle('отчет')
+                ->setCellValue('A1', '№ заказа')
+                ->setCellValue('B1', 'Закупщик')
+                ->setCellValue('C1', 'Наименование товара')
+                ->setCellValue('D1', 'Кол-во')
+                ->setCellValue('E1', 'Единица измерения')
+                ->setCellValue('F1', 'Стоимость за ед-цу')
+                ->setCellValue('G1', 'Сумма итого')
+                ->setCellValue('H1', 'Артикул')
+                ->setCellValue('I1', 'Комментарий');
+            $row=2;
+            foreach ($model as $foo) {
+                $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo['id']); 
+                $objPHPExcel->getActiveSheet()->setCellValue('B'.$row,$foo['name']);
+                $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['product']);
+                $objPHPExcel->getActiveSheet()->setCellValue('D'.$row,$foo['quantity']);
+                $objPHPExcel->getActiveSheet()->setCellValue('E'.$row,$foo['ed']);
+                $objPHPExcel->getActiveSheet()->setCellValue('F'.$row,$foo['price']);
+                $objPHPExcel->getActiveSheet()->setCellValue('G'.$row,$foo['total_price']);
+                $objPHPExcel->getActiveSheet()->setCellValue('H'.$row,$foo['article']);
+                $objPHPExcel->getActiveSheet()->setCellValue('I'.$row,$foo['note']);
+                $row++;
+            }
+            header('Content-Type: application/vnd.ms-excel');
+            $filename = "otchet_".date("d-m-Y-His").".xls";
+            header('Content-Disposition: attachment;filename='.$filename .' ');
+            header('Cache-Control: max-age=0');
+            $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+            $objWriter->save('php://output');
+        }
+    }
     public function actionCreate() {
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
@@ -154,7 +222,7 @@ class OrderController extends DefaultController {
         $searchModel = new GuideSearch();
         $params = Yii::$app->request->getQueryParams();
         $params['GuideSearch'] = Yii::$app->request->post("GuideSearch");
-        
+
         $dataProvider = $searchModel->search($params, $client->id);
 
         if (Yii::$app->request->isPjax) {
@@ -178,7 +246,7 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-        if ($client->type_id === Organization::TYPE_RESTAURANT) {
+        if ($name && $client->type_id === Organization::TYPE_RESTAURANT) {
             $guide = new Guide();
             $guide->client_id = $client->id;
             $guide->name = $name;
@@ -206,9 +274,11 @@ class OrderController extends DefaultController {
         }
         $session['currentGuide'] = $id;
 
-        $test = $session['guideProductList'];
         $guideProductList = isset($session['guideProductList']) ? $session['guideProductList'] : $guide->guideProductsIds;
         $session['guideProductList'] = $guideProductList;
+
+        $test = $session['selectedVendor'];
+        $test2 = $session['guideProductList'];
 
         $params = Yii::$app->request->getQueryParams();
 
@@ -219,8 +289,11 @@ class OrderController extends DefaultController {
 
         $productSearchModel = new OrderCatalogSearch();
         $vendors = $client->getSuppliers(null);
-        $test = array_keys($vendors);
-        $selectedVendor = isset($session['selectedVendor']) ? $session['selectedVendor'] : array_keys($vendors)[1];
+        $selectedVendor = $session['selectedVendor'];
+        if (empty($selectedVendor)) {
+            $selectedVendor = isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+        }
+        //isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
@@ -253,7 +326,7 @@ class OrderController extends DefaultController {
         if (isset($session['currentGuide']) && $id != $session['currentGuide']) {
             return $this->redirect(['order/guides']);
         }
-        
+
         $guideProductList = $session['guideProductList'];
 
         foreach ($guide->guideProducts as $guideProduct) {
@@ -292,7 +365,7 @@ class OrderController extends DefaultController {
     public function actionAjaxShowGuide($id) {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
-        
+
         $params = Yii::$app->request->getQueryParams();
 
         $guideSearchModel = new GuideProductsSearch();
@@ -343,8 +416,76 @@ class OrderController extends DefaultController {
         return false;
     }
 
+    public function actionAjaxAddGuideToCart($id) {
+        $client = $this->currentUser->organization;
+        $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
+
+        foreach ($guide->guideProducts as $guideProduct) {
+            
+            $orders = $client->getCart();
+
+            $product_id = $guideProduct->cbg_id;
+            $price = $guideProduct->price;
+            $product_name = $guideProduct->baseProduct->product;
+            $vendor = $guideProduct->baseProduct->vendor;
+            $units = $guideProduct->baseProduct->units;
+            $article = $guideProduct->baseProduct->article;
+            $quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
+            $isNewOrder = true;
+
+            foreach ($orders as $order) {
+                if ($order->vendor_id == $vendor->id) {
+                    $isNewOrder = false;
+                    $alteringOrder = $order;
+                }
+            }
+            if ($isNewOrder) {
+                $newOrder = new Order();
+                $newOrder->client_id = $client->id;
+                $newOrder->vendor_id = $vendor->id;
+                $newOrder->status = Order::STATUS_FORMING;
+                $newOrder->save();
+                $alteringOrder = $newOrder;
+            }
+
+            $isNewPosition = true;
+            foreach ($alteringOrder->orderContent as $position) {
+                if ($position->product_id == $product_id) {
+                    $position->quantity += $quantity;
+                    $position->save();
+                    $isNewPosition = false;
+                }
+            }
+            if ($isNewPosition) {
+                $position = new OrderContent();
+                $position->order_id = $alteringOrder->id;
+                $position->product_id = $product_id;
+                $position->quantity = $quantity;
+                $position->price = $price;
+                $position->product_name = $product_name;
+                $position->units = $units;
+                $position->article = $article;
+                $position->save();
+            }
+        }
+        $alteringOrder->calculateTotalPrice();
+        $cartCount = $client->getCartCount();
+        $this->sendCartChange($client, $cartCount);
+
+        return true; //$this->renderPartial('_orders', compact('orders'));
+    }
+
     public function actionFavorites() {
-        return $this->render('favorites');
+        $client = $this->currentUser->organization;
+
+        $params = Yii::$app->request->getQueryParams();
+        $params['FavoriteSearch'] = Yii::$app->request->post("FavoriteSearch");
+
+        $searchModel = new \common\models\search\FavoriteSearch();
+        $dataProvider = $searchModel->search($params, $client->id);
+        $dataProvider->pagination = ['pageSize' => 10];
+
+        return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }
 
     public function actionPjaxCart() {
@@ -1471,7 +1612,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: измененения в заказе №" . $order->id;
+        $subject = "Измененения в заказе №" . $order->id;
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1507,7 +1648,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: заказ №" . $order->id . " выполнен!";
+        $subject = "Заказ №" . $order->id . " выполнен!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1523,7 +1664,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
-                $text = $order->vendor->name . " выполнил заказ в системе f-keeper №" . $order->id;
+                $text = $order->vendor->name . " выполнил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1543,7 +1684,7 @@ class OrderController extends DefaultController {
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "f-keeper: новый заказ №" . $order->id . "!";
+        $subject = "Новый заказ №" . $order->id . "!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1559,7 +1700,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
-                $text = $order->client->name . " сформировал для Вас заказ в системе f-keeper №" . $order->id;
+                $text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1578,7 +1719,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " подтвержден!";
+        $subject = "Заказ №" . $order->id . " подтвержден!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1594,7 +1735,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
-                $text = "Заказ в системе f-keeper №" . $order->id . " согласован.";
+                $text = "Заказ в системе №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1613,7 +1754,7 @@ class OrderController extends DefaultController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " отменен!";
+        $subject = "Заказ №" . $order->id . " отменен!";
 
         $searchModel = new OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -1629,14 +1770,13 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $text = $senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
             }
         }
     }
-
     private function saveCartChanges($content) {
         foreach ($content as $position) {
             $product = OrderContent::findOne(['id' => $position['id']]);

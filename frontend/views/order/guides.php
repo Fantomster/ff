@@ -8,7 +8,7 @@ use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
-$this->title = "Список гайдов";
+$this->title = "Список гидов";
 
 yii\jui\JuiAsset::register($this);
 
@@ -18,9 +18,9 @@ $this->registerJs('
     $(document).on("click", ".delete-guide", function(e) {
         e.preventDefault();
         clicked = $(this);
-        title = "Удаление гайда";
-        text = "Вы уверены, что хотите удалить гайд?";
-        success = "Гайд удален!";
+        title = "Удаление гида";
+        text = "Вы уверены, что хотите удалить гид?";
+        success = "Гид удален!";
         swal({
             title: title,
             text: text,
@@ -51,7 +51,7 @@ $this->registerJs('
     $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "Назовите ваш новый гайд";
+        var title = "Назовите ваш новый гид";
         swal({
             title: title,
             input: "text",
@@ -91,6 +91,7 @@ $this->registerJs('
         e.preventDefault();
         var clicked = $(this);
         var title = "Комментарий к товару";
+        fixBootstrapModal();
         fixBootstrapModal();
         swal({
             title: title,
@@ -182,21 +183,74 @@ $this->registerJs('
         });
     });
 
+    $(document).on("click", ".add-guide-to-cart", function(e) {
+        e.preventDefault();
+        var cart = $(".basket_a");
+        var imgtodrag = $("#cart-image");
+        if (imgtodrag) {
+            var imgclone = imgtodrag.clone()
+                .offset({
+                top: $(this).offset().top - 30,
+                left: $(this).offset().left + 60
+            })
+                .css({
+                "opacity": "0.5",
+                    "position": "absolute",
+                    "height": "60px",
+                    "width": "60px",
+                    "z-index": "10000"
+            })
+                .appendTo($("body"))
+                .animate({
+                "top": cart.offset().top,
+                    "left": cart.offset().left,
+                    "width": 60,
+                    "height": 60
+            }, 1000, "easeInOutExpo");
+
+            setTimeout(function () {
+                cart.parent().effect("highlight", {
+                    times: 2,
+                    color: "#6ea262"
+                }, 350);
+            }, 1000);
+
+            imgclone.animate({
+                "width": 0,
+                    "height": 0
+            }, function () {
+                $(this).detach()
+            });
+        }
+        $.post(
+            "' . Url::to(['/order/ajax-add-guide-to-cart']) . '?id=" + $(this).data("id")
+        ).done(function(result) {
+        });
+    });
+    
+    $(document).on("click", ".btnSubmit", function() {
+        $($(this).data("target-form")).submit();
+    });
+
+    $(document).on("hidden.bs.modal", "#guideModal", function() {
+        $(this).data("bs.modal", null);
+    });
+
 ', View::POS_READY);
 ?>
 <img id="cart-image" src="/images/cart.png" style="position:absolute;left:-100%;">
-<section class="content">
+<section class="content circe_font">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
             <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
             <li class="active">
                 <a href="#">
-                    Гайды заказов <small class="label bg-yellow">new</small>
+                    Гиды заказов <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Избранные <small class="label bg-yellow">new</small>
+                    Фавориты <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -218,7 +272,7 @@ $this->registerJs('
                                     $form->field($searchModel, 'searchString', [
                                         'addon' => [
                                             'append' => [
-                                                'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                                                'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchForm"><i class="fa fa-search"></i></a>',
                                                 'options' => [
                                                     'class' => 'append',
                                                 ],
@@ -237,8 +291,7 @@ $this->registerJs('
                             <?php ActiveForm::end(); ?>
                         </div>
                         <div class="pull-right">
-                            <!--<a class="btn btn-md btn-outline-success new-guid" href="create.html" data-toggle="tooltip" data-original-title="Создать гайд" data-url="#"><i class="fa fa-plus"></i> Создать гайд</a>-->
-                            <?= Html::a('<i class="fa fa-plus"></i> Создать гайд', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
+                            <?= Html::a('<i class="fa fa-plus"></i> Создать гид', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
                         </div>
                     </div>
                 </div>

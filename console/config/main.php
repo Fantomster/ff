@@ -22,7 +22,7 @@ return [
         ],
     ],
     'aliases' => [
-          '@baseUrl'=>'https://f-keeper.ru'
+          '@baseUrl'=>'https://mixcart.ru'
 //        '@web' => 'http://f-keeper.dev',
 //        '@webroot' => '/var/www/html/f-keeper.dev/frontend/web',
     ],

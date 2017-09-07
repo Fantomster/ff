@@ -1,5 +1,5 @@
 <?php
 return [
-    'adminEmail' => 'noreply@f-keeper.ru',
+    'adminEmail' => 'noreply@mixcart.ru',
     'notificationsUrl' => 'https://notifications.f-keeper.ru:443',
 ];

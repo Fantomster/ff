@@ -5,7 +5,7 @@ if ($type == common\models\Organization::TYPE_SUPPLIER) {
     $organizationType = "vendor";
 }
 ?>
-<p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><img src="http://f-keeper.ru/img/immotion1.jpg" style="max-width: 100%; margin: 0; padding: 0;" alt="" /></p>
+<p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><img src="https://mixcart.ru/img/immotion1.jpg" style="max-width: 100%; margin: 0; padding: 0;" alt="" /></p>
 <h3 style="line-height: 1.1; color: #3f3e3e; font-weight: 500; font-size: 27px; margin: 0 0 15px; padding: 0;">
     Приветствую, <small style="font-size: 60%; color: #787878; line-height: 0; text-transform: none; margin: 0; padding: 0;"><?= $name ?></small>
 </h3>

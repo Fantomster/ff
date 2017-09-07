@@ -14,7 +14,7 @@ $this->title = "Успешная регистрация!";
 <div class="main-page-wrapper success">
 
     <div class="success-message"><a href="<?= Yii::$app->homeUrl; ?>" class="success-message__ico"></a>
-        <div class="success-message__text">Вы успешно зарегистрировались в системе <a href="<?= Yii::$app->homeUrl; ?>">f-keeper</a><br>На указанную Вами почту <b><?= $user->email ?></b> было выслано письмо с подтверждением.<br>Для продолжения работы в системе пройдите по ссылке в письме.</div>
+        <div class="success-message__text">Вы успешно зарегистрировались в системе <a href="<?= Yii::$app->homeUrl; ?>">MixCart</a><br>На указанную Вами почту <b><?= $user->email ?></b> было выслано письмо с подтверждением.<br>Для продолжения работы в системе пройдите по ссылке в письме.</div>
     </div>
     <div class="present-wrapper">
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>

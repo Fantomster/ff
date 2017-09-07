@@ -45,7 +45,7 @@
         <?php if (!empty($order->comment)) { ?>
             <div style="width: 100%;height: auto;border: 1px solid #DDDDDD;float: left;margin: 30px 0%; border-radius: 100px;">
                 <div style="border-right: 1px solid #DDDDDD;width: 55px;float: left;height: 50px;">
-                    <img src="https://f-keeper.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
+                    <img src="https://mixcart.ru/img/c.png" style="margin-left: 18px;margin-top: 13px;" alt="">
                 </div>
                 <p class = "pl" style="margin-left: 10px;padding-left: 60px;padding-top: 13px;"><?= $order->comment ?></p>
             </div>

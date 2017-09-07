@@ -1622,7 +1622,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_changed) {
-                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
@@ -1729,7 +1729,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_processing) {
-                $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider"))
+                $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
@@ -1764,7 +1764,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_canceled) {
-                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
+                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();

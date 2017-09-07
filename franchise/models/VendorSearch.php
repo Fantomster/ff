@@ -78,7 +78,7 @@ class VendorSearch extends Organization {
         }
 
         if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
-            //$query.=" and org.manager_id = any(select manager_id from relation_manager_leader where leader_id=".Yii::$app->user->id.")";
+            $query.=" and (org.manager_id=".Yii::$app->user->id." or org.manager_id in(select manager_id from relation_manager_leader where leader_id=".Yii::$app->user->id."))";
         }
 
         if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER){

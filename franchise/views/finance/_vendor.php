@@ -11,11 +11,11 @@
             <div class="pay-chek">
                 <table class="pay-table" width="100%">
                     <tbody><tr>
-                            <td style="text-align: left;">F-keeper Мне:</td>
+                            <td style="text-align: left;">MixCart Мне:</td>
                             <td style="text-align: right; font-size: 18px;">123000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">Я F-keeper'у:</td>
+                            <td style="text-align: left;">Я MixCart'у:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
@@ -55,7 +55,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper'у:</td>
+                            <td style="text-align: left;">MixCart'у:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
@@ -78,7 +78,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper %:</td>
+                            <td style="text-align: left;">MixCart %:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
@@ -90,7 +90,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper %:</td>
+                            <td style="text-align: left;">MixCart %:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
@@ -102,7 +102,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper %:</td>
+                            <td style="text-align: left;">MixCart %:</td>
                             <td style="text-align: right; font-size: 18px;">180000 руб.</td>
                         </tr>
                         <tr>

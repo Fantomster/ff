@@ -44,6 +44,8 @@ class OrganizationController extends DefaultController {
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_FRANCHISEE_LEADER,
+                            Role::ROLE_FRANCHISEE_MANAGER,
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -137,6 +139,7 @@ class OrganizationController extends DefaultController {
      * Add new restaurant
      */
     public function actionCreateClient() {
+        $managersArray = (new User())->getFranchiseeEmployees($this->currentFranchisee->id, true);
         $client = new Organization();
         $client->type_id = Organization::TYPE_RESTAURANT;
         $user = new User();
@@ -174,13 +177,15 @@ class OrganizationController extends DefaultController {
             }
         }
 
-        return $this->render('create-client', compact('client', 'user', 'profile', 'buisinessInfo'));
+        return $this->render('create-client', compact('client', 'user', 'profile', 'buisinessInfo', 'managersArray'));
     }
 
     /**
      * Update restaurant
      */
     public function actionUpdateClient($id) {
+        $user = new User();
+        $managersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id, true);
         $client = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
@@ -214,7 +219,7 @@ class OrganizationController extends DefaultController {
             }
         }
 
-        return $this->render('update-client', compact('client', 'buisinessInfo'));
+        return $this->render('update-client', compact('client', 'buisinessInfo', 'managersArray'));
     }
 
     /**
@@ -319,6 +324,7 @@ class OrganizationController extends DefaultController {
      * Add new supplier
      */
     public function actionCreateVendor() {
+        $managersArray = (new User())->getFranchiseeEmployees($this->currentFranchisee->id, true);
         $vendor = new Organization();
         $catalog = new \common\models\Catalog();
         $vendor->type_id = Organization::TYPE_SUPPLIER;
@@ -360,13 +366,14 @@ class OrganizationController extends DefaultController {
             }
         }
 
-        return $this->render('create-vendor', compact('vendor', 'user', 'profile', 'buisinessInfo'));
+        return $this->render('create-vendor', compact('vendor', 'user', 'profile', 'buisinessInfo', 'managersArray'));
     }
 
     /**
      * Update vendor
      */
     public function actionUpdateVendor($id) {
+        $managersArray = (new User())->getFranchiseeEmployees($this->currentFranchisee->id, true);
         $vendor = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
@@ -399,8 +406,7 @@ class OrganizationController extends DefaultController {
                 }
             }
         }
-
-        return $this->render('update-vendor', compact('vendor', 'buisinessInfo'));
+        return $this->render('update-vendor', compact('vendor', 'buisinessInfo', 'managersArray'));
     }
 
     /**

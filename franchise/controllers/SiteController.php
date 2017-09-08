@@ -4,6 +4,7 @@ namespace franchise\controllers;
 
 use common\models\Catalog;
 use common\models\FranchiseeAssociate;
+use common\models\RelationManagerLeader;
 use common\models\RelationSuppRest;
 use common\models\Request;
 use common\models\RequestCallback;
@@ -70,15 +71,17 @@ class SiteController extends DefaultController
                 'ruleConfig' => [
                     'class' => AccessRule::className(),
                 ],
-                'only' => ['index', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                'only' => ['index', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'setting', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form'],
+                        'actions' => ['index', 'setting', 'setting', 'service-desk', 'settings', 'promotion', 'users', 'create-user', 'update-user', 'delete-user', 'validate-user', 'catalog', 'get-sub', 'import-from-xls', 'ajax-delete-product', 'ajax-edit-catalog-form', 'requests', 'orders'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_FRANCHISEE_MANAGER,
+                            Role::ROLE_FRANCHISEE_LEADER,
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -336,15 +339,21 @@ class SiteController extends DefaultController
         $user = new User(['scenario' => 'manageNew']);
         $profile = new Profile();
         $organizationType = Organization::TYPE_FRANCHISEE;
+        $rel = new RelationManagerLeader();
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($user->load($post)) {
                 $profile->load($post);
+                $rel->load($post);
 
                 if ($user->validate() && $profile->validate()) {
-                    $user->setRegisterAttributes($user->role_id, User::STATUS_ACTIVE)->save();
+                    $user->setRegisterAttributes($user->role_id, $post['User']['status'])->save();
                     $profile->setUser($user->id)->save();
+                    if ($user->role_id==Role::ROLE_FRANCHISEE_MANAGER){
+                        $rel->manager_id=$user->id;
+                        $rel->save();
+                    }
                     $user->setFranchisee($this->currentFranchisee->id);
 //                    $this->currentUser->sendEmployeeConfirmation($user);
                     // send email
@@ -355,8 +364,9 @@ class SiteController extends DefaultController
                 }
             }
         }
+        $leadersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id);
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType', 'rel', 'leadersArray'));
     }
 
     /*
@@ -375,24 +385,32 @@ class SiteController extends DefaultController
         $user->setScenario("manage");
         $profile = $user->profile;
         $organizationType = Organization::TYPE_FRANCHISEE;
-
+        $rel = RelationManagerLeader::findOne(['manager_id'=>$id]);
+        if(!$rel){
+            $rel = new RelationManagerLeader();
+        }
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($user->load($post) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
+                $user->setRegisterAttributes($post['User']['role_id'], $post['User']['status'])->save();
                 $profile->load($post);
-
+                $rel->load($post);
                 if ($user->validate() && $profile->validate()) {
-
                     $user->save();
                     $profile->save();
-
+                    if(empty($post['RelationManagerLeader']['leader_id'])){
+                        $rel->delete();
+                    }else{
+                        $rel->save();
+                    }
                     $message = 'Пользователь обновлен!';
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
         }
+        $leadersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id);
 
-        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType'));
+        return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType', 'rel', 'leadersArray'));
     }
 
     /*
@@ -569,7 +587,7 @@ class SiteController extends DefaultController
             if (!is_readable($path)) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
                     . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                    . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -591,13 +609,13 @@ class SiteController extends DefaultController
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                     . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
-                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                    . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                     . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
-                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                    . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $transaction = Yii::$app->db->beginTransaction();
@@ -657,7 +675,7 @@ class SiteController extends DefaultController
                 $transaction->rollback();
                 Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
                     . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-                    . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+                    . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             }
         }
         return $this->renderAjax('catalog/_importCatalog', compact('importModel', 'vendor_id'));
@@ -770,7 +788,7 @@ class SiteController extends DefaultController
 //            if (!is_readable($path)) {
 //                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
 //                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-//                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+//                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
 //                return $this->redirect(\Yii::$app->request->getReferrer());
 //            }
 //            $localFile = \PHPExcel_IOFactory::identify($path);
@@ -790,7 +808,7 @@ class SiteController extends DefaultController
 //            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
 //                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
 //                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
-//                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+//                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
 //                return $this->redirect(\Yii::$app->request->getReferrer());
 //            }
 //            $transaction = Yii::$app->db->beginTransaction();
@@ -840,7 +858,7 @@ class SiteController extends DefaultController
 //                $transaction->rollback();
 //                Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
 //                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
-//                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="alert-link" style="background:none">info@f-keeper.ru</a></small>');
+//                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
 //            }
 //        }
 //

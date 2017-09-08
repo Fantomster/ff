@@ -41,7 +41,7 @@ a, span, div, p{
      font-size:14px;
     }
 .section{
-    background: url(images/tmp_file/flowers.png) bottom center no-repeat;
+    background: url(/images/tmp_file/flowers.png) bottom center no-repeat;
     height: 100%;
     position: absolute;
     width: 100%;
@@ -71,7 +71,7 @@ text-align:center;
 a.btn-continue{
     font-size: 24px;
     font-family: \'Circe-Bold\';
-    text-align: -webkit-center;
+    text-align: center;
     margin-top: 20px;
     display: block;
     width: 100%;
@@ -97,6 +97,19 @@ a.btn-continue:hover{
     color: #666;
     background-color: #eee;
     border-color: #ddd;
+}
+@media (max-width: 600px){
+.table {
+    overflow-x: scroll;
+    display: table;
+}
+}
+@media (max-width: 480px){
+.table a{float:none !important;padding: 0 !important;}
+.kv-table-wrap tr > td{border:0 !important;}   
+.kv-table-wrap tr > td:last-child{border-bottom: 1px solid #ccc !important;;}
+.kv-table-wrap tr:last-child > td:last-child{border-bottom: 0 !important;} 
+.kv-table-wrap th, .kv-table-wrap td {width: inherit !important; }
 }
 ');
 ?>
@@ -145,8 +158,8 @@ $grid = [
                                     'dataProvider' => $dataProvider,
                                     'filterPosition' => false,
                                     'columns' => $grid, 
-                                    'options' => ['class' => 'table-responsive'],
-                                    'tableOptions' => ['class' => 'table dataTable', 'role' => 'grid'],
+                                    'options' => [],
+                                    'tableOptions' => ['class' => 'table'],
                                     'bordered' => false,
                                     'striped' => false,
                                     'summary' => false,

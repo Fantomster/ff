@@ -7,7 +7,7 @@ $this->title = 'Обучающие видео';
 <section class="content-header">
     <h1>
         Обучающие видео
-        <small>Примеры работы с системой f-keeper</small>
+        <small>Примеры работы с системой MixCart</small>
     </h1>
     <?=
     Breadcrumbs::widget([

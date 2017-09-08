@@ -46,7 +46,7 @@ class User extends \amnah\yii2\user\models\User {
             
             // email rules invite client
             [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message'=>'Введите эл.почту партнера'],
-            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message'=>'Пользователь с таким Email уже работает в системе f-keeper, пожалуйста, свяжитесь с ним для сотрудничества!'],
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'],
             
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
@@ -146,6 +146,13 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getManagersLeader() {
+        return $this->hasOne(User::className(), ['leader_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getAssociated() {
         return $this->hasMany(ManagerAssociate::className(), ['manager_id' => 'id']);
     }
@@ -190,7 +197,7 @@ class User extends \amnah\yii2\user\models\User {
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($vendor->id, $userToken::TYPE_PASSWORD_RESET);
         $email = $vendor->email;
-        $subject = "Приглашение на f-keeper";
+        $subject = "Приглашение на MixCart";
         $result = $mailer->compose('acceptRestaurantsInvite', compact("subject", "vendor", "userToken", "restaurant"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -216,7 +223,7 @@ class User extends \amnah\yii2\user\models\User {
 		// send email
         $vendor = $this->organization->name;
         $email = $client->email;
-        $subject = "Приглашение на f-keeper";
+        $subject = "Приглашение на MixCart";
         $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -241,7 +248,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $this->module->emailViewPath;
 		// send email
         $we = $this->organization->name;
-        $subject = "Приглашение на f-keeper";
+        $subject = "Приглашение на MixCart";
         $result = $mailer->compose('friendInvite', compact("subject", "we"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -267,13 +274,13 @@ class User extends \amnah\yii2\user\models\User {
 		// send email
         $type = $this->organization->type_id;
         $name = $this->profile->full_name;
-        $subject = "Добро пожаловать на  f-keeper";
+        $subject = "Добро пожаловать на  MixCart";
         $result = $mailer->compose('welcome', compact("subject", "type", "name"))
                 ->setTo($this->email)
                 ->setSubject($subject)
                 ->send();
         
-        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
                 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
@@ -298,7 +305,7 @@ class User extends \amnah\yii2\user\models\User {
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;
-        $subject = "Подтвердите аккаунт на f-keeper";
+        $subject = "Подтвердите аккаунт на MixCart";
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -359,5 +366,26 @@ class User extends \amnah\yii2\user\models\User {
             return $franchiseeRoles;
         }
         return [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
+    }
+
+    public function getFranchiseeEmployees($franchisee_id, $is_managers=false){
+        // get all records from database and generate
+        static $dropdown;
+        if ($dropdown === null) {
+            $role = ($is_managers) ? Role::ROLE_FRANCHISEE_MANAGER : Role::ROLE_FRANCHISEE_LEADER;
+            $models = User::find()
+                ->joinWith("franchiseeUser")
+                ->joinWith("profile")->select(['user.id', 'profile.full_name'])
+                ->where([
+                    'franchisee_user.franchisee_id' => $franchisee_id,
+                    'role_id' => $role
+                ])->all();
+                foreach ($models as $model) {
+                    if ($model->id !== Role::ROLE_FRANCHISEE_AGENT) {
+                        $dropdown[$model->id] = $model->profile->full_name;
+                    }
+                }
+        }
+        return $dropdown;
     }
 }

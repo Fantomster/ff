@@ -2,6 +2,8 @@
 
 namespace franchise\models;
 
+use common\models\RelationManagerLeader;
+use common\models\Role;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -146,6 +148,20 @@ class OrderSearch extends Order {
             ['like', 'acceptedByProfile.full_name', $this->searchString],
             ]);
 
+        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER or Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
+            $searchArr[] = Yii::$app->user->id;
+            if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
+                $relArr = RelationManagerLeader::findAll(['leader_id'=>Yii::$app->user->id]);
+                foreach ($relArr as $one){
+                    $searchArr[] = $one['manager_id'];
+                }
+            }
+            $query->andFilterWhere(['or',
+                ['client.manager_id'=>$searchArr],
+                ['vendor.manager_id'=>$searchArr],
+            ]);
+        }
+
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,
             'total_price' => $this->total_price,
@@ -158,6 +174,7 @@ class OrderSearch extends Order {
             $query->andFilterWhere(['>=', "$orderTable.created_at", $t1_f]);
             $query->andFilterWhere(['<=', "$orderTable.created_at", $t2_f]);
         }
+        //dd($query);
 
         return $dataProvider;
     }

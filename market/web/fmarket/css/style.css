@@ -944,3 +944,11 @@ text-decoration: none;
   width: 95px;
   height: 17px;
 }
+
+.category-text-read-more {
+    padding-bottom: 10px;
+    color: #76aa69;
+}
+.category-text-read-more:hover {
+    color: #84bf76;
+}

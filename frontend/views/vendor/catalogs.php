@@ -70,7 +70,7 @@ Modal::begin([
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
                             <?= Html::a('<h4 class="m-b-xs text-info">Главный каталог</h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
-                            <p class="small">Этот каталог содержит все ваши продукты доступные на f-keeper</p>
+                            <p class="small">Этот каталог содержит все ваши продукты доступные на MixCart</p>
                         </div>
                         <div class="col-md-6 text-right">
                             <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default btn-sm m-t']) ?>

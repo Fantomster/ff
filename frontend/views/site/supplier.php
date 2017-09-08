@@ -19,7 +19,7 @@ $this->title = 'Поставщикам';
 
         <div class="inside__block">
             <div class="container-fluid">
-                <h2>возможности f-keeper</h2>
+                <h2>возможности MixCart</h2>
                 <span class="for__who">Для поставщиков</span>
 
                 <div class="row">

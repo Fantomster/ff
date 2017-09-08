@@ -137,25 +137,38 @@ class RequestController extends DefaultController {
             }    
         }
         if($organization->type_id == Organization::TYPE_SUPPLIER){
-            $my = \Yii::$app->request->get('myOnly')==2?['responsible_supp_org_id' => $organization->id]:[];
-            $rush = \Yii::$app->request->get('rush')==2?['rush_order' => 1]:[];
-            $dataListRequest = new ActiveDataProvider([
-                'query' => Request::find()->where(['active_status' => Request::ACTIVE])
-                    ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
-                    ->andWhere($search)
-                    ->andWhere($category)
-                    ->andWhere($my)
-                    ->andWhere($rush)
-                    //->andWhere('responsible_supp_org_id is null or responsible_suspp_org_id = ' . $organization->id)
-                    ->orderBy('id DESC'),
-                'pagination' => [
-                    'pageSize' => 15,
-                ],
-            ]);
-            if (Yii::$app->request->isPjax) {
-                return $this->renderPartial("list-vendor", compact('dataListRequest','organization'));
+            if(\common\models\DeliveryRegions::find()->where(['supplier_id'=>$organization->id])->exists()){
+                $deliveryRegions = \common\models\DeliveryRegions::find()
+                        ->select('administrative_area_level_1, locality')
+                        ->where(['supplier_id'=>$organization->id])
+                        ->asArray()
+                        ->all();
+                $my = \Yii::$app->request->get('myOnly')==2?['responsible_supp_org_id' => $organization->id]:[];
+                $rush = \Yii::$app->request->get('rush')==2?['rush_order' => 1]:[];
+                $dataListRequest = new ActiveDataProvider([
+                    'query' => Request::find()->where(['active_status' => Request::ACTIVE])
+                        ->joinWith('client')
+                        ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
+                        ->andWhere($search)
+                        ->andWhere($category)
+                        ->andWhere($my)
+                        ->andWhere($rush)
+                        ->andWhere(['OR',
+                            ['IN','administrative_area_level_1',$deliveryRegions],
+                            ['IN','locality',$deliveryRegions],
+                            ])
+                        ->orderBy('id DESC'),
+                    'pagination' => [
+                        'pageSize' => 15,
+                    ],
+                ]);
+                if (Yii::$app->request->isPjax) {
+                    return $this->renderPartial("list-vendor", compact('dataListRequest','organization'));
+                }else{
+                    return $this->render("list-vendor", compact('dataListRequest','organization'));
+                }    
             }else{
-                return $this->render("list-vendor", compact('dataListRequest','organization'));
+               return $this->render("delivery-vendor"); 
             }
         }
     }
@@ -224,7 +237,7 @@ class RequestController extends DefaultController {
             $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
             foreach($rows as $row){
                 if($row->profile->phone && $row->profile->sms_allow){
-                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе f-keeper.ru';
+                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе';
                     $target = $row->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target); 
@@ -239,7 +252,7 @@ class RequestController extends DefaultController {
                 $mailer = Yii::$app->mailer; 
                 $email = $client->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "f-keeper.ru - заявка №" . $request->id;
+                $subject = "mixcart.ru - заявка №" . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestSetResponsible', compact("request","client"))
                         ->setTo($email)->setSubject($subject)->send();
@@ -247,7 +260,7 @@ class RequestController extends DefaultController {
             //Отправка СМС
             foreach($vendors as $vendor){
                 if($vendor->profile->phone && $vendor->profile->sms_allow){
-                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе f-keeper.ru';
+                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе mixcart.ru';
                     $target = $vendor->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target); 
@@ -256,7 +269,7 @@ class RequestController extends DefaultController {
                 $mailer = Yii::$app->mailer; 
                 $email = $vendor->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "f-keeper.ru - заявка №" . $request->id;
+                $subject = "mixcart.ru - заявка №" . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestSetResponsibleMailToSupp', compact("request","vendor"))
                         ->setTo($email)->setSubject($subject)->send();
@@ -298,14 +311,14 @@ class RequestController extends DefaultController {
                 $mailer = Yii::$app->mailer; 
                 $email = $client->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "f-keeper.ru - заявка №" . $request->id;
+                $subject = "mixcart.ru - заявка №" . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestInviteSupplierMailToRest', compact("request","client"))
                         ->setTo($email)->setSubject($subject)->send();
                 }
                 foreach($vendorUsers as $user){
                     if($user->profile->phone && $user->profile->sms_allow){
-                        $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                        $text = $client->organization->name . ' хочет работать с Вами в системе';
                         $target = $user->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target); 
@@ -315,7 +328,7 @@ class RequestController extends DefaultController {
                     $mailer = Yii::$app->mailer;
                     $email = $user->email; 
                     //$email = 'marshal1209448@gmail.com';
-                    $subject = "f-keeper.ru - заявка №" . $request->id;
+                    $subject = "mixcart.ru - заявка №" . $request->id;
                     $mailer->htmlLayout = 'layouts/request';
                     $result = $mailer->compose('requestInviteSupplier', compact("request","user"))
                             ->setTo($email)->setSubject($subject)->send();
@@ -368,7 +381,7 @@ class RequestController extends DefaultController {
             $mailer = Yii::$app->mailer; 
             $email = $client->email;
             //$email = 'marshal1209448@gmail.com';
-            $subject = "f-keeper.ru - заявка №" . $request->id;
+            $subject = "mixcart.ru - заявка №" . $request->id;
             $mailer->htmlLayout = 'layouts/request';
             $result = $mailer->compose('requestNewCallback', compact("request","client","vendor"))
                     ->setTo($email)->setSubject($subject)->send();

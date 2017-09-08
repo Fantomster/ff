@@ -36,6 +36,22 @@ $grid = [
     ], 
 ];
 ?>
+<style>
+    
+@media (max-width: 600px){
+.network-list .table {
+    overflow-x: scroll;
+    display: table;
+}
+}
+@media (max-width: 480px){
+.network-list .table a{float:none !important;padding: 0 !important;}
+.network-list .kv-table-wrap tr > td{border:0;}   
+.network-list .kv-table-wrap tr > td:last-child{border-bottom: 1px solid #ccc;}
+.network-list .kv-table-wrap tr:last-child > td:last-child{border-bottom: 0} 
+.network-list .kv-table-wrap th, .kv-table-wrap td {width: inherit !important; }
+}
+</style>
 <div class="modal-body network-modal">
     <div class="row">
         <div class="col-md-12">
@@ -58,8 +74,8 @@ $grid = [
                     'dataProvider' => $dataProvider,
                     'filterPosition' => false,
                     'columns' => $grid, 
-                    'options' => ['class' => 'table-responsive'],
-                    'tableOptions' => ['class' => 'table dataTable', 'role' => 'grid'],
+                    'options' => [],
+                    'tableOptions' => ['class' => 'table'],
                     'bordered' => false,
                     'striped' => false,
                     'summary' => false,

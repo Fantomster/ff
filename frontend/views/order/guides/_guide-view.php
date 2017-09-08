@@ -4,7 +4,11 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 ?>
 <div class="guid_block_title">
-    <p><?= $model->name ?></p>
+    <p><?=
+        Html::a($model->name, ['/order/edit-guide', 'id' => $model->id], [
+            'class' => 'link-edit-guide',
+        ])
+        ?></p>
 </div>	
 <div class="guid_block_counts">
     <p>Кол-во товаров: <span><?= $model->productCount ?></span></p> 
@@ -24,12 +28,14 @@ use yii\helpers\Url;
         'class' => 'btn btn-sm btn-outline-default',
     ])
     ?>
-    <?= Html::a('<i class="fa fa-shopping-cart"></i> В корзину', ['order/ajax-show-guide', 'id' => $model->id], [
-                                    'class' => 'btn btn-sm btn-success',
-                                    'data' => [
-                                        'target' => '#guideModal',
-                                        'toggle' => 'modal',
-                                        'backdrop' => 'static',
-                                    ]
-                        ]); ?>
+    <?=
+    Html::a('<i class="fa fa-shopping-cart"></i> В корзину', ['order/ajax-show-guide', 'id' => $model->id], [
+        'class' => 'btn btn-sm btn-success',
+        'data' => [
+            'target' => '#guideModal',
+            'toggle' => 'modal',
+            'backdrop' => 'static',
+        ]
+    ]);
+    ?>
 </div>

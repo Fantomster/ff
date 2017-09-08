@@ -7,7 +7,7 @@ use yii\widgets\Breadcrumbs;
 ?>
 
 <?php
-$this->title = 'F-MARKET Продукты поставщика';
+$this->title = 'MixCart Продукты поставщика';
 ?>
 <div class="row">
     <div class="col-md-12 no-padding">

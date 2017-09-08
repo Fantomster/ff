@@ -10,7 +10,7 @@ $delivery = $vendor->delivery;
 ?>
 
 <?php
-$this->title = 'F-MARKET информация о товаре';
+$this->title = 'MixCart информация о товаре';
 ?>
 <style>
     .mp-product-image{

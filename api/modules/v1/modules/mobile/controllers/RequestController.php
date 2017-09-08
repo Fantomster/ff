@@ -85,6 +85,7 @@ class RequestController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         
         $user = Yii::$app->user->getIdentity();

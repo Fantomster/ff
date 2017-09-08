@@ -5,9 +5,9 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
+use api\modules\v1\modules\mobile\resources\CatalogGoods;
+use api\modules\v1\modules\mobile\resources\GoodsNotes;
 use yii\data\ActiveDataProvider;
-use common\models\CatalogGoods;
 use common\models\RelationSuppRest;
 use yii\helpers\Json;
 
@@ -15,12 +15,12 @@ use yii\helpers\Json;
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class CatalogBaseGoodsController extends ActiveController {
+class GoodsNotesController extends ActiveController {
 
     /**
      * @var string
      */
-    public $modelClass = 'api\modules\v1\modules\mobile\resources\CatalogBaseGoods';
+    public $modelClass = 'api\modules\v1\modules\mobile\resources\GoodsNotes';
 
     /**
      * @return array
@@ -48,6 +48,18 @@ class CatalogBaseGoodsController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'findModel' => [$this, 'findModel']
             ],
+            'update' => [
+                'class' => 'yii\rest\UpdateAction',
+                'modelClass' => 'common\models\GoodsNotes',
+                'checkAccess' => [$this, 'checkAccess'],
+                'scenario' => $this->updateScenario,
+            ],
+            'create' => [
+                'class' => 'yii\rest\CreateAction',
+                'modelClass' => 'common\models\GoodsNotes',
+                'checkAccess' => [$this, 'checkAccess'],
+                'scenario' => $this->createScenario,
+            ],
             'options' => [
                 'class' => 'yii\rest\OptionsAction'
             ]
@@ -60,7 +72,7 @@ class CatalogBaseGoodsController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = CatalogBaseGoods::findOne($id);
+        $model = GoodsNotes::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
@@ -72,68 +84,47 @@ class CatalogBaseGoodsController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new CatalogBaseGoods();
+        $params = new GoodsNotes();
         $user = Yii::$app->user->getIdentity();
-
-        $query = CatalogBaseGoods::find();
         
-        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-        $query = CatalogBaseGoods::find()->where(['in','id', 
-            CatalogGoods::find()->select('base_goods_id')->where(['in','cat_id', 
-                RelationSuppRest::find()->select('cat_id')->where(['rest_org_id' => $user->organization_id])])
-            ]);
-        
-        
-        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
-            $query = CatalogBaseGoods::find()->where(['in','id', 
-            CatalogGoods::find()->select('base_goods_id')->where(['in','cat_id', 
-                RelationSuppRest::find()->select('cat_id')->where(['supp_org_id' => $user->organization_id])])
-            ]);
+        $query = GoodsNotes::find();
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
             'pagination' => false,
         ));
         
+        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+        $query->andWhere (['rest_org_id'=>$user->organization_id]);
+        
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
         
         if($params->list != null)
-        {
-            $query->andWhere ('id IN('.implode(',', Json::decode($params->list)).')');
-        }
-
+            $query->andWhere ('catalog_base_goods_id IN('.implode(',', Json::decode($params->list)).')');
+  
         $query->andFilterWhere([
             'id' => $params->id, 
-            'cat_id' => $params->cat_id, 
-            'article' => $params->article, 
-            'product' => $params->product, 
-            'status' => ($params->status == null)?CatalogBaseGoods::STATUS_ON:$params->status, 
-            'market_place' => $params->market_place, 
-            'deleted' => $params->deleted, 
+            'rest_org_id' => $params->rest_org_id, 
+            'note' => $params->note,
             'created_at' => $params->created_at, 
             'updated_at' => $params->updated_at, 
-            'category_id' => $params->category_id, 
-            'note' => $params->note, 
-            'ed' => $params->ed, 
-            'brand' => $params->brand, 
-            'region' => $params->region, 
-            'weight' => $params->weight, 
-            'es_status' => $params->es_status, 
-            'mp_show_price' => $params->mp_show_price, 
-            'rating' => $params->rating
+            'catalog_base_goods_id' => $params->catalog_base_goods_id
            ]);
         return $dataProvider;
     }
     
-    public function actionTest()
-    {
-        $val = "1,2,3";
-        var_dump($val);
-        $val = explode(",", $val);
-        var_dump($val);
-    }
+   public function checkAccess($action, $model = null, $params = [])
+   {
+       // check if the user can access $action and $model
+       // throw ForbiddenHttpException if access should be denied
+       if ($action === 'update' || $action === 'delete') {
+           $user = Yii::$app->user->identity;
+           if ($model->rest_org_id !== $user->organization_id)
+               throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
+       }
+   }
 
     
 }

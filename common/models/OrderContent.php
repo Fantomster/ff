@@ -166,4 +166,16 @@ class OrderContent extends \yii\db\ActiveRecord
     public function  getNote() {
         return GoodsNotes::findOne(['catalog_base_goods_id' => $this->product_id, 'rest_org_id' => $this->order->client_id]);
     }
+    
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+    }
+    
+    public function afterDelete() {
+        parent::afterDelete();
+        
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+    }
 }

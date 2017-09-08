@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <h4 class="modal-title">Редактирование</h4>
+    <h4 class="modal-title">Обновление</h4>
 </div>
 <div class="modal-body text-center" style="font-size: 20px;">
     <?= $message ?>

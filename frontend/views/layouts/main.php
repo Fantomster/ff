@@ -264,7 +264,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                     ['label' => 'Главная', 'url' => ['/site/index']],
                                     ['label' => 'MIXMARKET', 'url' => 'https://market.mixcart.ru'],
                                     ['label' => 'Франшиза', 'url' => 'http://fr.mixcart.ru'],
-                                    ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
+                                   // ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
                                     ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
                                     ['label' => 'О компании', 'url' => ['/site/about']],
                                     ['label' => 'Контакты', 'url' => ['/site/contacts']],

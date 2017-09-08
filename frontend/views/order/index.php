@@ -11,6 +11,7 @@ use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
 
 $this->title = 'Заказы';
+$urlExport = Url::to(['/order/export-to-xls']);
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;
@@ -30,9 +31,15 @@ $this->registerJs('
             }
         });
         $(".box-body").on("click", "td", function (e) {
-            if ($(this).find("a").hasClass("reorder") || $(this).find("a").hasClass("complete")) {
+            if($(this).find("input").hasClass("checkbox-export")){
                 return true;
             }
+            if ($(this).find("a").hasClass("reorder") || 
+                $(this).find("a").hasClass("complete")
+            ){
+                return true;
+            }
+            
             var url = $(this).parent("tr").data("url");
             if (url !== undefined) {
                 location.href = url;
@@ -54,12 +61,16 @@ $this->registerJs('
             });
         });
     });
-        ');
+    $(document).on("click", ".export-to-xls", function(e) {
+        if($("#orderHistory").yiiGridView("getSelectedRows").length > 0){
+            window.location.href = "' . $urlExport . '?selected=" +  $("#orderHistory").yiiGridView("getSelectedRows");  
+        }
+    });
+');
 $this->registerCss("
     tr:hover{cursor: pointer;}
         ");
 ?>
-
 <section class="content-header">
     <h1>
         <i class="fa fa-history"></i>  Заказы
@@ -174,8 +185,14 @@ $this->registerCss("
                         ?>
                     </div>
                 </div>
+                <div class="col-lg-5 col-md-6 col-sm-6">
+                    
+                </div>
             </div>
-<?php ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
+            <?php if($organization->type_id == Organization::TYPE_SUPPLIER ){ ?>
+            <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> отчет xls', ['class' => 'btn btn-success export-to-xls']) ?>
+            <?php }?>
             <div class="row">
                 <div class="col-md-12">
                     <?=
@@ -189,6 +206,13 @@ $this->registerCss("
                         'options' => ['class' => 'table-responsive'],
                         'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                         'columns' => [
+                            [
+                                'visible'=> ( $organization->type_id == Organization::TYPE_SUPPLIER ) ? true : false,
+                                'class' => 'yii\grid\CheckboxColumn',
+                                'checkboxOptions' => function($model, $key, $index, $widget){
+                                    return ['value' => $model['id'],'class'=>'checkbox-export'];
+                                }
+                            ],
                             [
                                 'attribute' => 'id',
                                 'value' => 'id',

@@ -61,7 +61,6 @@ class Organization extends \yii\db\ActiveRecord {
 
     const FRANCHISEE_SORTED = 1;
     const FRANCHISEE_UNSORTED = 2;
-    
     const TYPE_RESTAURANT = 1;
     const TYPE_SUPPLIER = 2;
     const TYPE_FRANCHISEE = 3;
@@ -103,7 +102,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['address','place_id','lat','lng'], 'required', 'on' => ['complete', 'settings'],'message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],
             [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
-            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address','administrative_area_level_1'], 'string', 'max' => 255],
+            [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className()],
             [['email'], 'email'],
@@ -515,16 +514,17 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function getFranchisee() {
         return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
-            ->viaTable('franchisee_associate', ['organization_id' => 'id']);
+                        ->viaTable('franchisee_associate', ['organization_id' => 'id']);
     }
-    
+
     public function getFranchiseeManagerInfo() {
         $sql = 'SELECT `franchisee`.* FROM `organization` 
         JOIN `franchisee_associate` ON `organization`.id = `franchisee_associate`.`organization_id`
         JOIN `franchisee` ON `franchisee_associate`.`franchisee_id` = `franchisee`.`id` 
         WHERE `organization`.`id` = ' . $this->id;
-        return Franchisee::findBySql($sql)->one();    
+        return Franchisee::findBySql($sql)->one();
     }
+
     /**
      * @return string url to avatar image
      */
@@ -636,7 +636,7 @@ class Organization extends \yii\db\ActiveRecord {
     public function hasActiveUsers() {
         return User::find()->where(['organization_id' => $this->id, 'status' => User::STATUS_ACTIVE])->count();
     }
-    
+
     public function getManagersCount() {
         if ($this->type_id === Organization::TYPE_RESTAURANT) {
             return User::find()->where(['organization_id' => $this->id, 'role_id' => Role::ROLE_RESTAURANT_MANAGER])->count();
@@ -646,21 +646,20 @@ class Organization extends \yii\db\ActiveRecord {
         }
         return 0;
     }
-    
+
     public function getFavorite() {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return null;
         }
         return $this->hasOne(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_FAVORITE]);
     }
-    
+
     public function getGuides() {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
             return null;
         }
         return $this->hasMany(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_GUIDE]);
     }
-
 
     /**
      * @return organization managers data provider
@@ -669,10 +668,10 @@ class Organization extends \yii\db\ActiveRecord {
         $usrTable = User::tableName();
         $profTable = Profile::tableName();
         $query = User::find()
-            ->leftJoin("$profTable", "$profTable.user_id = $usrTable.id")
-            ->select(["$usrTable.id as id", "$usrTable.email as email", "$profTable.full_name as name", "$profTable.phone"])
-            ->where(["$usrTable.organization_id" => $this->id])
-            ->orderBy(['name' => SORT_ASC]);
+                ->leftJoin("$profTable", "$profTable.user_id = $usrTable.id")
+                ->select(["$usrTable.id as id", "$usrTable.email as email", "$profTable.full_name as name", "$profTable.phone"])
+                ->where(["$usrTable.organization_id" => $this->id])
+                ->orderBy(['name' => SORT_ASC]);
         $managersDataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
@@ -688,29 +687,27 @@ class Organization extends \yii\db\ActiveRecord {
         return $managersDataProvider;
     }
 
-
     /**
      * @return organization data query
      */
-    protected function getOrganizationQuery($organization_id, $type = 'supp'){
-        $type_id = ($type=='supp') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT;
-        $prefix = ($type=='rest') ? 'supp' : 'rest';
-        $name = ($type=='rest') ? 'client' : 'vendor';
+    protected function getOrganizationQuery($organization_id, $type = 'supp') {
+        $type_id = ($type == 'supp') ? Organization::TYPE_SUPPLIER : Organization::TYPE_RESTAURANT;
+        $prefix = ($type == 'rest') ? 'supp' : 'rest';
+        $name = ($type == 'rest') ? 'client' : 'vendor';
         return "SELECT self_registered, org.id as id, org.name as name,
-                org.created_at as created_at, org.contact_name as contact_name, org.phone as phone, (select count(id) from relation_supp_rest where ".$type."_org_id=org.id) as clientCount, 
-                (select count(id) from relation_supp_rest where ".$type."_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
-                (select count(id) from `order` where ".$name."_id=org.id and status in (1,2,3,4)) as orderCount,
-                (select count(id) from `order` where ".$name."_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
-                (select sum(total_price) from `order` where ".$name."_id=org.id and status in (1,2,3,4)) as orderSum,
-                (select sum(total_price) from `order` where ".$name."_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
+                org.created_at as created_at, org.contact_name as contact_name, org.phone as phone, (select count(id) from relation_supp_rest where " . $type . "_org_id=org.id) as clientCount, 
+                (select count(id) from relation_supp_rest where " . $type . "_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as clientCount_prev30, 
+                (select count(id) from `order` where " . $name . "_id=org.id and status in (1,2,3,4)) as orderCount,
+                (select count(id) from `order` where " . $name . "_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderCount_prev30,
+                (select sum(total_price) from `order` where " . $name . "_id=org.id and status in (1,2,3,4)) as orderSum,
+                (select sum(total_price) from `order` where " . $name . "_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY ) as orderSum_prev30
                 FROM `relation_supp_rest` AS rel
-                LEFT JOIN  `organization` AS org ON org.id = rel.".$type."_org_id
-                LEFT JOIN  `franchisee_associate` AS fa ON rel.".$type."_org_id = fa.organization_id
-                WHERE rel.".$prefix."_org_id = ".$organization_id." and org.type_id=".$type_id;
+                LEFT JOIN  `organization` AS org ON org.id = rel." . $type . "_org_id
+                LEFT JOIN  `franchisee_associate` AS fa ON rel." . $type . "_org_id = fa.organization_id
+                WHERE rel." . $prefix . "_org_id = " . $organization_id . " and org.type_id=" . $type_id;
     }
 
-
-    public function sendGenerationPasswordEmail($user, $isFranchise = false){
+    public function sendGenerationPasswordEmail($user, $isFranchise = false) {
         $userToken = new UserToken();
         $userTokenType = $userToken::TYPE_PASSWORD_RESET;
         if ($userTokenType) {
@@ -720,16 +717,15 @@ class Organization extends \yii\db\ActiveRecord {
         $email = $user->email;
         $subject = Yii::$app->id . " - " . Yii::$app->params['password_generation'];
         $mailer->compose('changePassword', compact(['userToken', 'isFranchise']))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
     }
 
-
     public function getAssociatedRequestsList($franchisee_id) {
-        $search = ['like','product',\Yii::$app->request->get('search')?:''];
+        $search = ['like', 'product', \Yii::$app->request->get('search') ?: ''];
         $dataListRequest = new ActiveDataProvider([
-            'query' => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id'=>$franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
+            'query' => Request::find()->leftJoin('franchisee_associate', "franchisee_associate.organization_id = request.rest_org_id")->where(['franchisee_associate.franchisee_id' => $franchisee_id])->andWhere($search)->orderBy('request.id DESC'),
             'pagination' => [
                 'pageSize' => 15,
             ],
@@ -737,8 +733,7 @@ class Organization extends \yii\db\ActiveRecord {
         return $dataListRequest;
     }
 
-
-    public function getClientsExportColumns(){
+    public function getClientsExportColumns() {
         return [
             [
                 'label' => 'Номер',
@@ -775,8 +770,7 @@ class Organization extends \yii\db\ActiveRecord {
         ];
     }
 
-
-    public function getVendorsExportColumns(){
+    public function getVendorsExportColumns() {
         return [
             [
                 'label' => 'Номер',
@@ -812,7 +806,7 @@ class Organization extends \yii\db\ActiveRecord {
             ],
         ];
     }
-    
+
     /**
      * 
      * return count of products
@@ -825,7 +819,52 @@ class Organization extends \yii\db\ActiveRecord {
         }
         return CatalogBaseGoods::find()->where(['supp_org_id' => $this->id, 'status' => CatalogBaseGoods::STATUS_ON, 'deleted' => CatalogBaseGoods::DELETED_OFF])->count();
     }
-    
+
+    public function getAvailableProductsCount($clientId) {
+        if ($this->type_id !== self::TYPE_SUPPLIER) {
+            return 0;
+        }
+//        $count = CatalogGoods::find()
+//                ->leftJoin('catalog', 'catalog_goods.cat_id=catalog.id')
+//                ->leftJoin('relation_supp_rest', 'relation_supp_rest.cat_id=catalog_goods.cat_id')
+//                ->leftJoin('catalog_base_goods', 'catalog_base_goods.id=catalog_goods.base_goods_id')
+//                ->where([
+//                    'relation_supp_rest.rest_org_id' => $clientId,
+//                    'relation_supp_rest.supp_org_id' => $this->id,
+//                    'catalog_base_goods.status' => CatalogBaseGoods::STATUS_ON,
+//                    'catalog_base_goods.deleted' => CatalogBaseGoods::DELETED_OFF,
+//                ])
+//                ->count();
+        $count = 0;
+        $catalogs = Catalog::find()
+                ->leftJoin('relation_supp_rest', 'relation_supp_rest.cat_id=catalog.id')
+                ->where([
+                    'relation_supp_rest.deleted' => false,
+                    'relation_supp_rest.supp_org_id' => $this->id,
+                    'relation_supp_rest.rest_org_id' => $clientId,
+                ])
+                ->all();
+        foreach ($catalogs as $catalog) {
+            if ($catalog->type === Catalog::BASE_CATALOG) {
+                $count = CatalogBaseGoods::find()->where([
+                            'cat_id' => $catalog->id,
+                            'status' => CatalogBaseGoods::STATUS_ON,
+                            'deleted' => CatalogBaseGoods::DELETED_OFF
+                        ])->count();
+            } else {
+                $count += CatalogGoods::find()
+                        ->leftJoin('catalog_base_goods', 'catalog_base_goods.id=catalog_goods.base_goods_id')
+                        ->where([
+                            'catalog_goods.cat_id' => $catalog->id,
+                            'catalog_base_goods.status' => CatalogBaseGoods::STATUS_ON,
+                            'catalog_base_goods.deleted' => CatalogBaseGoods::DELETED_OFF,
+                        ])
+                        ->count();
+            }
+        }
+        return $count;
+    }
+
     /**
      * return product if it is available to client
      * 
@@ -835,13 +874,13 @@ class Organization extends \yii\db\ActiveRecord {
         if ($this->type_id !== self::TYPE_RESTAURANT) {
             return null;
         }
-        
+
         $cgTable = CatalogGoods::tableName();
         $cbgTable = CatalogBaseGoods::tableName();
         $orgTable = Organization::tableName();
         $rsrTable = RelationSuppRest::tableName();
         $catTable = Catalog::tableName();
-        
+
         $product = CatalogGoods::find()
                 ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
                 ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
@@ -877,4 +916,5 @@ class Organization extends \yii\db\ActiveRecord {
         }
         return null;
     }
+
 }

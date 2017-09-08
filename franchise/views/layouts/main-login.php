@@ -17,7 +17,7 @@ use yii\helpers\Html;
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
 </head>
-<body style="background: url(images/login-bg.png) no-repeat center center fixed; 
+<body style="background: url(/images/login-bg.png) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;

@@ -131,7 +131,7 @@ if (!Yii::$app->user->isGuest) {
         e.preventDefault();
         form = $("#inviteForm");
         swal({
-            title: "Приглашение на f-keeper",
+            title: "Приглашение на MixCart",
             input: "text",
             showCancelButton: true,
             cancelButtonText: "Отмена",
@@ -300,7 +300,7 @@ JS;
     </script>
 <?php } ?>
 <header class="main-header">
-    <?= Html::a('<span class="logo-mini"><b>f</b>k</span><span class="logo-lg"><b>f</b>-keeper</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini"><b>M</b>C</span><span class="logo-lg">MixCart</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
         <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">

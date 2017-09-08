@@ -7,7 +7,7 @@ $this->title = 'Обучающие видео';
 <section class="content-header">
     <h1>
         Обучающие видео
-        <small>Примеры работы с системой f-keeper</small>
+        <small>Примеры работы с системой MixCart</small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -40,7 +40,7 @@ $this->title = 'Обучающие видео';
                     <i class="fa fa-video-camera bg-fk-success"></i>
 
                     <div class="timeline-item">
-                        <h3 class="timeline-header">Описание возможностей системы f-keeper</h3>
+                        <h3 class="timeline-header">Описание возможностей системы MixCart</h3>
 
                         <div class="timeline-body">
                             <div class="row">
@@ -48,7 +48,7 @@ $this->title = 'Обучающие видео';
                                     <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/fIeCESIFID4" frameborder="0" allowfullscreen=""></iframe>
                                 </div>
                                 <div class="col-md-9">
-                                    Описание возможностей системы f-keepers
+                                    Описание возможностей системы MixCarts
                                 </div>
                             </div>
                         </div>
@@ -76,7 +76,7 @@ $this->title = 'Обучающие видео';
                                     <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/Cj85FCJOZbQ" frameborder="0" allowfullscreen=""></iframe>
                                 </div>
                                 <div class="col-md-9">
-                                    Как начать работать в системе f-keeper, или Загрузка каталогов поставщиков 
+                                    Как начать работать в системе MixCart, или Загрузка каталогов поставщиков 
                                 </div>
                             </div>
                         </div>

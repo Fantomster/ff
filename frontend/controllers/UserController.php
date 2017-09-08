@@ -34,7 +34,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             'access' => [
                 'class' => AccessControl::className(),
                 'rules' => [[
-                'actions' => ['confirm','resend', 'logout','business','change-form','change','create'],
+                'actions' => ['confirm','resend', 'logout'],
                 'allow' => true,
                 'roles' => ['?', '@'],
                     ],
@@ -44,11 +44,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index','business','profile', 'account', 'cancel', 'resend-change'],
+                        'actions' => ['index','profile', 'account', 'cancel', 'resend-change'],
                         'allow' => false,
                     ],
                     [
-                        'actions' => ['ajax-invite-friend'],
+                        'actions' => ['ajax-invite-friend', 'business','change-form','change','create'],
                         'allow' => true,
                         'roles' => ['@'],
                     ]
@@ -251,7 +251,6 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
      */
     public function actionLogin() {
         //$this->layout = '@app/views/layouts/main-login';
-
         /** @var \amnah\yii2\user\models\forms\LoginForm $model */
         $model = $this->module->model("LoginForm");
 
@@ -291,7 +290,8 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                        $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
                        $user->role_id == Role::ROLE_ADMIN ||
                        $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
-                   Yii::$app->user->login($user, 1);
+                   //Yii::$app->user->login($user, 1);
+                   $returnUrl = $this->performLogin($user, 1);
                    return $this->redirect(['business']); 
                 }
             }
@@ -514,6 +514,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
     
     public function actionCreate(){
         $user = User::findIdentity(Yii::$app->user->id);
+        $currentOrganziation = $user->organization;
         $sql = "select distinct parent_id as `parent_id` from (
         select id, parent_id from organization where parent_id = (select parent_id from organization where id = " . $user->organization_id . ")
         union all
@@ -534,6 +535,25 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             if ($organization->load($post)) {
                 $organization->parent_id = $parent_id;
                 $organization->save();
+                
+                if($currentOrganziation->type_id == Organization::TYPE_RESTAURANT && 
+                    $organization->type_id == Organization::TYPE_SUPPLIER){
+                    $relationSuppRest = new \common\models\RelationSuppRest();
+                    $relationSuppRest->rest_org_id = $currentOrganziation->id;
+                    $relationSuppRest->supp_org_id = $organization->id;
+                    $relationSuppRest->status = 1;
+                    $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
+                    $relationSuppRest->save();
+                }
+                if($currentOrganziation->type_id == Organization::TYPE_SUPPLIER && 
+                    $organization->type_id == Organization::TYPE_RESTAURANT){
+                    $relationSuppRest = new \common\models\RelationSuppRest();
+                    $relationSuppRest->rest_org_id = $organization->id;
+                    $relationSuppRest->supp_org_id = $currentOrganziation->id;
+                    $relationSuppRest->status = 1;
+                    $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_ON;
+                    $relationSuppRest->save();
+                }
             }
         }
     }

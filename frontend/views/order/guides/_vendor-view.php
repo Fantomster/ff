@@ -7,7 +7,7 @@ use yii\helpers\Url;
         <p><?= $model->vendor->name ?></p>
     </div>	
     <div class="guid_block_create_counts">
-        <p>Кол-во товаров: <span><?= $model->vendor->productsCount ?></span></p> 
+        <p>Кол-во товаров: <span><?= $model->vendor->getAvailableProductsCount($model->rest_org_id) ?></span></p> 
     </div>     
 </td>
 <td>

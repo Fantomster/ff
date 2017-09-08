@@ -98,7 +98,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     
 $js2 = <<<JS
 $('#supp-phone,#supp-email').click(function(e){
-alert('Необходимо зарегистрироваться в системе f-keeper');  
+alert('Необходимо зарегистрироваться в системе MixCart');  
 })
 JS;
 $this->registerJs($js2, \yii\web\View::POS_READY);

@@ -45,7 +45,8 @@ return [
             'secret_key' => 'WGEfuqlvBXUSITrLYLfXDuiCueSmr0smMUziAQRe',
             'host' => 'email.eu-west-1.amazonaws.com',
             'messageConfig' => [
-                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+//                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],
+                'from' => ['noreply@mixcart.ru' => 'noreply@mixcart.ru'],
                 'charset' => 'UTF-8',
             ],
         ],
@@ -56,14 +57,15 @@ return [
             // Use pretty URLs
             'enablePrettyUrl' => true,
             'rules' => [
+                'product/<id:\d+>' => 'site/product',
+                'restaurant/<id:\d+>' => 'site/restaurant',
+                'supplier/<id:\d+>' => 'site/supplier',
+                'category/<slug:[a-z0-9_-]+>' => 'site/category',
+                '<controller:\w+>/<id:\d+>' => '<controller>/view',
+                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>/<id:\d+>' => '<controller>/<action>',
+                '<controller:[a-z0-9_-]+>/<action:[a-z0-9_-]+>' => '<controller>/<action>',
                 '<module:\w+>/<controller:\w+>/<action:\w+>/<id:\d+>' => '<module>/<controller>/<action>/<id>',
                 '<module:\w+>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
-                '<controller:\w+>/<id:\d+>' => '<controller>/view',
-                '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
-                '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
-            ],
-            //'enableStrictParsing' => true,
-            'rules' => [
                 '/' => 'site/index',
                 'client' => 'client/index',
                 'vendor' => 'vendor/index',

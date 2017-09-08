@@ -163,7 +163,7 @@ label {
 	<div class="row">
 		<div class="col-md-12 text-center">
                     <h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете
-                        <br><small>Товар будет доступен на площадке F-Market в течении 2 минут</small><h5>
+                        <br><small>Товар будет доступен на площадке MixMarket в течении 2 минут</small><h5>
 		</div>
 	</div>
 	<div class="row">
@@ -338,7 +338,7 @@ label {
                                 'size'=>'lg',
                                 ],
                             'labelSettings' => [
-                                'label' => 'РАЗМЕСТИТЬ В F-MARKET',
+                                'label' => 'РАЗМЕСТИТЬ В MixMarket',
                                 'position' => CheckboxX::LABEL_RIGHT,
                                 'options' =>['style'=>'font-weight: 700;']
                                 ]
@@ -358,7 +358,7 @@ label {
                                 'size'=>'lg',
                                 ],
                             'labelSettings' => [
-                                'label' => 'Показывать цену в F-MARKET',
+                                'label' => 'Показывать цену в MixMarket',
                                 'position' => CheckboxX::LABEL_RIGHT,
                                 'options' =>['style'=>'']
                                 ]

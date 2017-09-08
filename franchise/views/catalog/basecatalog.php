@@ -181,7 +181,7 @@ Modal::end();
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
-                            'href' => Url::to(['/site/ajax-edit-catalog-form', 'catalog' => Yii::$app->request->get('id')]),
+                            'href' => Url::to(['/catalog/ajax-update-product-market-place', 'id'=>0, 'supp_org_id'=>Yii::$app->request->get('vendor_id'), 'catalog_id' => Yii::$app->request->get('id')]),
                         ],
                     ])
                     ?><div class="btn-group pull-right" placement="left" style="margin-right: 10px">
@@ -204,17 +204,7 @@ Modal::end();
                             ExportMenu::FORMAT_TEXT => false,
                             ExportMenu::FORMAT_EXCEL => false,
                             ExportMenu::FORMAT_PDF => false,
-                            ExportMenu::FORMAT_CSV => false, /* [
-                              'label' => Yii::t('kvexport', 'CSV'),
-                              'icon' => 'file-code-o',
-                              'iconOptions' => ['class' => 'text-primary'],
-                              'linkOptions' => [],
-                              'options' => ['title' => Yii::t('kvexport', 'Comma Separated Values')],
-                              'alertMsg' => Yii::t('kvexport', 'Вы загружаете CSV файл.'),
-                              'mime' => 'application/csv;charset=UTF-8',
-                              'extension' => 'csv',
-                              'writer' => 'CSV'
-                              ], */
+                            ExportMenu::FORMAT_CSV => false,
                             ExportMenu::FORMAT_EXCEL_X => [
                                 'label' => Yii::t('kvexport', 'Excel'),
                                 'icon' => 'file-excel-o',
@@ -353,8 +343,8 @@ Modal::end();
                             'format' => 'raw',
                             'headerOptions' => ['style' => 'width:40px'],
                             'value' => function ($data) use($currentCatalog) {
-                                $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/site/ajax-edit-catalog-form',
-                                    'product_id' => $data['id'], 'catalog' => $currentCatalog], [
+                                $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/catalog/ajax-update-product-market-place',
+                                    'id' => $data['id'], 'supp_org_id'=>Yii::$app->request->get('vendor_id'), 'catalog_id' => Yii::$app->request->get('id')], [
                                     'data' => [
                                         'target' => '#add-product-market-place',
                                         'toggle' => 'modal',

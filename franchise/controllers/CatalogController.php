@@ -12,6 +12,7 @@ use common\models\Role;
 use common\models\User;
 use common\models\Organization;
 use common\models\CatalogBaseGoods;
+use yii\helpers\Json;
 use yii\web\HttpException;
 use yii\web\Response;
 
@@ -39,6 +40,8 @@ class CatalogController extends DefaultController
                         'actions' => [
                             'ajax-delete-product',
                             'ajax-create-product-market-place',
+                            'ajax-update-product-market-place',
+                            'get-sub-cat',
                             'index',
                             'changecatalogprop',
                             'changecatalogstatus',
@@ -646,6 +649,85 @@ class CatalogController extends DefaultController
             return $result;
             exit;
         }
+    }
+
+
+    public function actionAjaxUpdateProductMarketPlace($id, $supp_org_id = null, $catalog_id = null) {
+        if($id){
+            $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
+        }else{
+            $catalogBaseGoods = new CatalogBaseGoods();
+        }
+        $catalogBaseGoods->scenario = 'marketPlace';
+        $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
+	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
+        $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+        if (!empty($catalogBaseGoods->category_id)) {
+            $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
+            $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
+        }
+
+        if (Yii::$app->request->isAjax) {
+            $post = Yii::$app->request->post();
+            if ($catalogBaseGoods->load($post)) {
+                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
+                if($supp_org_id){
+                    $catalogBaseGoods->supp_org_id = $supp_org_id;
+                    $catalogBaseGoods->cat_id = $catalog_id;
+                }
+                if ($catalogBaseGoods->market_place == 1) {
+                    if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
+                        $catalogBaseGoods->es_status = 1;
+                        $catalogBaseGoods->save();
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('_success', ['message' => $message]);
+                    }
+                } else {
+                    if ($post && $catalogBaseGoods->validate()) {
+                        $catalogBaseGoods->category_id = $catalogBaseGoods->sub1 ? $catalogBaseGoods->sub2 : null;
+                        $catalogBaseGoods->es_status = 2;
+                        $catalogBaseGoods->save();
+                        $message = 'Продукт обновлен!';
+                        return $this->renderAjax('_success', ['message' => $message]);
+                    }
+                }
+            }
+        }
+        return $this->renderAjax('_form', compact('catalogBaseGoods', 'countrys', 'supp_org_id', 'catalog_id'));
+    }
+
+
+    public function actionGetSubCat() {
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $id = end($_POST['depdrop_parents']);
+            $list = \common\models\MpCategory::find()->select(['id', 'name'])->
+            andWhere(['parent' => $id])->
+            asArray()->
+            all();
+            $selected = null;
+            if ($id != null && count($list) > 0) {
+                $selected = '';
+                if (!empty($_POST['depdrop_params'])) {
+                    $params = $_POST['depdrop_params'];
+                    $id1 = $params[0]; // get the value of 1
+                    $id2 = $params[1]; // get the value of 2
+                    foreach ($list as $i => $cat) {
+                        $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
+                        if ($cat['id'] == $id1) {
+                            $selected = $cat['id'];
+                        }
+                        if ($cat['id'] == $id2) {
+                            $selected = $id2;
+                        }
+                    }
+                }
+                echo Json::encode(['output' => $out, 'selected' => $selected]);
+                return;
+            }
+        }
+        echo Json::encode(['output' => '', 'selected' => '']);
     }
 
 

@@ -20,7 +20,7 @@ $this->title = 'Ресторанам';
 
         <div class="inside__block">
             <div class="container-fluid">
-                <h2>возможности f-keeper</h2>
+                <h2>возможности MixCart</h2>
                 <span class="for__who">Для ресторанов</span>
 
                 <div class="row">
@@ -28,7 +28,7 @@ $this->title = 'Ресторанам';
                         <div class="rest__item">
                             <span>Все поставщики в одном месте</span>
                             <img src="/images/rest-1.png" alt="" />
-                            <p>В f-keeper, вы можете видеть всех поставщиков, и выбрать для себя тех, кто соответствует вашим критериям.</p> 
+                            <p>В MixCart, вы можете видеть всех поставщиков, и выбрать для себя тех, кто соответствует вашим критериям.</p> 
                         </div>
                     </div>
 

@@ -60,6 +60,14 @@ class Role extends \amnah\yii2\user\models\Role {
      * @var int franchisee agent role
      */
     const ROLE_FRANCHISEE_AGENT = 12;
+    /**
+     * @var int franchisee leader role
+     */
+    const ROLE_FRANCHISEE_LEADER = 13;
+    /**
+     * @var int franchisee manager role
+     */
+    const ROLE_FRANCHISEE_MANAGER = 14;
     
     public static function getManagerRole($organization_type) {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [

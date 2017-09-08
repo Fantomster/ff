@@ -27,7 +27,7 @@ use kartik\form\ActiveForm;
                 $form->field($guideSearchModel, 'searchString', [
                     'addon' => [
                         'append' => [
-                            'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
+                            'content' => '<a class="btn-xs btnSubmit" data-target-form="#searchProductForm"><i class="fa fa-search"></i></a>',
                             'options' => [
                                 'class' => 'append',
                             ],
@@ -103,7 +103,7 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function($data) {
-                            return Html::button('<i class="fa fa-comment"> Комментарий</i>', [
+                            return Html::button('<i class="fa fa-comment"> <span class="circe_font">Комментарий</span></i>', [
                                         'class' => 'add-note btn btn-md btn-gray pull-right',
                                         'data' => [
                                             'id' => $data->cbg_id,
@@ -119,7 +119,7 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> В корзину</i>', [
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">В корзину</span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right',
                                         'data-id' => $data->cbg_id,
                                         'data-cat' => $data->baseProduct->cat_id,
@@ -132,7 +132,7 @@ use kartik\form\ActiveForm;
             ]);
             ?>
             <?php Pjax::end(); ?>
-            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right"><i class="fa fa-paper-plane-o"></i> Добавить все</button> 
+            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right add-guide-to-cart" data-id="<?=$guide->id ?>"><i class="fa fa-paper-plane-o"></i> Добавить все</button> 
         </div>
     </div>
 </div>

@@ -72,7 +72,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
             Html::decode($product->mainCategory->name),
             [
                 'label' => Html::decode($product->category->name),
-                'url' => ['site/category', 'id' => $product->category_id],
+                'url' => ['site/category', 'slug' => $product->category->slug],
             ],
             [
             'label' => Html::decode($product->product, ['style'=>'text-overflow: ellipsis']),
@@ -124,7 +124,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     
 $js2 = <<<JS
 $('#supp-phone,#supp-email').click(function(e){
-alert('Необходимо зарегистрироваться в системе f-keeper');  
+alert('Необходимо зарегистрироваться в системе MixCart');  
 })
 JS;
 $this->registerJs($js2, \yii\web\View::POS_READY);

@@ -11,9 +11,7 @@ foreach ($content as $position) {
         <div class="block_left_bot_left">
             <?php //<img class= "img_product" src="<?= $position->product->imageUrl ? >" alt=""> ?>
             <p class = "block_left_bot_left_name"><?= $position->product_name ?></p>
-            <p class = "block_left_bot_left_art">Артикул: <?= $position->product->article ?></p>
-    <!--        <img  class = "izbranoe" src="/img/izb_icon.png" alt="">
-            <a class = "izbranoe_p" href="#">Избранное</a>--><br>
+            <p class = "block_left_bot_left_art">Артикул: <?= $position->product->article ?></p><br>
             <p class = "kr_p">Кратность: <?= $position->product->units ? $position->product->units : '' ?><?= $position->product->ed ?></p>
             <?=
             Html::button('Комментарий к товару', [

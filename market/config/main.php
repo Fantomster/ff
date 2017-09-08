@@ -54,7 +54,7 @@ return [
         ],
         'urlManagerFrontend' => [
             'class' => 'yii\web\urlManager',
-            'baseUrl' => '//f-keeper.ru',
+            'baseUrl' => '//mixcart.ru',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
         ],

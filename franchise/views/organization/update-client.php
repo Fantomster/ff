@@ -11,7 +11,7 @@ $organization = $client;
 <section class="content body">
     <div class="row">
         <div class="col-md-12">
-            <?= $this->render('_organization-form', compact('organization', 'buisinessInfo', 'organizationType')) ?>
+            <?= $this->render('_organization-form', compact('organization', 'buisinessInfo', 'organizationType', 'managersArray')) ?>
         </div>
     </div>
 </section>

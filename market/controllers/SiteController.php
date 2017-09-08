@@ -115,7 +115,6 @@ class SiteController extends Controller {
         
     }
     public function actionIndex() {
-        $session = Yii::$app->session;
         $relationSuppliers = [];
         $supplierRegion = [];
         $oWhere = [];
@@ -127,7 +126,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -153,7 +152,6 @@ class SiteController extends Controller {
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
-        
         $topSuppliers = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_SUPPLIER,
@@ -208,7 +206,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();   
             }
@@ -241,7 +239,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -262,7 +260,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -279,22 +277,15 @@ class SiteController extends Controller {
                             'operator' => 'AND'
                         ]
                     ]
-                ],
-                'filter' => [
-                    'bool' => [
-                        'must' => [
-                            'terms' => [
-                                'product_supp_id' => $where
-                            ]
-                        ]
-                    ]
                 ]
             ]
         ];
         $count = \common\models\ES\Product::find()->query($params)
+                        ->where(['in','product_supp_id',$where])
                         ->limit(10000)->count();
         if (!empty($count)) {
             $products = \common\models\ES\Product::find()->query($params)
+                            ->where(['in','product_supp_id',$where])
                             ->orderBy(['product_rating'=>SORT_DESC])->limit(12)->all();
             return $this->render('/site/search-products', compact('count', 'products', 'search'));
         } else {
@@ -311,7 +302,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -332,7 +323,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -349,25 +340,18 @@ class SiteController extends Controller {
                             'operator' => 'AND'
                         ]
                     ]
-                ],
-                'filter' => [
-                    'bool' => [
-                        'must' => [
-                            'terms' => [
-                                'product_supp_id' => $where
-                            ]
-                        ]
-                    ]
                 ]
             ]
         ];
         $count = \common\models\ES\Product::find()->query($params)
+                ->where(['in','product_supp_id',$where])
                 ->offset($num)
                 ->limit(12)
                 ->count();
 
         if ($count > 0) {
             $pr = \common\models\ES\Product::find()->query($params)
+                    ->where(['in','product_supp_id',$where])
                     ->orderBy(['product_rating'=>SORT_DESC])
                     ->offset($num)
                     ->limit(12)
@@ -385,7 +369,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -406,7 +390,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -454,7 +438,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -475,7 +459,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -527,7 +511,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSupplier = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();   
             }
@@ -649,7 +633,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -718,7 +702,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -839,7 +823,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -890,20 +874,38 @@ class SiteController extends Controller {
          
     }
 
-    public function actionCategory($id) {
+    public function actionCategory($slug) {
+        $category = \common\models\MpCategory::find()->where(['slug'=>$slug])->one();
+        if(empty($category)){
+          throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+        }
+        $id = $category->id;
         $session = Yii::$app->session;
         $relationSuppliers = [];
         $supplierRegion = [];
         $oWhere = [];
         $cbgWhere = [];
-        
+        $filter = "rating-up";
+        $filterWhere = "rating desc";
+        if(Yii::$app->request->get('filter') == "price-up"){
+             $filter = "price-down"; $filterWhere = "price ASC";
+        }
+        if(Yii::$app->request->get('filter') == "price-down"){
+             $filter = "price-up"; $filterWhere = "price DESC";
+        }
+        if(Yii::$app->request->get('filter') == "rating-up"){
+             $filter = "rating-down"; $filterWhere = "rating  ASC";
+        }
+        if(Yii::$app->request->get('filter') == "rating-down"){
+             $filter = "rating-up"; $filterWhere = "rating DESC";
+        }
         if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -939,7 +941,6 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
                 ->andWhere($cbgWhere)
-                ->orderBy([$cbgTable.'.rating'=>SORT_DESC]) 
                 ->limit(12)
                 ->count();
         $products = CatalogBaseGoods::find()
@@ -952,15 +953,14 @@ class SiteController extends Controller {
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                 ->andWhere(['category_id' => $id])
                 ->andWhere($cbgWhere)
-                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
+                ->orderBy($filterWhere)
                 ->limit(12)
                 ->all();
         
-        $category = \common\models\MpCategory::find()->where(['id' => $id])->one();
         if ($products) {
-            return $this->render('category', compact('products', 'id', 'count', 'category'));
+            return $this->render('category', compact('products', 'id', 'count', 'category','filter'));
         } else {
-            $title ='F-MARKET категории';
+            //$title = $category->title;//'F-MARKET категории';
             $breadcrumbs = \yii\widgets\Breadcrumbs::widget([
                 'options' => [
                     'class' => 'breadcrumb',
@@ -971,8 +971,8 @@ class SiteController extends Controller {
                 \common\models\MpCategory::getCategory($category->id),
                 ],
             ]);
-            $message = 'В данной категории, товаров нет';
-            return $this->render('not-found', compact('title','breadcrumbs','message','products','category'));
+            $message = 'В данной категории товаров нет';
+            return $this->render('not-found', compact('breadcrumbs','message','products','category'));
         }
     }
     
@@ -989,7 +989,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -1039,7 +1039,6 @@ class SiteController extends Controller {
                     'status' => CatalogBaseGoods::STATUS_ON,
                     'deleted'=>CatalogBaseGoods::DELETED_OFF])
                     ->andWhere($cbgWhere)
-                    ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
                     ->offset($num)
                         ->limit(6)
                         ->all();
@@ -1061,7 +1060,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
                         ->all();  
             }
@@ -1106,6 +1105,7 @@ class SiteController extends Controller {
                 ->count();
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
     }
+    
     public function actionView() {
         $where = [];
         $filterNotIn = [];
@@ -1115,7 +1115,7 @@ class SiteController extends Controller {
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $suppliers = RelationSuppRest::find()
                         ->select('supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::CATALOG_STATUS_ON])
+                        ->where(['rest_org_id' => $client->id, 'status' => RelationSuppRest::INVITE_ON])
                         ->all();
                 foreach ($suppliers AS $supplier) {
                     $filterNotIn[] = $supplier->supp_org_id;
@@ -1136,7 +1136,7 @@ class SiteController extends Controller {
                 }
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -1332,7 +1332,7 @@ class SiteController extends Controller {
     private function sendInvite($client, $vendor) {
         foreach($vendor->users as $recipient){
             if($recipient->profile->phone && $recipient->profile->sms_allow){
-                $text = "Ресторан " . $client->name . " добавил Вас через торговую площадку market.f-keeper.ru";
+                $text = "Ресторан " . $client->name . " добавил Вас через торговую площадку market.mixcart.ru";
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target); 

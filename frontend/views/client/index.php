@@ -174,7 +174,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                     <h3>F-Market</h3>
                                     <p>доступно для заказа товаров <b><?= $count_products_from_mp ?></b></p>
                                 </div>
-<?= Html::a('F-Market', 'https://market.f-keeper.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+<?= Html::a('F-Market', 'https://market.mixcart.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash2.png) no-repeat bottom right;
                                      background-size: 120px;">
@@ -392,7 +392,7 @@ $customJs = <<< JS
         if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
         if(targetUrl == 'order'){location.href = '$createUrl';}
         if(targetUrl == 'request'){location.href = '$requestUrl';}
-        if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+        if(targetUrl == 'fmarket'){window.open('https://market.mixcart.ru');}
     }) 
             
     $(document).on("click", "td", function (e) {
@@ -429,7 +429,7 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
     var targetUrl = $(this).attr('data-target');
         if(targetUrl == 'checkout'){location.href = '$checkoutUrl';}
         if(targetUrl == 'order'){location.href = '$createUrl';}
-        if(targetUrl == 'fmarket'){window.open('https://market.f-keeper.ru');}
+        if(targetUrl == 'fmarket'){window.open('https://market.mixcart.ru');}
     }); 
 
                     var _slides = [{

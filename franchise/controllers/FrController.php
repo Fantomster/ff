@@ -16,10 +16,11 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'http://f-keeper.dev', 'https://f-keeper.dev', 'http://f-keeper.ru', 'https://f-keeper.ru', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
+                    'Origin' => ['http://fr.f-keeper.dev', 'http://f-keeper.dev', 'https://mixcart.dev', 'http://f-keeper.ru', 'https://mixcart.ru', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
                         'https://franch.f-keeper.dev', 'http://franch.f-keeper.dev', 'https://franch.f-keeper.ru',
                         'http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
-                        'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru'],
+                        'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru', 
+                        'https://client.mixcart.ru', 'https://fr.mixcart.ru', 'https://franch.mixcart.ru'],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,

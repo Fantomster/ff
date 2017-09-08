@@ -324,7 +324,7 @@ class ClientController extends DefaultController {
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
                 if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                     $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>'.CatalogBaseGoods::MAX_INSERT_FROM_XLS.'</strong> позиций, пожалуйста свяжитесь с нами '
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>'];
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>'];
                     return $result;
                     exit;
                 }
@@ -550,7 +550,7 @@ class ClientController extends DefaultController {
                         $currentOrganization->save();
 
                         if (!empty($profile->phone)) {
-                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему';
                             $target = $profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
@@ -733,7 +733,7 @@ class ClientController extends DefaultController {
                         $currentOrganization->save();
 
                         if (!empty($profile->phone)) {
-                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему f-keeper.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему';
                             $target = $profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
@@ -836,13 +836,13 @@ class ClientController extends DefaultController {
 
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                            $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе';
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
                         }
                         $email = $row->email;
-                        $subject = "Ресторан " . $currentOrganization->name . " приглашает вас в систему f-keeper.ru";
+                        $subject = "Ресторан " . $currentOrganization->name . " приглашает вас в систему";
                         $mailer->htmlLayout = 'layouts/html';
                         $mailer->compose('clientInviteSupplier', compact("currentOrganization"))
                                 ->setTo($email)->setSubject($subject)->send();
@@ -928,7 +928,7 @@ class ClientController extends DefaultController {
             foreach ($organization->users as $recipient) {
                 $currentUser->sendInviteToVendor($recipient);
                 if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                    $text = "Повторное приглашение в систему F-keeper от " . $currentUser->organization->name;
+                    $text = "Повторное приглашение в систему от " . $currentUser->organization->name;
                     $target = $recipient->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target);
@@ -1021,7 +1021,7 @@ class ClientController extends DefaultController {
                         'class' => 'danger-fk',
                         'title' => 'Уведомление',
                         'body' => 'Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами '
-                        . '<a href="mailto://info@f-keeper.ru" target="_blank" class="text-success">info@f-keeper.ru</a>']];
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>']];
                 return $result;
                 exit;
             }

@@ -631,7 +631,7 @@ $(document).on("click", ".resend-invite", function(e) {
     var url = $(this).attr('href');
     console.log(url);
     bootbox.confirm({
-        title:"Приглашение на F-keeper",
+        title:"Приглашение на MixCart",
         message: "Отправить приглашение повторно?",
         buttons: {
             cancel: {

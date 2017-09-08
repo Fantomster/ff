@@ -20,11 +20,11 @@
                             <td style="text-align: right; font-size: 18px;"><?= number_format($vendorsStats['turnoverCut'], 2, '.', ' ') ?> руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">F-keeper Мне:</td>
+                            <td style="text-align: left;">MixCart Мне:</td>
                             <td style="text-align: right; font-size: 18px;"> 0 руб.</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;">Я F-keeper'у:</td>
+                            <td style="text-align: left;">Я MixCart'у:</td>
                             <td style="text-align: right; font-size: 18px;"><?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> руб.</td>
                         </tr>
 <!--                        <tr>

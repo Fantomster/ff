@@ -65,7 +65,36 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
             ])->label(false);
             ?>
 
-            <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown()) ?>
+            <?= $form->field($user, 'role_id')->dropDownList(common\models\Franchisee::limitedDropdown())->label('Роль') ?>
+
+            <div style="display: <?= (isset($user->role_id) && $user->role_id == Role::ROLE_FRANCHISEE_MANAGER) ? 'block' : 'none' ?>" class="alLeaderChoose">
+
+            <?= $form->field($rel, 'leader_id')->dropDownList($leadersArray, ['prompt'=>'Выберите руководителя для менеджера'])->label('Руководитель') ?>
+
+            <?= $form->field($rel, 'manager_id')->hiddenInput(['value'=>$user->id])->label(false) ?>
+
+            </div>
+
+            <?=
+            $form->field($user, 'status')->widget(CheckboxX::classname(), [
+                //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                'autoLabel' => true,
+                'model' => $user,
+                'attribute' => 'status',
+                'pluginOptions' => [
+                    'threeState' => false,
+                    'theme' => 'krajee-flatblue',
+                    'enclosedLabel' => false,
+                    'size' => 'md',
+                ],
+                'labelSettings' => [
+                    'label' => 'Активен',
+                    'position' => CheckboxX::LABEL_RIGHT,
+                    'options' => ['style' => '']
+                ]
+            ])->label(false);
+            ?>
+
 
         </div>
         <div class="modal-footer">
@@ -83,3 +112,18 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 <?php ActiveForm::end(); ?>
     </div>
 </div>
+<?php
+$role_id = Role::ROLE_FRANCHISEE_MANAGER;
+$customJs = <<< JS
+
+$('#user-role_id').on("change", function () {
+    var role_id = '$role_id';
+    if($(this).val()==role_id){
+        $('.alLeaderChoose').css('display', 'block');
+    }else{
+        $('.alLeaderChoose').css('display', 'none');
+    }
+});
+
+JS;
+$this->registerJs($customJs, \yii\web\View::POS_READY);

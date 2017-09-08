@@ -39,7 +39,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
         <div class="wrap">
             <?php
             NavBar::begin([
-                'brandLabel' => 'f-keeper',
+                'brandLabel' => 'MixCart',
                 'brandUrl' => Yii::$app->homeUrl,
                 'options' => [
                     'class' => 'navbar-inverse navbar-fixed-top',
@@ -73,7 +73,16 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             } else {
                 if (Yii::$app->user->identity->role_id === \common\models\Role::ROLE_ADMIN) {
                     $menuItems = array_merge($menuItems, [
-                        ['label' => 'SERVICEDESK', 'url' => ['/service-desk/index'],'linkOptions'=>['style'=>'color:#f4c871;font-size:bold']],
+                        [
+                            'label' => 'SEO',
+                            'items' => [
+                                [
+                                    'label' => 'Категории',
+                                    'url' => ['/mp-category/index'],
+                                ],
+                            ],
+                        ],
+                        ['label' => 'SERVICEDESK', 'url' => ['/service-desk/index'], 'linkOptions' => ['style' => 'color:#f4c871;font-size:bold']],
                         [
                             'label' => 'Пользователи',
                             'items' => [
@@ -82,7 +91,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'url' => ['/client/index'],
                                 ],
                                 [
-                                    'label' => 'Менеджеры f-keeper',
+                                    'label' => 'Менеджеры MixCart',
                                     'url' => ['/client/managers'],
                                 ],
                             ],
@@ -112,8 +121,13 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 ],
                             ],
                         ],
-                        ['label' => 'Заказы', 'url' => ['/order/index']],
-                        ['label' => 'Заявки', 'url' => ['/request/index']],
+                        [
+                            'label' => 'Заказы и заявки',
+                            'items' => [
+                                ['label' => 'Заказы', 'url' => ['/order/index']],
+                                ['label' => 'Заявки', 'url' => ['/request/index']],
+                            ],
+                        ],
                         [
                             'label' => 'Товары',
                             'items' => [
@@ -128,24 +142,23 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                             ],
                         ],
                     ]);
-                    
-                    if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529) || (Yii::$app->user->id === 4435))  {
-                        $menuItems = array_merge($menuItems,[
-                        [
-                            'label' => 'Интеграция',
-                            'items' => [
-                                [
-                                    'label' => 'R-keeper White Server',
-                                    'url' => ['/rkws/index'],
+
+                    if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529) || (Yii::$app->user->id === 4435)) {
+                        $menuItems = array_merge($menuItems, [
+                            [
+                                'label' => 'Интеграция',
+                                'items' => [
+                                    [
+                                        'label' => 'R-keeper White Server',
+                                        'url' => ['/rkws/index'],
+                                    ],
+                                //  [
+                                //      'label' => 'Загруженные каталоги',
+                                //      'url' => ['/goods/uploaded-catalogs'],
+                                //  ],
                                 ],
-                              //  [
-                              //      'label' => 'Загруженные каталоги',
-                              //      'url' => ['/goods/uploaded-catalogs'],
-                              //  ],
                             ],
-                        ],
                         ]);
-                        
                     }
                 }
                 $menuItems[] = '<li>'
@@ -176,7 +189,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
 
         <footer class="footer">
             <div class="container">
-                <p class="pull-left">&copy; f-keeper <?= date('Y') ?></p>
+                <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
 
                 <p class="pull-right">Работает, оно работает!</p>
             </div>

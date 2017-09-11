@@ -21,8 +21,8 @@ use yii\helpers\Url;
             'data-url' => Url::to(['/order/ajax-add-to-guide', 'id' => $model["id"]]),
         ]);
     } else {
-        //<button class="btn btn-md btn-success pull-right"><i class="fa fa-plus"></i> Добавить в гид</button> 
-        echo Html::button('<i class="fa fa-plus"></i> Добавить в гид', [
+        //<button class="btn btn-md btn-success pull-right"><i class="fa fa-plus"></i> Добавить в шаблон</button> 
+        echo Html::button('<i class="fa fa-plus"></i> Добавить в шаблон', [
             'class' => 'btn btn-md btn-success pull-right add-to-guide',
             'id' => 'product' . $model['id'],
             'data-url' => Url::to(['/order/ajax-add-to-guide', 'id' => $model["id"]]),

@@ -285,7 +285,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             <div class="footer__menu_block">
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
-                                    <li><?= Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>
+<!--                                    <li><?= ''//Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>-->
                                     <li><?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?></li>
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>

@@ -75,6 +75,7 @@ class GuideController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         $filters = [];
         $user = Yii::$app->user->getIdentity();

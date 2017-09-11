@@ -77,7 +77,7 @@ class CatalogBaseGoodsController extends ActiveController {
 
         $query = CatalogBaseGoods::find();
         
-        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+       /* if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
         $query = CatalogBaseGoods::find()->where(['in','id', 
             CatalogGoods::find()->select('base_goods_id')->where(['in','cat_id', 
                 RelationSuppRest::find()->select('cat_id')->where(['rest_org_id' => $user->organization_id])])
@@ -88,7 +88,7 @@ class CatalogBaseGoodsController extends ActiveController {
             $query = CatalogBaseGoods::find()->where(['in','id', 
             CatalogGoods::find()->select('base_goods_id')->where(['in','cat_id', 
                 RelationSuppRest::find()->select('cat_id')->where(['supp_org_id' => $user->organization_id])])
-            ]);
+            ]);*/
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,

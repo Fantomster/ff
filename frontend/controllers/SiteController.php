@@ -204,7 +204,7 @@ class SiteController extends Controller {
             $lead_partner = ''; //Тип партнерства
             //АВТОРИЗАЦИЯ
             $user = array(
-                'USER_LOGIN' => 'artur@mixcart.ru', #логин
+                'USER_LOGIN' => 'artur@f-keeper.ru', #логин
                 'USER_HASH' => '74ed35efba91ce97c029ceb8006b447b' #Хэш для доступа к API
             );
             $subdomain = 'fkeeper';

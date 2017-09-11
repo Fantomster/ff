@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\modules\vendorintegr\modules\odinc\controllers;
+namespace frontend\modules\clientintegr\modules\rkws\controllers;
 
 use Yii;
 use yii\web\Controller;

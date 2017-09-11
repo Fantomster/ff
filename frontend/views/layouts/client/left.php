@@ -66,7 +66,7 @@ $cartCount = $user->organization->getCartCount();
                             'options' => ['class' => "treeview hidden-xs"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
-                                ($user->organization_id == 4422)?['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default']]:[],
+                                ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default'],'visible' => ($user->organization_id === 4422)],
                                 ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
                                 ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
                             ]
@@ -87,6 +87,7 @@ $cartCount = $user->organization->getCartCount();
                 </span>
             </div>
         </form>
+        
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;padding-top:10px">

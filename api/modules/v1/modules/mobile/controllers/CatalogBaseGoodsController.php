@@ -110,7 +110,7 @@ class CatalogBaseGoodsController extends ActiveController {
             'article' => $params->article, 
             'product' => $params->product, 
             'status' => ($params->status == null)?CatalogBaseGoods::STATUS_ON:$params->status, 
-            'market_place' => $params->market_place, 
+            //'market_place' => $params->market_place, 
             'deleted' => $params->deleted, 
             'created_at' => $params->created_at, 
             'updated_at' => $params->updated_at, 
@@ -121,7 +121,7 @@ class CatalogBaseGoodsController extends ActiveController {
             'region' => $params->region, 
             'weight' => $params->weight, 
             'es_status' => $params->es_status, 
-            'mp_show_price' => $params->mp_show_price, 
+            //'mp_show_price' => $params->mp_show_price, 
             'rating' => $params->rating
            ]);
         return $dataProvider;

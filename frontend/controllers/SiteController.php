@@ -190,12 +190,21 @@ class SiteController extends Controller {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
+    
+    
+    /**
+     * 
+     * @param Organization $organizationModel
+     * @param Profile $profileModel
+     * @param User $userModel
+     * @return boolean
+     */
     private function SendToAmo($organizationModel, $profileModel, $userModel) {
             $response = null;
             $lead_name = $organizationModel->name;
             $company_name = $organizationModel->name;
             $responsible_user_id = 1427371;
-            $lead_status_id = 465729;
+            $lead_status_id = ($organizationModel->type_id === Organization::TYPE_RESTAURANT) ? 465729 : 463335;
             $comment = $organizationModel->formatted_address;
             $city = $organizationModel->country . ", " . $organizationModel->locality;
             $contact_name = $profileModel->full_name; //Название добавляемого контакта

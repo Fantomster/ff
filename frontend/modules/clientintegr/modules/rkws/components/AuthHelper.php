@@ -88,7 +88,7 @@ class AuthHelper extends Object {
  
     public function sendAuth() {
     
-    $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Login";
+    $url = "http://ws.ucs.ru/WSClient/api/Client/Login";
     
     $restrModel = RkAccess::find()->andwhere('id = 1')->one();
        

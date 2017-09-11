@@ -176,7 +176,7 @@ class SiteController extends Controller {
         $organization->scenario = "complete";
 
         $post = Yii::$app->request->post();
-        if (Yii::$app->request->isAjax && $profile->load($post) && $organization->load($post)) {
+        if (Yii::$app->request->isAjax && empty($organization->locality) && $profile->load($post) && $organization->load($post)) {
             if ($profile->validate() && $organization->validate()) {
                 $profile->save();
                 $organization->save();

@@ -8,7 +8,7 @@ use common\models\ES\Supplier;
 ?>
 
 <?php
-$this->title = 'F-MARKET Поставщики';
+$this->title = 'MixCart Поставщики';
 ?>
 <div class="row">
     <div class="col-md-12">

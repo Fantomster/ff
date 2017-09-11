@@ -5,7 +5,7 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\bootstrap\Modal;
 
-$this->title = 'F-MARKET главная';
+$this->title = 'MixCart главная';
 ?>
 <div class="row">
   <div class="col-md-12 min-padding">

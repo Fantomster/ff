@@ -8,8 +8,8 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'f-market',
-    'name' => 'f-market',
+    'id' => 'mixmarket',
+    'name' => 'mixmarket',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log',],// 'assetsAutoCompress'
     'controllerNamespace' => 'market\controllers',

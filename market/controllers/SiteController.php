@@ -563,8 +563,8 @@ class SiteController extends Controller {
                     'Каталог',
                 ],
             ];
-            $title = 'F-MARKET Продукты поставщика';
-            $message = 'Поставщик еще не добавил свои товары на торговую площадку F-MARKET';
+            $title = 'MixCart Продукты поставщика';
+            $message = 'Поставщик еще не добавил свои товары на торговую площадку MixCart';
             return $this->render('/site/empty', compact('breadcrumbs','title', 'message'));
         }
     }

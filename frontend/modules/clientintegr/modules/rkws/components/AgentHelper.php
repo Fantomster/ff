@@ -29,7 +29,7 @@ class AgentHelper extends AuthHelper {
     }    
     
     $guid = UUID::uuid4();
-          
+    
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_corrs" tasktype="any_call" guid="'.$guid.'" timeout="600" callback="'.self::CALLBACK_URL.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />

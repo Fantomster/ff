@@ -72,6 +72,7 @@ class FrController extends \yii\rest\Controller {
                 if ($formtype == 1) {
                     $lead_status_id = 465726;
                     if ($lpartner == 1) {
+                        $lead_status_id = 643219;
                         $responsible_user_id = 1515736; // Родион
                         $lead_name = 'fkeeper: Хочет стать партнером 50';
                     }

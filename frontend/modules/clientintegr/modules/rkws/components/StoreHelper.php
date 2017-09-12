@@ -129,6 +129,12 @@ class StoreHelper extends AuthHelper {
             } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
             
         $icount =0;  
+        
+      //  $sql = 'update rk_storetree set active = 0 where acc='.User::findOne([Yii::$app->user->id])->organization_id;
+        
+        Yii::$app->db_api
+                ->createCommand('UPDATE rk_storetree  SET active=0 WHERE acc=:acc', [':acc' => User::findOne([Yii::$app->user->id])->organization_id])
+                ->execute();
             
             
      // Заполнение складов с деревом

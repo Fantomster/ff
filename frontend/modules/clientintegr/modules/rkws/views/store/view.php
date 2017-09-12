@@ -95,7 +95,10 @@ use api\common\models\RkStoretree;
                                          TreeView::widget([
                                         // single query fetch to render the tree
                                         // use the Product model you have in the previous step
-                                        'query' => RkStoretree::find()->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])->addOrderBy('root, lft'), 
+                                        'query' => RkStoretree::find()
+                                                 ->andWhere('acc = :acc',[':acc' => User::findOne([Yii::$app->user->id])->organization_id])
+                                                 ->andWhere('active = 1')
+                                                 ->addOrderBy('root, lft'), 
                                         'headingOptions' => ['label' => 'Склады'],
                                         'fontAwesome' => false,     // optional
                                         'isAdmin' => false,         // optional (toggle to enable admin mode)

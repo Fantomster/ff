@@ -261,7 +261,10 @@ class OrderController extends DefaultController {
         $params = Yii::$app->request->getQueryParams();
 
         $vendorSearchModel = new VendorSearch();
-        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
+        if (Yii::$app->request->post("VendorSearch")) {
+            $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
+        }
+        $params['VendorSearch'] = $session['vendorSearchString'];
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
 
@@ -275,12 +278,18 @@ class OrderController extends DefaultController {
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
-        $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+            $session['orderCatalogSearchString'] = Yii::$app->request->post("OrderCatalogSearch");
+        }
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearchString'];
         $productDataProvider = $productSearchModel->search($params);
         $productDataProvider->pagination = ['pageSize' => 8];
 
         $guideSearchModel = new BaseProductSearch();
-        $params['BaseProductSearch'] = Yii::$app->request->post("BaseProductSearch");
+        if (Yii::$app->request->post("BaseProductSearch")) {
+            $session['baseProductSearchString'] = Yii::$app->request->post("BaseProductSearch");
+        }
+        $params['BaseProductSearch'] = $session['baseProductSearchString'];
         $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
         $guideDataProvider->pagination = ['pageSize' => 7];
 

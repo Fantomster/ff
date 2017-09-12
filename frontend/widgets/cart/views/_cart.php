@@ -28,7 +28,7 @@ $count = count($orders);
                     ?>
                     <div class="block_tovar_check">
 
-                        <p class="name_tovar"><span class="count"><?= $position->quantity + 0 ?></span><?= $position->product_name ?></p>
+                        <p class="name_tovar"><span class="count"><?= $position->quantity + 0 ?></span><?= Html::decode(Html::decode($position->product_name)) ?></p>
                         <p class="name_tovar1"><span class="count"><?= $position->price ?> руб. за 1 <?= $unit ?></span>на общую сумму <span><?= $position->quantity * $position->price ?> руб.</span></p>
                         <?=
                         Html::a('<img class="delete_tovar" src="' . $baseUrl . '/img/tovar_delete.png" alt="">', "#", [

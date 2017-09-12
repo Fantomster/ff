@@ -114,73 +114,50 @@ class OrderController extends DefaultController {
             ],
         ];
     }
-    
+
     public function actionExportToXls() {
         $selected = Yii::$app->request->get('selected');
-        if(!empty($selected)){
+        if (!empty($selected)) {
             $model = \Yii::$app->db->createCommand("
-select 
-ord.id as id, 
-o.name as name, 
-cbg.product as product, 
-quantity, 
-cbg.ed,
-cbg.price,
-(cbg.price*quantity) as total_price,
-cbg.article,
-gn.note
-from `order_content` oc 
-left join `order` ord on oc.`order_id` = ord.`id`
-left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
-left join `organization` o on ord.`client_id` = o.`id`
-left join `goods_notes` gn on cbg.id = gn.catalog_base_goods_id
-where ord.id in ($selected)
-union all
-select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` where id in ($selected)),' ',' '")->queryAll();
-            
+                select 
+                    cbg.article,
+                    cbg.product as product, 
+                    sum(quantity) as total_quantity,
+                    cbg.ed
+                from `order_content` oc 
+                left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+                where oc.order_id in ($selected)
+                group by cbg.id")->queryAll();
+
             $objPHPExcel = new \PHPExcel();
-            $sheet=0;
+            $sheet = 0;
             $objPHPExcel->setActiveSheetIndex($sheet);
             $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(60);
             $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
             $objPHPExcel->getActiveSheet()->setTitle('отчет')
-                ->setCellValue('A1', '№ заказа')
-                ->setCellValue('B1', 'Закупщик')
-                ->setCellValue('C1', 'Наименование товара')
-                ->setCellValue('D1', 'Кол-во')
-                ->setCellValue('E1', 'Единица измерения')
-                ->setCellValue('F1', 'Стоимость за ед-цу')
-                ->setCellValue('G1', 'Сумма итого')
-                ->setCellValue('H1', 'Артикул')
-                ->setCellValue('I1', 'Комментарий');
-            $row=2;
+                    ->setCellValue('A1', 'Артикул')
+                    ->setCellValue('B1', 'Наименование товара')
+                    ->setCellValue('C1', 'Кол-во')
+                    ->setCellValue('D1', 'Ед.изм');
+            $row = 2;
             foreach ($model as $foo) {
-                $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo['id']); 
-                $objPHPExcel->getActiveSheet()->setCellValue('B'.$row,$foo['name']);
-                $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['product']);
-                $objPHPExcel->getActiveSheet()->setCellValue('D'.$row,$foo['quantity']);
-                $objPHPExcel->getActiveSheet()->setCellValue('E'.$row,$foo['ed']);
-                $objPHPExcel->getActiveSheet()->setCellValue('F'.$row,$foo['price']);
-                $objPHPExcel->getActiveSheet()->setCellValue('G'.$row,$foo['total_price']);
-                $objPHPExcel->getActiveSheet()->setCellValue('H'.$row,$foo['article']);
-                $objPHPExcel->getActiveSheet()->setCellValue('I'.$row,$foo['note']);
+                $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
+                $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, $foo['product']);
+                $objPHPExcel->getActiveSheet()->setCellValue('C' . $row, $foo['total_quantity']);
+                $objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $foo['ed']);
                 $row++;
             }
             header('Content-Type: application/vnd.ms-excel');
-            $filename = "otchet_".date("d-m-Y-His").".xls";
-            header('Content-Disposition: attachment;filename='.$filename .' ');
+            $filename = "otchet_" . date("d-m-Y-His") . ".xls";
+            header('Content-Disposition: attachment;filename=' . $filename . ' ');
             header('Cache-Control: max-age=0');
             $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
             $objWriter->save('php://output');
         }
     }
+
     public function actionCreate() {
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
@@ -421,7 +398,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
         foreach ($guide->guideProducts as $guideProduct) {
-            
+
             $orders = $client->getCart();
 
             $product_id = $guideProduct->cbg_id;
@@ -1692,7 +1669,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $dataProvider->pagination = false;
 
         $test = $order->recipientsList;
-        
+
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_created) {
@@ -1779,6 +1756,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
             }
         }
     }
+
     private function saveCartChanges($content) {
         foreach ($content as $position) {
             $product = OrderContent::findOne(['id' => $position['id']]);

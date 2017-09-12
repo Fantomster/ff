@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use yii\helpers\Json;
+use yii\helpers\Html;
 use common\models\search\OrderCatalogSearch;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
@@ -144,7 +145,7 @@ class OrderController extends DefaultController {
             $row = 2;
             foreach ($model as $foo) {
                 $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
-                $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, $foo['product']);
+                $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode(Html::decode(Html::decode($foo['product']))));
                 $objPHPExcel->getActiveSheet()->setCellValue('C' . $row, $foo['total_quantity']);
                 $objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $foo['ed']);
                 $row++;

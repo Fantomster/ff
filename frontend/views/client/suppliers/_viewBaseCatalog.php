@@ -29,7 +29,10 @@ $gridColumnsCatalog = [
     ],
     [
     'label'=>'Наименование товара',
-    'value'=>'product',
+        'format' => 'raw',
+    'value'=>function($data) {
+        return Html::decode(Html::decode($data['product']));
+    },
     'contentOptions' => ['style' => 'vertical-align:middle;'],
     ],
     [

@@ -292,7 +292,10 @@ Modal::end();
                         [
                             'attribute' => 'product',
                             'label' => 'Наименование',
-                            'value' => 'product',
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::decode(Html::decode($data['product']));
+                            },
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                         ],
                         [

@@ -36,10 +36,11 @@ class EsController extends Controller
             "category": {
                 "properties" : {
                         "category_id" : {"type" : "long"},
+                        "category_slug" : { 
+                            "type" : "string",
+                        },
                         "category_name" : { 
-                            "type" : "string", 
-                            "analyzer" : "ru",
-                            "term_vector" : "yes"
+                            "type" : "string",
                         },
                         "category_sub_id" : {"type" : "long"}
                 }
@@ -200,9 +201,8 @@ class EsController extends Controller
                 "category": {
                     "properties" : {
                             "category_id" : {"type" : "long"},
-                            "category_name" : { 
-                                "type" : "string"
-                            },
+                            "category_slug" : {"type" : "string"},
+                            "category_name" : {"type" : "string"},
                             "category_sub_id" : {"type" : "long"}
                     }
                 }

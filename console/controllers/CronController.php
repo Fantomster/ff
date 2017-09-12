@@ -121,9 +121,16 @@ class CronController extends Controller {
             $category_slug = $name->slug;
             $category_sub_id = $name->id;
             $category_name = $name->name;
-            if(\common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id]) && \common\models\ES\Category::find()->exists()){
-            $category = \common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])->one();   
-            var_dump($category);
+//            if(\common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id]) && \common\models\ES\Category::find()->exists()){
+//            $category = \common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])->one();   
+//            $category->attributes = [
+//                "category_id" => $category_id,
+//                "category_slug" => $category_slug,
+//                "category_sub_id" => $category_sub_id,
+//                "category_name" => $category_name
+//            ];
+//            $category->save();    
+//            }else{
             $category->attributes = [
                 "category_id" => $category_id,
                 "category_slug" => $category_slug,
@@ -131,15 +138,7 @@ class CronController extends Controller {
                 "category_name" => $category_name
             ];
             $category->save();    
-            }else{
-            $category->attributes = [
-                "category_id" => $category_id,
-                "category_slug" => $category_slug,
-                "category_sub_id" => $category_sub_id,
-                "category_name" => $category_name
-            ];
-            $category->save();    
-            }
+//            }
         }
     }
     public function actionUpdateSuppliers() {

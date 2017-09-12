@@ -121,8 +121,9 @@ class CronController extends Controller {
             $category_slug = $name->slug;
             $category_sub_id = $name->id;
             $category_name = $name->name;
-            if(\common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])){
+            if(\common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id]) && \common\models\ES\Category::find()->exists()){
             $category = \common\models\ES\Category::find()->where(['category_sub_id'=>$category_sub_id])->one();   
+            var_dump($category);
             $category->attributes = [
                 "category_id" => $category_id,
                 "category_slug" => $category_slug,

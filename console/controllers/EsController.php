@@ -202,9 +202,7 @@ class EsController extends Controller
                     "properties" : {
                             "category_id" : {"type" : "long"},
                             "category_slug" : {"type" : "string"},
-                            "category_name" : { 
-                                "type" : "string"
-                            },
+                            "category_name" : {"type" : "string"},
                             "category_sub_id" : {"type" : "long"}
                     }
                 }

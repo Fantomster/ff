@@ -84,7 +84,7 @@ class UtilsController extends Controller {
     }
 
     public function actionCheckOrganizationPictures() {
-        $organizations = \common\models\Organization::find()->all();
+        $organizations = \common\models\Organization::find()->limit(100)->all();
         foreach ($organizations as $organization) {
             if ($organization->picture) {
                 $headers = get_headers($organization->pictureUrl);

@@ -75,6 +75,7 @@ class GuideProductController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         $filters = [];
 
@@ -82,7 +83,6 @@ class GuideProductController extends ActiveController {
             $query->andFilterWhere($filters);
             return $dataProvider;
         }
-  
        
             $filters['id'] = $params->id; 
             $filters['guide_id'] = $params->guide_id; 

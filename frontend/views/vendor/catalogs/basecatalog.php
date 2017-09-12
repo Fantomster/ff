@@ -350,7 +350,7 @@ Modal::end();
                         ],
                                     [
                             'attribute' => '',
-                            'label' => 'F-MARKET',
+                            'label' => 'MixMarket',
                             'format' => 'raw',
                             'contentOptions' => ['style' => 'width:70px'],
                             'headerOptions' => ['class' => 'text-center'],

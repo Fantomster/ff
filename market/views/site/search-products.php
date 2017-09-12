@@ -8,7 +8,7 @@ use common\models\ES\Product;
 ?>
 
 <?php
-$this->title = 'F-MARKET результаты поиска';
+$this->title = 'MixCart результаты поиска';
 ?>
 <div class="row">
     <div class="col-md-12 no-padding">

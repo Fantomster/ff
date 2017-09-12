@@ -262,9 +262,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 'options' => ['class' => 'nav_menu'],
                                 'items' => [
                                     ['label' => 'Главная', 'url' => ['/site/index']],
-                                    ['label' => 'F-MARKET', 'url' => 'https://market.mixcart.ru'],
+                                    ['label' => 'MIXMARKET', 'url' => 'https://market.mixcart.ru'],
                                     ['label' => 'Франшиза', 'url' => 'http://fr.mixcart.ru'],
-                                    ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
+                                   // ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
                                     ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
                                     ['label' => 'О компании', 'url' => ['/site/about']],
                                     ['label' => 'Контакты', 'url' => ['/site/contacts']],
@@ -285,7 +285,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             <div class="footer__menu_block">
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
-                                    <li><?= Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>
+<!--                                    <li><?= ''//Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>-->
                                     <li><?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?></li>
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>

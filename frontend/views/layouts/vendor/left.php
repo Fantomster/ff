@@ -45,7 +45,7 @@ $menuItems = [
     ['label' => 'Аналитика', 'icon' => 'signal', 'url' => ['/vendor/analytics'], 'options' => ['class' => 'hidden-xs']],
     //['label' => 'Обучающие видео', 'icon' => 'play-circle-o', 'url' => ['/vendor/tutorial', 'video' => 'video']],
     //['label' => 'Мои акции', 'icon' => 'ticket', 'url' => ['vendor/events']],
-    ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
+   // ['label' => 'Новости', 'icon' => 'newspaper-o', 'url' => 'http://blog.mixcart.ru?news', 'options' => ['class' => 'hidden-xs']],
         //['label' => 'Поддержка', 'icon' => 'support', 'url' => ['vendor/support']],
 ];
 if (Yii::$app->user->can('manage')) {

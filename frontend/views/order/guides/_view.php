@@ -12,7 +12,7 @@ use kartik\form\ActiveForm;
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">×</span></button>
     <h4 class="modal-title"><?= $guide->name ?></h4>
-    <span>Вы можете управлять гидом в данном заказе</span>
+    <span>Вы можете управлять шаблоном в данном заказе</span>
     <div class="guid-header">
         <?php
         $form = ActiveForm::begin([

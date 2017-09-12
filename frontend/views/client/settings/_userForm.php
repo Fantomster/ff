@@ -47,26 +47,6 @@ $form = ActiveForm::begin([
     ])
     ?>
 
-    <?=
-    $form->field($profile, 'sms_allow')->widget(CheckboxX::classname(), [
-        //'initInputType' => CheckboxX::INPUT_CHECKBOX,
-        'autoLabel' => true,
-        'model' => $profile,
-        'attribute' => 'sms_allow',
-        'pluginOptions' => [
-            'threeState' => false,
-            'theme' => 'krajee-flatblue',
-            'enclosedLabel' => false,
-            'size' => 'md',
-        ],
-        'labelSettings' => [
-            'label' => 'Разрешить СМС уведомление',
-            'position' => CheckboxX::LABEL_RIGHT,
-            'options' => ['style' => '']
-        ]
-    ])->label(false);
-    ?>
-
     <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType))->label("Роль") ?>
 
 </div>

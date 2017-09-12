@@ -632,6 +632,16 @@ class Organization extends \yii\db\ActiveRecord {
         return $managers;
     }
 
+    public function getAssociatedManagers($vendor_id) {
+        $usrTable = User::tableName();
+        $assocTable = ManagerAssociate::tableName();
+
+        return User::find()
+                        ->joinWith('associated')
+                        ->where(["$usrTable.organization_id" => $vendor_id, "$assocTable.organization_id" => $this->id])
+                        ->all();
+    }
+
     public function hasActiveUsers() {
         return User::find()->where(['organization_id' => $this->id, 'status' => User::STATUS_ACTIVE])->count();
     }

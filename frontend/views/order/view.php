@@ -28,6 +28,7 @@ $edit = false;
 
 $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
+        
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");

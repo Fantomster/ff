@@ -331,7 +331,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                         <a href="https://www.instagram.com/mixcart_ru/" target="_blank"><i class="fa fa-instagram"></i> </a>
 <!--                                        <a href="#"><i class="fa fa-youtube"></i></a>
                                         <a href="#"><i class="fa fa-twitter"></i></a>-->
-                                        <a href="https://www.facebook.com/fkeeper.ru/" target="_blank"><i class="fa fa-facebook"></i></a>
+                                        <a href="https://www.facebook.com/mixcartru/" target="_blank"><i class="fa fa-facebook"></i></a>
                                     </div>
                                 </div>
                             </div>

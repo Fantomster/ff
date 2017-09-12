@@ -2,11 +2,14 @@
 
 namespace backend\controllers;
 
+use amnah\yii2\user\models\forms\ForgotForm;
+use common\models\Profile;
 use Yii;
 use common\models\User;
 use common\models\Role;
 use backend\models\UserSearch;
 use yii\web\Controller;
+use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
@@ -54,11 +57,8 @@ class ClientController extends Controller {
     public function actionIndex() {
         $searchModel = new UserSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
-        ]);
+        $exceptionArray = Role::getExceptionArray();
+        return $this->render('index', compact('searchModel', 'dataProvider', 'exceptionArray'));
     }
 
     /**
@@ -81,8 +81,19 @@ class ClientController extends Controller {
      * @return mixed
      */
     public function actionView($id) {
+        $post = Yii::$app->request->post();
+
+        $newPassModel = new ForgotForm();
+        if ($newPassModel->load($post)) {
+            Yii::$app->session->set('new_pass_session', 'true');
+            $newPassModel->sendForgotEmail();
+            // set flash (which will show on the current page)
+            Yii::$app->session->setFlash("Forgot-success", 'Письмо отправлено пользователю');
+        }
+
         return $this->render('view', [
                     'model' => $this->findModel($id),
+                    'newPassModel' => $newPassModel
         ]);
     }
 
@@ -111,27 +122,31 @@ class ClientController extends Controller {
      * @return mixed
      */
     public function actionUpdate($id) {
-        $model = User::findOne(['id' => $id, 'role_id' => Role::ROLE_FKEEPER_MANAGER]);
+        $user = User::findOne(['id' => $id]);
+        $profile = Profile::findOne(['user_id' => $id]);
 
-        if (empty($model)) {
+        if(in_array($user->role_id, Role::getExceptionArray())){
+            throw new HttpException(403, 'Редактирование этого аккаунта отключено во имя Луны!');
+        }
+
+        if (empty($user)) {
             throw new NotFoundHttpException('Нет здесь ничего такого, проходите, гражданин!');
         }
 
-        if (($model->id === 2) && (Yii::$app->user->identity->id !== 76)) {
+        if (($user->id === 2) && (Yii::$app->user->identity->id !== 76)) {
             throw new NotFoundHttpException('Редактирование этого аккаунта отключено во имя Луны!');
         }
 
         try {
-            if ($model->load(Yii::$app->request->post())) {
-                if (($model->organization_id === 1) && (Yii::$app->user->identity->id !== 76)) {
+            if ($user->load(Yii::$app->request->post()) && $profile->load(Yii::$app->request->post())) {
+                if (($user->organization_id === 1) && (Yii::$app->user->identity->id !== 76)) {
                     throw new NotFoundHttpException('Добавление пользователей в эту организацию отключено во имя Луны!');
                 }
-                $model->save();
-                return $this->redirect(['view', 'id' => $model->id]);
+                $user->save();
+                $profile->save();
+                return $this->redirect(['/client']);
             } else {
-                return $this->render('update', [
-                            'model' => $model,
-                ]);
+                return $this->render('update', compact('user', 'profile'));
             }
         } catch (Exception $e) {
             throw new NotFoundHttpException('Ошибочка вышла!');

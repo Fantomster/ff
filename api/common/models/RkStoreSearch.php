@@ -41,7 +41,7 @@ class RkStoreSearch extends RkAccess
      */
     public function search($params)
     {
-        $query = RkStore::find();
+        $query = RkStore::find()->andWhere('acc = :acc',['acc'=>User::findOne([Yii::$app->user->id])->organization_id]);
 
         // add conditions that should always apply here
 

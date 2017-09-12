@@ -276,7 +276,34 @@ class EsController extends Controller
             $category->save();
         }
     }
-    
+    public function actionUpdateSupplier() {
+        $suppliers = \common\models\Organization::find()
+                ->where([
+                    'type_id' => \common\models\Organization::TYPE_SUPPLIER,
+                    'white_list' => \common\models\Organization::WHITE_LIST_ON])
+                ->andWhere('locality is not null and locality <> \'undefined\'')
+                ->all();
+        foreach($suppliers as $supplier){
+            $rating = 0;
+            if($supplier->partnership){$rating = $rating + 16;}
+            if($supplier->picture){$rating = $rating + 5;} 
+            if($supplier->contact_name){$rating = $rating + 2;} 
+            if($supplier->phone){$rating = $rating + 2;} 
+            if($supplier->email){$rating = $rating + 2;} 
+            if($supplier->address){$rating = $rating + 2;} 
+            if($supplier->about){$rating = $rating + 2;}
+            
+            $es_supplier = new \common\models\ES\Supplier();
+            $es_supplier->attributes = [
+                   "supplier_id" => $supplier->id,
+                   "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                   "supplier_name"  => $supplier->name,
+                   "supplier_rating"  => $rating,
+                   "supplier_partnership"  => $supplier->partnership
+            ];
+            $es_supplier->save();
+        }
+    }
     public function actionDeleleProductCollection(){
     
     }

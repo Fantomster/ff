@@ -148,10 +148,10 @@ $this->registerJs('
                         <div class="col-md-6"><i class="ico ico-cart"></i></div>
                     </div>
                 </div>
-                <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на f-market</div>
+                <div class="data-modal__sub-txt">Вы можете создать заявку на конкретный продукт,<br>поставщики сами Вас найдут.<br>Или найти продуктов и поставщиков на MixMarket</div>
                 <div class="data-modal__buts-wrp">
                     <a href="<?= Url::to('/request/list') ?>" class="but but_green wt wizard-off"><span>Создать заявку</span></a>
-                    <a href="https://market.mixcart.ru" class="but but_green"><span>Поиск на f-market</span></a>
+                    <a href="https://market.mixcart.ru" class="but but_green"><span>Поиск на MixMarket</span></a>
                 </div>
             </div>
         </div>

@@ -10,7 +10,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\UserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Users';
+$this->title = 'Пользователи';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
@@ -50,6 +50,21 @@ $gridColumns = [
         'value' => 'role.name',
         'label' => 'Роль',
     ],
+    [
+        'attribute' => '',
+        'label' => '',
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'width:40px'],
+        'value' => function ($data) use ($exceptionArray) {
+            if(in_array($data['role_id'], $exceptionArray))return '';
+            $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/client/update',
+                'id' => $data['id']], [
+                'class' => 'btn btn-xs btn-default'
+            ]);
+            return $link;
+        },
+    ],
+
 //            'created_at',
 //            'logged_in_at',
 ];
@@ -77,3 +92,4 @@ $gridColumns = [
     ]);
     ?>
     <?php Pjax::end(); ?></div>
+

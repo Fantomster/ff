@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model common\models\User */
 
 $this->title = $model->profile->full_name;
-$this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Пользователи', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-view">
@@ -81,3 +81,19 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
 </div>
+
+<?php if(Yii::$app->session->hasFlash('Forgot-success')): ?>
+    <div class="alert alert-info" role="alert">
+        <?= Yii::$app->session->getFlash('Forgot-success') ?>
+    </div>
+<?php endif; ?>
+
+<?php
+$form = \yii\widgets\ActiveForm::begin(['method' => 'post']);
+?>
+
+<?= $form->field($newPassModel, 'email')->hiddenInput(['value'=>$model->email])->label(false); ?>
+
+<?= Html::submitButton('Выслать письмо со сменой пароля', ['class' => 'btn btn-primary']) ?>
+
+<?php \yii\widgets\ActiveForm::end(); ?>

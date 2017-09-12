@@ -176,7 +176,7 @@ class SiteController extends Controller {
         $organization->scenario = "complete";
 
         $post = Yii::$app->request->post();
-        if (Yii::$app->request->isAjax && $profile->load($post) && $organization->load($post)) {
+        if (Yii::$app->request->isAjax && empty($organization->locality) && $profile->load($post) && $organization->load($post)) {
             if ($profile->validate() && $organization->validate()) {
                 $profile->save();
                 $organization->save();
@@ -190,12 +190,21 @@ class SiteController extends Controller {
         Yii::$app->response->format = Response::FORMAT_JSON;
         return \yii\widgets\ActiveForm::validate($profile, $organization);
     }
+    
+    
+    /**
+     * 
+     * @param Organization $organizationModel
+     * @param Profile $profileModel
+     * @param User $userModel
+     * @return boolean
+     */
     private function SendToAmo($organizationModel, $profileModel, $userModel) {
             $response = null;
             $lead_name = $organizationModel->name;
             $company_name = $organizationModel->name;
             $responsible_user_id = 1427371;
-            $lead_status_id = 465729;
+            $lead_status_id = ($organizationModel->type_id === Organization::TYPE_RESTAURANT) ? 465729 : 463335;
             $comment = $organizationModel->formatted_address;
             $city = $organizationModel->country . ", " . $organizationModel->locality;
             $contact_name = $profileModel->full_name; //Название добавляемого контакта
@@ -204,7 +213,7 @@ class SiteController extends Controller {
             $lead_partner = ''; //Тип партнерства
             //АВТОРИЗАЦИЯ
             $user = array(
-                'USER_LOGIN' => 'artur@mixcart.ru', #логин
+                'USER_LOGIN' => 'artur@f-keeper.ru', #логин
                 'USER_HASH' => '74ed35efba91ce97c029ceb8006b447b' #Хэш для доступа к API
             );
             $subdomain = 'fkeeper';

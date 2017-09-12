@@ -171,10 +171,10 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             <div class="dash-small-box step-f-market" data-target="fmarket">
                                 <div class="dash-title-border"></div>
                                 <div class="inner" style="position:relative;z-index:2">
-                                    <h3>F-Market</h3>
+                                    <h3>MixMarket</h3>
                                     <p>доступно для заказа товаров <b><?= $count_products_from_mp ?></b></p>
                                 </div>
-<?= Html::a('F-Market', 'https://market.mixcart.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+<?= Html::a('MixMarket', 'https://market.mixcart.ru', ['target' => '_blank', 'class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash2.png) no-repeat bottom right;
                                      background-size: 120px;">
@@ -471,7 +471,7 @@ if ($organization->step == Organization::STEP_TUTORIAL) {
                     },
                     {
                             title: '&nbsp;',
-                            content: 'Или найти новых с помощью сервиса F-Market.',
+                            content: 'Или найти новых с помощью сервиса MixMarket.',
                             position: 'bottom-center',
                             overlayMode: 'focus',
                             selector: '.step-f-market',

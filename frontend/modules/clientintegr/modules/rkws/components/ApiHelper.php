@@ -128,7 +128,7 @@ class ApiHelper  {
     $objectinfo = [];
     $respcode = [];
         
-    $url = "http://ws-w01m.ucs.ru/WSClient/api/Client/Cmd";
+    $url = "http://ws.ucs.ru/WSClient/api/Client/Cmd";
     
         if (empty($restr)) {
                    echo "SendCurl.Access is not found :(";

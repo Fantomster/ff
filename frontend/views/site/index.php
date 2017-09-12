@@ -68,12 +68,12 @@ $this->title = 'MixCart';
             <?= Html::a('<span>для ресторанов</span>', "https://client.mixcart.ru", ['class' => 'for__restaurants']) ?>
 <?= Html::a('<span>для поставщиков</span>', ["/site/supplier"], ['class' => 'for__suppliers']) ?>
             <div class="clear"></div>
-            <div class="watch_video">
+<!--            <div class="watch_video">
                 <a href="#" data-toggle="modal" data-target="#myModal2" >
                     <span class="glyphicon glyphicon-play-circle"></span>
                     <span class="watch__span">посмотреть видео</span>
                 </a>
-            </div>
+            </div>-->
             <div class="error__block">
                 <p><a class="callback_form" data-modal="callback" data-lead="Оставить заявку">оставить заявку</a></p>
             </div>

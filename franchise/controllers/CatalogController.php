@@ -666,7 +666,6 @@ class CatalogController extends DefaultController
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
             $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
         }
-
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {

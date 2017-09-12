@@ -21,6 +21,10 @@ namespace common\models;
 class Role extends \amnah\yii2\user\models\Role {
 
     /**
+     * @var int admin role
+     */
+    const ROLE_ADMIN = 1;
+    /**
      * @var int Restaurant manager role
      */
     const ROLE_RESTAURANT_MANAGER = 3;
@@ -106,6 +110,11 @@ class Role extends \amnah\yii2\user\models\Role {
             }
         }
         return $dropdown;
+    }
+
+
+    public static function getExceptionArray(){
+        return [self::ROLE_ADMIN, self::ROLE_FKEEPER_MANAGER, self::ROLE_FKEEPER_OBSERVER];
     }
     
 }

@@ -45,7 +45,7 @@ class WaybillHelper extends AuthHelper {
    
     foreach($recs as $rec) {
        
-       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="1800" />'.PHP_EOL;
+       $xml .='<ITEM rid="'.$rec['prid'].'" quant="'.($rec["quant"]*1000).'" mu="'.$rec["munit_rid"].'" sum="'.($rec['sum']*100).'" vatrate="'.$rec['vat'].'" />'.PHP_EOL;
     }
    
    // var_dump($recs);

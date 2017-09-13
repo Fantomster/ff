@@ -512,6 +512,10 @@ class Organization extends \yii\db\ActiveRecord {
         return $this->hasOne(FranchiseeAssociate::className(), ['organization_id' => 'id']);
     }
 
+    public function getProfile() {
+        return $this->hasOne(Profile::className(), ['user_id' => 'manager_id']);
+    }
+
     public function getFranchisee() {
         return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
                         ->viaTable('franchisee_associate', ['organization_id' => 'id']);

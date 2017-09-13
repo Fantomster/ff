@@ -160,12 +160,14 @@ class OrderController extends DefaultController {
     }
 
     public function actionCreate() {
+        $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
 
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
 
         $selectedCategory = null;
@@ -181,6 +183,9 @@ class OrderController extends DefaultController {
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
 
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+        }
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;

@@ -109,4 +109,17 @@ class GuideController extends ActiveController {
   
         return $dataProvider;
     }
+    
+    public function actionFavorites ()
+    {
+        $user = Yii::$app->user->getIdentity();
+        $searchModel  = new \common\models\search\FavoriteSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['FavoriteSearch'] = Yii::$app->request->post("FavoriteSearch");
+        $dataProvider = $searchModel->search($params, $user->organization_id);
+        $dataProvider->pagination = ['pageSize' => 15];
+
+        $data = $dataProvider->getModels();
+        return $data;
+    }
 }

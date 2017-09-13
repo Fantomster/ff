@@ -109,4 +109,9 @@ class Guide extends \yii\db\ActiveRecord {
         GuideProduct::deleteAll(['guide_id' => $this->id]);
         parent::delete();
     }
+    
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionGuide($this->id); 
+    }
 }

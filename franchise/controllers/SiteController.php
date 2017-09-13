@@ -364,7 +364,7 @@ class SiteController extends DefaultController
                 }
             }
         }
-        $leadersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id);
+        $leadersArray = $this->currentFranchisee->getFranchiseeEmployees();
 
         return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType', 'rel', 'leadersArray'));
     }
@@ -408,7 +408,7 @@ class SiteController extends DefaultController
                 }
             }
         }
-        $leadersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id);
+        $leadersArray = $this->currentFranchisee->getFranchiseeEmployees();
 
         return $this->renderAjax('settings/_userForm', compact('user', 'profile', 'organizationType', 'rel', 'leadersArray'));
     }

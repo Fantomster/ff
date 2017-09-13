@@ -12,7 +12,7 @@ frontend\assets\AppAsset::register($this);
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
 $this->title = "Вход / регистрация";
-$dashboard = Url::to(['/site/index']);
+$redirect = empty($returnUrl) ? Url::to(['/site/index']) : $returnUrl;
 $changeNetworkUrl = Url::to(['/user/change']);
 $js = <<<JS
     $(document).on("click",".change-net-org", function(e){
@@ -23,7 +23,7 @@ $js = <<<JS
         {id : id}
     ).done(function(result) {
         if (result) {
-            document.location = "$dashboard";
+            document.location = "$redirect";
         }
     });
 });
@@ -172,7 +172,7 @@ $grid = [
                             <?php Pjax::end(); ?> 
                         </div>
                     </div>
-                    <?=Html::a('ПРОДОЛЖИТЬ', '/site/index', [
+                    <?=Html::a('ПРОДОЛЖИТЬ', $redirect, [
                         'class' => 'btn-continue',
                     ]);?>
                 </div>  

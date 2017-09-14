@@ -139,7 +139,7 @@ class OrganizationController extends DefaultController {
      * Add new restaurant
      */
     public function actionCreateClient() {
-        $managersArray = (new User())->getFranchiseeEmployees($this->currentFranchisee->id, true);
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $client = new Organization();
         $client->type_id = Organization::TYPE_RESTAURANT;
         $user = new User();
@@ -184,8 +184,7 @@ class OrganizationController extends DefaultController {
      * Update restaurant
      */
     public function actionUpdateClient($id) {
-        $user = new User();
-        $managersArray = $user->getFranchiseeEmployees($this->currentFranchisee->id, true);
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $client = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
@@ -324,7 +323,7 @@ class OrganizationController extends DefaultController {
      * Add new supplier
      */
     public function actionCreateVendor() {
-        $managersArray = (new User())->getFranchiseeEmployees($this->currentFranchisee->id, true);
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $vendor = new Organization();
         $catalog = new \common\models\Catalog();
         $vendor->type_id = Organization::TYPE_SUPPLIER;
@@ -373,7 +372,7 @@ class OrganizationController extends DefaultController {
      * Update vendor
      */
     public function actionUpdateVendor($id) {
-        $managersArray = (new User())->getFranchiseeEmployees($this->currentFranchisee->id, true);
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $vendor = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
@@ -467,7 +466,6 @@ class OrganizationController extends DefaultController {
             $showButton = true;
             $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $organization->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
         }
-
         return $this->render("show-".$type, compact('organization','dataProvider', 'managersDataProvider', 'catalog', 'showButton'));
     }
 }

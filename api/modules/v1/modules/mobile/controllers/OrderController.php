@@ -136,7 +136,8 @@ class OrderController extends ActiveController {
             if (isset($post['GoodsNotes'])) {
                 $res = [];
                 foreach ($post['GoodsNotes'] as $note) {
-                    
+                    if(!isset($note))
+                        continue;
                     $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id',
                             [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
                     

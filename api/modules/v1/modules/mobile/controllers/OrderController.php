@@ -161,8 +161,8 @@ class OrderController extends ActiveController {
                         die();
                         throw new BadRequestHttpException;
                     }
-                    $notes->created_at = $note->created_at;
-                    $notes->updated_at = $note->updated-at;
+                    $notes->created_at = $note['created_at'];
+                    $notes->updated_at = $note['updated-at'];
                     $res[] = $notes;
                 }
             }

@@ -250,7 +250,7 @@ class NotificationHelper {
                             'activity' => "Work"]);
                 }
                 
-                //$response = Yii::$app->fcm->send($message);
+                $response = Yii::$app->fcm->send($message);
                 //var_dump($response->getStatusCode());
             }
         }
@@ -294,7 +294,7 @@ class NotificationHelper {
                             'activity' => "Work"]);
                 }
                 
-                //$response = Yii::$app->fcm->send($message);
+                $response = Yii::$app->fcm->send($message);
                 //var_dump($response->getStatusCode());
             }
         }

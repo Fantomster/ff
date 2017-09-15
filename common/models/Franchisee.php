@@ -199,4 +199,21 @@ class Franchisee extends \yii\db\ActiveRecord {
         }
         return $dropdown;
     }
+
+    public function getFranchiseeEmployees($is_managers=false){
+        $dropdown = [];
+        $role = ($is_managers) ? Role::ROLE_FRANCHISEE_MANAGER : Role::ROLE_FRANCHISEE_LEADER;
+        $models = User::find()
+            ->joinWith("franchiseeUser")
+            ->joinWith("profile")->select(['user.id', 'profile.full_name'])
+            ->where([
+                'franchisee_user.franchisee_id' => $this->id,
+                'role_id' => $role
+            ])->all();
+        foreach ($models as $model) {
+            $dropdown[$model->id] = $model->profile->full_name;
+        }
+
+        return $dropdown;
+    }
 }

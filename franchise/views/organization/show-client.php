@@ -128,6 +128,12 @@ $this->registerCss("
                                     <label for="exampleInputEmail1">Телефон контактного лица:</label>
                                     <p><?= $organization->phone ?></p>
                                 </div>
+                                <?php if(isset($organization->profile->full_name)): ?>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Управляющий менеджер:</label>
+                                        <p><?= $organization->profile->full_name ?></p>
+                                    </div>
+                                <?php endif; ?>
 
                             </div>
                         </div>

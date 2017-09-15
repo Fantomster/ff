@@ -130,6 +130,7 @@ class StoreHelper extends AuthHelper {
             
         $icount =0;  
             
+        $rress = Yii::$app->db_api->createCommand('UPDATE rk_storetree SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
             
      // Заполнение складов с деревом
          /*   

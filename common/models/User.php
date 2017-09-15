@@ -367,25 +367,4 @@ class User extends \amnah\yii2\user\models\User {
         }
         return [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
     }
-
-    public function getFranchiseeEmployees($franchisee_id, $is_managers=false){
-        // get all records from database and generate
-        static $dropdown;
-        if ($dropdown === null) {
-            $role = ($is_managers) ? Role::ROLE_FRANCHISEE_MANAGER : Role::ROLE_FRANCHISEE_LEADER;
-            $models = User::find()
-                ->joinWith("franchiseeUser")
-                ->joinWith("profile")->select(['user.id', 'profile.full_name'])
-                ->where([
-                    'franchisee_user.franchisee_id' => $franchisee_id,
-                    'role_id' => $role
-                ])->all();
-                foreach ($models as $model) {
-                    if ($model->id !== Role::ROLE_FRANCHISEE_AGENT) {
-                        $dropdown[$model->id] = $model->profile->full_name;
-                    }
-                }
-        }
-        return $dropdown;
-    }
 }

@@ -132,9 +132,9 @@ class OrderController extends ActiveController {
         $transaction = Yii::$app->db->beginTransaction();
         try {
             if (isset($post['GoodsNotes'])) {
-                if ($post['GoodsNotes']) {
-                    $res = [];
                     foreach ($post['GoodsNotes'] as $note) {
+                        if(empty($note))
+                            break;
                         $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id', [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
 
                         if ($notes == null) {

@@ -144,7 +144,7 @@ class OrderController extends ActiveController {
                     {
                         $notes = new \common\models\GoodsNotes();
                         $notes->attributes = $note;
-                        $notes->catalog_base_goods_id = intval(catalog_base_goods_id);
+                        $notes->catalog_base_goods_id = $note->catalog_base_goods_id;
                         $notes->rest_org_id =  $user->organization_id;
                         unset($notes->id);
                     }

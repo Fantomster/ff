@@ -132,34 +132,33 @@ class OrderController extends ActiveController {
         $transaction = Yii::$app->db->beginTransaction();
         try {
             if (isset($post['GoodsNotes'])) {
-                    foreach ($post['GoodsNotes'] as $note) {
-                        if(empty($note))
-                            break;
-                        $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id', [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
+                foreach ($post['GoodsNotes'] as $note) {
+                    if (empty($note))
+                        break;
+                    $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id', [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
 
-                        if ($notes == null) {
-                            $notes = new \common\models\GoodsNotes();
-                            $notes->attributes = $note;
-                            $notes->catalog_base_goods_id = $note['catalog_base_goods_id'];
-                            $notes->rest_org_id = $user->organization_id;
-                            unset($notes->id);
-                        } else {
-                            $notes->note = $note['note'];
-                            $notes->created_at = $note['created_at'];
-                            if (array_key_exists('updated_at', $note) != null)
-                                $notes->updated_at = $note['updated_at'];
-                        }
-
-                        if (!$notes->save()) {
-                            var_dump($notes->getErrors());
-                            die();
-                            throw new BadRequestHttpException;
-                        }
+                    if ($notes == null) {
+                        $notes = new \common\models\GoodsNotes();
+                        $notes->attributes = $note;
+                        $notes->catalog_base_goods_id = $note['catalog_base_goods_id'];
+                        $notes->rest_org_id = $user->organization_id;
+                        unset($notes->id);
+                    } else {
+                        $notes->note = $note['note'];
                         $notes->created_at = $note['created_at'];
                         if (array_key_exists('updated_at', $note) != null)
                             $notes->updated_at = $note['updated_at'];
-                        $res[] = $notes;
                     }
+
+                    if (!$notes->save()) {
+                        var_dump($notes->getErrors());
+                        die();
+                        throw new BadRequestHttpException;
+                    }
+                    $notes->created_at = $note['created_at'];
+                    if (array_key_exists('updated_at', $note) != null)
+                        $notes->updated_at = $note['updated_at'];
+                    $res[] = $notes;
                 }
             }
             $newOrder = new \common\models\Order();

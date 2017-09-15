@@ -257,7 +257,7 @@ class OrderController extends ActiveController {
             
             if ($profile->phone && $recipient->smsNotification->order_created) {
                 $text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
+                $target = $profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
             }

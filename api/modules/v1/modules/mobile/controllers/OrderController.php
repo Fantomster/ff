@@ -152,7 +152,7 @@ class OrderController extends ActiveController {
                     {
                         $notes->note = $note['note'];
                         $notes->created_at = $note['created_at'];
-                        if($note['updated_at'] != null)
+                        if(array_key_exists('updated_at', $note) != null)
                         $notes->updated_at = $note['updated_at'];
                     }
 
@@ -163,7 +163,7 @@ class OrderController extends ActiveController {
                         throw new BadRequestHttpException;
                     }
                     $notes->created_at = $note['created_at'];
-                    if($note['updated_at'] != null)
+                    if(array_key_exists('updated_at', $note) != null)
                         $notes->updated_at = $note['updated_at'];
                     $res[] = $notes;
                 }

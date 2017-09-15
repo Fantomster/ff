@@ -223,19 +223,27 @@ class OrderController extends ActiveController {
         }
     }
 
+    /**
+     * Sends mail informing both sides about new order
+     * 
+     * @param Organization $sender
+     * @param Order $order
+     */
     private function sendOrderCreated($sender, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
         $senderOrg = $sender->organization;
-        $subject = "MixCart: новый заказ №" . $order->id . "!";
+        $subject = "Новый заказ №" . $order->id . "!";
 
         $searchModel = new \common\models\search\OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination = false;
 
+        $test = $order->recipientsList;
+        
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_created) {
@@ -245,7 +253,7 @@ class OrderController extends ActiveController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
-                $text = $order->client->name . " сформировал для Вас заказ в системе MixCart №" . $order->id;
+                $text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

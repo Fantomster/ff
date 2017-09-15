@@ -128,6 +128,7 @@ class OrderController extends ActiveController {
     public function actionNewOrder() {
         $post = Yii::$app->request->post();
         $user = Yii::$app->user->getIdentity();
+        $res = [];
 
         $transaction = Yii::$app->db->beginTransaction();
         try {

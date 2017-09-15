@@ -11,7 +11,7 @@ class NotificationHelper {
     public static function actionConfirm($user)
     {
         $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->one();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->one();
         
         if($fcm == null)
             return;
@@ -32,7 +32,7 @@ class NotificationHelper {
     public static function actionForgot($user)
     {
         $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->one();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->one();
         
         if($fcm == null)
             return;
@@ -52,8 +52,8 @@ class NotificationHelper {
     public static function actionComplete($user)
     {
         $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->one();
-        
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->one();
+
         if($fcm == null)
             return;
       
@@ -80,11 +80,12 @@ class NotificationHelper {
         
         
 
-        $users = \common\models\User::find('organization_id = :client OR organization_id = :vendor', [':client' => $order->client_id, ':vendor' => $order->vendor_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client OR organization_id = :vendor', [':client' => $order->client_id, ':vendor' => $order->vendor_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+         $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+       
 
             foreach ($fcm as $row)
             {
@@ -110,12 +111,12 @@ class NotificationHelper {
         if($request === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $request->rest_org_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $request->rest_org_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
-
+         $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+       
             foreach ($fcm as $row)
             {
                 $message = Yii::$app->fcm->createMessage();
@@ -154,12 +155,12 @@ class NotificationHelper {
         if($request === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $request->rest_org_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $request->rest_org_id])->all();
         $vendor = Yii::$app->user->getIdentity();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -187,11 +188,11 @@ class NotificationHelper {
         if($rel === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $rel->rest_org_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $rel->rest_org_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -217,20 +218,17 @@ class NotificationHelper {
         if($order === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
-        
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $order->client_id])->all();
+
         $content = $order->orderContent;
         
         $curr_user = Yii::$app->user->getIdentity();
         
         $vendor = (($order->vendor_id == $curr_user->organization_id) ? 1 : 0);
-
+        
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
-
-        
-        
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
             foreach ($fcm as $row)
             {
                 $message = Yii::$app->fcm->createMessage();
@@ -252,7 +250,7 @@ class NotificationHelper {
                             'activity' => "Work"]);
                 }
                 
-                $response = Yii::$app->fcm->send($message);
+                //$response = Yii::$app->fcm->send($message);
                 //var_dump($response->getStatusCode());
             }
         }
@@ -271,11 +269,11 @@ class NotificationHelper {
         if($order === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $order->client_id])->all();
 
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -296,7 +294,7 @@ class NotificationHelper {
                             'activity' => "Work"]);
                 }
                 
-                $response = Yii::$app->fcm->send($message);
+                //$response = Yii::$app->fcm->send($message);
                 //var_dump($response->getStatusCode());
             }
         }
@@ -313,11 +311,11 @@ class NotificationHelper {
             return;
         
         $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
-        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $order->client_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -345,11 +343,11 @@ class NotificationHelper {
         if($guide === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $guide->client_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $guide->client_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -389,11 +387,11 @@ class NotificationHelper {
         if($guide === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $order->client_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -424,11 +422,11 @@ class NotificationHelper {
     {
         $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $guide->client_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $guide->client_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {
@@ -456,11 +454,11 @@ class NotificationHelper {
         if($guide === null)
             return;
         
-        $users = \common\models\User::find('organization_id = :client', [':client' => $order->client_id])->all();
+        $users = \common\models\User::find()->where('organization_id = :client', [':client' => $order->client_id])->all();
         
         foreach ($users as $user)
         {
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
 
             foreach ($fcm as $row)
             {

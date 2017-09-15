@@ -16,6 +16,7 @@ $count = count($orders);
                 <span class="col_vo"><?= $count ?></span>
                 <img class="hide_basket" src="<?= $baseUrl ?>/img/bask_del1.png" alt="">
             </div>
+            <?= Html::a('Перейти к оформлению', ['order/checkout'], ['class' => 'btn but_zakaz_bask', 'data-pjax' => 0]) ?>
             <?php
             foreach ($orders as $order) {
                 ?>

@@ -363,7 +363,7 @@ class OrderController extends DefaultController {
         $guideSearchModel = new GuideProductsSearch();
         $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
         $guideDataProvider = $guideSearchModel->search($params, $guide->id);
-        $guideDataProvider->pagination = ['pageSize' => 8];
+        $guideDataProvider->pagination = false;//['pageSize' => 8];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
@@ -491,11 +491,14 @@ class OrderController extends DefaultController {
     }
 
     public function actionAjaxAddToCart() {
-
+        $post = Yii::$app->request->post();
+        $quantity = $post['quantity'];
+        if ($quantity <= 0) {
+            return false;
+        }
         $client = $this->currentUser->organization;
         $orders = $client->getCart();
 
-        $post = Yii::$app->request->post();
         $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
 
         if ($product) {
@@ -517,7 +520,6 @@ class OrderController extends DefaultController {
             $units = $product->units;
             $article = $product->article;
         }
-        $quantity = $post['quantity'];
         $isNewOrder = true;
 
         foreach ($orders as $order) {

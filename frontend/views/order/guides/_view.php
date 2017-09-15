@@ -84,8 +84,8 @@ use kartik\form\ActiveForm;
                             return TouchSpin::widget([
                                         'name' => '',
                                         'pluginOptions' => [
-                                            'initval' => 0.100,
-                                            'min' => (isset($units) && ($units > 0)) ? $units : 0.001,
+                                            'initval' => 0,//0.100,
+                                            'min' => 0,//(isset($units) && ($units > 0)) ? $units : 0.001,
                                             'max' => PHP_INT_MAX,
                                             'step' => (isset($units) && ($units)) ? $units : 1,
                                             'decimals' => (empty($units) || (fmod($units, 1) > 0)) ? 3 : 0,
@@ -120,7 +120,7 @@ use kartik\form\ActiveForm;
                         'format' => 'raw',
                         'value' => function ($data) {
                             return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">В корзину</span></i>', [
-                                        'class' => 'add-to-cart btn btn-md btn-success pull-right',
+                                        'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
                                         'data-id' => $data->cbg_id,
                                         'data-cat' => $data->baseProduct->cat_id,
                                         'title' => 'Добавить в корзину',

@@ -75,7 +75,7 @@ class UtilsController extends Controller {
                 $headers = get_headers($product->imageUrl);
                 if ($headers[0] == 'HTTP/1.1 403 Forbidden') {
                     echo $product->id;
-                    $product->image = "delete";
+                    $product->image = null;
                     $product->save();
                     echo " - fixed\n";
                 }
@@ -90,7 +90,7 @@ class UtilsController extends Controller {
                 $headers = get_headers($organization->pictureUrl);
                 if ($headers[0] == 'HTTP/1.1 403 Forbidden') {
                     echo $organization->id;
-                    $organization->picture = "delete";
+                    $organization->picture = null;
                     $organization->save();
                     echo " - fixed\n";
                 }

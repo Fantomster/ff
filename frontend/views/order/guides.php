@@ -228,6 +228,18 @@ $this->registerJs('
         });
     });
     
+    $(document).on("change paste keyup", ".quantity", function() {
+        var btnAddToCart = $(this).parent().parent().parent().find(".add-to-cart");
+        if ($(this).val() > 0) {
+            btnAddToCart.removeClass("disabled");
+            $.post(
+                "' . Url::to(['/order/ajax-add-guide-to-cart']) . '?id=" + $(this).data("id")
+            );
+        } else {
+            btnAddToCart.addClass("disabled");
+        }
+    });
+    
     $(document).on("click", ".btnSubmit", function() {
         $($(this).data("target-form")).submit();
     });

@@ -252,7 +252,10 @@ class OrderController extends ActiveController {
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
+            
+            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+            
+            if ($profile->phone && $recipient->smsNotification->order_created) {
                 $text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();

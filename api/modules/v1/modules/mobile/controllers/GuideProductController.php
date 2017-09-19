@@ -83,6 +83,11 @@ class GuideProductController extends ActiveController {
             $query->andFilterWhere($filters);
             return $dataProvider;
         }
+        
+        if($params->list != null)
+        {
+            $query->andWhere ('guide_id IN('.implode(',', Json::decode($params->list)).')');
+        }
        
             $filters['id'] = $params->id; 
             $filters['guide_id'] = $params->guide_id; 

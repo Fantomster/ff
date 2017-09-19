@@ -237,8 +237,12 @@ class UserController extends ActiveController {
     public function actionRefreshFcmToken() {
         $device_id = Yii::$app->request->headers->get("Device_id");
         $token = Yii::$app->request->post('token');
+        if($device_id === null)
+            return "Fail";
         
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
+        var_dump($device_id);
+        
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
         
         if($fcm === null)
         {

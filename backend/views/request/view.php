@@ -2,7 +2,26 @@
 use yii\widgets\Breadcrumbs;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
-use yii\widgets\ListView;
+use yii\grid\GridView;
+use kartik\form\ActiveForm;
+
+$this->registerJs('
+    $("document").ready(function(){
+        var justSubmitted = false;
+        var timer;
+        $(".box-body").on("change", "#statusFilter", function() {
+            $("#searchForm").submit();
+        });
+        $("body").on("change keyup paste cut", "#searchString", function() {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    $("#searchForm").submit();
+                }, 700);
+            });
+    });
+        ');
 ?>
 
     <style>
@@ -31,13 +50,6 @@ use yii\widgets\ListView;
     <section  class="content-header">
         <div class="row">
             <div class="col-md-12">
-                <?php
-                Pjax::begin([
-                    'id' => 'pjax-callback',
-                    'timeout' => 10000,
-                    'enablePushState' => false,
-                ]);
-                ?>
                 <div class="box box-info">
                     <div class="box-body">
                         <div class="col-md-6">
@@ -74,27 +86,87 @@ use yii\widgets\ListView;
                                 <span  data-toggle="tooltip" data-placement="bottom" data-original-title="Предложений от поставщиков"><i class="fa fa-handshake-o" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->countCallback?></span>
                             </div>
                         </div>
-
+                        <?php
+                        Pjax::begin();
+                        ?>
                         <div class="col-md-12">
                             <hr>
                             <h3>Предложения поставщиков</h3>
-                            <?=ListView::widget([
-                                'dataProvider' => $dataCallback,
-                                'itemView' => function ($model, $key, $index, $widget) {
-                                    return $this->render('view/_vendorCBView', ['model' => $model]);
-                                },
-                                'pager' => [
-                                    'maxButtonCount' => 5,
-                                    'options' => [
-                                        'class' => 'pagination col-md-12'
-                                    ],
+
+                            <?php
+                            $form = ActiveForm::begin([
+                                'options' => [
+                                    'id' => 'searchForm',
+                                    //'class' => "navbar-form",
+                                    'role' => 'search',
                                 ],
+                            ]);
+                            ?>
+                            <div class="row">
+                                <div class="col-lg-5 col-md-5 col-sm-6">
+                                    <?=
+                                    $form->field($searchModel, 'searchString', [
+                                        'addon' => [
+                                            'prepend' => [
+                                                'content' => '<i class="fa fa-search"></i>',
+                                            ],
+                                        ],
+                                        'options' => [
+                                            'class' => "margin-right-15 form-group",
+                                        ],
+                                    ])
+                                        ->textInput([
+                                            'id' => 'searchString',
+                                            'class' => 'form-control',
+                                            'placeholder' => 'Поиск'])
+                                        ->label('Поиск', ['style' => 'color:#555'])
+                                    ?>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <?php ActiveForm::end(); ?>
+                            <?= GridView::widget([
+                                'dataProvider' => $dataCallback,
                                 'options'=>[
                                     'class'=>''
                                 ],
-                                'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
+                                'filterPosition' => false,
                                 'summary' => '',
+                                'options' => ['class' => 'table-responsive'],
+                                'tableOptions' => ['class' => 'table table-bordered table-striped table-hover dataTable', 'role' => 'grid'],
                                 'emptyText' => 'Пока нет ни одного предложения',
+                                'columns' => [
+                                    [
+                                        'attribute' => 'id',
+                                        'value' => 'id',
+                                        'label' => '№',
+                                    ],
+                                    [
+                                        'attribute' => 'organization.name',
+                                        'label' => 'Название поставщика',
+                                    ],
+                                    [
+                                        'attribute' => 'price',
+                                        'label' => 'Цена',
+                                    ],
+                                    [
+                                        'format' => 'raw',
+                                        'attribute' => 'comment',
+                                        'label' => 'Комментарий',
+                                    ],
+                                    [
+                                        'class' => 'yii\grid\ActionColumn',
+                                        'template' => '{edit}',
+                                        'buttons' => [
+                                            'edit' => function ($url,$model) {
+                                                $customurl=Yii::$app->getUrlManager()->createUrl(['request/update-callback','id'=>$model['id'], 'request_id'=>$model['request_id']]);
+                                                return \yii\helpers\Html::a( '<span class="glyphicon glyphicon-pencil"></span>', $customurl,
+                                                    ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
+                                            },
+                                        ],
+                                    ],
+                                ],
                             ])?>
                         </div>
                     </div>

@@ -249,7 +249,9 @@ class Request extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
-        \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
+        if($insert){
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
+        }
     }
 
 

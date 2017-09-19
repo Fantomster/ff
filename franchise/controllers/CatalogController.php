@@ -182,8 +182,6 @@ class CatalogController extends DefaultController
                     where(['supp_org_id' => $vendor_id, 'type' => 2])->
                     andFilterWhere(['LIKE', 'name', $searchString])->all();
                 }
-                return $this->render("index", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'arrCatalog', 'type', 'currentOrganization', 'arrBaseCatalog'));
-                return $this->render("index", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'arrCatalog', 'type', 'currentOrganization', 'arrBaseCatalog'));
             }
             return $this->render("index", compact("relation_supp_rest", "currentUser", "relation", "searchString", "restaurant", 'type', 'arrCatalog', 'currentOrganization', 'arrBaseCatalog'));
         }

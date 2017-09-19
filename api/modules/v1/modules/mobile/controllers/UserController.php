@@ -73,6 +73,7 @@ class UserController extends ActiveController {
         $user = User::findOne(Yii::$app->user->id);
         $profile = $user->profile;
         $organization = $user->organization;
+        $organization->picture = $organization->pictureUrl;
         return compact("user","profile","organization");
     }
     
@@ -231,14 +232,16 @@ class UserController extends ActiveController {
         /*$user = Yii::$app->user->identity;
         \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($user->email, $user->id);*/
         
-        \api\modules\v1\modules\mobile\components\NotificationHelper::actionSendMessage(132);
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder(29);
     }
     
     public function actionRefreshFcmToken() {
-        $device_id = Yii::$app->request->post('device_id');
+        $device_id = Yii::$app->request->headers->get("Device_id");
         $token = Yii::$app->request->post('token');
+        if($device_id === null)
+            return "Fail";
         
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
         
         if($fcm === null)
         {

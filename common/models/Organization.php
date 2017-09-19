@@ -221,21 +221,24 @@ class Organization extends \yii\db\ActiveRecord {
      * @return array
      */
     public function getSuppliers($category_id = '', $all = false) {
-        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
         }
         $query = RelationSuppRest::find()
                 ->select(['organization.id', 'organization.name'])
                 ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-                ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false]);
+                ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
+        if(!$all){
+            $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
+        }
+        $query->where(['relation_supp_rest.deleted' => false]);
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }
         $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
                                 ->asArray()
                                 ->all(), 'id', 'name');
-        $vendors[''] = 'Все поставщики';
+        if(!$all) $vendors[''] = 'Все поставщики';
         ksort($vendors);
         return $vendors;
     }

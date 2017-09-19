@@ -5,20 +5,21 @@ namespace api\modules\v1\modules\mobile\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
-use api\modules\v1\modules\mobile\resources\Order;
+use api\modules\v1\modules\mobile\resources\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
-use api\modules\v1\modules\mobile\resources\Guide;
+use common\models\CatalogGoods;
+use yii\helpers\Json;
 
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class GuideController extends ActiveController {
+class FavoritesController extends ActiveController {
 
     /**
      * @var string
      */
-    public $modelClass = 'api\modules\v1\modules\mobile\resources\Guide';
+    public $modelClass = 'api\modules\v1\modules\mobile\resources\CatalogBaseGoods';
 
     /**
      * @return array
@@ -58,7 +59,7 @@ class GuideController extends ActiveController {
      * @throws NotFoundHttpException
      */
     public function findModel($id) {
-        $model = Guide::findOne($id);
+        $model = CatalogBaseGoods::findOne($id);
         if (!$model) {
             throw new NotFoundHttpException;
         }
@@ -70,43 +71,13 @@ class GuideController extends ActiveController {
      */
     public function prepareDataProvider()
     {
-        $params = new Guide();
-        $query = Guide::find();
-        
-        $dataProvider =  new ActiveDataProvider(array(
-            'query' => $query,
-            'pagination' => false,
-        ));
-        $filters = [];
         $user = Yii::$app->user->getIdentity();
-        
-        $filters['client_id'] = $user->organization_id;
-
-        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            $query->andFilterWhere($filters);
-            return $dataProvider;
-        }
-        
-        if(isset($params->count))
-        {
-            $query->limit($params->count);
-                if(isset($params->page))
-                {
-                    $offset = ($params->page * $params->count) - $params->count;
-                    $query->offset($offset);
-                }
-        }
-  
-       
-            $filters['id'] = $params->id; 
-            $filters['type'] = $params->type; 
-            $filters['name'] = $params->name; 
-            $filters['deleted'] = $params->deleted; 
-            $filters['created_at'] = $params->created_at; 
-            $filters['updated_at'] = $params->updated_at; 
-  
-            $query->andFilterWhere($filters);
-  
+        $client = $user->organization;
+        $params = Yii::$app->request->getQueryParams();
+        $params =  $params['FavoriteSearch'] = Yii::$app->request->post("FavoriteSearch");
+        $searchModel = new \common\models\search\FavoriteSearch();
+        $dataProvider = $searchModel->search($params, $client->id);
+        $dataProvider->pagination = ['pageSize' => 15];
         return $dataProvider;
     }
 }

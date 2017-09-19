@@ -412,7 +412,15 @@ class OrderController extends DefaultController {
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
-        foreach ($guide->guideProducts as $guideProduct) {
+        $guideProducts = Yii::$app->request->post("GuideProduct");
+        
+        foreach ($guideProducts as $productId => $quantity) {
+
+            if ($quantity <= 0) {
+                continue;
+            }
+            
+            $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
 
             $orders = $client->getCart();
 
@@ -422,7 +430,7 @@ class OrderController extends DefaultController {
             $vendor = $guideProduct->baseProduct->vendor;
             $units = $guideProduct->baseProduct->units;
             $article = $guideProduct->baseProduct->article;
-            $quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
+            //$quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
             $isNewOrder = true;
 
             foreach ($orders as $order) {

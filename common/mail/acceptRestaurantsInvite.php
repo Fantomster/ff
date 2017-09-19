@@ -10,7 +10,7 @@ use yii\helpers\Url;
  */
 ?>
 
-<p><img src="https://mixcart.ru/img/invite-to-vendor.jpg" style="width: 100%;" alt=""/></p>
+<p><img src="https://mixcart.ru/images/invite-to-vendor.jpg" style="width: 100%;" alt=""/></p>
 
 <h3 style="font-weight: 500;font-size: 27px;">Здравствуйте, <small style="font-size: 60%;color: #787878;line-height: 0;text-transform: none;"><?= $vendor->profile->full_name ?>.</small></h3>
 <p>Наш ресторан, <u><?= $restaurant ?></u>, стал использовать очень удобный инструмент для автоматизации работы с вами. 

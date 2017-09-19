@@ -52,6 +52,13 @@ use kartik\form\ActiveForm;
             <?php
             Pjax::begin(['formSelector' => '#searchProductForm', 'enablePushState' => false, 'id' => 'guideProductList', 'timeout' => 30000, 'clientOptions' => ['url' => Url::to(['/order/ajax-show-guide', 'id' => $guide->id])]]);
             ?>
+            <?php
+            $form = ActiveForm::begin([
+                        'options' => [
+                            'id' => 'gridForm',
+                        ],
+            ]);
+            ?>
             <?=
             GridView::widget([
                 'dataProvider' => $guideDataProvider,
@@ -82,10 +89,10 @@ use kartik\form\ActiveForm;
                         'content' => function($data) {
                             $units = $data->baseProduct->units;
                             return TouchSpin::widget([
-                                        'name' => '',
+                                        'name' => 'GuideProduct[' . $data->id . ']',
                                         'pluginOptions' => [
-                                            'initval' => 0,//0.100,
-                                            'min' => 0,//(isset($units) && ($units > 0)) ? $units : 0.001,
+                                            'initval' => 0, //0.100,
+                                            'min' => 0, //(isset($units) && ($units > 0)) ? $units : 0.001,
                                             'max' => PHP_INT_MAX,
                                             'step' => (isset($units) && ($units)) ? $units : 1,
                                             'decimals' => (empty($units) || (fmod($units, 1) > 0)) ? 3 : 0,
@@ -131,8 +138,9 @@ use kartik\form\ActiveForm;
                 ],
             ]);
             ?>
+            <?php ActiveForm::end(); ?>
             <?php Pjax::end(); ?>
-            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right add-guide-to-cart" data-id="<?=$guide->id ?>"><i class="fa fa-paper-plane-o"></i> Добавить все</button> 
+            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right add-guide-to-cart" data-url="<?= Url::to(['order/ajax-add-guide-to-cart', 'id' => $guide->id]) ?>"><i class="fa fa-paper-plane-o"></i> Добавить все</button> 
         </div>
     </div>
 </div>

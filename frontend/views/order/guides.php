@@ -138,8 +138,9 @@ $this->registerJs('
 
     $(document).on("click", ".add-to-cart", function(e) {
         e.preventDefault();
-        quantity = $(this).parent().parent().find(".quantity").val();
+        var quantityInput = $(this).parent().parent().find(".quantity");
         var cart = $(".basket_a");
+        var btnAddToCart = $(this);
         var imgtodrag = $("#cart-image");
         if (imgtodrag) {
             var imgclone = imgtodrag.clone()
@@ -178,15 +179,19 @@ $this->registerJs('
         }
         $.post(
             "' . Url::to(['/order/ajax-add-to-cart']) . '",
-            {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
+            {"id": $(this).data("id"), "quantity": quantityInput.val(), "cat_id": $(this).data("cat")}
         ).done(function(result) {
         });
+        quantityInput.val(0);
+        btnAddToCart.addClass("disabled");
     });
 
     $(document).on("click", ".add-guide-to-cart", function(e) {
         e.preventDefault();
         var cart = $(".basket_a");
         var imgtodrag = $("#cart-image");
+        var form = $("#gridForm");
+        var url = $(this).data("url");
         if (imgtodrag) {
             var imgclone = imgtodrag.clone()
                 .offset({
@@ -223,8 +228,10 @@ $this->registerJs('
             });
         }
         $.post(
-            "' . Url::to(['/order/ajax-add-guide-to-cart']) . '?id=" + $(this).data("id")
+            url,
+            form.serialize()
         ).done(function(result) {
+            $("#guideModal").modal("toggle");
         });
     });
     
@@ -232,9 +239,6 @@ $this->registerJs('
         var btnAddToCart = $(this).parent().parent().parent().find(".add-to-cart");
         if ($(this).val() > 0) {
             btnAddToCart.removeClass("disabled");
-            $.post(
-                "' . Url::to(['/order/ajax-add-guide-to-cart']) . '?id=" + $(this).data("id")
-            );
         } else {
             btnAddToCart.addClass("disabled");
         }
@@ -246,6 +250,10 @@ $this->registerJs('
 
     $(document).on("hidden.bs.modal", "#guideModal", function() {
         $(this).data("bs.modal", null);
+    });
+    
+    $(document).on("loaded.bs.modal", "#guideModal", function(){
+        $(".modal-dialog").removeAttr("style");
     });
 
 ', View::POS_READY);

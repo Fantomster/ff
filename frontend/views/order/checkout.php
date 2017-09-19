@@ -380,6 +380,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                             'format' => 'dd.mm.yyyy',
                                             'autoclose' => true,
                                             'startDate' => "0d",
+                                            'endDate' => date('d.m.Y',strtotime(date("Y-m-d", mktime()) . " + 365 day")),
                                             'todayHighlight' => true,
                                         ]
                                     ])

@@ -240,8 +240,6 @@ class UserController extends ActiveController {
         if($device_id === null)
             return "Fail";
         
-        var_dump($device_id);
-        
         $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
         
         if($fcm === null)

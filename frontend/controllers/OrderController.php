@@ -467,8 +467,8 @@ class OrderController extends DefaultController {
                 $position->article = $article;
                 $position->save();
             }
+            $alteringOrder->calculateTotalPrice();
         }
-        $alteringOrder->calculateTotalPrice();
         $cartCount = $client->getCartCount();
         $this->sendCartChange($client, $cartCount);
 

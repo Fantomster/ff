@@ -5,6 +5,7 @@ namespace backend\controllers;
 use common\models\Organization;
 use common\models\Request;
 use common\models\RequestCallback;
+use common\models\RequestCallbackSearch;
 use common\models\RequestSearch;
 use Yii;
 use common\models\Role;
@@ -38,7 +39,7 @@ class RequestController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update'],
+                        'actions' => ['index', 'view', 'update', 'update-callback'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -88,13 +89,16 @@ class RequestController extends Controller
         }
         $request = Request::find()->where(['id' => $id])->one();
         $author = Organization::findOne(['id' => $request->rest_org_id]);
-        $dataCallback = new ActiveDataProvider([
-            'query' => RequestCallback::find()->where(['request_id' => $id])->orderBy('id DESC'),
-            'pagination' => [
-                'pageSize' => 15,
-            ],
-        ]);
-        return $this->render("view", compact('request', 'author', 'dataCallback'));
+
+        $searchModel = new RequestCallbackSearch();
+        $params = Yii::$app->request->getQueryParams();
+
+        if (Yii::$app->request->post("RequestCallbackSearch")) {
+            $params['RequestCallbackSearch'] = Yii::$app->request->post("RequestCallbackSearch");
+        }
+
+        $dataCallback = $searchModel->search($params);
+        return $this->render("view", compact('request', 'author', 'dataCallback', 'searchModel'));
     }
 
     /**
@@ -114,6 +118,30 @@ class RequestController extends Controller
         } else {
             return $this->render('/request/update', [
                 'model' => $model,
+            ]);
+        }
+    }
+
+
+    /**
+     * Displays general settings
+     *
+     * @return mixed
+     */
+    public function actionUpdateCallback($id, $request_id)
+    {
+        $model = RequestCallback::find()->with('organization')->where(['id'=>$id])->one();
+        $suppliersArray = (new Organization())->getSuppliers(0, true);
+        if(!$model){
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $request_id]);
+        } else {
+            return $this->render('/request/update-callback', [
+                'model' => $model,
+                'suppliersArray' => $suppliersArray
             ]);
         }
     }

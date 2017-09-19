@@ -50,25 +50,9 @@ class OrderSearch extends Order {
      * @return ActiveDataProvider
      */
     public function search($params, $franchisee_id, $prev30 = false) {
-        
         $orderTable = Order::tableName();
-        
         $query = Order::find();
         $this->load($params);
-
-        $filter_date_from = strtotime($this->date_from);
-        $filter_date_to = strtotime($this->date_to);
-
-        $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
-        if ($from) {
-            $t1_f = $from->format('Y-m-d');
-        }
-        $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
-        if ($to) {
-            $to->add(new \DateInterval('P1D'));
-            $t2_f = $to->format('Y-m-d');
-        }
-
         switch ($this->status) {
             case 1: //new
                 $this->status_array = [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
@@ -141,7 +125,7 @@ class OrderSearch extends Order {
         ];
 
         // grid filtering conditions
-        $query->andFilterWhere(['or', 
+        $query->andFilterWhere(['or',
             ['like', 'client.name', $this->searchString],
             ['like', 'vendor.name', $this->searchString],
             ['like', 'createdByProfile.full_name', $this->searchString],
@@ -171,10 +155,20 @@ class OrderSearch extends Order {
         if ($prev30) {
             $query->andWhere("$orderTable.created_at between CURDATE() - INTERVAL 30 DAY and CURDATE() + INTERVAL 1 DAY ");
         } else {
+            $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
+            $t1_f = null;
+            $t2_f = null;
+            if ($from) {
+                $t1_f = $from->format('Y-m-d');
+            }
+            $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
+            if ($to) {
+                $to->add(new \DateInterval('P1D'));
+                $t2_f = $to->format('Y-m-d');
+            }
             $query->andFilterWhere(['>=', "$orderTable.created_at", $t1_f]);
             $query->andFilterWhere(['<=', "$orderTable.created_at", $t2_f]);
         }
-        //dd($query);
 
         return $dataProvider;
     }

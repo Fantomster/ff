@@ -1,4 +1,5 @@
 <?php
+
 use yii\widgets\Breadcrumbs;
 use kartik\date\DatePicker;
 use kartik\grid\GridView;
@@ -6,6 +7,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
+
 frontend\assets\AdminltePluginsAsset::register($this);
 $this->title = 'Аналитика';
 $this->registerCss('
@@ -45,227 +47,232 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
     ?>
 </section>
 <section class="content">
-<div class="box box-info">
-    <!-- /.box-header -->
-    <div class="box-body order-history">
-        <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-total-price">
-                <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_zakaz;?></span>
-                    <span class="info-box-text">Всего заказов</span>
+    <div class="box box-info">
+        <!-- /.box-header -->
+        <div class="box-body order-history">
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-total-price">
+                    <div class="info-box-content">
+                        <span class="info-box-number"><?= $header_info_zakaz; ?></span>
+                        <span class="info-box-text">Всего заказов</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-total-price">
-                <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_purchases;?></span>
-                    <span class="info-box-text">Всего Закупок</span>
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-total-price">
+                    <div class="info-box-content">
+                        <span class="info-box-number"><?= $header_info_purchases; ?></span>
+                        <span class="info-box-text">Всего Закупок</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-total-price">
-                <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_suppliers?></span>
-                    <span class="info-box-text">Всего поставщиков</span>
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-total-price">
+                    <div class="info-box-content">
+                        <span class="info-box-number"><?= $header_info_suppliers ?></span>
+                        <span class="info-box-text">Всего поставщиков</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3 col-sm-6 col-xs-12">
-            <div class="info-box bg-total-price">
-                <div class="info-box-content">
-                    <span class="info-box-number"><?=$header_info_items;?></span>
-                    <span class="info-box-text">Позиций</span>
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-total-price">
+                    <div class="info-box-content">
+                        <span class="info-box-number"><?= $header_info_items; ?></span>
+                        <span class="info-box-text">Позиций</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-2 col-md-3 col-sm-6">
-<?= Html::label('Поставщик', null, ['class' => 'label','style'=>'color:#555']) ?>
-<?= Html::dropDownList('filter_supplier', null,
-                            $filter_get_supplier,['prompt' => 'Все поставщики','class' => 'form-control','id'=>'filter_supplier']) ?>        
-        </div>
-        <div class="col-lg-2 col-md-3 col-sm-6">
-<?= Html::label('Сотрудник', null, ['class' => 'label','style'=>'color:#555']) ?>
-<?= Html::dropDownList('filter_employee', null,
-                            $filter_get_employee,['prompt' => 'Все сотрудники','class' => 'form-control','id'=>'filter_employee']) ?>        
-        </div>
-        <div class="col-lg-2 col-md-3 col-sm-6">
-<?= Html::label('Статус заказа', null, ['class' => 'label','style'=>'color:#555']) ?>
-<?= Html::dropDownList('filter_status', null,
-                            [
-                                '1' => 'Ожидание от поставщика',
-                                '2' => 'Ожидание от заказчика',
-                                '3' => 'Выполняется',
-                                '4' => 'Завершен',
-                                '5' => 'Отменен заказчиком',
-                                '6' => 'Отменен поставщиком',
-                            ],['prompt' => 'Все','class' => 'form-control','id'=>'filter_status']) ?>         
-        </div>
-        <div class="col-lg-5 col-md-6 col-sm-6"> 
-            <?php 
-            $layout = <<< HTML
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <?= Html::label('Поставщик', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+<?= Html::dropDownList('filter_supplier', null, $filter_get_supplier, ['prompt' => 'Все поставщики', 'class' => 'form-control', 'id' => 'filter_supplier'])
+?>        
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <?= Html::label('Сотрудник', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+<?= Html::dropDownList('filter_employee', null, $filter_get_employee, ['prompt' => 'Все сотрудники', 'class' => 'form-control', 'id' => 'filter_employee'])
+?>        
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-6">
+                <?= Html::label('Статус заказа', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                <?=
+                Html::dropDownList('filter_status', null, [
+                    '1' => 'Ожидание от поставщика',
+                    '2' => 'Ожидание от заказчика',
+                    '3' => 'Выполняется',
+                    '4' => 'Завершен',
+                    '5' => 'Отменен заказчиком',
+                    '6' => 'Отменен поставщиком',
+                        ], ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_status'])
+                ?>         
+            </div>
+            <div class="col-lg-5 col-md-6 col-sm-6"> 
+                <?php
+                $layout = <<< HTML
                 {input1}
                 {separator}
                 {input2}
 HTML;
-            ?>
-            <?=Html::label('Начальная дата / Конечная дата', null, ['class' => 'label','style'=>'color:#555']) ?>
-            <?=DatePicker::widget([
-                'name' => 'filter_from_date',
-                'id'=>'filter-date',
-                'value' => $filter_from_date,
-                'type' => DatePicker::TYPE_RANGE,
-                'name2' => 'filter_to_date',
-                'value2' => $filter_to_date,
-                'separator' => '-',
-                'layout' => $layout,
-                'pluginOptions' => [
-                    'autoclose'=>true,
-                    'format' => 'dd-mm-yyyy',
-                    'todayHighlight' => true,
-                    'endDate' =>  "0d",
-                ],
-                'removeButton' => false,
-            ]);
-            ?>
-        </div>
-        <div class="col-lg-1 col-md-1 col-sm-2">
-<?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id'=>'reset','class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
+                ?>
+                <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                <?=
+                DatePicker::widget([
+                    'name' => 'filter_from_date',
+                    'id' => 'filter-date',
+                    'value' => $filter_from_date,
+                    'type' => DatePicker::TYPE_RANGE,
+                    'name2' => 'filter_to_date',
+                    'value2' => $filter_to_date,
+                    'separator' => '-',
+                    'layout' => $layout,
+                    'pluginOptions' => [
+                        'autoclose' => true,
+                        'format' => 'dd-mm-yyyy',
+                        'todayHighlight' => true,
+                        'endDate' => "0d",
+                    ],
+                    'removeButton' => false,
+                ]);
+                ?>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-2">
+    <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+    <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
+            </div>
         </div>
     </div>
-</div>
 <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
-<div class="row">
-    <div class="col-md-6">
-      <!-- AREA CHART -->
-      <div class="box box-info">
-        <div class="box-header with-border">
-          <h3 class="box-title">Объем заказов</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- AREA CHART -->
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Объем заказов</h3>
 
-          <div class="box-tools pull-right">
-            
-            </button>
-          </div>
+                    <div class="box-tools pull-right">
+
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body" style="display: block;">
+                    <div class="chart">
+                        <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
         </div>
-        <div class="box-body" style="display: block;">
-          <div class="chart">
-            <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
-          </div>
+        <div class="col-md-6">
+            <!-- AREA CHART -->
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Заказы по поставщикам</h3>
+
+                    <div class="box-tools pull-right">
+
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body" style="display: block;">
+                    <div class="chart">
+                        <canvas id="barChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
         </div>
-        <!-- /.box-body -->
-      </div>
-      <!-- /.box -->
+        <div class="col-md-6">
+            <!-- AREA CHART -->
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Объем по поставщикам</h3>
+
+                    <div class="box-tools pull-right">
+
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body" style="display: block;">
+                    <div class="chart">
+                        <canvas id="pieChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>  
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <div class="col-md-6">
+            <!-- AREA CHART -->
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Статистика по товарам</h3>
+
+                    <div class="box-tools pull-right">
+
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body" style="display: block;">
+                    <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
+                    <?php
+                    $columns = [
+                        [
+                            'attribute' => 'product_id',
+                            'label' => 'Товар',
+                            'format' => 'raw',
+                            'value' => function ($data) {
+                                return Html::decode(Html::decode(\common\models\CatalogBaseGoods::find()->where(['id' => $data['product_id']])->one()->product));
+                            },
+                            'contentOptions' => ['style' => 'vertical-align:middle;'],
+                        ],
+                        [
+                            'attribute' => 'quantity',
+                            'label' => 'Кол-во',
+                            'value' => 'quantity',
+                            'contentOptions' => ['style' => 'vertical-align:middle;width:18%'],
+                        ],
+                        [
+                            'attribute' => 'price',
+                            'format' => 'raw',
+                            'label' => 'Итого',
+                            'value' => function ($data) {
+                                return (float) $data['price'] . "<i class=\"fa fa-fw fa-rub\"></i>";
+                            },
+                            'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:25%'],
+                        ]
+                    ];
+                    ?>
+                    <?=
+                    GridView::widget([
+                        'dataProvider' => $dataProvider,
+                        'filterPosition' => false,
+                        'columns' => $columns,
+                        'tableOptions' => ['class' => 'table no-margin'],
+                        'options' => ['class' => 'table-responsive'],
+                        'bordered' => false,
+                        'striped' => false,
+                        'condensed' => false,
+                        'resizableColumns' => false,
+                        'responsive' => false,
+                        'hover' => true,
+                        'summary' => false,
+                    ]);
+                    ?> 
+    <?php Pjax::end(); ?>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
     </div>
-    <div class="col-md-6">
-      <!-- AREA CHART -->
-      <div class="box box-info">
-        <div class="box-header with-border">
-          <h3 class="box-title">Заказы по поставщикам</h3>
+    <?php
+    $arr_create_at = json_encode($arr_create_at);
+    $arr_price = json_encode($arr_price);
+    ?>
 
-          <div class="box-tools pull-right">
-            
-            </button>
-          </div>
-        </div>
-        <div class="box-body" style="display: block;">
-          <div class="chart">
-            <canvas id="barChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
-          </div>
-        </div>
-        <!-- /.box-body -->
-      </div>
-      <!-- /.box -->
-    </div>
-    <div class="col-md-6">
-      <!-- AREA CHART -->
-      <div class="box box-info">
-        <div class="box-header with-border">
-          <h3 class="box-title">Объем по поставщикам</h3>
-
-          <div class="box-tools pull-right">
-            
-            </button>
-          </div>
-        </div>
-        <div class="box-body" style="display: block;">
-          <div class="chart">
-          <canvas id="pieChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>  
-          </div>
-        </div>
-        <!-- /.box-body -->
-      </div>
-      <!-- /.box -->
-    </div>
-    <div class="col-md-6">
-      <!-- AREA CHART -->
-      <div class="box box-info">
-        <div class="box-header with-border">
-          <h3 class="box-title">Статистика по товарам</h3>
-
-          <div class="box-tools pull-right">
-            
-            </button>
-          </div>
-        </div>
-        <div class="box-body" style="display: block;">
-          <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
-             <?php 
-            $columns = [
-                [
-                'attribute' => 'product_id',
-                'label'=>'Товар',
-                'value'=>function ($data) {
-                    return \common\models\CatalogBaseGoods::find()->where(['id'=>$data['product_id']])->one()->product;
-                },
-                'contentOptions' => ['style' => 'vertical-align:middle;'],
-                ],
-                [
-                'attribute' => 'quantity',
-                'label'=>'Кол-во',
-                'value'=>'quantity',
-                'contentOptions' => ['style' => 'vertical-align:middle;width:18%'],
-                ],
-                [
-                'attribute' => 'price',
-                'format'=>'raw',
-                'label'=>'Итого',
-                'value'=>function ($data) { return (float)$data['price']."<i class=\"fa fa-fw fa-rub\"></i>";},
-                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:25%'],
-                ]
-            ];
-            ?>
-             <?=GridView::widget([
-            'dataProvider' => $dataProvider,
-            'filterPosition' => false,
-            'columns' => $columns,
-            'tableOptions' => ['class' => 'table no-margin'],
-            'options' => ['class' => 'table-responsive'],
-            'bordered' => false,
-            'striped' => false,
-            'condensed' => false,
-           'resizableColumns'=>false,
-            'responsive' => false,
-            'hover' => true,
-            'summary' => false,
-            ]);
-            ?> 
-            <?php  Pjax::end(); ?>
-        </div>
-        <!-- /.box-body -->
-      </div>
-      <!-- /.box -->
-    </div>
-</div>
-<?php
-
-$arr_create_at =   json_encode($arr_create_at);
-$arr_price =   json_encode($arr_price);
-?>
-
-<?php
-$customJs = <<< JS
+    <?php
+    $customJs = <<< JS
     
 // Get context with jQuery - using jQuery's .get() method.
 var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
@@ -358,8 +365,8 @@ var barChartDemo = new Chart(ctx).Bar(barChartData, {
   ToolTipTitle: false
 });
 JS;
-$this->registerJs($customJs, View::POS_READY);
-?>
+    $this->registerJs($customJs, View::POS_READY);
+    ?>
 
 <?php Pjax::end(); ?>
 </section>

@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 
-$this->title = "Редактирование гида";
+$this->title = "Редактирование шаблона";
 
 $this->registerJs('
     $(document).on("click", ".select-vendor", function() {
@@ -67,7 +67,7 @@ $this->registerJs('
                     .removeClass("disabled")
                     .removeClass("btn-gray")
                     .addClass("btn-success")
-                    .html(\'<i class="fa fa-plus"></i> Добавить в гид\');
+                    .html(\'<i class="fa fa-plus"></i> Добавить в шаблон\');
             }
         });
     });
@@ -83,12 +83,12 @@ $this->registerJs('
             <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
             <li class="active">
                 <a href="#">
-                    Гиды заказов <small class="label bg-yellow">new</small>
+                    Шаблоны заказов <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Фавориты <small class="label bg-yellow">new</small>
+                    Часто заказываемые товары <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -185,7 +185,7 @@ $this->registerJs('
                         <div class="col-md-12 col-lg-4">
                             <div class="guid_table_block">
                                 <div class="guid_table_block_title">
-                                    <div class="guid_block_title_r pull-left">Гид: <?= $guide->name ?></div>
+                                    <div class="guid_block_title_r pull-left">Шаблон: <?= $guide->name ?></div>
                                     <div class="guid_block_title_l pull-right">ШАГ 3</div>
                                 </div> 
                                 <?php
@@ -215,7 +215,7 @@ $this->registerJs('
                                         ->textInput([
                                             'id' => 'searchGuideString',
                                             'class' => 'form-control',
-                                            'placeholder' => 'Поиск по набранному гиду'])
+                                            'placeholder' => 'Поиск по набранному шаблону'])
                                         ->label(false)
                                 ?>
                                 <?php ActiveForm::end(); ?>

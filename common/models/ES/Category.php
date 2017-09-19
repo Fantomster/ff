@@ -20,6 +20,7 @@ class Category extends ActiveRecord
     {
         return [            
             "category_id",
+            "category_slug",
             "category_sub_id",
             "category_name"
           ];

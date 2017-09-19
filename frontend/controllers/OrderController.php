@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use yii\helpers\Json;
+use yii\helpers\Html;
 use common\models\search\OrderCatalogSearch;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
@@ -114,80 +115,59 @@ class OrderController extends DefaultController {
             ],
         ];
     }
-    
+
     public function actionExportToXls() {
         $selected = Yii::$app->request->get('selected');
-        if(!empty($selected)){
+        if (!empty($selected)) {
             $model = \Yii::$app->db->createCommand("
-select 
-ord.id as id, 
-o.name as name, 
-cbg.product as product, 
-quantity, 
-cbg.ed,
-cbg.price,
-(cbg.price*quantity) as total_price,
-cbg.article,
-gn.note
-from `order_content` oc 
-left join `order` ord on oc.`order_id` = ord.`id`
-left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
-left join `organization` o on ord.`client_id` = o.`id`
-left join `goods_notes` gn on cbg.id = gn.catalog_base_goods_id
-where ord.id in ($selected)
-union all
-select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` where id in ($selected)),' ',' '")->queryAll();
-            
+                select 
+                    cbg.article,
+                    cbg.product as product, 
+                    sum(quantity) as total_quantity,
+                    cbg.ed
+                from `order_content` oc 
+                left join `catalog_base_goods` cbg on oc.`product_id` = cbg.`id`
+                where oc.order_id in ($selected)
+                group by cbg.id")->queryAll();
+
             $objPHPExcel = new \PHPExcel();
-            $sheet=0;
+            $sheet = 0;
             $objPHPExcel->setActiveSheetIndex($sheet);
             $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(60);
             $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(20);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
             $objPHPExcel->getActiveSheet()->setTitle('отчет')
-                ->setCellValue('A1', '№ заказа')
-                ->setCellValue('B1', 'Закупщик')
-                ->setCellValue('C1', 'Наименование товара')
-                ->setCellValue('D1', 'Кол-во')
-                ->setCellValue('E1', 'Единица измерения')
-                ->setCellValue('F1', 'Стоимость за ед-цу')
-                ->setCellValue('G1', 'Сумма итого')
-                ->setCellValue('H1', 'Артикул')
-                ->setCellValue('I1', 'Комментарий');
-            $row=2;
+                    ->setCellValue('A1', 'Артикул')
+                    ->setCellValue('B1', 'Наименование товара')
+                    ->setCellValue('C1', 'Кол-во')
+                    ->setCellValue('D1', 'Ед.изм');
+            $row = 2;
             foreach ($model as $foo) {
-                $objPHPExcel->getActiveSheet()->setCellValue('A'.$row,$foo['id']); 
-                $objPHPExcel->getActiveSheet()->setCellValue('B'.$row,$foo['name']);
-                $objPHPExcel->getActiveSheet()->setCellValue('C'.$row,$foo['product']);
-                $objPHPExcel->getActiveSheet()->setCellValue('D'.$row,$foo['quantity']);
-                $objPHPExcel->getActiveSheet()->setCellValue('E'.$row,$foo['ed']);
-                $objPHPExcel->getActiveSheet()->setCellValue('F'.$row,$foo['price']);
-                $objPHPExcel->getActiveSheet()->setCellValue('G'.$row,$foo['total_price']);
-                $objPHPExcel->getActiveSheet()->setCellValue('H'.$row,$foo['article']);
-                $objPHPExcel->getActiveSheet()->setCellValue('I'.$row,$foo['note']);
+                $objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $foo['article']);
+                $objPHPExcel->getActiveSheet()->setCellValue('B' . $row, Html::decode(Html::decode(Html::decode($foo['product']))));
+                $objPHPExcel->getActiveSheet()->setCellValue('C' . $row, $foo['total_quantity']);
+                $objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $foo['ed']);
                 $row++;
             }
             header('Content-Type: application/vnd.ms-excel');
-            $filename = "otchet_".date("d-m-Y-His").".xls";
-            header('Content-Disposition: attachment;filename='.$filename .' ');
+            $filename = "otchet_" . date("d-m-Y-His") . ".xls";
+            header('Content-Disposition: attachment;filename=' . $filename . ' ');
             header('Cache-Control: max-age=0');
             $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
             $objWriter->save('php://output');
         }
     }
+
     public function actionCreate() {
+        $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
         $params = Yii::$app->request->getQueryParams();
 
         if (Yii::$app->request->post("OrderCatalogSearch")) {
             $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+            $session['orderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
         }
 
         $selectedCategory = null;
@@ -203,6 +183,9 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $searchModel->client = $client;
         $searchModel->catalogs = $catalogs;
 
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+        }
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearch'];
         $dataProvider = $searchModel->search($params);
         $dataProvider->pagination->params['OrderCatalogSearch[searchString]'] = isset($params['OrderCatalogSearch']['searchString']) ? $params['OrderCatalogSearch']['searchString'] : null;
         $dataProvider->pagination->params['OrderCatalogSearch[selectedVendor]'] = $selectedVendor;
@@ -283,7 +266,10 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $params = Yii::$app->request->getQueryParams();
 
         $vendorSearchModel = new VendorSearch();
-        $params['VendorSearch'] = Yii::$app->request->post("VendorSearch");
+        if (Yii::$app->request->post("VendorSearch")) {
+            $session['vendorSearchString'] = Yii::$app->request->post("VendorSearch");
+        }
+        $params['VendorSearch'] = $session['vendorSearchString'];
         $vendorDataProvider = $vendorSearchModel->search($params, $client->id);
         $vendorDataProvider->pagination = ['pageSize' => 8];
 
@@ -297,12 +283,18 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
         $productSearchModel->client = $client;
         $productSearchModel->catalogs = $catalogs;
-        $params['OrderCatalogSearch'] = Yii::$app->request->post("OrderCatalogSearch");
+        if (Yii::$app->request->post("OrderCatalogSearch")) {
+            $session['orderCatalogSearchString'] = Yii::$app->request->post("OrderCatalogSearch");
+        }
+        $params['OrderCatalogSearch'] = $session['orderCatalogSearchString'];
         $productDataProvider = $productSearchModel->search($params);
         $productDataProvider->pagination = ['pageSize' => 8];
 
         $guideSearchModel = new BaseProductSearch();
-        $params['BaseProductSearch'] = Yii::$app->request->post("BaseProductSearch");
+        if (Yii::$app->request->post("BaseProductSearch")) {
+            $session['baseProductSearchString'] = Yii::$app->request->post("BaseProductSearch");
+        }
+        $params['BaseProductSearch'] = $session['baseProductSearchString'];
         $guideDataProvider = $guideSearchModel->search($params, $guideProductList);
         $guideDataProvider->pagination = ['pageSize' => 7];
 
@@ -371,7 +363,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $guideSearchModel = new GuideProductsSearch();
         $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
         $guideDataProvider = $guideSearchModel->search($params, $guide->id);
-        $guideDataProvider->pagination = ['pageSize' => 8];
+        $guideDataProvider->pagination = false;//['pageSize' => 8];
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('/order/guides/_view', compact('guideSearchModel', 'guideDataProvider', 'guide'));
@@ -420,8 +412,16 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $client = $this->currentUser->organization;
         $guide = Guide::findOne(['id' => $id, 'client_id' => $client->id]);
 
-        foreach ($guide->guideProducts as $guideProduct) {
+        $guideProducts = Yii::$app->request->post("GuideProduct");
+        
+        foreach ($guideProducts as $productId => $quantity) {
+
+            if ($quantity <= 0) {
+                continue;
+            }
             
+            $guideProduct = GuideProduct::findOne(['id' => $productId, 'guide_id' => $id]);
+
             $orders = $client->getCart();
 
             $product_id = $guideProduct->cbg_id;
@@ -430,7 +430,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
             $vendor = $guideProduct->baseProduct->vendor;
             $units = $guideProduct->baseProduct->units;
             $article = $guideProduct->baseProduct->article;
-            $quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
+            //$quantity = $guideProduct->baseProduct->units ? $guideProduct->baseProduct->units : 1;
             $isNewOrder = true;
 
             foreach ($orders as $order) {
@@ -499,11 +499,14 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
     }
 
     public function actionAjaxAddToCart() {
-
+        $post = Yii::$app->request->post();
+        $quantity = $post['quantity'];
+        if ($quantity <= 0) {
+            return false;
+        }
         $client = $this->currentUser->organization;
         $orders = $client->getCart();
 
-        $post = Yii::$app->request->post();
         $product = CatalogGoods::findOne(['base_goods_id' => $post['id'], 'cat_id' => $post['cat_id']]);
 
         if ($product) {
@@ -525,7 +528,6 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
             $units = $product->units;
             $article = $product->article;
         }
-        $quantity = $post['quantity'];
         $isNewOrder = true;
 
         foreach ($orders as $order) {
@@ -1692,7 +1694,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
         $dataProvider->pagination = false;
 
         $test = $order->recipientsList;
-        
+
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_created) {
@@ -1779,6 +1781,7 @@ select 'Итого: ',' ',' ',' ',' ',' ',(select sum(total_price) from `order` 
             }
         }
     }
+
     private function saveCartChanges($content) {
         foreach ($content as $position) {
             $product = OrderContent::findOne(['id' => $position['id']]);

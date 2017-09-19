@@ -15,7 +15,7 @@ class QTSMS {
     */
 	var $user='37251';			// ваш логин в системе 
 	var $pass='!1asdf';			// ваш пароль в системе
-        var $sendler = 'mixcart';           // Имя отправителя
+        var $sendler = 'MixCart';           // Имя отправителя
         var $period = false;                      // период
         var $post_id = 'x1209448';            // пост id
 	var $hostname='service.qtelecom.ru';	// host замените на адрес сервера указанный в меню "Поддержка -> протокол HTTP"  без префикса http://

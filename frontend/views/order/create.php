@@ -129,12 +129,12 @@ $this->registerJs(
             <li class="active"><a href="#">Все продукты</a></li>
             <li>
                 <a href="<?= Url::to(['order/guides']) ?>">
-                    Гиды заказов <small class="label bg-yellow">new</small>
+                    Шаблоны заказов <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Фавориты <small class="label bg-yellow">new</small>
+                    Часто заказываемые товары <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -209,7 +209,7 @@ $this->registerJs(
                                     'attribute' => 'product',
                                     'value' => function($data) {
                                         $note = ""; //empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
-                                        $productUrl = Html::a($data['product'], Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
+                                        $productUrl = Html::a(Html::decode(Html::decode($data['product'])), Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
                                                     'data' => [
                                                         'target' => '#showDetails',
                                                         'toggle' => 'modal',
@@ -217,6 +217,9 @@ $this->registerJs(
                                                     ],
                                                     'title' => 'Подробности',
                                         ]);
+//                                        $productUrl = "<a title = 'Подробности' data-target='#showDetails' data-toggle='modal' data-backdrop='static' href='".
+//                                                Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]).
+//                                                "'>".$data['product']."</a>";
                                         return "<div class='grid-prod'>" . $productUrl . "</div>$note<div>Поставщик: "
                                                 . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
                                                 . $data['article'] . "</span></div>";

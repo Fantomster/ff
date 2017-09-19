@@ -20,7 +20,7 @@ class FrController extends \yii\rest\Controller {
                         'https://franch.f-keeper.dev', 'http://franch.f-keeper.dev', 'https://franch.f-keeper.ru',
                         'http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
                         'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru', 
-                        'https://client.mixcart.ru', 'https://fr.mixcart.ru', 'https://franch.mixcart.ru'],
+                        'https://client.mixcart.ru', 'https://fr.mixcart.ru', 'https://franch.mixcart.ru', 'https://2017.mixcart.ru'],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,

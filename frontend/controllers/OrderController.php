@@ -1630,7 +1630,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                $text = "Заказ изменен ".$order->getUrlForUser($recipient->id);//$subject;
+                $text = "Заказ изменен ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));//$subject;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1666,7 +1666,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
-                $text = "Заказ выполнен ".$order->getUrlForUser($recipient->id);//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
+                $text = "Заказ выполнен ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1704,7 +1704,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
-                $text = "Новый заказ ".$order->getUrlForUser($recipient->id);//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
+                $text = "Новый заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1739,7 +1739,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
-                $text = "Заказ согласован ".$order->getUrlForUser($recipient->id);//"Заказ в системе №" . $order->id . " согласован.";
+                $text = "Заказ согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));//"Заказ в системе №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
@@ -1774,7 +1774,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = "Заказ отменен ".$order->getUrlForUser($recipient->id);//$senderOrg->name . " отменил заказ в системе №" . $order->id;
+                $text = "Заказ отменен ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

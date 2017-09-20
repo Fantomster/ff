@@ -114,7 +114,7 @@ class Role extends \amnah\yii2\user\models\Role {
 
 
     public static function getExceptionArray(){
-        return [self::ROLE_ADMIN, self::ROLE_FKEEPER_MANAGER, self::ROLE_FKEEPER_OBSERVER];
+        return [self::ROLE_ADMIN, self::ROLE_FKEEPER_OBSERVER];
     }
     
 }

@@ -1630,6 +1630,7 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
+                $test = Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));
                 $text = "Заказ изменен ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));//$subject;
                 $target = $recipient->profile->phone;
                 $sms = new \common\components\QTSMS();

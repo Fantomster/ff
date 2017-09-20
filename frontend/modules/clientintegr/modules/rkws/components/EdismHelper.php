@@ -21,7 +21,7 @@ use api\common\models\RkEdismSearch;
 
 class EdismHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/edism";
+    // const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/edism";
     
     public function getEdism () {
     if (!$this->Authorizer()) {
@@ -33,7 +33,7 @@ class EdismHelper extends AuthHelper {
     $guid = UUID::uuid4();
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_munits" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <RQ cmd="sh_get_munits" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/edism'.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     </RQ>'; 
        

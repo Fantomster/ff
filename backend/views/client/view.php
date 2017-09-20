@@ -68,7 +68,8 @@ $this->params['breadcrumbs'][] = $this->title;
 //            'banned_reason',
 //            'organization_id',
             [
-                'value' => $model->organization_id,
+                'format' => 'raw',
+                'value' => Html::a($model->organization_id, ['organization/view', 'id' => $model->organization_id]),
                 'label' => 'ID организации',
             ],
             [

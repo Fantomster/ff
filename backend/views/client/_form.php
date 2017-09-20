@@ -16,8 +16,6 @@ use kartik\checkbox\CheckboxX;
 
     <?= $form->field($profile, 'full_name') ?>
 
-    <?= $form->field($user, 'username') ?>
-
     <?= $form->field($profile, 'phone')->widget(\common\widgets\PhoneInput::className(), [
         'jsOptions' => [
             'preferredCountries' => ['ru'],

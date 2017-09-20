@@ -88,10 +88,11 @@ class OrderSearch extends Order {
                 $query->from(Profile::tableName() . ' acceptedByProfile');
             },
                 ], true);
-        $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = client.id");
+        $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = vendor.id");
+        $query->leftJoin("franchisee_associate as fa", "fa.organization_id = client.id");
         $query->where(Order::tableName() . '.status != ' .Order::STATUS_FORMING);
-        $query->andWhere(['franchisee_associate.franchisee_id' => $franchisee_id]);
-        
+        $query->andWhere(['or', ['franchisee_associate.franchisee_id' => $franchisee_id], ['fa.franchisee_id' => $franchisee_id]]);
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]]

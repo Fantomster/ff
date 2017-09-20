@@ -8,6 +8,7 @@ use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\Order;
 use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\resources\GuideProduct;
+use yii\helpers\Json;
 
 
 /**
@@ -82,6 +83,11 @@ class GuideProductController extends ActiveController {
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             $query->andFilterWhere($filters);
             return $dataProvider;
+        }
+        
+        if($params->list != null)
+        {
+            $query->andWhere ('guide_id IN('.implode(',', Json::decode($params->list)).')');
         }
        
             $filters['id'] = $params->id; 

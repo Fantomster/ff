@@ -8,7 +8,7 @@ use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
-$this->title = "Список гидов";
+$this->title = "Список шаблонов";
 
 yii\jui\JuiAsset::register($this);
 
@@ -18,9 +18,9 @@ $this->registerJs('
     $(document).on("click", ".delete-guide", function(e) {
         e.preventDefault();
         clicked = $(this);
-        title = "Удаление гида";
-        text = "Вы уверены, что хотите удалить гид?";
-        success = "Гид удален!";
+        title = "Удаление шаблона";
+        text = "Вы уверены, что хотите удалить шаблон?";
+        success = "Шаблон удален!";
         swal({
             title: title,
             text: text,
@@ -51,7 +51,7 @@ $this->registerJs('
     $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "Назовите ваш новый гид";
+        var title = "Назовите ваш новый шаблон";
         swal({
             title: title,
             input: "text",
@@ -138,8 +138,9 @@ $this->registerJs('
 
     $(document).on("click", ".add-to-cart", function(e) {
         e.preventDefault();
-        quantity = $(this).parent().parent().find(".quantity").val();
+        var quantityInput = $(this).parent().parent().find(".quantity");
         var cart = $(".basket_a");
+        var btnAddToCart = $(this);
         var imgtodrag = $("#cart-image");
         if (imgtodrag) {
             var imgclone = imgtodrag.clone()
@@ -178,15 +179,19 @@ $this->registerJs('
         }
         $.post(
             "' . Url::to(['/order/ajax-add-to-cart']) . '",
-            {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
+            {"id": $(this).data("id"), "quantity": quantityInput.val(), "cat_id": $(this).data("cat")}
         ).done(function(result) {
         });
+        quantityInput.val(0);
+        btnAddToCart.addClass("disabled");
     });
 
     $(document).on("click", ".add-guide-to-cart", function(e) {
         e.preventDefault();
         var cart = $(".basket_a");
         var imgtodrag = $("#cart-image");
+        var form = $("#gridForm");
+        var url = $(this).data("url");
         if (imgtodrag) {
             var imgclone = imgtodrag.clone()
                 .offset({
@@ -223,9 +228,20 @@ $this->registerJs('
             });
         }
         $.post(
-            "' . Url::to(['/order/ajax-add-guide-to-cart']) . '?id=" + $(this).data("id")
+            url,
+            form.serialize()
         ).done(function(result) {
+            $("#guideModal").modal("toggle");
         });
+    });
+    
+    $(document).on("change paste keyup", ".quantity", function() {
+        var btnAddToCart = $(this).parent().parent().parent().find(".add-to-cart");
+        if ($(this).val() > 0) {
+            btnAddToCart.removeClass("disabled");
+        } else {
+            btnAddToCart.addClass("disabled");
+        }
     });
     
     $(document).on("click", ".btnSubmit", function() {
@@ -234,6 +250,10 @@ $this->registerJs('
 
     $(document).on("hidden.bs.modal", "#guideModal", function() {
         $(this).data("bs.modal", null);
+    });
+    
+    $(document).on("loaded.bs.modal", "#guideModal", function(){
+        $(".modal-dialog").removeAttr("style");
     });
 
 ', View::POS_READY);
@@ -245,12 +265,12 @@ $this->registerJs('
             <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
             <li class="active">
                 <a href="#">
-                    Гиды заказов <small class="label bg-yellow">new</small>
+                    Шаблоны заказов <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Фавориты <small class="label bg-yellow">new</small>
+                    Часто заказываемые товары <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -291,7 +311,7 @@ $this->registerJs('
                             <?php ActiveForm::end(); ?>
                         </div>
                         <div class="pull-right">
-                            <?= Html::a('<i class="fa fa-plus"></i> Создать гид', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
+                            <?= Html::a('<i class="fa fa-plus"></i> Создать шаблон', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
                         </div>
                     </div>
                 </div>

@@ -17,7 +17,7 @@ if (($order->status == Order::STATUS_PROCESSING) && ($organizationType == Organi
                 Order::STATUS_PROCESSING]));
     $priceEditable = (in_array($order->status, [
                 Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR,
-                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT])); //($organizationType == Organization::TYPE_SUPPLIER) && 
+                Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT]));
 }
 $urlButtons = Url::to(['/order/ajax-refresh-buttons']);
 $urlOrderAction = Url::to(['/order/ajax-order-action']);
@@ -94,14 +94,6 @@ $js = <<<JS
             $("#loader-show").showLoading();
             form.submit();
             saving = true;
-//            $.post(
-//                form.attr("action"),
-//                form.serialize()
-//            ).done(function(result) {
-//                document.location = "$urlViewOrder";
-////                dataEdited = 0;
-////                $("#loader-show").hideLoading();
-//            });
         });
         $('.content').on('click', '.deletePosition', function(e) {
             e.preventDefault();

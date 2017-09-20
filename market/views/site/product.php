@@ -89,7 +89,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
         <div class="col-md-8 col-lg-8">
             <div class="row">
                 <div class="col-md-12">
-                    <h3><?= $product->product ?> <br>
+                    <h3><?= Html::decode(Html::decode($product->product)) ?> <br>
                         <a class="grey-link" href="<?=Url::to(['/site/supplier', 'id' => $vendor->id]);?>">
                             <small><?= $vendor->name ?></small>
                         </a>

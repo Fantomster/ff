@@ -268,17 +268,7 @@ Modal::end();
                             '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
                     )
                     ?>
-                    <?=
-                    Html::a('<i class="fa fa-question-circle" aria-hidden="true"></i>', ['#'], [
-                        'class' => 'btn btn-warning btn-sm pull-right',
-                        'style' => 'margin-right:10px;',
-                        'data' => [
-                            'target' => '#instruction',
-                            'toggle' => 'modal',
-                            'backdrop' => 'static',
-                        ],
-                    ]);
-                    ?>
+                    
                 </div>
                 <div class="panel-body">
                     <?php
@@ -292,7 +282,10 @@ Modal::end();
                         [
                             'attribute' => 'product',
                             'label' => 'Наименование',
-                            'value' => 'product',
+                            'format' => 'raw',
+                            'value' => function($data) {
+                                return Html::decode(Html::decode($data['product']));
+                            },
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                         ],
                         [

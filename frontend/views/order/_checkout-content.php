@@ -10,7 +10,7 @@ foreach ($content as $position) {
     <div class="block_left_bot">
         <div class="block_left_bot_left">
             <?php //<img class= "img_product" src="<?= $position->product->imageUrl ? >" alt=""> ?>
-            <p class = "block_left_bot_left_name"><?= $position->product_name ?></p>
+            <p class = "block_left_bot_left_name"><?= Html::decode(Html::decode($position->product_name)) ?></p>
             <p class = "block_left_bot_left_art">Артикул: <?= $position->product->article ?></p><br>
             <p class = "kr_p">Кратность: <?= $position->product->units ? $position->product->units : '' ?><?= $position->product->ed ?></p>
             <?=

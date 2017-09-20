@@ -350,7 +350,9 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 'pageSize' => 4,
             ],
         ]);
-        return $this->render('business', compact('user','dataProvider'));
+        $loginRedirect = $this->module->loginRedirect;
+        $returnUrl = Yii::$app->user->getReturnUrl($loginRedirect);
+        return $this->render('business', compact('user','dataProvider', 'returnUrl'));
     }
     /**
      * Forgot password

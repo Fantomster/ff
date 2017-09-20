@@ -12,7 +12,7 @@ class Organization extends \common\models\Organization
     
     public function fields()
     {
-        return ['id', 'name', 'type_id', 'picture'];
+        return ['id', 'name', 'type_id', 'picture', 'pictureUrl'];
     }
     
     /**

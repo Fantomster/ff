@@ -22,7 +22,7 @@ if ($order->isObsolete) {
 } else {
     switch ($order->status) {
         case Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR:
-            $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+            $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_RESTAURANT) {
                 $statusInfo .= '<a href="#" class="btn btn-warning disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
             } else {
@@ -31,7 +31,7 @@ if ($order->isObsolete) {
             $canEdit = true;
             break;
         case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
-            $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+            $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_SUPPLIER) {
                 $statusInfo .= '<a href="#" class="btn btn-warning disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Ожидаем подтверждения</a>';
             } else {
@@ -40,7 +40,7 @@ if ($order->isObsolete) {
             $canEdit = true;
             break;
         case Order::STATUS_PROCESSING:
-            $actionButtons .= $btnCancel; //'<a href="#" class="btn btn-outline-danger btnOrderAction" data-action="cancel"><i class="icon fa fa-ban"></i> Отменить</a>';
+            $actionButtons .= $btnCancel;
             if ($organizationType == Organization::TYPE_SUPPLIER) {
                 $statusInfo .= '<a href="#" class="btn btn-processing disabled"><span class="badge"><i class="icon fa fa-info"></i></span>&nbsp; Исполняется</a>';
             } else {
@@ -59,7 +59,6 @@ if ($order->isObsolete) {
             break;
     }
 }
-//$actionButtons .= '<a href="#" class="btn btn-outline-default" id="btnPrint"><i class="icon fa fa-print"></i> Распечатать</a>';
 ?>
 <div class="box box-info block_wrapper" style="height:auto;">
     <div class="box-header">

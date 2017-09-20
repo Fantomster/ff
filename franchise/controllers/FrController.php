@@ -16,11 +16,14 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'http://f-keeper.dev', 'https://mixcart.dev', 'http://f-keeper.ru', 'https://mixcart.ru', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
-                        'https://franch.f-keeper.dev', 'http://franch.f-keeper.dev', 'https://franch.f-keeper.ru',
-                        'http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
-                        'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru', 
-                        'https://client.mixcart.ru', 'https://fr.mixcart.ru', 'https://franch.mixcart.ru'],
+                    'Origin' => [
+                        'https://mixcart.ru',
+                        'https://client.mixcart.ru',
+                        'https://fr.mixcart.ru',
+                        'https://franch.mixcart.ru',
+                        'https://2017.mixcart.ru',
+                        'http://2017.mixcart.dev',
+                    ],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,
@@ -38,7 +41,8 @@ class FrController extends \yii\rest\Controller {
             $cname = Html::encode($fields['name']);
             $cphone = Html::encode($fields['phone']);
             $cemail = isset($fields['email']) ? Html::encode($fields['email']) : '';
-            $city = Html::encode($fields['city']);
+            $city = isset($fields['city']) ? Html::encode($fields['city']) : '';
+            $company_name = isset($fields['company_name']) ? Html::encode($fields['company_name']) : '';
             $comment = isset($fields['comment']) ? Html::encode($fields['comment']) : '';
             $type = isset($fields['type']) ? Html::encode($fields['type']) : '';
             $lpartner = isset($fields['partner']) ? Html::encode($fields['partner']) : '';
@@ -67,6 +71,10 @@ class FrController extends \yii\rest\Controller {
             if ($sitepage == "franch") {
                 $lead_status_id = 465726;
                 $responsible_user_id = 1515736;
+            }
+            if ($sitepage == "2017") {
+                $lead_status_id = 773370;
+                $responsible_user_id = 1295688;
             }
             if ($sitepage == "fkeeper") {
                 if ($formtype == 1) {
@@ -264,6 +272,7 @@ class FrController extends \yii\rest\Controller {
             'name' => $contact_name,
             'linked_leads_id' => array($lead_id), //id сделки
             'responsible_user_id' => $responsible_user_id, //id ответственного
+            'company_name' => $company_name,
             'custom_fields' => array(
                 array(
                     'id' => $sFields['PHONE'],

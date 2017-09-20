@@ -76,7 +76,7 @@ if (!empty($success) || !empty($invalidToken)) {
         <div class="auth-sidebar h-fx_center auth">
             <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
             <div class="auth-sidebar__content">
-                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="images/tmp_file/logo.png" alt=""></a></div>
+                <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
 
                 <div class="auth-sidebar__annotation">Введите новый пароль</div>
                 <?php
@@ -121,7 +121,7 @@ if (!empty($success) || !empty($invalidToken)) {
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
         <h1>Онлайн-сервис для автоматизации закупок</h1>
         <div class="present__media clearfix">
-            <div class="present__image"><img src="images/tmp_file/flowers.png" alt=""></div>
+            <div class="present__image"><img src="/images/tmp_file/flowers.png" alt=""></div>
 <!--            <a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a>
             <a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>-->
         </div>

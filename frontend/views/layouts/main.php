@@ -89,7 +89,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
         <?= Html::csrfMetaTags() ?>
         <title><?= Html::encode($this->title) ?></title>
         <link href="<?= yii\helpers\Url::base() ?>/css/style.css" rel="stylesheet">
-        <link rel="shortcut icon" href="/images/favicon/favicon.ico" type="image/x-icon">
+        <link rel="manifest" href="/images/favicon/manifest.json">
         <?php $this->head() ?>
         <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -285,7 +285,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                             <div class="footer__menu_block">
                                 <span class="title__menu">Карта сайта</span>
                                 <ul class="links">
-                                    <li><?= Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>
+<!--                                    <li><?= ''//Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>-->
                                     <li><?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?></li>
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>
@@ -327,11 +327,11 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="sot__set_block">
-                                        <a href="https://vk.com/f_keeper" target="_blank"><i class="fa fa-vk"></i></a>
-                                        <a href="https://www.instagram.com/f_keeper.ru/" target="_blank"><i class="fa fa-instagram"></i> </a>
+                                        <a href="https://vk.com/mixcartru" target="_blank"><i class="fa fa-vk"></i></a>
+                                        <a href="https://www.instagram.com/mixcart_ru/" target="_blank"><i class="fa fa-instagram"></i> </a>
 <!--                                        <a href="#"><i class="fa fa-youtube"></i></a>
                                         <a href="#"><i class="fa fa-twitter"></i></a>-->
-                                        <a href="https://www.facebook.com/fkeeper.ru/" target="_blank"><i class="fa fa-facebook"></i></a>
+                                        <a href="https://www.facebook.com/mixcartru/" target="_blank"><i class="fa fa-facebook"></i></a>
                                     </div>
                                 </div>
                             </div>

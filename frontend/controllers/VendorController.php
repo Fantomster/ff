@@ -1347,7 +1347,7 @@ class VendorController extends DefaultController {
         $array = [];
         foreach ($arr as $arrs) {
             $c_article = $arrs['article'];
-            $c_product = $arrs['product'];
+            $c_product = Html::decode(Html::decode(Html::decode($arrs['product'])));
             $c_base_goods_id = $arrs['base_goods_id'];
             $c_goods_id = $arrs['goods_id'];
             $c_base_price = $arrs['base_price'];

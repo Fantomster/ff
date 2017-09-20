@@ -8,6 +8,7 @@ use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\Order;
 use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\resources\GuideProduct;
+use yii\helpers\Json;
 
 
 /**

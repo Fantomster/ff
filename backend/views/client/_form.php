@@ -47,12 +47,6 @@ use kartik\checkbox\CheckboxX;
     ])->label(false);
     ?>
 
-    <?= $form->field($user, 'email')->textInput(['disabled'=>'true']) ?>
-
-    <?= $form->field($user->role, 'name')->textInput(['disabled'=>'true'])->label('Роль') ?>
-
-    <?= isset($user->organization) ? $form->field($user->organization, 'name')->textInput(['maxlength' => true, 'disabled'=>'true']) : '' ?>
-
     <?= $user->role_id === common\models\Role::ROLE_FKEEPER_MANAGER ? $form->field($user, 'organization_id')->textInput(['maxlength' => true]) : '' ?>
 
     <div class="form-group">

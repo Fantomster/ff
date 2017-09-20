@@ -15,8 +15,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php
+    echo Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
     if ($model->role_id === \common\models\Role::ROLE_FKEEPER_MANAGER) {
-        echo Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
         echo Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'style' => 'margin-bottom: 10px; margin-left: 10px;',
@@ -83,7 +83,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </div>
 
-<?php if(Yii::$app->session->hasFlash('Forgot-success')): ?>
+<?php if (Yii::$app->session->hasFlash('Forgot-success')): ?>
     <div class="alert alert-info" role="alert">
         <?= Yii::$app->session->getFlash('Forgot-success') ?>
     </div>
@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $form = \yii\widgets\ActiveForm::begin(['method' => 'post']);
 ?>
 
-<?= $form->field($newPassModel, 'email')->hiddenInput(['value'=>$model->email])->label(false); ?>
+<?= $form->field($newPassModel, 'email')->hiddenInput(['value' => $model->email])->label(false); ?>
 
 <?= Html::submitButton('Выслать письмо со сменой пароля', ['class' => 'btn btn-primary']) ?>
 

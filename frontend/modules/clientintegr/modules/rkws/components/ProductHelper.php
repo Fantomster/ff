@@ -19,7 +19,7 @@ use api\common\models\RkDic;
 
 class ProductHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/product";
+  //  const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/product";
     
     public function getProduct () {
     if (!$this->Authorizer()) {
@@ -31,7 +31,7 @@ class ProductHelper extends AuthHelper {
     $guid = UUID::uuid4();
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/product'.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     <PARAM name="goodgroup_rid" val="1" />
     <PARAM name="include_goods" val="1" />    

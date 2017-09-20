@@ -19,8 +19,8 @@ use api\common\models\RkDic;
 
 class AgentHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/agent";
-    
+    // protected $callbackUrl = Yii::$app->params['rkeepCallBackURL']."/agent";
+        
     public function getAgents () {
     if (!$this->Authorizer()) {
        
@@ -31,7 +31,7 @@ class AgentHelper extends AuthHelper {
     $guid = UUID::uuid4();
     
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_corrs" tasktype="any_call" guid="'.$guid.'" timeout="600" callback="'.self::CALLBACK_URL.'">
+    <RQ cmd="sh_get_corrs" tasktype="any_call" guid="'.$guid.'" timeout="600" callback="'.Yii::$app->params['rkeepCallBackURL'].'/agent'.'">
     <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     </RQ>'; 
        

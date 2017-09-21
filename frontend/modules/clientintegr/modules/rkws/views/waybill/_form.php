@@ -15,7 +15,7 @@ use common\models\User;
 
 <div class="dict-agent-form">
     
-     <?php $org = User::findOne(Yii::$app->user->id)->organization_id; var_dump($org); ?>
+     <?php $org = User::findOne(Yii::$app->user->id)->organization_id; // var_dump($org); ?>
     
     <?php  if(empty($model->store_rid)) $model->store_rid = 1; ?>
 

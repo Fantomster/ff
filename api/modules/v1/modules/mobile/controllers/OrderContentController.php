@@ -350,7 +350,7 @@ class OrderContentController extends ActiveController {
             
             if ($profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
-                $target = $recipient->profile->phone;
+                $target = $profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
             }
@@ -388,7 +388,7 @@ class OrderContentController extends ActiveController {
             
             if ($profile->phone && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
                 $text = $subject;
-                $target = $recipient->profile->phone;
+                $target = $profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
            }

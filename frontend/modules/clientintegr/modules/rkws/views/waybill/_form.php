@@ -14,6 +14,8 @@ use yii\bootstrap\Dropdown;
 
 <div class="dict-agent-form">
     
+     <?php $org = User::findOne(Yii::$app->user->id)->organization_id; ?>
+    
     <?php  if(empty($model->store_rid)) $model->store_rid = 1; ?>
 
     <?php $form = ActiveForm::begin(); ?>
@@ -36,7 +38,7 @@ use yii\bootstrap\Dropdown;
                                                     [
                                                         'name' => 'store_rid',
                                                         'value' => 'true', // preselected values
-                                                        'query' => api\common\models\RkStoretree::find()->addOrderBy('root, lft'),
+                                                        'query' => api\common\models\RkStoretree::find()->andWhere('acc = :acc',[':acc' => $org])->addOrderBy('root, lft'),
                                                       //  'headingOptions' => ['label' => 'Склады'],
                                                         'rootOptions' => ['label'=>'Корень'],
                                                         'fontAwesome' => true,

@@ -321,13 +321,10 @@ class NotificationHelper {
             {
                 $message = Yii::$app->fcm->createMessage();
                 $message->addRecipient(new Device($row->token));
-                if($is_new)
-                {
-                    $message->setData(['action' => 'orderContentDelete',
+                $message->setData(['action' => 'orderContentDelete',
                             'title' => 'Удалена позиция в заказе №'.$order->id,
                             'data' => $orderContent->id,
                             'activity' => "Work"]);
-                }
 
                 $response = Yii::$app->fcm->send($message);
                 //var_dump($response->getStatusCode());

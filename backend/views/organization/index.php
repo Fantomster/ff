@@ -14,7 +14,13 @@ $this->title = 'Общий список организаций';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
-    'id',
+    [
+        'format' => 'raw',
+        'attribute' => 'id',
+        'value' => function ($data) {
+            return Html::a($data['id'], ['organization/view', 'id' => $data['id']]);
+        },
+    ],
     [
         'attribute' => 'type_id',
         'value' => 'type.name',

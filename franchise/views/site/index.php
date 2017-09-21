@@ -63,6 +63,7 @@ use dosamigos\chartjs\ChartJs;
                 <!-- /.box-body -->
                 <div class="box-footer">
                     <div class="row">
+                        <?php if(isset($franchiseeType->share)): ?>
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
                                 <span class="description-percentage text-green"><?= $franchiseeType->share ?>%</span>
@@ -80,13 +81,14 @@ use dosamigos\chartjs\ChartJs;
                             </div>
                             <!-- /.description-block -->
                         </div>
+                        <?php endif; ?>
                         <!-- /.col -->
                         <div class="col-sm-3 col-xs-6">
                             <div class="description-block border-right">
                                 <span class="description-percentage text-green">&nbsp;
                                     <!--<i class="fa fa-caret-up"></i> 20%-->
                                 </span>
-                                <h5 class="description-header"><?= $vendorsStats30['orderCount'] ?></h5>
+                                <h5 class="description-header"><?= $dataProvider->getTotalCount() ?></h5>
                                 <span class="description-text">Общее кол-во заказов</span>
                             </div>
                             <!-- /.description-block -->
@@ -158,11 +160,11 @@ use dosamigos\chartjs\ChartJs;
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">Заказов:</td>
-                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= $vendorsStats['orderCount'] ?></td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= $dataProvider->getTotalCount() ?></td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left;">Оборот:</td>
-                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= number_format($vendorsStats['turnover'], 2, '.', ' ') ?> руб.</td>
+                                    <td style="text-align: right; font-size: 18px; font-weight: bold;"> <?= number_format($totalIncome, 2, '.', ' ') ?> руб.</td>
                                 </tr>
                             </tbody></table>
                     </div>         

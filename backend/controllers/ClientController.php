@@ -144,7 +144,7 @@ class ClientController extends Controller {
                 }
                 $user->save();
                 $profile->save();
-                return $this->redirect(['/client']);
+                return $this->redirect(['client/view', 'id' => $user->id]);
             } else {
                 return $this->render('update', compact('user', 'profile'));
             }

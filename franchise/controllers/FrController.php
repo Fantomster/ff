@@ -174,38 +174,38 @@ class FrController extends \yii\rest\Controller {
             }
         }
 
-        //// Проверка на уже существующий контакт
-        if ($sitepage == "client") {
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
-        }
-        if ($type == "restaurant") {
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
-        }
-        if ($type != "restaurant" && $sitepage != "client") {
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
-        }
-        $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
-        #Устанавливаем необходимые опции для сеанса cURL
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
-        curl_setopt($curl, CURLOPT_URL, $link);
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
-        curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-
-        $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
-        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-        if (!$this->CheckCurlResponse($code)) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ['result' => 'error'];
-        }
-        if ($out) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ['result' => 'errorPhone'];
-        }
+//        //// Проверка на уже существующий контакт - DISABLED FOR GREAT JUSTICE
+//        if ($sitepage == "client") {
+//            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
+//        }
+//        if ($type == "restaurant") {
+//            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
+//        }
+//        if ($type != "restaurant" && $sitepage != "client") {
+//            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
+//        }
+//        $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
+//        #Устанавливаем необходимые опции для сеанса cURL
+//        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+//        curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
+//        curl_setopt($curl, CURLOPT_URL, $link);
+//        curl_setopt($curl, CURLOPT_HEADER, false);
+//        curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
+//        curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
+//        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+//        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+//
+//        $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
+//        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+//        curl_close($curl);
+//        if (!$this->CheckCurlResponse($code)) {
+//            Yii::$app->response->format = Response::FORMAT_JSON;
+//            return ['result' => 'error'];
+//        }
+//        if ($out) {
+//            Yii::$app->response->format = Response::FORMAT_JSON;
+//            return ['result' => 'errorPhone'];
+//        }
         //ДОБАВЛЯЕМ СДЕЛКУ
         $post = Yii::$app->request->post();
         $roistat_cookie = isset($post['roi']) ? $post['roi'] : "неизвестно";

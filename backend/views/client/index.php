@@ -14,11 +14,17 @@ $this->title = 'Пользователи';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
-    'id',
+    [
+        'format' => 'raw',
+        'attribute' => 'id',
+        'value' => function ($data) {
+            return Html::a($data['id'], ['client/view', 'id' => $data['id']]);
+        },
+        'label' => 'Id',
+    ],
     [
         'format' => 'raw',
         'attribute' => 'full_name',
-//                'value' => 'profile.full_name',
         'value' => function ($data) {
             return Html::a($data['profile']['full_name'], ['client/view', 'id' => $data['id']]);
         },

@@ -56,8 +56,13 @@ Breadcrumbs::widget([
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
-                        <div style=""> 
-                    <?php echo "test"; ?>    
+                        <div style="text-align:right;"> 
+                    <?php echo '<label class="cbx-label" for="s_1">Цены в Заказе включают НДС?</label>';
+                          echo CheckboxX::widget([
+                                'name'=>'s_1',
+                                'options'=>['id'=>'s_1'],
+                                'pluginOptions'=>['threeState'=>false]
+                                ]); ?>    
                         </div>    
 <?=
 GridView::widget([

@@ -179,8 +179,9 @@ class ApiHelper  {
     
     if(!isset($myXML->OBJECTS)) {
     
-   // echo "&&&&&&&&&&&&&<br>";
-   // var_dump($data,true);
+    // echo "&&&&&&&&&&&&&<br>";
+    // var_dump($data,true);
+    // die();
     
     foreach ($myXML->OBJECTINFO as $obj) {
      

@@ -62,6 +62,7 @@ GridView::widget([
     'pjax' => true, // pjax is set to always true for this demo
     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
     'filterPosition' => false,
+    'before' => '',
     'toolbar'=> [
         ['content'=>
             Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>Yii::t('kvgrid', 'Add Book'), 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']),

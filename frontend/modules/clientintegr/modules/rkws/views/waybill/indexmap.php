@@ -10,6 +10,7 @@ use yii\web\View;
 use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
+use kartik\checkbox\CheckboxX;
 use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;

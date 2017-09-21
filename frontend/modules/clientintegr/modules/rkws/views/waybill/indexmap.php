@@ -56,7 +56,9 @@ Breadcrumbs::widget([
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
+                        <div style=""> 
                     <?php echo "test"; ?>    
+                        </div>    
 <?=
 GridView::widget([
     'dataProvider' => $dataProvider,

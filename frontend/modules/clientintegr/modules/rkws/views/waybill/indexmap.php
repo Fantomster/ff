@@ -56,24 +56,13 @@ Breadcrumbs::widget([
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
+                    <?php echo "test"; ?>    
 <?=
 GridView::widget([
     'dataProvider' => $dataProvider,
     'pjax' => true, // pjax is set to always true for this demo
     //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
     'filterPosition' => false,
-            'panel' => [
-            'type' => GridView::TYPE_PRIMARY,
-            'heading' => 'User Types',
-        ],
-
-    'toolbar'=> [
-        ['content'=>
-            Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>Yii::t('kvgrid', 'Add Book'), 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']),
-            '{export}',
-        ],
-        
-    ],
     'columns' => [
         'product_id',
         [

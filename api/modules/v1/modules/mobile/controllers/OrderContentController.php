@@ -340,7 +340,7 @@ class OrderContentController extends ActiveController {
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_canceled) {
-                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
+                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();

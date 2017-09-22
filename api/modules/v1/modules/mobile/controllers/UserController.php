@@ -80,7 +80,9 @@ class UserController extends ActiveController {
      public function actionAvatar($name) {
          $organization = new Organization();  
          $organization->picture = $name;
-         header('Location: ' . $organization->pictureUrl);
+         header('Content-type: image/jpeg');
+         echo file_get_contents($organization->pictureUrl);
+  
     }
     
     public function actionRegistration() {

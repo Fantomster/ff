@@ -4,6 +4,7 @@ namespace frontend\modules\clientintegr\modules\rkws\components;
 use yii;
 use api\common\models\RkSession;
 use api\common\models\RkAccess;
+use api\common\models\RkService;
 use frontend\modules\clientintegr\modules\rkws\components\UUID;
 use frontend\modules\clientintegr\modules\rkws\components\ApiHelper;
 use common\models\User;
@@ -26,7 +27,9 @@ class AuthHelper extends Object {
         if(isset(User::findOne(Yii::$app->user->id)->organization_id))
         $this->org = User::findOne(Yii::$app->user->id)->organization_id;
         
-        $this->restr = RkAccess::find()->andwhere('id=1')->one();
+        if (isset($this->org))
+        $this->restr = RkService::find()->andwhere('org = :org',[':org' => $this->org])->one();
+                
        
     } 
     
@@ -60,7 +63,7 @@ class AuthHelper extends Object {
         } else {
         $xml = '<?xml version="1.0" encoding="utf-8" ?>
         <RQ cmd="get_objectinfo">
-        <PARAM name="object_id" val="'.$this->restr->salespoint.'"/>
+        <PARAM name="object_id" val="'.$this->restr->code.'"/>
         </RQ>';  
         
         $res = ApiHelper::sendCurl($xml,$this->restr);

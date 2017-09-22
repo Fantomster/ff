@@ -34,7 +34,7 @@ class EdismHelper extends AuthHelper {
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_munits" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/edism'.'">
-    <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
+    <PARAM name="object_id" val="'.$this->restr->code.'" />
     </RQ>'; 
        
      $res = ApiHelper::sendCurl($xml,$this->restr);

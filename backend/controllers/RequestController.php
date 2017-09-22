@@ -39,7 +39,7 @@ class RequestController extends Controller
                 ],
                 'rules' => [
                     [
-                        'actions' => ['index', 'view', 'update', 'update-callback'],
+                        'actions' => ['index', 'view', 'update', 'update-callback', 'delete-callback'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -145,4 +145,13 @@ class RequestController extends Controller
             ]);
         }
     }
+
+
+        public function actionDeleteCallback($id)
+    {
+        RequestCallback::findOne($id)->delete();
+
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
 }

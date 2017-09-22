@@ -3,6 +3,7 @@ use yii\widgets\Breadcrumbs;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
+use yii\helpers\Html;
 use kartik\form\ActiveForm;
 
 $this->registerJs('
@@ -157,12 +158,18 @@ $this->registerJs('
                                     ],
                                     [
                                         'class' => 'yii\grid\ActionColumn',
-                                        'template' => '{edit}',
+                                        'template' => '{edit} &nbsp {delete}',
+                                        'headerOptions' => ['width' => '60'],
                                         'buttons' => [
                                             'edit' => function ($url,$model) {
                                                 $customurl=Yii::$app->getUrlManager()->createUrl(['request/update-callback','id'=>$model['id'], 'request_id'=>$model['request_id']]);
-                                                return \yii\helpers\Html::a( '<span class="glyphicon glyphicon-pencil"></span>', $customurl,
-                                                    ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
+                                                return Html::a( '<span class="glyphicon glyphicon-pencil"></span>', $customurl,
+                                                    ['title' => 'Просмотр', 'data-pjax' => '0']);
+                                            },
+                                            'delete' => function ($url, $model) {
+                                                $customurl=Yii::$app->getUrlManager()->createUrl(['request/delete-callback', 'id' => $model['id']]);
+                                                return Html::a('<span class="glyphicon glyphicon-trash text-red" style="color: #dd4b39;" title="Удалить"></span>',
+                                                    $customurl, ['title' => 'Удалить', 'data-pjax' => '0', 'class' => 'f-delete']);
                                             },
                                         ],
                                     ],

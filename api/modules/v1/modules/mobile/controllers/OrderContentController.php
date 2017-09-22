@@ -340,14 +340,17 @@ class OrderContentController extends ActiveController {
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_canceled) {
-                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider"))
+                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();
             }
-            if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
+            
+            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+            
+            if ($profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
-                $target = $recipient->profile->phone;
+                $target = $profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);
             }
@@ -380,12 +383,15 @@ class OrderContentController extends ActiveController {
                         ->setSubject($subject)
                         ->send();
             }
-//            if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-//                $text = $subject;
-//                $target = $recipient->profile->phone;
-//                $sms = new \common\components\QTSMS();
-//                $sms->post_message($text, $target);
-//            }
+            
+            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+            
+            if ($profile->phone && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
+                $text = $subject;
+                $target = $profile->phone;
+                $sms = new \common\components\QTSMS();
+                $sms->post_message($text, $target);
+           }
         }
     }
 

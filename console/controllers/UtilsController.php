@@ -124,7 +124,7 @@ class UtilsController extends Controller {
             \common\models\DeliveryRegions::deleteAll(['supplier_id' => $orgId]);
             \common\models\FranchiseeAssociate::deleteAll(['organization_id' => $orgId]);
             $guides = \common\models\guides\Guide::findAll(['client_id' => $orgId]);
-            foreach ($organization->guides as $guide) {
+            foreach ($guides as $guide) {
                 \common\models\guides\GuideProduct::deleteAll(['guide_id' => $guide->id]);
                 $guide->delete();
             }

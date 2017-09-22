@@ -262,7 +262,7 @@ $this->registerCss("
                                 },
                                 'label' => 'Дата создания',
                                 'contentOptions'   =>   ['class' => 'small_cell_date'],
-                                'headerOptions'    =>   ['style' => 'min-width:110px;','nowrap'],
+                                'headerOptions'    =>   ['style' => 'min-width:110px;','nowrap' => 'nowrap'],
                             ],
                             [
                                 'format' => 'raw',

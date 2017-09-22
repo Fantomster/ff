@@ -381,9 +381,4 @@ class Order extends \yii\db\ActiveRecord {
             \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder ($this->id, false);
     }
     
-    public function beforeDelete() {
-        OrderChat::deleteAll(['order_id' => $this->id]);
-        OrderContent::deleteAll(['order_id' => $this->id]);
-        parent::beforeDelete();
-    }
 }

@@ -21,7 +21,7 @@
     float:left;
 }
 .small_cell_checkbox {
-    max-width: 20px;
+    max-width: 20px !important;
     text-align: center;
 }
 .block_img {

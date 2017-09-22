@@ -18,7 +18,7 @@ class OrderChat extends \common\models\OrderChat
     
     public function fields()
     {
-        return ['id', 'order_id', 'sent_by_id', 'is_system', 'message', 'created_at', 'viewed', 'picture',  
+        return ['id', 'order_id', 'sent_by_id', 'is_system', 'message', 'created_at', 'viewed',  
             'recipient_id', 'danger', 'type', 'count', 'page', 'organization_picture', 'organization_name'];
     }
     

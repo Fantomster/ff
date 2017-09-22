@@ -359,7 +359,7 @@
     
     .small_cell_date {
         max-width: 140px;  
-        min-width: 90px !important;
+        min-width: 100px !important;
     }
     .small_cell_status {
         max-width: 140px;  
@@ -504,7 +504,7 @@
     
     .small_cell_date {
         max-width: 140px;  
-        min-width: 90px !important;
+        min-width: 100px !important;
     }
     .small_cell_status {
         max-width: 140px;  

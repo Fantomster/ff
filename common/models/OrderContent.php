@@ -176,6 +176,6 @@ class OrderContent extends \yii\db\ActiveRecord
     public function afterDelete() {
         parent::afterDelete();
         
-        \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
     }
 }

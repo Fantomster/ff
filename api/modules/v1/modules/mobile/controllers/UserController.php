@@ -73,8 +73,14 @@ class UserController extends ActiveController {
         $user = User::findOne(Yii::$app->user->id);
         $profile = $user->profile;
         $organization = $user->organization;
-        $organization->picture = $organization->pictureUrl;
+        //$organization->picture = $organization->pictureUrl;
         return compact("user","profile","organization");
+    }
+    
+     public function actionAvatar($name) {
+         $organization = new Organization();  
+         $organization->picture = $name;
+         header('Location: ' . $organization->pictureUrl);
     }
     
     public function actionRegistration() {

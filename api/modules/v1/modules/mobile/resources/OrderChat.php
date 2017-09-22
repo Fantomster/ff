@@ -12,8 +12,6 @@ class OrderChat extends \common\models\OrderChat
     public $page;
     public $organization_picture;
     public $organization_name;
-    public $picture;
-    public $org_id;
     
     const TYPE_DIALOGS=1;
     const TYPE_MESSAGES=2;
@@ -36,13 +34,6 @@ class OrderChat extends \common\models\OrderChat
             [['order_id'], 'exist', 'skipOnError' => true, 'targetClass' => Order::className(), 'targetAttribute' => ['order_id' => 'id']],
             [['sent_by_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['sent_by_id' => 'id']],
         ];
-    }
-    
-    
-    public static function getOrganizationPicture ()
-    {
-        $organization = \common\models\Organization::findOne(['id' => $org_id]);
-        return $organization->pictureUrl;
     }
     
     public static function sendChatMessage($user, $order_id, $message) {

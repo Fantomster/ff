@@ -20,6 +20,10 @@
     width: 50%;
     float:left;
 }
+.small_cell_checkbox {
+    width: 20px;
+    text-align: center;
+}
 .block_img {
     width: 40%;
     float:left;
@@ -349,28 +353,28 @@
     }
         .small_cell_sum {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
     
     .small_cell_date {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
     .small_cell_status {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
     .small_cell_sozdal {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
    .small_cell_prinyal {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
    .small_cell_supp {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
 
 }
@@ -494,29 +498,29 @@
    
     .small_cell_sum {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
     
     .small_cell_date {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
     .small_cell_status {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
     
     .small_cell_sozdal {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
    .small_cell_prinyal {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
    .small_cell_supp {
         max-width: 140px;  
-        min-width: 10px !important;
+        min-width: 90px !important;
     }
 }
 .box.box-info {

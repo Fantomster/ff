@@ -209,7 +209,7 @@ $this->registerCss("
                             [
                                 'visible'=> ( $organization->type_id == Organization::TYPE_SUPPLIER ) ? true : false,
                                 'class' => 'yii\grid\CheckboxColumn',
-                                'contentOptions'   =>   ['style' => 'width:20px;'],
+                                'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
                                 'checkboxOptions' => function($model, $key, $index, $widget){
                                     return ['value' => $model['id'],'class'=>'checkbox-export'];
                                 }

@@ -367,4 +367,14 @@ class User extends \amnah\yii2\user\models\User {
         }
         return [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
     }
+    
+    public function beforeDelete() {
+        ManagerAssociate::deleteAll(['manager_id' => $this->id]);
+        notifications\EmailNotification::deleteAll(['user_id' => $this->id]);
+        notifications\SmsNotification::deleteAll(['user_id' => $this->id]);
+        UserFcmToken::deleteAll(['user_id' => $this->id]);
+        UserToken::deleteAll(['user_id' => $this->id]);
+        Profile::deleteAll(['user_id' => $this->id]);
+        parent::beforeDelete();
+    }
 }

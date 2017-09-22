@@ -104,15 +104,47 @@ class UtilsController extends Controller {
 
     public function actionTestRedis() {
         \Yii::$app->redis->executeCommand('PUBLISH', [
-                'channel' => 'test',
-                'message' => 'ololo!'
-            ]);
+            'channel' => 'test',
+            'message' => 'ololo!'
+        ]);
     }
-    
+
     public function actionUpdateMpCategories() {
         $categories = \common\models\MpCategory::find()->all();
         foreach ($categories as $category) {
             $category->update();
         }
     }
+
+    public function actionEraseOrganization($orgId) {
+        $organization = \common\models\Organization::findOne(['id' => $orgId]);
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            \common\models\DeliveryRegions::deleteAll(['supplier_id' => $orgId]);
+            \common\models\FranchiseeAssociate::deleteAll(['organization_id' => $orgId]);
+            foreach ($organization->guides as $guide) {
+                \common\models\guides\GuideProduct::deleteAll(['guide_id' => $guide->id]);
+                $guide->delete();
+            }
+            \common\models\RelationSuppRest::deleteAll(['supp_org_id' => $orgId]);
+            \common\models\RelationSuppRest::deleteAll(['rest_org_id' => $orgId]);
+            \common\models\Order::deleteAll(['client_id' => $orgId]);
+            \common\models\Order::deleteAll(['vendor_id' => $orgId]);
+            $catalogs = \common\models\Catalog::findAll(['supp_org_id' => $orgId]);
+            foreach ($catalogs as $catalog) {
+                \common\models\CatalogGoods::deleteAll(['cat_id' => $catalog->id]);
+            }
+            \common\models\CatalogBaseGoods::deleteAll(['supp_org_id' => $orgId]);
+            \common\models\Catalog::deleteAll(['supp_org_id' => $orgId]);
+            \common\models\RequestCallback::deleteAll(['supp_org_id' => $orgId]);
+            \common\models\Request::deleteAll(['rest_org_id' => $orgId]);
+            \common\models\ManagerAssociate::deleteAll(['organization_id' => $orgId]);
+            \common\models\User::deleteAll(['organization_id' => $orgId]);
+            $organization->delete();
+            $transaction->commit();
+        } catch (Exception $ex) {
+            $transaction->rollback();
+        }
+    }
+
 }

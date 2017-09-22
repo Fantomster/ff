@@ -300,4 +300,9 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->id, 'rest_org_id' => $clientId]);
         return isset($note) ? $note->note : '';
     }
+    
+    public function beforeDelete() {
+        GoodsNotes::deleteAll(['catalog_base_goods_id' => $this->id]);
+        parent::beforeDelete();
+    }
 }

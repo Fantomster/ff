@@ -298,4 +298,10 @@ class Request extends \yii\db\ActiveRecord
             ],
         ];
     }
+    
+    public function beforeDelete() {
+        RequestCallback::deleteAll(['request_id' => $this->id]);
+        RequestCounters::deleteAll(['request_id' => $this->id]);
+        parent::beforeDelete();
+    }
 }

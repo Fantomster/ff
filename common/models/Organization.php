@@ -673,7 +673,7 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function getGuides() {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
-            return null;
+            return [];
         }
         return $this->hasMany(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_GUIDE]);
     }

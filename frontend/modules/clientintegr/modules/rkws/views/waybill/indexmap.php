@@ -57,7 +57,7 @@ Breadcrumbs::widget([
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
-                        <div style="text-align:right;"> 
+                        <div style="text-align:center;"> 
                     <?php echo '<label class="cbx-label" for="s_1">Цены в Заказе включают НДС?</label>';
                           echo CheckboxX::widget([
                                 'name'=>'s_1',

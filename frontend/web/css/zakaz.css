@@ -330,6 +330,9 @@
     .block_logo {
     width: 300px;
     }
+    .small_cell_id {
+        max-width: 140px;         
+    }
 }
 @media (max-width: 600px) {
     .table{
@@ -339,6 +342,35 @@
     }
     td{
         min-width: 200px !important;
+    }
+    .small_cell_id {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+        .small_cell_sum {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+    
+    .small_cell_date {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+    .small_cell_status {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+    .small_cell_sozdal {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+   .small_cell_prinyal {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+   .small_cell_supp {
+        max-width: 140px;  
+        min-width: 10px !important;
     }
 
 }
@@ -454,6 +486,37 @@
     
     .block_logo {
     width: 250px;
+    }
+    .small_cell_id {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+   
+    .small_cell_sum {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+    
+    .small_cell_date {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+    .small_cell_status {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+    
+    .small_cell_sozdal {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+   .small_cell_prinyal {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+   .small_cell_supp {
+        max-width: 140px;  
+        min-width: 10px !important;
     }
 }
 .box.box-info {

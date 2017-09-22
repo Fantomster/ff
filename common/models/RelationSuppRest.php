@@ -93,17 +93,17 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         ];
     }
     
-    public function delete() {
-        $this->deleted = true;
-        return $this->save();
-    }
-    
-    public static function deleteAll($condition = '', $params = array()) {
-        $command = static::getDb()->createCommand();
-        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
-
-        return $command->execute();
-    }
+//    public function delete() {
+//        $this->deleted = true;
+//        return $this->save();
+//    }
+//    
+//    public static function deleteAll($condition = '', $params = array()) {
+//        $command = static::getDb()->createCommand();
+//        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
+//
+//        return $command->execute();
+//    }
     
     public static function GetRelationCatalogs() {
         $catalog = RelationSuppRest::

@@ -380,4 +380,5 @@ class Order extends \yii\db\ActiveRecord {
         else
             \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder ($this->id, false);
     }
+    
 }

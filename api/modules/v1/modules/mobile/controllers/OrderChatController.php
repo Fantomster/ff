@@ -83,7 +83,7 @@ class OrderChatController extends ActiveController {
         $filters['recipient_id'] = ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) ? $user->organization_id : $params->recipient_id;*/
          
         $query->select(
-                'order_chat.*,profile.full_name, organization.id as org_id'
+                'order_chat.*,profile.full_name, organization.id as org_id, '
               . 'organization.name as organization_name')
             ->from('order_chat')
             ->innerJoin('user', 'user.id = order_chat.sent_by_id')

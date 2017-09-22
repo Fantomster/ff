@@ -261,7 +261,7 @@ $this->registerCss("
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
                                 'label' => 'Дата создания',
-                                'contentOptions'   =>   ['class' => 'small_cell_date'],
+                                'contentOptions'   =>   ['style' => 'min-width:120px;'],
                                
                             ],
                             [

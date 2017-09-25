@@ -318,7 +318,7 @@
         float: right !important;
     }
     .block_wrapper1{
-        height: 1200px !important; 
+        height: 100% !important; 
     }
     .block_new {
         width: 100%;
@@ -342,8 +342,6 @@
 @media (max-width: 600px) {
     .table{
         overflow-x: scroll;
-        display: block;
-
     }
     td{
         min-width: 200px !important;
@@ -483,7 +481,7 @@
         width: 100% !important;
     }
     .block_wrapper1{
-        height: 1320px !important; 
+        height: 100% !important; 
     }
     .pl{
         font-size: 12px !important; 

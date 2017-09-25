@@ -384,6 +384,12 @@
     }
 
 }
+@media (max-width: 480px) {
+    .pull-right{
+        float: none !important;
+    }
+
+}
 @media (max-width: 400px) {
     .pp{
         width: 100%;

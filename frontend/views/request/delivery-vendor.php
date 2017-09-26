@@ -1,4 +1,6 @@
 <?php
+use yii\helpers\Url;
+use yii\helpers\Html;
 $user = Yii::$app->user->identity;
 
 $franchiseeManager = $user->organization->getFranchiseeManagerInfo();
@@ -17,8 +19,11 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 ?>
 <section class="content">
   <div class="row">
-      <div class="col-xs-12 col-sm-12 col-md-12">
-          <h3>Регионы доставки не указаны <small>Свяжитесь с нами для уточнения Ваших регионов доставки <a href="tel:<?= $phoneUrl ?>"><?= $phone ?></a></small></h3>         
+      <div class="col-xs-12 col-sm-12 col-md-12 text-center">
+          <h3>Регионы доставки не указаны. <br>
+              <small>Проставьте их самостоятельно, в разделе <?=Html::a( 'Доставка', ['vendor/delivery'], ["style"=>"text-decoration:underline"] )?><br>
+                  или свяжитесь с нами для уточнения Ваших регионов доставки <a href="tel:<?= $phoneUrl ?>"><?= $phone ?></a></small>
+          </h3>         
       </div>
   </div>
 </section>

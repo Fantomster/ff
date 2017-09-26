@@ -17,6 +17,14 @@ $this->registerJs(
             });
         });'
 );
+$this->registerCss('
+section>h3>small {
+    font-size: 15px;
+    display: inline-block;
+    padding-left: 4px;
+    font-weight: 300;
+}
+');
 ?>
 <section class='content-header'>
     <h1>
@@ -168,7 +176,7 @@ $this->registerJs(
 </section>
 <section class='content'>
     <h3>
-        <i class="fa fa-gears"></i> Регионы Доставки
+        <i class="fa fa-gears"></i> Регионы доставки
         <small>Добавьте регионы в которые Вы доставляете</small>
     </h3>
     <div class="box box-info delivery">
@@ -214,51 +222,53 @@ $this->registerJs(
                     ActiveForm::end(); 
                     ?>
                 </div>
-            </div>
-            <br>
-            <div class="col-md-12">
-                <div class="row">
-                    <?php Pjax::begin(['id'=>'pjax-container-form']); ?>
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <strong>Страна</strong>
+                <br>
+                <div class="col-md-12">
+                    <div class="row">
+                        <?php Pjax::begin(['id'=>'pjax-container-form']); ?>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Страна</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Область</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Город</strong>
+                                </div>
+                                <hr>
                             </div>
-                            <div class="col-md-4">
-                                <strong>Область</strong>
-                            </div>
-                            <div class="col-md-4">
-                                <strong>Город</strong>
-                            </div>
-                            <hr>
-                        </div>
-                        
-                        <?php foreach($regionsList as $list){ ?>
-                        <?php if($list->exception == 0){ ?>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <?=$list->country;?>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <?=$list->administrative_area_level_1;?>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <?=$list->locality;?>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <a href="#" class="delete btn btn-sm btn-danger" style="margin:1px 0;" data-url="<?=Url::toRoute(['vendor/remove-delivery-region', 'id' => $list->id]);?>">-</a>
+
+                            <?php foreach($regionsList as $list){ ?>
+                            <?php if($list->exception == 0){ ?>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <?=$list->country;?>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <?=$list->administrative_area_level_1;?>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <?=$list->locality;?>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <a href="#" class="delete btn btn-sm btn-danger" style="margin:1px 0;" data-url="<?=Url::toRoute(['vendor/remove-delivery-region', 'id' => $list->id]);?>">-</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <hr>
+                            <?php } } ?>
                         </div>
-                        <hr>
-                        <?php } } ?>
+                        <?php Pjax::end(); ?>
                     </div>
-                    <?php Pjax::end(); ?>
                 </div>
             </div>
+            <br>
+            
         </div>
     </div>
 </section>

@@ -214,7 +214,7 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
+                    <?php //Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'product-analytic-list',]); ?>
                     <?php
                     $columns = [
                         [
@@ -259,7 +259,7 @@ HTML;
                         'summary' => false,
                     ]);
                     ?> 
-    <?php Pjax::end(); ?>
+    <?php //Pjax::end(); ?>
                 </div>
                 <!-- /.box-body -->
             </div>

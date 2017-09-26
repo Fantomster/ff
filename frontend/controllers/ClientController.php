@@ -323,7 +323,7 @@ class ClientController extends DefaultController {
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
                 if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>'.CatalogBaseGoods::MAX_INSERT_FROM_XLS.'</strong> позиций, пожалуйста свяжитесь с нами '
+                    $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . '</strong> позиций, пожалуйста свяжитесь с нами '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>'];
                     return $result;
                     exit;
@@ -1324,12 +1324,12 @@ class ClientController extends DefaultController {
             return $hex;
         }
 
-        if (Yii::$app->request->isAjax) {
+        if (Yii::$app->request->isPjax) {
             $filter_status = trim(\Yii::$app->request->get('filter_status'));
             $filter_supplier = trim(\Yii::$app->request->get('filter_supplier'));
             $filter_employee = trim(\Yii::$app->request->get('filter_employee'));
-            $filter_from_date = trim(\Yii::$app->request->get('filter_from_date'));
-            $filter_to_date = trim(\Yii::$app->request->get('filter_to_date'));
+            $filter_from_date = \Yii::$app->request->get('filter_from_date') ? trim(\Yii::$app->request->get('filter_from_date')) : date("d-m-Y", strtotime(" -2 months"));
+            $filter_to_date = \Yii::$app->request->get('filter_to_date') ? trim(\Yii::$app->request->get('filter_to_date')) : date("d-m-Y");
 
             empty($filter_status) ? "" : $where .= " and status='" . $filter_status . "'";
             empty($filter_supplier) ? "" : $where .= " and vendor_id='" . $filter_supplier . "'";
@@ -1403,11 +1403,16 @@ class ClientController extends DefaultController {
                 "and status<>" . Order::STATUS_FORMING . " and client_id = " . $currentUser->organization_id .
                 $where .
                 ") group by product_id order by sum(price*quantity) desc");
+        $countQuery = "SELECT count(*) from (".$query->sql.") as a";
+        $count = Yii::$app->db->createCommand($countQuery)->queryScalar();
+        $page = Yii::$app->request->get("page");
         $dataProvider = new \yii\data\SqlDataProvider([
             'sql' => $query->sql,
+            'totalCount' => $count,
             'pagination' => [
                 'pageSize' => 7,
-            ]
+                'page' => isset($page) ? ($page-1) : 0,
+            ],
         ]);
         /*
          * 
@@ -1435,9 +1440,15 @@ class ClientController extends DefaultController {
          * BarChart заказы по поставщикам END
          * 
          */
-        return $this->render('analytics/index', compact(
-                                'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
-        ));
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('analytics/index', compact(
+                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+            ));
+        } else {
+            return $this->render('analytics/index', compact(
+                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+            ));
+        }
     }
 
     public function actionTutorial() {

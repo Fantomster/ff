@@ -191,7 +191,7 @@ class UserController extends ActiveController {
             $userToken->delete();
         }
 
-        return ($success) ? compact("user","profile","organization") : ['error' => Yii::t('user','Invalid PIN')];
+        return ($success) ? compact("user","profile","organization") : ['error' => 'Неверный код'/*Yii::t('user','Invalid PIN')*/];
     }
 
     public function actionCompleteRegistration() {

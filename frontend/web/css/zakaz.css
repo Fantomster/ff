@@ -20,6 +20,11 @@
     width: 50%;
     float:left;
 }
+.small_cell_checkbox {
+    max-width: 20px !important;
+    min-width: 20px !important;
+    text-align: center;
+}
 .block_img {
     width: 40%;
     float:left;
@@ -313,7 +318,7 @@
         float: right !important;
     }
     .block_wrapper1{
-        height: 1200px !important; 
+        height: 100% !important; 
     }
     .block_new {
         width: 100%;
@@ -330,15 +335,45 @@
     .block_logo {
     width: 300px;
     }
+    .small_cell_id {
+        max-width: 140px;         
+    }
 }
 @media (max-width: 600px) {
     .table{
         overflow-x: scroll;
-        display: block;
-
     }
     td{
         min-width: 200px !important;
+    }
+    .small_cell_id {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+        .small_cell_sum {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    
+    .small_cell_date {
+        max-width: 140px;  
+        min-width: 120px !important;
+    }
+    .small_cell_status {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    .small_cell_sozdal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_prinyal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_supp {
+        max-width: 140px;  
+        min-width: 90px !important;
     }
 
 }
@@ -346,6 +381,12 @@
     .pp{
         width: 100%;
         margin: 0 0%;
+    }
+
+}
+@media (max-width: 480px) {
+    .pull-right{
+        float: none !important;
     }
 
 }
@@ -446,7 +487,7 @@
         width: 100% !important;
     }
     .block_wrapper1{
-        height: 1320px !important; 
+        height: 100% !important; 
     }
     .pl{
         font-size: 12px !important; 
@@ -454,6 +495,37 @@
     
     .block_logo {
     width: 250px;
+    }
+    .small_cell_id {
+        max-width: 140px;  
+        min-width: 10px !important;
+    }
+   
+    .small_cell_sum {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    
+    .small_cell_date {
+        max-width: 140px;  
+        min-width: 120px !important;
+    }
+    .small_cell_status {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+    
+    .small_cell_sozdal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_prinyal {
+        max-width: 140px;  
+        min-width: 90px !important;
+    }
+   .small_cell_supp {
+        max-width: 140px;  
+        min-width: 90px !important;
     }
 }
 .box.box-info {

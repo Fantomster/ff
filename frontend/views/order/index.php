@@ -209,6 +209,8 @@ $this->registerCss("
                             [
                                 'visible'=> ( $organization->type_id == Organization::TYPE_SUPPLIER ) ? true : false,
                                 'class' => 'yii\grid\CheckboxColumn',
+                                'contentOptions'   =>   ['class' => 'small_cell_checkbox'],
+                                'headerOptions'    =>   ['style' => 'text-align:center;'],
                                 'checkboxOptions' => function($model, $key, $index, $widget){
                                     return ['value' => $model['id'],'class'=>'checkbox-export'];
                                 }
@@ -217,10 +219,12 @@ $this->registerCss("
                                 'attribute' => 'id',
                                 'value' => 'id',
                                 'label' => '№',
+                                'contentOptions'   =>   ['class' => 'small_cell_id'],
                             ],
                             $organization->type_id == Organization::TYPE_RESTAURANT ? [
                                 'attribute' => 'vendor.name',
                                 'value' => 'vendor.name',
+                                'contentOptions'   =>   ['class' => 'small_cell_supp'],
                                 'label' => 'Поставщик',
                                     //'headerOptions' => ['class'=>'sorting',],
                                     ] : [
@@ -232,11 +236,13 @@ $this->registerCss("
                                 'attribute' => 'createdByProfile.full_name',
                                 'value' => 'createdByProfile.full_name',
                                 'label' => 'Заказ создал',
+                                'contentOptions'   =>   ['class' => 'small_cell_sozdal'],
                             ],
                             [
                                 'attribute' => 'acceptedByProfile.full_name',
                                 'value' => 'acceptedByProfile.full_name',
                                 'label' => 'Заказ принял',
+                                'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                             ],
                             [
                                 'format' => 'raw',
@@ -245,6 +251,7 @@ $this->registerCss("
                                     return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
                                 },
                                 'label' => 'Сумма',
+                                'contentOptions'   =>   ['class' => 'small_cell_sum'],
                             ],
                             [
                                 'format' => 'raw',
@@ -254,6 +261,8 @@ $this->registerCss("
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
                                 'label' => 'Дата создания',
+                                'contentOptions'   =>   ['style' => 'min-width:120px;'],
+                               
                             ],
                             [
                                 'format' => 'raw',
@@ -278,6 +287,7 @@ $this->registerCss("
                                     return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
                                 },
                                 'label' => 'Статус',
+                                'contentOptions'   =>   ['class' => 'small_cell_status'],
                             ],
                             [
                                 'format' => 'raw',

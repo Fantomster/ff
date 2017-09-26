@@ -12,6 +12,7 @@ use common\models\Role;
 use common\models\Profile;
 use common\models\search\UserSearch;
 use common\models\RelationSuppRest;
+use common\models\DeliveryRegions;
 use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
@@ -102,6 +103,7 @@ class VendorController extends DefaultController {
                             'support',
                             'view-catalog',
                             'view-client',
+                            'remove-delivery-region'
                         ],
                         'allow' => true,
                         // Allow suppliers managers
@@ -164,27 +166,43 @@ class VendorController extends DefaultController {
 
     public function actionDelivery() {
         $organization = $this->currentUser->organization;
-
+        $supplier = $organization->id;
+        $regionsList = DeliveryRegions::find()->where(['supplier_id' => $supplier])->all();
+        $deliveryRegions = new DeliveryRegions();
+        $deliveryRegions->supplier_id = $supplier;
+        
         $delivery = $organization->delivery;
+        
         if (!$delivery) {
             $delivery = new \common\models\Delivery();
             $delivery->vendor_id = $organization->id;
             $delivery->save();
         }
-
+        
+        if ($deliveryRegions->load(Yii::$app->request->post()) && $deliveryRegions->validate()) {
+            $deliveryRegions->save();
+        }
+        
         if ($delivery->load(Yii::$app->request->get())) {
             if ($delivery->validate()) {
                 $delivery->save();
             }
         }
-
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('delivery', compact('delivery'));
+            return $this->renderPartial('delivery', compact('delivery','regionsList','supplier','deliveryRegions'));
         } else {
-            return $this->render('delivery', compact('delivery'));
+            return $this->render('delivery', compact('delivery','regionsList','supplier','deliveryRegions'));
         }
     }
-
+    public function actionRemoveDeliveryRegion($id)
+    {
+     $organization = $this->currentUser->organization;
+     $deliveryRegions = \common\models\DeliveryRegions::findOne($id);
+     if($deliveryRegions)
+        {
+            $deliveryRegions->delete();
+        }
+    }
     /*
      *  User validate
      */

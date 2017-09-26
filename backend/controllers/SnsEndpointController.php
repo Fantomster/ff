@@ -63,7 +63,6 @@ class SnsEndpointController extends \yii\rest\Controller {
         // Check the type of the message and handle the subscription.
         if ($message->get('Type') === 'SubscriptionConfirmation') {
             // Confirm the subscription by sending a GET request to the SubscribeURL
-            Yii::error($message->get('SubscribeURL'));
             file_get_contents($message->get('SubscribeURL'));
         }
 
@@ -71,11 +70,11 @@ class SnsEndpointController extends \yii\rest\Controller {
         if (($message->get('Type') === 'Notification') && ($data['notificationType'] === 'Complaint')) {
             $complainedRecipients = $data["complaint"]["complainedRecipients"];
             foreach ($complainedRecipients as $recipient) {
-                //if (!EmailBlacklist::find()->where(['email' => $recipient['emailAddress']])->exists()) {
+                if (!EmailBlacklist::find()->where(['email' => $recipient['emailAddress']])->exists()) {
                     $newBlacklisted = new EmailBlacklist();
                     $newBlacklisted->email = $recipient['emailAddress'];
                     $newBlacklisted->save();
-                //}
+                }
                 $newFail = new EmailFails();
                 $newFail->type = EmailFails::TYPE_COMPLAINT;
                 $newFail->email = $recipient['emailAddress'];

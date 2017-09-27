@@ -21,7 +21,7 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
   <div class="row">
       <div class="col-xs-12 col-sm-12 col-md-12 text-center">
           <h3>Регионы доставки не указаны. <br>
-              <small>Проставьте их самостоятельно, в разделе <?=Html::a( 'Доставка', ['vendor/delivery'], ["style"=>"text-decoration:underline"] )?><br>
+              <small>Проставьте их самостоятельно в разделе <?=Html::a( 'Доставка', ['vendor/delivery'], ["style"=>"text-decoration:underline"] )?><br>
                   или свяжитесь с нами для уточнения Ваших регионов доставки <a href="tel:<?= $phoneUrl ?>"><?= $phone ?></a></small>
           </h3>         
       </div>

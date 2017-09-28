@@ -132,7 +132,7 @@ class RelationSuppRestController extends ActiveController {
                 $relationSuppRest->save(); 
                 $request = Request::findOne(['id'=>$request_id]);
                 
-                $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
+                $vendorUsers = User::find()->where(['organization_id' => $vendor->id])->all();
                 if($client->email){
                 $mailer = Yii::$app->mailer; 
                 $email = $client->email;
@@ -142,6 +142,7 @@ class RelationSuppRestController extends ActiveController {
                 $result = $mailer->compose('requestInviteSupplierMailToRest', compact("request","client"))
                         ->setTo($email)->setSubject($subject)->send();
                 }
+
                 foreach($vendorUsers as $user){
                     if($user->profile->phone && $user->profile->sms_allow){
                         $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';

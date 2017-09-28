@@ -234,7 +234,8 @@ $(document).on('hidden.bs.modal','#modal_addProduct', function (e) {
   $('#CreateCatalog *').remove();
 });
 $('#invite').click(function(e){	
-    $('#loader-show').showLoading();
+    $("#invite").button("loading");
+    $("#btnCancel").prop( "disabled", true );
     e.preventDefault();
 	var i, items, item, dataItem, data = [];
 	var cols = ['product', 'ed', 'price'];
@@ -270,7 +271,8 @@ $('#invite').click(function(e){
             success: function (response) {
                 if(response.success){
                     $("#continue").prop("disabled", false);
-                    $('#loader-show').hideLoading();
+                    $("#invite").button("reset");
+                    $("#btnCancel").prop( "disabled", false );
                     swal({
                         title: "Поставщик добавлен!", 
                         text: response.message,
@@ -279,7 +281,8 @@ $('#invite').click(function(e){
                             location.reload(); 
                         });
                 }else{
-                    $('#loader-show').hideLoading();
+                    $("#invite").button("reset");
+                    $("#btnCancel").prop( "disabled", false );
                     swal({
                         title: "Ошибка!", 
                         text: response.message,
@@ -287,7 +290,8 @@ $('#invite').click(function(e){
                 }
             },
             error: function(response) {
-                $('#loader-show').hideLoading();
+                $("#invite").button("reset");
+                $("#btnCancel").prop( "disabled", false );
             }
         });
 });       
@@ -366,8 +370,8 @@ $disabled = true;
             </div>
             <div class="modal-footer">
                 
-                <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
-                <button id="invite" type="button" class="btn btn-success">Отправить</button>
+                <button type="button" class="btn btn-gray" data-dismiss="modal" id="btnCancel">Отмена</button>
+                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
             </div>
         </div>
     </div>

@@ -30,26 +30,26 @@ $js = <<<JS
         $("#chatBody").scrollTop($("#chatBody")[0].scrollHeight);
         
         $('#actionButtons').on('click', '.btnOrderAction', function() { 
+            var clickedButton = $(this);
             if ($(this).data("action") == "confirm" && dataEdited) {
                 var form = $("#editOrder");
                 extData = "&orderAction=confirm"; 
-                $("#loader-show").showLoading();
+                clickedButton.button("loading");
                 $.post(
                     form.attr("action"),
                     form.serialize() + extData
                 ).done(function(result) {
                     dataEdited = 0;
-                    $("#loader-show").hideLoading();
+                    clickedButton.button("reset");
                 });
             } else if ($(this).data("action") != "cancel") {
-                $("#loader-show").showLoading();
+                clickedButton.button("loading");
                 $.post(
                     "$urlOrderAction",
                         {"action": $(this).data("action"), "order_id": $order->id}
                 ).done(function(result) {
                         $('#actionButtons').html(result);
-                        //$.pjax.reload({container: "#orderContent"});
-                        $("#loader-show").hideLoading();
+                        clickedButton.button("reset");
                 });
             }
         });
@@ -93,13 +93,13 @@ $js = <<<JS
         $('.content').on('click', '#btnSave', function(e) {
             e.preventDefault();
             var form = $("#editOrder");
-            $("#loader-show").showLoading();
+            $(".btnSave").button("loading");
             $.post(
                 form.attr("action"),
                 form.serialize()
             ).done(function(result) {
                 dataEdited = 0;
-                $("#loader-show").hideLoading();
+                $(".btnSave").button("reset");
             });
         });
         $('.content').on('click', '.deletePosition', function(e) {

@@ -102,7 +102,6 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
 }
 $(".step-2").click(function(e){
 e.preventDefault();
-//$("#loader-show").showLoading();
 var urlStap = "'.$router.'";
 $.ajax({
     url: urlStap,

@@ -853,65 +853,6 @@ class VendorController extends DefaultController {
         }
     }
 
-    /*
-     *  User product
-     */
-    /*
-      public function actionAjaxUpdateProduct($id) {
-      $catalogBaseGoods = CatalogBaseGoods::find()->where(['id' => $id])->one();
-      $currentUser = User::findIdentity(Yii::$app->user->id);
-      if (Yii::$app->request->isAjax) {
-      $post = Yii::$app->request->post();
-
-      if ($catalogBaseGoods->load($post)) {
-      $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-      $catalogBaseGoods->supp_org_id = $currentUser->organization_id;
-      if ($catalogBaseGoods->validate()) {
-
-      $catalogBaseGoods->save();
-
-      $message = 'Товар обновлен!';
-      return $this->renderAjax('catalogs/_success', ['message' => $message]);
-      }
-      }
-      }
-
-      return $this->renderAjax('catalogs/_baseProductForm', compact('catalogBaseGoods'));
-      } */
-
-//    public function actionAjaxValidateProduct() {
-//        $catalogBaseGoods = new CatalogBaseGoods();
-//        $categorys = new \yii\base\DynamicModel([
-//            'sub1', 'sub2'
-//        ]);
-//        $categorys->addRule(['sub1', 'sub2'], 'required', ['message' => Yii::t('app', 'Укажите категорию товара')])
-//                ->addRule(['sub1', 'sub2'], 'integer');
-//
-//
-//        if (Yii::$app->request->isAjax) {
-//            $post = Yii::$app->request->post();
-//            if ($catalogBaseGoods->load($post) && $categorys->load($post)) {
-//                $catalogBaseGoods->status = 1;
-//                $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
-//                $catalogBaseGoods->supp_org_id = $this->currentUser->organization_id;
-//
-//                //var_dump($catalogBaseGoods);
-//                if ($catalogBaseGoods->market_place == 1) {
-//                    //if ($post && $catalogBaseGoods->validate() && $categorys->validate()) {
-//                        Yii::$app->response->format = Response::FORMAT_JSON;
-//                        $test = json_encode(\yii\widgets\ActiveForm::validateMultiple([$catalogBaseGoods, $categorys]));
-//                        return $test;
-//                    //}
-//                } else {
-//                    //if ($post && $catalogBaseGoods->validate()) {
-//                        Yii::$app->response->format = Response::FORMAT_JSON;
-//                        return json_encode(\yii\widgets\ActiveForm::validate($catalogBaseGoods));
-//                    //}
-//                }
-//            }
-//        }
-//    }
-
     public function actionAjaxCreateProductMarketPlace() {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $catalogBaseGoods = new CatalogBaseGoods(['scenario' => 'marketPlace']);

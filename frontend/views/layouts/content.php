@@ -2,9 +2,6 @@
 use yii\widgets\Breadcrumbs;
 use dmstr\widgets\Alert;
 use yii\web\View;
-use nirvana\showloading\ShowLoadingAsset;
-ShowLoadingAsset::register($this);
-$this->registerCss('#loader-show {position:absolute;width:100%;display:none;}');
 ?>
 <div id="loader-show"></div>
 <div class="content-wrapper">
@@ -17,12 +14,3 @@ $this->registerCss('#loader-show {position:absolute;width:100%;display:none;}');
     </div>
     <strong>mixcart.ru &copy; <?= date('Y') ?></strong>
 </footer>
-<?php
-$customJs = <<< JS
-$('#loader-show').css('height',$(window).height());       
-$(window).on('resize',function() {
-    $('#loader-show').css('height',$(window).height());
-});
-JS;
-$this->registerJs($customJs, View::POS_READY);
-?>

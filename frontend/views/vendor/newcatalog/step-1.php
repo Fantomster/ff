@@ -10,8 +10,6 @@ use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
-use nirvana\showloading\ShowLoadingAsset;
-ShowLoadingAsset::register($this);
 $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога'
 ?>
 <section class="content-header">
@@ -112,11 +110,8 @@ $.ajax({
     success: function(response) {
             
             if(response.success){
-                //bootbox.alert("<h3>Сохранено!</h3>");
                 var url = "' . Url::toRoute(['vendor/step-2', 'id' => '']) . '"+response.cat_id;
                 $(location).attr("href",url);
-                //$.pjax({url: url, container: "#pjax-container"});
-                //$("#loader-show").hideLoading();
                 }else{
             if(response.type==1){
             bootbox.dialog({
@@ -130,13 +125,11 @@ $.ajax({
                     },
                     className: response.alert.class
                 });
-            //$("#loader-show").hideLoading();
             }
             console.log(response);    
             }
         },
         failure: function(errMsg) {
-        //$("#loader").hideLoading();
         console.log(errMsg);
         }
     });

@@ -162,7 +162,7 @@ class RelationSuppRestController extends ActiveController {
                     }
                 }
                 
-                return compact("relationSuppRest");
+                return $relationSuppRest;
             }
     }
 }

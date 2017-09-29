@@ -107,6 +107,9 @@ $customJs = <<< JS
     });    
         
     $(document).on("change keyup paste cut", "#SuppliersFormSend input", function() {
+        if (!$(this).is(":focus")) {
+            return false;
+        }
         if (timer) {
             clearTimeout(timer);
         }
@@ -137,11 +140,9 @@ $customJs = <<< JS
         )
         .done(function(result) {
             if (!result.errors) {
-                //form.replaceWith(result.form);
                 if (result.vendorFound) {
                     $("#addProduct").hide();
                     $("#inviteSupplier").show();
-                    //form.replaceWith(result.form);
                     $("#profile-full_name").prop("disabled", true);
                     $("#profile-phone").prop("disabled", true);
                     $("#organization-name").prop("disabled", true);
@@ -150,10 +151,11 @@ $customJs = <<< JS
                     $("#organization-name").val(result.organization_name);
                 } else {
                     enableFields();
-                    //$("#profile-full_name").focus();
                     $("#addProduct").show();
                     $("#inviteSupplier").hide();
-                    $("#addProduct").prop("disabled", false);
+                    if ($("#profile-full_name").val()) {
+                        $("#addProduct").prop("disabled", false);
+                    }
                 }
             } else {
                 $("#addProduct").prop("disabled", true);

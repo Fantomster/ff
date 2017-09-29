@@ -1622,8 +1622,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 $profile = $vendorManager->profile;
                 $organization = $vendorManager->organization;
                 $disabled = true;
-                return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => true];
-//                return ['errors' => false, 'organization_name' => $organization->name, 'phone' => $profile->phone, 'full_name'=>$profile->full_name, 'vendorFound' => true];
+                //return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => true];
+                return ['errors' => false, 'organization_name' => $organization->name, 'phone' => $profile->phone, 'full_name'=>$profile->full_name, 'vendorFound' => true];
             } elseif ($user->validate() && empty($relation)) {
                 $validated = true;
                 if (!$profile->load($post)) {
@@ -1638,8 +1638,8 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 }
                 $disabled = false;
                 if ($validated) {
-                    return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
-                    //return ['errors' => false, 'vendorFound' => false];
+                    //return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => false];
+                    return ['errors' => false, 'vendorFound' => false];
                 }
             }
 

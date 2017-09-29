@@ -137,18 +137,24 @@ $customJs = <<< JS
         )
         .done(function(result) {
             if (!result.errors) {
-                form.replaceWith(result.form);
+                //form.replaceWith(result.form);
                 if (result.vendorFound) {
                     $("#addProduct").hide();
                     $("#inviteSupplier").show();
                     //form.replaceWith(result.form);
+                    $("#profile-full_name").prop("disabled", true);
+                    $("#profile-phone").prop("disabled", true);
+                    $("#organization-name").prop("disabled", true);
+                    $("#profile-full_name").val(result.full_name);
+                    $("#profile-phone").val(result.phone);
+                    $("#organization-name").val(result.organization_name);
                 } else {
                     enableFields();
                     //$("#profile-full_name").focus();
                     $("#addProduct").show();
                     $("#inviteSupplier").hide();
+                    $("#addProduct").prop("disabled", false);
                 }
-                $("#addProduct").prop("disabled", false);
             } else {
                 $("#addProduct").prop("disabled", true);
                 if (result.vendor_added) {

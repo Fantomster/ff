@@ -382,4 +382,16 @@ class Order extends \yii\db\ActiveRecord {
             \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder ($this->id, false);
     }
     
+    /**
+     * @param integer user_id
+     * 
+     * @return string
+     */
+    public function getUrlForUser($user_id) {
+        $user = User::findOne(['id' => $user_id]);
+        if (empty($user) || (!in_array($user->organization_id,[$this->client_id, $this->vendor_id]))) {
+            return;
+        }
+        return ($user->status === User::STATUS_UNCONFIRMED_EMAIL) ? Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/order/view", "id" => $this->id, "token" => $user->access_token]) : Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/order/view", "id" => $this->id]);
+    }
 }

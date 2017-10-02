@@ -63,7 +63,6 @@ class SnsEndpointController extends \yii\rest\Controller {
         // Check the type of the message and handle the subscription.
         if ($message->get('Type') === 'SubscriptionConfirmation') {
             // Confirm the subscription by sending a GET request to the SubscribeURL
-            Yii::error($message->get('SubscribeURL'));
             file_get_contents($message->get('SubscribeURL'));
         }
 

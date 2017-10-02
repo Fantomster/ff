@@ -19,18 +19,6 @@ $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;overflow: hidden;}
 .hide{dosplay:none}
 ');
-//$this->registerCssFile('modules/handsontable/dist/handsontable.full.css');
-//$this->registerCssFile('modules/handsontable/dist/bootstrap.css');
-//$this->registerCssFile('modules/handsontable/dist/chosen.css');
-//$this->registerCssFile('modules/handsontable/dist/pikaday/pikaday.css');
-//$this->registerjsFile('modules/handsontable/dist/pikaday/pikaday.js');
-//$this->registerjsFile('modules/handsontable/dist/moment/moment.js');
-//$this->registerjsFile('modules/handsontable/dist/numbro/numbro.js');
-//$this->registerjsFile('modules/handsontable/dist/zeroclipboard/ZeroClipboard.js');
-//$this->registerjsFile('modules/handsontable/dist/numbro/languages.js');
-//$this->registerJsFile('modules/handsontable/dist/handsontable.js');
-//$this->registerJsFile('modules/handsontable/dist/handsontable-chosen-editor.js');
-//$this->registerJsFile(Yii::$app->request->BaseUrl . '/modules/handsontable/dist/chosen.jquery.js', ['depends' => [yii\web\JqueryAsset::className()]]);
 ?>
 <?php
 Modal::begin([
@@ -41,20 +29,7 @@ Modal::begin([
 Modal::end();
 ?>
 <?php
-/*
-if (isset($step) && ($step == common\models\Organization::STEP_ADD_CATALOG)) {
-    echo yii\bootstrap\Alert::widget([
-        'options' => [
-            'class' => 'alert-warning fade in',
-        ],
-        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
-        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-    ]);
-} 
- */
-?>
-<?php
-if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
+if (false) {
     $this->registerJs('
         $("document").ready(function(){
             $("#showVideo").modal("show");
@@ -64,14 +39,6 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
             });
         });
             ');
-
-//    echo yii\bootstrap\Alert::widget([
-//        'options' => [
-//            'class' => 'alert-warning fade in',
-//        ],
-//        'body' => 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог. '
-//        . '<a class="btn btn-default btn-sm" href="#">Сделаем это!</a>',
-//    ]);
 
     Modal::begin([
         'id' => 'showVideo',

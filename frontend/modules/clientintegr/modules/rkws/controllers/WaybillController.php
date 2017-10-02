@@ -105,6 +105,13 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
     public function actionMap($waybill_id) {
 
         $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product', 'rk_product.id = product_rid');
+        
+        $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $waybill_id])->one();
+        
+        if(!$wmodel) {
+            echo "Cant find wmodel in map controller";
+            die();
+        }
 
         $dataProvider = new ActiveDataProvider(['query' => $records,
             'sort' => false,
@@ -116,12 +123,57 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial($vi, [
                         'dataProvider' => $dataProvider,
+                        'wmodel' => $wmodel,
             ]);
         } else {
             return $this->render($vi, [
                         'dataProvider' => $dataProvider,
+                        'wmodel' => $wmodel,
             ]);
         }
+    }
+    
+    public function actionChangevat() {
+        
+      $checked = Yii::$app->request->post('key');
+      
+      $arr = explode(",", $checked);
+      $wbill_id = $arr[1];
+      $is_checked = $arr[0]; 
+      
+      $wmodel = RkWaybill::find()->andWhere('id = :acc', [':acc' => $wbill_id])->one();
+      
+      if (!$wmodel) {
+          die('Waybill model is not found');
+      }
+      
+      if ($is_checked) { // Добавляем НДС
+          
+      $rress = Yii::$app->db_api
+              ->createCommand('UPDATE rk_waybill_data SET sum=round(sum/(vat/10000+1),2) WHERE waybill_id = :acc', [':acc' => $wbill_id])->execute();
+      
+      $wmodel->vat_included = 1;
+      if (!$wmodel->save()) {
+          die('Cant save wmodel where vat = 1');
+      }
+                
+      } else { // Убираем НДС
+          
+      $rress = Yii::$app->db_api
+              ->createCommand('UPDATE rk_waybill_data SET sum=defsum WHERE waybill_id = :acc', [':acc' => $wbill_id])->execute();    
+      
+      $wmodel->vat_included = 0;
+      if (!$wmodel->save()) {
+          die('Cant save wmodel where vat = 0');
+      }
+      
+      }
+       if ($rress) {
+           return true;
+       } else {
+           return false;
+       }
+       
     }
 
     public function actionCleardata($id) {
@@ -129,8 +181,20 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $model = $this->findDataModel($id);
 
         $model->quant = $model->defquant;
-        $model->sum = $model->defsum;
         $model->koef = 1;
+        
+        $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $model->waybill_id])->one();
+        if(!$wmodel) {
+            echo "Cant find wmodel in map controller cleardata";
+            die();
+        }
+        
+        if ($wmodel->vat_included) {
+            $model->sum = round($model->defsum/(1+$model->vat/10000),2);
+        } else {
+            $model->sum = $model->defsum;
+        }
+        
 
         if (!$model->save()) {
             echo $model->getErrors();

@@ -204,8 +204,8 @@ $this->title = 'Заявки';
       </div>
     </div>
     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-2">
-          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs', 'style'=>'margin-bottom:15px']) ?>
-          <?php echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs']) ?>
+          <?php //echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs', 'style'=>'margin-bottom:15px']) ?>
+          <?php //echo Html::img('@web/images/banner-240x400.gif', ['class' => 'img-responsive hidden-xs']) ?>
     </div>
   </div>
 </section>

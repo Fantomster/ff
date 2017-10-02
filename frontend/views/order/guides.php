@@ -138,9 +138,12 @@ $this->registerJs('
 
     $(document).on("click", ".add-to-cart", function(e) {
         e.preventDefault();
+        var btnAddToCart = $(this);
+        if (btnAddToCart.hasClass("disabled")) {
+            return false;
+        }
         var quantityInput = $(this).parent().parent().find(".quantity");
         var cart = $(".basket_a");
-        var btnAddToCart = $(this);
         var imgtodrag = $("#cart-image");
         if (imgtodrag) {
             var imgclone = imgtodrag.clone()

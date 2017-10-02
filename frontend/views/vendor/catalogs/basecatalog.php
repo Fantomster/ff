@@ -204,17 +204,7 @@ Modal::end();
                             ExportMenu::FORMAT_TEXT => false,
                             ExportMenu::FORMAT_EXCEL => false,
                             ExportMenu::FORMAT_PDF => false,
-                            ExportMenu::FORMAT_CSV => false, /* [
-                              'label' => Yii::t('kvexport', 'CSV'),
-                              'icon' => 'file-code-o',
-                              'iconOptions' => ['class' => 'text-primary'],
-                              'linkOptions' => [],
-                              'options' => ['title' => Yii::t('kvexport', 'Comma Separated Values')],
-                              'alertMsg' => Yii::t('kvexport', 'Вы загружаете CSV файл.'),
-                              'mime' => 'application/csv;charset=UTF-8',
-                              'extension' => 'csv',
-                              'writer' => 'CSV'
-                              ], */
+                            ExportMenu::FORMAT_CSV => false, 
                             ExportMenu::FORMAT_EXCEL_X => [
                                 'label' => Yii::t('kvexport', 'Excel'),
                                 'icon' => 'file-excel-o',
@@ -642,7 +632,6 @@ $(".del-product").live("click", function(e){
 	        cache: false,
 	        success: function(response) {
 		        if(response.success){
-                        //$.pjax.reload({container: "#clients-list"});
 			        $.pjax.reload({container: "#kv-unique-id-1"}); 
 			        }else{
 				    console.log('Что-то пошло не так');    
@@ -670,13 +659,15 @@ $("body").on("show.bs.modal", "#add-product-market-place", function() {
 $(document).on("submit", "#marketplace-product-form", function(e) {
         e.preventDefault();
     var form = $("#marketplace-product-form");
-    $('#loader-show').showLoading();
+    $("#btnSave").button("loading");
+    $("#btnCancel").prop("disabled", true);
     $.post(
         form.attr("action"),
             form.serialize()
             )
             .done(function(result) {
-            $('#loader-show').hideLoading();
+            $("#btnSave").button("reset");
+            $("#btnCancel").prop("disabled", false);
             form.replaceWith(result);
         $.pjax.reload({container: "#kv-unique-id-1"});
         });

@@ -287,9 +287,13 @@ class CatalogController extends DefaultController
                 exit;
             } else {
                 $product_id = Yii::$app->request->post('baseProductId');
-                $CatalogGoods = CatalogGoods::deleteAll(['base_goods_id' => $product_id]);
-                return (['success' => true, 'Удален']);
-                exit;
+                $catalog_id = Yii::$app->request->post('cat_id');
+                if($product_id && $catalog_id){
+                    CatalogGoods::deleteAll(['base_goods_id' => $product_id, 'cat_id' => $catalog_id]);
+                    return (['success' => true, 'Удален']);
+                    exit;
+                }
+                return (['success' => false, 'Ошибка']);
             }
         }
     }

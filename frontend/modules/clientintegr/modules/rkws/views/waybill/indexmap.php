@@ -10,6 +10,7 @@ use yii\web\View;
 use yii\widgets\ListView;
 use kartik\grid\GridView;
 use kartik\editable\Editable;
+use kartik\checkbox\CheckboxX;
 use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;
@@ -46,7 +47,9 @@ Breadcrumbs::widget([
 ?>
 </section>
 <section class="content-header">
-<?= $this->render('/default/_menu.php'); ?>
+<?= $this->render('/default/_menu.php'); ?>   
+
+
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
 </section>
 <section class="content">
@@ -56,11 +59,51 @@ Breadcrumbs::widget([
             <div class="box-header with-border">
                 <div class="panel-body">
                     <div class="box-body table-responsive no-padding">
+                        <div style="text-align:center;"> 
+                    <?php echo '<label class="cbx-label" for="s_1">Цены в Заказе включают НДС</label>';
+                          echo CheckboxX::widget([
+                                'name'=>'s_1',
+                                'value' => $wmodel->vat_included ? 1 : 0,
+                                'options'=>['id'=>'s_1'],
+                                'pluginOptions'=>['threeState'=>false],
+                                'pluginEvents' =>[ 'change'=>'function() {
+                                    
+                                  //  var output = $("#output"); // блок вывода информации
+                                    
+                                    $.ajax({
+                                                url: "changevat", // путь к php-обработчику
+                                                type: "POST", // метод передачи данных
+                                            // dataType: "json", // тип ожидаемых данных в ответе
+                                                data: {key: this.value + "," + "'.$wmodel->id.'"}, // данные, которые передаем на сервер
+                                            /*            
+                                          beforeSend: function(){ // Функция вызывается перед отправкой запроса
+                                                      output.text("Запрос отправлен. Ждите ответа.");
+                                                                }, */
+                                                /*                    
+                                               error: function(req, text, error){ // отслеживание ошибок во время выполнения ajax-запроса
+                                                      output.text("Хьюстон, У нас проблемы! " + text + " | " + error);
+                                                                }, */
+                                                /*                    
+                                            complete: function(){ // функция вызывается по окончании запроса
+                                                      output.append("<p>Запрос полностью завершен!</p>");
+                                                                }, */
+                                                                
+                                              success: function(json){ // функция, которая будет вызвана в случае удачного завершения запроса к серверу
+                                                      // json - переменная, содержащая данные ответа от сервера. Обзывайте её как угодно ;)
+                                                      // output.html(json); // выводим на страницу данные, полученные с сервера
+                                                      // $("map_grid1").refresh;
+                                                      $.pjax.reload({container:"#map_grid1"}); 
+                                                                    }
+                                            }); 
+                                            // alert(this.value);
+                                            }'],
+                                ]); ?>    
+                        </div>   
 <?=
 GridView::widget([
     'dataProvider' => $dataProvider,
     'pjax' => true, // pjax is set to always true for this demo
-    //    'pjaxSettings' => ['options' => ['id' => 'kv-unique-id-1'], 'loadingCssClass' => false],
+    'pjaxSettings' => ['options' => ['id' => 'map_grid1']],
     'filterPosition' => false,
     'columns' => [
         'product_id',
@@ -283,3 +326,38 @@ GridView::widget([
     </div>            
 </section>
 
+<?php 
+/*
+$js = "
+  $('#s_1').on('change', function(){
+  
+    alert($('#s_1').checked);
+    return true;
+  /*
+    $.ajax({
+      url: 'changevat', // путь к php-обработчику
+      type: 'POST', // метод передачи данных
+      dataType: 'json', // тип ожидаемых данных в ответе
+      data: {key: 1}, // данные, которые передаем на сервер
+      beforeSend: function(){ // Функция вызывается перед отправкой запроса
+        output.text('Запрос отправлен. Ждите ответа.');
+      },
+      error: function(req, text, error){ // отслеживание ошибок во время выполнения ajax-запроса
+        output.text('Хьюстон, У нас проблемы! ' + text + ' | ' + error);
+      },
+      complete: function(){ // функция вызывается по окончании запроса
+        output.append('<p>Запрос полностью завершен!</p>');
+      },
+      success: function(json){ // функция, которая будет вызвана в случае удачного завершения запроса к серверу
+        // json - переменная, содержащая данные ответа от сервера. Обзывайте её как угодно ;)
+        output.html(json); // выводим на страницу данные, полученные с сервера
+      }
+    });
+
+  });
+
+";
+    
+$this->registerJs($js);  
+*/
+?>

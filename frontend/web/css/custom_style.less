@@ -327,7 +327,7 @@ a {
     color: @sidebar-dark-bg !important;
     border-color: #f39c12; 
 }*/
-.fk-tab.nav-tabs > li> a{
+.fk-tab.nav-tabs > li> a, .fk-tab.nav-tabs > li> button {
     border: none; 
     background: #ecf0f5;
     color:#ccc;
@@ -375,7 +375,7 @@ a {
     //float:left;
 }
 
-.fk-prev-next > li> a{
+.fk-prev-next > li> a, .fk-prev-next > li> button{
     display:block;
     border: none; 
     background: #ecf0f5;
@@ -390,7 +390,7 @@ a {
     font-weight:bold;
     color: lighten(@sidebar-dark-bg,30%); 
 }
-.fk-prev-next .fk-next > a{
+.fk-prev-next .fk-next > a, .fk-prev-next .fk-next > button {
     //border:1px solid #ddd;
     background-color: @fk-success;
     color: #fff;  
@@ -923,7 +923,7 @@ a:hover, a:active, a:focus {
     }
 }
 #actionButtons {
-    .disabled {
+    .status {
         margin-bottom: 15px;
     }
     .btnOrderAction {

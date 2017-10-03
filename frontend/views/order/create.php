@@ -31,7 +31,6 @@ $this->registerJs(
             });
             $(document).on("click", ".add-to-cart", function(e) {
                 e.preventDefault();
-                //$("#loader-show").showLoading();
                 quantity = $(this).parent().parent().find(".quantity").val();
                 var cart = $(".basket_a");
                 var imgtodrag = $("#cart-image");
@@ -74,7 +73,6 @@ $this->registerJs(
                     "' . Url::to(['/order/ajax-add-to-cart']) . '",
                     {"id": $(this).data("id"), "quantity": quantity, "cat_id": $(this).data("cat")}
                 ).done(function(result) {
-                    //$("#loader-show").hideLoading();
                 });
             });
             
@@ -87,33 +85,8 @@ $this->registerJs(
                     $("#searchForm").submit();
                 }, 700);
             });
-            $("#orders").on("click", ".delete-position", function(e) {
-                $("#loader-show").showLoading();
-                clicked = $(this);
-                $.post(
-                    clicked.data("url")
-                )
-                .done(function (result) {
-                    $("#loader-show").hideLoading();
-                });
-                return false;
-            });
             $("body").on("hidden.bs.modal", "#changeQuantity, #showDetails", function() {
                 $(this).data("bs.modal", null);
-            });
-            $("body").on("submit", "#quantityForm", function() {
-                return false;
-            });
-            $("#changeQuantity").on("click", ".save", function() {
-                $("#loader-show").showLoading();
-                var form = $("#quantityForm");
-                $.post(
-                    form.attr("action"),
-                    form.serialize()
-                )
-                .done(function (result) {
-                    $("#loader-show").hideLoading();
-                });
             });
             $(document).on("click", ".pagination li a", function() {
                 clearTimeout(timer);

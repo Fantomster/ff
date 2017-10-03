@@ -84,7 +84,7 @@ class NotificationHelper {
         
         foreach ($users as $user)
         {
-         $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+         $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
        
 
             foreach ($fcm as $row)
@@ -115,7 +115,7 @@ class NotificationHelper {
         
         foreach ($users as $user)
         {
-         $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
+         $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();
        
             foreach ($fcm as $row)
             {

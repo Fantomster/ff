@@ -1,15 +1,15 @@
-<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 600px;">
+<div class="block_wrapper1" style="width: 100%;-webkit-border-radius: 3px;border-radius: 3px;background-color: #fff;border-top: 3px solid #00a65a;box-shadow: 0 1px 1px rgba(0,0,0,0.1); min-width: 320px;">
     <div class="block__wrapp" style="width: 100%;	height: 100%; padding: 20px;">
-        <img  src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" alt="" style="margin: 0 auto;display: block;margin-top: 10px;margin-bottom: 30px;" width="393" height="113">
+        <img  src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" alt="" class="block_logo">
 
         <div style="width: 100%;">
-            <div style="width: 50%;float:left;">
+            <div class="block_new">
                 <div style="width: 100%;">
                     <div class="block_name" style="width: 60%;float:left;">
                         <p class = "z_1" style="font-family: Circe_Bold; text-transform: uppercase;font-size: 16px; text-align: left;">Заказчик</p>
                         <p class= "name_dashed" style="font-family: sans-serif;font-size: 18px;border-bottom: 1px dashed #000; width: 100%;text-align: left;font-weight: 100;" ><?= $order->client->name ?></p>
                     </div>
-                    <div class="block_img" style="width: 40%;float:left;">
+                    <div class="block_img" >
                         <img class = "img_i pull-left" src="<?= $order->client->pictureUrl ?>" alt="" width="93" height="52">
                     </div>
                 </div>
@@ -22,9 +22,9 @@
                     <p style="font-family: Circe_Bold;padding-top: 20px;	text-align: left;color: #999C9E;flex-wrap: bold;">Запрошенная дата доставки: <?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:j M Y") : '' ?></p>
                 </div>
             </div>
-            <div style="width: 50%;float:left;">
+            <div class="block_new2">
                 <div style="width: 100%;">
-                    <div class="block_img" style="width: 40%;float:left;">
+                    <div class="block_img" >
                         <img  class = "img_i pull-right" src="<?= $order->vendor->pictureUrl ?>" alt="" width="93" height="52">
                     </div>
                     <div class="block_name" style="width: 60%;float:left;">

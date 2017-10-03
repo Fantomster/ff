@@ -107,6 +107,9 @@ $customJs = <<< JS
     });    
         
     $(document).on("change keyup paste cut", "#SuppliersFormSend input", function() {
+        if (!$(this).is(":focus")) {
+            return false;
+        }
         if (timer) {
             clearTimeout(timer);
         }
@@ -137,18 +140,23 @@ $customJs = <<< JS
         )
         .done(function(result) {
             if (!result.errors) {
-                form.replaceWith(result.form);
                 if (result.vendorFound) {
                     $("#addProduct").hide();
                     $("#inviteSupplier").show();
-                    //form.replaceWith(result.form);
+                    $("#profile-full_name").prop("disabled", true);
+                    $("#profile-phone").prop("disabled", true);
+                    $("#organization-name").prop("disabled", true);
+                    $("#profile-full_name").val(result.full_name);
+                    $("#profile-phone").val(result.phone);
+                    $("#organization-name").val(result.organization_name);
                 } else {
                     enableFields();
-                    //$("#profile-full_name").focus();
                     $("#addProduct").show();
                     $("#inviteSupplier").hide();
+                    if ($("#profile-full_name").val()) {
+                        $("#addProduct").prop("disabled", false);
+                    }
                 }
-                $("#addProduct").prop("disabled", false);
             } else {
                 $("#addProduct").prop("disabled", true);
                 if (result.vendor_added) {
@@ -234,7 +242,8 @@ $(document).on('hidden.bs.modal','#modal_addProduct', function (e) {
   $('#CreateCatalog *').remove();
 });
 $('#invite').click(function(e){	
-    $('#loader-show').showLoading();
+    $("#invite").button("loading");
+    $("#btnCancel").prop( "disabled", true );
     e.preventDefault();
 	var i, items, item, dataItem, data = [];
 	var cols = ['product', 'ed', 'price'];
@@ -270,7 +279,8 @@ $('#invite').click(function(e){
             success: function (response) {
                 if(response.success){
                     $("#continue").prop("disabled", false);
-                    $('#loader-show').hideLoading();
+                    $("#invite").button("reset");
+                    $("#btnCancel").prop( "disabled", false );
                     swal({
                         title: "Поставщик добавлен!", 
                         text: response.message,
@@ -279,7 +289,8 @@ $('#invite').click(function(e){
                             location.reload(); 
                         });
                 }else{
-                    $('#loader-show').hideLoading();
+                    $("#invite").button("reset");
+                    $("#btnCancel").prop( "disabled", false );
                     swal({
                         title: "Ошибка!", 
                         text: response.message,
@@ -287,7 +298,8 @@ $('#invite').click(function(e){
                 }
             },
             error: function(response) {
-                $('#loader-show').hideLoading();
+                $("#invite").button("reset");
+                $("#btnCancel").prop( "disabled", false );
             }
         });
 });       
@@ -366,8 +378,8 @@ $disabled = true;
             </div>
             <div class="modal-footer">
                 
-                <button type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
-                <button id="invite" type="button" class="btn btn-success">Отправить</button>
+                <button type="button" class="btn btn-gray" data-dismiss="modal" id="btnCancel">Отмена</button>
+                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
             </div>
         </div>
     </div>

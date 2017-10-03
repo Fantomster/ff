@@ -6,6 +6,7 @@ use kartik\date\DatePicker;
 use yii\helpers\ArrayHelper;
 use kartik\tree\TreeViewInput;
 use yii\bootstrap\Dropdown;
+use common\models\User;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\pdict\DictAgent */
@@ -13,6 +14,8 @@ use yii\bootstrap\Dropdown;
 ?>
 
 <div class="dict-agent-form">
+    
+     <?php $org = User::findOne(Yii::$app->user->id)->organization_id; // var_dump($org); ?>
     
     <?php  if(empty($model->store_rid)) $model->store_rid = 1; ?>
 
@@ -36,7 +39,7 @@ use yii\bootstrap\Dropdown;
                                                     [
                                                         'name' => 'store_rid',
                                                         'value' => 'true', // preselected values
-                                                        'query' => api\common\models\RkStoretree::find()->addOrderBy('root, lft'),
+                                                        'query' => api\common\models\RkStoretree::find()->andWhere('acc = :acc',[':acc' => $org])->addOrderBy('root, lft'),
                                                       //  'headingOptions' => ['label' => 'Склады'],
                                                         'rootOptions' => ['label'=>'Корень'],
                                                         'fontAwesome' => true,

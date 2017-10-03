@@ -73,7 +73,7 @@ class AgentHelper extends AuthHelper {
             } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
         }
      
-     // var_dump($res);
+     var_dump($res);
      
      return true;
     

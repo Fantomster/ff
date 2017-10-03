@@ -104,15 +104,81 @@ class UtilsController extends Controller {
 
     public function actionTestRedis() {
         \Yii::$app->redis->executeCommand('PUBLISH', [
-                'channel' => 'test',
-                'message' => 'ololo!'
-            ]);
+            'channel' => 'test',
+            'message' => 'ololo!'
+        ]);
     }
-    
+
     public function actionUpdateMpCategories() {
         $categories = \common\models\MpCategory::find()->all();
         foreach ($categories as $category) {
             $category->update();
         }
     }
+
+    public function actionEraseOrganization($orgId) {
+        $organization = \common\models\Organization::findOne(['id' => $orgId]);
+        echo $organization->name;
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            \common\models\DeliveryRegions::deleteAll(['supplier_id' => $orgId]);
+            \common\models\FranchiseeAssociate::deleteAll(['organization_id' => $orgId]);
+            $guides = \common\models\guides\Guide::findAll(['client_id' => $orgId]);
+            foreach ($guides as $guide) {
+                \common\models\guides\GuideProduct::deleteAll(['guide_id' => $guide->id]);
+                $guide->delete();
+            }
+            \common\models\RelationSuppRest::deleteAll(['supp_org_id' => $orgId]);
+            \common\models\RelationSuppRest::deleteAll(['rest_org_id' => $orgId]);
+            $orders = ($organization->type_id === \common\models\Organization::TYPE_RESTAURANT) ? \common\models\Order::findAll(['client_id' => $orgId]) : \common\models\Order::findAll(['vendor_id' => $orgId]);
+            foreach ($orders as $order) {
+                //\common\models\OrderContent::deleteAll(['order_id' => $order->id]);
+                foreach ($order->orderContent as $content) {
+                    $content->delete();
+                }
+                foreach ($order->orderChat as $chat) {
+                    $chat->delete();
+                }
+                //\common\models\OrderChat::deleteAll(['order_id' => $this->id]);
+                $order->delete();
+            }
+            $catalogs = \common\models\Catalog::findAll(['supp_org_id' => $orgId]);
+            foreach ($catalogs as $catalog) {
+                \common\models\CatalogGoods::deleteAll(['cat_id' => $catalog->id]);
+            }
+            $goodsNotes = \common\models\GoodsNotes::find()
+                    ->leftJoin('catalog_base_goods', 'catalog_base_goods.id = goods_notes.catalog_base_goods_id')
+                    ->where(['catalog_base_goods.supp_org_id' => $orgId])
+                    ->all();
+            foreach ($goodsNotes as $note) {
+                $note->delete();
+            }
+            \common\models\CatalogBaseGoods::deleteAll(['supp_org_id' => $orgId]);
+            \common\models\Catalog::deleteAll(['supp_org_id' => $orgId]);
+            \common\models\RequestCallback::deleteAll(['supp_org_id' => $orgId]);
+            $requests = \common\models\Request::findAll(['rest_org_id' => $orgId]);
+            foreach ($requests as $request) {
+                \common\models\RequestCallback::deleteAll(['request_id' => $this->id]);
+                \common\models\RequestCounters::deleteAll(['request_id' => $this->id]);
+                $request->delete();
+            }
+            \common\models\ManagerAssociate::deleteAll(['organization_id' => $orgId]);
+            $users = \common\models\User::findAll(['organization_id' => $orgId]);
+            foreach ($users as $user) {
+                \common\models\ManagerAssociate::deleteAll(['manager_id' => $this->id]);
+                $user->emailNotification->delete();
+                $user->smsNotification->delete();
+                \common\models\UserFcmToken::deleteAll(['user_id' => $this->id]);
+                \common\models\UserToken::deleteAll(['user_id' => $this->id]);
+                $user->profile->delete();
+                $user->delete();
+            }
+            $organization->buisinessInfo->delete();
+            $organization->delete();
+            $transaction->commit();
+        } catch (Exception $ex) {
+            $transaction->rollback();
+        }
+    }
+
 }

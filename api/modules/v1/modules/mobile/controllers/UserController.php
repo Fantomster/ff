@@ -73,8 +73,16 @@ class UserController extends ActiveController {
         $user = User::findOne(Yii::$app->user->id);
         $profile = $user->profile;
         $organization = $user->organization;
-        $organization->picture = $organization->pictureUrl;
+        //$organization->picture = $organization->pictureUrl;
         return compact("user","profile","organization");
+    }
+    
+     public function actionAvatar($name) {
+         $organization = new Organization();  
+         $organization->picture = $name;
+         header('Content-type: image/jpeg');
+         echo file_get_contents($organization->pictureUrl);
+  
     }
     
     public function actionRegistration() {
@@ -183,7 +191,7 @@ class UserController extends ActiveController {
             $userToken->delete();
         }
 
-        return ($success) ? compact("user","profile","organization") : ['error' => Yii::t('user','Invalid PIN')];
+        return ($success) ? compact("user","profile","organization") : ['error' => 'Неверный код'/*Yii::t('user','Invalid PIN')*/];
     }
 
     public function actionCompleteRegistration() {

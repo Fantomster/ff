@@ -11,8 +11,6 @@ use yii\web\View;
 use common\models\Users;
 use kartik\export\ExportMenu;
 use kartik\editable\Editable;
-use nirvana\showloading\ShowLoadingAsset;
-ShowLoadingAsset::register($this);
 \frontend\assets\HandsOnTableAsset::register($this);
 
 $this->registerCss('.handsontable .htCore .htDimmed {
@@ -56,7 +54,14 @@ $this->title = 'Редактировать продукты';
             </ul>
             <ul class="fk-prev-next pull-right">
               <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Далее',['vendor/step-4','id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
+              <?='<li class="fk-next">'.Html::button('<span><i class="fa fa-save"></i> Далее</span>', [
+                  'id'=>'save', 
+                  'name'=>'save',
+                  'data' => [
+                      'url' => Url::to(['vendor/step-4','id'=>$cat_id]),
+                      'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+                  ],
+                  ]).'</li>'?>
             </ul>
         </div>
         <div class="panel-body">
@@ -247,7 +252,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
             data.push({dataItem});
         }    
     });
-    $('#loader-show').showLoading();
+    $('#save').button("loading");
     $.ajax({
           url: "$step3CopyUrl",
           type: 'POST',
@@ -259,7 +264,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                 var url = "$step4Url";
                 $(location).attr("href",url);
               }else{
-                $('#loader-show').hideLoading();
+                $('#save').button("reset");
                 bootbox.dialog({
                     message: response.alert.body,
                     title: response.alert.title,

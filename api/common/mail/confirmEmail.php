@@ -25,4 +25,4 @@ use yii\helpers\Url;
     width: 80%;">Подтвердить</a>
 </div>
 <br style="margin: 0; padding: 0;" />
-<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Или введите в мобильном приложении PIN: <b><?=$userToken->pin?></b></p>
+<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Или введите код в мобильном приложении: <b><?=$userToken->pin?></b></p>

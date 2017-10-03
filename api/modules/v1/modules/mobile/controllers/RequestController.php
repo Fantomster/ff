@@ -39,12 +39,12 @@ class RequestController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            'update' => [
+            /*'update' => [
                 'class' => 'yii\rest\UpdateAction',
                 'modelClass' => 'common\models\Request',
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
-            ],
+            ],*/
             'create' => [
                 'class' => 'yii\rest\CreateAction',
                 'modelClass' => 'common\models\Request',
@@ -149,4 +149,21 @@ class RequestController extends ActiveController {
                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
        }
    }
+   
+   public function actionUpdate($id)
+    {
+        /* @var $model ActiveRecord */
+        $model = $this->findModel($id);
+
+        $this->checkAccess($this->id, $model);
+
+        $model->scenario = $this->updateScenario;
+        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+        var_dump(Yii::$app->getRequest()->getBodyParams());
+        if ($model->save() === false && !$model->hasErrors()) {
+            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
+        }
+
+        return $model;
+    }
 }

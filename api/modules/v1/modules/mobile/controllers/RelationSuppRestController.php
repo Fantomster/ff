@@ -125,7 +125,7 @@ class RelationSuppRestController extends ActiveController {
                 }else{
                 $relationSuppRest = new \common\models\RelationSuppRest();   
                 }
-                $relationSuppRest->deleted = false;
+                $relationSuppRest->deleted = 0;
                 $relationSuppRest->rest_org_id = $client->organization_id;
                 $relationSuppRest->supp_org_id = $vendor->id;
                 $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;

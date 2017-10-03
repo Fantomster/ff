@@ -39,12 +39,12 @@ class RequestController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            /*'update' => [
+            'update' => [
                 'class' => 'yii\rest\UpdateAction',
                 'modelClass' => 'common\models\Request',
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
-            ],*/
+            ],
             'create' => [
                 'class' => 'yii\rest\CreateAction',
                 'modelClass' => 'common\models\Request',
@@ -150,7 +150,7 @@ class RequestController extends ActiveController {
        }
    }
    
-   public function actionUpdate($id)
+   public function actionRemoveSupply($id)
     {
         /* @var $model ActiveRecord */
         $model = $this->findModel($id);
@@ -158,8 +158,7 @@ class RequestController extends ActiveController {
         $this->checkAccess($this->id, $model);
 
         $model->scenario = $this->updateScenario;
-        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
-        var_dump(Yii::$app->getRequest()->getBodyParams());
+        $model->responsible_supp_org_id = null;
         if ($model->save() === false && !$model->hasErrors()) {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }

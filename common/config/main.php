@@ -23,8 +23,8 @@ return [
         ],
         'resourceManager' => [
             'class' => 'dosamigos\resourcemanager\AmazonS3ResourceManager',
-            'key' => 'AKIAIQWR4FTPYC2CM6QQ',
-            'secret' => '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',
+            'key' => 'AKIAJZH26ZXTQSLVFT6A',
+            'secret' => '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',
             'bucket' => 'fkeeper',
         ],
         'i18n' => [
@@ -41,8 +41,8 @@ return [
             'viewPath' => '@common/mail',
             'class' => 'common\components\Mailer',
             'useFileTransport' => false,
-            'access_key' => 'AKIAIFLSS7TR5MOL64WQ',
-            'secret_key' => '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',
+            'access_key' => 'AKIAIMZCOXBPC5GJY4MA',
+            'secret_key' => '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',
             'host' => 'email.eu-west-1.amazonaws.com',
             'messageConfig' => [
 //                'from' => ['noreply@f-keeper.ru' => 'noreply@f-keeper.ru'],

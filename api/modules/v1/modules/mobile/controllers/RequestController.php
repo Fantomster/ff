@@ -149,4 +149,20 @@ class RequestController extends ActiveController {
                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
        }
    }
+   
+   public function actionRemoveSupply($id)
+    {
+        /* @var $model ActiveRecord */
+        $model = $this->findModel($id);
+
+        $this->checkAccess($this->id, $model);
+
+        $model->scenario = $this->updateScenario;
+        $model->responsible_supp_org_id = null;
+        if ($model->save() === false && !$model->hasErrors()) {
+            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
+        }
+
+        return $model;
+    }
 }

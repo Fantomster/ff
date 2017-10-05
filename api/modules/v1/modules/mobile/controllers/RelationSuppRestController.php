@@ -125,7 +125,7 @@ class RelationSuppRestController extends ActiveController {
                 }else{
                 $relationSuppRest = new \common\models\RelationSuppRest();   
                 }
-                $relationSuppRest->deleted = false;
+                $relationSuppRest->deleted = 0;
                 $relationSuppRest->rest_org_id = $client->organization_id;
                 $relationSuppRest->supp_org_id = $vendor->id;
                 $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
@@ -137,7 +137,7 @@ class RelationSuppRestController extends ActiveController {
                 $mailer = Yii::$app->mailer; 
                 $email = $client->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "f-keeper.ru - заявка №" . $request->id;
+                 $subject = "mixcart.ru - заявка №" . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestInviteSupplierMailToRest', compact("request","client"))
                         ->setTo($email)->setSubject($subject)->send();
@@ -155,7 +155,7 @@ class RelationSuppRestController extends ActiveController {
                     $mailer = Yii::$app->mailer;
                     $email = $user->email; 
                     //$email = 'marshal1209448@gmail.com';
-                    $subject = "f-keeper.ru - заявка №" . $request->id;
+                    $subject = "mixcart.ru - заявка №" . $request->id;
                     $mailer->htmlLayout = 'layouts/request';
                     $result = $mailer->compose('requestInviteSupplier', compact("request","user"))
                             ->setTo($email)->setSubject($subject)->send();

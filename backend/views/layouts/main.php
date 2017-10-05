@@ -185,11 +185,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 ?>
                 <?= Alert::widget() ?>
                 <?= $content ?>
-                
-                <?php
-                echo Yii::$app->params['integratAdminID'];
-                echo Yii::$app->user->id;
-                ?>
+
             </div>
         </div>
 

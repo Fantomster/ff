@@ -193,6 +193,11 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
 
                 <p class="pull-right">Работает, оно работает!</p>
+                <?php
+                var_dump(Yii::$app->params['integratAdminID']);
+                var_dump(Yii::$app->user->id);
+                ?>
+                
             </div>
         </footer>
         <div id="loader-show"></div>

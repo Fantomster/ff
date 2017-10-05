@@ -35,10 +35,10 @@ class ServiceHelper extends AuthHelper {
     <RQ cmd="get_objects" guid="'.$guid.'">
      </RQ>'; 
        
-     $res = ApiHelper::sendCurl($xml,$this->restr);
+     $res = ApiHelper::sendCurl($xml,199990046);
      
-    // var_dump($res);
-       
+    var_dump($res);
+     
                // Обновление списка доступных объектов
     foreach($res['resp'] as $obj) {
                 

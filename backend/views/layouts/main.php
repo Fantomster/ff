@@ -144,7 +144,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                     ]);
 
                 //    if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529) || (Yii::$app->user->id === 4435)) {
-                    if (inArray(Yii::$app->user->id,Yii::$app->params['integratAdminID'])) {
+                    if (in_Array(Yii::$app->user->id,Yii::$app->params['integratAdminID'])) {
                         $menuItems = array_merge($menuItems, [
                             [
                                 'label' => 'Интеграция',

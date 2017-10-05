@@ -197,7 +197,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             <div class="container">
                 <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
 
-                <p class="pull-right">Работает, оно работает!!</p>
+                <p class="pull-right">Работает, оно работает!</p>
 
                 
             </div>

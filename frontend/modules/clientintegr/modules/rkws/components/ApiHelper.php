@@ -125,8 +125,6 @@ class ApiHelper  {
     */
     public static function sendCurl($xml,$restr) {
         
-    echo $restr;    
-        
     $objectinfo = [];
     $respcode = [];
         

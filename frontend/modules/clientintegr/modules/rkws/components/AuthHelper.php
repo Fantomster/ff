@@ -66,7 +66,7 @@ class AuthHelper extends Object {
         <PARAM name="object_id" val="199990046"/>
         </RQ>';  
         
-        $res = ApiHelper::sendCurl($xml,$this->restr);
+        $res = ApiHelper::sendCurl($xml,199990046);
         
       //  echo "Checkauthbool<br>";
       //  var_dump($res);

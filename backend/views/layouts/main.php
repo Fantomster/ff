@@ -194,8 +194,8 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
 
                 <p class="pull-right">Работает, оно работает!</p>
                 <?php
-                var_dump(Yii::$app->params['integratAdminID']);
-                var_dump(Yii::$app->user->id);
+                echo Yii::$app->params['integratAdminID'];
+                echo Yii::$app->user->id;
                 ?>
                 
             </div>

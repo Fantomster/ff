@@ -185,6 +185,11 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 ?>
                 <?= Alert::widget() ?>
                 <?= $content ?>
+                
+                <?php
+                echo Yii::$app->params['integratAdminID'];
+                echo Yii::$app->user->id;
+                ?>
             </div>
         </div>
 
@@ -193,10 +198,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
 
                 <p class="pull-right">Работает, оно работает!</p>
-                <?php
-                echo Yii::$app->params['integratAdminID'];
-                echo Yii::$app->user->id;
-                ?>
+
                 
             </div>
         </footer>

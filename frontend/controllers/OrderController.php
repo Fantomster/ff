@@ -773,23 +773,39 @@ class OrderController extends DefaultController {
 
     public function actionAjaxSetDelivery() {
         if (Yii::$app->request->post()) {
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             $client = $this->currentUser->organization;
             $order_id = Yii::$app->request->post('order_id');
             $delivery_date = Yii::$app->request->post('delivery_date');
             $order = Order::findOne(['id' => $order_id, 'client_id' => $client->id, 'status' => Order::STATUS_FORMING]);
             $oldDateSet = isset($order->requested_delivery);
-            if ($order) {
+            if ($order && !empty($delivery_date)) {
+                
+                $nowTS = time();
+                $requestedTS = strtotime($delivery_date . ' 19:00:00');
+                
                 $timestamp = date('Y-m-d H:i:s', strtotime($delivery_date . ' 19:00:00'));
 
-                $order->requested_delivery = $timestamp;
-                $order->save();
+                if ($nowTS < $requestedTS) {
+                    $order->requested_delivery = $timestamp;
+                    $order->save();
+                } else {
+                    $result = ["title" => "Некорректная дата", "type" => "error"];
+                    return $result;
+                }
             }
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            if ($oldDateSet) {
+            if ($oldDateSet && !empty($delivery_date)) {
                 $result = ["title" => "Дата доставки изменена", "type" => "success"];
                 return $result;
-            } else {
+            } 
+            if (!$oldDateSet && !empty($delivery_date)) {
                 $result = ["title" => "Дата доставки установлена", "type" => "success"];
+                return $result;
+            }
+            if (empty($delivery_date)) {
+                $order->requested_delivery = null;
+                $order->save();
+                $result = ["title" => "Дата доставки удалена", "type" => "success"];
                 return $result;
             }
         }

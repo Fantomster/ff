@@ -12,5 +12,6 @@ return [
     ],
     'password_generation' => 'Создание пароля для входа в систему MixCart',
     'protocol' => 'http',
-    'franchiseeHost' => '//partner.f-keeper.ru'
+    'franchiseeHost' => '//partner.f-keeper.ru',
+    'integratAdminID' => [],
 ];

@@ -118,7 +118,7 @@ class UtilsController extends Controller {
 
     public function actionEraseOrganization($orgId) {
         $organization = \common\models\Organization::findOne(['id' => $orgId]);
-        echo $organization->name . '\n';
+        echo $organization->name . "\n";
         $transaction = \Yii::$app->db->beginTransaction();
         try {
             \common\models\DeliveryRegions::deleteAll(['supplier_id' => $orgId]);

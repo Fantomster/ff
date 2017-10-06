@@ -155,26 +155,26 @@
                     <td>Мобильные приложения Андройд keynote</td>
                     <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/5_Мобильные_приложения_Андройд_keynote.key" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
-                <tr>
-                    <td>Почетные гости: UCS - новые подходы к маркетингу ресторана</td>
-                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/6_Почетные_гости_UCS_Новые_подходы_к_маркетингу_ресторана.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                    <td>Почетные гости: LeClickRU - рынок онлайн бронирования</td>
-                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/7_Почетные_гости_LeClickRU_Рынок_онлайн_бронирования.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                    <td>Почетные гости: Foodfox - интегрированный сервис доставки еды</td>
-                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/8_Почетные_гости_Foodfox_интегрированный_сервис_доставки_еды.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                    <td>Почетные гости: ServiceGuru - новая технология обучения персонала</td>
-                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/9_Почетные_гости_ServiceGuru_Новая_технология_обучения_персонала.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
-                <tr>
-                    <td>Почетные гости: HURMA EDUCATION GASTREET 2017</td>
-                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/10_Почетные_гости_HURMA_EDUCATION_GASTREET_2017.pdf" data-skin="skin-blue" target="_blank" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
+<!--                <tr>-->
+<!--                    <td>Почетные гости: UCS - новые подходы к маркетингу ресторана</td>-->
+<!--                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/6_Почетные_гости_UCS_Новые_подходы_к_маркетингу_ресторана.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td>Почетные гости: LeClickRU - рынок онлайн бронирования</td>-->
+<!--                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/7_Почетные_гости_LeClickRU_Рынок_онлайн_бронирования.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td>Почетные гости: Foodfox - интегрированный сервис доставки еды</td>-->
+<!--                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/8_Почетные_гости_Foodfox_интегрированный_сервис_доставки_еды.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td>Почетные гости: ServiceGuru - новая технология обучения персонала</td>-->
+<!--                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/9_Почетные_гости_ServiceGuru_Новая_технология_обучения_персонала.pdf" target="_blank" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td>Почетные гости: HURMA EDUCATION GASTREET 2017</td>-->
+<!--                    <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/10_Почетные_гости_HURMA_EDUCATION_GASTREET_2017.pdf" data-skin="skin-blue" target="_blank" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>-->
+<!--                </tr>-->
                 <tr>
                     <td>Презентации_mixcart_семинар_102017.tar.gz</td>
                     <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/Презентации_mixcart_семинар_102017.tar.gz" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>

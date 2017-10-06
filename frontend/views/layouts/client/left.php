@@ -24,9 +24,11 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 
-$arrService = RkService::find()->select('org')->asArray->all(); 
+$arrService = RkService::find()->select('org')->asArray()->all(); 
+    foreach ($arrService as $key => $val) {
+        $resArr[] = $val['org'];
+    }
 
-var_dump($arrService);
 ?>
 
 <aside class="main-sidebar">
@@ -101,7 +103,7 @@ var_dump($arrService);
                     </a>
                 </p>
             </div>
-        </ul>
+        </ul>     
     </section>
 </aside>
 <?php

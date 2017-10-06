@@ -181,7 +181,7 @@ class UtilsController extends Controller {
         }
     }
 
-    public function MassErase() {
+    public function actionMassErase() {
         $organizationsIds = [3471,
             3472,
             3473,

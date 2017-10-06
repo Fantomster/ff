@@ -118,6 +118,9 @@ class UtilsController extends Controller {
 
     public function actionEraseOrganization($orgId) {
         $organization = \common\models\Organization::findOne(['id' => $orgId]);
+        if (empty($organization)) {
+            return;
+        }
         echo $organization->name . "\n";
         $transaction = \Yii::$app->db->beginTransaction();
         try {

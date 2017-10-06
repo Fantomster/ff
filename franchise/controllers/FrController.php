@@ -34,6 +34,7 @@ class FrController extends \yii\rest\Controller {
     }
 
     public function actionPost() {
+        Yii::$app->response->format = Response::FORMAT_JSON;
         if (Yii::$app->request->post('FIELDS')) {
             $fields = Yii::$app->request->post('FIELDS');
             $sitepage = isset($fields['sitepage']) ? Html::encode($fields['sitepage']) : '';
@@ -49,7 +50,6 @@ class FrController extends \yii\rest\Controller {
             $lname = isset($fields['lead_name']) ? Html::encode($fields['lead_name']) : '';
             $response = null;
             if (strlen(trim($cname)) < 2 || strlen(trim($cphone)) < 7) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
                 return ['result' => 'error'];
             }
 
@@ -106,6 +106,9 @@ class FrController extends \yii\rest\Controller {
                 $lead_name = 'fkeeper: Поставщик';
                 $responsible_user_id = 1427371;
             }
+        }
+        if (!isset($sitepage)) {
+            return ['result' => 'error'];
         }
         if ($sitepage == "client") {
             $lead_status_id = 465729;
@@ -323,13 +326,11 @@ class FrController extends \yii\rest\Controller {
         $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if (!$this->CheckCurlResponse($code)) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
             return ['result' => 'error'];
         }
 
         $Response = json_decode($out, true);
 
-        Yii::$app->response->format = Response::FORMAT_JSON;
         return ['result' => 'success'];
     }
 

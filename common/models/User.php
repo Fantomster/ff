@@ -54,6 +54,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
             [['organization_id'], 'integer'],
+            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'message' => 'Организация не найдена'],
         ];
 
         // add required for currentPassword on account page

@@ -138,7 +138,7 @@ class ClientController extends Controller {
         }
 
         try {
-            if ($user->load(Yii::$app->request->post()) && $profile->load(Yii::$app->request->post())) {
+            if ($user->load(Yii::$app->request->post()) && $profile->load(Yii::$app->request->post()) && $user->validate() && $profile->validate()) {
                 if (($user->organization_id == 1) && (Yii::$app->user->identity->id !== 76)) {
                     throw new NotFoundHttpException('Добавление пользователей в эту организацию отключено во имя Луны!');
                 }

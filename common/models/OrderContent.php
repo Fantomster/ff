@@ -170,12 +170,16 @@ class OrderContent extends \yii\db\ActiveRecord
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
         
-        \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+        }
     }
     
     public function afterDelete() {
         parent::afterDelete();
         
-        \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+        }
     }
 }

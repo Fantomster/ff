@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
+use api\common\models\RkService;
 
 $user = Yii::$app->user->identity;
 
@@ -22,6 +23,10 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
+
+$arrService = RkService::find()->select('org')->asArray->all(); 
+
+var_dump($arrService);
 ?>
 
 <aside class="main-sidebar">

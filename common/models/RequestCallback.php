@@ -18,21 +18,19 @@ use Yii;
  * @property Organization $organization
  * @property Request $request
  */
-class RequestCallback extends \yii\db\ActiveRecord
-{
+class RequestCallback extends \yii\db\ActiveRecord {
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'request_callback';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['request_id', 'supp_org_id', 'price'], 'required'],
             [['request_id', 'supp_org_id'], 'integer'],
@@ -47,8 +45,7 @@ class RequestCallback extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => 'ID',
             'request_id' => 'Request ID',
@@ -63,20 +60,22 @@ class RequestCallback extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getRequest()
-    {
+    public function getRequest() {
         return $this->hasOne(Request::className(), ['id' => 'request_id']);
     }
-    public function getOrganization()
-    {
+
+    public function getOrganization() {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
     }
-    
+
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
-        if($insert){
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequestCallback($this->id);
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            if ($insert) {
+                \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequestCallback($this->id);
+            }
         }
     }
+
 }

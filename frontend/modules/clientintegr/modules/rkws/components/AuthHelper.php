@@ -63,10 +63,10 @@ class AuthHelper extends Object {
         } else {
         $xml = '<?xml version="1.0" encoding="utf-8" ?>
         <RQ cmd="get_objectinfo">
-        <PARAM name="object_id" val="'.$this->restr->code.'"/>
+        <PARAM name="object_id" val="199990046"/>
         </RQ>';  
         
-        $res = ApiHelper::sendCurl($xml,$this->restr);
+        $res = ApiHelper::sendCurl($xml,199990046);
         
       //  echo "Checkauthbool<br>";
       //  var_dump($res);

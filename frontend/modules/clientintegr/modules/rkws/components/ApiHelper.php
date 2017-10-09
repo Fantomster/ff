@@ -133,7 +133,7 @@ class ApiHelper  {
     $url = Yii::$app->params['rkeepCmdURL'] ? Yii::$app->params['rkeepCmdURL'] : 'http://ws.ucs.ru/WSClient/api/Client/Cmd';
     
         if (empty($restr)) {
-                   echo "SendCurl.Access is not found :(";
+                   echo "SendCurl.Access is not found :((";
                    exit;
         }
     

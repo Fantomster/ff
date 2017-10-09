@@ -12,6 +12,8 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
 use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
+use api\common\models\RkService;
+
 //use frontend\modules\clientintegr\modules\rkws\components\ServiceHelper;
 
 /**
@@ -177,6 +179,18 @@ class RkwsController extends Controller {
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    protected function checkIntegrRK () {
+        
+        $arr = RkService::find()->select('org')->asArray->all();
+                
+        if (in_array(User::findOne([Yii::$app->user->id])->organization_id,$arr)) {
+            return true; // Ресторан есть в доступах к лицензии (даже если она неактивна
+        } else {
+            return false; // Ресторана нет в сервисах
+        }
+            
     }
 
 }

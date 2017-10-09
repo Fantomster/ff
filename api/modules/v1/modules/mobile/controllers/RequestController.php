@@ -141,7 +141,7 @@ class RequestController extends ActiveController {
    {
        // check if the user can access $action and $model
        // throw ForbiddenHttpException if access should be denied
-       if ($action === 'update' || $action === 'delete') {
+       if ($action === 'update' || $action === 'delete' || $action === 'view') {
            $user = Yii::$app->user->identity;
            if ($model->rest_org_id !== $user->organization_id)
                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));

@@ -117,7 +117,7 @@ class RequestCallbackController extends ActiveController {
    {
        // check if the user can access $action and $model
        // throw ForbiddenHttpException if access should be denied
-       if ($action === 'update' || $action === 'delete') {
+       if ($action === 'update' || $action === 'delete' || $action === 'view') {
            $user = Yii::$app->user->identity;
            
            if ($model->request->rest_org_id !== $user->organization_id)

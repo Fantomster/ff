@@ -23,7 +23,7 @@ class RequestCallback extends \common\models\RequestCallback
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.1],
             [['comment'], 'string', 'max' => 255],
-            [['request_id'], 'exist', 'skipOnError' => true, 'targetClass' => Request::className(), 'targetAttribute' => ['request_id' => 'id']],
+            //[['request_id'], 'exist', 'skipOnError' => true, 'targetClass' => Request::className(), 'targetAttribute' => ['request_id' => 'id']],
         ];
     }
 }

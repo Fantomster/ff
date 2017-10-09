@@ -54,11 +54,9 @@ class RequestController extends ActiveController {
             'view' => [
                 'class' => 'yii\rest\ViewAction',
                 'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
+                'findModel' => [$this, 'findModel'],
+                'checkAccess' => [$this, 'checkAccess'],
             ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -121,7 +119,7 @@ class RequestController extends ActiveController {
             'count_views' => $params->count_views, 
             'created_at' => $params->created_at, 
             'end' => $params->end, 
-            'rest_org_id' => $params->rest_org_id, 
+            //'rest_org_id' => $params->rest_org_id, 
             'active_status' => $params->active_status
            ]);
         return $dataProvider;

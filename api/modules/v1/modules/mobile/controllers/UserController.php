@@ -4,7 +4,7 @@ namespace api\modules\v1\modules\mobile\controllers;
 
 use Yii;
 use api\modules\v1\modules\mobile\models\User;
-use backend\modules\api\v1\resources\User as UserResource;
+use api\modules\v1\modules\mobile\resources\User as UserResource;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use common\models\Profile;
@@ -33,39 +33,6 @@ class UserController extends ActiveController {
         $behaviors = array_merge($behaviors, $this->module->controllerBehaviors);
 
         return $behaviors;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function actions() {
-        return [
-            'index' => [
-                'class' => 'yii\rest\IndexAction',
-                'modelClass' => $this->modelClass
-            ],
-            'view' => [
-                'class' => 'yii\rest\ViewAction',
-                'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
-            ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
-        ];
-    }
-
-    /**
-     * @param $id
-     * @return null|static
-     * @throws NotFoundHttpException
-     */
-    public function findModel($id) {
-        $model = UserResource::findOne($id);
-        if (!$model) {
-            throw new NotFoundHttpException;
-        }
-        return $model;
     }
 
     public function actionAuth() {

@@ -153,7 +153,7 @@ class RequestController extends ActiveController {
         /* @var $model ActiveRecord */
         $model = $this->findModel($id);
 
-        $this->checkAccess($this->id, $model);
+        $this->checkAccess('update', $model);
 
         $model->scenario = $this->updateScenario;
         $model->responsible_supp_org_id = null;

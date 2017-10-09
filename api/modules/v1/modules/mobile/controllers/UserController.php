@@ -34,6 +34,15 @@ class UserController extends ActiveController {
 
         return $behaviors;
     }
+    
+     /**
+     * @inheritdoc
+     */
+    public function actions()
+    {
+        return [
+        ];
+    }
 
     public function actionAuth() {
         

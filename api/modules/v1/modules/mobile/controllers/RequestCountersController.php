@@ -46,9 +46,6 @@ class RequestCountersController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'findModel' => [$this, 'findModel']
             ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -80,18 +77,14 @@ class RequestCountersController extends ActiveController {
         $user = Yii::$app->user->getIdentity();
         
         if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-            $query = RequestCounters::find()->where(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
+            $query->andWhere(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
                 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;
         }
   
          $query->andFilterWhere([
-            'id' => $params->id, 
             'request_id' => $params->request_id, 
-            'user' => $params->user_id, 
-            'created_at' => $params->created_at, 
-            'updated-at' => $params->updated_at
            ]);
         return $dataProvider;
     }

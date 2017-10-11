@@ -69,7 +69,7 @@ class FavoritesController extends ActiveController {
     {
         $user = Yii::$app->user->getIdentity();
         $client = $user->organization;
-        $params = new \common\models\search\FavoriteSearch();
+        $params = new \api\modules\v1\modules\mobile\resources\FavoriteSearch();
 
         $cbgTable = CatalogBaseGoods::tableName();
         $orderTable = Order::tableName();
@@ -91,15 +91,21 @@ class FavoritesController extends ActiveController {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-          //  'sort' => ['defaultOrder' => ["$orderTable.created_at" => SORT_DESC]],
+             'pagination' => false,
         ]);
-
-        $dataProvider->pagination = ['pageSize' => 15];
         
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+        
+        if (isset($params->count)) {
+            $query->limit($params->count);
+            if (isset($params->page)) {
+                $offset = ($params->page * $params->count) - $params->count;
+                $query->offset($offset);
+            }
         }
 
         // grid filtering conditions

@@ -28,12 +28,12 @@ class Module extends \yii\base\Module
         'enableSession' => false,
         ]);
         
-        Yii::$app->set(
+        /*Yii::$app->set(
                 'mailer', [
                     'class' => 'yii\swiftmailer\Mailer',
                     'viewPath' => '@common/mail',
                     'htmlLayout' => '@common/mail/layouts/html'
-                    ]);
+                    ]);*/
         
         Yii::$app->set(
                 'request', [

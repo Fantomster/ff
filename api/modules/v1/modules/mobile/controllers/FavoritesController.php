@@ -69,8 +69,8 @@ class FavoritesController extends ActiveController {
     {
         $user = Yii::$app->user->getIdentity();
         $client = $user->organization;
-        $params = Yii::$app->request->getQueryParams();
-        $params =  $params['FavoriteSearch'] = Yii::$app->request->post("FavoriteSearch");
+        $params = new \common\models\search\FavoriteSearch();
+
         $cbgTable = CatalogBaseGoods::tableName();
         $orderTable = Order::tableName();
         $ordContentTable = OrderContent::tableName();
@@ -86,7 +86,7 @@ class FavoritesController extends ActiveController {
 
         // add conditions that should always apply here
         //where ord.client_id = 1 and cbg.status=1 and cbg.deleted = 0
-        $query->where(["$orderTable.client_id" => $clientId, "$cbgTable.status" => CatalogBaseGoods::STATUS_ON, "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF]);
+        $query->where(["$orderTable.client_id" => $client->id, "$cbgTable.status" => CatalogBaseGoods::STATUS_ON, "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF]);
         $query->groupBy(["$cbgTable.id"]);
 
         $dataProvider = new ActiveDataProvider([
@@ -95,17 +95,15 @@ class FavoritesController extends ActiveController {
         ]);
 
         $dataProvider->pagination = ['pageSize' => 15];
-
-        $this->load($params);
         
-        if (!$this->validate()) {
+        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
 
         // grid filtering conditions
-        $query->andFilterWhere(['like', "$cbgTable.product", $this->searchString]);
+        $query->andFilterWhere(['like', "$cbgTable.product", $params->searchString]);
 
         return $dataProvider;
     }

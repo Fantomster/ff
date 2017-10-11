@@ -9,8 +9,6 @@ class Guide extends \common\models\guides\Guide
 {
     public $count;
     public $page;
-    public $organization_name;
-    public $supp_org_id;
     
     public function fields()
     {

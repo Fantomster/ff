@@ -79,10 +79,7 @@ class GuideController extends ActiveController {
         
         $filters['guide.client_id'] = $user->organization_id;
         
-        $query->select('guide.*, catalog_base_goods.supp_org_id as supp_org_id, organization.`name` as organization_name');
-        $query->leftJoin('(select count(id) as count, guide_id, cbg_id from guide_product group by guide_id) as gp', 'gp.guide_id = guide.id')
-        ->leftJoin('catalog_base_goods','catalog_base_goods.id = gp.cbg_id')
-        ->leftJoin('organization','organization.id = catalog_base_goods.supp_org_id');
+        $query->leftJoin('(select count(id) as count, guide_id, cbg_id from guide_product group by guide_id) as gp', 'gp.guide_id = guide.id');
         $query->andWhere('gp.count is not null');
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {

@@ -15,9 +15,8 @@ class FavoriteSearch extends \common\models\search\FavoriteSearch
      */
     public function rules() {
         return [
-            [
                 [['page','count'], 'integer'],
-                ['searchString', 'id', 'product', 'order.created_at'], 'safe'],
+                [['searchString', 'id', 'product', 'order.created_at'], 'safe'],
         ];
     }
 

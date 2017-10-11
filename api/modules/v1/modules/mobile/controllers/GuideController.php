@@ -77,7 +77,7 @@ class GuideController extends ActiveController {
         $filters = [];
         $user = Yii::$app->user->getIdentity();
         
-        $filters['guide.client_id'] = $user->organization_id;
+        $filters['client_id'] = $user->organization_id;
         
         $query->leftJoin('(select count(id) as count, guide_id, cbg_id from guide_product group by guide_id) as gp', 'gp.guide_id = guide.id');
         $query->andWhere('gp.count is not null');
@@ -98,12 +98,12 @@ class GuideController extends ActiveController {
         }
   
        
-            $filters['guide.id'] = $params->id; 
-            $filters['guide.type'] = $params->type; 
-            $filters['guide.name'] = $params->name; 
-            $filters['guide.deleted'] = $params->deleted; 
-            $filters['guide.created_at'] = $params->created_at; 
-            $filters['guide.updated_at'] = $params->updated_at; 
+            $filters['id'] = $params->id; 
+            $filters['type'] = $params->type; 
+            $filters['name'] = $params->name; 
+            $filters['deleted'] = $params->deleted; 
+            $filters['created_at'] = $params->created_at; 
+            $filters['updated_at'] = $params->updated_at; 
   
             $query->andFilterWhere($filters);
   

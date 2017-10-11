@@ -12,7 +12,7 @@ class Guide extends \common\models\guides\Guide
     
     public function fields()
     {
-        return ['id', 'client_id', 'type', 'name', 'deleted', 'created_at', 'updated_at', 'organization_name', 'supp_org_id'];
+        return ['id', 'client_id', 'type', 'name', 'deleted', 'created_at', 'updated_at'];
     }
     
     public function rules()

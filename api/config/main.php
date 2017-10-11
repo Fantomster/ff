@@ -7,7 +7,7 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'api.f-keeper',
+    'id' => 'mixcart',
     'name' => 'mixcart',
     'basePath' => dirname(__DIR__),
     'bootstrap' => [

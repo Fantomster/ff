@@ -69,6 +69,9 @@ class GuidProductSearchController extends ActiveController {
     public function prepareDataProvider()
     {
         $params = new \api\modules\v1\modules\mobile\resources\GuideProductSearch();
+        $user = Yii::$app->user->getIdentity();
+        $client = $user->organization;
+        
         $cbgTable = CatalogBaseGoods::tableName();
         $goodsNotesTable = GoodsNotes::tableName();
         $organizationTable = Organization::tableName();
@@ -94,9 +97,12 @@ class GuidProductSearchController extends ActiveController {
             return $dataProvider;
         }
 
-        $query->where([
-            'guide_product.guide_id' => $params->guide_id,
-        ]);
+        if($params->guide_id != null)
+            $query->where([
+                'guide_product.guide_id' => $params->guide_id,
+            ]);
+        else
+            $query->leftJoin ("guide","guide.id = guide_product.guide_id")->where ("guide.client_id = ".$client->id);
         
         if (isset($params->count)) {
             $query->limit($params->count);

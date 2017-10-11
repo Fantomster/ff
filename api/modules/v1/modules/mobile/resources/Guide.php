@@ -9,10 +9,12 @@ class Guide extends \common\models\guides\Guide
 {
     public $count;
     public $page;
+    public $organization_name;
+    public $supp_org_id;
     
     public function fields()
     {
-        return ['id', 'client_id', 'type', 'name', 'deleted', 'created_at', 'updated_at'];
+        return ['id', 'client_id', 'type', 'name', 'deleted', 'created_at', 'updated_at', 'organization_name', 'supp_org_id'];
     }
     
     public function rules()

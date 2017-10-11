@@ -30,7 +30,7 @@ class Module extends \yii\base\Module
         
         Yii::$app->set(
                 'mailer', [
-                    'class' => 'yii\swiftmailer\Mailer',
+                    'class' => 'common\components\Mailer',
                     'viewPath' => '@common/mail',
                     'htmlLayout' => '@common/mail/layouts/html',
                     'useFileTransport' => false,

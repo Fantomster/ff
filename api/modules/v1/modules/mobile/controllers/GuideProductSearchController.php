@@ -19,7 +19,7 @@ use common\models\guides\GuideProduct;
 /**
  * @author Eugene Terentev <eugene@terentev.net>
  */
-class GuidProductSearchController extends ActiveController {
+class GuideProductSearchController extends ActiveController {
 
     /**
      * @var string

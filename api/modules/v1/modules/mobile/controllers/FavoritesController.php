@@ -86,7 +86,7 @@ class FavoritesController extends ActiveController {
 
         // add conditions that should always apply here
         //where ord.client_id = 1 and cbg.status=1 and cbg.deleted = 0
-        $query->where(["$orderTable.client_id1" => $client->id, "$cbgTable.status" => CatalogBaseGoods::STATUS_ON, "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF]);
+        $query->where(["$orderTable.client_id" => $client->id, "$cbgTable.status" => CatalogBaseGoods::STATUS_ON, "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF]);
         $query->groupBy(["$cbgTable.id"]);
 
         $dataProvider = new ActiveDataProvider([

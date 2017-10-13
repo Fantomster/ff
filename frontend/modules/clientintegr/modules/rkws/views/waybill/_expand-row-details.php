@@ -37,7 +37,7 @@
                                                 [
                                                     'attribute' => 'corr_rid',
                                                     'value'=>function ($model) {
-                                                              return $model->corr->denom;
+                                                              return (!empty($model->corr->denom)) ? $model->corr->denom : 'Не указано';
 
                                                                  },
                                                                     
@@ -45,7 +45,7 @@
                                                 [
                                                     'attribute' => 'store_rid',
                                                     'value'=>function ($model) {
-                                                              return $model->store->name;
+                                                              return (!empty($model->store->name)) ? $model->store->name : 'Не указано';
 
                                                                  },
                                                                     

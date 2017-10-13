@@ -6,6 +6,8 @@ use yii\helpers\Html;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
 use yii\web\View;
+use common\models\Currency;
+use yii\helpers\Json;
 
 \frontend\assets\HandsOnTableAsset::register($this);
 
@@ -15,6 +17,9 @@ $this->registerCss('.handsontable .htCore .htDimmed {
     color: #696969;
  }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
 $this->title = 'Редактировать продукты';
+
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode(Currency::getSymbolList());
 ?>
 <section class="content-header">
     <h1>
@@ -79,6 +84,7 @@ $this->title = 'Редактировать продукты';
                         <?=
                         Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
                             'class' => 'btn btn-outline-default btn-sm pull-right',
+                            'id' => 'changeCurrency',
                         ])
                         ?>
                     </div>
@@ -290,6 +296,47 @@ $.post(
     });
 return false;
 })
+        
+    var currencies = $.map($currencySymbolList, function(el) { return el });
+    var newCurrency = {$currentCatalog->currency->id};
+        
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (value != 1) {
+                        newCurrency = value;
+                        resolve()
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            }
+        }).then(function (result) {
+            swal({
+                title: 'Пересчитать цены в каталоге?',
+                html: 
+                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> {$currentCatalog->currency->symbol} = ' +
+                    '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
+                showCancelButton: true,
+                preConfirm: function () {
+                    return new Promise(function (resolve) {
+                        resolve([
+                            $('#swal-curr1').val(),
+                            $('#swal-curr2').val()
+                        ])
+                    })
+                }
+            }).then(function (result) {
+                swal(JSON.stringify(result))
+            })
+        })        
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

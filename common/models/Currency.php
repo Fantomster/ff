@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "currency".
@@ -14,21 +15,19 @@ use Yii;
  * @property Catalog[] $catalogs
  * @property Order[] $orders
  */
-class Currency extends \yii\db\ActiveRecord
-{
+class Currency extends \yii\db\ActiveRecord {
+
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'currency';
     }
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['text', 'symbol'], 'required'],
             [['text', 'symbol'], 'string', 'max' => 255],
@@ -38,8 +37,7 @@ class Currency extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => Yii::t('app', 'ID'),
             'text' => Yii::t('app', 'Text'),
@@ -50,16 +48,42 @@ class Currency extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCatalogs()
-    {
+    public function getCatalogs() {
         return $this->hasMany(Catalog::className(), ['currency_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrders()
-    {
+    public function getOrders() {
         return $this->hasMany(Order::className(), ['currency_id' => 'id']);
+    }
+
+    /**
+     * array of all currency types
+     * 
+     * @return array
+     */
+    public static function getList() {
+        $models = Currency::find()
+                ->select(['id', 'text'])
+                ->asArray()
+                ->all();
+
+        return ArrayHelper::map($models, 'id', 'text');
+    }
+    
+    /**
+     * array of all currency symbols
+     * 
+     * @return array
+     */
+    public static function getSymbolList() {
+        $models = Currency::find()
+                ->select(['id', 'symbol'])
+                ->asArray()
+                ->all();
+
+        return ArrayHelper::map($models, 'id', 'symbol');
     }
 }

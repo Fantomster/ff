@@ -18,7 +18,8 @@ class m171009_132526_currency_update extends Migration
         ], $tableOptions);
         
         $this->batchInsert('{{%currency}}', ['text','symbol'], [
-            ['руб', '₽'],
+            ['Российский рубль - ₽', '₽'],
+            ['US dollar - $', '$'],
         ]);
         
         $this->addColumn('{{%catalog}}', 'currency_id', $this->integer()->notNull()->defaultValue(1));

@@ -23,7 +23,7 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 
-$arrService = RkService::find()->select('org')->asArray->all(); 
+$arrService = \api\common\models\RkService::find()->select('org')->asArray()->all();
 ?>
 
 <aside class="main-sidebar">

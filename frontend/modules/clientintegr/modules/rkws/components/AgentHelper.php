@@ -118,8 +118,8 @@ class AgentHelper extends AuthHelper {
     }
     */
     
-    $cmdguid = strval($myXML['cmdguid']); 
-    $posid = strval($myXML['posid']); 
+    $cmdguid = strval($myXML['cmdguid']) ? strval($myXML['cmdguid']) : strval($myXML['taskguid']); 
+    $posid = strval($myXML['posid']) ? strval($myXML['posid']) : 1; 
     
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
         

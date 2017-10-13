@@ -14,7 +14,10 @@ use Yii;
  * @property integer $type
  * @property string $created_at
  * @property string $updated_at
+ * @property integer $currency_id
+ * 
  * @property Vendor $vendor
+ * @property Currency $currency
  */
 class Catalog extends \yii\db\ActiveRecord
 {    
@@ -102,7 +105,12 @@ class Catalog extends \yii\db\ActiveRecord
 		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();   
 		return $catalog;
     }
+    
     public function getVendor() {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
+    }
+    
+    public function getCurrency() {
+        return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
     }
 }

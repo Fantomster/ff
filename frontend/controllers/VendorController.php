@@ -170,39 +170,39 @@ class VendorController extends DefaultController {
         $regionsList = DeliveryRegions::find()->where(['supplier_id' => $supplier])->all();
         $deliveryRegions = new DeliveryRegions();
         $deliveryRegions->supplier_id = $supplier;
-        
+
         $delivery = $organization->delivery;
-        
+
         if (!$delivery) {
             $delivery = new \common\models\Delivery();
             $delivery->vendor_id = $organization->id;
             $delivery->save();
         }
-        
+
         if ($deliveryRegions->load(Yii::$app->request->post()) && $deliveryRegions->validate()) {
             $deliveryRegions->save();
         }
-        
+
         if ($delivery->load(Yii::$app->request->get())) {
             if ($delivery->validate()) {
                 $delivery->save();
             }
         }
         if (Yii::$app->request->isPjax) {
-            return $this->renderPartial('delivery', compact('delivery','regionsList','supplier','deliveryRegions'));
+            return $this->renderPartial('delivery', compact('delivery', 'regionsList', 'supplier', 'deliveryRegions'));
         } else {
-            return $this->render('delivery', compact('delivery','regionsList','supplier','deliveryRegions'));
+            return $this->render('delivery', compact('delivery', 'regionsList', 'supplier', 'deliveryRegions'));
         }
     }
-    public function actionRemoveDeliveryRegion($id)
-    {
-     $organization = $this->currentUser->organization;
-     $deliveryRegions = \common\models\DeliveryRegions::findOne($id);
-     if($deliveryRegions)
-        {
+
+    public function actionRemoveDeliveryRegion($id) {
+        $organization = $this->currentUser->organization;
+        $deliveryRegions = \common\models\DeliveryRegions::findOne($id);
+        if ($deliveryRegions) {
             $deliveryRegions->delete();
         }
     }
+
     /*
      *  User validate
      */
@@ -316,7 +316,7 @@ class VendorController extends DefaultController {
             $relation = yii\helpers\ArrayHelper::map(\common\models\Organization::find()->
                                     where(['in', 'id', \common\models\RelationSuppRest::find()->
                                         select('rest_org_id')->
-                                        where(['supp_org_id' => $currentUser->organization_id, 'invite' => '1'])])->all(), 'id', 'name');
+                                        where(['supp_org_id' => $currentUser->organization_id, 'invite' => '1', 'deleted' => false])])->all(), 'id', 'name');
             $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
                             where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->all();
 
@@ -330,7 +330,7 @@ class VendorController extends DefaultController {
                                     andFilterWhere(['id' => \common\models\RelationSuppRest::find()->
                                         select(['cat_id'])->
                                         where(['supp_org_id' => $currentUser->organization_id,
-                                            'rest_org_id' => $restaurant])])->one();
+                                            'rest_org_id' => $restaurant, 'deleted' => false])])->one();
                     if (empty($arrCatalog)) {
                         $arrCatalog == "";
                     } else {
@@ -506,24 +506,27 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
         $searchString = "";
-        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG])->id;
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        if (empty($baseCatalog)) {
+            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
         $currentCatalog = $baseCatalog;
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
             $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog AND "
+                    . "WHERE cat_id = $baseCatalog->id AND "
                     . "deleted=0 AND (product LIKE :product or article LIKE :article)";
             $query = \Yii::$app->db->createCommand($sql);
             $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                            . "WHERE cat_id = $baseCatalog AND "
+                            . "WHERE cat_id = $baseCatalog->id AND "
                             . "deleted=0 AND (product LIKE :product or article LIKE :article)", [':article' => $searchString, ':product' => $searchString])->queryScalar();
         } else {
             $sql = "SELECT id,article,product,units,category_id,price,ed,note,status,market_place FROM catalog_base_goods "
-                    . "WHERE cat_id = $baseCatalog AND "
+                    . "WHERE cat_id = $baseCatalog->id AND "
                     . "deleted=0";
             $query = \Yii::$app->db->createCommand($sql);
             $totalCount = Yii::$app->db->createCommand("SELECT count(*) FROM catalog_base_goods "
-                            . "WHERE cat_id = $baseCatalog AND "
+                            . "WHERE cat_id = $baseCatalog->id AND "
                             . "deleted=0", [':article' => $searchString, ':product' => $searchString])->queryScalar();
         }
         $dataProvider = new \yii\data\SqlDataProvider([
@@ -1280,11 +1283,7 @@ class VendorController extends DefaultController {
         if (empty($model)) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
-        // выборка для handsontable
-        /* $arr = CatalogGoods::find()->select(['id', 'base_goods_id', 'price', 'discount', 'discount_percent'])->where(['cat_id' => $id])->
-          andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->
-          where(['supp_org_id' => $currentUser->organization_id, 'deleted' => 1])])->all();
-          $arr = \yii\helpers\ArrayHelper::toArray($arr); */
+        $currentCatalog = $model;
 
         $sql = "SELECT "
                 . "catalog.id as id,"
@@ -1360,7 +1359,7 @@ class VendorController extends DefaultController {
             return $result;
             exit;
         }
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id'));
+        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog'));
     }
 
     public function actionStep3($id) {
@@ -1495,7 +1494,7 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
-                    
+
                     $postedAssociatedIds = Yii::$app->request->post("associatedManagers") ? Yii::$app->request->post("associatedManagers") : [];
                     $currentAssociatedIds = array_keys($organization->getAssociatedManagersList($vendor->id));
                     $newAssociatedIds = array_diff($postedAssociatedIds, $currentAssociatedIds);

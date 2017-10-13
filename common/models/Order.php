@@ -22,6 +22,7 @@ use yii\helpers\Url;
  * @property string $comment
  * @property string $discount
  * @property integer $discount_type
+ * @property integer $currency_id
  * 
  * @property User $acceptedBy
  * @property User $createdBy
@@ -36,6 +37,7 @@ use yii\helpers\Url;
  * @property bool $isObsolete
  * @property string $rawPrice
  * @property User[] $recipientsList
+ * @property Currency $currency
  */
 class Order extends \yii\db\ActiveRecord {
 
@@ -384,5 +386,13 @@ class Order extends \yii\db\ActiveRecord {
             return;
         }
         return ($user->status === User::STATUS_UNCONFIRMED_EMAIL) ? Url::toRoute(["/order/view", "id" => $this->id, "token" => $user->access_token], true) : Url::toRoute(["/order/view", "id" => $this->id], true);
+    }
+    
+    public function getCurrency() {
+        return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+    }
+    
+    public function formatPrice() {
+        return $this->total_price . " " . $this->currency->symbol;
     }
 }

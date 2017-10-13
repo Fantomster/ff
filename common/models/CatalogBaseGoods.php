@@ -42,6 +42,7 @@ use yii\helpers\Url;
  * @property MpCategory $mainCategory
  * @property RatingStars $ratingStars
  * @property RatingPercent $ratingPercent
+ * @property Catalog $catalog
  */
 class CatalogBaseGoods extends \yii\db\ActiveRecord {
 
@@ -218,12 +219,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
         return $dataProvider;
     }
 
-    public static function GetCatalog() {
-        $catalog = CatalogBaseGoods::find()
-                        ->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id), 'type' => \common\models\Catalog::BASE_CATALOG])->all();
-        return $catalog;
-    }
-
     public static function get_value($id) {
         $model = CatalogBaseGoods::find()->where(["id" => $id])->one();
         if (!empty($model)) {
@@ -299,5 +294,13 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function getClientNote($clientId) {
         $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->id, 'rest_org_id' => $clientId]);
         return isset($note) ? $note->note : '';
+    }
+    
+    public function formatPrice() {
+        return $this->price . " " . $this->catalog->currency->symbol;
+    }
+
+    public function getCatalog() {
+        return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
     }
 }

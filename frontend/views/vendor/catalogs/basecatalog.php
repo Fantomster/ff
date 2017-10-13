@@ -204,7 +204,7 @@ Modal::end();
                             ExportMenu::FORMAT_TEXT => false,
                             ExportMenu::FORMAT_EXCEL => false,
                             ExportMenu::FORMAT_PDF => false,
-                            ExportMenu::FORMAT_CSV => false, 
+                            ExportMenu::FORMAT_CSV => false,
                             ExportMenu::FORMAT_EXCEL_X => [
                                 'label' => Yii::t('kvexport', 'Excel'),
                                 'icon' => 'file-excel-o',
@@ -258,7 +258,13 @@ Modal::end();
                             '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
                     )
                     ?>
-                    
+                    <?=
+                    Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
+                        'class' => 'btn btn-outline-default btn-sm pull-right',
+                        'style' => ['margin-right' => '10px;']
+                    ])
+                    ?>
+
                 </div>
                 <div class="panel-body">
                     <?php
@@ -331,7 +337,7 @@ Modal::end();
                                 return $link;
                             },
                         ],
-                                    [
+                        [
                             'attribute' => '',
                             'label' => 'MixMarket',
                             'format' => 'raw',
@@ -495,7 +501,7 @@ Modal::end();
     </div>
 </section>
 <?php
-$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog]);
+$baseCatalogUrl = Url::to(['vendor/basecatalog', 'id' => $currentCatalog->id]);
 $changeCatalogPropUrl = Url::to(['vendor/changecatalogprop']);
 $changeSetCatalogUrl = Url::to(['vendor/changesetcatalog']);
 $deleteProductUrl = Url::to(['vendor/ajax-delete-product']);
@@ -578,7 +584,7 @@ $(document).on('change','input[event-type=set-catalog]', function(e) {
         url: "$changeSetCatalogUrl",
         type: "POST",
         dataType: "json",
-        data: {'id' : id, 'curCat' : $currentCatalog,'state' : state},
+        data: {'id' : id, 'curCat' : $currentCatalog->id,'state' : state},
         cache: false,
         success: function(response) {
                 console.log(response)

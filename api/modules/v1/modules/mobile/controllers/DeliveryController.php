@@ -7,6 +7,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\resources\Delivery;
+use common\models\RelationSuppRest;
 use yii\helpers\Json;
 
 
@@ -70,6 +71,13 @@ class DeliveryController extends ActiveController {
             'pagination' => false,
         ));
         $user = Yii::$app->user->getIdentity();
+        
+         if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+            $query->andWhere (['in ','vendor_id', RelationSuppRest::find()->select('supp_org_id')->where(['rest_org_id' => $user->organization_id])]);
+
+        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
+            $query->andWhere('vendor_id = '.$user->organization_id);
+
         
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             return $dataProvider;

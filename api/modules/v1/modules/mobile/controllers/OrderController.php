@@ -56,9 +56,6 @@ class OrderController extends ActiveController {
                 'modelClass' => 'common\models\Order',
                 'checkAccess' => [$this, 'checkAccess'],
             ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -153,7 +150,7 @@ class OrderController extends ActiveController {
 
                     if (!$notes->save()) {
                         var_dump($notes->getErrors());
-                        die();
+                        //die();
                         throw new BadRequestHttpException;
                     }
                     $notes->created_at = $note['created_at'];
@@ -167,7 +164,7 @@ class OrderController extends ActiveController {
             $newOrder->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             if (!$newOrder->save()) {
                 var_dump($newOrder->getErrors());
-                die();
+                //die();
                 throw new BadRequestHttpException;
             }
 
@@ -178,7 +175,7 @@ class OrderController extends ActiveController {
                 $pos->order_id = $newOrder->id;
                 if (!$pos->save()) {
                     var_dump($pos->getErrors());
-                    die();
+                    //die();
                     throw new BadRequestHttpException;
                 }
             }

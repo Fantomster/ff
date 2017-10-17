@@ -85,6 +85,11 @@ class AgentHelper extends AuthHelper {
     $acc =0;    
         
     $getr = Yii::$app->request->getRawBody();
+    
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'()()()()()('.PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.print_r($getr,true).PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'()()()()()('.PHP_EOL,FILE_APPEND); 
+    
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
     
@@ -225,6 +230,7 @@ class AgentHelper extends AuthHelper {
     
     if (empty($er)) $er = 'пусто';     
     if (empty($er3)) $er3 = 'пусто'; 
+    if (empty($er2)) $er2 = 'пусто'; 
         
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   

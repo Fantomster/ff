@@ -133,7 +133,7 @@ class OrderController extends ActiveController {
                 foreach ($post['GoodsNotes'] as $note) {
                     if (empty($note))
                         break;
-                    $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id', [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
+                        $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id', [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
 
                     if ($notes == null) {
                         $notes = new \common\models\GoodsNotes();
@@ -149,9 +149,9 @@ class OrderController extends ActiveController {
                     }
 
                     if (!$notes->save()) {
-                        var_dump($notes->getErrors());
-                        //die();
-                        throw new BadRequestHttpException;
+                        echo json_encode(['GoodsNotes' => $notes->getErrors()]);
+                        $transaction->rollback();
+                        return;
                     }
                     $notes->created_at = $note['created_at'];
                     if (array_key_exists('updated_at', $note) != null)
@@ -163,9 +163,9 @@ class OrderController extends ActiveController {
             $newOrder->load($post, 'Order');
             $newOrder->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
             if (!$newOrder->save()) {
-                var_dump($newOrder->getErrors());
-                //die();
-                throw new BadRequestHttpException;
+                echo json_encode(['Order' => $newOrder->getErrors()]);
+                $transaction->rollback();
+                return;
             }
 
             foreach ($post['OrderContents'] as $position) {
@@ -175,8 +175,9 @@ class OrderController extends ActiveController {
                 $pos->order_id = $newOrder->id;
                 if (!$pos->save()) {
                     var_dump($pos->getErrors());
-                    //die();
-                    throw new BadRequestHttpException;
+                    echo json_encode(['OrderContents' => $pos->getErrors()]);
+                    $transaction->rollback();
+                    return;
                 }
             }
 

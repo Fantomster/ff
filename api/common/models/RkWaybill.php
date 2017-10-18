@@ -137,9 +137,9 @@ class RkWaybill extends \yii\db\ActiveRecord {
                     $wdmodel->waybill_id = $this->id;
                     $wdmodel->product_id = $record->product_id;
                     $wdmodel->quant = $record->quantity;                    
-                    $wdmodel->sum = $record->price;
+                    $wdmodel->sum = round($record->price*$record->quantity,2);
                     $wdmodel->defquant = $record->quantity;                    
-                    $wdmodel->defsum = $record->price;
+                    $wdmodel->defsum = round($record->price*$record->quantity,2);
                     $wdmodel->vat = 1800;
                     $wdmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
                     $wdmodel->org = $this->org;

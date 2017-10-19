@@ -8,6 +8,7 @@ use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\RequestCallback;
 use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\resources\Request;
+use common\models\Organization;
 
 
 /**
@@ -82,6 +83,11 @@ class RequestCallbackController extends ActiveController {
 
         if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
                 $query->andWhere (['supp_org_id' => $user->organization_id]);
+        
+        $organizationTable = Organization::tableName();
+        
+        $query->select("request_callback.*, $organizationTable.name as organization_name");
+        $query->leftJoin($organizationTable, "$organizationTable.id = request_callback.supp_org_id");
           
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             $dataProvider =  new ActiveDataProvider(array(

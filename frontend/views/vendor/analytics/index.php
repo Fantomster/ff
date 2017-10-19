@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
+use dosamigos\chartjs\ChartJs;
 
 $this->title = 'Аналитика';
 $this->registerCss('
@@ -157,8 +158,28 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div class="chart">
-                        <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    <div class="chart" style="position:relative;height:100%;width:100%;min-height: 286px;">
+                        <?=
+                        ChartJs::widget([
+                            'type' => 'line',
+                            'options' => [
+                                'maintainAspectRatio' => false,
+                                'responsive' => true,
+                                'height' => '282px',
+                            ],
+                            'data' => [
+                                'labels' => $arr_create_at,
+                                'datasets' => [
+                                    [
+                                        'label' => "Объем продаж",
+                                        'fillColor' => "rgba(0,0,0,.05)",
+                                        'borderColor' => "#84bf76",
+                                        'data' => $arr_price,
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -176,7 +197,27 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <canvas id="pieChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    <div style="position:relative;height:282px;width:282px;min-height: 286px;margin: auto;">
+                        <?= 
+                        ChartJs::widget([
+                            'type' => 'pie',
+                            'options' => [
+                                'height' => 282,
+                                'width' => 282,
+                            ],
+                            'data' => [
+                                'labels' => $arr_clients_labels,
+                                'datasets' => [
+                                    [
+                                        'data' => $arr_clients_price,
+                                        'backgroundColor' => $arr_clients_colors,
+                                        'hoverBackgroundColor' => $arr_clients_colors,
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
+                    </div>
                 </div>
                 <!-- /.box-body -->
             </div>
@@ -259,7 +300,7 @@ var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
 // This will get the first returned node in the jQuery collection.
 var areaChart = new Chart(areaChartCanvas);
 var areaChartData = {
-      labels: $arr_create_at,
+      labels: $ arr_create_at,
       datasets: [
         {
           label: "Объем продаж",
@@ -269,7 +310,7 @@ var areaChartData = {
           pointStrokeColor: "#000",
           pointHighlightFill: "#000",
           pointHighlightStroke: "#000",
-          data: $arr_price
+          data: $ arr_price
         }
       ]
     };
@@ -316,7 +357,7 @@ var areaChartOptions = {
     areaChart.Line(areaChartData, areaChartOptions);
         
         
-var pieData = $arr_clients_price;
+var pieData = $ arr_clients_price;
 
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData);
@@ -325,7 +366,7 @@ var skillsChart = new Chart(context).Pie(pieData);
 }*/
         
 JS;
-    $this->registerJs($customJs, View::POS_READY);
+   // $this->registerJs($customJs, View::POS_READY);
     ?>
 <?php Pjax::end(); ?>
 </section>

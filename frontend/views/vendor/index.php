@@ -3,12 +3,9 @@
 use yii\widgets\Breadcrumbs;
 use common\models\Order;
 use common\models\Organization;
-use common\models\Profile;
-use kartik\date\DatePicker;
 use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\web\View;
 use yii\widgets\Pjax;
 use dosamigos\chartjs\ChartJs;
 

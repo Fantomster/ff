@@ -33,7 +33,7 @@ $arrService = RkService::find()->select('org')->asArray()->all();
         <?=
         dmstr\widgets\Menu::widget(
                 [
-                    'options' => ['class' => 'sidebar-menu'],
+                    'options' => ['class' => 'sidebar-menu tree', 'data-widget' => "tree"],
                     'encodeLabels' => false,
                     'items' => [
                         ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
@@ -66,7 +66,7 @@ $arrService = RkService::find()->select('org')->asArray()->all();
                             'label' => 'Настройки',
                             'icon' => 'gears',
                             'url' => '#', //['client/settings'],
-                            'options' => ['class' => "treeview hidden-xs"],
+                            'options' => ['class' => "hidden-xs"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
                                 ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default'],'visible' => (in_array($user->organization_id, $arrService))],

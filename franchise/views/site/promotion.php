@@ -9,7 +9,7 @@
     <div class="col-md-12">
       <section id="introduction">
         <br>
-        
+
         
         </section>
       </div>
@@ -118,10 +118,10 @@
                   <td>Презентация для ресторанов</td>
                   <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/resto.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
                 </tr>
-                <tr>
-                  <td>Презентация для поставщиков</td>
-                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/postavchik.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>
-                </tr>
+<!--                <tr>-->
+<!--                  <td>Презентация для поставщиков</td>-->
+<!--                  <td style="text-align: center;"><a href="http://static.f-keeper.ru/promo/postavchik.zip" data-skin="skin-blue" class="btn btn-primary btn-xs"><i class="fa fa-download"></i></a></td>-->
+<!--                </tr>-->
 
                 <tr>
                     <td>Заставка между презентациями</td>

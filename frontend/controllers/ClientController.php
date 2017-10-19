@@ -63,6 +63,7 @@ class ClientController extends DefaultController {
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                     [
@@ -90,6 +91,7 @@ class ClientController extends DefaultController {
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                 ],
@@ -107,9 +109,13 @@ class ClientController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
         $organization->scenario = "settings";
-        if ($organization->load(Yii::$app->request->post())) {
+        $post = Yii::$app->request->post();
+        if ($organization->load($post)) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;
+                if(!$post['Organization']['is_allowed_for_franchisee']){
+                    User::updateAll(['organization_id'=>null], ['organization_id'=>$organization->id, 'role_id'=>Role::getFranchiseeEditorRoles()]);
+                }
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_VENDOR;
                     $organization->save();

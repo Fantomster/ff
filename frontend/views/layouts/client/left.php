@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\web\View;
 use yii\helpers\Url;
+use api\common\models\RkService;
 
 $user = Yii::$app->user->identity;
 
@@ -23,7 +24,7 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 
-$arrService = RkService::find()->select('org')->asArray->all(); 
+$arrService = RkService::find()->select('org')->asArray()->all();
 ?>
 
 <aside class="main-sidebar">
@@ -70,7 +71,7 @@ $arrService = RkService::find()->select('org')->asArray->all();
                                 ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
                                 ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default'],'visible' => (in_array($user->organization_id, $arrService))],
                                 ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
-                                ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+                                ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],

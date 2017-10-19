@@ -38,7 +38,7 @@ class OrganizationController extends DefaultController {
                 'only' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
+                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
@@ -467,5 +467,21 @@ class OrganizationController extends DefaultController {
             $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $organization->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
         }
         return $this->render("show-".$type, compact('organization','dataProvider', 'managersDataProvider', 'catalog', 'showButton'));
+    }
+
+
+    public function actionUpdateUsersOrganization($organization_id){
+        $organization = Organization::find()
+            ->joinWith("franchiseeAssociate")
+            ->where(['organization.id' => $organization_id, 'franchisee_associate.franchisee_id' => $this->currentFranchisee->id])
+            ->one();
+        if(!$organization || !$organization->is_allowed_for_franchisee){
+            throw new HttpException(403, Yii::t('app', 'Организация закрыла доступ к своему кабинету'));
+        }
+        $user_id = $this->currentUser->id;
+        $user = User::findOne($user_id);
+        $user->organization_id = $organization_id;
+        $user->save();
+        return $this->redirect(Yii::$app->params['protocol'] . ':' . Yii::$app->urlManagerFrontend->baseUrl . "/user/login");
     }
 }

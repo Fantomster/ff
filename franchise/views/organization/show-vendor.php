@@ -134,7 +134,9 @@ $this->registerCss("
                                     <p><?= $organization->profile->full_name ?></p>
                                 </div>
                                 <?php endif; ?>
-
+                                <div>
+                                    <?= Html::a(Yii::t('app', 'Перейти в ЛК организации под своей учеткой'), ['organization/update-users-organization', 'organization_id' => $organization->id], ['class' => 'btn btn-default', 'target' => '_blank']) ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -250,7 +252,7 @@ $this->registerCss("
                                         'format' => 'raw',
                                         'attribute' => 'orderSum',
                                         'value' => function ($data) {
-                                            $progress = $data["orderSum"] ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
+                                            $progress = $data["orderSum"]>0 ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
 //                                            if ($progress > 0) {
                                             $divider = '<i class="fa fa-caret-up"></i>';
                                             //                                          }

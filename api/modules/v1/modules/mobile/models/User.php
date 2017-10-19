@@ -111,7 +111,7 @@ class User extends BaseUser implements RateLimitInterface
 		// send email
         $type = $this->organization->type_id;
         $name = $this->profile->full_name;
-        $subject = "Добро пожаловать на  f-keeper";
+        $subject = "Добро пожаловать на  MixCart";
         $result = $mailer->compose('@common/mail/welcome', compact("subject", "type", "name"))
                 ->setTo($this->email)
                 ->setSubject($subject)

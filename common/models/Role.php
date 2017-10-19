@@ -72,6 +72,7 @@ class Role extends \amnah\yii2\user\models\Role {
      * @var int franchisee manager role
      */
     const ROLE_FRANCHISEE_MANAGER = 14;
+
     
     public static function getManagerRole($organization_type) {
         $role = static::find()->where('can_manage=1 AND organization_type = :orgType', [
@@ -115,6 +116,11 @@ class Role extends \amnah\yii2\user\models\Role {
 
     public static function getExceptionArray(){
         return [self::ROLE_ADMIN, self::ROLE_FKEEPER_OBSERVER];
+    }
+
+
+    public static function getFranchiseeEditorRoles(){
+        return [self::ROLE_FRANCHISEE_OWNER, self::ROLE_FRANCHISEE_OPERATOR, self::ROLE_FRANCHISEE_LEADER, self::ROLE_FRANCHISEE_MANAGER];
     }
     
 }

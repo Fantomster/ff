@@ -71,10 +71,12 @@ class SettingsController extends DefaultController {
     public function actionNotifications() {
         $emailNotification = $this->currentUser->emailNotification;
         $smsNotification = $this->currentUser->smsNotification;
-        if ($emailNotification->load(Yii::$app->request->post()) && $smsNotification->load(Yii::$app->request->post())) {
-            if ($emailNotification->validate() && $smsNotification->validate()) {
-                $emailNotification->save();
-                $smsNotification->save();
+        if($emailNotification && $smsNotification){
+            if ($emailNotification->load(Yii::$app->request->post()) && $smsNotification->load(Yii::$app->request->post())) {
+                if ($emailNotification->validate() && $smsNotification->validate()) {
+                    $emailNotification->save();
+                    $smsNotification->save();
+                }
             }
         }
         return $this->render('notifications', compact('emailNotification', 'smsNotification'));

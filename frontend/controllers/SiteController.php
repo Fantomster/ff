@@ -52,6 +52,7 @@ class SiteController extends Controller {
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                         'denyCallback' => function($rule, $action) {
                     $user = Yii::$app->user->identity;

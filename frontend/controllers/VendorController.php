@@ -60,6 +60,7 @@ class VendorController extends DefaultController {
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                     [
@@ -112,6 +113,7 @@ class VendorController extends DefaultController {
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                 ],
@@ -129,9 +131,13 @@ class VendorController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
         $organization->scenario = "settings";
+        $post = Yii::$app->request->post();
         if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;
+                if(!$post['Organization']['is_allowed_for_franchisee']){
+                    User::updateAll(['organization_id'=>null], ['organization_id'=>$organization->id, 'role_id'=>Role::getFranchiseeEditorRoles()]);
+                }
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_CATALOG;
                     $organization->save();

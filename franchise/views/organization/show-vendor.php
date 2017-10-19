@@ -134,7 +134,9 @@ $this->registerCss("
                                     <p><?= $organization->profile->full_name ?></p>
                                 </div>
                                 <?php endif; ?>
-
+                                <div>
+                                    <?= Html::a(Yii::t('app', 'Перейти в ЛК организации под своей учеткой'), ['organization/update-users-organization', 'organization_id' => $organization->id], ['class' => 'btn btn-default', 'target' => '_blank']) ?>
+                                </div>
                             </div>
                         </div>
                     </div>

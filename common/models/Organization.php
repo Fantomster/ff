@@ -109,6 +109,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
+            [['is_allowed_for_franchisee'], 'boolean'],
         ];
     }
 
@@ -168,7 +169,8 @@ class Organization extends \yii\db\ActiveRecord {
             'place_id' => 'Place ID',
             'formatted_address' => 'Formatted Address',
             'franchisee_sorted'=>'Назначен Франшизы',
-            'manager_id'=>'Менеджер'
+            'manager_id'=>'Менеджер',
+            'is_allowed_for_franchisee'=>'Разрешить франчайзи вход в данный Личный Кабинет'
         ];
     }
 

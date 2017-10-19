@@ -56,7 +56,7 @@ use yii\helpers\Url;
 
         <tr>
                 <td style="padding: 10px 30px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 14px; mso-height-rule: exactly; line-height: 20px; color: #555;">
-                        Вашей организации было отправлено приглашение на сотрудничество в системе f-keeper от <b><?=$request->client->name;?></b>
+                        Вашей организации было отправлено приглашение на сотрудничество в системе MixCart от <b><?=$request->client->name;?></b>
                         <br><br>
 
                 </td>

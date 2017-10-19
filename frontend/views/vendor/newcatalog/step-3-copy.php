@@ -80,14 +80,14 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                             <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search_field']) ?>
                         </div>
                     </div> 
-                    <div class="col-sm-8">
+<!--                    <div class="col-sm-8">
                         <?=
                         Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
                             'class' => 'btn btn-outline-default btn-sm pull-right',
                             'id' => 'changeCurrency',
                         ])
                         ?>
-                    </div>
+                    </div>-->
                 </div>
             </div>
             <div class="panel-body">
@@ -307,19 +307,43 @@ return false;
             inputOptions: $currencyList,
             inputPlaceholder: 'Выберите новую валюту каталога',
             showCancelButton: true,
+            showLoaderOnConfirm: true,
+            allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
-                    if (value != 1) {
+                    if (!value) {
+                        reject('Выберите валюту из списка')
+                    }
+                    if (value != {$currentCatalog->currency->id}) {
                         newCurrency = value;
-                        resolve()
+                        resolve();
                     } else {
                         reject('Данная валюта уже используется!')
                     }
                 })
-            }
+            },
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+//                    $.post(
+//                        clicked.data("url"),
+//                        {comment: text}
+//                    ).done(function (result) {
+//                        if (result) {
+//                            resolve(result);
+//                        } else {
+//                            resolve(false);
+//                        }
+//                    });
+                    setTimeout(function (){
+
+                        resolve();
+
+                    }, 2000);
+                })
+            },
         }).then(function (result) {
             swal({
-                title: 'Пересчитать цены в каталоге?',
+                title: 'Валюта каталога изменена! Пересчитать цены в каталоге?',
                 html: 
                     '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> {$currentCatalog->currency->symbol} = ' +
                     '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],

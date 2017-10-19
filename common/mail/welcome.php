@@ -19,25 +19,6 @@ if ($type == common\models\Organization::TYPE_SUPPLIER) {
    <br> ---<br>
     Я искренне рад видеть Вас в числе наших клиентов и обещаю - мы сделаем все, чтобы превысить Ваши ожидания от работы с нашим сервисом.<br>
 </p>
-<?php /*
-<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Предлагаю посмотреть обучающие видео и ближе познакомиться с f-keeper.</p>
-<br style="margin: 0; padding: 0;" />
-<div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-    <a href="<?= Url::toRoute(["/$organizationType/tutorial"], true); ?>" 
-       style="text-decoration: none;
-    color: #FFF;
-    background-color: #84bf76;
-    padding: 10px 16px;
-    font-weight: bold;
-    margin-right: 10px;
-    text-align: center;
-    cursor: pointer;
-    display: inline-block;
-    border-radius: 4px;
-    width: 80%;">Видео обучение</a>
-</div>
- * 
- */ ?>
 <br/><br/>
  Желаю Вам успехов в бизнесе.
  <br/><br/>

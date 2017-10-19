@@ -14,7 +14,7 @@ use yii\helpers\Url;
 		<meta charset="utf-8"> <!-- utf-8 works for most cases -->
 		<meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
-		<title>f-keeper</title> <!-- The title tag shows in email notifications, like Android 4.4. -->
+		<title>MixCart</title> <!-- The title tag shows in email notifications, like Android 4.4. -->
 		<?php $this->head() ?>
                 <!-- Web Font / @font-face : BEGIN -->
 		<!-- NOTE: If web fonts are not required, lines 9 - 26 can be safely removed. -->

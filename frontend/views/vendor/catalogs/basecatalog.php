@@ -258,11 +258,11 @@ Modal::end();
                             '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
                     )
                     ?>
-                    <?=
-                    Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
-                        'class' => 'btn btn-outline-default btn-sm pull-right',
-                        'style' => ['margin-right' => '10px;']
-                    ])
+                    <?= ''
+//                    Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
+//                        'class' => 'btn btn-outline-default btn-sm pull-right',
+//                        'style' => ['margin-right' => '10px;']
+//                    ])
                     ?>
 
                 </div>

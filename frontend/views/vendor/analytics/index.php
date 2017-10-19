@@ -8,7 +8,6 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 
-frontend\assets\AdminltePluginsAsset::register($this);
 $this->title = 'Аналитика';
 $this->registerCss('
 .box-analytics {border:1px solid #eee}.input-group.input-daterange .input-group-addon {

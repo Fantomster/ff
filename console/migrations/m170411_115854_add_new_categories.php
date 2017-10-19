@@ -6,21 +6,21 @@ class m170411_115854_add_new_categories extends Migration
 {
     public function safeUp()
     {
-        $newMasterCategory = new \common\models\MpCategory();
-        $newMasterCategory->name = 'Продукты глубокой заморозки';
-        $newMasterCategory->parent = null;
-        $newMasterCategory->save();
-        $newMasterCategory->refresh();
         $this->batchInsert('{{%mp_category}}', ['name','parent'], [
-            ['Пельмени, Хинкали, Вареники', $newMasterCategory->id],
-            ['Овощи, фрукты и ягоды', $newMasterCategory->id],
-            ['Картофель', $newMasterCategory->id],
-            ['Блины', $newMasterCategory->id],
-            ['Пицца и тесто', $newMasterCategory->id],
-            ['Готовые блюда', $newMasterCategory->id],
-            ['Котлеты и наггетсы', $newMasterCategory->id],
-            ['Морепродукты', $newMasterCategory->id],
-            ['Мясо и птица', $newMasterCategory->id],
+            ['Продукты глубокой заморозки', null],
+        ]);
+        $query = "SELECT id FROM mp_category WHERE name='Продукты глубокой заморозки' AND parent IS NULL";
+        $newMasterCategoryId = Yii::$app->db->createCommand($query)->queryScalar();
+        $this->batchInsert('{{%mp_category}}', ['name','parent'], [
+            ['Пельмени, Хинкали, Вареники', $newMasterCategoryId],
+            ['Овощи, фрукты и ягоды', $newMasterCategoryId],
+            ['Картофель', $newMasterCategoryId],
+            ['Блины', $newMasterCategoryId],
+            ['Пицца и тесто', $newMasterCategoryId],
+            ['Готовые блюда', $newMasterCategoryId],
+            ['Котлеты и наггетсы', $newMasterCategoryId],
+            ['Морепродукты', $newMasterCategoryId],
+            ['Мясо и птица', $newMasterCategoryId],
         ]);
     }
 

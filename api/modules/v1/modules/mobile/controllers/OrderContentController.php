@@ -7,6 +7,7 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\OrderContent;
 use api\modules\v1\modules\mobile\resources\Order;
+use common\models\CatalogBaseGoods;
 use yii\data\ActiveDataProvider;
 use common\models\RelationSuppRest;
 use yii\helpers\Json;
@@ -61,9 +62,6 @@ class OrderContentController extends ActiveController {
                 'class' => 'yii\rest\DeleteAction',
                 'modelClass' => 'common\models\OrderContent',
                 'checkAccess' => [$this, 'checkAccess'],
-            ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
             ]
         ];
     }
@@ -96,6 +94,11 @@ class OrderContentController extends ActiveController {
         
         if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
              $query = OrderContent::find()->where(['in','order_id', Order::find()->select('id')->where(['vendor_id' => $user->organization_id])]);
+        
+        $cbgTable = CatalogBaseGoods::tableName();
+        
+        $query->select("order_content.*, $cbgTable.ed as ed");
+        $query->leftJoin($cbgTable,"$cbgTable.id = order_content.product_id");
      
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,

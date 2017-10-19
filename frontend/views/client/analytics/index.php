@@ -7,8 +7,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
+use dosamigos\chartjs\ChartJs;
 
-frontend\assets\AdminltePluginsAsset::register($this);
 $this->title = 'Аналитика';
 $this->registerCss('
 .box-analytics {border:1px solid #eee}.input-group.input-daterange .input-group-addon {
@@ -154,8 +154,28 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div class="chart">
-                        <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    <div class="chart" style="position:relative;height:286px;width:100%;min-height: 286px;">
+                        <?=
+                        ChartJs::widget([
+                            'type' => 'line',
+                            'options' => [
+                                'maintainAspectRatio' => false,
+                                'responsive' => true,
+                                'height' => '282px',
+                            ],
+                            'data' => [
+                                'labels' => $arr_create_at,
+                                'datasets' => [
+                                    [
+                                        'label' => "Объем заказов",
+                                        'fillColor' => "rgba(0,0,0,.05)",
+                                        'borderColor' => "#84bf76",
+                                        'data' => $arr_price,
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -174,8 +194,26 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div class="chart">
-                        <canvas id="barChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    <div class="chart" style="position:relative;height:286px;width:100%;min-height: 286px;">
+                        <?=
+                        ChartJs::widget([
+                            'type' => 'bar',
+                            'options' => [
+                                'maintainAspectRatio' => false,
+                                'responsive' => true,
+                                'height' => '282px',
+                            ],
+                            'data' => [
+                                'labels' => $chart_bar_label,
+                                'datasets' => [
+                                    [
+                                        'label' => "Заказы по поставщикам",
+                                        'data' => $chart_bar_value,
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -194,8 +232,26 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div class="chart">
-                        <canvas id="pieChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>  
+                    <div style="position:relative;height:282px;width:282px;min-height: 286px;margin: auto;">
+                        <?=
+                        ChartJs::widget([
+                            'type' => 'pie',
+                            'options' => [
+                                'height' => 282,
+                                'width' => 282,
+                            ],
+                            'data' => [
+                                'labels' => $vendors_labels,
+                                'datasets' => [
+                                    [
+                                        'data' => $vendors_total_price,
+                                        'backgroundColor' => $vendors_colors,
+                                        'hoverBackgroundColor' => $vendors_colors,
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -289,7 +345,7 @@ var areaChartData = {
           pointStrokeColor: "#000",
           pointHighlightFill: "#000",
           pointHighlightStroke: "#000",
-          data: $arr_price
+          data: $ arr_price
         }
       ]
     };
@@ -336,7 +392,7 @@ var areaChartOptions = {
     areaChart.Line(areaChartData, areaChartOptions);
         
         
-var pieData = $vendors_total_price;
+var pieData = $ vendors_total_price;
 var Options = {responsive: true}
 var context = document.getElementById('pieChart').getContext('2d');
 var skillsChart = new Chart(context).Pie(pieData, Options);
@@ -349,11 +405,11 @@ var skillsChart = new Chart(context).Pie(pieData, Options);
 //- BAR CHART -
 //-------------
 var barChartData = {
-  labels: $chart_bar_label,
+  labels: $ chart_bar_label,
   datasets: [{
     fillColor: "rgba(0,0,0,.05)",
     strokeColor: "#84bf76",
-    data: $chart_bar_value
+    data: $ chart_bar_value
   }]
 }
 
@@ -365,7 +421,7 @@ var barChartDemo = new Chart(ctx).Bar(barChartData, {
   ToolTipTitle: false
 });
 JS;
-    $this->registerJs($customJs, View::POS_READY);
+    //$this->registerJs($customJs, View::POS_READY);
     ?>
 
 <?php Pjax::end(); ?>

@@ -13,8 +13,8 @@ class QTSMS {
     
     const SET_CATALOG_TO_RESTAURANT = '111';
     */
-	var $user='37251';			// ваш логин в системе 
-	var $pass='!1asdf';			// ваш пароль в системе
+	var $user='37251.4';			// ваш логин в системе 
+	var $pass='27816749';			// ваш пароль в системе
         var $sendler = 'MixCart';           // Имя отправителя
         var $period = false;                      // период
         var $post_id = 'x1209448';            // пост id

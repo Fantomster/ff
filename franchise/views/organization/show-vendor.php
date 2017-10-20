@@ -88,7 +88,7 @@ $this->registerCss("
                             <img style="max-width: 100%;" src="<?= $organization->pictureUrl ?>">
                             <?php if ($showButton): ?>
                                 <div class="btn-edite">
-                                    <?= isset($catalog->id) ? Html::a('Базовый прайс-лист', ['site/catalog', 'id' => $catalog->id], ['class' => 'btn btn-green btn-block']) : '' ?>
+                                    <?= isset($catalog->id) ? Html::a('Прайс-листы поставщика', ['catalog/index', 'vendor_id' => $organization->id], ['class' => 'btn btn-green btn-block']) : '' ?>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -128,7 +128,15 @@ $this->registerCss("
                                     <label for="exampleInputEmail1">Телефон контактного лица:</label>
                                     <p><?= $organization->phone ?></p>
                                 </div>
-
+                                <?php if(isset($organization->profile->full_name)): ?>
+                                <div class="form-group">
+                                    <label for="exampleInputEmail1">Управляющий менеджер:</label>
+                                    <p><?= $organization->profile->full_name ?></p>
+                                </div>
+                                <?php endif; ?>
+                                <div>
+                                    <?= Html::a(Yii::t('app', 'Перейти в ЛК организации под своей учеткой'), ['organization/update-users-organization', 'organization_id' => $organization->id], ['class' => 'btn btn-default', 'target' => '_blank']) ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -244,7 +252,7 @@ $this->registerCss("
                                         'format' => 'raw',
                                         'attribute' => 'orderSum',
                                         'value' => function ($data) {
-                                            $progress = $data["orderSum"] ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
+                                            $progress = $data["orderSum"]>0 ? round($data["orderSum_prev30"] * 100 / $data["orderSum"], 2) : 0;
 //                                            if ($progress > 0) {
                                             $divider = '<i class="fa fa-caret-up"></i>';
                                             //                                          }

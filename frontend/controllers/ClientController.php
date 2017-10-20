@@ -63,6 +63,7 @@ class ClientController extends DefaultController {
                             Role::ROLE_RESTAURANT_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                     [
@@ -90,6 +91,7 @@ class ClientController extends DefaultController {
                             Role::ROLE_RESTAURANT_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                 ],
@@ -107,9 +109,13 @@ class ClientController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
         $organization->scenario = "settings";
-        if ($organization->load(Yii::$app->request->post())) {
+        $post = Yii::$app->request->post();
+        if ($organization->load($post)) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;
+                if(!$post['Organization']['is_allowed_for_franchisee']){
+                    User::updateAll(['organization_id'=>null], ['organization_id'=>$organization->id, 'role_id'=>Role::getFranchiseeEditorRoles()]);
+                }
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_VENDOR;
                     $organization->save();
@@ -1368,15 +1374,21 @@ class ClientController extends DefaultController {
                         " and client_id = " . $currentUser->organization_id .
                         " and status<>" . Order::STATUS_FORMING . " group by vendor_id")->queryAll();
         $vendors_total_price = [];
+        $vendors_labels = [];
+        $vendors_colors = [];
+        
         foreach ($vendors_total_price_sql as $vendors_total_price_sql_arr) {
-            $arr = array(
-                'value' => $vendors_total_price_sql_arr['total_price'],
-                'label' => \common\models\Organization::find()->where(['id' => $vendors_total_price_sql_arr['vendor_id']])->one()->name,
-                'color' => hex()
-            );
-            array_push($vendors_total_price, $arr);
+//            $arr = array(
+//                'value' => $vendors_total_price_sql_arr['total_price'],
+//                'label' => \common\models\Organization::find()->where(['id' => $vendors_total_price_sql_arr['vendor_id']])->one()->name,
+//                'color' => hex()
+//            );
+//            array_push($vendors_total_price, $arr);
+            $vendors_total_price[] = $vendors_total_price_sql_arr['total_price'];
+            $vendors_labels[] = \common\models\Organization::find()->where(['id' => $vendors_total_price_sql_arr['vendor_id']])->one()->name;
+            $vendors_colors[] = hex();
         }
-        $vendors_total_price = json_encode($vendors_total_price);
+        //$vendors_total_price = json_encode($vendors_total_price);
         /*
          * 
          * PIE CHART Аналитика по поставщикам END
@@ -1426,8 +1438,8 @@ class ClientController extends DefaultController {
             $arr = array(\common\models\Organization::find()->where(['id' => $vendors_bar_total_price_sql_arr['vendor_id']])->one()->name);
             array_push($chart_bar_label, $arr);
         }
-        $chart_bar_value = json_encode($chart_bar_value);
-        $chart_bar_label = json_encode($chart_bar_label);
+//        $chart_bar_value = json_encode($chart_bar_value);
+//        $chart_bar_label = json_encode($chart_bar_label);
         /*
          * 
          * BarChart заказы по поставщикам END
@@ -1435,11 +1447,11 @@ class ClientController extends DefaultController {
          */
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('analytics/index', compact(
-                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price','vendors_labels','vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
             ));
         } else {
             return $this->render('analytics/index', compact(
-                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price','vendors_labels','vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
             ));
         }
     }

@@ -92,4 +92,11 @@ class GuideProduct extends \yii\db\ActiveRecord
         $note = \common\models\GoodsNotes::findOne(['catalog_base_goods_id' => $this->cbg_id, 'rest_org_id' => $this->guide->client_id]);
         return isset($note) ? $note->note : '';
     }
+    
+    public function afterSave() {
+        parent::afterDelete();
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionGuideProduct($this->id);
+        }
+    }
 }

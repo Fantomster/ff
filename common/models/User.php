@@ -36,29 +36,25 @@ class User extends \amnah\yii2\user\models\User {
             [['email', 'username'], 'filter', 'filter' => 'trim'],
             [['email'], 'email'],
             [['username'], 'match', 'pattern' => '/^\w+$/u', 'except' => 'social', 'message' => Yii::t('user', '{attribute} can contain only letters, numbers, and "_"')],
-
             // password rules
             [['newPassword'], 'string', 'min' => 3],
             [['newPassword'], 'filter', 'filter' => 'trim'],
             [['newPassword'], 'required', 'on' => ['register', 'reset', 'acceptInvite', 'manageNew']],
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
             [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
-            
             // email rules invite client
-            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message'=>'Введите эл.почту партнера'],
-            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message'=>'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'],
-            
+            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => 'Введите эл.почту партнера'],
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message' => 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'],
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
-
             // admin crud rules
             [['role_id', 'status'], 'required', 'on' => ['admin']],
             [['role_id', 'status'], 'integer', 'on' => ['admin']],
             [['banned_at'], 'integer', 'on' => ['admin']],
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
-            
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
             [['organization_id'], 'integer'],
+            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'message' => 'Организация не найдена'],
         ];
 
         // add required for currentPassword on account page
@@ -77,7 +73,7 @@ class User extends \amnah\yii2\user\models\User {
 
         return $rules;
     }
-    
+
     public function afterSave($insert, $changedAttributes) {
         if ($insert) {
             $emailNotification = new notifications\EmailNotification();
@@ -97,7 +93,7 @@ class User extends \amnah\yii2\user\models\User {
         }
         parent::afterSave($insert, $changedAttributes);
     }
-    
+
     /**
      * Set organization id
      * @param int $orgId
@@ -105,7 +101,7 @@ class User extends \amnah\yii2\user\models\User {
      */
     public function setOrganization($organization, $first = false) {
         $this->organization_id = $organization->id;
-        
+
 //        if (isset($this->email)) {
 //            $organization->email = $this->email;
 //        }
@@ -127,7 +123,7 @@ class User extends \amnah\yii2\user\models\User {
         }
         return $this;
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -146,6 +142,13 @@ class User extends \amnah\yii2\user\models\User {
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getManagersLeader() {
+        return $this->hasOne(User::className(), ['leader_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getAssociated() {
         return $this->hasMany(ManagerAssociate::className(), ['manager_id' => 'id']);
     }
@@ -156,14 +159,14 @@ class User extends \amnah\yii2\user\models\User {
     public function getEmailNotification() {
         return $this->hasOne(notifications\EmailNotification::className(), ['user_id' => 'id']);
     }
-    
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getSmsNotification() {
         return $this->hasOne(notifications\SmsNotification::className(), ['user_id' => 'id']);
     }
-    
+
     /**
      * Check if user account is active
      * 
@@ -185,7 +188,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-		// send email
+        // send email
         $restaurant = $this->organization->name;
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($vendor->id, $userToken::TYPE_PASSWORD_RESET);
@@ -200,7 +203,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         //return $result;
     }
-    
+
     /**
      * Send email invite to restaurant
      * @param User $client
@@ -213,7 +216,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-		// send email
+        // send email
         $vendor = $this->organization->name;
         $email = $client->email;
         $subject = "Приглашение на MixCart";
@@ -226,7 +229,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         //return $result;
     }
-    
+
     /**
      * Send email invite to restaurant
      * @param User $client
@@ -239,7 +242,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-		// send email
+        // send email
         $we = $this->organization->name;
         $subject = "Приглашение на MixCart";
         $result = $mailer->compose('friendInvite', compact("subject", "we"))
@@ -251,7 +254,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
-    
+
     /**
      * Send welcome email after confirmation
      * @param User $client
@@ -264,7 +267,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-		// send email
+        // send email
         $type = $this->organization->type_id;
         $name = $this->profile->full_name;
         $subject = "Добро пожаловать на  MixCart";
@@ -272,14 +275,16 @@ class User extends \amnah\yii2\user\models\User {
                 ->setTo($this->email)
                 ->setSubject($subject)
                 ->send();
-        
-        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
-                
+
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
+        }
+
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
-    
+
     /**
      *  Send confirmation email to your new employee
      *  @param User $user
@@ -288,13 +293,12 @@ class User extends \amnah\yii2\user\models\User {
     public function sendEmployeeConfirmation($user) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-        
         $profile = $user->profile;
-        
+
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
         $mailer->viewPath = $this->module->emailViewPath;
-        
+
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;
@@ -308,10 +312,10 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
-    
+
     public static function getOrganizationUser($user_ids) {
-		$user_orgganization = User::find()->select('organization_id')->where(['id' => $user_ids])->one();
-		return $user_orgganization['organization_id'];
+        $user_orgganization = User::find()->select('organization_id')->where(['id' => $user_ids])->one();
+        return $user_orgganization['organization_id'];
     }
 
     /**
@@ -319,11 +323,9 @@ class User extends \amnah\yii2\user\models\User {
      * @param UserToken $userToken
      * @return int
      */
-    public function sendEmailConfirmation($userToken)
-    {
+    public function sendEmailConfirmation($userToken) {
         /** @var Mailer $mailer */
         /** @var Message $message */
-
         // modify view path to module views
         $mailer = Yii::$app->mailer;
         $oldViewPath = $mailer->viewPath;
@@ -334,17 +336,17 @@ class User extends \amnah\yii2\user\models\User {
         $profile = $user->profile;
         $email = $userToken->data ?: $user->email;
         $subject = Yii::$app->id . " - " . Yii::t("user", "Email Confirmation");
-        
+
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
-            ->setTo($email)
-            ->setSubject($subject)
-            ->send();
+                ->setTo($email)
+                ->setSubject($subject)
+                ->send();
 
         // restore view path and return result
         $mailer->viewPath = $oldViewPath;
         return $result;
     }
-    
+
     public static function getAllowedRoles($role_id) {
         $clientRoles = [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE];
         $vendorRoles = [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE];
@@ -360,4 +362,5 @@ class User extends \amnah\yii2\user\models\User {
         }
         return [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
     }
+
 }

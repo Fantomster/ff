@@ -40,14 +40,6 @@ class MpCategoryController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            'view' => [
-                'class' => 'yii\rest\ViewAction',
-                'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
-            ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -74,6 +66,7 @@ class MpCategoryController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
@@ -85,14 +78,14 @@ class MpCategoryController extends ActiveController {
             $query->andWhere (['parent' => null]);
             $query->andFilterWhere([
                 'id' => $params->id, 
-                'name1' => $params->name, 
+                'name' => $params->name, 
                ]);
         }
         else 
              $query->andFilterWhere([
             'id' => $params->id, 
             'parent' => $params->parent, 
-            'name2' => $params->name, 
+            'name' => $params->name, 
            ]);
         return $dataProvider;
     }

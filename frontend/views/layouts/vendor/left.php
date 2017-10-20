@@ -58,7 +58,7 @@ if (Yii::$app->user->can('manage')) {
             ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/vendor/settings']],
             //   ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/vendorintegr/default']],
             ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
-            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
         ]
     ];
@@ -69,7 +69,7 @@ if (Yii::$app->user->can('manage')) {
         'url' => '#',
         'options' => ['class' => "treeview hidden-xs"],
         'items' => [
-            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+            ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
         ]
     ];
 }
@@ -82,7 +82,7 @@ $menuItems[] = ['label' => 'ОТПРАВИТЬ ПРИГЛАШЕНИЕ', 'options
         <?=
         dmstr\widgets\Menu::widget(
                 [
-                    'options' => ['class' => 'sidebar-menu'],
+                    'options' => ['class' => 'sidebar-menu tree', 'data-widget' => "tree"],
                     'encodeLabels' => false,
                     'items' => $menuItems,
                 ]

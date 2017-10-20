@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model common\models\User */
 
 $this->title = $model->profile->full_name;
-$this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Пользователи', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-view">
@@ -15,8 +15,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <?php
+    echo Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
     if ($model->role_id === \common\models\Role::ROLE_FKEEPER_MANAGER) {
-        echo Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary', 'style' => 'margin-bottom: 10px;']);
         echo Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'style' => 'margin-bottom: 10px; margin-left: 10px;',
@@ -43,8 +43,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'logged_in_ip',
             'logged_in_at',
             [
+                'format' => 'raw',
                 'attribute' => 'logged_in_at',
-                'label' => 'IP при авторизации',
+                'label' => 'Дата последней авторизации',
                 'value' => function ($data) {
                     return Yii::$app->formatter->asTime($data->logged_in_at, "php:j M Y, H:i:s");
                 }
@@ -68,7 +69,8 @@ $this->params['breadcrumbs'][] = $this->title;
 //            'banned_reason',
 //            'organization_id',
             [
-                'value' => $model->organization_id,
+                'format' => 'raw',
+                'value' => Html::a($model->organization_id, ['organization/view', 'id' => $model->organization_id]),
                 'label' => 'ID организации',
             ],
             [
@@ -81,3 +83,19 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
 </div>
+
+<?php if (Yii::$app->session->hasFlash('Forgot-success')): ?>
+    <div class="alert alert-info" role="alert">
+        <?= Yii::$app->session->getFlash('Forgot-success') ?>
+    </div>
+<?php endif; ?>
+
+<?php
+$form = \yii\widgets\ActiveForm::begin(['method' => 'post']);
+?>
+
+<?= $form->field($newPassModel, 'email')->hiddenInput(['value' => $model->email])->label(false); ?>
+
+<?= Html::submitButton('Выслать письмо со сменой пароля', ['class' => 'btn btn-primary']) ?>
+
+<?php \yii\widgets\ActiveForm::end(); ?>

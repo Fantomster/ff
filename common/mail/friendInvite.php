@@ -22,7 +22,7 @@ use yii\helpers\Url;
 
 <br />
 <div style="width: 100%; text-align: center;">
-    <a href="<?= Url::toRoute(["/user/register"], true) ?>"
+    <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/register"]) ?>"
        style="text-decoration: none;
     color: #FFF;
     background-color: #84bf76;

@@ -8,6 +8,7 @@ use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\RequestCallback;
 use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\resources\Request;
+use common\models\Organization;
 
 
 /**
@@ -44,11 +45,9 @@ class RequestCallbackController extends ActiveController {
             'view' => [
                 'class' => 'yii\rest\ViewAction',
                 'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
+                'findModel' => [$this, 'findModel'],
+                'checkAccess' => [$this, 'checkAccess'],
             ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -79,21 +78,23 @@ class RequestCallbackController extends ActiveController {
         
         $user = Yii::$app->user->getIdentity();
         
-        
-                
-        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
-            if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-                $query = RequestCallback::find()->where(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
+        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+                $query->andWhere(['in','request_id', Request::find()->select('id')->where(['rest_org_id' => $user->organization_id])]);
 
-            if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
+        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
                 $query->andWhere (['supp_org_id' => $user->organization_id]);
-            
+        
+        $organizationTable = Organization::tableName();
+        
+        $query->select("request_callback.*, $organizationTable.name as organization_name");
+        $query->leftJoin($organizationTable, "$organizationTable.id = request_callback.supp_org_id");
+          
+        if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             $dataProvider =  new ActiveDataProvider(array(
                 'query' => $query,
                 ));
             return $dataProvider;
         }
-  
          $query->andFilterWhere([
             'id' => $params->id, 
             'request_id' => $params->request_id, 
@@ -105,4 +106,28 @@ class RequestCallbackController extends ActiveController {
            ]);
         return $dataProvider;
     }
+    
+     /**
+    * Checks the privilege of the current user.
+    *
+    * This method should be overridden to check whether the current user has the privilege
+    * to run the specified action against the specified data model.
+    * If the user does not have access, a [[ForbiddenHttpException]] should be thrown.
+    *
+    * @param string $action the ID of the action to be executed
+    * @param \yii\base\Model $model the model to be accessed. If `null`, it means no specific model is being accessed.
+    * @param array $params additional parameters
+    * @throws ForbiddenHttpException if the user does not have access
+    */
+   public function checkAccess($action, $model = null, $params = [])
+   {
+       // check if the user can access $action and $model
+       // throw ForbiddenHttpException if access should be denied
+       if ($action === 'update' || $action === 'delete' || $action === 'view') {
+           $user = Yii::$app->user->identity;
+           
+           if ($model->request->rest_org_id !== $user->organization_id)
+               throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
+       }
+   }
 }

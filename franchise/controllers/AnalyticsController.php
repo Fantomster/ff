@@ -42,6 +42,7 @@ class AnalyticsController extends DefaultController {
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_FRANCHISEE_LEADER,
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -253,7 +254,7 @@ class AnalyticsController extends DefaultController {
             left outer join (
                 select count(b.id) as first,year(b.created_at) as year, month(b.created_at) as month, day(b.created_at) as day 
                 from (select a.* 
-                    from `f-keeper`.order a left join $fraTable on $fraTable.organization_id=a.vendor_id  
+                    from `order` a left join $fraTable on $fraTable.organization_id=a.vendor_id  
                     where $fraTable.franchisee_id = " . $this->currentFranchisee->id . " and a.status <> 7 and a.created_at BETWEEN :dateFrom AND :dateTo group by a.client_id order by a.id) b group by year(b.created_at), month(b.created_at), day(b.created_at)
                 ) bb
             on aa.year = bb.year and aa.month=bb.month and aa.day=bb.day";

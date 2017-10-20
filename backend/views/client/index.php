@@ -10,15 +10,21 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\UserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Users';
+$this->title = 'Пользователи';
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [
-    'id',
+    [
+        'format' => 'raw',
+        'attribute' => 'id',
+        'value' => function ($data) {
+            return Html::a($data['id'], ['client/view', 'id' => $data['id']]);
+        },
+        'label' => 'Id',
+    ],
     [
         'format' => 'raw',
         'attribute' => 'full_name',
-//                'value' => 'profile.full_name',
         'value' => function ($data) {
             return Html::a($data['profile']['full_name'], ['client/view', 'id' => $data['id']]);
         },
@@ -50,6 +56,21 @@ $gridColumns = [
         'value' => 'role.name',
         'label' => 'Роль',
     ],
+    [
+        'attribute' => '',
+        'label' => '',
+        'format' => 'raw',
+        'headerOptions' => ['style' => 'width:40px'],
+        'value' => function ($data) use ($exceptionArray) {
+            if(in_array($data['role_id'], $exceptionArray))return '';
+            $link = Html::a('<i class="fa fa-pencil" aria-hidden="true"></i>', ['/client/update',
+                'id' => $data['id']], [
+                'class' => 'btn btn-xs btn-default'
+            ]);
+            return $link;
+        },
+    ],
+
 //            'created_at',
 //            'logged_in_at',
 ];
@@ -77,3 +98,4 @@ $gridColumns = [
     ]);
     ?>
     <?php Pjax::end(); ?></div>
+

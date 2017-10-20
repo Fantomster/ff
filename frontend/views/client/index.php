@@ -1,11 +1,8 @@
 <?php
 
-use yii\widgets\Breadcrumbs;
-use kartik\date\DatePicker;
 use kartik\grid\GridView;
 use common\models\Order;
 use common\models\Organization;
-use common\models\Profile;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
@@ -13,7 +10,6 @@ use yii\widgets\Pjax;
 
 $this->title = 'Рабочий стол';
 
-frontend\assets\AdminltePluginsAsset::register($this);
 frontend\assets\TutorializeAsset::register($this);
 
 $this->registerCss('

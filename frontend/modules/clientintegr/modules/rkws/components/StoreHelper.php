@@ -34,7 +34,7 @@ class StoreHelper extends AuthHelper {
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_stores" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/store'.'">
-    <PARAM name="object_id" val="'.$this->restr->code.'" />
+    <PARAM name="object_id" val="'.$this->restr->salespoint.'" />
     </RQ>'; 
        
      $res = ApiHelper::sendCurl($xml,$this->restr);
@@ -134,6 +134,7 @@ class StoreHelper extends AuthHelper {
         
         $rress = Yii::$app->db_api->createCommand('UPDATE rk_storetree SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
             
+        $rress = Yii::$app->db_api->createCommand('UPDATE rk_storetree SET active=0 WHERE acc=:acc', [':acc' => $acc])->execute();
             
      // Заполнение складов с деревом
          /*   
@@ -366,6 +367,10 @@ class StoreHelper extends AuthHelper {
     if (empty($cmdguid)) $cmdguid = 'пусто';     
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
+     
+    if (empty($er)) $er = 'пусто';     
+    if (empty($er3)) $er3 = 'пусто'; 
+    if (empty($er2)) $er2 = 'пусто';  
         
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   

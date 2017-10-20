@@ -7,8 +7,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
+use dosamigos\chartjs\ChartJs;
 
-frontend\assets\AdminltePluginsAsset::register($this);
 $this->title = 'Аналитика';
 $this->registerCss('
 .box-analytics {border:1px solid #eee}.input-group.input-daterange .input-group-addon {
@@ -85,8 +85,8 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
             </div>
             <div class="col-lg-2 col-md-3 col-sm-6">
                 <?= Html::label('Сотрудник', null, ['class' => 'label', 'style' => 'color:#555']) ?>
-<?= Html::dropDownList('filter_employee', null, $filter_get_employee, ['prompt' => 'Все сотрудники', 'class' => 'form-control', 'id' => 'filter_employee'])
-?>        
+                <?= Html::dropDownList('filter_employee', null, $filter_get_employee, ['prompt' => 'Все сотрудники', 'class' => 'form-control', 'id' => 'filter_employee'])
+                ?>        
             </div>
             <div class="col-lg-2 col-md-3 col-sm-6">
                 <?= Html::label('Статус заказа', null, ['class' => 'label', 'style' => 'color:#555']) ?>
@@ -134,19 +134,19 @@ HTML;
                 ?>
             </div>
             <div class="col-lg-2 col-md-3 col-sm-6">
-<?= Html::label('Клиент', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                <?= Html::label('Клиент', null, ['class' => 'label', 'style' => 'color:#555']) ?>
                 <?= Html::dropDownList('filter_client', null, $filter_restaurant, ['prompt' => 'Все', 'class' => 'form-control', 'id' => 'filter_client', 'options' => [\Yii::$app->request->get('filter_client') => ["Selected" => true]]])
                 ?>        
             </div>
             <div class="col-lg-1 col-md-1 col-sm-2">
-<?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
-<?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
+                <?= Html::label('&nbsp;', null, ['class' => 'label']) ?>
+                <?= Html::button('<i class="fa fa-times" aria-hidden="true"></i>', ['id' => 'reset', 'class' => 'form-control clear_filters btn btn-outline-danger teaser']) ?>        
             </div>
         </div>
         <!-- /.box-body -->
     </div>
 
-<?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
+    <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'analytics-list',]); ?>
     <div class="row">
         <div class="col-md-6">
             <!-- AREA CHART -->
@@ -158,8 +158,28 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <div class="chart">
-                        <canvas id="areaChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    <div class="chart" style="position:relative;height:100%;width:100%;min-height: 286px;">
+                        <?=
+                        ChartJs::widget([
+                            'type' => 'line',
+                            'options' => [
+                                'maintainAspectRatio' => false,
+                                'responsive' => true,
+                                'height' => '282px',
+                            ],
+                            'data' => [
+                                'labels' => $arr_create_at,
+                                'datasets' => [
+                                    [
+                                        'label' => "Объем продаж",
+                                        'fillColor' => "rgba(0,0,0,.05)",
+                                        'borderColor' => "#84bf76",
+                                        'data' => $arr_price,
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -177,7 +197,27 @@ HTML;
                     </div>
                 </div>
                 <div class="box-body" style="display: block;">
-                    <canvas id="pieChart" style="height: 282px; width: 574px;" height="282" width="574"></canvas>
+                    <div style="position:relative;height:282px;width:282px;min-height: 286px;margin: auto;">
+                        <?=
+                        ChartJs::widget([
+                            'type' => 'pie',
+                            'options' => [
+                                'height' => 282,
+                                'width' => 282,
+                            ],
+                            'data' => [
+                                'labels' => $arr_clients_labels,
+                                'datasets' => [
+                                    [
+                                        'data' => $arr_clients_price,
+                                        'backgroundColor' => $arr_clients_colors,
+                                        'hoverBackgroundColor' => $arr_clients_colors,
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
+                    </div>
                 </div>
                 <!-- /.box-body -->
             </div>
@@ -238,7 +278,7 @@ HTML;
                             'columns' => $columns,
                         ]);
                         ?> 
-<?php Pjax::end(); ?>
+                        <?php Pjax::end(); ?>
                     </div>
                 </div>
                 <!-- /.box-body -->
@@ -247,88 +287,7 @@ HTML;
         </div>
 
     </div>
-    <?php
-    $arr_create_at = json_encode($arr_create_at);
-    $arr_price = json_encode($arr_price);
-    ?>
-
-    <?php
-    $customJs = <<< JS
-    
-// Get context with jQuery - using jQuery's .get() method.
-var areaChartCanvas = $("#areaChart").get(0).getContext("2d");
-// This will get the first returned node in the jQuery collection.
-var areaChart = new Chart(areaChartCanvas);
-var areaChartData = {
-      labels: $arr_create_at,
-      datasets: [
-        {
-          label: "Объем продаж",
-          fillColor: "rgba(0,0,0,.05)",
-          strokeColor: "#84bf76",
-          pointColor: "#000",
-          pointStrokeColor: "#000",
-          pointHighlightFill: "#000",
-          pointHighlightStroke: "#000",
-          data: $arr_price
-        }
-      ]
-    };
-
-var areaChartOptions = {
-      //Boolean - If we should show the scale at all
-      showScale: true,
-      //Boolean - Whether grid lines are shown across the chart
-      scaleShowGridLines: true,
-      //String - Colour of the grid lines
-      scaleGridLineColor: "rgba(0,0,0,.05)",
-      //Number - Width of the grid lines
-      scaleGridLineWidth: 1,
-      //Boolean - Whether to show horizontal lines (except X axis)
-      scaleShowHorizontalLines: true,
-      //Boolean - Whether to show vertical lines (except Y axis)
-      scaleShowVerticalLines: true,
-      //Boolean - Whether the line is curved between points
-      bezierCurve: true,
-      //Number - Tension of the bezier curve between points
-      bezierCurveTension: 0.3,
-      //Boolean - Whether to show a dot for each point
-      pointDot: false,
-      //Number - Radius of each point dot in pixels
-      pointDotRadius: 5,
-      //Number - Pixel width of point dot stroke
-      pointDotStrokeWidth: 1,
-      //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-      pointHitDetectionRadius: 20,
-      //Boolean - Whether to show a stroke for datasets
-      datasetStroke: true,
-      //Number - Pixel width of dataset stroke
-      datasetStrokeWidth: 2,
-      //Boolean - Whether to fill the dataset with a color
-      datasetFill: true,
-      //String - A legend template
-      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
-      //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
-      maintainAspectRatio: true,
-      //Boolean - whether to make the chart responsive to window resizing
-      responsive: true
-    };
-  //Create the line chart
-    areaChart.Line(areaChartData, areaChartOptions);
-        
-        
-var pieData = $arr_clients_price;
-
-var context = document.getElementById('pieChart').getContext('2d');
-var skillsChart = new Chart(context).Pie(pieData);
-/*if(!areaChartData.labels.length) {
-    //$('.chart').html('Нет данных')
-}*/
-        
-JS;
-    $this->registerJs($customJs, View::POS_READY);
-    ?>
-<?php Pjax::end(); ?>
+    <?php Pjax::end(); ?>
 </section>
 <?php
 $filter_clear_from_date = date("d-m-Y", strtotime(" -2 months"));

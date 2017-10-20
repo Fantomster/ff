@@ -93,17 +93,17 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         ];
     }
     
-    public function delete() {
-        $this->deleted = true;
-        return $this->save();
-    }
-    
-    public static function deleteAll($condition = '', $params = array()) {
-        $command = static::getDb()->createCommand();
-        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
-
-        return $command->execute();
-    }
+//    public function delete() {
+//        $this->deleted = true;
+//        return $this->save();
+//    }
+//    
+//    public static function deleteAll($condition = '', $params = array()) {
+//        $command = static::getDb()->createCommand();
+//        $command->update(static::tableName(), ['deleted' => true], $condition, $params);
+//
+//        return $command->execute();
+//    }
     
     public static function GetRelationCatalogs() {
         $catalog = RelationSuppRest::
@@ -122,17 +122,19 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
       } */
 
     public function search($params, $currentUser, $const) {
+        $vendor_id = Yii::$app->request->get('vendor_id');
+        $org_id = !empty($vendor_id) ? $vendor_id : $currentUser->organization_id;
         if ($const == RelationSuppRest::PAGE_CLIENTS) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $currentUser->organization_id]);
+                    ->where(['supp_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_SUPPLIERS) {
             $query = RelationSuppRest::find()
-                    ->where(['rest_org_id' => $currentUser->organization_id]);
+                    ->where(['rest_org_id' => $org_id]);
         }
         if ($const == RelationSuppRest::PAGE_CATALOG) {
             $query = RelationSuppRest::find()
-                    ->where(['supp_org_id' => $currentUser->organization_id])
+                    ->where(['supp_org_id' => $org_id])
                     ->andWhere(['invite' => RelationSuppRest::INVITE_ON]);
         }
         $dataProvider = new ActiveDataProvider([
@@ -153,6 +155,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         }
         return $dataProvider;
     }
+
 
     public static function row_count($id) {
         $count = RelationSuppRest::find()
@@ -192,6 +195,8 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
-        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
+        }
     }
 }

@@ -99,8 +99,8 @@ class Organization extends \yii\db\ActiveRecord {
             ['type_id', 'required', 'on' => 'register', 'message' => 'Укажите, Вы покупаете или продаете?'],
             [['type_id'], 'required'],
             //[['name', 'city', 'address'], 'required', 'on' => 'complete'],
-            [['address', 'place_id', 'lat', 'lng'], 'required', 'on' => ['complete', 'settings'], 'message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],
-            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted'], 'integer'],
+            [['address','place_id','lat','lng'], 'required', 'on' => ['complete', 'settings'],'message' => 'Установите точку на карте, путем ввода адреса в поисковую строку.'],
+            [['id', 'type_id', 'step', 'es_status', 'rating', 'franchisee_sorted', 'manager_id'], 'integer'],
             [['created_at', 'updated_at', 'white_list', 'partnership'], 'safe'],
             [['name', 'city', 'address', 'zip_code', 'phone', 'email', 'website', 'legal_entity', 'contact_name', 'country', 'locality', 'route', 'street_number', 'place_id', 'formatted_address', 'administrative_area_level_1'], 'string', 'max' => 255],
             [['name', 'city', 'address', 'zip_code', 'phone', 'website', 'legal_entity', 'contact_name', 'about'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
@@ -109,6 +109,7 @@ class Organization extends \yii\db\ActiveRecord {
             [['lat', 'lng'], 'number'],
             [['type_id'], 'exist', 'skipOnError' => true, 'targetClass' => OrganizationType::className(), 'targetAttribute' => ['type_id' => 'id']],
             [['picture'], 'image', 'extensions' => 'jpg, jpeg, gif, png', 'on' => 'settings'],
+            [['is_allowed_for_franchisee'], 'boolean'],
         ];
     }
 
@@ -167,7 +168,9 @@ class Organization extends \yii\db\ActiveRecord {
             'street_number' => 'Дом',
             'place_id' => 'Place ID',
             'formatted_address' => 'Formatted Address',
-            'franchisee_sorted' => 'Назначен Франшизы'
+            'franchisee_sorted'=>'Назначен Франшизы',
+            'manager_id'=>'Менеджер',
+            'is_allowed_for_franchisee'=>'Разрешить франчайзи вход в данный Личный Кабинет'
         ];
     }
 
@@ -220,21 +223,24 @@ class Organization extends \yii\db\ActiveRecord {
      * @return array
      */
     public function getSuppliers($category_id = '', $all = false) {
-        if ($this->type_id !== Organization::TYPE_RESTAURANT) {
+        if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
         }
         $query = RelationSuppRest::find()
                 ->select(['organization.id', 'organization.name'])
                 ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
-                ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id')
-                ->where(['relation_supp_rest.rest_org_id' => $this->id, 'relation_supp_rest.deleted' => false]);
+                ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
+        if(!$all){
+            $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
+        }
+        $query->where(['relation_supp_rest.deleted' => false]);
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }
         $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
                                 ->asArray()
                                 ->all(), 'id', 'name');
-        $vendors[''] = 'Все поставщики';
+        if(!$all) $vendors[''] = 'Все поставщики';
         ksort($vendors);
         return $vendors;
     }
@@ -511,6 +517,10 @@ class Organization extends \yii\db\ActiveRecord {
         return $this->hasOne(FranchiseeAssociate::className(), ['organization_id' => 'id']);
     }
 
+    public function getProfile() {
+        return $this->hasOne(Profile::className(), ['user_id' => 'manager_id']);
+    }
+
     public function getFranchisee() {
         return $this->hasOne(Franchisee::className(), ['id' => 'franchisee_id'])
                         ->viaTable('franchisee_associate', ['organization_id' => 'id']);
@@ -665,7 +675,7 @@ class Organization extends \yii\db\ActiveRecord {
 
     public function getGuides() {
         if ($this->type_id !== Organization::TYPE_RESTAURANT) {
-            return null;
+            return [];
         }
         return $this->hasMany(Guide::className(), ['client_id' => 'id', 'type' => Guide::TYPE_GUIDE]);
     }

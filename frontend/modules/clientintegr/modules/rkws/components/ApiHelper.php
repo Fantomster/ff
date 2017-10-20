@@ -134,6 +134,7 @@ class ApiHelper  {
     
         if (empty($restr)) {
                    echo "SendCurl.Access is not found :(";
+                   file_put_contents('runtime/logs/rk.log',PHP_EOL.'111111'.PHP_EOL,FILE_APPEND); 
                    exit;
         }
     
@@ -141,6 +142,7 @@ class ApiHelper  {
     
     if (!$sess) {
                  echo "SendCurl. Session is not found :((";
+                 file_put_contents('runtime/logs/rk.log',PHP_EOL.'2222'.PHP_EOL,FILE_APPEND); 
                  exit;
     }
     
@@ -149,6 +151,7 @@ class ApiHelper  {
     
         if (empty($cook)) {
                    echo "SendCurl.Session is not found :(";
+                   file_put_contents('runtime/logs/rk.log',PHP_EOL.'33333'.PHP_EOL,FILE_APPEND); 
                    exit;
         }
     
@@ -174,13 +177,22 @@ class ApiHelper  {
 
     $data = curl_exec($ch); 
     $info = curl_getinfo($ch);
+    
+    file_put_contents('runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
+    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($xml,true).PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($url,true).PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($data,true).PHP_EOL,FILE_APPEND); 
+    file_put_contents('runtime/logs/rk.log',PHP_EOL.'**************'.PHP_EOL,FILE_APPEND);
+    file_put_contents('runtime/logs/rk.log',PHP_EOL.print_r($info,true).PHP_EOL,FILE_APPEND);
+    file_put_contents('runtime/logs/rk.log',PHP_EOL.'^^^^^^^^^^^^^^'.PHP_EOL,FILE_APPEND);
        
     $myXML   = simplexml_load_string($data);
     
     if(!isset($myXML->OBJECTS)) {
     
-   // echo "&&&&&&&&&&&&&<br>";
-   // var_dump($data,true);
+    // echo "&&&&&&&&&&&&&<br>";
+    // var_dump($data,true);
+    // die();
     
     foreach ($myXML->OBJECTINFO as $obj) {
      

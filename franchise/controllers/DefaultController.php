@@ -30,6 +30,9 @@ class DefaultController extends Controller {
             if ($this->currentUser->role_id === \common\models\Role::ROLE_FRANCHISEE_AGENT && (Yii::$app->controller->id != 'agent-request') && (Yii::$app->controller->id != 'organization')) {
                 return $this->redirect(['agent-request/index']);
             }
+            if ($this->currentUser->role_id === \common\models\Role::ROLE_FRANCHISEE_ACCOUNTANT && (Yii::$app->controller->id != 'finance')) {
+                return $this->redirect(['finance/index']);
+            }
         }
         if (!parent::beforeAction($action)) {
             return false;

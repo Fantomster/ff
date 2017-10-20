@@ -37,7 +37,7 @@ $arrService = RkService::find()->select('org')->asArray()->all();
         <?=
         dmstr\widgets\Menu::widget(
                 [
-                    'options' => ['class' => 'sidebar-menu'],
+                    'options' => ['class' => 'sidebar-menu tree', 'data-widget' => "tree"],
                     'encodeLabels' => false,
                     'items' => [
                         ['label' => 'НАВИГАЦИЯ', 'options' => ['class' => 'header']],
@@ -70,12 +70,12 @@ $arrService = RkService::find()->select('org')->asArray()->all();
                             'label' => 'Настройки',
                             'icon' => 'gears',
                             'url' => '#', //['client/settings'],
-                            'options' => ['class' => "treeview hidden-xs"],
+                            'options' => ['class' => "hidden-xs"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
                                 ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default'], 'visible' => (in_array($user->organization_id,$resArr))],
                                 ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
-                                ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications']],
+                                ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],
@@ -94,6 +94,7 @@ $arrService = RkService::find()->select('org')->asArray()->all();
                 </span>
             </div>
         </form>
+        
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;">ТЕХНИЧЕСКАЯ ПОДДЕРЖКА</span></li>
             <div style="text-align: center; color: #d8d7d7;padding-top:10px">

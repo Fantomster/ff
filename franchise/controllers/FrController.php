@@ -16,11 +16,14 @@ class FrController extends \yii\rest\Controller {
             'corsFilter' => [
                 'class' => \yii\filters\Cors::className(),
                 'cors' => [
-                    'Origin' => ['http://fr.f-keeper.dev', 'http://f-keeper.dev', 'https://mixcart.dev', 'http://f-keeper.ru', 'https://mixcart.ru', 'https://fr.f-keeper.dev', 'https://fr.f-keeper.ru',
-                        'https://franch.f-keeper.dev', 'http://franch.f-keeper.dev', 'https://franch.f-keeper.ru',
-                        'http://franch.f-keeper.ru', 'https://tmp.f-keeper.ru',
-                        'http://client.f-keeper.dev', 'https://client.f-keeper.dev', 'https://client.f-keeper.ru', 
-                        'https://client.mixcart.ru', 'https://fr.mixcart.ru', 'https://franch.mixcart.ru'],
+                    'Origin' => [
+                        'https://mixcart.ru',
+                        'https://client.mixcart.ru',
+                        'https://fr.mixcart.ru',
+                        'https://franch.mixcart.ru',
+                        'https://2017.mixcart.ru',
+                        'http://2017.mixcart.dev',
+                    ],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
                     'Access-Control-Max-Age' => 3600,
@@ -31,6 +34,7 @@ class FrController extends \yii\rest\Controller {
     }
 
     public function actionPost() {
+        Yii::$app->response->format = Response::FORMAT_JSON;
         if (Yii::$app->request->post('FIELDS')) {
             $fields = Yii::$app->request->post('FIELDS');
             $sitepage = isset($fields['sitepage']) ? Html::encode($fields['sitepage']) : '';
@@ -38,14 +42,14 @@ class FrController extends \yii\rest\Controller {
             $cname = Html::encode($fields['name']);
             $cphone = Html::encode($fields['phone']);
             $cemail = isset($fields['email']) ? Html::encode($fields['email']) : '';
-            $city = Html::encode($fields['city']);
+            $city = isset($fields['city']) ? Html::encode($fields['city']) : '';
+            $company_name = isset($fields['company_name']) ? Html::encode($fields['company_name']) : '';
             $comment = isset($fields['comment']) ? Html::encode($fields['comment']) : '';
             $type = isset($fields['type']) ? Html::encode($fields['type']) : '';
             $lpartner = isset($fields['partner']) ? Html::encode($fields['partner']) : '';
             $lname = isset($fields['lead_name']) ? Html::encode($fields['lead_name']) : '';
             $response = null;
             if (strlen(trim($cname)) < 2 || strlen(trim($cphone)) < 7) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
                 return ['result' => 'error'];
             }
 
@@ -68,10 +72,15 @@ class FrController extends \yii\rest\Controller {
                 $lead_status_id = 465726;
                 $responsible_user_id = 1515736;
             }
+            if ($sitepage == "2017") {
+                $lead_status_id = 773370;
+                $responsible_user_id = 1295688;
+            }
             if ($sitepage == "fkeeper") {
                 if ($formtype == 1) {
                     $lead_status_id = 465726;
                     if ($lpartner == 1) {
+                        $lead_status_id = 643219;
                         $responsible_user_id = 1515736; // Родион
                         $lead_name = 'fkeeper: Хочет стать партнером 50';
                     }
@@ -97,6 +106,9 @@ class FrController extends \yii\rest\Controller {
                 $lead_name = 'fkeeper: Поставщик';
                 $responsible_user_id = 1427371;
             }
+        }
+        if (!isset($sitepage)) {
+            return ['result' => 'error'];
         }
         if ($sitepage == "client") {
             $lead_status_id = 465729;
@@ -165,38 +177,38 @@ class FrController extends \yii\rest\Controller {
             }
         }
 
-        //// Проверка на уже существующий контакт
-        if ($sitepage == "client") {
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
-        }
-        if ($type == "restaurant") {
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
-        }
-        if ($type != "restaurant" && $sitepage != "client") {
-            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
-        }
-        $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
-        #Устанавливаем необходимые опции для сеанса cURL
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
-        curl_setopt($curl, CURLOPT_URL, $link);
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
-        curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-
-        $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
-        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-        if (!$this->CheckCurlResponse($code)) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ['result' => 'error'];
-        }
-        if ($out) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return ['result' => 'errorPhone'];
-        }
+//        //// Проверка на уже существующий контакт - DISABLED FOR GREAT JUSTICE
+//        if ($sitepage == "client") {
+//            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
+//        }
+//        if ($type == "restaurant") {
+//            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone;
+//        }
+//        if ($type != "restaurant" && $sitepage != "client") {
+//            $link = 'https://' . $subdomain . '.amocrm.ru/private/api/v2/json/contacts/list?query=' . $contact_phone . '&query=' . $contact_email;
+//        }
+//        $curl = curl_init(); #Сохраняем дескриптор сеанса cURL
+//        #Устанавливаем необходимые опции для сеанса cURL
+//        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+//        curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-API-client/1.0');
+//        curl_setopt($curl, CURLOPT_URL, $link);
+//        curl_setopt($curl, CURLOPT_HEADER, false);
+//        curl_setopt($curl, CURLOPT_COOKIEFILE, dirname(__FILE__) . '/../cookie/cookie.txt');
+//        curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/../cookie/cookie.txt');
+//        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+//        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+//
+//        $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
+//        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+//        curl_close($curl);
+//        if (!$this->CheckCurlResponse($code)) {
+//            Yii::$app->response->format = Response::FORMAT_JSON;
+//            return ['result' => 'error'];
+//        }
+//        if ($out) {
+//            Yii::$app->response->format = Response::FORMAT_JSON;
+//            return ['result' => 'errorPhone'];
+//        }
         //ДОБАВЛЯЕМ СДЕЛКУ
         $post = Yii::$app->request->post();
         $roistat_cookie = isset($post['roi']) ? $post['roi'] : "неизвестно";
@@ -263,6 +275,7 @@ class FrController extends \yii\rest\Controller {
             'name' => $contact_name,
             'linked_leads_id' => array($lead_id), //id сделки
             'responsible_user_id' => $responsible_user_id, //id ответственного
+            'company_name' => $company_name,
             'custom_fields' => array(
                 array(
                     'id' => $sFields['PHONE'],
@@ -313,13 +326,11 @@ class FrController extends \yii\rest\Controller {
         $out = curl_exec($curl); #Инициируем запрос к API и сохраняем ответ в переменную
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if (!$this->CheckCurlResponse($code)) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
             return ['result' => 'error'];
         }
 
         $Response = json_decode($out, true);
 
-        Yii::$app->response->format = Response::FORMAT_JSON;
         return ['result' => 'success'];
     }
 

@@ -60,6 +60,7 @@ class VendorController extends DefaultController {
                             Role::ROLE_SUPPLIER_MANAGER,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                     [
@@ -112,6 +113,7 @@ class VendorController extends DefaultController {
                             Role::ROLE_SUPPLIER_EMPLOYEE,
                             Role::ROLE_FKEEPER_MANAGER,
                             Role::ROLE_ADMIN,
+                            Role::getFranchiseeEditorRoles(),
                         ],
                     ],
                 ],
@@ -129,9 +131,13 @@ class VendorController extends DefaultController {
     public function actionSettings() {
         $organization = $this->currentUser->organization;
         $organization->scenario = "settings";
+        $post = Yii::$app->request->post();
         if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;
+                if(!$post['Organization']['is_allowed_for_franchisee']){
+                    User::updateAll(['organization_id'=>null], ['organization_id'=>$organization->id, 'role_id'=>Role::getFranchiseeEditorRoles()]);
+                }
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_CATALOG;
                     $organization->save();
@@ -1737,17 +1743,22 @@ class VendorController extends DefaultController {
                         " and vendor_id = " . $currentUser->organization_id .
                         " and status<>" . Order::STATUS_FORMING . " group by client_id")->queryAll();
         $arr_clients_price = [];
+        $arr_clients_labels = [];
+        $arr_clients_colors = [];
         foreach ($clients_query as $clients_querys) {
-            $arr = array(
-                'value' => $clients_querys['total_price'],
-                'label' => \common\models\Organization::find()->where(['id' => $clients_querys['client_id']])->one()->name,
-                'color' => hex()
-            );
-            array_push($arr_clients_price, $arr);
+//            $arr = array(
+//                'value' => $clients_querys['total_price'],
+//                'label' => \common\models\Organization::find()->where(['id' => $clients_querys['client_id']])->one()->name,
+//                'color' => hex()
+//            );
+//            array_push($arr_clients_price, $arr);
+            $arr_clients_price[] = $clients_querys['total_price'];
+            $arr_clients_labels[] = \common\models\Organization::find()->where(['id' => $clients_querys['client_id']])->one()->name;
+            $arr_clients_colors[] = hex();
         }
-        $arr_clients_price = json_encode($arr_clients_price);
+        //$arr_clients_price = json_encode($arr_clients_price);
 
-        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'total_price', 'filter_get_employee'
+        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price','arr_clients_labels','arr_clients_colors', 'total_price', 'filter_get_employee'
         ));
     }
 

@@ -213,7 +213,14 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
                                 <?=
                                 $form->field($organization, 'about')
                                 ->label('Информация об организации')
-                                ->textarea(['placeholder' => "Несколько слов об организации ...", 'rows' => 3])
+                                ->textarea(['placeholder' => "Несколько слов об организации ...", 'rows' => 2])
+                                ?>
+                            </div>
+                            <div class="form-group">
+                                <?=
+                                $form->field($organization, 'is_allowed_for_franchisee')
+                                    ->label(Yii::t('app', 'Разрешить франчайзи вход в данный Личный Кабинет'))
+                                    ->checkbox()
                                 ?>
                             </div>
                         </div>

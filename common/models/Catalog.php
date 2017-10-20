@@ -20,10 +20,10 @@ use Yii;
  * @property Currency $currency
  */
 class Catalog extends \yii\db\ActiveRecord
-{    
+{
     const BASE_CATALOG = 1;
     const CATALOG = 2;
-	
+
     const NON_CATALOG = 0;
     const CATALOG_BASE_NAME = 'Главный каталог';
     const STATUS_ON = 1;
@@ -76,7 +76,7 @@ class Catalog extends \yii\db\ActiveRecord
             'created_at' => 'Create Datetime',
         ];
     }
-    
+
     public function uniqueBaseCatalog() {
         if ($this->type == 1) {
             $baseCheck = self::find()->where(['supp_org_id' => $this->supp_org_id, 'type' => 1])->all();
@@ -85,10 +85,10 @@ class Catalog extends \yii\db\ActiveRecord
             }
         }
     }
-    
+
     public static function getNameCatalog($id){
 	$catalogName = Catalog::find()
-	->where(['id' => $id])->one();  
+	->where(['id' => $id])->one();
 	return $catalogName;
     }
     public static function get_value($id){
@@ -98,11 +98,11 @@ class Catalog extends \yii\db\ActiveRecord
         }
         return null;
     }
-    public static function GetCatalogs($type)
+    public static function GetCatalogs($type, $vendorId = null)
     {
 		$catalog = Catalog::find()
 		->select(['id','status','name','created_at'])
-		->where(['supp_org_id' => \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();   
+		->where(['supp_org_id' => $vendorId ? $vendorId : \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();
 		return $catalog;
     }
     

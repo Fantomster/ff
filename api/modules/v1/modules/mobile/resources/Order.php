@@ -7,6 +7,9 @@ namespace api\modules\v1\modules\mobile\resources;
  */
 class Order extends \common\models\Order
 {
+    public $count;
+    public $page;
+    
     public function fields()
     {
         return ['id', 'client_id', 'vendor_id', 'created_by_id', 'accepted_by_id', 'status', 'total_price', 
@@ -18,7 +21,7 @@ class Order extends \common\models\Order
      */
     public function rules() {
         return [
-            [['client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type'], 'integer'],
+            [['id', 'client_id', 'vendor_id', 'created_by_id', 'status', 'discount_type','count', 'page'], 'integer'],
             [['total_price', 'discount'], 'number'],
             [['created_at', 'updated_at', 'requested_delivery', 'actual_delivery', 'comment'], 'safe'],
             [['comment'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],

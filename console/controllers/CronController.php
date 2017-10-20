@@ -327,7 +327,18 @@ class CronController extends Controller {
                 $franchiseeAssociate->franchisee_id = $f['franchisee_id'];
                 $franchiseeAssociate->organization_id = $organization->id;
                 $franchiseeAssociate->self_registered = \common\models\FranchiseeAssociate::SELF_REGISTERED;
-                $franchiseeAssociate->save();
+                if($franchiseeAssociate->save()){
+                    //send email to franchisee
+                    $route = Yii::$app->params['protocol'] . ":". Yii::$app->params['franchiseeHost'] . "/organization/show-";
+                    $route.= ($organization->type_id==\common\models\Organization::TYPE_RESTAURANT) ? 'client' : 'vendor';
+                    $route.= '/';
+                    $route.= $organization->id;
+                    $message = Yii::$app->mailer;
+                    $message->compose('franchiseeAssociateAdded', compact("organization", "route"))
+                        ->setTo($f['legal_email'])
+                        ->setSubject('Самостоятельно зарегистрировавшаяся организация добавлена во франчайзи')
+                        ->send();
+                }
                 //Если спонсор, тогда никто больше не претендует на эту организацию 
                 //во всех дальнейших итераций
                 break;

@@ -41,14 +41,11 @@ class GuideController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            'view' => [
+            /*'view' => [
                 'class' => 'yii\rest\ViewAction',
                 'modelClass' => $this->modelClass,
                 'findModel' => [$this, 'findModel']
-            ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
+            ],*/
         ];
     }
 
@@ -75,11 +72,15 @@ class GuideController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         $filters = [];
         $user = Yii::$app->user->getIdentity();
         
         $filters['client_id'] = $user->organization_id;
+        
+        $query->leftJoin('(select count(id) as count, guide_id, cbg_id from guide_product group by guide_id) as gp', 'gp.guide_id = guide.id');
+        $query->andWhere('gp.count is not null');
 
         if (!($params->load(Yii::$app->request->queryParams) && $params->validate())) {
             $query->andFilterWhere($filters);

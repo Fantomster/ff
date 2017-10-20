@@ -54,11 +54,9 @@ class RequestController extends ActiveController {
             'view' => [
                 'class' => 'yii\rest\ViewAction',
                 'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
+                'findModel' => [$this, 'findModel'],
+                'checkAccess' => [$this, 'checkAccess'],
             ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -85,6 +83,7 @@ class RequestController extends ActiveController {
         
         $dataProvider =  new ActiveDataProvider(array(
             'query' => $query,
+            'pagination' => false,
         ));
         
         $user = Yii::$app->user->getIdentity();
@@ -120,7 +119,7 @@ class RequestController extends ActiveController {
             'count_views' => $params->count_views, 
             'created_at' => $params->created_at, 
             'end' => $params->end, 
-            'rest_org_id' => $params->rest_org_id, 
+            //'rest_org_id' => $params->rest_org_id, 
             'active_status' => $params->active_status
            ]);
         return $dataProvider;
@@ -142,10 +141,26 @@ class RequestController extends ActiveController {
    {
        // check if the user can access $action and $model
        // throw ForbiddenHttpException if access should be denied
-       if ($action === 'update' || $action === 'delete') {
+       if ($action === 'update' || $action === 'delete' || $action === 'view') {
            $user = Yii::$app->user->identity;
            if ($model->rest_org_id !== $user->organization_id)
                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
        }
    }
+   
+   public function actionRemoveSupply($id)
+    {
+        /* @var $model ActiveRecord */
+        $model = $this->findModel($id);
+
+        $this->checkAccess('update', $model);
+
+        $model->scenario = $this->updateScenario;
+        $model->responsible_supp_org_id = null;
+        if ($model->save() === false && !$model->hasErrors()) {
+            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
+        }
+
+        return $model;
+    }
 }

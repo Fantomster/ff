@@ -2,6 +2,8 @@
 
 namespace franchise\models;
 
+use common\models\RelationManagerLeader;
+use common\models\Role;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -48,25 +50,9 @@ class OrderSearch extends Order {
      * @return ActiveDataProvider
      */
     public function search($params, $franchisee_id, $prev30 = false) {
-        
         $orderTable = Order::tableName();
-        
         $query = Order::find();
         $this->load($params);
-
-        $filter_date_from = strtotime($this->date_from);
-        $filter_date_to = strtotime($this->date_to);
-
-        $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
-        if ($from) {
-            $t1_f = $from->format('Y-m-d');
-        }
-        $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
-        if ($to) {
-            $to->add(new \DateInterval('P1D'));
-            $t2_f = $to->format('Y-m-d');
-        }
-
         switch ($this->status) {
             case 1: //new
                 $this->status_array = [Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR, Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT];
@@ -102,10 +88,11 @@ class OrderSearch extends Order {
                 $query->from(Profile::tableName() . ' acceptedByProfile');
             },
                 ], true);
-        $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = client.id");
+        $query->leftJoin("franchisee_associate", "franchisee_associate.organization_id = vendor.id");
+        $query->leftJoin("franchisee_associate as fa", "fa.organization_id = client.id");
         $query->where(Order::tableName() . '.status != ' .Order::STATUS_FORMING);
-        $query->andWhere(['franchisee_associate.franchisee_id' => $franchisee_id]);
-        
+        $query->andWhere(['or', ['franchisee_associate.franchisee_id' => $franchisee_id], ['fa.franchisee_id' => $franchisee_id]]);
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
@@ -139,12 +126,26 @@ class OrderSearch extends Order {
         ];
 
         // grid filtering conditions
-        $query->andFilterWhere(['or', 
+        $query->andFilterWhere(['or',
             ['like', 'client.name', $this->searchString],
             ['like', 'vendor.name', $this->searchString],
             ['like', 'createdByProfile.full_name', $this->searchString],
             ['like', 'acceptedByProfile.full_name', $this->searchString],
             ]);
+
+        if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_MANAGER or Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
+            $searchArr[] = Yii::$app->user->id;
+            if(Yii::$app->user->identity->role_id == Role::ROLE_FRANCHISEE_LEADER){
+                $relArr = RelationManagerLeader::findAll(['leader_id'=>Yii::$app->user->id]);
+                foreach ($relArr as $one){
+                    $searchArr[] = $one['manager_id'];
+                }
+            }
+            $query->andFilterWhere(['or',
+                ['client.manager_id'=>$searchArr],
+                ['vendor.manager_id'=>$searchArr],
+            ]);
+        }
 
         $query->andFilterWhere([
             Order::tableName() . '.status' => $this->status_array,
@@ -155,6 +156,17 @@ class OrderSearch extends Order {
         if ($prev30) {
             $query->andWhere("$orderTable.created_at between CURDATE() - INTERVAL 30 DAY and CURDATE() + INTERVAL 1 DAY ");
         } else {
+            $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
+            $t1_f = null;
+            $t2_f = null;
+            if ($from) {
+                $t1_f = $from->format('Y-m-d');
+            }
+            $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
+            if ($to) {
+                $to->add(new \DateInterval('P1D'));
+                $t2_f = $to->format('Y-m-d');
+            }
             $query->andFilterWhere(['>=', "$orderTable.created_at", $t1_f]);
             $query->andFilterWhere(['<=', "$orderTable.created_at", $t2_f]);
         }

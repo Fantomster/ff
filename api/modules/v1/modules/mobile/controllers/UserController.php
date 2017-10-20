@@ -4,7 +4,7 @@ namespace api\modules\v1\modules\mobile\controllers;
 
 use Yii;
 use api\modules\v1\modules\mobile\models\User;
-use backend\modules\api\v1\resources\User as UserResource;
+use api\modules\v1\modules\mobile\resources\User as UserResource;
 use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use common\models\Profile;
@@ -34,38 +34,14 @@ class UserController extends ActiveController {
 
         return $behaviors;
     }
-
-    /**
+    
+     /**
      * @inheritdoc
      */
-    public function actions() {
+    public function actions()
+    {
         return [
-            'index' => [
-                'class' => 'yii\rest\IndexAction',
-                'modelClass' => $this->modelClass
-            ],
-            'view' => [
-                'class' => 'yii\rest\ViewAction',
-                'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
-            ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
-    }
-
-    /**
-     * @param $id
-     * @return null|static
-     * @throws NotFoundHttpException
-     */
-    public function findModel($id) {
-        $model = UserResource::findOne($id);
-        if (!$model) {
-            throw new NotFoundHttpException;
-        }
-        return $model;
     }
 
     public function actionAuth() {
@@ -73,7 +49,16 @@ class UserController extends ActiveController {
         $user = User::findOne(Yii::$app->user->id);
         $profile = $user->profile;
         $organization = $user->organization;
+        //$organization->picture = $organization->pictureUrl;
         return compact("user","profile","organization");
+    }
+    
+     public function actionAvatar($name) {
+         $organization = new Organization();  
+         $organization->picture = $name;
+         header('Content-type: image/jpeg');
+         echo file_get_contents($organization->pictureUrl);
+  
     }
     
     public function actionRegistration() {
@@ -182,7 +167,7 @@ class UserController extends ActiveController {
             $userToken->delete();
         }
 
-        return ($success) ? compact("user","profile","organization") : ['error' => Yii::t('user','Invalid PIN')];
+        return ($success) ? compact("user","profile","organization") : ['error' => 'Неверный код'/*Yii::t('user','Invalid PIN')*/];
     }
 
     public function actionCompleteRegistration() {
@@ -231,14 +216,16 @@ class UserController extends ActiveController {
         /*$user = Yii::$app->user->identity;
         \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($user->email, $user->id);*/
         
-        \api\modules\v1\modules\mobile\components\NotificationHelper::actionSendMessage(132);
+        \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder(29);
     }
     
     public function actionRefreshFcmToken() {
-        $device_id = Yii::$app->request->post('device_id');
+        $device_id = Yii::$app->request->headers->get("Device_id");
         $token = Yii::$app->request->post('token');
+        if($device_id === null)
+            return "Fail";
         
-        $fcm = UserFcmToken::find('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
+        $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id = :device_id', [':user_id' => Yii::$app->user->id, ':device_id' => $device_id])->one();
         
         if($fcm === null)
         {

@@ -38,12 +38,14 @@ class OrganizationController extends DefaultController {
                 'only' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'agent'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor'],
+                        'actions' => ['index', 'clients', 'delete', 'vendors', 'ajax-show-client', 'ajax-show-vendor', 'create-client', 'create-vendor', 'update-users-organization'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_FRANCHISEE_OWNER,
                             Role::ROLE_FRANCHISEE_OPERATOR,
                             Role::ROLE_FRANCHISEE_ACCOUNTANT,
+                            Role::ROLE_FRANCHISEE_LEADER,
+                            Role::ROLE_FRANCHISEE_MANAGER,
                             Role::ROLE_ADMIN,
                         ],
                     ],
@@ -137,6 +139,7 @@ class OrganizationController extends DefaultController {
      * Add new restaurant
      */
     public function actionCreateClient() {
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $client = new Organization();
         $client->type_id = Organization::TYPE_RESTAURANT;
         $user = new User();
@@ -174,13 +177,14 @@ class OrganizationController extends DefaultController {
             }
         }
 
-        return $this->render('create-client', compact('client', 'user', 'profile', 'buisinessInfo'));
+        return $this->render('create-client', compact('client', 'user', 'profile', 'buisinessInfo', 'managersArray'));
     }
 
     /**
      * Update restaurant
      */
     public function actionUpdateClient($id) {
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $client = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
@@ -214,7 +218,7 @@ class OrganizationController extends DefaultController {
             }
         }
 
-        return $this->render('update-client', compact('client', 'buisinessInfo'));
+        return $this->render('update-client', compact('client', 'buisinessInfo', 'managersArray'));
     }
 
     /**
@@ -319,6 +323,7 @@ class OrganizationController extends DefaultController {
      * Add new supplier
      */
     public function actionCreateVendor() {
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $vendor = new Organization();
         $catalog = new \common\models\Catalog();
         $vendor->type_id = Organization::TYPE_SUPPLIER;
@@ -360,13 +365,14 @@ class OrganizationController extends DefaultController {
             }
         }
 
-        return $this->render('create-vendor', compact('vendor', 'user', 'profile', 'buisinessInfo'));
+        return $this->render('create-vendor', compact('vendor', 'user', 'profile', 'buisinessInfo', 'managersArray'));
     }
 
     /**
      * Update vendor
      */
     public function actionUpdateVendor($id) {
+        $managersArray = $this->currentFranchisee->getFranchiseeEmployees(true);
         $vendor = Organization::find()
                 ->joinWith("franchiseeAssociate")
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
@@ -399,8 +405,7 @@ class OrganizationController extends DefaultController {
                 }
             }
         }
-
-        return $this->render('update-vendor', compact('vendor', 'buisinessInfo'));
+        return $this->render('update-vendor', compact('vendor', 'buisinessInfo', 'managersArray'));
     }
 
     /**
@@ -461,7 +466,22 @@ class OrganizationController extends DefaultController {
             $showButton = true;
             $catalog = \common\models\Catalog::find()->where(['supp_org_id' => $organization->id, 'type' => \common\models\Catalog::BASE_CATALOG])->one();
         }
-
         return $this->render("show-".$type, compact('organization','dataProvider', 'managersDataProvider', 'catalog', 'showButton'));
+    }
+
+
+    public function actionUpdateUsersOrganization($organization_id){
+        $organization = Organization::find()
+            ->joinWith("franchiseeAssociate")
+            ->where(['organization.id' => $organization_id, 'franchisee_associate.franchisee_id' => $this->currentFranchisee->id])
+            ->one();
+        if(!$organization || !$organization->is_allowed_for_franchisee){
+            throw new HttpException(403, Yii::t('app', 'Организация закрыла доступ к своему кабинету'));
+        }
+        $user_id = $this->currentUser->id;
+        $user = User::findOne($user_id);
+        $user->organization_id = $organization_id;
+        $user->save();
+        return $this->redirect(Yii::$app->params['protocol'] . ':' . Yii::$app->urlManagerFrontend->baseUrl . "/user/login");
     }
 }

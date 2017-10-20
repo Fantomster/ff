@@ -169,5 +169,19 @@ class OrderContent extends \yii\db\ActiveRecord
     
     public function formatPrice() {
         return $this->price . " " . $this->order->currency->symbol;
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+        }
+    }
+    
+    public function afterDelete() {
+        parent::afterDelete();
+        
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+        }
     }
 }

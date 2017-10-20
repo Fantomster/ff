@@ -9,6 +9,9 @@ use api\modules\v1\modules\mobile\resources\RelationSuppRest;
 use yii\data\ActiveDataProvider;
 use api\modules\v1\modules\mobile\models\User;
 use common\models\forms\LoginForm;
+use common\models\Organization;
+use common\models\RequestCallback;
+use common\models\Request;
 
 
 /**
@@ -42,14 +45,6 @@ class RelationSuppRestController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            'view' => [
-                'class' => 'yii\rest\ViewAction',
-                'modelClass' => $this->modelClass,
-                'findModel' => [$this, 'findModel']
-            ],
-            'options' => [
-                'class' => 'yii\rest\OptionsAction'
-            ]
         ];
     }
 
@@ -122,23 +117,24 @@ class RelationSuppRestController extends ActiveController {
                 }else{
                 $relationSuppRest = new \common\models\RelationSuppRest();   
                 }
-                $relationSuppRest->deleted = false;
+                $relationSuppRest->deleted = 0;
                 $relationSuppRest->rest_org_id = $client->organization_id;
                 $relationSuppRest->supp_org_id = $vendor->id;
                 $relationSuppRest->invite = \common\models\RelationSuppRest::INVITE_OFF;
                 $relationSuppRest->save(); 
                 $request = Request::findOne(['id'=>$request_id]);
                 
-                $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
+                $vendorUsers = User::find()->where(['organization_id' => $vendor->id])->all();
                 if($client->email){
                 $mailer = Yii::$app->mailer; 
                 $email = $client->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "f-keeper.ru - заявка №" . $request->id;
+                 $subject = "mixcart.ru - заявка №" . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestInviteSupplierMailToRest', compact("request","client"))
                         ->setTo($email)->setSubject($subject)->send();
                 }
+
                 foreach($vendorUsers as $user){
                     if($user->profile->phone && $user->profile->sms_allow){
                         $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
@@ -151,14 +147,14 @@ class RelationSuppRestController extends ActiveController {
                     $mailer = Yii::$app->mailer;
                     $email = $user->email; 
                     //$email = 'marshal1209448@gmail.com';
-                    $subject = "f-keeper.ru - заявка №" . $request->id;
+                    $subject = "mixcart.ru - заявка №" . $request->id;
                     $mailer->htmlLayout = 'layouts/request';
                     $result = $mailer->compose('requestInviteSupplier', compact("request","user"))
                             ->setTo($email)->setSubject($subject)->send();
                     }
                 }
                 
-                return compact("relationSuppRest");
+                return $relationSuppRest;
             }
     }
 }

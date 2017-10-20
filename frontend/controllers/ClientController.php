@@ -827,12 +827,6 @@ class ClientController extends DefaultController {
                     $relationSuppRest->supp_org_id = $get_supp_org_id;
                     $relationSuppRest->invite = RelationSuppRest::INVITE_ON;
                     $relationSuppRest->save();
-//                    if (!empty($categorys)) {
-//                        foreach ($categorys as $arrCategorys) {
-//                            $sql = "insert into " . RelationCategory::tableName() . "(`category_id`,`rest_org_id`,`supp_org_id`,`created_at`) VALUES ('$arrCategorys',$currentUser->organization_id,$get_supp_org_id,NOW())";
-//                            \Yii::$app->db->createCommand($sql)->execute();
-//                        }
-//                    }
                     $result = ['success' => true, 'message' => 'Приглашение отправлено!'];
                     $currentOrganization = $currentUser->organization;
 
@@ -860,7 +854,6 @@ class ClientController extends DefaultController {
                         $currentOrganization->save();
                     }
                     return $result;
-                    exit;
                 }
             } else {
                 $result = ['success' => true, 'message' => 'Валидация не пройдена!'];

@@ -167,6 +167,8 @@ class OrderContent extends \yii\db\ActiveRecord
         return GoodsNotes::findOne(['catalog_base_goods_id' => $this->product_id, 'rest_org_id' => $this->order->client_id]);
     }
     
+    public function formatPrice() {
+        return $this->price . " " . $this->order->currency->symbol;
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
         

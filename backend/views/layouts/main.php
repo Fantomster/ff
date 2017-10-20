@@ -143,8 +143,8 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                         ],
                     ]);
 
-                //    if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529) || (Yii::$app->user->id === 4435)) {
-                    if (in_Array(Yii::$app->user->id,Yii::$app->params['integratAdminID'])) {
+                  //  if ((Yii::$app->user->id === 467) || (Yii::$app->user->id === 3529) || (Yii::$app->user->id === 4435) || (Yii::$app->user->id === 7761)) {
+                      if (inArray(Yii::$app->user->id,Yii::$app->params['integratAdminID'])) {
                         $menuItems = array_merge($menuItems, [
                             [
                                 'label' => 'Интеграция',
@@ -185,6 +185,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 ?>
                 <?= Alert::widget() ?>
                 <?= $content ?>
+
             </div>
         </div>
 
@@ -193,6 +194,8 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                 <p class="pull-left">&copy; MixCart <?= date('Y') ?></p>
 
                 <p class="pull-right">Работает, оно работает!</p>
+
+                
             </div>
         </footer>
         <div id="loader-show"></div>

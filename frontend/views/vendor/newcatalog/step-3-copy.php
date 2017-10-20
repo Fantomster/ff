@@ -1,16 +1,14 @@
 <?php
+
 use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
-use kartik\grid\GridView;
 use yii\helpers\Html;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
-use yii\widgets\ActiveForm;
-use yii\helpers\ArrayHelper;
 use yii\web\View;
-use common\models\Users;
-use kartik\export\ExportMenu;
-use kartik\editable\Editable;
+use common\models\Currency;
+use yii\helpers\Json;
+
 \frontend\assets\HandsOnTableAsset::register($this);
 
 $this->registerCss('.handsontable .htCore .htDimmed {
@@ -20,10 +18,12 @@ $this->registerCss('.handsontable .htCore .htDimmed {
  }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
 $this->title = 'Редактировать продукты';
 
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode(Currency::getSymbolList());
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <i class="fa fa-list-alt"></i> Редактирование каталога <?= '<strong>' . common\models\Catalog::get_value($cat_id)->name . '</strong>' ?>
         <small></small>
     </h1>
     <?=
@@ -33,8 +33,8 @@ $this->title = 'Редактировать продукты';
         ],
         'links' => [
             [
-            'label' => 'Каталоги',
-            'url' => ['vendor/catalogs'],
+                'label' => 'Каталоги',
+                'url' => ['vendor/catalogs'],
             ],
             'Шаг 3. Редактирование каталога',
         ],
@@ -42,70 +42,70 @@ $this->title = 'Редактировать продукты';
     ?>
 </section>
 <section class="content">
-<div class="box box-info">
-    <!-- /.box-header -->
-    <div class="box-body">
-        <div class="panel-body">
-            <ul class="nav fk-tab nav-tabs pull-left">
-                <?='<li>'.Html::a('Название',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a('Изменить цены <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>'?>
-            </ul>
-            <ul class="fk-prev-next pull-right">
-              <?='<li class="fk-prev">'.Html::a('Назад',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::button('<span><i class="fa fa-save"></i> Далее</span>', [
-                  'id'=>'save', 
-                  'name'=>'save',
-                  'data' => [
-                      'url' => Url::to(['vendor/step-4','id'=>$cat_id]),
-                      'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
-                  ],
-                  ]).'</li>'?>
-            </ul>
-        </div>
-        <div class="panel-body">
-            <div class="callout callout-fk-info">
-                <h4>ШАГ 3</h4>
-                <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
-            </div> 
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="input-group">
-                            <span class="input-group-addon">
-                              <i class="fa fa-search"></i>
-                            </span>
-                    <?=Html::input('text', 'search_field', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search_field']) ?>
-                    </div>
+    <div class="box box-info">
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="panel-body">
+                <ul class="nav fk-tab nav-tabs pull-left">
+                    <?= '<li>' . Html::a('Название', ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a('Добавить товары', ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li class="active">' . Html::a('Изменить цены <i class="fa fa-fw fa-hand-o-right"></i>', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a('Назначить ресторану', ['vendor/step-4', 'id' => $cat_id]) . '</li>' ?>
+                </ul>
+                <ul class="fk-prev-next pull-right">
+                    <?= '<li class="fk-prev">' . Html::a('Назад', ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
+                    <?=
+                    '<li class="fk-next">' . Html::button('<span><i class="fa fa-save"></i> Далее</span>', [
+                        'id' => 'save',
+                        'name' => 'save',
+                        'data' => [
+                            'url' => Url::to(['vendor/step-4', 'id' => $cat_id]),
+                            'loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+                        ],
+                    ]) . '</li>'
+                    ?>
+                </ul>
+            </div>
+            <div class="panel-body">
+                <div class="callout callout-fk-info">
+                    <h4>ШАГ 3</h4>
+                    <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
                 </div> 
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-search"></i>
+                            </span>
+                            <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search_field']) ?>
+                        </div>
+                    </div> 
+                    <div class="col-sm-8">
+                        <?=
+                        Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
+                            'class' => 'btn btn-outline-default btn-sm pull-right',
+                            'id' => 'changeCurrency',
+                        ])
+                        ?>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <?php Pjax::begin(['id' => 'pjax-container']); ?>
+                <div class="handsontable" id="handsontable"></div> 
+                <?php Pjax::end(); ?>   
             </div>
         </div>
-        <div class="panel-body">
-            <?php /*=Html::a('<i class="fa fa-pencil m-r-xs"></i> установить скидку на весь ассортимент', 
-                    [
-                    'vendor/ajax-set-percent','id'=>$cat_id
-                    ], 
-                    [
-                    'data' => [
-                        'target' => '#discount-all-product',
-                        'toggle' => 'modal',
-                        'backdrop' => 'static',
-                        ],'class'=>'pull-left'
-                    ])*/?>
-            <?php Pjax::begin(['id' => 'pjax-container']); ?>
-                <div class="handsontable" id="handsontable"></div> 
-            <?php Pjax::end(); ?>   
-        </div>
     </div>
-</div>
 </section>
-<?=Modal::widget([
-'id' => 'discount-all-product',
-'clientOptions' => false,
+<?=
+Modal::widget([
+    'id' => 'discount-all-product',
+    'clientOptions' => false,
 ])
 ?>
 <?php
-$arr= json_encode($array, JSON_UNESCAPED_UNICODE);
+$arr = json_encode($array, JSON_UNESCAPED_UNICODE);
 $arr_count = count($array);
 
 $step3CopyUrl = Url::to(['vendor/step-3-copy', 'id' => $cat_id]);
@@ -296,6 +296,47 @@ $.post(
     });
 return false;
 })
+        
+    var currencies = $.map($currencySymbolList, function(el) { return el });
+    var newCurrency = {$currentCatalog->currency->id};
+        
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (value != 1) {
+                        newCurrency = value;
+                        resolve()
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            }
+        }).then(function (result) {
+            swal({
+                title: 'Пересчитать цены в каталоге?',
+                html: 
+                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> {$currentCatalog->currency->symbol} = ' +
+                    '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
+                showCancelButton: true,
+                preConfirm: function () {
+                    return new Promise(function (resolve) {
+                        resolve([
+                            $('#swal-curr1').val(),
+                            $('#swal-curr2').val()
+                        ])
+                    })
+                }
+            }).then(function (result) {
+                swal(JSON.stringify(result))
+            })
+        })        
+    });
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

@@ -24,7 +24,11 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 
-$arrService = RkService::find()->select('org')->asArray()->all();
+$arrService = RkService::find()->select('org')->asArray()->all(); 
+    foreach ($arrService as $key => $val) {
+        $resArr[] = $val['org'];
+    }
+
 ?>
 
 <aside class="main-sidebar">
@@ -69,7 +73,7 @@ $arrService = RkService::find()->select('org')->asArray()->all();
                             'options' => ['class' => "hidden-xs"],
                             'items' => [
                                 ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
-                                ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default'],'visible' => (in_array($user->organization_id, $arrService))],
+                                ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default'], 'visible' => (in_array($user->organization_id,$resArr))],
                                 ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
                                 ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
                             ]
@@ -100,7 +104,7 @@ $arrService = RkService::find()->select('org')->asArray()->all();
                     </a>
                 </p>
             </div>
-        </ul>
+        </ul>     
     </section>
 </aside>
 <?php

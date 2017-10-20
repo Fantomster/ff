@@ -21,7 +21,9 @@ use yii\data\ActiveDataProvider;
  * @property CatalogBaseGoods $baseProduct  
  * @property GoodsNotes $notes
  * @property Organization $organization
+ * @property Catalog $catalog
  */
+
 class CatalogGoods extends \yii\db\ActiveRecord {
 
     /**
@@ -135,7 +137,15 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     public function getOrganization() {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id'])->via('baseProduct');
     }
+
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getCatalog() {
+        return $this->hasOne(Catalog::className(), ['id' => 'cat_id']);
+    }
+    
+    public function formatPrice() {
+        return $this->price . " " . $this->catalog->currency->symbol;
+    }
 }

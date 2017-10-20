@@ -123,8 +123,8 @@ class AgentHelper extends AuthHelper {
     }
     */
     
-    $cmdguid = strval($myXML['cmdguid']); 
-    $posid = strval($myXML['posid']); 
+    $cmdguid = strval($myXML['cmdguid']) ? strval($myXML['cmdguid']) : strval($myXML['taskguid']); 
+    $posid = strval($myXML['posid']) ? strval($myXML['posid']) : 1; 
     
     if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
         
@@ -230,7 +230,7 @@ class AgentHelper extends AuthHelper {
     
     if (empty($er)) $er = 'пусто';     
     if (empty($er3)) $er3 = 'пусто'; 
-    if (empty($er2)) $er2 = 'пусто'; 
+    
         
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   

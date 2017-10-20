@@ -80,7 +80,7 @@ use kartik\form\ActiveForm;
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data->price . ' РУБ/' . $data->baseProduct->ed;
+                            return $data->formattedPrice . '/' . $data->baseProduct->ed;
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],

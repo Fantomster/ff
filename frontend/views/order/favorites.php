@@ -190,7 +190,7 @@ $this->registerJs('
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data->price . ' РУБ/' . $data->ed;
+                            return $data->formatPrice() . '/' . $data->ed;
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],
@@ -220,7 +220,7 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function($data) use ($client) {
-                            return Html::button('<i class="fa fa-comment"> <span class="circe_font">Комментарий</span></i>', [
+                            return Html::button('<i class="fa fa-comment"> <span class="circe_font"> Комментарий</span></i>', [
                                         'class' => 'add-note btn btn-md btn-gray pull-right circe_font',
                                         'data' => [
                                             'id' => $data->id,
@@ -236,7 +236,7 @@ $this->registerJs('
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">В корзину</span></i>', [
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font"> В корзину</span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right circe_font',
                                         'data-id' => $data->id,
                                         'data-cat' => $data->cat_id,

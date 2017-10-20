@@ -2,23 +2,26 @@
 
 use kartik\grid\GridView;
 use yii\widgets\Breadcrumbs;
-use kartik\editable\Editable;
 use yii\helpers\Html;
 use kartik\export\ExportMenu;
 use yii\bootstrap\Modal;
 use yii\helpers\Url;
+use yii\helpers\Json;
 use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
-use yii\helpers\ArrayHelper;
 use yii\web\View;
-use common\models\Category;
-use common\models\CatalogBaseGoods;
 use kartik\checkbox\CheckboxX;
 use common\assets\CroppieAsset;
+use common\models\Currency;
 
 CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 kartik\select2\Select2Asset::register($this);
+
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode(Currency::getSymbolList());
+
+$changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
+$calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
 ?>
 <?php
 $this->registerJs("           
@@ -258,11 +261,12 @@ Modal::end();
                             '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
                     )
                     ?>
-                    <?= ''
-//                    Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
-//                        'class' => 'btn btn-outline-default btn-sm pull-right',
-//                        'style' => ['margin-right' => '10px;']
-//                    ])
+                    <?= 
+                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
+                        'class' => 'btn btn-outline-default btn-sm pull-right',
+                        'style' => ['margin-right' => '10px;'],
+                        'id' => 'changeCurrency',
+                    ])
                     ?>
 
                 </div>
@@ -680,7 +684,93 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
         return false;
     });
   $('#add-product-market-place').removeAttr('tabindex');
-  
+
+    var currencies = $.map($currencySymbolList, function(el) { return el });
+    var newCurrency = {$currentCatalog->currency->id};
+    var currentCurrency = {$currentCatalog->currency->id};
+    var oldCurrency = {$currentCatalog->currency->id};
+        
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            showLoaderOnConfirm: true,
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (!value) {
+                        reject('Выберите валюту из списка')
+                    }
+                    if (value != currentCurrency) {
+                        newCurrency = value;
+                        resolve();
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            },
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        "{$changeCurrencyUrl}",
+                        {newCurrencyId: newCurrency}
+                    ).done(function (response) {
+                        if (response.result === 'success') {
+                            $(".currency-symbol").html(response.symbol);
+                            oldCurrency = currentCurrency;
+                            currentCurrency = newCurrency;
+                            resolve();
+                        } else {
+                            swal({
+                                type: response.result,
+                                title: response.message
+                            });
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
+            swal({
+                title: 'Валюта каталога изменена!',
+                type: 'success',
+                html: 
+                    '<hr /><div>Пересчитать цены в каталоге?</div>' +
+                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency-1] + ' = ' +
+                    '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
+                showCancelButton: true,
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
+                preConfirm: function () {
+                    return new Promise(function (resolve) {
+                        $.post(
+                            '{$calculatePricesUrl}',
+                            {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
+                        ).done(function (response) {
+                            if (response.result === 'success') {
+                                $.pjax.reload({container: "#kv-unique-id-1", timeout:30000});
+                                resolve();
+                            } else {
+                                swal({
+                                    type: response.result,
+                                    title: response.message
+                                });
+                            }
+                        });
+                    })
+                }
+            }).then(function (result) {
+                swal({
+                    type: "success",
+                    title: "Цены успешно изменены!",
+                    allowOutsideClick: true,
+                });
+            })
+        })        
+    });
+        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

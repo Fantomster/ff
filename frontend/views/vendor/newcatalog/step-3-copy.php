@@ -80,14 +80,14 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                             <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search_field']) ?>
                         </div>
                     </div> 
-<!--                    <div class="col-sm-8">
+                    <div class="col-sm-8">
                         <?=
-                        Html::button('<span class="text-label">Изменить валюту: </span> ' . $currentCatalog->currency->symbol, [
+                        Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                             'class' => 'btn btn-outline-default btn-sm pull-right',
                             'id' => 'changeCurrency',
                         ])
                         ?>
-                    </div>-->
+                    </div>
                 </div>
             </div>
             <div class="panel-body">
@@ -110,6 +110,9 @@ $arr_count = count($array);
 
 $step3CopyUrl = Url::to(['vendor/step-3-copy', 'id' => $cat_id]);
 $step4Url = Url::to(['vendor/step-4', 'id' => $cat_id]);
+
+$changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
+$calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
 
 $customJs = <<< JS
 /** 
@@ -138,7 +141,7 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
   //clickBeginsEditing : true,
-  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Индивидуальная цена', 'Ед. измерения','Скидка в рублях','Скидка %','Итоговая цена'],
+  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена', 'Индивидуальная цена', 'Ед. измерения','Фикс. скидка','Скидка %','Итоговая цена'],
   search: true,
   renderAllRows: false,
   maxRows: $arr_count,
@@ -160,14 +163,14 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
     {
         data: 'price', 
         type: 'numeric',
-        format: '0.00 $',
+        format: '0.00',
         language: 'ru-RU'
     },
     {data: 'ed',readOnly: true}, 
     {
         data: 'discount',
         type: 'numeric',
-        format: '0.00 $',
+        format: '0.00',
         language: 'ru-RU'
     },
     {data: 'discount_percent', type: 'numeric',format: '0',},
@@ -299,6 +302,8 @@ return false;
         
     var currencies = $.map($currencySymbolList, function(el) { return el });
     var newCurrency = {$currentCatalog->currency->id};
+    var currentCurrency = {$currentCatalog->currency->id};
+    var oldCurrency = {$currentCatalog->currency->id};
         
     $(document).on("click", "#changeCurrency", function() {
         swal({
@@ -314,7 +319,7 @@ return false;
                     if (!value) {
                         reject('Выберите валюту из списка')
                     }
-                    if (value != {$currentCatalog->currency->id}) {
+                    if (value != currentCurrency) {
                         newCurrency = value;
                         resolve();
                     } else {
@@ -324,40 +329,59 @@ return false;
             },
             preConfirm: function (text) {
                 return new Promise(function (resolve, reject) {
-//                    $.post(
-//                        clicked.data("url"),
-//                        {comment: text}
-//                    ).done(function (result) {
-//                        if (result) {
-//                            resolve(result);
-//                        } else {
-//                            resolve(false);
-//                        }
-//                    });
-                    setTimeout(function (){
-
-                        resolve();
-
-                    }, 2000);
+                    $.post(
+                        "{$changeCurrencyUrl}",
+                        {newCurrencyId: newCurrency}
+                    ).done(function (response) {
+                        if (response.result === 'success') {
+                            $(".currency-symbol").html(response.symbol);
+                            oldCurrency = currentCurrency;
+                            currentCurrency = newCurrency;
+                            resolve();
+                        } else {
+                            swal({
+                                type: response.result,
+                                title: response.message
+                            });
+                        }
+                    });
                 })
             },
         }).then(function (result) {
             swal({
-                title: 'Валюта каталога изменена! Пересчитать цены в каталоге?',
+                title: 'Валюта каталога изменена!',
+                type: 'success',
                 html: 
-                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> {$currentCatalog->currency->symbol} = ' +
+                    '<hr /><div>Пересчитать цены в каталоге?</div>' +
+                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[currentCurrency-1] + ' = ' +
                     '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
                 showCancelButton: true,
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
                 preConfirm: function () {
                     return new Promise(function (resolve) {
-                        resolve([
-                            $('#swal-curr1').val(),
-                            $('#swal-curr2').val()
-                        ])
+                        $.post(
+                            '{$calculatePricesUrl}',
+                            {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
+                        ).done(function (response) {
+                            if (response.result === 'success') {
+                                $.pjax.reload("#pjax-container", {timeout:30000});
+                                resolve();
+                            } else {
+                                swal({
+                                    type: response.result,
+                                    title: response.message
+                                });
+                            }
+                        });
                     })
                 }
             }).then(function (result) {
-                swal(JSON.stringify(result))
+                swal({
+                    type: "success",
+                    title: "Цены успешно изменены!",
+                    allowOutsideClick: true,
+                });
             })
         })        
     });

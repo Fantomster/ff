@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $html = Html::tag('a', $data->email, ['href' => 'mailto:' . $data->email]);
 
                     //Прверяем не попал ли Email в черный список
-                    if (!$model->getEmailInBlackList()) {
+                    if ($model->getEmailInBlackList()) {
                         $html .= '<span class="badge pull-right">' . \Yii::t('app', 'Email в черном списке') . '</span>';
                     }
 

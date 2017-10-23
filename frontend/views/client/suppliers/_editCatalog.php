@@ -34,7 +34,7 @@ var save = document.getElementById('save-catalog-supplier'), hot, originalColWid
 hot = new Handsontable(container, {
 removeRowPlugin: true,
 data: JSON.parse(JSON.stringify(data)),
-colHeaders : ['base_goods_id', 'goods_id', 'Артикул', 'Наименование товара', 'Кратность', 'Цена (руб)', 'Ед. измерения', 'Комментарий'],
+colHeaders : ['base_goods_id', 'goods_id', 'Артикул', 'Наименование товара', 'Кратность', 'Цена (<span class="currency-symbol">{$catalogCurrency->symbol}</span>)', 'Ед. измерения', 'Комментарий'],
 colWidths: [0, 0, 50, 60, 40, 30, 40, 60],
 columns: [
         

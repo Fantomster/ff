@@ -429,9 +429,20 @@ class VendorController extends DefaultController {
                 return $result;
                 exit;
             }
-            $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
-            \Yii::$app->db->createCommand($sql)->execute();
-            $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
+            
+            $currency = Currency::findOne(['id' => Yii::$app->request->post('currency')]);
+            
+            $newBaseCatalog = new Catalog();
+            $newBaseCatalog->supp_org_id = $currentUser->organization_id;
+            $newBaseCatalog->name = 'Главный каталог';
+            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+            $newBaseCatalog->status = Catalog::STATUS_ON;
+            if (!empty($currency)) {
+                $newBaseCatalog->currency_id = $currency->id;
+            }
+            $newBaseCatalog->save();
+            
+            $lastInsert_base_cat_id = $newBaseCatalog->id;
 
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));

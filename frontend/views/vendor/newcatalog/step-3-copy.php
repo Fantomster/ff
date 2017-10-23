@@ -353,7 +353,7 @@ return false;
                 type: 'success',
                 html: 
                     '<hr /><div>Пересчитать цены в каталоге?</div>' +
-                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[currentCurrency-1] + ' = ' +
+                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency-1] + ' = ' +
                     '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
                 showCancelButton: true,
                 showLoaderOnConfirm: true,

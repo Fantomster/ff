@@ -8,6 +8,8 @@
 
 namespace common\models;
 
+use common\models\notifications\EmailBlacklist;
+use common\models\notifications\EmailFails;
 use Yii;
 
 /**
@@ -288,7 +290,7 @@ class User extends \amnah\yii2\user\models\User {
     /**
      *  Send confirmation email to your new employee
      *  @param User $user
-     *  @return int 
+     *  @return int
      */
     public function sendEmployeeConfirmation($user) {
         /** @var Mailer $mailer */
@@ -360,7 +362,33 @@ class User extends \amnah\yii2\user\models\User {
         if (in_array($role_id, $franchiseeRoles)) {
             return $franchiseeRoles;
         }
-        return [Role::ROLE_RESTAURANT_MANAGER, Role::ROLE_RESTAURANT_EMPLOYEE, Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_FRANCHISEE_OWNER, Role::ROLE_FRANCHISEE_OPERATOR, Role::ROLE_FRANCHISEE_ACCOUNTANT];
+        return [
+            Role::ROLE_RESTAURANT_MANAGER,
+            Role::ROLE_RESTAURANT_EMPLOYEE,
+            Role::ROLE_SUPPLIER_MANAGER,
+            Role::ROLE_SUPPLIER_EMPLOYEE,
+            Role::ROLE_FRANCHISEE_OWNER,
+            Role::ROLE_FRANCHISEE_OPERATOR,
+            Role::ROLE_FRANCHISEE_ACCOUNTANT
+        ];
+    }
+
+    /**
+     * Занесен ли Email в черный список
+     * @return bool
+     */
+    public function getEmailInBlackList()
+    {
+        return (bool)EmailBlacklist::find()->where("email = :e", [':e' => $this->email])->one();
+    }
+
+    /**
+     * Получаем последний фэйл по емайлу
+     * @return array|EmailFails|null|\yii\db\ActiveRecord
+     */
+    public function getEmailLastFail()
+    {
+        return EmailFails::find()->where("email = :e", [':e' => $this->email])->orderBy('type DESC, id DESC')->one();
     }
 
 }

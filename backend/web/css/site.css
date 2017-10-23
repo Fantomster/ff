@@ -109,3 +109,12 @@ a.desc:after {
 .nav > li > form > button:hover {
     text-decoration: none;
 }
+
+.text-sm {
+    font-size: 12px;
+}
+
+.email-error {
+    max-width: 300px;
+    margin-top: 10px;
+}

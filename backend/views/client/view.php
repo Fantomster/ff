@@ -39,7 +39,44 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => 'Роль',
             ],
             'status',
-            'email:email',
+            [
+                'format' => 'raw',
+                'attribute' => 'email',
+                'label' => \Yii::t('app', 'Email'),
+                'value' => function ($data) use ($model) {
+                    $html = Html::tag('a', $data->email, ['href' => 'mailto:' . $data->email]);
+
+                    //Прверяем не попал ли Email в черный список
+                    if (!$model->getEmailInBlackList()) {
+                        $html .= '<span class="badge pull-right">' . \Yii::t('app', 'Email в черном списке') . '</span>';
+                    }
+
+                    //Находим последний фэйл по этому емэйлу
+                    if ($lastFail = $model->getEmailLastFail()) {
+                        $body = json_decode($lastFail->body, true);
+                        $reason = null;
+                        switch ($body['notificationType']) {
+                            case 'Complaint':
+                                $reason = $body['complaint']['complaintFeedbackType'];
+                                break;
+                            case 'Bounce':
+                                if (isset($body['bounce']['bouncedRecipients'][0])) {
+                                    $reason = $body['bounce']['bouncedRecipients'][0]['diagnosticCode'];
+                                }
+                                break;
+                        }
+                        //Добавляем сообщение
+                        if($reason !== null) {
+                            $html .= '<div class="email-error text-sm alert alert-danger" >';
+                            $html .= '<b>' . \Yii::t('app', 'Не удалось отправить письмо') . '</b><br>';
+                            $html .= \Yii::t('app', 'Причина') . ':' . $reason;
+                            $html .= '</div>';
+                        }
+                    }
+
+                    return $html;
+                }
+            ],
             'logged_in_ip',
             'logged_in_at',
             [

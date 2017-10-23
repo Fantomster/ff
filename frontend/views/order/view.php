@@ -148,7 +148,6 @@ $js = <<<JS
                 confirmButtonText: "Да",
                 showLoaderOnConfirm: true,
                 allowOutsideClick: false,
-                showLoaderOnConfirm: true,
                 preConfirm: function (text) {
                     return new Promise(function (resolve, reject) {
                         $.post(

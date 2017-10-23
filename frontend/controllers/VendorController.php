@@ -17,6 +17,7 @@ use common\models\Catalog;
 use common\models\CatalogGoods;
 use common\models\CatalogBaseGoods;
 use common\models\ManagerAssociate;
+use common\models\Currency;
 use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
@@ -104,7 +105,9 @@ class VendorController extends DefaultController {
                             'support',
                             'view-catalog',
                             'view-client',
-                            'remove-delivery-region'
+                            'remove-delivery-region',
+                            'ajax-change-currency',
+                            'ajax-calculate-prices',
                         ],
                         'allow' => true,
                         // Allow suppliers managers
@@ -426,9 +429,20 @@ class VendorController extends DefaultController {
                 return $result;
                 exit;
             }
-            $sql = "insert into " . Catalog::tableName() . "(`supp_org_id`,`name`,`type`,`created_at`,`status`) VALUES ($currentUser->organization_id,'Главный каталог'," . Catalog::BASE_CATALOG . ",NOW(),1)";
-            \Yii::$app->db->createCommand($sql)->execute();
-            $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
+            
+            $currency = Currency::findOne(['id' => Yii::$app->request->post('currency')]);
+            
+            $newBaseCatalog = new Catalog();
+            $newBaseCatalog->supp_org_id = $currentUser->organization_id;
+            $newBaseCatalog->name = 'Главный каталог';
+            $newBaseCatalog->type = Catalog::BASE_CATALOG;
+            $newBaseCatalog->status = Catalog::STATUS_ON;
+            if (!empty($currency)) {
+                $newBaseCatalog->currency_id = $currency->id;
+            }
+            $newBaseCatalog->save();
+            
+            $lastInsert_base_cat_id = $newBaseCatalog->id;
 
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -557,7 +571,8 @@ class VendorController extends DefaultController {
         ]);
         $searchModel2 = new RelationSuppRest;
         $dataProvider2 = $searchModel2->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
-        return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog'));
+        $cat_id = $baseCatalog->id;
+        return $this->render('catalogs/basecatalog', compact('searchString', 'dataProvider', 'searchModel2', 'dataProvider2', 'currentCatalog', 'cat_id'));
     }
 
     public function actionImportToXls($id) {
@@ -1365,7 +1380,12 @@ class VendorController extends DefaultController {
             return $result;
             exit;
         }
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog'));
+        
+        if (Yii::$app->request->isPjax) {
+            return $this->renderPartial('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog'));
+        } else {
+            return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog'));
+        }
     }
 
     public function actionStep3($id) {
@@ -1853,4 +1873,59 @@ class VendorController extends DefaultController {
                         Yii::$app->session->set('sidebar-collapse', true);
     }
 
+    /**
+     * changes currency in given catalog
+     */
+    public function actionAjaxChangeCurrency($id) {
+        $newCurrencyId = Yii::$app->request->post('newCurrencyId');
+        $catalog = Catalog::find()->where(['id' => $id, 'supp_org_id' => $this->currentUser->organization_id])->one();
+        
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        if (empty($catalog)) {
+            return ['result' => 'error', 'message' => 'Каталог не найден!'];
+        }
+        
+        $currency = Currency::findOne(['id' => $newCurrencyId]);
+        if (empty($currency)) {
+            return ['result' => 'error', 'message' => 'Валюта не найдена!'];
+        }
+        
+        $catalog->currency_id = $newCurrencyId;
+        $catalog->save();
+        return ['result' => 'success', 'symbol' => $currency->symbol];
+    }
+    
+    /**
+     * calculate prices with new currency
+     */
+    public function actionAjaxCalculatePrices($id) {
+        $catalog = Catalog::find()->where(['id' => $id, 'supp_org_id' => $this->currentUser->organization_id])->one();
+        
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        
+        if (empty($catalog)) {
+            return ['result' => 'error', 'message' => 'Каталог не найден!'];
+        }
+        
+        $oldCurrencyUnits = Yii::$app->request->post('oldCurrencyUnits') + 0.0;
+        $newCurrencyUnits = Yii::$app->request->post('newCurrencyUnits') + 0.0;
+        if (($oldCurrencyUnits <= 0) || ($newCurrencyUnits <= 0)) {
+            return ['result' => 'error', 'message' => 'Некорректный курс!'];
+        }
+        
+        $attributes = ['price' => new \yii\db\Expression('price * ' . $newCurrencyUnits / $oldCurrencyUnits)];
+        $condition = ['cat_id' => $id];
+        
+        switch ($catalog->type) {
+            case Catalog::BASE_CATALOG:
+                $updated = CatalogBaseGoods::updateAll($attributes, $condition);
+                break;
+            case Catalog::CATALOG:
+                $updated = CatalogGoods::updateAll($attributes, $condition);
+                break;
+        }
+        
+        return ['result' => 'success'];
+    }
 }

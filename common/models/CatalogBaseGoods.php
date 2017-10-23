@@ -121,7 +121,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => 'Размер файла не должен превышать 2 Мб'], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
-            [['price'], 'number', 'min' => 0.1],
+            [['price'], 'number', 'min' => 0.01],
             [['sub1', 'sub2'], 'required',
                 'when' => function($model) {
             return $model->market_place == self::MARKETPLACE_ON;
@@ -162,7 +162,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'product' => 'Товар',
             'supp_org_id' => 'id поставщика',
             'units' => 'Кратность',
-            'price' => 'Цена (руб.)',
+            'price' => 'Цена',
             'status' => 'Статус',
             'market_place' => 'Market_place',
             'deleted' => 'Deleted',

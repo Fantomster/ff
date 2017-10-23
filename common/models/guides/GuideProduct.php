@@ -4,6 +4,8 @@ namespace common\models\guides;
 
 use Yii;
 use common\models\CatalogBaseGoods;
+use common\models\CatalogGoods;
+use common\models\Catalog;
 
 /**
  * This is the model class for table "guide_product".
@@ -18,6 +20,7 @@ use common\models\CatalogBaseGoods;
  * @property Guide $guide
  * @property string $price
  * @property string $note
+ * @property string $formattedPrice
  */
 class GuideProduct extends \yii\db\ActiveRecord
 {
@@ -97,6 +100,52 @@ class GuideProduct extends \yii\db\ActiveRecord
         parent::afterDelete();
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             \api\modules\v1\modules\mobile\components\NotificationHelper::actionGuideProduct($this->id);
+        }
+    }
+    
+    public function getFormattedPrice() {
+        $cgTable = CatalogGoods::tableName();
+        $cbgTable = CatalogBaseGoods::tableName();
+        $orgTable = \common\models\Organization::tableName();
+        $rsrTable = \common\models\RelationSuppRest::tableName();
+        $catTable = Catalog::tableName();
+        $currencySymbol = '';
+        
+        $product = CatalogGoods::find()
+                ->leftJoin($cbgTable, "$cbgTable.id = $cgTable.base_goods_id")
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.deleted" => false,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.rest_org_id" => $this->guide->client_id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $this->cbg_id,
+                ])
+                ->one();
+        if ($product) {
+            $currencySymbol = $product->catalog->currency->symbol;
+            return $this->price . ' ' . $currencySymbol;
+        }
+
+        $product = CatalogBaseGoods::find()
+                ->leftJoin($orgTable, "$orgTable.id = $cbgTable.supp_org_id")
+                ->leftJoin($rsrTable, "$rsrTable.cat_id = $cbgTable.cat_id")
+                ->leftJoin($catTable, "$catTable.id = $rsrTable.cat_id")
+                ->where([
+                    "$rsrTable.deleted" => false,
+                    "$cbgTable.deleted" => CatalogBaseGoods::DELETED_OFF,
+                    "$cbgTable.status" => CatalogBaseGoods::STATUS_ON,
+                    "$rsrTable.rest_org_id" => $this->guide->client_id,
+                    "$catTable.status" => Catalog::STATUS_ON,
+                    "$cbgTable.id" => $this->cbg_id,
+                ])
+                ->one();
+        if ($product) {
+            $currencySymbol = $product->catalog->currency->symbol;
+            return $this->price . ' ' . $currencySymbol;
         }
     }
 }

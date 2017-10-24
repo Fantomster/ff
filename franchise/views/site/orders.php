@@ -177,9 +177,29 @@ kartik\select2\Select2Asset::register($this);
                                     'label' => 'Заказ создал',
                                 ],
                                 [
-                                    'attribute' => 'vendorManager',
-                                    'value' => 'acceptedByProfile.full_name',
-                                    'label' => 'Заказ принял',
+                                    'attribute' => 'acceptedByProfile.full_name',
+                                    'value' => function($data) {
+                                        $arr = [];
+                                        foreach($data->orderParticipants as $participant){
+                                            $arr[$participant->profile->full_name]=$participant->profile->full_name;
+                                        }
+                                        foreach ($data->orderChat as $chat){
+                                            $arr[$chat->profile->full_name]=$chat->profile->full_name;
+                                        }
+                                        if(isset($data->acceptedByProfile->full_name)){
+                                            $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;
+                                        }
+                                        $string = '';
+                                        foreach ($arr as $key => $value){
+                                            $string.=$value;
+                                            if($key!=end($arr)){
+                                                $string.=', ';
+                                            }
+                                        }
+                                        return $string;
+                                    },
+                                    'label' => 'Заказ обработали',
+                                    'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                                 ],
                                 [
                                     'format' => 'raw',

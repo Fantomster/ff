@@ -405,7 +405,8 @@ JS;
                                 if($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
                                    $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
                                    $user->role_id == Role::ROLE_ADMIN ||
-                                   $user->role_id == Role::ROLE_FKEEPER_MANAGER)
+                                   $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
+                                    in_array($user->role_id, Role::getFranchiseeEditorRoles()))
                                 {
                                     echo Html::a("БИЗНЕСЫ", ['user/change-form'], [
                                         'data' => [

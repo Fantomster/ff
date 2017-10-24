@@ -511,6 +511,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
             $user->save();
             return true;
         }
+        if(in_array($user->role_id, Role::getFranchiseeEditorRoles())){
+            $user->organization_id = $id;
+            $user->save();
+            return true;
+        }
         return false;
     }
     

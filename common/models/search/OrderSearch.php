@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\OrderParticipants;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -112,6 +113,11 @@ class OrderSearch extends Order {
             },
                 ], true);
         $query->joinWith([
+            'orderParticipants' => function($query) {
+                $query->from(OrderParticipants::tableName(). ' orderParticipants');
+            },
+        ], true);
+        $query->joinWith([
             'acceptedByProfile' => function($query) {
                 $query->from(Profile::tableName(). ' acceptedByProfile');
             },
@@ -122,7 +128,6 @@ class OrderSearch extends Order {
             $query->rightJoin($maTable, "$maTable.organization_id = `$orderTable`.client_id AND $maTable.manager_id = " . $this->manager_id);
         }
         $query->where(Order::tableName() . '.status != :status', ['status' => Order::STATUS_FORMING]);
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
@@ -161,7 +166,6 @@ class OrderSearch extends Order {
 
         $query->andFilterWhere(['vendor_id' => $this->vendor_id]);
         $query->andFilterWhere(['client_id' => $this->client_id]);
-
         return $dataProvider;
     }  
     

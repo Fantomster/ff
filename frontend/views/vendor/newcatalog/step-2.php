@@ -4,13 +4,7 @@ use yii\widgets\Breadcrumbs;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
 use yii\helpers\Html;
-use yii\bootstrap\Modal;
 use yii\helpers\Url;
-use yii\widgets\ActiveForm;
-use yii\helpers\ArrayHelper;
-use yii\web\View;
-use common\models\Users;
-use dosamigos\switchinput\SwitchBox;
 use kartik\checkbox\CheckboxX;
 
 $this->title = 'Добавить продукты';
@@ -49,11 +43,11 @@ $this->registerCss('
                     <?= '<li>' . Html::a('Название', ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
                     <?= '<li class="active">' . Html::a('Добавить товары <i class="fa fa-fw fa-hand-o-right"></i>', ['vendor/step-2', 'id' => $cat_id]) . '</li>' ?>
                     <?= '<li>' . Html::a('Изменить цены', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
-<?= '<li>' . Html::a('Назначить ресторану', ['vendor/step-4', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li>' . Html::a('Назначить ресторану', ['vendor/step-4', 'id' => $cat_id]) . '</li>' ?>
                 </ul>
                 <ul class="fk-prev-next pull-right">
                     <?= '<li class="fk-prev">' . Html::a('Назад', ['vendor/step-1-update', 'id' => $cat_id]) . '</li>' ?>
-<?= '<li class="fk-next">' . Html::a('<i class="fa fa-save"></i> Далее', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
+                    <?= '<li class="fk-next">' . Html::a('<i class="fa fa-save"></i> Далее', ['vendor/step-3-copy', 'id' => $cat_id]) . '</li>' ?>
                 </ul>
             </div>
 
@@ -117,19 +111,20 @@ $this->registerCss('
                     },
                 ],
                 [
-                    'attribute' => 'Добавить',
+                    'label' => 'Добавить',
                     'format' => 'raw',
                     'contentOptions' => ['style' => 'width:50px;'],
-                    'value' => function ($data) use($cat_id) {
+                    'value' => function ($data) use ($cat_id) {
 
                         $step2AddProductUrl = Url::to(['vendor/step-2-add-product']);
-
+                        
+                        $value = common\models\CatalogGoods::searchProductFromCatalogGoods($data['id'], Yii::$app->request->get('id')) ? 1 : 0;
                         $link = CheckboxX::widget([
                                     'name' => 'product_' . $data['id'],
                                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                    'value' => common\models\CatalogGoods::searchProductFromCatalogGoods($data['id'], Yii::$app->request->get('id')) ? 1 : 0,
+                                    'value' => $value,
                                     'autoLabel' => true,
-                                    'options' => ['id' => 'product_' . $data['id'], 'data-id' => $data['id'], 'cat-id' => $cat_id],
+                                    'options' => ['id' => 'product_' . $data['id'], 'data-id' => $data['id'], 'cat-id' => $cat_id, 'value' => $value],
                                     'pluginOptions' => [
                                         'threeState' => false,
                                         'theme' => 'krajee-flatblue',
@@ -159,6 +154,12 @@ $this->registerCss('
                                         'reset' => 'function() { console.log("reset"); }',
                                     ]
                         ]);
+//                        $link = CheckboxX::widget([
+//                                    'name' => 'test' . $data['id'],
+//                                   // 'initInputType' => CheckboxX::INPUT_CHECKBOX,
+//                                    'value' => 0,
+//                                    'autoLabel' => true,
+//                        ]);
                         return $link;
                     },
                 ]
@@ -178,7 +179,14 @@ $this->registerCss('
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                <?= Html::input('text', 'search', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
+                            <?= Html::input('text', 'search', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
+                                        <?= ''
+//                    CheckboxX::widget([
+//                                    'name' => 'test',
+//                                    'initInputType' => CheckboxX::INPUT_CHECKBOX,
+//                                    'value' => 0,
+//                        ]) 
+                ?>
                         </div>
                     </div> 
                 </div>
@@ -202,7 +210,7 @@ $this->registerCss('
                     'resizableColumns' => false,
                 ]);
                 ?>
-<?php Pjax::end(); ?>
+                <?php Pjax::end(); ?>
             </div>
         </div>    
     </div>

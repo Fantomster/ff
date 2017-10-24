@@ -10,11 +10,19 @@ class UploadForm extends Model
      * @var UploadedFile
      */
     public $importFile;
+    public $importType;
 
     public function rules()
     {
         return [
+            [['importType'], 'integer'],
             [['importFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'xlsx', 'checkExtensionByMimeType' => false],
+        ];
+    }
+    
+    public function attributeLabels() {
+        return [
+            'importType' => 'Тип импорта',
         ];
     }
     

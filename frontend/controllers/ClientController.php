@@ -313,7 +313,11 @@ class ClientController extends DefaultController {
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
-
+            
+            if (isset($post['currency'])) {
+                $currency = \common\models\Currency::findOne(['id' => $post['currency']]);
+            }
+                        
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             //$relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -443,6 +447,9 @@ class ClientController extends DefaultController {
                             $newBaseCatalog->name = 'Главный каталог';
                             $newBaseCatalog->type = Catalog::BASE_CATALOG;
                             $newBaseCatalog->status = Catalog::STATUS_ON;
+                            if (isset($currency)) {
+                                $newBaseCatalog->currency_id = $currency->id;
+                            }
                             $newBaseCatalog->save();
                             $newBaseCatalog->refresh();
                             $lastInsert_base_cat_id = $newBaseCatalog->id;
@@ -458,6 +465,9 @@ class ClientController extends DefaultController {
                                 $newBaseCatalog->name = 'Главный каталог';
                                 $newBaseCatalog->type = Catalog::BASE_CATALOG;
                                 $newBaseCatalog->status = Catalog::STATUS_ON;
+                                if (isset($currency)) {
+                                    $newBaseCatalog->currency_id = $currency->id;
+                                }
                                 $newBaseCatalog->save();
                                 $newBaseCatalog->refresh();
                                 $lastInsert_base_cat_id = $newBaseCatalog->id;
@@ -469,6 +479,9 @@ class ClientController extends DefaultController {
                         $newCatalog->name = $currentUser->organization->name;
                         $newCatalog->type = Catalog::CATALOG;
                         $newCatalog->status = Catalog::STATUS_ON;
+                        if (isset($currency)) {
+                            $newCatalog->currency_id = $currency->id;
+                        }
                         $newCatalog->save();
                         $newCatalog->refresh();
 
@@ -620,12 +633,16 @@ class ClientController extends DefaultController {
                          * 2) Создаем базовый и каталог для ресторана
                          *    
                          * */
+                        
                         if ($check['eventType'] == 5) {
                             $newBaseCatalog = new Catalog();
                             $newBaseCatalog->supp_org_id = $get_supp_org_id;
                             $newBaseCatalog->name = 'Главный каталог';
                             $newBaseCatalog->type = Catalog::BASE_CATALOG;
                             $newBaseCatalog->status = Catalog::STATUS_ON;
+                            if (isset($currency)) {
+                                $newBaseCatalog->currency_id = $currency->id;
+                            }
                             $newBaseCatalog->save();
                             $newBaseCatalog->refresh();
                             $lastInsert_base_cat_id = $newBaseCatalog->id;
@@ -641,6 +658,9 @@ class ClientController extends DefaultController {
                                 $newBaseCatalog->name = 'Главный каталог';
                                 $newBaseCatalog->type = Catalog::BASE_CATALOG;
                                 $newBaseCatalog->status = Catalog::STATUS_ON;
+                                if (isset($currency)) {
+                                    $newBaseCatalog->currency_id = $currency->id;
+                                }
                                 $newBaseCatalog->save();
                                 $newBaseCatalog->refresh();
                                 $lastInsert_base_cat_id = $newBaseCatalog->id;
@@ -652,6 +672,9 @@ class ClientController extends DefaultController {
                         $newCatalog->name = $currentUser->organization->name;
                         $newCatalog->type = Catalog::CATALOG;
                         $newCatalog->status = Catalog::STATUS_ON;
+                        if (isset($currency)) {
+                            $newCatalog->currency_id = $currency->id;
+                        }
                         $newCatalog->save();
                         $newCatalog->refresh();
 
@@ -941,9 +964,10 @@ class ClientController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
 
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::BASE_CATALOG) {
-            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status "
+            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_base_goods.price,catalog_base_goods.status,currency.symbol as symbol "
                     . " FROM `catalog` "
                     . " JOIN catalog_base_goods on catalog.id = catalog_base_goods.cat_id"
+                    . " LEFT JOIN `currency` ON `catalog`.currency_id=`currency`.id"
                     . " WHERE "
                     . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand(" SELECT COUNT(*) "
@@ -953,10 +977,11 @@ class ClientController extends DefaultController {
                             . " catalog_base_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF)->queryScalar();
         }
         if (Catalog::find()->where(['id' => $cat_id, 'status' => 1])->one()->type == Catalog::CATALOG) {
-            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status "
+            $query = Yii::$app->db->createCommand("SELECT catalog.id as id,article,catalog_base_goods.product as product,units,ed,catalog_goods.price as price, catalog_base_goods.status,currency.symbol as symbol "
                     . " FROM `catalog` "
                     . " JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
                     . " JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id"
+                    . " LEFT JOIN `currency` ON `catalog`.currency_id=`currency`.id"
                     . " WHERE "
                     . " catalog_goods.cat_id = $id and deleted = " . CatalogBaseGoods::DELETED_OFF);
             $totalCount = Yii::$app->db->createCommand("SELECT COUNT(*) "
@@ -993,7 +1018,9 @@ class ClientController extends DefaultController {
     public function actionEditCatalog($id) {
         $catalog_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
-        $supp_org_id = Catalog::find()->where(['id' => $catalog_id])->one()->supp_org_id;
+        $currentCatalog = Catalog::find()->where(['id' => $catalog_id])->one();
+        $supp_org_id = $currentCatalog->supp_org_id;
+        $catalogCurrency = $currentCatalog->currency;
         $supplier = Organization::find()->where(['id' => $supp_org_id])->one();
 
         $catalog = CatalogGoods::find()->where(['cat_id' => $catalog_id])->all();
@@ -1261,7 +1288,7 @@ class ClientController extends DefaultController {
             ]);
         }
         $array = json_encode($array, JSON_UNESCAPED_UNICODE);
-        return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array'));
+        return $this->renderAjax('suppliers/_editCatalog', compact('id', 'array', 'catalogCurrency'));
     }
 
     public function actionRemoveSupplier() {

@@ -59,7 +59,7 @@ class Catalog extends \yii\db\ActiveRecord
             [['supp_org_id', 'type', 'status'], 'integer'],
             [['created_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
-            ['type', 'uniqueBaseCatalog'],
+            //['type', 'uniqueBaseCatalog'],
         ];
     }
     /**

@@ -204,7 +204,7 @@ $this->registerJs(
                                     'attribute' => 'price',
                                     'value' => function($data) {
                                         $unit = empty($data['ed']) ? '' : " / " . $data['ed'];
-                                        return '<b>' . $data['price'] . '</b> <i class="fa fa-fw fa-rub"></i>' . $unit;
+                                        return '<b>' . $data['price'] . '</b> ' . $data['symbol'] . $unit;
                                     },
                                     'label' => 'Цена',
                                     'contentOptions' => ['class' => 'width150'],

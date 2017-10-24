@@ -264,7 +264,7 @@ $this->registerCss("
                                 'format' => 'raw',
                                 'attribute' => 'total_price',
                                 'value' => function($data) {
-                                    return "<b>$data->total_price</b><i class='fa fa-fw fa-rub'></i>";
+                                    return "<b>$data->total_price</b> " . $data->currency->symbol;
                                 },
                                 'label' => 'Сумма',
                                 'contentOptions'   =>   ['class' => 'small_cell_sum'],

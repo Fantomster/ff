@@ -4,8 +4,16 @@ use yii\widgets\Pjax;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
 use yii\web\View;
+use yii\helpers\Json;
+use common\models\Currency;
+use yii\helpers\Html;
 
 \frontend\assets\HandsOnTableAsset::register($this);
+
+$currencySymbolListList = Currency::getSymbolList();
+$firstCurrency = $currencySymbolListList[1];
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode($currencySymbolListList);
 
 $this->registerCss(
         '
@@ -48,37 +56,6 @@ $home = Url::to(['client/index']);
 
 $customJs = <<< JS
     $(".modal").removeAttr("tabindex");
-    $('#modal_addProduct').on('shown.bs.modal', function() {
-    var data = [];
-    for ( var i = 0; i < 60; i++ ) {
-        data.push({article: '', product: '', units: '', price: '',  ed: '', notes: '',});
-    }
-      var container = document.getElementById('CreateCatalog');
-      var hot = new Handsontable(container, {
-      data: data,
-      colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (руб)'],
-      columns: [
-            {data: 'product', wordWrap:true},
-            {data: 'ed', allowEmpty: false},
-            {
-                data: 'price', 
-                type: 'numeric',
-                format: '0.00',
-                language: 'ru-RU'
-            }
-        ],
-      className : 'Handsontable_table',
-      rowHeaders : true,
-      renderAllRows: true,
-      stretchH : 'all',
-      autoRowSize: true,
-      manualColumnResize: true,
-      autoWrapRow: true,
-      minSpareRows: 1,
-      Controller: true,
-      tableClassName: ['table-hover']
-      })   
-    });
     $('#addProduct').click(function (e){
       e.preventDefault();
       if ($(this).attr('disabled') == 'disabled') {
@@ -209,7 +186,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (руб)'],
+  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (<span class="currency-symbol">'+currencies[currentCurrency-1]+'</span>)'],
   columns: [
         {data: 'product', wordWrap:true},
         {data: 'ed', allowEmpty: false},
@@ -268,13 +245,14 @@ $('#invite').click(function(e){
         var form = $("#SuppliersFormSend")[0];
         var formData = new FormData(form);
         formData.append('catalog', catalog);
+        formData.append('currency',currentCurrency);
         $.ajax({
             processData: false,
             contentType: false,
             url: '$createUrl',
             type: 'POST',
             dataType: "json",
-            data: formData, //$("#SuppliersFormSend" ).serialize() + '&' + $.param({'catalog':catalog}),
+            data: formData,
             cache: false,
             success: function (response) {
                 if(response.success){
@@ -340,6 +318,41 @@ $(document).on("click",".del", function(e){
 $(document).on("click", "#continue", function(e) {
         document.location = "$home";
 });
+        
+    var currencies = $.map($currencySymbolList, function(el) { return el });
+    var currentCurrency = 1;
+
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (!value) {
+                        reject('Выберите валюту из списка')
+                    }
+                    if (value != currentCurrency) {
+                        currentCurrency = value;
+                        $(".currency-symbol").html(currencies[currentCurrency-1]);
+                        resolve();
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            },
+        }).then(function (result) {
+            swal({
+                title: 'Валюта каталога изменена!',
+                type: 'success',
+                showCancelButton: false,
+            })
+        })        
+    });
+        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>
@@ -377,7 +390,13 @@ $disabled = true;
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
-                
+                            <?= 
+                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                        'class' => 'btn btn-default pull-left',
+                        'style' => ['margin'=>'0 5px;'],
+                        'id' => 'changeCurrency',
+                    ])
+                    ?>
                 <button type="button" class="btn btn-gray" data-dismiss="modal" id="btnCancel">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
             </div>

@@ -35,7 +35,7 @@
 <br /><br />
 
 
-<h5 align="center" style="font-weight: 900;font-size: 17px;">В f-keeper очень широкие возможности для поставщиков, о некоторых из них несколько слов ниже.</h5>
+<h5 align="center" style="font-weight: 900;font-size: 17px;">В MixCart очень широкие возможности для поставщиков, о некоторых из них несколько слов ниже.</h5>
 <br /><br />
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">

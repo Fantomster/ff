@@ -45,7 +45,7 @@ $form = ActiveForm::begin([
             'label' => 'Цена',
             'format' => 'raw',
             'value' => function ($data) {
-                return $data['price'] . "<i class=\"fa fa-fw fa-rub\"></i>";
+                return $data['price'] . " " . $data['symbol'];
             },
         ],
         [

@@ -245,6 +245,9 @@ $this->registerCss("
                                     foreach($data->orderParticipants as $participant){
                                         $arr[$participant->profile->full_name]=$participant->profile->full_name;
                                     }
+                                    foreach ($data->orderChat as $chat){
+                                        $arr[$chat->profile->full_name]=$chat->profile->full_name;
+                                    }
                                     if(isset($data->acceptedByProfile->full_name)){
                                         $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;
                                     }

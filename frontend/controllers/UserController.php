@@ -495,8 +495,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                 ($user->role_id == Role::ROLE_RESTAURANT_MANAGER || 
                  $user->role_id == Role::ROLE_SUPPLIER_MANAGER || 
                  $user->role_id == Role::ROLE_ADMIN ||
-                 $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
-                    in_array($user->role_id, Role::getFranchiseeEditorRoles()))){
+                 $user->role_id == Role::ROLE_FKEEPER_MANAGER)){
             if($organization->type_id == Organization::TYPE_RESTAURANT && 
                     ($user->role_id != Role::ROLE_ADMIN &&
                      $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
@@ -508,6 +507,11 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                      $user->role_id != Role::ROLE_FKEEPER_MANAGER)){
                      $user->role_id = Role::ROLE_SUPPLIER_MANAGER;   
             }
+            $user->organization_id = $id;
+            $user->save();
+            return true;
+        }
+        if(in_array($user->role_id, Role::getFranchiseeEditorRoles())){
             $user->organization_id = $id;
             $user->save();
             return true;

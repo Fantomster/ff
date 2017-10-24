@@ -144,6 +144,11 @@ class Order extends \yii\db\ActiveRecord {
         return $this->hasOne(Profile::className(), ['user_id' => 'created_by_id']);
     }
 
+
+    public function getOrderParticipants(){
+        return $this->hasMany(OrderParticipants::className(), ['order_id'=>'id']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */

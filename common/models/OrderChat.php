@@ -92,8 +92,8 @@ class OrderChat extends \yii\db\ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'sent_by_id']);
     }
 
-    public function getProfile(){
-        return $this->hasOne(Profile::className(), ['user_id' => 'sent_by_id']);
+    public function getUser(){
+        return $this->hasOne(User::className(), ['id' => 'sent_by_id']);
     }
     
     public function afterSave($insert, $changedAttributes) {

@@ -10,6 +10,7 @@ use common\models\Order;
 use kartik\export\ExportMenu;
 use common\assets\CroppieAsset;
 use yii\web\View;
+use common\models\Role;
 
 CroppieAsset::register($this);
 kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
@@ -180,11 +181,10 @@ kartik\select2\Select2Asset::register($this);
                                     'attribute' => 'acceptedByProfile.full_name',
                                     'value' => function($data) {
                                         $arr = [];
-                                        foreach($data->orderParticipants as $participant){
-                                            $arr[$participant->profile->full_name]=$participant->profile->full_name;
-                                        }
                                         foreach ($data->orderChat as $chat){
-                                            $arr[$chat->profile->full_name]=$chat->profile->full_name;
+                                            if(in_array($chat->user->role_id, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_ADMIN])){
+                                                $arr[$chat->user->profile->full_name]=$chat->user->profile->full_name;
+                                            }
                                         }
                                         if(isset($data->acceptedByProfile->full_name)){
                                             $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;

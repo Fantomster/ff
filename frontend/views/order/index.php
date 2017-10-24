@@ -9,6 +9,7 @@ use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
+use common\models\Role;
 
 $this->title = 'Заказы';
 $urlExport = Url::to(['/order/export-to-xls']);
@@ -242,11 +243,10 @@ $this->registerCss("
                                 'attribute' => 'acceptedByProfile.full_name',
                                 'value' => function($data) {
                                     $arr = [];
-                                    foreach($data->orderParticipants as $participant){
-                                        $arr[$participant->profile->full_name]=$participant->profile->full_name;
-                                    }
                                     foreach ($data->orderChat as $chat){
-                                        $arr[$chat->profile->full_name]=$chat->profile->full_name;
+                                        if(in_array($chat->user->role_id, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_ADMIN])){
+                                            $arr[$chat->user->profile->full_name]=$chat->user->profile->full_name;
+                                        }
                                     }
                                     if(isset($data->acceptedByProfile->full_name)){
                                         $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;

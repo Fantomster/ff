@@ -138,8 +138,8 @@ class VendorController extends DefaultController {
         if ($organization->load(Yii::$app->request->post())) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;
-                if(!$post['Organization']['is_allowed_for_franchisee']){
-                    User::updateAll(['organization_id'=>null], ['organization_id'=>$organization->id, 'role_id'=>Role::getFranchiseeEditorRoles()]);
+                if (!$post['Organization']['is_allowed_for_franchisee']) {
+                    User::updateAll(['organization_id' => null], ['organization_id' => $organization->id, 'role_id' => Role::getFranchiseeEditorRoles()]);
                 }
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_CATALOG;
@@ -429,9 +429,9 @@ class VendorController extends DefaultController {
                 return $result;
                 exit;
             }
-            
+
             $currency = Currency::findOne(['id' => Yii::$app->request->post('currency')]);
-            
+
             $newBaseCatalog = new Catalog();
             $newBaseCatalog->supp_org_id = $currentUser->organization_id;
             $newBaseCatalog->name = 'Главный каталог';
@@ -441,7 +441,7 @@ class VendorController extends DefaultController {
                 $newBaseCatalog->currency_id = $currency->id;
             }
             $newBaseCatalog->save();
-            
+
             $lastInsert_base_cat_id = $newBaseCatalog->id;
 
             foreach ($arrCatalog as $arrCatalogs) {
@@ -1213,20 +1213,20 @@ class VendorController extends DefaultController {
 
     public function actionStep2AddProduct() {
         if (Yii::$app->request->isAjax) {
+            $product_id = Yii::$app->request->post('baseProductId');
+            $cat_id = Yii::$app->request->post('cat_id');
             Yii::$app->response->format = Response::FORMAT_JSON;
             if (Yii::$app->request->post('state') == 'true') {
                 $product_id = Yii::$app->request->post('baseProductId');
                 $catalogGoods = new CatalogGoods;
                 $catalogGoods->base_goods_id = $product_id;
-                $catalogGoods->cat_id = Yii::$app->request->post('cat_id');
-
+                $catalogGoods->cat_id = $cat_id;
                 $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
                 $catalogGoods->save();
                 return (['success' => true, 'Добавлен']);
                 exit;
             } else {
-                $product_id = Yii::$app->request->post('baseProductId');
-                $CatalogGoods = CatalogGoods::deleteAll(['base_goods_id' => $product_id]);
+                CatalogGoods::deleteAll(['base_goods_id' => $product_id, 'cat_id' => $cat_id]);
                 return (['success' => true, 'Удален']);
                 exit;
             }
@@ -1380,7 +1380,7 @@ class VendorController extends DefaultController {
             return $result;
             exit;
         }
-        
+
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog'));
         } else {
@@ -1778,7 +1778,7 @@ class VendorController extends DefaultController {
         }
         //$arr_clients_price = json_encode($arr_clients_price);
 
-        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price','arr_clients_labels','arr_clients_colors', 'total_price', 'filter_get_employee'
+        return $this->render('analytics/index', compact('filter_restaurant', 'headerStats', 'filter_status', 'filter_from_date', 'filter_to_date', 'filter_client', 'arr_create_at', 'arr_price', 'dataProvider', 'arr_clients_price', 'arr_clients_labels', 'arr_clients_colors', 'total_price', 'filter_get_employee'
         ));
     }
 
@@ -1879,44 +1879,44 @@ class VendorController extends DefaultController {
     public function actionAjaxChangeCurrency($id) {
         $newCurrencyId = Yii::$app->request->post('newCurrencyId');
         $catalog = Catalog::find()->where(['id' => $id, 'supp_org_id' => $this->currentUser->organization_id])->one();
-        
+
         Yii::$app->response->format = Response::FORMAT_JSON;
-        
+
         if (empty($catalog)) {
             return ['result' => 'error', 'message' => 'Каталог не найден!'];
         }
-        
+
         $currency = Currency::findOne(['id' => $newCurrencyId]);
         if (empty($currency)) {
             return ['result' => 'error', 'message' => 'Валюта не найдена!'];
         }
-        
+
         $catalog->currency_id = $newCurrencyId;
         $catalog->save();
         return ['result' => 'success', 'symbol' => $currency->symbol];
     }
-    
+
     /**
      * calculate prices with new currency
      */
     public function actionAjaxCalculatePrices($id) {
         $catalog = Catalog::find()->where(['id' => $id, 'supp_org_id' => $this->currentUser->organization_id])->one();
-        
+
         Yii::$app->response->format = Response::FORMAT_JSON;
-        
+
         if (empty($catalog)) {
             return ['result' => 'error', 'message' => 'Каталог не найден!'];
         }
-        
+
         $oldCurrencyUnits = Yii::$app->request->post('oldCurrencyUnits') + 0.0;
         $newCurrencyUnits = Yii::$app->request->post('newCurrencyUnits') + 0.0;
         if (($oldCurrencyUnits <= 0) || ($newCurrencyUnits <= 0)) {
             return ['result' => 'error', 'message' => 'Некорректный курс!'];
         }
-        
+
         $attributes = ['price' => new \yii\db\Expression('price * ' . $newCurrencyUnits / $oldCurrencyUnits)];
         $condition = ['cat_id' => $id];
-        
+
         switch ($catalog->type) {
             case Catalog::BASE_CATALOG:
                 $updated = CatalogBaseGoods::updateAll($attributes, $condition);
@@ -1925,7 +1925,8 @@ class VendorController extends DefaultController {
                 $updated = CatalogGoods::updateAll($attributes, $condition);
                 break;
         }
-        
+
         return ['result' => 'success'];
     }
+
 }

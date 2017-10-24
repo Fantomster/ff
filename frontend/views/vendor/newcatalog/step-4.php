@@ -75,12 +75,13 @@ $this->title = 'Назначить каталог';
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) {
+                    $value = $data->cat_id ==Yii::$app->request->get('id') ? 1 : 0;
                 $link = CheckboxX::widget([
                     'name'=>'setcatalog_'.$data->rest_org_id,
                     'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                    'value'=>$data->cat_id ==Yii::$app->request->get('id') ? 1 : 0,
+                    'value'=>$value,
                     'autoLabel' => true,
-                    'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id],
+                    'options'=>['id'=>'setcatalog_'.$data->id, 'data-id'=>$data->rest_org_id, 'value' => $value],
                     'pluginOptions'=>[
                         'threeState'=>false,
                         'theme' => 'krajee-flatblue',

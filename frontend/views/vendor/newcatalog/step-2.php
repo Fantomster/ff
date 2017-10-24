@@ -111,7 +111,7 @@ $this->registerCss('
                     },
                 ],
                 [
-                    'attribute' => 'Добавить',
+                    'label' => 'Добавить',
                     'format' => 'raw',
                     'contentOptions' => ['style' => 'width:50px;'],
                     'value' => function ($data) use ($cat_id) {

@@ -71,7 +71,7 @@ $this->title = 'Назначить каталог';
 		}
 		],
               [
-            'attribute' => 'Назначить',
+            'label' => 'Назначить',
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) {

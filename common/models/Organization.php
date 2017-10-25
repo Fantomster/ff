@@ -405,6 +405,13 @@ class Organization extends \yii\db\ActiveRecord {
         return $this->hasMany(User::className(), ['organization_id' => 'id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAdditionalEmail() {
+        return $this->hasMany(AdditionalEmail::className(), ['organization_id' => 'id']);
+    }
+
     /*
      * @return \yii\db\ActiveQuery
      */

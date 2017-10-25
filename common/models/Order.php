@@ -334,6 +334,13 @@ class Order extends \yii\db\ActiveRecord {
                 $recipients = array_merge($recipients, $associatedManagers);
             }
         }
+
+        //Получаем дополнительные Емайлы для рассылки
+        //Для заказчика
+        $recipients = array_merge($recipients, $this->client->additionalEmail);
+        //Для поставщика
+        $recipients = array_merge($recipients, $this->vendor->additionalEmail);
+
         return $recipients;
     }
 
@@ -388,16 +395,39 @@ class Order extends \yii\db\ActiveRecord {
     }
 
     /**
-     * @param integer user_id
-     * 
+     * @param $user
      * @return string
      */
-    public function getUrlForUser($user_id) {
-        $user = User::findOne(['id' => $user_id]);
-        if (empty($user) || (!in_array($user->organization_id, [$this->client_id, $this->vendor_id]))) {
-            return;
+    public function getUrlForUser($user)
+    {
+        if ($user instanceof User) {
+            if (empty($user) || (!in_array($user->organization_id, [$this->client_id, $this->vendor_id]))) {
+                return '';
+            }
+            switch ($user->status) {
+                case User::STATUS_UNCONFIRMED_EMAIL:
+                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                        "/order/view",
+                        "id" => $this->id,
+                        "token" => $user->access_token
+                    ]);
+                    break;
+                default:
+                    $url = Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                        "/order/view",
+                        "id" => $this->id
+                    ]);
+            }
+            return $url;
         }
-        return ($user->status === User::STATUS_UNCONFIRMED_EMAIL) ? Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/order/view", "id" => $this->id, "token" => $user->access_token]) : Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/order/view", "id" => $this->id]);
+
+        //Если пришла модель с дополнительного Емайла
+        if($user instanceof AdditionalEmail){
+            return Yii::$app->urlManagerFrontend->createAbsoluteUrl([
+                "/order/view",
+                "id" => $this->id
+            ]);
+        }
     }
     
     public function getCurrency() {

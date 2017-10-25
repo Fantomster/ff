@@ -253,6 +253,9 @@ $this->title = 'Уведомления';
 //                    ])->label(false)
                     ?>
                 </div>
+                <div class="col-md-6">
+                    <?=$this->render('_additional_email', ['additional_email' => $additional_email])?>
+                </div>
             </div>
         </div>
         <div class="box-footer clearfix">

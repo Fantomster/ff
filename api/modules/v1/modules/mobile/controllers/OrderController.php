@@ -255,7 +255,7 @@ class OrderController extends ActiveController {
             
             if ($profile->phone && $recipient->smsNotification->order_created) {
                 //$text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
-                $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient->id));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
+                $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $profile->phone;
                 $sms = new \common\components\QTSMS();
                 $sms->post_message($text, $target);

@@ -12,7 +12,7 @@ $orgType = ($senderOrg->type_id == Organization::TYPE_RESTAURANT) ? "Ресто�
 </p>
 <br style="margin: 0; padding: 0;" />
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
-    <a href="<?= $order->getUrlForUser($recipient->id) ?>" 
+    <a href="<?= $order->getUrlForUser($recipient) ?>"
        style="text-decoration: none;
     color: #FFF;
     background-color: #84bf76;

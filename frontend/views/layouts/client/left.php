@@ -24,10 +24,12 @@ if ($franchiseeManager && $franchiseeManager->phone_manager) {
 $newOrdersCount = $user->organization->getNewOrdersCount();
 $cartCount = $user->organization->getCartCount();
 
-$arrService = RkService::find()->select('org')->asArray()->all(); 
-    foreach ($arrService as $key => $val) {
-        $resArr[] = $val['org'];
-    }
+$resArr = [];
+
+$arrService = RkService::find()->select('org')->asArray()->all();
+foreach ($arrService as $key => $val) {
+    $resArr[] = $val['org'];
+}
 
 ?>
 

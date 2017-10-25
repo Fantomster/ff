@@ -2,7 +2,6 @@
 
 namespace common\models\search;
 
-use common\models\OrderParticipants;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -112,11 +111,7 @@ class OrderSearch extends Order {
                 $query->from(Profile::tableName(). ' createdByProfile');
             },
                 ], true);
-        $query->joinWith([
-            'orderParticipants' => function($query) {
-                $query->from(OrderParticipants::tableName(). ' orderParticipants');
-            },
-        ], true);
+
         $query->joinWith([
             'acceptedByProfile' => function($query) {
                 $query->from(Profile::tableName(). ' acceptedByProfile');

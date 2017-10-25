@@ -145,10 +145,6 @@ class Order extends \yii\db\ActiveRecord {
     }
 
 
-    public function getOrderParticipants(){
-        return $this->hasMany(OrderParticipants::className(), ['order_id'=>'id']);
-    }
-
     /**
      * @return \yii\db\ActiveQuery
      */

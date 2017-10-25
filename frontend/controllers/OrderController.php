@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\models\OrderParticipants;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -1177,13 +1176,6 @@ class OrderController extends DefaultController {
                 }
             }
             $order->save();
-            if(!$orderParticipant = OrderParticipants::findOne(['order_id'=>$order->id, 'profile_id'=>$user->profile->id])){
-                $orderParticipant = new OrderParticipants();
-                $orderParticipant->order_id = $order->id;
-                $orderParticipant->profile_id = $user->profile->id;
-                $orderParticipant->save();
-            }
-
 
 //        if ($orderChanged) {
             return $this->redirect(["order/view", "id" => $order->id]);

@@ -179,26 +179,27 @@ kartik\select2\Select2Asset::register($this);
                                 ],
                                 [
                                     'attribute' => 'acceptedByProfile.full_name',
-                                    'value' => function($data) {
-                                        $arr = [];
-                                        foreach ($data->orderChat as $chat){
-                                            if(in_array($chat->user->role_id, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_ADMIN])){
-                                                $arr[$chat->user->profile->full_name]=$chat->user->profile->full_name;
-                                            }
-                                        }
-                                        if(isset($data->acceptedByProfile->full_name)){
-                                            $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;
-                                        }
-                                        $string = '';
-                                        foreach ($arr as $key => $value){
-                                            $string.=$value;
-                                            if($key!=end($arr)){
-                                                $string.=', ';
-                                            }
-                                        }
-                                        return $string;
-                                    },
-                                    'label' => 'Заказ обработали',
+                                    'value' => 'acceptedByProfile.full_name',
+//                                    'value' => function($data) {
+//                                        $arr = [];
+//                                        foreach ($data->orderChat as $chat){
+//                                            if(in_array($chat->user->role_id, [Role::ROLE_SUPPLIER_MANAGER, Role::ROLE_SUPPLIER_EMPLOYEE, Role::ROLE_ADMIN])){
+//                                                $arr[$chat->user->profile->full_name]=$chat->user->profile->full_name;
+//                                            }
+//                                        }
+//                                        if(isset($data->acceptedByProfile->full_name)){
+//                                            $arr[$data->acceptedByProfile->full_name] = $data->acceptedByProfile->full_name;
+//                                        }
+//                                        $string = '';
+//                                        foreach ($arr as $key => $value){
+//                                            $string.=$value;
+//                                            if($key!=end($arr)){
+//                                                $string.=', ';
+//                                            }
+//                                        }
+//                                        return $string;
+//                                    },
+                                    'label' => 'Заказ принял',
                                     'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                                 ],
                                 [

@@ -1,4 +1,5 @@
 <?php
+$this->title = Yii::t('app', 'Добавить ресторан');
 $organizationType = \common\models\Organization::TYPE_RESTAURANT;
 $organization = $client;
 ?>

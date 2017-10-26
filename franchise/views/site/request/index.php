@@ -1,5 +1,7 @@
 <?php
 
+$this->title = Yii::t('app', 'Заявки');
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use kartik\grid\GridView;

@@ -1,3 +1,6 @@
+<?php
+    $this->title = Yii::t('app', 'Промо-материалы');
+?>
 <section class="content-header">
   <h1>
   <i class="fa fa-home"></i> Промо-материалы

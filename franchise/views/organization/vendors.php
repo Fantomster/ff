@@ -1,5 +1,7 @@
 <?php
 
+$this->title = Yii::t('app', 'Ваши поставщики');
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use kartik\grid\GridView;

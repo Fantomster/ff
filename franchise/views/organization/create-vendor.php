@@ -1,5 +1,5 @@
 <?php
-
+$this->title = Yii::t('app', 'Добавить поставщика');
 $organizationType = \common\models\Organization::TYPE_SUPPLIER;
 $organization = $vendor;
 ?>

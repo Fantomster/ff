@@ -6,6 +6,11 @@ use yii\widgets\Pjax;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
 
+$this->title = implode(" - ", [
+    Yii::t('app', 'Поставщик'),
+    $organization->name
+]);
+
 $this->registerJs('
     $("document").ready(function(){
         $("#vendorInfo").data("bs.modal", null);

@@ -4,7 +4,7 @@ use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
-$this->title = 'ServiceDesk';
+$this->title = Yii::t('app', 'Техническая поддержка');
 ?>
 <section class="content-header">
     <h1>Запрос техническому отделу<small> Ваш запрос будет обработан в порядке очереди и приоритета</small>

@@ -1,4 +1,7 @@
-<?php 
+<?php
+
+$this->title = Yii::t('app', 'Финансы');
+
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;

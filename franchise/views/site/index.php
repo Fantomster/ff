@@ -1,5 +1,7 @@
 <?php
 
+$this->title = Yii::t('app', 'Рабочий стол');
+
 use yii\widgets\Breadcrumbs;
 use common\models\Order;
 use common\models\Organization;

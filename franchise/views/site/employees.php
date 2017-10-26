@@ -10,6 +10,11 @@ use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\widgets\Breadcrumbs;
 
+$this->title = implode(" - ", [
+    Yii::t('app', 'Настройки'),
+    Yii::t('app', 'Сотрудники')
+]);
+
 $user = new User();
 $role = new Role();
 

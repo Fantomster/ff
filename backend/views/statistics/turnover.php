@@ -11,6 +11,11 @@ use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
 use dosamigos\chartjs\ChartJs;
 
+$this->title = implode(' - ',[
+    Yii::t('app','Статистика'),
+    Yii::t('app','Оборот')
+]);
+
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;

@@ -10,7 +10,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel backend\models\OrderSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Orders';
+$this->title = Yii::t('app','Заказы');
 $this->params['breadcrumbs'][] = $this->title;
 
 $gridColumns = [

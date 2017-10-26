@@ -1,4 +1,10 @@
 <?php
+
+$this->title = implode(" - ", [
+    Yii::t('app', 'Аналитика'),
+    Yii::t('app', 'Регистрации'),
+]);
+
 use yii\bootstrap\Tabs;
 use yii\helpers\Url;
 ?>

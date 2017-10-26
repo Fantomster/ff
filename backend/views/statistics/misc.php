@@ -4,6 +4,11 @@ use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;
 use dosamigos\chartjs\ChartJs;
 
+$this->title = implode(' - ',[
+    Yii::t('app','Статистика'),
+    Yii::t('app','Разное')
+]);
+
 $this->registerJs('
     $(document).ready(function(){
         var justSubmitted = false;

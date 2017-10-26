@@ -62,7 +62,8 @@
         "ofat/yii2-yashop-ses": "*",
         "kartik-v/yii2-tree-manager": "@dev",
         "branchonline/yii2-lightbox": "*",
-        "npm-asset/readmore.js": "*"
+        "npm-asset/readmore.js": "*",
+        "insolita/yii2-migration-generator": "~2.3"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

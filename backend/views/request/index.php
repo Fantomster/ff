@@ -10,6 +10,8 @@ use yii\widgets\Breadcrumbs;
 use yii\bootstrap\Modal;
 use common\models\Order;
 
+$this->title = Yii::t('app','Заявки ресторанов');
+
 $this->registerJs('
     $("document").ready(function(){
         var justSubmitted = false;

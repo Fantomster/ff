@@ -1,5 +1,10 @@
 <?php
 
+$this->title = implode(' - ',[
+    Yii::t('app','Статистика'),
+    Yii::t('app','Регистрация')
+]);
+
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\date\DatePicker;

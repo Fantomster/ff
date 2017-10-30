@@ -19,6 +19,7 @@ use Yii;
  * @property CatalogBaseGoods $product
  * @property string $total
  * @property string $note
+ * @property CatalogGoods $productFromCatalog
  */
 class OrderContent extends \yii\db\ActiveRecord
 {
@@ -173,6 +174,19 @@ class OrderContent extends \yii\db\ActiveRecord
     
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
+        
+        $product = $this->productFromCatalog;
+        if (!empty($product)) {
+            $catalog = $product->catalog;
+        } else {
+            $catalog = $this->product->catalog;
+        }
+        
+        if ($catalog->currency_id !== $this->order->currency_id) {
+            $order = $this->order;
+            $order->currency_id = $catalog->currency_id;
+            $order->save();
+        }
         
         if (!is_a(Yii::$app, 'yii\console\Application')) {
             \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);

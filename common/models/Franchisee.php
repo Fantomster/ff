@@ -148,6 +148,7 @@ class Franchisee extends \yii\db\ActiveRecord {
         $firstOrg = Organization::find()
                 ->joinWith('franchiseeAssociate')
                 ->where(['franchisee_associate.franchisee_id' => $this->id])
+                ->andWhere('organization.created_at is not null')
                 ->orderBy(['organization.created_at' => SORT_ASC])
                 ->limit(1)
                 ->one();

@@ -19,5 +19,3 @@ service nginx restart
 # service elasticsearch restart
 # service redis restart
 service supervisor restart
-
-export LANG=C

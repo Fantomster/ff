@@ -16,16 +16,15 @@ class UploadForm extends Model
     {
         return [
             [['importType'], 'integer'],
+            //[['importType'], 'required'],
             [['importFile'], 'file', 'skipOnEmpty' => false, 'extensions' => 'xlsx', 'checkExtensionByMimeType' => false],
         ];
     }
-    
     public function attributeLabels() {
         return [
             'importType' => 'Тип импорта',
         ];
     }
-    
     public function upload()
     {
         if ($this->validate()) {
@@ -36,4 +35,5 @@ class UploadForm extends Model
             return false;
         }
     }
+    
 }

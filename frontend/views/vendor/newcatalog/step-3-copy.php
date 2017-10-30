@@ -82,9 +82,25 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                     </div> 
                     <div class="col-sm-8">
                         <?=
+                        Modal::widget([
+                            'id' => 'importToXls',
+                            'clientOptions' => false,
+                            'size' => 'modal-md',
+                            'toggleButton' => [
+                                'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Импорт</span>',
+                                'tag' => 'a',
+                                'data-target' => '#importToXls',
+                                'class' => 'btn btn-outline-default btn-sm pull-right',
+                                'href' => Url::to(['vendor/import-restaurant', 'id' => $cat_id]),
+                                'style' => 'margin-right:10px;',
+                            ],
+                        ])
+                        ?>    
+                        <?=
                         Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                             'class' => 'btn btn-outline-default btn-sm pull-right',
                             'id' => 'changeCurrency',
+                            'style' => 'margin-right: 5px;',
                         ])
                         ?>
                     </div>

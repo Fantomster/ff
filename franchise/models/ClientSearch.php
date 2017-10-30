@@ -52,14 +52,14 @@ class ClientSearch extends Organization {
         $filter_date_to = strtotime($this->date_to);
 
         $from = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_from . " 00:00:00");
-        if ($from) {
+        //if ($from) {
             $t1_f = $from->format('Y-m-d');
-        }
+        //}
         $to = \DateTime::createFromFormat('d.m.Y H:i:s', $this->date_to . " 00:00:00");
-        if ($to) {
+        //if ($to) {
             $to->add(new \DateInterval('P1D'));
             $t2_f = $to->format('Y-m-d');
-        }
+        //}
 
         $query = "SELECT fa.id as franchisee_associate_id, self_registered, org.id as id, org.name as name, (select count(id) from relation_supp_rest where rest_org_id=org.id) as vendorCount, 
                 (select count(id) from relation_supp_rest where rest_org_id=org.id and created_at BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() + INTERVAL 1 DAY and status in (1,2,3,4)) as vendorCount_prev30, 

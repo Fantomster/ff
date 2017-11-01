@@ -35,10 +35,10 @@ class ServiceHelper extends AuthHelper {
     <RQ cmd="get_objects" guid="'.$guid.'">
      </RQ>'; 
        
-     $res = ApiHelper::sendCurl($xml,199990046);
+     $res = ApiHelper::sendCurl($xml,$this->restr);
      
-    var_dump($res);
-     
+    // var_dump($res);
+       
                // Обновление списка доступных объектов
     foreach($res['resp'] as $obj) {
                 
@@ -48,9 +48,9 @@ class ServiceHelper extends AuthHelper {
         
         $nmodel = new RkService();
         
-        $nmodel->code = isset($obj['code']) ? $obj['code'] : 0;
-        $nmodel->name = isset($obj['name']) ? $obj['name'] : 'Не задано';  
-        $nmodel->address = isset($obj['address']) ? $obj['address'] : 'Не задано';
+        $nmodel->code = $obj['code'] ? $obj['code'] : 0;
+        $nmodel->name = $obj['name'] ? $obj['name'] : 'Не задано';  
+        $nmodel->address = $obj['address'] ? $obj['address'] : 'Не задано';
     //    $nmodel->phone = $obj['phone'] ? $obj['phone'] : 'Не задано';
         $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
         $nmodel->status_id=1;
@@ -235,10 +235,6 @@ class ServiceHelper extends AuthHelper {
     if (empty($cmdguid)) $cmdguid = 'пусто';     
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
-    
-    if (empty($er)) $er = 'пусто';     
-    if (empty($er3)) $er3 = 'пусто'; 
-    if (empty($er2)) $er2 = 'пусто'; 
         
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   

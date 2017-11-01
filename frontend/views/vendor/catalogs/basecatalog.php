@@ -184,10 +184,11 @@ Modal::end();
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
-                            'href' => Url::to(['/vendor/ajax-create-product-market-place', 'id' => Yii::$app->request->get('id')]),
+                            'href' => Url::to(['/vendor/ajax-create-product-market-place', 'id' => $cat_id]),
                         ],
                     ])
-                    ?><div class="btn-group pull-right" placement="left" style="margin-right: 10px">
+                    ?>
+                    <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
                     <?=
                     ExportMenu::widget([
                         'dataProvider' => $dataProvider,
@@ -199,7 +200,7 @@ Modal::end();
                         'showConfirmAlert' => false,
                         'showColumnSelector' => false,
                         'dropdownOptions' => [
-                            'label' => '<span class="text-label">Скачать каталог</span>',
+                            'label' => '<span class="text-label">экспорт</span>',
                             'class' => ['btn btn-outline-default btn-sm pull-right']
                         ],
                         'exportConfig' => [
@@ -247,19 +248,14 @@ Modal::end();
                         'clientOptions' => false,
                         'size' => 'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">импорт</span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
-                            'href' => Url::to(['/vendor/import-to-xls', 'id' => Yii::$app->request->get('id')]),
+                            'href' => Url::to(['/vendor/import', 'id' => $cat_id]),
                             'style' => 'margin-right:10px;',
                         ],
                     ])
-                    ?>
-                    <?=
-                    Html::a(
-                            '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
-                    )
                     ?>
                     <?= 
                     Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [

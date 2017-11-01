@@ -829,15 +829,15 @@ class VendorController extends DefaultController {
                         $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
                         
                         if (!empty($row_product && $row_price)) {
-                            if (!in_array($row_product, $arr)) {
-                                $baseGoodsId = CatalogBaseGoods::findOne([
-                                    'supp_org_id'=>$currentUser->organization->id,
+                            if (in_array($row_product, $arr)) {
+                                $baseGoods = CatalogBaseGoods::findOne([
+                                    'supp_org_id'=>$currentUser->organization_id,
                                     'deleted'=>0,
-                                    'product'=>$row_product])->id;
-                                if($baseGoodsId){
+                                    'product'=>$row_product]);
+                                if($baseGoods){
                                     $data_insert[] = [
                                         $id,
-                                        $baseGoodsId,
+                                        $baseGoods->id,
                                         $row_price
                                     ];
                                 }
@@ -872,14 +872,14 @@ class VendorController extends DefaultController {
                         $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
                         if (!empty($row_product && $row_price)) {
                             if (in_array($row_product, $arr)) {
-                                $baseGoodsId = CatalogBaseGoods::findOne([
-                                    'supp_org_id'=>$currentUser->organization->id,
+                                $baseGoods = CatalogBaseGoods::findOne([
+                                    'supp_org_id'=>$currentUser->organization_id,
                                     'deleted'=>0,
-                                    'product'=>$row_product])->id;
-                                if($baseGoodsId){
+                                    'product'=>$row_product]);
+                                if($baseGoods){
                                     $data_update .= "UPDATE $cbgTable set 
                                         `price` = $row_price
-                                         where cat_id=$id and base_goods_id=$baseGoodsId;";
+                                         where cat_id=$id and base_goods_id=$baseGoods->id;";
                                 }
                             }
                         }

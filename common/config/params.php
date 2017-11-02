@@ -14,4 +14,7 @@ return [
     'protocol' => 'http',
     'franchiseeHost' => '//partner.mixcart.ru',
     'integratAdminID' => [],
+
+    #id франчази к которому крепим организации, для которых не нашли франчей
+    'default_franchisee_id' => 1,
 ];

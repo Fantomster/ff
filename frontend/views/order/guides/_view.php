@@ -77,13 +77,13 @@ use kartik\form\ActiveForm;
                         },
                         'contentOptions' => ['style' => 'width: 40%;'],
                     ],
-                    ['format' => 'raw',
-                        'attribute' => 'price',
-                        'value' => function($data) {
-                            return $data->formattedPrice . '/' . $data->baseProduct->ed;
-                        },
-                        'contentOptions' => ['style' => 'width: 20%;'],
-                    ],
+//                    ['format' => 'raw',
+//                        'attribute' => 'price',
+//                        'value' => function($data) {
+//                            return $data->formattedPrice . '/' . $data->baseProduct->ed;
+//                        },
+//                        'contentOptions' => ['style' => 'width: 20%;'],
+//                    ],
                     [
                         'attribute' => 'quantity',
                         'content' => function($data) {

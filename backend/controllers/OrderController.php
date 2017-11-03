@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use common\models\search\OrderContentSearch;
 use Yii;
 use common\models\Order;
 use common\models\Role;
@@ -71,8 +72,15 @@ class OrderController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $searchModel = new OrderContentSearch();
+        $params = Yii::$app->request->getQueryParams();
+        $params['OrderContentSearch']['order_id'] = $model->id;
+        $dataProvider = $searchModel->search($params);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'dataProvider' => $dataProvider
         ]);
     }
 

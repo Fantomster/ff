@@ -137,6 +137,16 @@ class Organization extends \yii\db\ActiveRecord {
         ];
     }
 
+    public function getRouteText()
+    {
+        return $this->route == 'undefined' ? '' : $this->route;
+    }
+
+    public function getStreetText()
+    {
+        return $this->street_number == 'undefined' ? '' : $this->street_number;
+    }
+
     /**
      * @inheritdoc
      */
@@ -503,13 +513,18 @@ class Organization extends \yii\db\ActiveRecord {
         return $result;
     }
 
-    public function afterSave($insert, $changedAttributes) {
+    public function afterSave($insert, $changedAttributes)
+    {
         if ($insert && ($this->type_id == self::TYPE_SUPPLIER)) {
             $delivery = new Delivery();
             $delivery->vendor_id = $this->id;
             $delivery->save();
         }
+
         parent::afterSave($insert, $changedAttributes);
+
+        //Определяем франча
+        $this->setFranchise();
     }
 
     public function markViewed($orderId) {
@@ -941,6 +956,203 @@ class Organization extends \yii\db\ActiveRecord {
             return $product;
         }
         return null;
+    }
+
+    /**
+     * Прикрепление организации к франчази
+     * @param bool $delete_assoc удаление всех связей с франчайзи
+     * @param bool $cancel_sorted удаление признака привязки к франчу
+     */
+    public function setFranchise($delete_assoc = false, $cancel_sorted = false)
+    {
+        /*********Начальная проверка START*****************************************/
+        //Если пустая страна, даже не будем ее никуда цеплять
+        //При заполнении адреса они снова попадут сюда
+        if (empty($this->country)) {
+            return;
+        }
+        //Передавая этот флаг, можем перекрепить организацию
+        if ($delete_assoc === true) {
+            if (FranchiseeAssociate::find()->where(['organization_id' => $this->id])->exists()) {
+                //Удаляем все связи
+                Yii::$app->db->createCommand()
+                    ->delete(FranchiseeAssociate::tableName(), ['organization_id' => $this->id])
+                    ->execute();
+            }
+        }
+        //Этот флаг снимает признак того что организация отсортирована
+        if ($cancel_sorted === true) {
+            //Ставим признак то что не отсортирован
+            Yii::$app->db->createCommand()
+                ->update(self::tableName(), ['franchisee_sorted' => 0], ['id' => $this->id])
+                ->execute();
+            $this->refresh();
+        }
+        //Проводим прикрепление только для неотсортированых организаций c адресом
+        if ($this->franchisee_sorted === 1) {
+            return;
+        }
+        /*********Начальная проверка END*******************************************/
+
+        //Если организация уже привязана
+        if (FranchiseeAssociate::find()->where(['organization_id' => $this->id])->exists()) {
+            Yii::$app->db->createCommand()
+                ->update(self::tableName(), ['franchisee_sorted' => 1], ['id' => $this->id])
+                ->execute();
+        } else {
+            //Есть, уже есть шанс что к кому то ее прилепим
+            //Франчази по умолчанию
+            $franchise = null;
+            $default_id = 1;
+            if (isset(Yii::$app->params['default_franchisee_id'])) {
+                //Берем id из параметров
+                $default_id = (integer)Yii::$app->params['default_franchisee_id'];
+            }
+            //Есть ли франшиза в стране организации
+            if (FranchiseeGeo::find()->where(['country' => $this->country])->exists()) {
+                //Поля для получения
+                $fields = [
+                    'franchisee_id',
+                    'franchisee.type_id',
+                    'exception',
+                    'administrative_area_level_1',
+                    'locality',
+                    'franchisee.legal_email'
+                ];
+                //Поиск франчей в городе организации
+                $franchise = FranchiseeGeo::find()->asArray()
+                    ->select($fields)
+                    ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
+                    ->where(['country' => $this->country, 'locality' => $this->locality])
+                    ->andWhere('LENGTH(locality) > 2')->all();
+
+                if (!$franchise) {
+                    //Если не нашли франчей в этом городе, ищем в области
+                    $franchise = FranchiseeGeo::find()->asArray()
+                        ->select($fields)
+                        ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
+                        ->where([
+                            'country' => $this->country,
+                            'administrative_area_level_1' => $this->administrative_area_level_1
+                        ])->andWhere('LENGTH(administrative_area_level_1) > 2')->all();
+
+                    if (!$franchise) {
+                        //Если же не нашли даже в области, ищем в стране
+                        $franchise = FranchiseeGeo::find()->asArray()
+                            ->select($fields)
+                            ->leftJoin('franchisee', 'franchisee.id = franchisee_id')
+                            ->where(['country' => $this->country])
+                            ->andWhere("locality ='' or locality is null")
+                            ->andWhere("administrative_area_level_1 ='' or administrative_area_level_1 is null")->all();
+                    }
+                }
+            }
+            //Если кого то нашли, крепим к нему, если нет, к франчу из параметров
+            if ($this->setTypeFranchiseeAndSaveAssoc($franchise) === false) {
+                //Создаем новую связь
+                $associate = new FranchiseeAssociate([
+                    'franchisee_id' => $default_id,
+                    'organization_id' => $this->id,
+                    'self_registered' => FranchiseeAssociate::SELF_REGISTERED
+                ]);
+                //Схраняем к дефолтному, и ставим знак что франч не отсортирован
+                if ($associate->save()) {
+                    Yii::$app->db->createCommand()
+                        ->update(self::tableName(), ['franchisee_sorted' => 0], ['id' => $this->id])
+                        ->execute();
+                    //Обновляем атрибуты модели
+                    $this->refresh();
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $franchise_pull [
+     *              [
+     *                  'franchisee_id',
+     *                  'franchisee.type_id',
+     *                  'exception',
+     *                  'administrative_area_level_1',
+     *                  'locality',
+     *                  'franchisee.legal_email'
+     *              ], ... ]
+     * @return bool
+     */
+    private function setTypeFranchiseeAndSaveAssoc($franchise_pull)
+    {
+        //Если нет франчей возвращаем false
+        if (empty($franchise_pull) or is_null($franchise_pull)) {
+            return false;
+        }
+
+        $franchise = null;
+        $result = [];
+        //Формируем массив франчей по рангу
+        foreach ($franchise_pull as $f) {
+            if ($f['exception'] == 1) {
+                if (
+                    $f['administrative_area_level_1'] == $this->administrative_area_level_1
+                    ||
+                    $f['locality'] == $this->locality
+                ) {
+                    continue;
+                }
+            }
+            $result[$f['type_id']][] = $f;
+        }
+        //Если никого не нашли
+        if (empty($result)) {
+            return false;
+        }
+        //Сортируем по группам приоритетов 3,2,1
+        krsort($result);
+        //Поиск подходящего франча
+        foreach ($result as $key => $fr_array) {
+            //Если в высшем ранге только один франч, то цепляем организацию к нему
+            if (count($fr_array) == 1) {
+                $franchise = $fr_array[0];
+            } else {
+                //Если id четное, отдаем франчу с i = 0
+                //п.с. появится третий, будем думать))))
+                $i = (($this->id % 2 == 0) ? 0 : 1);
+                $franchise = $fr_array[$i];
+            }
+            break;
+        }
+        //Если никого не нашлось, отправляем к дефолту
+        if ($franchise === null) {
+            return false;
+        }
+        //Создаем связь организации с франчем
+        $associate = new FranchiseeAssociate([
+            'franchisee_id' => $franchise['franchisee_id'],
+            'organization_id' => $this->id,
+            'self_registered' => FranchiseeAssociate::SELF_REGISTERED
+        ]);
+        if ($associate->save()) {
+            //Ставим что припарковали организацию
+            Yii::$app->db->createCommand()
+                ->update(self::tableName(), ['franchisee_sorted' => 1], ['id' => $this->id])
+                ->execute();
+            //Отправлем емайл франчу, если есть адрес почты
+            if (!empty($franchise['legal_email'])) {
+                $route = implode('', [
+                    Yii::$app->params['protocol'] . ":" . Yii::$app->params['franchiseeHost'] . "/organization/show-",
+                    ($this->type_id == Organization::TYPE_RESTAURANT ? 'client' : 'vendor'),
+                    '/',
+                    $this->id
+                ]);
+                $message = Yii::$app->mailer;
+                $message->compose('franchiseeAssociateAdded', ["organization" => $this, "route" => $route])
+                    ->setTo($franchise['legal_email'])
+                    ->setSubject(Yii::t('app', 'Самостоятельно зарегистрировавшаяся организация добавлена во франчайзи'))
+                    ->send();
+            }
+        }
+        //Обновляем атрибуты
+        $this->refresh();
+        return true;
     }
 
 }

@@ -164,7 +164,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'units' => 'Кратность',
             'price' => 'Цена',
             'status' => 'Статус',
-            'market_place' => 'Market_place',
+            'market_place' => 'Размещен на F-MARKET',
             'deleted' => 'Deleted',
             'note' => 'Комментарий',
             'ed' => 'Единица измерения',

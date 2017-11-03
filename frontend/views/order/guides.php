@@ -253,6 +253,8 @@ $this->registerJs('
 
     $(document).on("hidden.bs.modal", "#guideModal", function() {
         $(this).data("bs.modal", null);
+        $(".modal-header").html("<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>");
+        $(".modal-body").html("");
     });
     
     $(document).on("loaded.bs.modal", "#guideModal", function(){

@@ -53,9 +53,10 @@ class OrderContent extends \yii\db\ActiveRecord
         return [
             'order_id' => 'Order ID',
             'product_id' => 'Product ID',
-            'quantity' => 'Количество',
-            'initial_quantity' => 'Запрошенное количество',
-            'price' => 'Цена',
+            'quantity' => Yii::t('app','Количество'),
+            'initial_quantity' => Yii::t('app','Запрошенное количество'),
+            'price' => Yii::t('app','Цена'),
+            'total' => Yii::t('app','Сумма'),
         ];
     }
 
@@ -192,7 +193,11 @@ class OrderContent extends \yii\db\ActiveRecord
             \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
         }
     }
-    
+
+    public function getCurrency() {
+         return Currency::findOne($this->order->currency_id);
+    }
+
     public function afterDelete() {
         parent::afterDelete();
         

@@ -384,6 +384,7 @@ class NotificationHelper {
         if($guide === null)
             return;
         
+        return; // $order -???
         $users = \common\models\User::find()->where('organization_id = :client', [':client' => $order->client_id])->all();
         
         foreach ($users as $user)

@@ -42,9 +42,9 @@ class GuideProductsSearch extends \yii\base\Model {
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog cat ON cbg.cat_id = cat.id 
-                            AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = 1)))
+                            AND (cbg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
                 JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (gp.guide_id = 3)
+            WHERE (gp.guide_id = $guideId)
                     AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0) 
@@ -53,11 +53,11 @@ class GuideProductsSearch extends \yii\base\Model {
             FROM guide_product AS gp
                     LEFT JOIN catalog_base_goods AS cbg ON gp.cbg_id = cbg.id
                     LEFT JOIN catalog_goods AS cg ON cg.base_goods_id = gp.cbg_id 
-                            AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = 1)))
+                            AND (cg.cat_id IN (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=cbg.supp_org_id) AND (rest_org_id = $clientId)))
                 LEFT JOIN organization AS org ON cbg.supp_org_id = org.id 
                 LEFT JOIN catalog AS cat ON cg.cat_id = cat.id 
                 JOIN currency curr ON cat.currency_id = curr.id 
-            WHERE (gp.guide_id = 3)
+            WHERE (gp.guide_id = $guideId)
                     AND (cbg.product LIKE :searchString) 
                 AND (cbg.status = 1) 
                 AND (cbg.deleted = 0))

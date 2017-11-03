@@ -364,7 +364,7 @@ class OrderController extends DefaultController {
 
         $guideSearchModel = new GuideProductsSearch();
         $params['GuideProductsSearch'] = Yii::$app->request->post("GuideProductsSearch");
-        $guideDataProvider = $guideSearchModel->search($params, $guide->id);
+        $guideDataProvider = $guideSearchModel->search($params, $guide->id, $this->currentUser->organization_id);
         $guideDataProvider->pagination = false;//['pageSize' => 8];
 
         if (Yii::$app->request->isPjax) {

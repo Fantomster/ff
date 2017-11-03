@@ -72,24 +72,24 @@ use kartik\form\ActiveForm;
                         'format' => 'raw',
                         'attribute' => 'baseProduct.product',
                         'value' => function($data) {
-                            return "<div class='guid_block_create_title'><p>" . $data->baseProduct->product . "</p></div>"
-                                    . "<div class='guid_block_create_counts'><p>" . $data->baseProduct->vendor->name . "</p></div>";
+                            return "<div class='guid_block_create_title'><p>" . $data["product"] . "</p></div>"
+                                    . "<div class='guid_block_create_counts'><p>" . $data["name"] . "</p></div>";
                         },
                         'contentOptions' => ['style' => 'width: 40%;'],
                     ],
-//                    ['format' => 'raw',
-//                        'attribute' => 'price',
-//                        'value' => function($data) {
-//                            return $data->formattedPrice . '/' . $data->baseProduct->ed;
-//                        },
-//                        'contentOptions' => ['style' => 'width: 20%;'],
-//                    ],
+                    ['format' => 'raw',
+                        'attribute' => 'price',
+                        'value' => function($data) {
+                            return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
+                        },
+                        'contentOptions' => ['style' => 'width: 20%;'],
+                    ],
                     [
                         'attribute' => 'quantity',
                         'content' => function($data) {
-                            $units = $data->baseProduct->units;
+                            $units = $data["units"];
                             return TouchSpin::widget([
-                                        'name' => 'GuideProduct[' . $data->id . ']',
+                                        'name' => 'GuideProduct[' . $data["id"] . ']',
                                         'pluginOptions' => [
                                             'initval' => 0, //0.100,
                                             'min' => 0, //(isset($units) && ($units > 0)) ? $units : 0.001,
@@ -110,14 +110,14 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function($data) {
-                            return Html::button('<i class="fa fa-comment"> <span class="circe_font">Комментарий</span></i>', [
+                            return Html::button('<i class="fa fa-comment"> <span class="circe_font"> Комментарий</span></i>', [
                                         'class' => 'add-note btn btn-md btn-gray pull-right',
                                         'data' => [
-                                            'id' => $data->cbg_id,
-                                            'url' => Url::to(['order/ajax-set-note', 'product_id' => $data->cbg_id]),
+                                            'id' => $data["cbg_id"],
+                                            'url' => Url::to(['order/ajax-set-note', 'product_id' => $data["cbg_id"]]),
                                             'toggle' => "tooltip",
                                             'placement' => "bottom",
-                                            'original-title' => $data->note,
+                                            'original-title' => $data["note"],
                                         ],
                             ]);
                         },
@@ -126,10 +126,10 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">В корзину</span></i>', [
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font"> В корзину</span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
-                                        'data-id' => $data->cbg_id,
-                                        'data-cat' => $data->baseProduct->cat_id,
+                                        'data-id' => $data["cbg_id"],
+                                        'data-cat' => $data["cat_id"],
                                         'title' => 'Добавить в корзину',
                             ]);
                         },

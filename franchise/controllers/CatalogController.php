@@ -133,7 +133,7 @@ class CatalogController extends DefaultController
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = Organization::findOne($vendor_id);
         if($currentOrganization->franchisee->id!=$currentUser->franchiseeUser->franchisee_id){
-            throw new HttpException(403, 'Доступ запрещен');
+            throw new HttpException(403, Yii::t('app', 'Доступ запрещен'));
         }
         if (!Catalog::find()->where(['supp_org_id' => $vendor_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
             $step = $currentUser->organization->step;
@@ -201,12 +201,12 @@ class CatalogController extends DefaultController
                     $catalog->save();
                     return (['success' => true, 'cat_id' => $catalog->id]);
                 } else {
-                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Укажите корректное  <strong>Имя</strong> каталога']];
+                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('app', 'УПС! Ошибка'), 'body' => Yii::t('app', 'Укажите корректное  <strong>Имя</strong> каталога')]];
                     return $result;
                     exit;
                 }
             } else {
-                return (['success' => false, 'type' => 2, 'POST не определен']);
+                return (['success' => false, 'type' => 2, Yii::t('app', 'POST не определен')]);
                 exit;
             }
         }
@@ -230,7 +230,7 @@ class CatalogController extends DefaultController
                     $catalog->save();
                     return (['success' => true, 'cat_id' => $catalog->id]);
                 } else {
-                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Укажите корректное  <strong>Имя</strong> каталога']];
+                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('app', 'УПС! Ошибка'), 'body' => Yii::t('app', 'Укажите корректное  <strong>Имя</strong> каталога')]];
                     return $result;
                     exit;
                 }
@@ -314,7 +314,7 @@ class CatalogController extends DefaultController
 
         $baseCatalog = Catalog::findOne(['supp_org_id' => $vendor_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($baseCatalog)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
         }
         $searchString = "";
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
@@ -365,7 +365,7 @@ class CatalogController extends DefaultController
         $cat_id = $id;
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $vendor_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
         }
 
         $sql = "SELECT "
@@ -415,7 +415,7 @@ class CatalogController extends DefaultController
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
 
                 if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный товар']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('app', 'УПС! Ошибка'), 'body' => Yii::t('app', 'Неверный товар')]];
                     return $result;
                     exit;
                 }
@@ -423,7 +423,7 @@ class CatalogController extends DefaultController
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('app', 'УПС! Ошибка'), 'body' => Yii::t('app', 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>')]];
                     return $result;
                     exit;
                 }
@@ -438,7 +438,7 @@ class CatalogController extends DefaultController
                 $catalogGoods->price = $price;
                 $catalogGoods->update();
             }
-            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Сохранено', 'body' => 'Данные успешно обновлены']];
+            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => Yii::t('app', 'Сохранено'), 'body' => Yii::t('app', 'Данные успешно обновлены')]];
             return $result;
             exit;
         }
@@ -450,7 +450,7 @@ class CatalogController extends DefaultController
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
         }
         $searchModel = new CatalogGoods();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $cat_id);
@@ -481,7 +481,7 @@ class CatalogController extends DefaultController
         $currentUser->organization_id = $vendor_id;
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $vendor_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
         }
         $searchModel = new RelationSuppRest;
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);

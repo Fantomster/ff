@@ -86,7 +86,7 @@ class SiteController extends DefaultController
                     ],
                 ],
 //             'denyCallback' => function($rule, $action) {
-//              throw new \yii\web\HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+//              throw new \yii\web\HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
 //              } 
             ],
             'verbs' => [
@@ -362,7 +362,7 @@ class SiteController extends DefaultController
                     // send email
                     $model = new Organization();
                     $model->sendGenerationPasswordEmail($user, true);
-                    $message = 'Пользователь добавлен!';
+                    $message = Yii::t('app', 'Пользователь добавлен!');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -434,20 +434,20 @@ class SiteController extends DefaultController
                     ->one();
                 $usersCount = count($this->currentFranchisee->franchiseeUsers);
                 if ($user->id == $this->currentUser->id) {
-                    $message = 'Может воздержимся от удаления себя?';
+                    $message = Yii::t('app', 'Может воздержимся от удаления себя?');
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
                     $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save() && $user->franchiseeUser->delete()) {
-                        $message = 'Пользователь удален!';
+                        $message = Yii::t('app', 'Пользователь удален!');
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
             }
         }
-        $message = 'Не удалось удалить пользователя!';
+        $message = Yii::t('app', 'Не удалось удалить пользователя!');
         return $this->renderAjax('settings/_success', ['message' => $message]);
     }
 
@@ -507,7 +507,7 @@ class SiteController extends DefaultController
                     $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                     $catalogBaseGoods->save();
 
-                    $message = 'Продукт обновлен!';
+                    $message = Yii::t('app', 'Продукт обновлен!');
                     return $this->renderAjax('catalog/_success', ['message' => $message]);
                 }
             }
@@ -588,8 +588,8 @@ class SiteController extends DefaultController
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
-                    . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>')
+                    . Yii::t('app', '<small>Если ошибка повторяется, пожалуйста, сообщите нам')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -610,14 +610,14 @@ class SiteController extends DefaultController
                 }
             }
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                    . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка загрузки каталога<br>')
+                    . Yii::t('app', '<small>Вы пытаетесь загрузить каталог объемом больше ') . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', ' позиций (Новых позиций), обратитесь к нам и мы вам поможем')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                    . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '
+                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка загрузки каталога<br>')
+                    . Yii::t('app', '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! ')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -676,8 +676,8 @@ class SiteController extends DefaultController
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();
-                Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
-                    . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка сохранения, повторите действие')
+                    . Yii::t('app', '<small>Если ошибка повторяется, пожалуйста, сообщите нам')
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             }
         }

@@ -21,6 +21,7 @@ return [
                 'on_ssl' => false,
                 'period' => false,
                 'post_id' => 'x1209448',
+                'path' => '/public/http/'
             ]
         ],
         'user' => [

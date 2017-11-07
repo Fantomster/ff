@@ -13,7 +13,6 @@
 namespace common\components\sms;
 
 use yii\db\Exception;
-use yii\db\Expression;
 
 class Sms extends \yii\base\Component
 {
@@ -31,6 +30,8 @@ class Sms extends \yii\base\Component
             foreach ($this->attributes as $key => $value) {
                 if (property_exists($this->sender, $key)) {
                     $this->sender->setProperty($key, $value);
+                } else {
+                    throw new Exception(get_class($this->sender) . ' not property ' . $key);
                 }
             }
             parent::init();
@@ -48,29 +49,10 @@ class Sms extends \yii\base\Component
     public function send($message, $target)
     {
         try {
-            //Получаем id смс
-            $sms_id = $this->sender->send($message, $target);
-            //Сохраняем что отправили смс
-            $model = new \common\models\SmsSend([
-                'provider' => get_class($this->sender),
-                'target' => $target,
-                'text' => $message,
-                'status' => 1,
-                'send_date' => new Expression('NOW()'),
-                'sms_id' => $sms_id
-            ]);
-            //Валидируем, сохраняем
-            if ($model->validate()) {
-                $model->save();
-            }
+            $this->sender->send($message, $target);
         } catch (Exception $e) {
             //Сохраняем ошибку в лог, чтобы ошибка при отправке, не рушила систему
-            $error = new \common\models\SmsError([
-                'message' => $message,
-                'target' => $target,
-                'error' => $e->getMessage(),
-            ]);
-            $error->save();
+            $this->sender->setError($this->sender->message, $this->sender->target, $e->getMessage());
         }
     }
 

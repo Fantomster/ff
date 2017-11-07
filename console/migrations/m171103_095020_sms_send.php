@@ -11,11 +11,11 @@ class m171103_095020_sms_send extends Migration
         $this->createTable($this->tableName, [
             'id' => $this->primaryKey(),
             'sms_id' => $this->string(),
-            'status' => $this->integer(2)->defaultValue(1),
+            'status_id' => $this->integer(2)->defaultValue(1),
             'text' => $this->text(),
             'target' => $this->string(),
-            'send_date' => $this->dateTime(),
-            'status_date' => $this->dateTime()->null(),
+            'created_at' => $this->timestamp()->null()->defaultValue(null),
+            'updated_at' => $this->timestamp()->null()->defaultValue(null),
             'provider' => $this->string()
         ]);
 
@@ -23,18 +23,17 @@ class m171103_095020_sms_send extends Migration
         $this->createIndex(
             'idx-sms_send_status',
             $this->tableName,
-            'status'
+            'status_id'
         );
 
         // add foreign key for table `post`
         $this->addForeignKey(
             'fk-sms_status',
             $this->tableName,
-            'status',
+            'status_id',
             'sms_status',
             'status'
         );
-
     }
 
     public function safeDown()

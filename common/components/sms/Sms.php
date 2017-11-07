@@ -16,10 +16,26 @@ use yii\db\Exception;
 
 class Sms extends \yii\base\Component
 {
+    /**
+     *  Класс с реализацией общения с API
+     *  Class extends AbstractProvider
+     */
     public $provider;
+
+    /**
+     * Свойства класса провайдера
+     * array
+     */
     public $attributes;
+
+    /**
+     * instance $provider
+     */
     private $sender;
 
+    /**
+     * @throws Exception
+     */
     public function init()
     {
         //делаем отправителя из провайдера
@@ -44,11 +60,11 @@ class Sms extends \yii\base\Component
      * Отправка смс
      * @param $message
      * @param $target
-     * @throws \Exception
      */
     public function send($message, $target)
     {
         try {
+            //Отправка смс
             $this->sender->send($message, $target);
         } catch (Exception $e) {
             //Сохраняем ошибку в лог, чтобы ошибка при отправке, не рушила систему
@@ -56,5 +72,17 @@ class Sms extends \yii\base\Component
         }
     }
 
-
+    /**
+     * Получить статус СМС сообщения
+     * @param $sms_id
+     * @return mixed
+     */
+    public function checkStatus($sms_id)
+    {
+        try {
+            return $this->sender->checkStatus($sms_id);
+        } catch(Exception $e){
+            return false;
+        }
+    }
 }

@@ -41,8 +41,8 @@ class SmsStatus extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'status' => 'Status',
-            'text' => 'Text',
+            'status' => 'Status ID',
+            'text' => Yii::t('app', 'Статус'),
         ];
     }
 

@@ -34,6 +34,12 @@ abstract class AbstractProvider
     public abstract function send($message, $target);
 
     /**
+     * Проверка статуса СМС от провайдера
+     * @param $sms_id
+     */
+    public abstract function checkStatus($sms_id);
+
+    /**
      * Установка свойств провайдера
      * @param $name
      * @param $value
@@ -91,8 +97,7 @@ abstract class AbstractProvider
             'provider' => get_class($this),
             'target' => $target,
             'text' => $message,
-            'status' => 1,
-            'send_date' => new Expression('NOW()'),
+            'status_id' => 1,
             'sms_id' => $sms_id
         ]);
         $model->save();

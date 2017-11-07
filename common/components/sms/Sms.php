@@ -58,5 +58,13 @@ class Sms extends \yii\base\Component
         }
     }
 
-
+    /**
+     * Получить статус СМС сообщения
+     * @param $sms_id
+     * @return mixed
+     */
+    public function checkStatus($sms_id)
+    {
+        return $this->sender->checkStatus($sms_id);
+    }
 }

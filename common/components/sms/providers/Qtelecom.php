@@ -9,6 +9,7 @@
 namespace common\components\sms\providers;
 
 use common\components\sms\AbstractProvider;
+use common\models\SmsStatus;
 
 class Qtelecom extends AbstractProvider
 {
@@ -64,6 +65,44 @@ class Qtelecom extends AbstractProvider
         $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
         //Посылаем запрос
         return $this->curlPost($url, $post, true);
+    }
+
+    /**
+     * Проверка статуса СМС от провайдера
+     * @param $sms_id
+     * @return mixed
+     */
+    public function checkStatus($sms_id)
+    {
+        //Данные для запроса к АПИ
+        $post = [
+            'action' => 'status',
+            'sms_id' => $sms_id,
+            'user' => trim($this->user),
+            'pass' => trim($this->pass),
+            'CLIENTADR' => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
+            'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
+        ];
+        //УРЛ для запроса
+        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        //Посылаем запрос
+        $result = $this->xmlToArray($this->curlPost($url, $post, true));
+        //Разбор результата
+        $return = false;
+        if (isset($result['MESSAGES'])) {
+            switch ($result['MESSAGES']['MESSAGE']['SMSSTC_CODE']) {
+                case 'queued':
+                case 'wait':
+                case 'accepted': $status_id = 1; break;
+                case 'delivered': $status_id = 2; break;
+                case 'not_delivered': $status_id = 5; break;
+                case 'failed': $status_id = 21; break;
+            }
+            if(isset($status_id)) {
+                $return = SmsStatus::findOne(['status' => $status_id]);
+            }
+        }
+        return $return;
     }
 
     /**

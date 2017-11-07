@@ -34,6 +34,12 @@ abstract class AbstractProvider
     public abstract function send($message, $target);
 
     /**
+     * Проверка статуса СМС от провайдера
+     * @param $sms_id
+     */
+    public abstract function checkStatus($sms_id);
+
+    /**
      * Установка свойств провайдера
      * @param $name
      * @param $value

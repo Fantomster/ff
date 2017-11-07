@@ -91,8 +91,7 @@ abstract class AbstractProvider
             'provider' => get_class($this),
             'target' => $target,
             'text' => $message,
-            'status' => 1,
-            'send_date' => new Expression('NOW()'),
+            'status_id' => 1,
             'sms_id' => $sms_id
         ]);
         $model->save();

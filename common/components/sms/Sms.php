@@ -20,6 +20,9 @@ class Sms extends \yii\base\Component
     public $attributes;
     private $sender;
 
+    /**
+     * @throws Exception
+     */
     public function init()
     {
         //делаем отправителя из провайдера
@@ -44,7 +47,6 @@ class Sms extends \yii\base\Component
      * Отправка смс
      * @param $message
      * @param $target
-     * @throws \Exception
      */
     public function send($message, $target)
     {

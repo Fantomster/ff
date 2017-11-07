@@ -5,18 +5,18 @@ namespace common\models;
 use Yii;
 
 /**
- * This is the model class for table "sms_send".
+ * This is the model class for table "{{%sms_send}}".
  *
  * @property integer $id
  * @property string $sms_id
- * @property integer $status
+ * @property integer $status_id
  * @property string $text
  * @property string $target
- * @property string $send_date
- * @property string $status_date
+ * @property string $created_at
+ * @property string $updated_at
  * @property string $provider
  *
- * @property SmsStatus $status0
+ * @property SmsStatus $status
  */
 class SmsSend extends \yii\db\ActiveRecord
 {
@@ -25,7 +25,21 @@ class SmsSend extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'sms_send';
+        return '{{%sms_send}}';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors() {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'value' => function ($event) {
+                    return gmdate("Y-m-d H:i:s");
+                },
+            ],
+        ];
     }
 
     /**
@@ -34,11 +48,11 @@ class SmsSend extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['status'], 'integer'],
+            [['status_id'], 'integer'],
             [['text'], 'string'],
-            [['send_date', 'status_date'], 'safe'],
+            [['created_at', 'updated_at'], 'safe'],
             [['sms_id', 'target', 'provider'], 'string', 'max' => 255],
-            [['status'], 'exist', 'skipOnError' => true, 'targetClass' => SmsStatus::className(), 'targetAttribute' => ['status' => 'status']],
+            [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsStatus::className(), 'targetAttribute' => ['status_id' => 'status']],
         ];
     }
 
@@ -50,11 +64,11 @@ class SmsSend extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'sms_id' => 'Sms ID',
-            'status' => 'Status',
+            'status_id' => 'Status ID',
             'text' => 'Text',
             'target' => 'Target',
-            'send_date' => 'Send Date',
-            'status_date' => 'Status Date',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
             'provider' => 'Provider',
         ];
     }
@@ -62,8 +76,8 @@ class SmsSend extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getStatus0()
+    public function getStatus()
     {
-        return $this->hasOne(SmsStatus::className(), ['status' => 'status']);
+        return $this->hasOne(SmsStatus::className(), ['status' => 'status_id']);
     }
 }

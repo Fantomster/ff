@@ -22,7 +22,7 @@ class Qtelecom extends AbstractProvider
     public $path;
 
     /**
-     * Отправка сообщения, возвращает ID отправленной СМС
+     * Отправка сообщения
      * @param $message
      * @param $target
      * @return mixed
@@ -69,7 +69,6 @@ class Qtelecom extends AbstractProvider
     /**
      * Разбор ответа
      * @param $result
-     * @return mixed
      * @throws \yii\db\Exception
      */
     private function parseResponse($result)

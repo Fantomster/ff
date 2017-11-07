@@ -279,7 +279,7 @@ class User extends \amnah\yii2\user\models\User {
                 ->send();
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this->email, $this->id);
+            \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($this);
         }
 
         // restore view path and return result

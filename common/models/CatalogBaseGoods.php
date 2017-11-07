@@ -109,11 +109,11 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['cat_id', 'price', 'product', 'ed','article'], 'required'],
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
-            [['article'], 'required', 'on' => 'uniqueArticle'],
+            //[['article'], 'required', 'on' => 'uniqueArticle'],
             [['article'], 'string', 'max' => 50],
-            [['article'], 'uniqueArticle','when' => function($model) {
-            return !empty($model->cat_id);
-            }],
+//            [['article'], 'uniqueArticle','when' => function($model) {
+//            return !empty($model->cat_id);
+//            }],
             [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
             [['note'], 'string', 'max' => 255],
@@ -140,16 +140,16 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             ],
         ];
     }
-    public function uniqueArticle($attribute, $params, $validator)
-    {
-        empty($this->id)?$where= "true":$where = "id <> $this->id";
-        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
-                    ->andWhere($where)
-                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
-                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
-        }
-        
-    }
+//    public function uniqueArticle($attribute, $params, $validator)
+//    {
+//        empty($this->id)?$where= "true":$where = "id <> $this->id";
+//        if (self::find()->where(['cat_id'=>$this->cat_id,'article'=>$this->article,'deleted'=>self::DELETED_OFF])
+//                    ->andWhere($where)
+//                    ->exists() && User::findIdentity(Yii::$app->user->id)->organization->type_id == Organization::TYPE_SUPPLIER) {
+//                $this->addError($attribute, 'Такой артикул уже существует в каталоге');
+//        }
+//        
+//    }
     /**
      * @inheritdoc
      */

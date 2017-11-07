@@ -8,6 +8,8 @@ use kartik\widgets\TouchSpin;
 use kartik\form\ActiveForm;
 use common\models\Order;
 
+$currencySymbol = $order->currency->symbol;
+
 $form = ActiveForm::begin([
             'id' => 'editOrder',
             'enableAjaxValidation' => false,
@@ -17,6 +19,7 @@ $form = ActiveForm::begin([
             'method' => 'post',
             'action' => Url::to(['order/edit', 'id' => $order->id]),
         ]);
+
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
@@ -24,9 +27,6 @@ echo GridView::widget([
     'summary' => '',
     'tableOptions' => ['class' => 'table table-bordered table-striped dataTable order-table'],
     'options' => ['class' => 'table-responsive'],
-//    'panel' => false,
-//    'bootstrap' => false,
-//    'resizableColumns' => false,
     'columns' => [
         [
             'format' => 'raw',
@@ -85,8 +85,8 @@ echo GridView::widget([
             'contentOptions' => ['class' => 'width150'],
                 ] : ['format' => 'raw',
             'attribute' => 'price',
-            'value' => function($data) {
-                return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->price . ' '. $currencySymbol . '</b>';
             },
             'label' => 'Цена',
             'contentOptions' => ['class' => 'width150'],
@@ -94,8 +94,8 @@ echo GridView::widget([
         [
             'format' => 'raw',
             'attribute' => 'total',
-            'value' => function($data) {
-                return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->total . ' '. $currencySymbol . '</b>';
             },
             'label' => 'Сумма',
             'contentOptions' => ['class' => 'width150'],
@@ -109,7 +109,7 @@ echo GridView::widget([
         ],
     ],
 ]);
-$discountTypes = Order::discountDropDown();
+$discountTypes = $order->discountDropDown();
 if ($priceEditable) {
     //editable discount
     ?>
@@ -141,7 +141,7 @@ if ($priceEditable) {
                 <span>Стоимость доставки:</span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->calculateDelivery() . ' руб' ?></span>
+                <span><?= $order->calculateDelivery() . ' ' . $currencySymbol ?></span>
             </div>
         </div>
         <div class="row">
@@ -149,7 +149,7 @@ if ($priceEditable) {
                 <span>Итого:</span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->total_price . ' руб' ?></span>
+                <span><?= $order->total_price . ' ' . $currencySymbol ?></span>
             </div>
         </div>
     </div>
@@ -181,7 +181,7 @@ if ($priceEditable) {
                 <span>Стоимость доставки:</span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->calculateDelivery() . ' руб' ?></span>
+                <span><?= $order->calculateDelivery() . ' ' . $currencySymbol ?></span>
             </div>
         </div>
         <div class="row">
@@ -189,7 +189,7 @@ if ($priceEditable) {
                 <span>Итого:</span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->total_price . ' руб' ?></span>
+                <span><?= $order->total_price . ' ' . $currencySymbol ?></span>
             </div>
         </div>
     </div>

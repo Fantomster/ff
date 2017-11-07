@@ -285,15 +285,15 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             ]
                         ]);
                         ?>
-                        <?=
-                        Html::button("&nbsp;<span>$totalCart</span> <i class='fa fa-fw fa-rub'></i>&nbsp;", [
-                            'class' => 'btn btn-success createAll btn-outline total-cart',
-                            'data' => [
-                                'url' => Url::to(['/order/ajax-make-order']),
-                                'all' => true,
-                                'id' => null,
-                            ]
-                        ]);
+                        <?= ''
+//                        Html::button("&nbsp;<span>$totalCart</span> <i class='fa fa-fw fa-rub'></i>&nbsp;", [
+//                            'class' => 'btn btn-success createAll btn-outline total-cart',
+//                            'data' => [
+//                                'url' => Url::to(['/order/ajax-make-order']),
+//                                'all' => true,
+//                                'id' => null,
+//                            ]
+//                        ]);
                         ?>
                     </div>
                 </div>
@@ -324,6 +324,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                 ?>
                 <?php
                 foreach ($orders as $order) {
+                    $currencySymbol = $order->currency->symbol;
                     $forMinOrderPrice = $order->forMinOrderPrice();
                     $forFreeDelivery = $order->forFreeDelivery();
                     ?>
@@ -387,18 +388,18 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                     ?>
                                 </div>
                             </div>
-    <?= $this->render('_checkout-content', ['content' => $order->orderContent, 'vendor_id' => $order->vendor_id]) ?>
+    <?= $this->render('_checkout-content', ['order' => $order]) ?>
                         </div>
                         <div class="block_right">
                             <div class="block_right_wrap">
-                                <p>Итого: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> р.</p>
+                                <p>Итого: <span id="orderTotal<?= $order->id ?>"><?= $order->total_price ?></span> <?= $currencySymbol ?></p>
 
                             </div>
                             <div class="block_right_wrap_1">
                                 <?php if ($forMinOrderPrice) { ?>
-                                    <p>до минимального заказа</p><p><?= $forMinOrderPrice ?> руб</p>
+                                    <p>до минимального заказа</p><p><?= $forMinOrderPrice ?> <?= $currencySymbol ?></p>
                                 <?php } elseif ($forFreeDelivery) { ?>
-                                    <p>до бесплатной доставки </p><p><?= $forFreeDelivery ?> руб</p>
+                                    <p>до бесплатной доставки </p><p><?= $forFreeDelivery ?> <?= $currencySymbol ?></p>
                                 <?php } else { ?>
                                     <p>бесплатная доставка!</p>
                                 <?php } ?>

@@ -1027,7 +1027,6 @@ class OrderController extends DefaultController {
             $order = $this->findOrder([Order::tableName() . '.id' => $id], Yii::$app->user->can('manage'));
         } else {
             $order = Order::findOne(['id' => $id]);
-            ;
         }
 
         if (empty($order) || !(($order->client_id == $user->organization_id) || ($order->vendor_id == $user->organization_id))) {
@@ -1043,7 +1042,8 @@ class OrderController extends DefaultController {
         $initiator = ($organizationType == Organization::TYPE_RESTAURANT) ? $order->client->name : $order->vendor->name;
         $message = "";
         $orderChanged = 0;
-
+        $currencySymbol = $order->currency->symbol;
+        
         if (Yii::$app->request->post()) {
             $content = Yii::$app->request->post('OrderContent');
             $discount = Yii::$app->request->post('Order');
@@ -1071,7 +1071,7 @@ class OrderController extends DefaultController {
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= "<br/> изменил цену $product->product_name с $product->price руб на $position[price] руб";
+                        $message .= "<br/> изменил цену $product->product_name с $product->price $currencySymbol на $position[price] $currencySymbol";
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();
@@ -1117,7 +1117,7 @@ class OrderController extends DefaultController {
                     $order->discount = $order->discount_type ? abs($discount['discount']) : null;
                     $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
-                        $discountValue = $order->discount . " руб";
+                        $discountValue = $order->discount . " $currencySymbol";
                     } else {
                         $discountValue = $order->discount . "%";
                     }

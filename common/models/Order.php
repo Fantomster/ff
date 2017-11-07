@@ -211,10 +211,10 @@ class Order extends \yii\db\ActiveRecord {
         return $text;
     }
 
-    public static function discountDropDown() {
+    public function discountDropDown() {
         return [
             '' => 'Без скидки',
-            '1' => 'Скидка (р)',
+            '1' => 'Скидка ('.$this->currency->symbol.')',
             '2' => 'Скидка (%)',
         ];
     }
@@ -309,7 +309,7 @@ class Order extends \yii\db\ActiveRecord {
             case self::DISCOUNT_NO_DISCOUNT:
                 return false;
             case self::DISCOUNT_FIXED:
-                return $this->discount . " руб";
+                return $this->discount . " " . $this->currency->symbol;
             case self::DISCOUNT_PERCENT:
                 return $this->discount . "%";
         }

@@ -4,6 +4,7 @@ use common\models\Order;
 use common\models\Organization;
 use yii\helpers\Html;
 
+$currencySymbol = $order->currency->symbol;
 $statusInfo = '';
 $actionButtons = '';
 $btnCancel = Html::button('<span><i class="icon fa fa-ban"></i> Отменить</span>', [
@@ -108,9 +109,9 @@ if ($order->isObsolete) {
     <div class="box-body">
         <p class="ppp">Общая сумма</p>
 
-        <p class="pppp"><?= $order->total_price ?> <i class="fa fa-fw fa-rub" style="font-size: 24px;"></i></p><br>
+        <p class="pppp"><?= $order->total_price ?> <?= $currencySymbol ?></i></p><br>
         <p class="ps">включая доставку</p>
-        <p class="ps"><?= $order->calculateDelivery() ?> <i class="fa fa-fw fa-rub"></i></p>
+        <p class="ps"><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
         <p class="ps">дата создания </p>
         <p class="ps"><?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>
         <div class="row">

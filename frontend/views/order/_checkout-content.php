@@ -4,6 +4,10 @@ use kartik\widgets\TouchSpin;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+$currencySymbol = $order->currency->symbol;
+$content = $order->orderContent;
+$vendor_id = $order->vendor_id;
+
 foreach ($content as $position) {
     $note = $position->getNote();
     ?>
@@ -48,8 +52,8 @@ foreach ($content as $position) {
             ?>
         </div>
         <div class="block_cena">
-            <p class = "block_cena_p"><span id="total<?= $position->id ?>"><?= number_format($position->price * $position->quantity, 2) ?></span> руб.</p>
-            <p class = "block_cena_p1"><?= $position->quantity ?> x <span> <?= $position->price ?> руб.</span></p>
+            <p class = "block_cena_p"><span id="total<?= $position->id ?>"><?= number_format($position->price * $position->quantity, 2) ?></span> <?= $currencySymbol ?></p>
+            <p class = "block_cena_p1"><?= $position->quantity ?> x <span> <?= $position->price ?> <?= $currencySymbol ?></span></p>
             <?=
             Html::a('<img class= "delete_tovar1" src="/img/tovar_delete.png" alt="">', '#', [
                 'class' => 'remove',

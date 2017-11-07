@@ -6,7 +6,8 @@ use common\models\Order;
 use yii\helpers\Html;
 
 $dataProvider->sort = false;
-$discountTypes = Order::discountDropDown();
+$discountTypes = $order->discountDropDown();
+$currencySymbol = $order->currency->symbol;
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterPosition' => false,
@@ -35,8 +36,8 @@ echo GridView::widget([
         ],
         ['format' => 'raw',
             'attribute' => 'price',
-            'value' => function($data) {
-                return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->price . '</b> ' . $currencySymbol;
             },
             'label' => 'Цена',
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
@@ -45,8 +46,8 @@ echo GridView::widget([
         [
             'format' => 'raw',
             'attribute' => 'total',
-            'value' => function($data) {
-                return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
+            'value' => function($data) use ($currencySymbol) {
+                return '<b>' . $data->total . '</b> '.$currencySymbol.'</i>';
             },
             'label' => 'Сумма',
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],

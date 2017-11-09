@@ -14,7 +14,7 @@ use common\models\Category;
 /* 
  * 
  */
-$this->title = 'Главный каталог';
+$this->title = Yii::t('app', 'Главный каталог');
 $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;overflow: hidden;}
 .hide{dosplay:none}
@@ -75,8 +75,8 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
 
     Modal::begin([
         'id' => 'showVideo',
-        'header' => '<h4>Загрузка Главного каталога поставщика</h4>',
-        'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>',
+        'header' => '<h4>' . Yii::t('app', 'Загрузка Главного каталога поставщика') . ' </h4>',
+        'footer' => '<a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> ' . Yii::t('app', 'Закрыть') . ' </a>',
     ]);
     ?>
     <div class="modal-body form-inline"> 
@@ -84,7 +84,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
             <iframe class="embed-responsive-item fk-video" src="https://www.youtube.com/embed/ElzNEsKR0dA" frameborder="0" allowfullscreen=""></iframe>
         </div>
         <div style="padding-top: 15px;">
-            Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог.
+            <?= Yii::t('app', 'Для того, чтобы продолжить работу с нашей системой, создайте ваш первый каталог.') ?>
         </div>
     </div>
     <?php
@@ -94,7 +94,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Создание главного каталога
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Создание главного каталога') ?>
         <small></small>
     </h1>
     <?=
@@ -103,7 +103,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
             'class' => 'breadcrumb',
         ],
         'links' => [
-            'Создание главного каталога'
+            Yii::t('app', 'Создание главного каталога')
         ],
     ])
     ?>
@@ -113,7 +113,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
 <?php if (Yii::$app->session->hasFlash('success')): ?>
     <div class="alert alert-danger alert-dismissable">
     <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-    <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+    <h4><i class="icon fa fa-check"></i><?= Yii::t('app', 'Ошибка') ?></h4>
     <?= Yii::$app->session->getFlash('success') ?>
     </div>
   <?php endif; ?>
@@ -121,11 +121,11 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
     <div class="box-body">
         <div class="panel-body">
     <?= Html::a(
-        '<i class="icon fa fa-save"></i> Сохранить',
+        '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить') . ' ',
         ['#'],
         ['class' => 'btn btn-success pull-right','style' => ['margin-left'=>'5px'],'id'=>'save', 'name'=>'save']
     ) ?>
-    <?= Html::a('<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>', 
+    <?= Html::a('<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('app', 'Загрузить каталог (XLS)') . ' </span>',
             ['/vendor/import-base-catalog-from-xls'], [
                 'data' => [
                 'target' => '#importFromXls',
@@ -138,7 +138,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
             ]);
     ?>
     <?= Html::a(
-        '<i class="fa fa-list-alt"></i> Скачать шаблон',
+        '<i class="fa fa-list-alt"></i> ' . Yii::t('app', 'Скачать шаблон') . ' ',
         Url::to('@web/upload/template.xlsx'),
         ['class' => 'btn btn-default pull-right','style' => ['margin'=>'0 5px']]
     ) ?>
@@ -160,7 +160,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
 </section>
 <?php 
 Modal::begin([
-   'header'=>'<h4 class="modal-title">Загрузка каталога</h4>',
+   'header'=>'<h4 class="modal-title">' . Yii::t('app', 'Загрузка каталога') . ' </h4>',
    'id'=>'instruction',
    'size'=>'modal-lg',
 ]);

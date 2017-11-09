@@ -20,11 +20,11 @@ $this->registerCss('.handsontable .htCore .htDimmed {
     cursor: not-allowed;
     color: #696969;
  }.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}.Handsontable_table{position: relative;width: 100%;overflow: hidden;height:400px;}');
-$this->title = 'Редактировать продукты';
+$this->title = Yii::t('app', 'Редактировать продукты');
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Редактирование каталога') ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
         <small></small>
     </h1>
     <?=
@@ -34,10 +34,10 @@ $this->title = 'Редактировать продукты';
         ],
         'links' => [
             [
-            'label' => 'Каталоги',
+            'label' => Yii::t('app', 'Каталоги'),
             'url' => ['catalog/index', 'vendor_id'=>$vendor_id],
             ],
-            'Шаг 3. Редактирование каталога',
+            Yii::t('app', 'Шаг 3. Редактирование каталога'),
         ],
     ])
     ?>
@@ -48,20 +48,20 @@ $this->title = 'Редактировать продукты';
     <div class="box-body">
         <div class="panel-body">
             <ul class="nav fk-tab nav-tabs pull-left">
-                <?='<li>'.Html::a('Название',['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Добавить товары',['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a('Изменить цены <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Назначить ресторану',['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'Название'),['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'Добавить товары'),['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a(' ' . Yii::t('app', 'Изменить цены') . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'Назначить ресторану'),['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
             </ul>
             <ul class="fk-prev-next pull-right">
-              <?='<li class="fk-prev">'.Html::a('Назад',['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Далее',['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
+              <?='<li class="fk-prev">'.Html::a(Yii::t('app', 'Назад'),['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'Далее') . ' ',['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id],['id'=>'save', 'name'=>'save']).'</li>'?>
             </ul>
         </div>
         <div class="panel-body">
             <div class="callout callout-fk-info">
-                <h4>ШАГ 3</h4>
-                <p>Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.</p>
+                <h4><?= Yii::t('app', 'ШАГ 3') ?></h4>
+                <p><?= Yii::t('app', 'Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.') ?></p>
             </div> 
             <div class="row">
                 <div class="col-sm-4">
@@ -69,7 +69,7 @@ $this->title = 'Редактировать продукты';
                             <span class="input-group-addon">
                               <i class="fa fa-search"></i>
                             </span>
-                    <?=Html::input('text', 'search_field', null, ['class' => 'form-control','placeholder'=>'Поиск','id'=>'search_field']) ?>
+                    <?=Html::input('text', 'search_field', null, ['class' => 'form-control','placeholder'=>Yii::t('app', 'Поиск'),'id'=>'search_field']) ?>
                     </div>
                 </div> 
             </div>

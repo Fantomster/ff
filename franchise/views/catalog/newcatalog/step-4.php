@@ -11,11 +11,11 @@ use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
 use kartik\checkbox\CheckboxX;
-$this->title = 'Назначить каталог';
+$this->title = Yii::t('app', 'Назначить каталог');
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Редактирование каталога') ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
         <small></small>
     </h1>
     <?=
@@ -25,10 +25,10 @@ $this->title = 'Назначить каталог';
         ],
         'links' => [
             [
-            'label' => 'Каталоги',
+            'label' => Yii::t('app', 'Каталоги'),
             'url' => ['catalog/index', 'vendor_id'=>$vendor_id],
             ],
-            'Шаг 4. Редактирование каталога',
+            Yii::t('app', 'Шаг 4. Редактирование каталога'),
         ],
     ])
     ?>
@@ -39,14 +39,14 @@ $this->title = 'Назначить каталог';
     <div class="box-body">
         <div class="panel-body">
             <ul class="nav fk-tab nav-tabs pull-left">
-              <?='<li>'.Html::a('Название',['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Добавить товары',['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a('Изменить цены',['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a('Назначить ресторану <i class="fa fa-fw fa-thumbs-o-up"></i>',['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+              <?='<li>'.Html::a(Yii::t('app', 'Название'),['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'Добавить товары'),['catalog/step-2', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'Изменить цены'),['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a(' ' . Yii::t('app', 'Назначить ресторану') . '  <i class="fa fa-fw fa-thumbs-o-up"></i>',['catalog/step-4', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
             </ul>
             <ul class="fk-prev-next pull-right">
-              <?='<li class="fk-prev">'.Html::a('Назад',['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Завершить',['catalog/index', 'vendor_id'=>$vendor_id]).'</li>'?>
+              <?='<li class="fk-prev">'.Html::a(Yii::t('app', 'Назад'),['catalog/step-3-copy', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'Завершить') . ' ',['catalog/index', 'vendor_id'=>$vendor_id]).'</li>'?>
             </ul>
         </div>
 
@@ -55,14 +55,14 @@ $this->title = 'Назначить каталог';
         <?php
         $gridColumns = [
 		[
-		'label'=>'Ресторан',
+		'label'=>Yii::t('app', 'Ресторан'),
 		'value'=>function ($data) {
                 $organization_name=common\models\Organization::get_value($data->rest_org_id)->name;
                 return $organization_name;
                 }
 		],
 		[
-		'label'=>'Текущий каталог',
+		'label'=>Yii::t('app', 'Текущий каталог'),
                 'format' => 'raw',
 		'value'=>function ($data) {
             $catalog = common\models\Catalog::get_value($data->cat_id);
@@ -71,7 +71,7 @@ $this->title = 'Назначить каталог';
 		}
 		],
               [
-            'attribute' => 'Назначить',
+            'attribute' => Yii::t('app', 'Назначить'),
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) {
@@ -96,9 +96,9 @@ $this->title = 'Назначить каталог';
         ?>
         <div class="panel-body">
             <div class="callout callout-fk-info">
-                <h4>ШАГ 4</h4>
+                <h4><?= Yii::t('app', 'ШАГ 4') ?></h4>
 
-                <p>И наконец, укажите рестораны, которым будет доступен ваш каталог.</p>
+                <p><?= Yii::t('app', 'И наконец, укажите рестораны, которым будет доступен ваш каталог.') ?></p>
             </div>
         <?php Pjax::begin(['id' => 'pjax-container']); ?>
         <?=GridView::widget([

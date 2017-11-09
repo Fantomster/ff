@@ -69,8 +69,8 @@ $this->registerCss("
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Сотрудники
-        <small>Список сотрудников организации</small>
+        <i class="fa fa-gears"></i> <?= Yii::t('app', 'Сотрудники') ?>
+        <small><?= Yii::t('app', 'Список сотрудников организации') ?></small>
     </h1>
     <?=
     ''
@@ -105,7 +105,7 @@ $this->registerCss("
                     $form->field($searchModel, 'searchString')->textInput([
                         'id' => 'searchString',
                         'class' => 'form-control',
-                        'placeholder' => 'Поиск'])->label(false)
+                        'placeholder' => Yii::t('app', 'Поиск')])->label(false)
                     ?>
                 </div><div class="col-md-9">
                     <?=
@@ -113,7 +113,7 @@ $this->registerCss("
                         'id' => 'add-user',
                         'clientOptions' => false,
                         'toggleButton' => [
-                            'label' => '<i class="icon fa fa-user-plus"></i>  Добавить сотрудника',
+                            'label' => '<i class="icon fa fa-user-plus"></i>  ' . Yii::t('app', 'Добавить сотрудника') . ' ',
                             'tag' => 'a',
                             'data-target' => '#add-user',
                             'class' => 'btn btn-sm btn-success pull-right',
@@ -145,7 +145,7 @@ $this->registerCss("
                         'profile.phone',
                         [
                             'attribute' => 'role.name',
-                            'label' => 'Роль',
+                            'label' => Yii::t('app', 'Роль'),
                             'value' => 'role.name'
                         ],
                         [

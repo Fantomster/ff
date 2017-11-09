@@ -35,7 +35,7 @@ $form = ActiveForm::begin([
                 <div class="col-md-12"> 
                     <div class="row">
                         <div class="col-md-4 col-sm-12 text-center">
-                            <h4>За все время (<?= $totalCount ?>)</h4>
+                            <h4><?= Yii::t('app', 'За все время') ?> (<?= $totalCount ?>)</h4>
                             <?=
                             ChartJs::widget([
                                 'type' => 'pie',
@@ -58,7 +58,7 @@ $form = ActiveForm::begin([
                             ?>
                         </div>
                         <div class="col-md-4 col-sm-12 text-center">
-                            <h4>За текущий месяц (<?= $totalCountThisMonth ?>)</h4>
+                            <h4><?= Yii::t('app', 'За текущий месяц') ?> (<?= $totalCountThisMonth ?>)</h4>
                             <?=
                             ChartJs::widget([
                                 'type' => 'pie',
@@ -80,7 +80,7 @@ $form = ActiveForm::begin([
                             ?>
                         </div>
                         <div class="col-md-4 col-sm-12 text-center">
-                            <h4>Сегодня (<?= $totalCountThisDay ?>)</h4>
+                            <h4><?= Yii::t('app', 'Сегодня') ?> (<?= $totalCountThisDay ?>)</h4>
                             <?=
                             ChartJs::widget([
                                 'type' => 'pie',
@@ -106,7 +106,7 @@ $form = ActiveForm::begin([
             </div>
             <div class="row">
                 <div class="col-md-12 text-center"> 
-                    <h3 class="box-title" style="margin-left:15px;">Заказов за период <span class="text-bold text-primary">(<?= $total ?>)</span></h3>
+                    <h3 class="box-title" style="margin-left:15px;"><?= Yii::t('app', 'Заказов за период') ?> <span class="text-bold text-primary">(<?= $total ?>)</span></h3>
                     <div class="form-group" style="width: 350px;margin:0 auto;margin-bottom:15px">
                     <?=
                     DatePicker::widget([
@@ -114,8 +114,8 @@ $form = ActiveForm::begin([
                         'name2' => 'date2',
                         'value' => $dateFilterFrom,
                         'value2' => $dateFilterTo,
-                        'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
-                        'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                        'options' => ['placeholder' => Yii::t('app', 'Начальная Дата'), 'id' => 'dateFrom'],
+                        'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
                         'separator' => '-',
                         'type' => DatePicker::TYPE_RANGE,
                         'pluginOptions' => [
@@ -139,7 +139,7 @@ $form = ActiveForm::begin([
                     'labels' => $dayLabels,
                     'datasets' => [
                         [
-                            'label' => 'Все заказы',
+                            'label' => Yii::t('app', 'Все заказы'),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,.8)",
                             'pointBackgroundColor' => "rgba(54,140,191,1)",
@@ -152,7 +152,7 @@ $form = ActiveForm::begin([
                             'fill' => false,
                         ],
                         [
-                            'label' => 'Первые заказы',
+                            'label' => Yii::t('app', 'Первые заказы'),
                             'backgroundColor' => "rgba(126,188,89,.2)",
                             'borderColor' => "rgba(126,188,89,.8)",
                             'pointBackgroundColor' => "rgba(126,188,89,.1)",

@@ -157,17 +157,17 @@ label {
 
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?=$catalogBaseGoods->isNewRecord ? 'ДОБАВЛЕНИЕ ТОВАРА':'РЕДАКТИРОВАНИЕ ТОВАРА'?></h4>
+    <h4 class="modal-title"><?=$catalogBaseGoods->isNewRecord ? Yii::t('app', 'ДОБАВЛЕНИЕ ТОВАРА'):Yii::t('app', 'РЕДАКТИРОВАНИЕ ТОВАРА')?></h4>
 </div>
 <div class="modal-body" style="background:#fff !important">
 	<div class="row">
 		<div class="col-md-12">
 			<div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
-                                <label class="control-label" for="dynamicmodel-sub1">Категория товара</label>
+                                <label class="control-label" for="dynamicmodel-sub1"><?= Yii::t('app', 'Категория товара') ?></label>
                             <?php
                             echo $form->field($catalogBaseGoods, 'sub1')->widget(Select2::classname(), [
                                 'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(),'id', 'name'),
-                                'options' => ['placeholder' => 'Выберите...'],
+                                'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
                                 'theme' => "default",
                                 'pluginOptions' => [
                                     'allowClear' => true
@@ -190,7 +190,7 @@ label {
                                     'depends'=>['catalogbasegoods-sub1'],
                                     'placeholder' => false,
                                     'url' => Url::to(['site/get-sub-cat']),
-                                    'loadingText' => 'Загрузка...',
+                                    'loadingText' => Yii::t('app', 'Загрузка...'),
                                     'initialize' => true,
                                     'params'=>['catalogBaseGoods_id1','input-type-2'],
                                 ]
@@ -206,27 +206,27 @@ label {
 				<div class="col-md-6">
                                         <?= $form->field($catalogBaseGoods, 'product', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
-    textInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','style'=>'border-radius:3px']) ?>
+    textInput(['placeholder' => Yii::t('app', 'НАИМЕНОВАНИЕ ТОВАРА'),'style'=>'border-radius:3px']) ?>
 					<?= $form->field($catalogBaseGoods, 'article', 
     ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
     title="Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара">
     </span></span></div>{error}'])->
-    textInput(['placeholder' => 'АРТИКУЛ']) ?>
+    textInput(['placeholder' => Yii::t('app', 'АРТИКУЛ')]) ?>
                                     <?= $form->field($catalogBaseGoods, 'price', 
     ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
     title="Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)">
     </span></span></div>{error}'])->
-    textInput(['placeholder' => 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ']) ?>
-                                    <label class="control-label" for="">Ед измерения</label>
+    textInput(['placeholder' => Yii::t('app', 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ')]) ?>
+                                    <label class="control-label" for=""><?= Yii::t('app', 'Ед измерения') ?></label>
                                     <?php
                                     echo $form->field($catalogBaseGoods, 'ed')->widget(Select2::classname(), [
                                         'model'=>$catalogBaseGoods->ed,
                                         'data' => ArrayHelper::map(\common\models\MpEd::find()->asArray()->all(),'name', 'name'),
-                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
                                         'theme' => Select2::THEME_DEFAULT,
                                         'pluginOptions' => [
                                             'allowClear' => true,
@@ -237,15 +237,15 @@ label {
     <span class="glyphicon glyphicon-question-sign"
     data-toggle="tooltip" 
     title="Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)"></span></span></div>{error}'])->
-    textInput(['placeholder' => 'КРАТНОСТЬ ПОСТАВКИ']) ?>
+    textInput(['placeholder' => Yii::t('app', 'КРАТНОСТЬ ПОСТАВКИ')]) ?>
 				</div>
 				<div class="col-md-6">
-                                    <label class="control-label" for="">Страна производитель</label>
+                                    <label class="control-label" for=""><?= Yii::t('app', 'Страна производитель') ?></label>
                                     <?php 
                                     echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
                                         'model'=>$catalogBaseGoods->region,
                                         'data' => ArrayHelper::map($countrys,'id', 'name'),
-                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
                                         'theme' => "default",
                                         'pluginOptions' => [
                                             'allowClear' => true,
@@ -256,10 +256,10 @@ label {
                                     
                                     <?= $form->field($catalogBaseGoods, 'brand', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
-    textInput(['placeholder' => 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ','style'=>'border-radius:3px']) ?>
+    textInput(['placeholder' => Yii::t('app', 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ'),'style'=>'border-radius:3px']) ?>
                                     <?= $form->field($catalogBaseGoods, 'weight', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
-    textInput(['placeholder' => 'ВЕС УПАКОВКИ','style'=>'border-radius:3px']) ?>
+    textInput(['placeholder' => Yii::t('app', 'ВЕС УПАКОВКИ'),'style'=>'border-radius:3px']) ?>
                                     <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
 				
                                 </div>
@@ -271,11 +271,11 @@ label {
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">   
                     <div class="pull-right" style="margin-top: 10px;">
                     <?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
-                        '<i class="icon fa fa-plus-circle"></i> Создать' : 
-                        '<i class="icon fa fa-save"></i> Сохранить', 
+                        '<i class="icon fa fa-plus-circle"></i> ' . Yii::t('app', 'Создать') . ' ' :
+                        '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить') . ' ',
                         ['class' => $catalogBaseGoods->isNewRecord ? 
                         'btn btn-success edit' : 'btn btn-success edit']) ?>
-                        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+                        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'Отмена') ?></a>
                     </div>	
 		</div>
 	</div>

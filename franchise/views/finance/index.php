@@ -12,8 +12,8 @@ use yii\widgets\Breadcrumbs;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> Ваши финансы
-        <small>Узнайте ваши денежные потоки</small>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'Ваши финансы') ?>
+        <small><?= Yii::t('app', 'Узнайте ваши денежные потоки') ?></small>
     </h1> <?php /*
     <div class="nav-tabs-custom" style="cursor: move; margin-top:15px;">
         <!-- Tabs within a box -->
@@ -58,7 +58,7 @@ use yii\widgets\Breadcrumbs;
                            // 'model' => $searchModel,
                             'name' => 'month',
                             'attribute' => 'month',
-                            'options' => ['placeholder' => 'Выберите месяц', 'id' => 'month', 'style' => 'max-width: 150px;'],
+                            'options' => ['placeholder' => Yii::t('app', 'Выберите месяц'), 'id' => 'month', 'style' => 'max-width: 150px;'],
                             'type' => DatePicker::TYPE_INPUT,
                             'pluginOptions' => [
                                 'format' => 'MM yyyy',
@@ -72,7 +72,7 @@ use yii\widgets\Breadcrumbs;
                 </div>
                 <div class="col-md-5 no-padding">
                     <div class="input-group pull-right" style="width: 150px;">
-                        <input type="text" name="table_search" class="form-control" placeholder="Поиск">
+                        <input type="text" name="table_search" class="form-control" placeholder="<?= Yii::t('app', 'Поиск') ?>">
                             <div class="input-group-btn">
                                 <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                             </div>
@@ -123,37 +123,37 @@ use yii\widgets\Breadcrumbs;
                                 'format' => 'raw',
                                 'attribute' => 'name',
                                 'value' => 'name',
-                                'label' => 'Имя поставщика',
+                                'label' => Yii::t('app', 'Имя поставщика'),
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'turnoverCut',
                                 'value' => 'turnoverCut',
-                                'label' => 'Поставщик мне',
+                                'label' => Yii::t('app', 'Поставщик мне'),
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'fromFkeeper',
                                 'value' => 'fromFkeeper',
-                                'label' => 'MixCart мне',
+                                'label' => Yii::t('app', 'MixCart мне'),
                             ],
                             [
                                 'format' => 'raw',
                                 'attribute' => 'toFkeeper',
                                 'value' => 'toFkeeper',
-                                'label' => 'Я MixCart\'у',
+                                'label' => Yii::t('app', 'Я MixCart\'у'),
                             ],
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
                                     return $data['turnoverCut'] - $data['toFkeeper'];
                                 },
-                                'label' => 'Итого прибыль',
+                                'label' => Yii::t('app', 'Итого прибыль'),
                             ],
                             [
                                 'format' => 'raw',
                                 'value' => function($data) {
-                                    $result = '<a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i> Выставить счет</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i> Оплачено</small></a>';
+                                    $result = '<a href="#"><small class="label label-default"><i class="fa fa-print"></i></small></a><a href="#"><small class="label label-primary"><i class="fa fa-money"></i>'. Yii::t('app', 'Выставить счет') . '</small></a><a href="#"><small class="label label-success"><i class="fa fa-check-square-o"></i>'. Yii::t('app', 'Оплачено') . ' </small></a>';
                                     return $result;
                                 },
                                         'contentOptions' => ['class' => 'table-btns'],

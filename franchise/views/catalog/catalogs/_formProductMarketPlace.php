@@ -34,10 +34,10 @@ echo Select2::widget([
     'theme' => Select2::THEME_DEFAULT,
     'name'=>'catag-ids',
     'value'=>0,
-    'data' => array_merge([0 => "Выберите..."],
+    'data' => array_merge([0 => Yii::t('app', "Выберите...")],
             ArrayHelper::map(\common\models\MpCategory::find()->
                     where('parent IS NULL')->asArray()->all(), 'id', 'name')),
-    'options' => ['placeholder' => 'Выберите...', 'id' => 'catag-ids','style'=>'margin-top:10px'],
+    'options' => ['placeholder' => Yii::t('app', 'Выберите...'), 'id' => 'catag-ids','style'=>'margin-top:10px'],
     'hideSearch' => true,
     'pluginOptions' => [
         'allowClear' => false,

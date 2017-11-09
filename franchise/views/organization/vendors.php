@@ -74,8 +74,8 @@ $this->registerCss("
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i>  Ваши поставщики
-        <small>Подключенные Вами поставщики и информация о них</small>
+        <i class="fa fa-home"></i>  <?= Yii::t('app', 'Ваши поставщики') ?>
+        <small><?= Yii::t('app', 'Подключенные Вами поставщики и информация о них') ?></small>
     </h1>
     <?=
     ''
@@ -104,25 +104,25 @@ $this->registerCss("
             ?>
             <div class="row">
                 <div class="col-lg-3 col-md-3 col-sm-6">
-                    <?= Html::label('Поиск', null, ['style' => 'color:#555']) ?>
+                    <?= Html::label(Yii::t('app', 'Поиск'), null, ['style' => 'color:#555']) ?>
                     <div class="input-group  pull-left">
                         <span class="input-group-addon">
                             <i class="fa fa-search"></i>
                         </span>
-                        <?= Html::input('text', 'search', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style'=>'width:300px']) ?>
+                        <?= Html::input('text', 'search', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => Yii::t('app', 'Поиск'), 'id' => 'search', 'style'=>'width:300px']) ?>
                     </div>
                 </div>
 
                 <div class="col-lg-5 col-md-6 col-sm-6">
-                        <?= Html::label('Начальная дата / Конечная дата', null, ['style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('app', 'Начальная дата / Конечная дата'), null, ['style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
                         <?=
                         DatePicker::widget([
                             'model' => $searchModel,
                             'attribute' => 'date_from',
                             'attribute2' => 'date_to',
-                            'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                            'options' => ['placeholder' => Yii::t('app', 'Дата'), 'id' => 'dateFrom'],
+                            'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
                             'separator' => '-',
                             'type' => DatePicker::TYPE_RANGE,
                             'pluginOptions' => [
@@ -142,13 +142,13 @@ $this->registerCss("
                         'dataProvider' => $dataProvider,
                         'columns' => $exportColumns,
                         'fontAwesome' => true,
-                        'filename' => 'Поставщики - ' . date('Y-m-d'),
+                        'filename' => Yii::t('app', 'Поставщики - ') . date('Y-m-d'),
                         'encoding' => 'UTF-8',
                         'target' => ExportMenu::TARGET_SELF,
                         'showConfirmAlert' => false,
                         'showColumnSelector' => false,
                         'dropdownOptions' => [
-                            'label' => '<span class="text-label">Скачать список</span>',
+                            'label' => '<span class="text-label">' . Yii::t('app', 'Скачать список') . ' </span>',
                             'class' => ['btn btn-outline-default btn-sm'],
                             'style' => 'margin-right:10px;',
                         ],
@@ -229,7 +229,7 @@ $this->registerCss("
                                     }
                                     return $data['name'];
                                 },
-                                'label' => 'Имя поставщика',
+                                'label' => Yii::t('app', 'Имя поставщика'),
                             ],
                             [
                                 'format' => 'raw',
@@ -247,7 +247,7 @@ $this->registerCss("
                                     }
                                     return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                'label' => 'Кол-во ресторанов',
+                                'label' => Yii::t('app', 'Кол-во ресторанов'),
                             ],
                             [
                                 'format' => 'raw',
@@ -265,7 +265,7 @@ $this->registerCss("
                                     }
                                     return $data["orderCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                'label' => 'Кол-во заказов',
+                                'label' => Yii::t('app', 'Кол-во заказов'),
                             ],
                             [
                                 'format' => 'raw',
@@ -283,7 +283,7 @@ $this->registerCss("
                                     }
                                     return ($data["orderSum"] ? $data["orderSum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                'label' => 'Сумма заказов',
+                                'label' => Yii::t('app', 'Сумма заказов'),
                             ],
                             [
                                 'format' => 'raw',
@@ -292,17 +292,17 @@ $this->registerCss("
                                     $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
-                                'label' => 'Дата регистрации',
+                                'label' => Yii::t('app', 'Дата регистрации'),
                             ],
                             [
                                 'attribute' => 'contact_name',
                                 'value' => 'contact_name',
-                                'label' => 'Контакт',
+                                'label' => Yii::t('app', 'Контакт'),
                             ],
                             [
                                 'attribute' => 'phone',
                                 'value' => 'phone',
-                                'label' => 'Телефон',
+                                'label' => Yii::t('app', 'Телефон'),
                             ],
                             [
                                 'format' => 'raw',
@@ -316,7 +316,7 @@ $this->registerCss("
                                 'buttons' => [
                                     'delete' => function ($url, $data) {
                                         return Html::a(
-                                            '<span class="glyphicon glyphicon-trash text-red" title="Удалить"></span>',
+                                            '<span class="glyphicon glyphicon-trash text-red" title="' . Yii::t('app', 'Удалить') . ' "></span>',
                                             null, ['data-pjax'=>'0', 'class' => 'f-delete', 'url'=>Url::to(['organization/delete', 'id' => $data["franchisee_associate_id"]])]);
                                     },
                                 ],

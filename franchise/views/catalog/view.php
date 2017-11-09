@@ -56,7 +56,7 @@ $(document).on('change', '#upload', function () {
 );*/
 ?>
 <?php
-$this->title = 'Каталог №' . $id;
+$this->title = Yii::t('app', 'Каталог №') . $id;
 
 $this->registerCss('');
 ?>
@@ -72,27 +72,27 @@ Modal::end();
 $exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
 $exportColumns = [
     [
-        'label' => 'Артикул',
+        'label' => Yii::t('app', 'Артикул'),
         'value' => 'article',
     ],
     [
-        'label' => 'Наименование',
+        'label' => Yii::t('app', 'Наименование'),
         'value' => 'product',
     ],
     [
-        'label' => 'Кратность',
+        'label' => Yii::t('app', 'Кратность'),
         'value' => 'units',
     ],
     [
-        'label' => 'Цена',
+        'label' => Yii::t('app', 'Цена'),
         'value' => 'price',
     ],
     [
-        'label' => 'Единица измерения',
+        'label' => Yii::t('app', 'Единица измерения'),
         'value' => 'ed',
     ],
     [
-        'label' => 'Комментарий',
+        'label' => Yii::t('app', 'Комментарий'),
         'value' => function ($data) {
             return $data['note'] ? $data['note'] : '';
         },
@@ -103,19 +103,19 @@ $exportColumns = [
 $grid = [
     [
         'attribute' => 'article',
-        'label' => 'Артикул',
+        'label' => Yii::t('app', 'Артикул'),
         'value' => 'article',
         'contentOptions' => ['style' => 'vertical-align:middle;'],
     ],
     [
         'attribute' => 'product',
-        'label' => 'Наименование',
+        'label' => Yii::t('app', 'Наименование'),
         'value' => 'product',
         'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
     ],
     [
         'attribute' => 'units',
-        'label' => 'Кратность',
+        'label' => Yii::t('app', 'Кратность'),
         'value' => function ($data) {
             return empty($data['units']) ? '' : $data['units'];
         },
@@ -123,7 +123,7 @@ $grid = [
     ],
     [
         'attribute' => 'category_id',
-        'label' => 'Категория',
+        'label' => Yii::t('app', 'Категория'),
         'value' => function ($data) {
             $data['category_id'] == 0 ? $category_name = '' :
                             $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
@@ -133,13 +133,13 @@ $grid = [
             ],
             [
                 'attribute' => 'price',
-                'label' => 'Цена',
+                'label' => Yii::t('app', 'Цена'),
                 'value' => 'price',
                 'contentOptions' => ['style' => 'vertical-align:middle;'],
             ],
             [
                 'attribute' => 'ed',
-                'label' => 'Ед. измерения',
+                'label' => Yii::t('app', 'Ед. измерения'),
                 'value' => function ($data) {
                     return $data['ed'];
                 },
@@ -180,7 +180,7 @@ $grid = [
 ?> 
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Каталог № <?=$id?>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Каталог №') ?> <?=$id?>
         <small></small>
     </h1>
 </section>
@@ -188,7 +188,7 @@ $grid = [
 <?php if (Yii::$app->session->hasFlash('success')): ?>
     <div class="alert alert-danger alert-dismissable">
         <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-        <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+        <h4><i class="icon fa fa-check"></i><?= Yii::t('app', 'Ошибка') ?></h4>
         <?= Yii::$app->session->getFlash('success') ?>
     </div>
 <?php endif; ?>
@@ -207,7 +207,7 @@ $grid = [
                         'id' => 'add-product',
                         'clientOptions' => ['class' => 'pull-right'],
                         'toggleButton' => [
-                            'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
+                            'label' => '<i class="fa fa-plus-circle"></i> ' . Yii::t('app', 'Новый товар'),
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
@@ -221,7 +221,7 @@ $grid = [
                         'clientOptions' => false,
                         'size' => 'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('app', 'Загрузить каталог (XLS)') . '</span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
@@ -235,13 +235,13 @@ $grid = [
                         'dataProvider' => $dataProvider,
                         'columns' => $exportColumns,
                         'fontAwesome' => true,
-                        'filename' => 'Главный каталог - ' . date('Y-m-d'),
+                        'filename' => Yii::t('app', 'Главный каталог - ') . date('Y-m-d'),
                         'encoding' => 'UTF-8',
                         'target' => ExportMenu::TARGET_SELF,
                         'showConfirmAlert' => false,
                         'showColumnSelector' => false,
                         'dropdownOptions' => [
-                            'label' => '<span class="text-label">Скачать каталог</span>',
+                            'label' => '<span class="text-label">' . Yii::t('app', 'Скачать каталог') . '</span>',
                             'class' => ['btn btn-outline-default btn-sm'],
                             'style' => 'margin-right:10px;',
                         ],
@@ -290,7 +290,7 @@ $grid = [
                     ]);
                     ?>
                     </div>
-                    <a class="btn btn-outline-default btn-sm pull-right" href="/upload/template.xlsx" style="margin-right: 10px;;"><i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span></a>
+                    <a class="btn btn-outline-default btn-sm pull-right" href="/upload/template.xlsx" style="margin-right: 10px;;"><i class="fa fa-list-alt"></i> <span class="text-label"><?= Yii::t('app', 'Скачать шаблон (XLS)') ?></span></a>
                 </div>
             </div>
             <div class="row">
@@ -324,6 +324,10 @@ $grid = [
 <?php
 $catalogUrl = Url::to(['site/catalog', 'id' => $id]);
 $deleteProductUrl = Url::to(['site/ajax-delete-product']);
+$delProduct = Yii::t('app', 'Удалить этот продукт?');
+$message = Yii::t('app', 'Продукт будет удален из всех каталогов');
+$del = Yii::t('app', 'Удалить');
+$cancel = Yii::t('app', 'Отмена');
 
 $customJs = <<< JS
 var timer;
@@ -344,15 +348,15 @@ window.clearTimeout(timer);
 $(document).on("click",".del-product", function(e){
     var id = $(this).attr('data-id');
 	bootbox.confirm({
-            title: "Удалить этот продукт?",
-            message: "Продукт будет удален из всех каталогов", 
+            title:  '$delProduct',
+            message: "$message", 
             buttons: {
                 confirm: {
-                    label: 'Удалить',
+                    label: '$del',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$cancel',
                     className: 'btn-default'
                 }
             },

@@ -290,10 +290,10 @@ class CatalogController extends DefaultController
                 $catalog_id = Yii::$app->request->post('cat_id');
                 if($product_id && $catalog_id){
                     CatalogGoods::deleteAll(['base_goods_id' => $product_id, 'cat_id' => $catalog_id]);
-                    return (['success' => true, 'Удален']);
+                    return (['success' => true, Yii::t('app', 'Удален')]);
                     exit;
                 }
-                return (['success' => false, 'Ошибка']);
+                return (['success' => false, Yii::t('app', 'Ошибка')]);
             }
         }
     }
@@ -306,7 +306,7 @@ class CatalogController extends DefaultController
                 if (CatalogGoods::find()->where(['cat_id' => $cat_id])->exists()) {
                     return (['success' => true, 'cat_id' => $cat_id]);
                 } else {
-                    return (['success' => false, 'type' => 1, 'message' => 'Пустой каталог']);
+                    return (['success' => false, 'type' => 1, 'message' => Yii::t('app', 'Пустой каталог')]);
                     exit;
                 }
             }
@@ -497,7 +497,7 @@ class CatalogController extends DefaultController
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                            $text = Yii::t('app', 'Поставщик ') . $currentUser->organization->name . Yii::t('app', ' назначил для Вас каталог в системе f-keeper.ru');
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
@@ -511,7 +511,7 @@ class CatalogController extends DefaultController
                     $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
                     $relation_supp_rest->status = 0;
                     $relation_supp_rest->update();
-                    return (['success' => true, 'Не подписан']);
+                    return (['success' => true, Yii::t('app', 'Не подписан')]);
                     exit;
                 }
             }
@@ -577,13 +577,13 @@ class CatalogController extends DefaultController
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                 foreach ($rows as $row) {
                     if ($row->profile->phone && $row->profile->sms_allow) {
-                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
+                        $text = Yii::t('app', 'Поставщик ') . $currentUser->organization->name . Yii::t('app', ' назначил для Вас каталог в системе f-keeper.ru');
                         $target = $row->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target);
                     }
                 }
-                return (['success' => true, 'Подписан']);
+                return (['success' => true, Yii::t('app', 'Подписан')]);
                 exit;
             } else {
                 $rest_org_id = $id;
@@ -591,7 +591,7 @@ class CatalogController extends DefaultController
                 $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
                 $relation_supp_rest->status = 0;
                 $relation_supp_rest->update();
-                return (['success' => true, 'Не подписан']);
+                return (['success' => true, Yii::t('app', 'Не подписан')]);
                 exit;
             }
         }

@@ -43,7 +43,7 @@ foreach ($pr as $row) {
                         <?php if (empty($row->product_show_price)) { ?>
                             <h4 style="color: #dfdfdf">договорная цена</h4>
                         <?php } else { ?>
-                            <h4><?= floatval($row->product_price); ?> <small>руб.</small></h4>
+                            <h4><?= floatval($row->product_price); ?> <small><?= $row->product_currency ?></small></h4>
     <?php } ?>
                     </div>
 

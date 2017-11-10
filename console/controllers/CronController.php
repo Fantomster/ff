@@ -43,6 +43,7 @@ class CronController extends Controller {
                 $product_supp_id = $catalogBaseGoods->supp_org_id;
                 $product_supp_name = $catalogBaseGoods->vendor->name; 
                 $product_price = $catalogBaseGoods->price; 
+                $product_currency = $catalogBaseGoods->catalog->currency->symbol;
                 $product_category_id = $catalogBaseGoods->category->parent; 
                 $product_category_name = \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category->parent])->one()->name; 
                 $product_category_sub_id = $catalogBaseGoods->category->id; 
@@ -67,6 +68,7 @@ class CronController extends Controller {
                                 "product_supp_id"  => $product_supp_id,
                                 "product_supp_name"  => $product_supp_name,
                                 "product_price"  => $product_price,
+                                    "product_currency" => $product_currency,
                                 "product_category_id" => $product_category_id,
                                 "product_category_name" => $product_category_name,
                                 "product_category_sub_id" => $product_category_sub_id,

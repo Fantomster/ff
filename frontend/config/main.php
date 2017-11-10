@@ -13,6 +13,7 @@ return [
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-fk',
+            'enableCsrfCookie' => true,
         ],
         'session' => [
             // this is the name of the session cookie used for login on the frontend

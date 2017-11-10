@@ -97,7 +97,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
               <?php if(empty($product->mp_show_price)){ ?>
               <h2 style="color:#dfdfdf;padding-bottom:15px">договорная цена</h2>
               <?php } else {?>
-              <h2 style="padding-bottom:15px"><?=floatval($product->price); ?> <small>руб.</small></h2>
+              <h2 style="padding-bottom:15px"><?=floatval($product->price); ?> <small><?= $product->catalog->currency->symbol; ?></small></h2>
               <?php } ?>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">

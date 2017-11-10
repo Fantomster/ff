@@ -28,6 +28,7 @@ class Product extends ActiveRecord
             "product_supp_name",
             "product_image",
             "product_price",
+            "product_currency",
             "product_category_id",
             "product_category_sub_id",
             "product_category_name",

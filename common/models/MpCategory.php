@@ -46,7 +46,8 @@ class MpCategory extends \yii\db\ActiveRecord {
                 'slugAttribute' => 'slug',
                 'transliterator' => 'Russian-Latin/BGN; NFKD',
                 //Set this to true, if you want to update a slug when source attribute has been changed
-                'forceUpdate' => true
+                'forceUpdate' => true,
+                'ensureUnique' => true,
             ],
         ];
     }

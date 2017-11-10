@@ -107,6 +107,18 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         $records = RkWaybilldata::find()->select('rk_waybill_data.*, rk_product.denom as pdenom ')->andWhere(['waybill_id' => $waybill_id])->leftJoin('rk_product', 'rk_product.id = product_rid');
         
         $wmodel = RkWaybill::find()->andWhere('id= :id',[':id' => $waybill_id])->one();
+
+        // Используем определение браузера и платформы для лечения бага с клавиатурой Android с помощью USER_AGENT (YT SUP-3)
+
+            $userAgent = \xj\ua\UserAgent::model();
+            /* @var \xj\ua\UserAgent $userAgent */
+
+                $platform = $userAgent->platform;
+                $browser = $userAgent->browser;
+
+                 if (stristr($platform,'android') OR stristr($browser,'android')) {
+                    $isAndroid = true;
+                 } else $isAndroid = false;
         
         if(!$wmodel) {
             echo "Cant find wmodel in map controller";
@@ -124,11 +136,13 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
             return $this->renderPartial($vi, [
                         'dataProvider' => $dataProvider,
                         'wmodel' => $wmodel,
+                        'isAndroid' => $isAndroid,
             ]);
         } else {
             return $this->render($vi, [
                         'dataProvider' => $dataProvider,
                         'wmodel' => $wmodel,
+                        'isAndroid' => $isAndroid,
             ]);
         }
     }

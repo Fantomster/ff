@@ -67,7 +67,10 @@
                                                 'attribute'=>'status_id',
                                                 'label' => 'Статус',   
                                                 'value'=>function ($model) {
-                                                    return $model->status->denom;
+                                                            if (isset($model->status)) {
+                                                                return $model->status->denom;
+                                                            }
+
                                                          },    
                                                 ],                   
                                                 [

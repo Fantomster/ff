@@ -138,7 +138,9 @@ GridView::widget([
             'vAlign' => 'middle',
             'width' => '210px',
             'refreshGrid' => true,
+
             'editableOptions'=>[
+                'asPopover' => $isAndroid ? false : true,
                  'formOptions' => ['action' => ['edit']],
         'header'=>'Продукт R-keeper', 
         'size'=>'md',
@@ -206,7 +208,8 @@ GridView::widget([
                 'attribute'=>'koef',
                 'refreshGrid' => true,
                 'editableOptions'=>[
-                'header'=>':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
+                    'asPopover' => $isAndroid ? false : true,
+                    'header'=>':<br><strong>1 единица F-keeper равна:&nbsp; &nbsp;</srong>',
                 'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
                 'formOptions' => [
                               'action' => Url::toRoute('changekoef'),
@@ -217,6 +220,7 @@ GridView::widget([
                 'vAlign'=>'middle',
                 // 'width'=>'100px',
                 'format'=>['decimal',6],
+
                 'pageSummary'=>true
                 ],      
                 [
@@ -224,7 +228,8 @@ GridView::widget([
                 'attribute'=>'quant',
                 'refreshGrid' => true,
                 'editableOptions'=>[
-                'header'=>':<br><strong>Новое количество равно:&nbsp; &nbsp;</srong>',
+                    'asPopover' => $isAndroid ? false : true,
+                    'header'=>':<br><strong>Новое количество равно:&nbsp; &nbsp;</srong>',
                 'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
                 'formOptions' => [
                               'action' => Url::toRoute('changekoef'),
@@ -235,6 +240,7 @@ GridView::widget([
                 'vAlign'=>'middle',
                 // 'width'=>'100px',
                 'format'=>['decimal'],
+
                 'pageSummary'=>true
                 ],  
                 [
@@ -242,7 +248,8 @@ GridView::widget([
                 'attribute'=>'sum',
                 'refreshGrid' => true,
                 'editableOptions'=>[
-                'header'=>'<strong>Новая сумма равна:&nbsp; &nbsp;</srong>',
+                    'asPopover' => $isAndroid ? false : true,
+                    'header'=>'<strong>Новая сумма равна:&nbsp; &nbsp;</srong>',
                 'inputType'=>\kartik\editable\Editable::INPUT_TEXT,  
                 'formOptions' => [
                               'action' => Url::toRoute('changekoef'),
@@ -253,17 +260,19 @@ GridView::widget([
                 'vAlign'=>'middle',
                 // 'width'=>'100px',
                 'format'=>['decimal',2],
+
                 'pageSummary'=>true
                 ], 
                  [
                 'class'=>'kartik\grid\EditableColumn',
                 'attribute'=>'vat',
-                'label' => 'Ставка НДС',     
+                'label' => 'Ставка НДС',
                 'value' => function ($model) {
                          return $model->vat/100;
                 },
                 'refreshGrid' => true,
                 'editableOptions'=>[
+                    'asPopover' => $isAndroid ? false : true,
                 'header'=>'<strong>Новая ставка НДС равна:&nbsp; &nbsp;</srong>',
                 'inputType'=>\kartik\editable\Editable::INPUT_DROPDOWN_LIST, 
                 'data' => ['0' => '0', '1000' => '10', '1800' => '18'],    
@@ -275,6 +284,7 @@ GridView::widget([
                 'vAlign'=>'middle',
                 // 'width'=>'100px',
                 'format'=>['decimal'],
+
                 'pageSummary'=>true
                 ],       
                 

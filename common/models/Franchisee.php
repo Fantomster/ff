@@ -30,7 +30,8 @@ use common\models\Role;
  * @property string $fio_manager
  * @property string $phone_manager
  * @property integer $additional_number_manager
- *  
+ * @property integer $receiving_organization
+ *
  * @property FranchiseeAssociate[] $franchiseeAssociates
  * @property FranchiseeUser[] $franchiseeUsers
  * @property FracnchiseeType type
@@ -65,7 +66,7 @@ class Franchisee extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['type_id','additional_number_manager'], 'integer'],
+            [['type_id','additional_number_manager', 'receiving_organization'], 'integer'],
             [['type_id'], 'required'],
             [['info'], 'string'],
             [['created_at', 'updated_at', 'deleted'], 'safe'],

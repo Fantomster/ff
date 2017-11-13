@@ -8,6 +8,7 @@ use yii\console\Controller;
 use common\models\WhiteList;
 use common\models\CatalogBaseGoods;
 use common\models\Organization;
+
 //`php yii cron/count`
 class CronController extends Controller {
 
@@ -25,96 +26,99 @@ class CronController extends Controller {
         $latest = new \DateTime($latest);
         $randomInterval = rand(3, 15);
         $interval = $now->diff($latest, true)->i;
-        echo "latest:".Yii::$app->formatter->asTime($latest, "php:j M Y, H:i:s").";now:".Yii::$app->formatter->asTime($now, "php:j M Y, H:i:s").";diff:".$interval."\n";
+        echo "latest:" . Yii::$app->formatter->asTime($latest, "php:j M Y, H:i:s") . ";now:" . Yii::$app->formatter->asTime($now, "php:j M Y, H:i:s") . ";diff:" . $interval . "\n";
     }
-    
+
     //обновление одного продукта (крон запускается каждые 2 минуты)
     public function actionUpdateCollection() {
         $base = CatalogBaseGoods::find()
                 ->andWhere('category_id is not null')
-                ->andWhere(['in','es_status',[1,2]])
+                ->andWhere(['in', 'es_status', [1, 2]])
                 ->limit(500)
                 ->all();
-        
-        foreach($base as $catalogBaseGoods){
-                $product_id = $catalogBaseGoods->id;
-                $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : ''; 
-                $product_name = $catalogBaseGoods->product; 
-                $product_supp_id = $catalogBaseGoods->supp_org_id;
-                $product_supp_name = $catalogBaseGoods->vendor->name; 
-                $product_price = $catalogBaseGoods->price; 
-                $product_currency = $catalogBaseGoods->catalog->currency->symbol;
-                $product_category_id = $catalogBaseGoods->category->parent; 
-                $product_category_name = \common\models\MpCategory::find()->where(['id'=>$catalogBaseGoods->category->parent])->one()->name; 
-                $product_category_sub_id = $catalogBaseGoods->category->id; 
-                $product_category_sub_name = $catalogBaseGoods->category->name;
-                $product_show_price = $catalogBaseGoods->mp_show_price;
-                $product_created_at = $catalogBaseGoods->created_at;
-                $product_partnership = $catalogBaseGoods->vendor->partnership; 
-                
-                $product_rating = $catalogBaseGoods->vendor->rating;
-                if(!empty($product_image)){$product_rating = $product_rating + 5;}
-                if(!empty($product_show_price)){$product_rating = $product_rating + 5;}
-               
-                if($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted == 0 && $catalogBaseGoods->vendor->white_list == 1){
 
-                        if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
+        foreach ($base as $catalogBaseGoods) {
+            $product_id = $catalogBaseGoods->id;
+            $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : '';
+            $product_name = $catalogBaseGoods->product;
+            $product_supp_id = $catalogBaseGoods->supp_org_id;
+            $product_supp_name = $catalogBaseGoods->vendor->name;
+            $product_price = $catalogBaseGoods->price;
+            $product_currency = $catalogBaseGoods->catalog->currency->symbol;
+            $product_category_id = $catalogBaseGoods->category->parent;
+            $product_category_name = \common\models\MpCategory::find()->where(['id' => $catalogBaseGoods->category->parent])->one()->name;
+            $product_category_sub_id = $catalogBaseGoods->category->id;
+            $product_category_sub_name = $catalogBaseGoods->category->name;
+            $product_show_price = $catalogBaseGoods->mp_show_price;
+            $product_created_at = $catalogBaseGoods->created_at;
+            $product_partnership = $catalogBaseGoods->vendor->partnership;
 
-                                $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-                                $es_product->attributes = [
-                                "product_id" => $product_id,
-                                "product_image" => $product_image,
-                                "product_name"  => $product_name,
-                                "product_supp_id"  => $product_supp_id,
-                                "product_supp_name"  => $product_supp_name,
-                                "product_price"  => $product_price,
-                                    "product_currency" => $product_currency,
-                                "product_category_id" => $product_category_id,
-                                "product_category_name" => $product_category_name,
-                                "product_category_sub_id" => $product_category_sub_id,
-                                "product_category_sub_name" => $product_category_sub_name,
-                                "product_show_price" => $product_show_price,
-                                "product_created_at"  => $product_created_at,
-                                "product_rating"  => $product_rating,
-                                "product_partnership"  => $product_partnership
-                                        ];
-                                $es_product->save();
+            $product_rating = $catalogBaseGoods->vendor->rating;
+            if (!empty($product_image)) {
+                $product_rating = $product_rating + 5;
+            }
+            if (!empty($product_show_price)) {
+                $product_rating = $product_rating + 5;
+            }
 
-                        }else{
-                                $es_product = new \common\models\ES\Product();
-                                $es_product->attributes = [
-                                "product_id" => $product_id,
-                                "product_image" => $product_image,
-                                "product_name"  => $product_name,
-                                "product_supp_id"  => $product_supp_id,
-                                "product_supp_name"  => $product_supp_name,
-                                "product_price"  => $product_price,
-                                "product_category_id" => $product_category_id,
-                                "product_category_name" => $product_category_name,
-                                "product_category_sub_id" => $product_category_sub_id,
-                                "product_category_sub_name" => $product_category_sub_name,
-                                "product_show_price" => $product_show_price,
-                                "product_created_at"  => $product_created_at,
-                                "product_rating"  => $product_rating,
-                                "product_partnership"  => $product_partnership
-                                        ];
-                                $es_product->save();
+            if ($catalogBaseGoods->es_status == 1 && $catalogBaseGoods->market_place == 1 && $catalogBaseGoods->deleted == 0 && $catalogBaseGoods->vendor->white_list == 1) {
 
-                        }
-                }else{
-                    if(\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0 ){
-                        $es_product = \common\models\ES\Product::find()->where(['product_id'=>$product_id])->one();
-                        $es_product->delete();
-                    } 
+                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0) {
+
+                    $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                    $es_product->attributes = [
+                        "product_id" => $product_id,
+                        "product_image" => $product_image,
+                        "product_name" => $product_name,
+                        "product_supp_id" => $product_supp_id,
+                        "product_supp_name" => $product_supp_name,
+                        "product_price" => $product_price,
+                        "product_currency" => $product_currency,
+                        "product_category_id" => $product_category_id,
+                        "product_category_name" => $product_category_name,
+                        "product_category_sub_id" => $product_category_sub_id,
+                        "product_category_sub_name" => $product_category_sub_name,
+                        "product_show_price" => $product_show_price,
+                        "product_created_at" => $product_created_at,
+                        "product_rating" => $product_rating,
+                        "product_partnership" => $product_partnership
+                    ];
+                    $es_product->save();
+                } else {
+                    $es_product = new \common\models\ES\Product();
+                    $es_product->attributes = [
+                        "product_id" => $product_id,
+                        "product_image" => $product_image,
+                        "product_name" => $product_name,
+                        "product_supp_id" => $product_supp_id,
+                        "product_supp_name" => $product_supp_name,
+                        "product_price" => $product_price,
+                        "product_currency" => $product_currency,
+                        "product_category_id" => $product_category_id,
+                        "product_category_name" => $product_category_name,
+                        "product_category_sub_id" => $product_category_sub_id,
+                        "product_category_sub_name" => $product_category_sub_name,
+                        "product_show_price" => $product_show_price,
+                        "product_created_at" => $product_created_at,
+                        "product_rating" => $product_rating,
+                        "product_partnership" => $product_partnership
+                    ];
+                    $es_product->save();
                 }
-            
-            Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
+            } else {
+                if (\common\models\ES\Product::find()->where(['product_id' => $product_id])->count() > 0) {
+                    $es_product = \common\models\ES\Product::find()->where(['product_id' => $product_id])->one();
+                    $es_product->delete();
+                }
+            }
+
+            Yii::$app->db->createCommand("update " . CatalogBaseGoods::tableName() . " set "
                     . "es_status = 0, "
                     . "rating = " . $product_rating . " "
                     . "where id = " . $product_id)->execute();
         }
-        
     }
+
     public function actionUpdateCategory() {
         $model = \common\models\MpCategory::find()->where('parent is not null')->all();
         foreach ($model as $name) {
@@ -139,132 +143,142 @@ class CronController extends Controller {
                 "category_sub_id" => $category_sub_id,
                 "category_name" => $category_name
             ];
-            $category->save();    
+            $category->save();
 //            }
         }
     }
-    
+
     public function actionUpdateSuppliers() {
         $suppliers = Organization::find()
                 ->where([
                     'type_id' => Organization::TYPE_SUPPLIER,
                     'white_list' => Organization::WHITE_LIST_ON])
-                ->andWhere(['in','es_status',[
-                    Organization::ES_UPDATED,
-                    Organization::ES_DELETED
-                    ]])
+                ->andWhere(['in', 'es_status', [
+                        Organization::ES_UPDATED,
+                        Organization::ES_DELETED
+            ]])
                 ->andWhere('locality is not null and locality <> \'undefined\'')
                 ->limit(20)
                 ->all();
-        foreach($suppliers as $supplier){
+        foreach ($suppliers as $supplier) {
             $rating = 0;
-            if($supplier->partnership){$rating = $rating + 16;}
-            if($supplier->picture){$rating = $rating + 5;} 
-            if($supplier->contact_name){$rating = $rating + 2;} 
-            if($supplier->phone){$rating = $rating + 2;} 
-            if($supplier->email){$rating = $rating + 2;} 
-            if($supplier->address){$rating = $rating + 2;} 
-            if($supplier->about){$rating = $rating + 2;}
-            
-            if($supplier->es_status == Organization::ES_UPDATED){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() == 0){
+            if ($supplier->partnership) {
+                $rating = $rating + 16;
+            }
+            if ($supplier->picture) {
+                $rating = $rating + 5;
+            }
+            if ($supplier->contact_name) {
+                $rating = $rating + 2;
+            }
+            if ($supplier->phone) {
+                $rating = $rating + 2;
+            }
+            if ($supplier->email) {
+                $rating = $rating + 2;
+            }
+            if ($supplier->address) {
+                $rating = $rating + 2;
+            }
+            if ($supplier->about) {
+                $rating = $rating + 2;
+            }
+
+            if ($supplier->es_status == Organization::ES_UPDATED) {
+                if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() == 0) {
                     $es_supplier = new \common\models\ES\Supplier();
                     $es_supplier->attributes = [
-                           "supplier_id" => $supplier->id,
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
-                           "supplier_rating"  => $rating,
-                           "supplier_partnership"  => $supplier->partnership
+                        "supplier_id" => $supplier->id,
+                        "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                        "supplier_name" => $supplier->name,
+                        "supplier_rating" => $rating,
+                        "supplier_partnership" => $supplier->partnership
                     ];
                     $es_supplier->save();
                 }
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
-                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+                if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() > 0) {
+                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->one();
                     $es_supplier->attributes = [
-                           "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
-                           "supplier_name"  => $supplier->name,
-                           "supplier_rating"  => $rating,
-                           "supplier_partnership"  => $supplier->partnership
+                        "supplier_image" => !empty($supplier->picture) ? $supplier->pictureUrl : '',
+                        "supplier_name" => $supplier->name,
+                        "supplier_rating" => $rating,
+                        "supplier_partnership" => $supplier->partnership
                     ];
-                    $es_supplier->save();  
+                    $es_supplier->save();
                 }
             }
-            if($supplier->es_status == Organization::ES_DELETED){
-                if(\common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->count() > 0){
-                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id'=>$supplier->id])->one();
+            if ($supplier->es_status == Organization::ES_DELETED) {
+                if (\common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->count() > 0) {
+                    $es_supplier = \common\models\ES\Supplier::find()->where(['supplier_id' => $supplier->id])->one();
                     $es_supplier->delete();
                 }
-                Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
-                    . "es_status = ".Organization::ES_DELETED." "
-                    . "where supp_org_id = " . $supplier->id)->execute();
-                
+                Yii::$app->db->createCommand("update " . CatalogBaseGoods::tableName() . " set "
+                        . "es_status = " . Organization::ES_DELETED . " "
+                        . "where supp_org_id = " . $supplier->id)->execute();
             }
             Yii::$app->db->createCommand("update organization set "
-                    . "es_status = ".Organization::ES_INACTIVE.","
-                    . "rating = ".$rating." "
+                    . "es_status = " . Organization::ES_INACTIVE . ","
+                    . "rating = " . $rating . " "
                     . "where id = " . $supplier->id)->execute();
-            if($supplier->white_list == 1){
-            Yii::$app->db->createCommand("update ".CatalogBaseGoods::tableName()." set "
-                    . "es_status = ".CatalogBaseGoods::ES_UPDATE." "
-                    . "where supp_org_id = " . $supplier->id . " and "
-                    . "es_status <> " . CatalogBaseGoods::ES_DELETED)->execute();
+            if ($supplier->white_list == 1) {
+                Yii::$app->db->createCommand("update " . CatalogBaseGoods::tableName() . " set "
+                        . "es_status = " . CatalogBaseGoods::ES_UPDATE . " "
+                        . "where supp_org_id = " . $supplier->id . " and "
+                        . "es_status <> " . CatalogBaseGoods::ES_DELETED)->execute();
             }
         }
-       
     }
-    
+
     public function actionUpdateOrganizationRating() {
         
-        
     }
-    
+
     public function actionUpdateProductRating() {
         
-        
     }
-    
+
     public function actionMappingOrganizationFromGoogleApiMaps() {
         $model = Organization::find()->where('lng is not null and lat is not null and country is not null and administrative_area_level_1 is null')->limit(500)->all();
-        foreach($model as $s){
-            $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key='.Yii::$app->params['google-api']['key-id'].'&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
+        foreach ($model as $s) {
+            $address_url = 'https://maps.googleapis.com/maps/api/geocode/json?key=' . Yii::$app->params['google-api']['key-id'] . '&latlng=' . $s->lat . ',' . $s->lng . '&language=ru&sensor=false';
             $address_json = json_decode(file_get_contents($address_url));
-            if(!empty($address_json->results[0]->address_components)){
-            $address_data = $address_json->results[0]->address_components;
-            $location = array();
-            $location['locality'] = '';
-            $location['admin_1'] = '';
-            $location['country'] = '';
-            foreach ($address_data as $component) {
-              switch ($component->types) {
-                case in_array('locality', $component->types):
-                  $location['locality'] = $component->long_name;
-                  break;
-                case in_array('administrative_area_level_1', $component->types):
-                  $location['admin_1'] = $component->long_name;
-                  break;
-                case in_array('country', $component->types):
-                  $location['country'] = $component->long_name;
-                  break;
-              }
+            if (!empty($address_json->results[0]->address_components)) {
+                $address_data = $address_json->results[0]->address_components;
+                $location = array();
+                $location['locality'] = '';
+                $location['admin_1'] = '';
+                $location['country'] = '';
+                foreach ($address_data as $component) {
+                    switch ($component->types) {
+                        case in_array('locality', $component->types):
+                            $location['locality'] = $component->long_name;
+                            break;
+                        case in_array('administrative_area_level_1', $component->types):
+                            $location['admin_1'] = $component->long_name;
+                            break;
+                        case in_array('country', $component->types):
+                            $location['country'] = $component->long_name;
+                            break;
+                    }
+                }
 
-            }
-        
-        $country = $location['country'];
-        $locality = $location['locality'];
-        $administrative_area_level_1 = $location['admin_1'];
-        
-        $organization = Organization::findOne($s->id);
-        $organization->administrative_area_level_1 = $administrative_area_level_1;
-        $organization->save();
+                $country = $location['country'];
+                $locality = $location['locality'];
+                $administrative_area_level_1 = $location['admin_1'];
+
+                $organization = Organization::findOne($s->id);
+                $organization->administrative_area_level_1 = $administrative_area_level_1;
+                $organization->save();
             }
         }
     }
-    
+
     public function actionSendMailNewRequests() {
         //
     }
-    
+
     public function actionUpdateBlacklist() {
         Organization::updateAll(["blacklisted" => true], "blacklisted = 0 AND (name LIKE '%test%' OR name LIKE '%тест%')");
     }
+
 }

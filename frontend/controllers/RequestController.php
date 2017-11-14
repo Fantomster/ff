@@ -242,8 +242,8 @@ class RequestController extends DefaultController {
                 if($row->profile->phone && $row->profile->sms_allow){
                     $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе';
                     $target = $row->profile->phone;
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target); 
+                    
+                    Yii::$app->sms->send($text, $target); 
                 }
             }
         }else{
@@ -265,8 +265,8 @@ class RequestController extends DefaultController {
                 if($vendor->profile->phone && $vendor->profile->sms_allow){
                     $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе mixcart.ru';
                     $target = $vendor->profile->phone;
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target); 
+                    
+                    Yii::$app->sms->send($text, $target); 
                 }
                 if($vendor->email){
                 $mailer = Yii::$app->mailer; 
@@ -323,8 +323,8 @@ class RequestController extends DefaultController {
                     if($user->profile->phone && $user->profile->sms_allow){
                         $text = $client->organization->name . ' хочет работать с Вами в системе';
                         $target = $user->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target); 
+                        
+                        Yii::$app->sms->send($text, $target); 
                     }
                     //$this->sendMail("invite-supplier", $request, $row);
                     if(!empty($user->email)){
@@ -377,8 +377,8 @@ class RequestController extends DefaultController {
             if($client->profile->phone && $client->profile->sms_allow){
                         $text = "Новый отклик по Вашей заявке №" . $request->id . " от поставщика " . $vendor->organization->name;
                         $target = $client->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target); 
+                        
+                        Yii::$app->sms->send($text, $target); 
             }
             if($client->email){
             $mailer = Yii::$app->mailer; 

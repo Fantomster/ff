@@ -499,8 +499,8 @@ class CatalogController extends DefaultController
                         if ($row->profile->phone && $row->profile->sms_allow) {
                             $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
                             $target = $row->profile->phone;
-                            $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target);
+                            
+                            Yii::$app->sms->send($text, $target);
                         }
                     }
                     return (['success' => true, 'Подписан']);
@@ -579,8 +579,8 @@ class CatalogController extends DefaultController
                     if ($row->profile->phone && $row->profile->sms_allow) {
                         $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе f-keeper.ru';
                         $target = $row->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target);
+                        
+                        Yii::$app->sms->send($text, $target);
                     }
                 }
                 return (['success' => true, 'Подписан']);

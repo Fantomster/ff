@@ -139,8 +139,8 @@ class RelationSuppRestController extends ActiveController {
                     if($user->profile->phone && $user->profile->sms_allow){
                         $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
                         $target = $user->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target); 
+                        
+                        Yii::$app->sms->send($text, $target); 
                     }
                     //$this->sendMail("invite-supplier", $request, $row);
                     if(!empty($user->email)){

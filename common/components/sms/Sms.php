@@ -96,4 +96,16 @@ class Sms extends \yii\base\Component
             return false;
         }
     }
+
+    /**
+     * Получить баланс на аккаунте
+     */
+    public function getBalance()
+    {
+        try {
+            return $this->sender->getBalance();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
 }

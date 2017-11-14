@@ -20,6 +20,11 @@ $('#loader-show').css('height',$(window).height());
 $(window).on('resize',function() {
     $('#loader-show').css('height',$(window).height());
 });
+
+$.post('/sms/ajax-balance',function(data){
+    $('#sms-info').html(data);
+});
+
 JS;
 $this->registerJs($customJs, yii\web\View::POS_READY);
 ?>
@@ -178,6 +183,7 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
             ?>
 
             <div class="container">
+                <span id="sms-info"></span>
                 <?=
                 Breadcrumbs::widget([
                     'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],

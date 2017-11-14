@@ -40,6 +40,11 @@ abstract class AbstractProvider
     public abstract function checkStatus($sms_id);
 
     /**
+     * Проверка баланса
+     */
+    public abstract function getBalance();
+
+    /**
      * Установка свойств провайдера
      * @param $name
      * @param $value

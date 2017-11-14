@@ -126,7 +126,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         $dataProvider = new ActiveDataProvider(['query' => $records,
-            'sort' => false,
+            'sort' => ['defaultOrder' => ['munit_rid' => SORT_ASC]],
         ]);
         
         $lic = $this->checkLic();       

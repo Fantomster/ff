@@ -47,7 +47,7 @@ class RkWaybill extends \yii\db\ActiveRecord {
      */
     public function rules() {
         return [
-            [['order_id', 'doc_date', 'corr_rid', 'note', 'text_code', 'num_code'], 'required'],
+            [['order_id', 'doc_date', 'corr_rid'], 'required'],
             [['corr_rid', 'store_rid', 'status_id'], 'integer'],
                 //     [['comment'], 'string', 'max' => 255],
             [['store_rid', 'org','vat_included'],'safe']
@@ -110,6 +110,12 @@ class RkWaybill extends \yii\db\ActiveRecord {
             } else {
             $this->doc_date = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd');    
             }
+
+            if (empty($this->text_code))
+                $this->text_code = 'mixcart';
+
+            if (empty($this->num_code))
+                $this->num_code = $this->order_id;
             
             return true;
         }

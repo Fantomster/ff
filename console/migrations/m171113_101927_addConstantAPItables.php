@@ -35,6 +35,8 @@ class m171113_101927_addConstantAPItables extends Migration
                 'denom'=> $this->string(255)->null()->defaultValue(null),
                 'def_value'=> $this->string(255)->null()->defaultValue(null),
                 'comment'=> $this->string(255)->null()->defaultValue(null),
+                'type'=> $this->integer(11)->null()->defaultValue(null),
+
             ],$tableOptions
         );
         $this->createTable(
@@ -51,15 +53,14 @@ class m171113_101927_addConstantAPItables extends Migration
 
         $this->addForeignKey('{{%fk_rk_const}}', '{{%rk_pconst}}', 'const_id', '{{%rk_dicconst}}', 'id');
 
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'taxVat', 'def_value' =>'1800', 'comment' => 'Ставка НДС по умолчанию при выгрузке накладных']);
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'defStore', 'def_value' =>'0', 'comment' => 'Склад, на который по умолчанию выгружаются приходы']);
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAutoExport', 'def_value' =>'0', 'comment' => 'Использование автоматической выгрузки накладных']);
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAutoNumber', 'def_value' =>'0', 'comment' => 'Использование автоматической нумерации накладных']);
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'moveZipAfter', 'def_value' =>'0', 'comment' => 'Через сколько дней отправлять накладную в архив']);
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'doBackSync', 'def_value' =>'0', 'comment' => 'Выполнять автоматическую обратную синхронизацию Заказов']);
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAcceptedDocs', 'def_value' =>'0', 'comment' => 'Выгружать накладные в SH с последующим проведением']);
-        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAgentGroup', 'def_value' =>'0', 'comment' => 'Использовать отдельную группу при выгрузке контрагентов']);
-
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'taxVat', 'def_value' =>'1800', 'comment' => 'Ставка НДС по умолчанию при выгрузке накладных','type'=>1]);
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'defStore', 'def_value' =>'0', 'comment' => 'Склад, на который по умолчанию выгружаются приходы','type'=>2]);
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAutoExport', 'def_value' =>'0', 'comment' => 'Использование автоматической выгрузки накладных','type'=>1]);
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAutoNumber', 'def_value' =>'0', 'comment' => 'Использование автоматической нумерации накладных','type'=>1]);
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'moveZipAfter', 'def_value' =>'0', 'comment' => 'Через сколько дней отправлять накладную в архив','type'=>2]);
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'doBackSync', 'def_value' =>'0', 'comment' => 'Выполнять автоматическую обратную синхронизацию Заказов','type'=>1]);
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAcceptedDocs', 'def_value' =>'0', 'comment' => 'Выгружать накладные в SH с последующим проведением','type'=>1]);
+        $this->insert('{{%rk_dicconst}}',[ 'denom' => 'useAgentGroup', 'def_value' =>'0', 'comment' => 'Использовать отдельную группу при выгрузке контрагентов','type'=>1]);
 
 
     }

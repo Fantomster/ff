@@ -485,7 +485,6 @@ class OrderController extends DefaultController {
 
         $searchModel = new \common\models\search\FavoriteSearch();
         $dataProvider = $searchModel->search($params, $client->id);
-        $dataProvider->pagination = ['pageSize' => 10];
 
         return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }

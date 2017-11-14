@@ -571,8 +571,7 @@ class ClientController extends DefaultController {
                         if (!empty($profile->phone)) {
                             $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему';
                             $target = $profile->phone;
-                            $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target);
+                            Yii::$app->sms->send($text, $target);
                         }
                         $transaction->commit();
                         if ($check['eventType'] == 5) {
@@ -764,8 +763,7 @@ class ClientController extends DefaultController {
                         if (!empty($profile->phone)) {
                             $text = 'Ресторан ' . $currentUser->organization->name . ' приглашает Вас в систему';
                             $target = $profile->phone;
-                            $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target);
+                            Yii::$app->sms->send($text, $target);
                         }
                         $transaction->commit();
                         if ($check['eventType'] == 5) {
@@ -861,8 +859,7 @@ class ClientController extends DefaultController {
                         if ($row->profile->phone && $row->profile->sms_allow) {
                             $text = 'Ресторан ' . $currentUser->organization->name . ' хочет работать с Вами в системе';
                             $target = $row->profile->phone;
-                            $sms = new \common\components\QTSMS();
-                            $sms->post_message($text, $target);
+                            Yii::$app->sms->send($text, $target);
                         }
                         $email = $row->email;
                         $subject = "Ресторан " . $currentOrganization->name . " приглашает вас в систему";
@@ -952,8 +949,7 @@ class ClientController extends DefaultController {
                 if ($recipient->profile->phone && $recipient->profile->sms_allow) {
                     $text = "Повторное приглашение в систему от " . $currentUser->organization->name;
                     $target = $recipient->profile->phone;
-                    $sms = new \common\components\QTSMS();
-                    $sms->post_message($text, $target);
+                    Yii::$app->sms->send($text, $target);
                 }
             }
         }

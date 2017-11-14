@@ -214,8 +214,7 @@ class OrderContentController extends ActiveController {
                     if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target);
+                        Yii::$app->sms->send($text, $target);
                     }
                 }
                 $order->calculateTotalPrice();
@@ -233,8 +232,7 @@ class OrderContentController extends ActiveController {
                     if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
                         $text = $subject;
                         $target = $recipient->profile->phone;
-                        $sms = new \common\components\QTSMS();
-                        $sms->post_message($text, $target);
+                        Yii::$app->sms->send($text, $target);
                     }
                 }
             }
@@ -354,8 +352,7 @@ class OrderContentController extends ActiveController {
             if ($profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
                 $target = $profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -392,8 +389,7 @@ class OrderContentController extends ActiveController {
             if ($profile->phone && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
                 $text = $subject;
                 $target = $profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
            }
         }
     }

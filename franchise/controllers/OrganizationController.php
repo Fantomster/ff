@@ -58,7 +58,7 @@ class OrganizationController extends DefaultController {
                     ],
                 ],
             /* 'denyCallback' => function($rule, $action) {
-              throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+              throw new HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
               } */
             ],
             'verbs' => [
@@ -190,7 +190,7 @@ class OrganizationController extends DefaultController {
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->one();
         if (empty($client)) {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
         }
         if (empty($client->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
@@ -378,7 +378,7 @@ class OrganizationController extends DefaultController {
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
         if (empty($vendor)) {
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
         }
         if (empty($vendor->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();

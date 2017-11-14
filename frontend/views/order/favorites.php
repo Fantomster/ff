@@ -182,22 +182,22 @@ $this->registerJs('
                         'format' => 'raw',
                         'attribute' => 'baseProduct.product',
                         'value' => function($data) {
-                            return "<div class='guid_block_create_title'><p>" . $data->product . "</p></div>"
-                                    . "<div class='guid_block_create_counts'><p>" . $data->vendor->name . "</p></div>";
+                            return "<div class='guid_block_create_title'><p>" . $data["product"] . "</p></div>"
+                                    . "<div class='guid_block_create_counts'><p>" . $data["name"] . "</p></div>";
                         },
                         'contentOptions' => ['style' => 'width: 40%;'],
                     ],
                     ['format' => 'raw',
                         'attribute' => 'price',
                         'value' => function($data) {
-                            return $data->formatPrice() . '/' . $data->ed;
+                            return $data["price"] . ' ' . $data["symbol"] . '/' . $data["ed"];
                         },
                         'contentOptions' => ['style' => 'width: 20%;'],
                     ],
                     [
                         'attribute' => 'quantity',
                         'content' => function($data) {
-                            $units = $data->units;
+                            $units = $data["units"];
                             return TouchSpin::widget([
                                         'name' => '',
                                         'pluginOptions' => [
@@ -223,11 +223,11 @@ $this->registerJs('
                             return Html::button('<i class="fa fa-comment"> <span class="circe_font"> Комментарий</span></i>', [
                                         'class' => 'add-note btn btn-md btn-gray pull-right circe_font',
                                         'data' => [
-                                            'id' => $data->id,
-                                            'url' => Url::to(['order/ajax-set-note', 'product_id' => $data->id]),
+                                            'id' => $data["cbg_id"],
+                                            'url' => Url::to(['order/ajax-set-note', 'product_id' => $data["cbg_id"]]),
                                             'toggle' => "tooltip",
                                             'placement' => "bottom",
-                                            'original-title' => $data->getClientNote($client->id),
+                                            'original-title' => $data["note"],
                                         ],
                             ]);
                         },
@@ -238,8 +238,8 @@ $this->registerJs('
                         'value' => function ($data) {
                             return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font"> В корзину</span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right circe_font',
-                                        'data-id' => $data->id,
-                                        'data-cat' => $data->cat_id,
+                                        'data-id' => $data["cbg_id"],
+                                        'data-cat' => $data["cat_id"],
                                         'title' => 'Добавить в корзину',
                             ]);
                         },

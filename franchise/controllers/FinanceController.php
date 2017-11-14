@@ -41,7 +41,7 @@ class FinanceController extends DefaultController {
                     ],
                 ],
             /* 'denyCallback' => function($rule, $action) {
-              throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+              throw new HttpException(404 ,Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
               } */
             ],
             'verbs' => [

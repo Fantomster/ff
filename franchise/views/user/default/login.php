@@ -30,11 +30,11 @@ $this->title = Yii::t('user', 'Login');
                 <?=
                         $form->field($model, 'password')
                         ->label(false)
-                        ->passwordInput(['class' => 'form-control', 'placeholder' => 'Пароль'])
+                        ->passwordInput(['class' => 'form-control', 'placeholder' => Yii::t('app', 'Пароль')])
                 ?>
             </div>
             <?=
-            Html::a('Войти в личный кабинет', '#', [
+            Html::a(Yii::t('app', 'Войти в личный кабинет'), '#', [
                 'data' => [
                     'method' => 'post',
                 ],
@@ -43,7 +43,7 @@ $this->title = Yii::t('user', 'Login');
             ?>
             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1" />
             <div class="regist">
-                <?= Html::a("Восcтановить пароль", ["/user/forgot"], ['class' => 'small-login']) ?>
+                <?= Html::a(Yii::t('app', "Восcтановить пароль"), ["/user/forgot"], ['class' => 'small-login']) ?>
             </div>
             <?php ActiveForm::end(); ?>
         </div>

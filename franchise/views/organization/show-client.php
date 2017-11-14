@@ -68,7 +68,7 @@ $this->registerCss("
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> Ресторан <?= $organization->name ?>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'Ресторан') ?> <?= $organization->name ?>
     </h1>
 </section>
 <section class="content">
@@ -76,12 +76,12 @@ $this->registerCss("
     <div class="box box-info order-history">
         <div class="box-body">
             <ul class="nav nav-tabs">
-                <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">Ресторан</a></li>
+                <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true"><?= Yii::t('app', 'Ресторан') ?></a></li>
                 <?php if($showButton): ?>
-                <li class=""><a href="#tab_2" data-toggle="tab" aria-expanded="false">Реквизиты</a></li>
-                <li class=""><a href="#tab_3" data-toggle="tab" aria-expanded="false">Список поставщиков ресторана</a> </li>
+                <li class=""><a href="#tab_2" data-toggle="tab" aria-expanded="false"><?= Yii::t('app', 'Реквизиты') ?></a></li>
+                <li class=""><a href="#tab_3" data-toggle="tab" aria-expanded="false"><?= Yii::t('app', 'Список поставщиков ресторана') ?></a> </li>
                 <?php endif; ?>
-                <li class=""><a href="#tab_4" data-toggle="tab" aria-expanded="false">Список сотрудников ресторана</a></li>
+                <li class=""><a href="#tab_4" data-toggle="tab" aria-expanded="false"><?= Yii::t('app', 'Список сотрудников ресторана') ?></a></li>
             </ul>
             <div class="modal-content tab-content" style="box-shadow: 0 2px 3px rgba(0,0,0,0.125);">
                 <div class="modal-body tab-pane active" id="tab_1">
@@ -93,49 +93,49 @@ $this->registerCss("
                             <img style="max-width: 100%;" src="<?= $organization->pictureUrl ?>">
                             <?php if($showButton): ?>
                             <div class="btn-edite">
-                                <?= Html::a('Аналитика', ['analytics/client-stats', 'id' => $organization->id], ['class' => "btn btn-strip-green btn-block"]) ?>
+                                <?= Html::a(Yii::t('app', 'Аналитика'), ['analytics/client-stats', 'id' => $organization->id], ['class' => "btn btn-strip-green btn-block"]) ?>
                             </div>
                             <?php endif; ?>
                         </div>
                         <div class="col-md-8">
                             <div class="edite-place">
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Название ресторана:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'Название ресторана:') ?></label>
                                     <p><?= $organization->name ?></p>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Название юр. лица:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'Название юр. лица:') ?></label>
                                     <p><?= $organization->legal_entity ?></p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Город:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'Город:') ?></label>
                                     <p><?= $organization->city ?></p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Адрес:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'Адрес:') ?></label>
                                     <p><?= $organization->address ?></p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Краткая информация:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'Краткая информация:') ?></label>
                                     <p><?= $organization->about ?></p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">ФИО контактного лица:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'ФИО контактного лица:') ?></label>
                                     <p><?= $organization->contact_name ?></p>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">E-mail контактного лица:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'E-mail контактного лица:') ?></label>
                                     <p><?= $organization->email ?></p>
                                 </div>
                                 <div class="form-group">
-                                    <label for="exampleInputEmail1">Телефон контактного лица:</label>
+                                    <label for="exampleInputEmail1"><?= Yii::t('app', 'Телефон контактного лица:') ?></label>
                                     <p><?= $organization->phone ?></p>
                                 </div>
                                 <?php if(isset($organization->profile->full_name)): ?>
                                     <div class="form-group">
-                                        <label for="exampleInputEmail1">Управляющий менеджер:</label>
+                                        <label for="exampleInputEmail1"><?= Yii::t('app', 'Управляющий менеджер:') ?></label>
                                         <p><?= $organization->profile->full_name ?></p>
                                     </div>
                                 <?php endif; ?>
@@ -148,39 +148,39 @@ $this->registerCss("
                 </div>
                 <div class="modal-body tab-pane" id="tab_2">
                     <div class="modal-header f-header">
-                        <h4 class="modal-title f-title">Реквизиты ресторана <?= $organization->name ?></h4>
+                        <h4 class="modal-title f-title"><?= Yii::t('app', 'Реквизиты ресторана') ?> <?= $organization->name ?></h4>
                     </div>
-                    <h3>Реквизиты</h3>
-                    <label>Подписант: </label>
+                    <h3><?= Yii::t('app', 'Реквизиты') ?></h3>
+                    <label><?= Yii::t('app', 'Подписант:') ?> </label>
                     <p><?= $organization->buisinessInfo->signed ?></p>
-                    <label>Юридическое название: </label>
+                    <label><?= Yii::t('app', 'Юридическое название:') ?> </label>
                     <p><?= $organization->buisinessInfo->legal_entity ?></p>
-                    <label>Юридический адрес: </label>
+                    <label><?= Yii::t('app', 'Юридический адрес:') ?> </label>
                     <p><?= $organization->buisinessInfo->legal_address ?></p>
-                    <label>Официальный email: </label>
+                    <label><?= Yii::t('app', 'Официальный email:') ?> </label>
                     <p><?= $organization->buisinessInfo->legal_email ?></p>
-                    <label>ИНН: </label>
+                    <label><?= Yii::t('app', 'ИНН:') ?> </label>
                     <p><?= $organization->buisinessInfo->inn ?></p>
-                    <label>КПП: </label>
+                    <label><?= Yii::t('app', 'КПП:') ?> </label>
                     <p><?= $organization->buisinessInfo->kpp ?></p>
-                    <label>ОГРН: </label>
+                    <label><?= Yii::t('app', 'ОГРН:') ?> </label>
                     <p><?= $organization->buisinessInfo->ogrn ?></p>
-                    <label>Банк: </label>
+                    <label><?= Yii::t('app', 'Банк:') ?> </label>
                     <p><?= $organization->buisinessInfo->bank_name ?></p>
-                    <label>БИК: </label>
+                    <label><?= Yii::t('app', 'БИК:') ?> </label>
                     <p><?= $organization->buisinessInfo->bik ?></p>
-                    <label>Телефон: </label>
+                    <label><?= Yii::t('app', 'Телефон:') ?> </label>
                     <p><?= $organization->buisinessInfo->phone ?></p>
-                    <label>р/с: </label>
+                    <label><?= Yii::t('app', 'р/с:') ?> </label>
                     <p><?= $organization->buisinessInfo->correspondent_account ?></p>
-                    <label>к/с: </label>
+                    <label><?= Yii::t('app', 'к/с:') ?> </label>
                     <p><?= $organization->buisinessInfo->checking_account ?></p>
-                    <label>Поле для заметок: </label>
+                    <label><?= Yii::t('app', 'Поле для заметок:') ?> </label>
                     <p><?= $organization->buisinessInfo->info ?></p>
                 </div>
                 <div class="modal-body tab-pane" id="tab_3">
                     <div class="modal-header f-header">
-                        <h4 class="modal-title f-title">Список поставщиков ресторана <?= $organization->name ?></h4>
+                        <h4 class="modal-title f-title"><?= Yii::t('app', 'Список поставщиков ресторана') ?> <?= $organization->name ?></h4>
                     </div>
                     <?php
                     Pjax::begin(['formSelector' => 'form', 'enablePushState' => false, 'id' => 'vendor-list', 'timeout' => 5000]);
@@ -211,11 +211,11 @@ $this->registerCss("
                                         'attribute' => 'name',
                                         'value' => function ($data) {
                                             if ($data['self_registered'] == \common\models\FranchiseeAssociate::SELF_REGISTERED) {
-                                                return "<i title='Клиент самостоятельно зарегистрировался' class='fa fa-bolt text-success' aria-hidden='true'></i>" . $data['name'];
+                                                return "<i title='" . Yii::t('app', 'Клиент самостоятельно зарегистрировался') . "' class='fa fa-bolt text-success' aria-hidden='true'></i>" . $data['name'];
                                             }
                                             return $data['name'];
                                         },
-                                        'label' => 'Имя поставщика',
+                                        'label' => Yii::t('app', 'Имя поставщика'),
                                     ],
                                     [
                                         'format' => 'raw',
@@ -233,7 +233,7 @@ $this->registerCss("
                                             }
                                             return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                         },
-                                        'label' => 'Кол-во ресторанов',
+                                        'label' => Yii::t('app', 'Кол-во ресторанов'),
                                     ],
                                     [
                                         'format' => 'raw',
@@ -251,7 +251,7 @@ $this->registerCss("
                                             }
                                             return $data["orderCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                         },
-                                        'label' => 'Кол-во заказов',
+                                        'label' => Yii::t('app', 'Кол-во заказов'),
                                     ],
                                     [
                                         'format' => 'raw',
@@ -269,7 +269,7 @@ $this->registerCss("
                                             }
                                             return ($data["orderSum"] ? $data["orderSum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
                                         },
-                                        'label' => 'Сумма заказов',
+                                        'label' => Yii::t('app', 'Сумма заказов'),
                                     ],
                                     [
                                         'format' => 'raw',
@@ -278,17 +278,17 @@ $this->registerCss("
                                             $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
                                             return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                         },
-                                        'label' => 'Дата регистрации',
+                                        'label' => Yii::t('app', 'Дата регистрации'),
                                     ],
                                     [
                                         'attribute' => 'contact_name',
                                         'value' => 'contact_name',
-                                        'label' => 'Контакт',
+                                        'label' => Yii::t('app', 'Контакт'),
                                     ],
                                     [
                                         'attribute' => 'phone',
                                         'value' => 'phone',
-                                        'label' => 'Телефон',
+                                        'label' => Yii::t('app', 'Телефон'),
                                     ],
 //                                    [
 //                                        'format' => 'raw',
@@ -308,7 +308,7 @@ $this->registerCss("
                 </div>
                 <div class="modal-body tab-pane" id="tab_4">
                     <div class="modal-header f-header">
-                        <h4 class="modal-title f-title">Список сотрудников ресторана <?= $organization->name ?></h4>
+                        <h4 class="modal-title f-title"><?= Yii::t('app', 'Список сотрудников ресторана') ?> <?= $organization->name ?></h4>
                     </div>
                     <div class="row">
                         <?= GridView::widget([

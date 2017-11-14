@@ -28,8 +28,9 @@ class GuideProductsSearch extends \yii\base\Model {
      *
      * @param array $params
      * @param integer $guideId
+     * @param integer $clientId
      *
-     * @return ActiveDataProvider
+     * @return SqlDataProvider
      */
     public function search($params, $guideId, $clientId) {
         $this->load($params);

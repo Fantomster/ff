@@ -1334,8 +1334,7 @@ class SiteController extends Controller {
             if($recipient->profile->phone && $recipient->profile->sms_allow){
                 $text = "Ресторан " . $client->name . " добавил Вас через торговую площадку market.mixcart.ru";
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target); 
+                Yii::$app->sms->send($text, $target);
             } 
         }
     }

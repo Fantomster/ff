@@ -33,8 +33,8 @@ use yii\helpers\Html;
                                     <td style="margin: 0; padding: 0;text-align:center;"><img src="http://mixcart.ru/img/logo.png" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" /></td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small>Революция в работе с поставщиками.
-                                            Закупка в 2 клика.</small></td>
+                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small><?= Yii::t('app', 'Революция в работе с поставщиками.
+                                            Закупка в 2 клика.') ?></small></td>
                                 </tr>
                             </table>
                         </div>
@@ -101,7 +101,7 @@ use yii\helpers\Html;
                                 <tr style="margin: 0; padding: 0;">
                                     <td align="center" style="margin: 0; padding: 0;">
                                         <p style="font-size: 11px; font-weight: normal; line-height: 1.6; margin: 0 0 10px; padding: 0;">
-                                            © 2016 MixCart — ООО «Онлайн Маркет»
+                                            © 2016 MixCart — <?= Yii::t('app', 'ООО «Онлайн Маркет»') ?>
                                         </p>
                                     </td>
                                 </tr>
@@ -116,9 +116,9 @@ use yii\helpers\Html;
 
 
         </div>
-        <p style="font-size: 8px;text-align: center;width: 600px;margin: 0 auto;line-height: 12px;">Вы получили это письмо, т.к. зарегистрированы на сайте <a style="color:#84BF76" href="http://mixcart.ru">mixcart.ru</a>. Если вы хотите изменить настройки уведомлений, авторизуйтесь на сайте, зайдите в раздел "Настройки/Почтовые уведомления" и отключите получение нежелательных рассылок.
+        <p style="font-size: 8px;text-align: center;width: 600px;margin: 0 auto;line-height: 12px;"><?= Yii::t('app', 'Вы получили это письмо, т.к. зарегистрированы на сайте') ?> <a style="color:#84BF76" href="http://mixcart.ru">mixcart.ru</a>. <?= Yii::t('app', 'Если вы хотите изменить настройки уведомлений, авторизуйтесь на сайте, зайдите в раздел "Настройки/Почтовые уведомления" и отключите получение нежелательных рассылок.') ?>
 
-            Если вы больше не хотите получать уведомления, вы можете отписаться от получения рассылок перейдя по этой ссылке.</p>        
+            <?= Yii::t('app', 'Если вы больше не хотите получать уведомления, вы можете отписаться от получения рассылок перейдя по этой ссылке.') ?></p>
         <?php $this->endBody() ?>
     </body>
 </html>

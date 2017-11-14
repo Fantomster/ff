@@ -58,7 +58,7 @@ $this->registerJs("
 );
 ?>
 <?php
-$this->title = 'Главный каталог';
+$this->title = Yii::t('app', 'Главный каталог');
 
 $this->registerCss('
 @media (max-width: 1485px){
@@ -82,27 +82,27 @@ Modal::widget([
 $exportFilename = 'catalog_' . date("Y-m-d_H-m-s");
 $exportColumns = [
     [
-        'label' => 'Артикул',
+        'label' => Yii::t('app', 'Артикул'),
         'value' => 'article',
     ],
     [
-        'label' => 'Наименование',
+        'label' => Yii::t('app', 'Наименование'),
         'value' => 'product',
     ],
     [
-        'label' => 'Кратность',
+        'label' => Yii::t('app', 'Кратность'),
         'value' => 'units',
     ],
     [
-        'label' => 'Цена',
+        'label' => Yii::t('app', 'Цена'),
         'value' => 'price',
     ],
     [
-        'label' => 'Единица измерения',
+        'label' => Yii::t('app', 'Единица измерения'),
         'value' => 'ed',
     ],
     [
-        'label' => 'Комментарий',
+        'label' => Yii::t('app', 'Комментарий'),
         'value' => function ($data) {
             return $data['note'] ? $data['note'] : '';
         },
@@ -111,7 +111,7 @@ $exportColumns = [
 ?>
 <?php
 Modal::begin([
-    'header' => '<h4 class="modal-title">Загрузка каталога</h4>',
+    'header' => '<h4 class="modal-title">' . Yii::t('app', 'Загрузка каталога') . ' </h4>',
     'id' => 'instruction',
     'size' => 'modal-lg',
 ]);
@@ -128,8 +128,8 @@ Modal::end();
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Главный каталог
-        <small>Это ваш главный каталог</small><label>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Главный каталог') ?>
+        <small><?= Yii::t('app', 'Это ваш главный каталог') ?></small><label>
             <div class="icheckbox_minimal-blue" aria-checked="false" aria-disabled="false" style="position: relative;"><input type="checkbox" class="minimal" style="position: absolute; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div>
         </label>
     </h1>
@@ -140,10 +140,10 @@ Modal::end();
         ],
         'links' => [
             [
-                'label' => 'Каталоги',
+                'label' => Yii::t('app', 'Каталоги'),
                 'url' => ['vendor/catalogs'],
             ],
-            'Главный каталог',
+            Yii::t('app', 'Главный каталог'),
         ],
     ])
     ?>
@@ -152,14 +152,14 @@ Modal::end();
     <?php if (Yii::$app->session->hasFlash('success')): ?>
         <div class="alert alert-danger alert-dismissable">
             <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
-            <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+            <h4><i class="icon fa fa-check"></i><?= Yii::t('app', 'Ошибка') ?></h4>
             <?= Yii::$app->session->getFlash('success') ?>
         </div>
     <?php endif; ?>
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs" style="background-color: #f1f0ee;">
-            <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5 class="box-title">Редактирование</h5></a></li>
-            <li><a data-toggle="tab" href="#tabClients"><h5 class="box-title">Назначить ресторану</h5></a></li>
+            <li class="active"><a data-toggle="tab" href="#tabCatalog"><h5 class="box-title"><?= Yii::t('app', 'Редактирование') ?></h5></a></li>
+            <li><a data-toggle="tab" href="#tabClients"><h5 class="box-title"><?= Yii::t('app', 'Назначить ресторану') ?></h5></a></li>
         </ul>
         <div class="tab-content">
             <div id="tabCatalog" class="tab-pane fade in active">
@@ -169,7 +169,7 @@ Modal::end();
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
+                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('app', 'Поиск'), 'id' => 'search']) ?>
                         </div>
                     </div>   
                     <?=
@@ -177,7 +177,7 @@ Modal::end();
                         'id' => 'add-product',
                         'clientOptions' => ['style' => 'margin-top:13.2px;'],
                         'toggleButton' => [
-                            'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
+                            'label' => '<i class="fa fa-plus-circle"></i> ' . Yii::t('app', 'Новый товар') . ' ',
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
@@ -190,13 +190,13 @@ Modal::end();
                         'dataProvider' => $dataProvider,
                         'columns' => $exportColumns,
                         'fontAwesome' => true,
-                        'filename' => 'Главный каталог - ' . date('Y-m-d'),
+                        'filename' => Yii::t('app', 'Главный каталог - ') . date('Y-m-d'),
                         'encoding' => 'UTF-8',
                         'target' => ExportMenu::TARGET_SELF,
                         'showConfirmAlert' => false,
                         'showColumnSelector' => false,
                         'dropdownOptions' => [
-                            'label' => '<span class="text-label">Скачать каталог</span>',
+                            'label' => '<span class="text-label">' . Yii::t('app', 'Скачать каталог') . ' </span>',
                             'class' => ['btn btn-outline-default btn-sm pull-right']
                         ],
                         'exportConfig' => [
@@ -254,7 +254,7 @@ Modal::end();
                         'clientOptions' => false,
                         'size' => 'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (XLS)</span>',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">' . Yii::t('app', 'Загрузить каталог (XLS)') . ' </span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
@@ -265,7 +265,7 @@ Modal::end();
                     ?>
                     <?=
                     Html::a(
-                            '<i class="fa fa-list-alt"></i> <span class="text-label">Скачать шаблон (XLS)</span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
+                            '<i class="fa fa-list-alt"></i> <span class="text-label">' . Yii::t('app', 'Скачать шаблон (XLS)') . ' </span>', Url::to('@web/upload/template.xlsx'), ['class' => 'btn btn-outline-default btn-sm pull-right', 'style' => ['margin-right' => '10px;']]
                     )
                     ?>
                     <?=
@@ -285,19 +285,19 @@ Modal::end();
                     $gridColumnsBaseCatalog = [
                         [
                             'attribute' => 'article',
-                            'label' => 'Артикул',
+                            'label' => Yii::t('app', 'Артикул'),
                             'value' => 'article',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'product',
-                            'label' => 'Наименование',
+                            'label' => Yii::t('app', 'Наименование'),
                             'value' => 'product',
                             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
                         ],
                         [
                             'attribute' => 'units',
-                            'label' => 'Кратность',
+                            'label' => Yii::t('app', 'Кратность'),
                             'value' => function ($data) {
                                 return empty($data['units']) ? '' : $data['units'];
                             },
@@ -305,7 +305,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'category_id',
-                            'label' => 'Категория',
+                            'label' => Yii::t('app', 'Категория'),
                             'value' => function ($data) {
                                 $data['category_id'] == 0 ? $category_name = '' : $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
                                 return $category_name;
@@ -314,13 +314,13 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => 'Цена',
+                            'label' => Yii::t('app', 'Цена'),
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
                         [
                             'attribute' => 'ed',
-                            'label' => 'Ед. измерения',
+                            'label' => Yii::t('app', 'Ед. измерения'),
                             'value' => function ($data) {
                                 return $data['ed'];
                             },
@@ -328,7 +328,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'status',
-                            'label' => 'Наличие',
+                            'label' => Yii::t('app', 'Наличие'),
                             'format' => 'raw',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                             'value' => function ($data) {
@@ -433,14 +433,14 @@ Modal::end();
                 <?php
                 $gridColumnsCatalog = [
                     [
-                        'label' => 'Ресторан',
+                        'label' => Yii::t('app', 'Ресторан'),
                         'value' => function ($data) {
                             $organization_name = common\models\Organization::find()->where(['id' => $data->rest_org_id])->one()->name;
                             return $organization_name;
                         }
                     ],
                     [
-                        'label' => 'Текущий каталог',
+                        'label' => Yii::t('app', 'Текущий каталог'),
                         'format' => 'raw',
                         'value' => function ($data) {
                             $catalog_name = $data->cat_id == 0 ? '' :
@@ -449,7 +449,7 @@ Modal::end();
                         }
                     ],
                     [
-                        'attribute' => 'Назначить',
+                        'attribute' => Yii::t('app', 'Назначить'),
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:50px;'],
                         'value' => function ($data) {

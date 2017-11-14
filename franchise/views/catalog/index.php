@@ -19,7 +19,7 @@ use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-$this->title = 'Мои каталоги';
+$this->title = Yii::t('app', 'Мои каталоги');
 $this->registerCss('
 .text-info {
     color: #378a5f;
@@ -40,8 +40,8 @@ Modal::begin([
 <?php Modal::end(); ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> Каталоги поставщика <?= $currentOrganization->name?>
-        <small>Создавайте, добавляйте и редактируйте каталоги поставщика</small>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Каталоги поставщика') ?> <?= $currentOrganization->name?>
+        <small><?= Yii::t('app', 'Создавайте, добавляйте и редактируйте каталоги поставщика') ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -49,7 +49,7 @@ Modal::begin([
             'class' => 'breadcrumb',
         ],
         'links' => [
-            'Мои каталоги'
+            Yii::t('app', 'Мои каталоги')
         ],
     ])
     ?>
@@ -58,7 +58,7 @@ Modal::begin([
 <div class="catalog-index">
     	<div class="box box-info">
             <div class="box-header with-border">
-              <h3 class="box-title">Каталоги</h3>
+              <h3 class="box-title"><?= Yii::t('app', 'Каталоги') ?></h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -68,12 +68,12 @@ Modal::begin([
                 <div class="hpanel">
                     <div class="panel-body">
                         <div class="col-md-6 text-left">
-                            <?= Html::a('<h4 class="m-b-xs text-info">Главный каталог</h4>', ['catalog/basecatalog', 'vendor_id'=>$currentOrganization->id, 'id' => $arrBaseCatalogs->id]) ?>
-                            <p class="small">Этот каталог содержит все продукты поставщика</p>
+                            <?= Html::a('<h4 class="m-b-xs text-info">' . Yii::t('app', 'Главный каталог') . '</h4>', ['catalog/basecatalog', 'vendor_id'=>$currentOrganization->id, 'id' => $arrBaseCatalogs->id]) ?>
+                            <p class="small"><?= Yii::t('app', 'Этот каталог содержит все продукты поставщика') ?></p>
                         </div>
                         <div class="col-md-6 text-right">
-                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['catalog/basecatalog', 'vendor_id'=>$currentOrganization->id, 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default btn-sm m-t']) ?>
-                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дублировать', ['catalog/step-1-clone', 'vendor_id'=>$currentOrganization->id, 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t btn-sm clone-catalog']) ?>
+                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> ' . Yii::t('app', 'Корректировка цен') . ' ', ['catalog/basecatalog', 'vendor_id'=>$currentOrganization->id, 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default btn-sm m-t']) ?>
+                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> ' . Yii::t('app', 'Дублировать') . ' ', ['catalog/step-1-clone', 'vendor_id'=>$currentOrganization->id, 'id' => $arrBaseCatalogs->id],['class'=>'btn btn-default m-t btn-sm clone-catalog']) ?>
                         </div>
                     </div>
                 </div>
@@ -88,7 +88,7 @@ Modal::begin([
                 <div class="box box-info">
             <div class="box-header with-border">
               <div class="box-title pull-left">
-                 <?= Html::a('<i class="fa fa-plus-circle"></i> Новый каталог', ['catalog/step-1', 'vendor_id' => $currentOrganization->id],['class'=>'btn btn-md fk-button']) ?>
+                 <?= Html::a('<i class="fa fa-plus-circle"></i> ' . Yii::t('app', 'Новый каталог') . ' ', ['catalog/step-1', 'vendor_id' => $currentOrganization->id],['class'=>'btn btn-md fk-button']) ?>
               </div>
             </div>
             <!-- /.box-header -->
@@ -114,12 +114,12 @@ Modal::begin([
                 <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'catalog-list',]); ?>
                     <?php  
                     if(empty($arrCatalog)){ ?>   
-                        <div class="empty">Ничего не найдено.</div>
+                        <div class="empty"><?= Yii::t('app', 'Ничего не найдено') ?>.</div>
                     <?php 
                     }else{
                         if($type==1){ ?>
                             <div class="panel-body">
-                                <h4 class="text-info">Ресторан подключен к <strong>Главному каталогу</strong></h4>
+                                <h4 class="text-info"><?= Yii::t('app', 'Ресторан подключен к <strong>Главному каталогу</strong>') ?></h4>
                             </div>
                         <?php 
                         }else{
@@ -130,7 +130,7 @@ Modal::begin([
                                         <div class="col-md-4 text-left">
                                         <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
                                                 '</h4>', ['catalog/step-3-copy', 'vendor_id'=>$currentOrganization->id, 'id' => $arrCatalogs->id],['data-pjax'=>'0']) ?>
-                                        <p class="small m-b-none">Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
+                                        <p class="small m-b-none"><?= Yii::t('app', 'Создан:') ?> <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
                                         </div>
                                         <div class="col-md-8 text-right">
                                                 <?php echo $link = SwitchBox::widget([
@@ -139,17 +139,17 @@ Modal::begin([
                                                 'clientOptions' => [
                                                     'onColor' => 'success',
                                                     'offColor' => 'default',
-                                                    'onText'=>'Вкл',
-                                                    'offText'=>'Выкл',
+                                                    'onText'=>Yii::t('app', 'Вкл'),
+                                                    'offText'=>Yii::t('app', 'Выкл'),
                                                     'baseClass'=>'bootstrap-switch',
                                                     'wrapperClass'=>'wrapper m-t bootstrap-switch-small',
                                                 ],
                                                 'class'=>'m-t'
                                             ]);
                                             ?>
-                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Корректировка цен', ['catalog/step-3-copy', 'vendor_id'=>$currentOrganization->id, 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t btn-sm','data-pjax'=>'0','data-pjax'=>'0']) ?>
-                                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> Дублировать', ['catalog/step-1-clone', 'vendor_id'=>$currentOrganization->id, 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
-                                            <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', ['class' => 'btn btn-outline-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
+                                            <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> ' . Yii::t('app', 'Корректировка цен') . ' ', ['catalog/step-3-copy', 'vendor_id'=>$currentOrganization->id, 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t btn-sm','data-pjax'=>'0','data-pjax'=>'0']) ?>
+                                            <?= Html::a('<i class="fa fa-fw fa-clone"></i> ' . Yii::t('app', 'Дублировать') . ' ', ['catalog/step-1-clone', 'vendor_id'=>$currentOrganization->id, 'id' => $arrCatalogs->id],['class'=>'btn btn-outline-default m-t clone-catalog btn-sm','data-pjax'=>'0']) ?>
+                                            <?= Html::button('<i class="fa fa-fw fa-trash-o"></i> ' . Yii::t('app', 'Удалить') . ' ', ['class' => 'btn btn-outline-danger m-t del btn-sm','name'=>'del_'.$arrCatalogs->id,'id'=>'del_'.$arrCatalogs->id]) ?>
                                         </div>
                                     </div>
                                 </div>
@@ -169,6 +169,14 @@ Modal::begin([
 $catalogsUrl = Url::to(['catalog/index', 'vendor_id'=>$currentOrganization->id]);
 $myCatalogDelCatalogUrl = Url::to(['catalog/mycatalogdelcatalog']);
 $changeCatalogStatusUrl = Url::to(['catalog/changecatalogstatus']);
+$delCat = Yii::t('app', 'Удалить каталог?');
+$del = Yii::t('app', 'Удалить');
+$mess = Yii::t('app', 'Все рестораны будут отвязаны от текущего каталога');
+$cancel = Yii::t('app', 'Отмена');
+$double = Yii::t('app', 'Создать дубликат?');
+$copy = Yii::t('app', 'Будет создана копия текущего каталога');
+$create = Yii::t('app', 'Создать');
+
 
 $customJs = <<< JS
 var timer;
@@ -220,15 +228,15 @@ $(location).attr('href','$catalogsUrl')
 $(document).on('click', '.del', function (e){
 	var id = $(this).attr('id').replace('del_','');
 	bootbox.confirm({
-            title: "Удалить каталог?",
-            message: "Все рестораны будут отвязаны от текущего каталога", 
+            title: "$delCat",
+            message: "$mess", 
             buttons: {
                 confirm: {
-                    label: 'Удалить',
+                    label: '$del',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$cancel',
                     className: 'btn-default'
                 }
             },
@@ -285,15 +293,15 @@ $(document).on('click', '.clone-catalog', function(e) {
     elem = $(this)
     Url = $(this).attr('href')
     bootbox.confirm({
-            title: "Создать дубликат?",
-            message: "Будет создана копия текущего каталога", 
+            title: "$double",
+            message: "$copy", 
             buttons: {
                 confirm: {
-                    label: 'Создать',
+                    label: '$create',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$cancel',
                     className: 'btn-default'
                 }
             },

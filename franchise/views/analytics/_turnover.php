@@ -40,7 +40,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title">Оборот за период &nbsp;<span class="text-bold text-success"><?= $total ?> руб</span></h3>
+            <h3 class="box-title"><?= Yii::t('app', 'Оборот за период') ?> &nbsp;<span class="text-bold text-success"><?= $total ?> руб</span></h3>
         </div>
         <div class="form-group" style="width: 350px;">
             <?=
@@ -49,8 +49,8 @@ $form = ActiveForm::begin([
                 'name2' => 'date2',
                 'value' => $dateFilterFrom,
                 'value2' => $dateFilterTo,
-                'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
-                'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                'options' => ['placeholder' => Yii::t('app', 'Начальная Дата'), 'id' => 'dateFrom'],
+                'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
                 'separator' => '-',
                 'type' => DatePicker::TYPE_RANGE,
                 'pluginOptions' => [
@@ -74,7 +74,7 @@ $form = ActiveForm::begin([
                     'labels' => $dayLabels,
                     'datasets' => [
                         [
-                            'label' => 'Все заказы',
+                            'label' => Yii::t('app', 'Все заказы'),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,.8)",
                             'pointBackgroundColor' => "rgba(54,140,191,1)",
@@ -96,7 +96,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title">Общий оборот по месяцам</h3>
+            <h3 class="box-title"><?= Yii::t('app', 'Общий оборот по месяцам') ?></h3>
         </div>
             <?=
             ChartJs::widget([
@@ -109,7 +109,7 @@ $form = ActiveForm::begin([
                     'labels' => $monthLabels,
                     'datasets' => [
                         [
-                            'label' => 'Общий оборот',
+                            'label' => Yii::t('app', 'Общий оборот'),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,1)",
                             'data' => $totalSpent,
@@ -123,7 +123,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title">Средний оборот в месяц (на 1 ресторан)</h3>
+            <h3 class="box-title"><?= Yii::t('app', 'Средний оборот в месяц (на 1 ресторан)') ?></h3>
         </div>
             <?=
             ChartJs::widget([
@@ -136,7 +136,7 @@ $form = ActiveForm::begin([
                     'labels' => $monthLabels,
                     'datasets' => [
                         [
-                            'label' => 'Средний оборот',
+                            'label' => Yii::t('app', 'Средний оборот'),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,1)",
                             'data' => $averageSpent,
@@ -150,7 +150,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title">Средний чек на 1 заказ</h3>
+            <h3 class="box-title"><?= Yii::t('app', 'Средний чек на 1 заказ') ?></h3>
         </div>
             <?=
             ChartJs::widget([
@@ -163,7 +163,7 @@ $form = ActiveForm::begin([
                     'labels' => $monthLabels,
                     'datasets' => [
                         [
-                            'label' => 'Средний чек',
+                            'label' => Yii::t('app', 'Средний чек'),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,1)",
                             'data' => $averageCheque,

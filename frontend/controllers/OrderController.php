@@ -485,7 +485,6 @@ class OrderController extends DefaultController {
 
         $searchModel = new \common\models\search\FavoriteSearch();
         $dataProvider = $searchModel->search($params, $client->id);
-        $dataProvider->pagination = ['pageSize' => 10];
 
         return $this->render('favorites', compact('searchModel', 'dataProvider', 'client'));
     }
@@ -1136,15 +1135,6 @@ class OrderController extends DefaultController {
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
                 $this->sendSystemMessage($user, $order->id, $order->client->name . ' изменил детали заказа №' . $order->id . ":$message");
-//                $subject = $order->client->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
-//                foreach ($order->recipientsList as $recipient) {
-//                    if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
-//                        $text = $subject;
-//                        $target = $recipient->profile->phone;
-//                        $sms = new \common\components\QTSMS();
-//                        $sms->post_message($text, $target);
-//                    }
-//                }
                 $order->calculateTotalPrice();
                 $order->save();
                 $this->sendOrderChange($order->client, $order);
@@ -1155,15 +1145,6 @@ class OrderController extends DefaultController {
                 $order->save();
                 $this->sendSystemMessage($user, $order->id, $order->vendor->name . ' изменил детали заказа №' . $order->id . ":$message");
                 $this->sendOrderChange($order->vendor, $order);
-//                $subject = $order->vendor->name . ' изменил детали заказа №' . $order->id . ":" . str_replace('<br/>', ' ', $message);
-//                foreach ($order->client->users as $recipient) {
-//                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-//                        $text = $subject;
-//                        $target = $recipient->profile->phone;
-//                        $sms = new \common\components\QTSMS();
-//                        $sms->post_message($text, $target);
-//                    }
-//                }
             }
 
             if (Yii::$app->request->post('orderAction') && (Yii::$app->request->post('orderAction') == 'confirm')) {
@@ -1649,8 +1630,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
                 $text = $senderOrg->name . " изменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1685,8 +1665,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
                 $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1723,8 +1702,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
                 $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1758,8 +1736,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
                 $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1793,8 +1770,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }

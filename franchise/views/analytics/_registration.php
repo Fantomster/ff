@@ -32,10 +32,10 @@ $form = ActiveForm::begin([
 ?>
     <div class="row">
         <div class="col-md-12">
-            <h3>Зарегистрировано</h3>
+            <h3><?= Yii::t('app', 'Зарегистрировано') ?></h3>
             <div class="row">
                 <div class="col-md-4 col-sm-12 text-center">
-                    <h4>За все время (<?= $allTimeCount ?>)</h4>
+                    <h4><?= Yii::t('app', 'За все время') ?> (<?= $allTimeCount ?>)</h4>
                     <?=
                     ChartJs::widget([
                         'type' => 'pie',
@@ -47,7 +47,7 @@ $form = ActiveForm::begin([
                             ],
                         ],
                         'data' => [
-                            'labels' => ['Рестораны', 'Поставщики'],
+                            'labels' => [Yii::t('app', 'Рестораны'), Yii::t('app', 'Поставщики')],
                             'datasets' => [
                                 [
                                     'data' => $allTime,
@@ -60,7 +60,7 @@ $form = ActiveForm::begin([
                     ?>
                 </div>
                 <div class="col-md-4 col-sm-12 text-center">
-                    <h4>За текущий месяц (<?= $thisMonthCount ?>)</h4>
+                    <h4><?= Yii::t('app', 'За текущий месяц') ?> (<?= $thisMonthCount ?>)</h4>
                     <?=
                     ChartJs::widget([
                         'type' => 'pie',
@@ -69,7 +69,7 @@ $form = ActiveForm::begin([
                             'width' => 200,
                         ],
                         'data' => [
-                            'labels' => ['Рестораны', 'Поставщики'],
+                            'labels' => [Yii::t('app', 'Рестораны'), Yii::t('app', 'Поставщики')],
                             'datasets' => [
                                 [
                                     'data' => $thisMonth,
@@ -82,7 +82,7 @@ $form = ActiveForm::begin([
                     ?>
                 </div>
                 <div class="col-md-4 col-sm-12 text-center">
-                    <h4>Сегодня (<?= $todayCount ?>)</h4>
+                    <h4><?= Yii::t('app', 'Сегодня') ?> (<?= $todayCount ?>)</h4>
                     <?=
                     ChartJs::widget([
                         'type' => 'pie',
@@ -91,7 +91,7 @@ $form = ActiveForm::begin([
                             'width' => 200,
                         ],
                         'data' => [
-                            'labels' => ['Рестораны', 'Поставщики'],
+                            'labels' => [Yii::t('app', 'Рестораны'), Yii::t('app', 'Поставщики')],
                             'datasets' => [
                                 [
                                     'data' => $todayArr,
@@ -108,7 +108,7 @@ $form = ActiveForm::begin([
     </div>
     <div class="row" style="margin-top:50px">
         <div class="col-md-12">
-            <h3>Зарегистрировано за период <span class="text-bold text-primary">(<?= $total ?>)</span></h3>
+            <h3><?= Yii::t('app', 'Зарегистрировано за период') ?> <span class="text-bold text-primary">(<?= $total ?>)</span></h3>
             <div class="form-group" style="width: 350px;">
                 <?=
                 DatePicker::widget([
@@ -116,8 +116,8 @@ $form = ActiveForm::begin([
                     'name2' => 'date2',
                     'value' => $dateFilterFrom,
                     'value2' => $dateFilterTo,
-                    'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
-                    'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                    'options' => ['placeholder' => Yii::t('app', 'Начальная Дата'), 'id' => 'dateFrom'],
+                    'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
                     'separator' => '-',
                     'type' => DatePicker::TYPE_RANGE,
                     'pluginOptions' => [
@@ -139,7 +139,7 @@ $form = ActiveForm::begin([
                     'labels' => $dayLabels,
                     'datasets' => [
                         [
-                            'label' => 'Все организации',
+                            'label' => Yii::t('app', 'Все организации'),
                             'backgroundColor' => "rgba(51,54,59,.2)",
                             'borderColor' => "rgba(51,54,59,.8)",
                             'pointBackgroundColor' => "rgba(51,54,59,1)",
@@ -152,7 +152,7 @@ $form = ActiveForm::begin([
                             'fill' => false,
                         ],
                         [
-                            'label' => 'Рестораны',
+                            'label' => Yii::t('app', 'Рестораны'),
                             'backgroundColor' => "rgba(126,188,89,.2)",
                             'borderColor' => "rgba(126,188,89,.8)",
                             'pointBackgroundColor' => "rgba(126,188,89,1)",
@@ -165,7 +165,7 @@ $form = ActiveForm::begin([
                             'fill' => false,
                         ],
                         [
-                            'label' => 'Поставщики',
+                            'label' => Yii::t('app', 'Поставщики'),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,.8)",
                             'pointBackgroundColor' => "rgba(54,140,191,1)",

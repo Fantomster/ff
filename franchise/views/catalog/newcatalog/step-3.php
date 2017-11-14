@@ -11,44 +11,44 @@ use common\models\Users;
 use kartik\export\ExportMenu;
 use kartik\editable\Editable;
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
-$this->title = 'Редактировать продукты';
+$this->title = Yii::t('app', 'Редактировать продукты');
 ?>
 
 
 <div class="panel-body">
-    <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
+    <h3 class="font-light"><i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Редактирование каталога') ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
 </div>
 <div class="panel-body">
     <ul class="nav nav-tabs">
-        <?='<li>'.Html::a('Имя каталога',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-        <?='<li class="active">'.Html::a('Редактировать',['vendor/step-3','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a(Yii::t('app', 'Имя каталога'),['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a(Yii::t('app', 'Добавить продукты'),['vendor/step-2','id'=>$cat_id]).'</li>'?>
+        <?='<li class="active">'.Html::a(Yii::t('app', 'Редактировать'),['vendor/step-3','id'=>$cat_id]).'</li>'?>
         <?='<li>'.Html::a('test',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a(Yii::t('app', 'Назначить ресторану'),['vendor/step-4','id'=>$cat_id]).'</li>'?>
     </ul>
 </div>
 <?php Pjax::begin(['id' => 'pjax-container']); ?>
 <?php 
 $gridColumnsCatalog = [
     [
-    'label'=>'Артикул',
+    'label'=>Yii::t('app', 'Артикул'),
     'value'=>function ($data) {return common\models\CatalogBaseGoods::get_value($data->base_goods_id)->article;},
     ],
     [
-    'label'=>'Продукт',
+    'label'=>Yii::t('app', 'Продукт'),
     'value'=>function ($data) {return common\models\CatalogBaseGoods::get_value($data->base_goods_id)->product;},
     ],
     [
-    'label'=>'Базовая цена',
+    'label'=>Yii::t('app', 'Базовая цена'),
     'value'=>function ($data) { 
     $price = common\models\CatalogBaseGoods::find()->where(['id'=>$data->base_goods_id])->one()->price;
-    return $price." руб.";
+    return $price.Yii::t('app', " руб.");
     },
     ],
     [
-    'label'=>'Цена',
+    'label'=>Yii::t('app', 'Цена'),
     'value'=>function ($data) {
-    return $data->price." руб.";
+    return $data->price.Yii::t('app', " руб.");
     },
     ],
     /*[
@@ -67,11 +67,11 @@ $gridColumnsCatalog = [
     ],*/
     
     [
-    'label'=>'Скидка (руб)',
-    'value'=>function ($data) {return $data->discount!=0?$data->discount." руб.":'0 руб.';},
+    'label'=>Yii::t('app', 'Скидка (руб)'),
+    'value'=>function ($data) {return $data->discount!=0?$data->discount.Yii::t('app', " руб."):Yii::t('app', '0 руб.');},
     ],
     [
-    'header' => 'Скидка (%)'.Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['vendor/ajax-set-percent','id'=>$cat_id], [
+    'header' => Yii::t('app', 'Скидка (%)').Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['vendor/ajax-set-percent','id'=>$cat_id], [
             'data' => [
             'target' => '#discount-all-product',
             'toggle' => 'modal',
@@ -80,11 +80,11 @@ $gridColumnsCatalog = [
     'value'=>function ($data) {return $data->discount_percent!=0?$data->discount_percent." %":'0 %';},
     ],
     [
-    'label'=>'Фиксированная цена',
+    'label'=>Yii::t('app', 'Фиксированная цена'),
     'value'=>function ($data) {return $data->discount_fixed!=0?$data->discount_fixed." руб.":'-';},
     ],
     [
-    'label'=>'Итоговая',
+    'label'=>Yii::t('app', 'Итоговая'),
     'format' => 'raw',
     'value'=>function ($data) {
         $price = preg_replace('/[^\d.,]/','',$data->price);
@@ -104,7 +104,7 @@ $gridColumnsCatalog = [
                 }
             }
             $price = number_format((float)$price,2, '.', '');
-            return '<span class="text-success-fk">'.$price.' руб.</span>';
+            return '<span class="text-success-fk">'.$price.' ' . Yii::t('app', 'руб.') . ' </span>';
         },
     ],
     [

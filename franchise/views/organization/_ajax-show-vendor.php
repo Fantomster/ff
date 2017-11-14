@@ -28,24 +28,24 @@ use yii\helpers\Html;
                 <div class="col-md-12">
                     <div class="edite-place">
                         <div class="form-group">
-                            <label for="exampleInputEmail1">Название поставщика:</label>
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'Название поставщика:') ?></label>
                             <p><?= $vendor->name ?></p>
                         </div>
 
                         <div class="form-group">
-                            <label for="exampleInputEmail1">Название юр. лица:</label>
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'Название юр. лица:') ?></label>
                             <p><?= $vendor->buisinessInfo->legal_entity ?></p>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputEmail1">Город:</label>
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'Город:') ?></label>
                             <p><?= $vendor->city ?></p>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputEmail1">Адрес:</label>
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'Адрес:') ?></label>
                             <p><?= $vendor->address ?></p>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputEmail1">Краткая информация:</label>
+                            <label for="exampleInputEmail1"><?= Yii::t('app', 'Краткая информация:') ?></label>
                             <p><?= $vendor->about ?></p>
                         </div>
 
@@ -114,11 +114,11 @@ use yii\helpers\Html;
               </div>-->
         <div class="modal-footer" style="background-color: #fff; border-top: 1px solid #e5e5e5;">
             <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i
-                        class="fa fa-fw fa-close"></i> Закрыть
+                        class="fa fa-fw fa-close"></i> <?= Yii::t('app', 'Закрыть') ?>
             </button>
-            <?= Html::a('<i class="fa fa-fw fa-mail-forward"></i> Просмотр', ['organization/show-vendor', 'id' => $vendor->id], ['class' => 'btn btn-info']) ?>
+            <?= Html::a('<i class="fa fa-fw fa-mail-forward"></i> ' . Yii::t('app', 'Просмотр') . ' ', ['organization/show-vendor', 'id' => $vendor->id], ['class' => 'btn btn-info']) ?>
             <?php if ($showEditButton): ?>
-                <?= Html::a('<i class="fa fa-fw fa-pencil"></i> Редактировать', ['organization/update-vendor', 'id' => $vendor->id], ['class' => 'btn btn-primary']) ?>
+                <?= Html::a('<i class="fa fa-fw fa-pencil"></i> ' . Yii::t('app', 'Редактировать') . ' ', ['organization/update-vendor', 'id' => $vendor->id], ['class' => 'btn btn-primary']) ?>
             <?php endif; ?>
         </div>
     </div>

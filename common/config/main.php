@@ -10,6 +10,20 @@ return [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        'sms' => [
+            'class' => 'common\components\sms\Sms',
+            'provider' => 'common\components\sms\providers\Qtelecom',
+            'attributes' => [
+                'user' => 'login',
+                'pass' => 'password',
+                'sender' => 'MixCart',
+                'hostname' => 'service.qtelecom.ru',
+                'on_ssl' => false,
+                'period' => false,
+                'post_id' => 'post_id',
+                'path' => '/public/http/'
+            ]
+        ],
         'user' => [
             'class' => 'amnah\yii2\user\components\User',
             'identityClass' => 'common\models\User',

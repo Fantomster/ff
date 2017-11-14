@@ -10,6 +10,7 @@ use common\models\SmsSendSearch;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
 use yii\filters\VerbFilter;
+use yii\helpers\Html;
 
 class SmsController extends \yii\web\Controller
 {
@@ -43,7 +44,7 @@ class SmsController extends \yii\web\Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index'],
+                        'actions' => ['index', 'ajax-balance'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN
@@ -71,22 +72,55 @@ class SmsController extends \yii\web\Controller
     }
 
     /**
+     * Возвращает баланс в ЛК
+     */
+    public function actionAjaxBalance()
+    {
+        if(Yii::$app->request->isAjax){
+
+            if(!Yii::$app->cache->get('sms_balance')){
+                Yii::$app->cache->set('sms_balance', Yii::$app->sms->getBalance(), 300);
+            }
+
+            $balance = Yii::$app->cache->get('sms_balance');
+
+            echo \kartik\alert\Alert::widget([
+                'options' => [
+                    'class' => ($balance > 1000 ? 'alert-info' : 'alert-danger')
+                ],
+                'body' =>   Html::tag('b', Yii::t('app', 'Баланс СМС')) .
+                            ": " .
+                            $balance .
+                            Html::a(Yii::t('app', 'пополнить'), 'https://go.qtelecom.ru/index.php', [
+                                'target' => '_blank',
+                                'class' => 'btn btn-success btn-xs',
+                                'style' => 'margin-left:20px'
+                            ])
+            ]);
+        }
+    }
+
+    /**
      * Смена статуса СМС сообщения, принимает параметры от сервера провайдера Qtelecom
      * POST [
-     *    ORDID = SmsSend->sms_id
+     *    ORDID = SmsSend->sms_id,
+     *    STATUS = SmsStatus->status
      * ]
      */
     public function actionChangeStatus()
     {
+        /**
+         * Добавить проверку, на то откуда пришел запрос
+         **/
+
         //Проверяем, получили мы ID смс или нет
         if ($sms_id = Yii::$app->request->post('ORDID')) {
-            //Отправляем запрос провайдеру об этой смс
-            //Если сервер знает эту смс едем дальше
-            if ($statusModel = Yii::$app->sms->checkStatus($sms_id)) {
-                //ищем эту смс у нас
-                $model = SmsSend::findOne(['sms_id' => $sms_id]);
-                //Если нашли, идем обновлять ее статус
-                if (!empty($model)) {
+            $model = SmsSend::findOne(['sms_id' => $sms_id]);
+            //ищем эту смс у нас
+            if (!empty($model)) {
+                //Если сервер знает эту смс едем дальше
+                if ($statusModel = SmsStatus::findOne(['status' => Yii::$app->request->post('STATUS')])) {
+                    //Полуичили ответ идем обновлять ее статус
                     $model->setAttribute('status_id', $statusModel->status);
                     if ($model->validate()) {
                         $model->save();

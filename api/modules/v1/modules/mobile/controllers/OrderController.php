@@ -257,7 +257,6 @@ class OrderController extends ActiveController {
                 //$text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $profile->phone;
-                
                 Yii::$app->sms->send($text, $target);
             }
         }

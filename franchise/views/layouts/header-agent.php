@@ -9,7 +9,7 @@ if (!Yii::$app->user->isGuest) {
 ?>
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini"><b>f</b>k</span><span class="logo-lg"><b>f</b>-keeper</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini"><b>m</b>c</span><span class="logo-lg"><b>mix</b>-cart</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
         <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
@@ -40,7 +40,7 @@ if (!Yii::$app->user->isGuest) {
                             <span class="label label-warning unread-notifications-count" style="display: <?= false ? 'block' : 'none' ?>"><?= 0 ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header">Оповещений: <span class="unread-notifications-count"><?= 0 ?></span></li>
+                            <li class="header"><?= Yii::t('app', 'Оповещений:') ?> <span class="unread-notifications-count"><?= 0 ?></span></li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-notifications">
@@ -52,7 +52,7 @@ if (!Yii::$app->user->isGuest) {
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-msg="0" data-ntf="1">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-msg="0" data-ntf="1"><?= Yii::t('app', 'Пометить как прочитанные') ?></a>
                             </li>
                         </ul>
                     </li>
@@ -83,7 +83,7 @@ if (!Yii::$app->user->isGuest) {
                     <li class="dropdown tasks-menu">
                         <?=
                         Html::a(
-                                '<i class="fa fa-sign-out"></i> Выход', ['/user/logout'], ['data-method' => 'post']
+                                '<i class="fa fa-sign-out"></i> ' . Yii::t('app', 'Выход') . ' ', ['/user/logout'], ['data-method' => 'post']
                         )
                         ?>
                     </li>

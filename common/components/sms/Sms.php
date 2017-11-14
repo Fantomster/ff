@@ -38,6 +38,9 @@ class Sms extends \yii\base\Component
      */
     public function init()
     {
+        if (empty($this->provider)) {
+            throw new Exception('provider is empty : main.php -> [components => "sms" => [..."provider" => class, ...]]');
+        }
         //делаем отправителя из провайдера
         $this->sender = new $this->provider();
         //Проверяем что реализованы все необходимые методы от AbstractProvider
@@ -64,6 +67,14 @@ class Sms extends \yii\base\Component
     public function send($message, $target)
     {
         try {
+            //Если пустой получатель, игнорируем
+            if (empty($target)) {
+                throw new Exception('Поле получатель не может быть пустым. ');
+            }
+            //Если пустое сообщение, игнорируем
+            if (empty($message)) {
+                throw new Exception('Сообщение не может быть пустым. ');
+            }
             //Отправка смс
             $this->sender->send($message, $target);
         } catch (Exception $e) {
@@ -81,8 +92,20 @@ class Sms extends \yii\base\Component
     {
         try {
             return $this->sender->checkStatus($sms_id);
-        } catch(Exception $e){
+        } catch (Exception $e) {
             return false;
+        }
+    }
+
+    /**
+     * Получить баланс на аккаунте
+     */
+    public function getBalance()
+    {
+        try {
+            return $this->sender->getBalance();
+        } catch (Exception $e) {
+            return null;
         }
     }
 }

@@ -23,8 +23,8 @@ $this->registerJs('
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-signal"></i> Аналитика
-        <small>Статистика поставщика <?= $vendor->name ?></small>
+        <i class="fa fa-signal"></i> <?= Yii::t('app', 'Аналитика') ?>
+        <small><?= Yii::t('app', 'Статистика поставщика') ?> <?= $vendor->name ?></small>
     </h1>
     <?= ''
 //    Breadcrumbs::widget([
@@ -56,7 +56,7 @@ $this->registerJs('
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
                     <span class="info-box-number"><?=$headerStats["ordersCount"];?></span>
-                    <span class="info-box-text">Всего заказов</span>
+                    <span class="info-box-text"><?= Yii::t('app', 'Всего заказов') ?></span>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@ $this->registerJs('
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
                     <span class="info-box-number"><?=$headerStats["goodsCount"];?></span>
-                    <span class="info-box-text">Всего товаров</span>
+                    <span class="info-box-text"><?= Yii::t('app', 'Всего товаров') ?></span>
                 </div>
             </div>
         </div>
@@ -72,7 +72,7 @@ $this->registerJs('
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
                     <span class="info-box-number"><?=$headerStats["clientsCount"]?></span>
-                    <span class="info-box-text">Всего клиентов</span>
+                    <span class="info-box-text"><?= Yii::t('app', 'Всего клиентов') ?></span>
                 </div>
             </div>
         </div>
@@ -80,13 +80,13 @@ $this->registerJs('
             <div class="info-box bg-total-price">
                 <div class="info-box-content">
                     <span class="info-box-number"><?=$headerStats["totalTurnover"];?> <i class="fa fa-fw fa-rub"></i></span>
-                    <span class="info-box-text">Оборот</span>
+                    <span class="info-box-text"><?= Yii::t('app', 'Оборот') ?></span>
                 </div>
             </div>
         </div>
         </div>
         <div class="col-lg-5 col-md-6 col-sm-6"> 
-                    <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                    <?= Html::label(Yii::t('app', 'Начальная дата / Конечная дата'), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
             <?=
             DatePicker::widget([
@@ -94,8 +94,8 @@ $this->registerJs('
                 'name2' => 'date2',
                 'value' => $dateFilterFrom,
                 'value2' => $dateFilterTo,
-                'options' => ['placeholder' => 'Начальная Дата', 'id' => 'dateFrom'],
-                'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                'options' => ['placeholder' => Yii::t('app', 'Начальная Дата'), 'id' => 'dateFrom'],
+                'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
                 'separator' => '-',
                 'type' => DatePicker::TYPE_RANGE,
                 'pluginOptions' => [
@@ -114,7 +114,7 @@ $this->registerJs('
       <!-- AREA CHART -->
       <div class="box box-info">
         <div class="box-header with-border">
-          <h3 class="box-title">Объем заказов</h3>
+          <h3 class="box-title"><?= Yii::t('app', 'Объем заказов') ?></h3>
         </div>
         <div class="box-body" style="display: block;">
                     <?=
@@ -128,7 +128,7 @@ $this->registerJs('
                             'labels' => $dayLabels,
                             'datasets' => [
                                 [
-                                    'label' => 'Все заказы',
+                                    'label' => Yii::t('app', 'Все заказы'),
                                     'backgroundColor' => "rgba(54,140,191,.2)",
                                     'borderColor' => "rgba(54,140,191,.8)",
                                     'pointBackgroundColor' => "rgba(54,140,191,1)",
@@ -153,7 +153,7 @@ $this->registerJs('
       <!-- AREA CHART -->
       <div class="box box-info">
         <div class="box-header with-border">
-          <h3 class="box-title">Объем по клиентам</h3>
+          <h3 class="box-title"><?= Yii::t('app', 'Объем по клиентам') ?></h3>
         </div>
         <div class="box-body" style="display: block;">
                     <?=
@@ -167,7 +167,7 @@ $this->registerJs('
                             'labels' => $clientsTurnover['labels'],
                             'datasets' => [
                                 [
-                                    'label' => 'Общий оборот',
+                                    'label' => Yii::t('app', 'Общий оборот'),
                                     'backgroundColor' => $clientsTurnover['colors'],
                                     'borderColor' => $clientsTurnover['colors'],
                                     'data' => $clientsTurnover['stats'],
@@ -185,7 +185,7 @@ $this->registerJs('
       <!-- AREA CHART -->
       <div class="box box-info">
         <div class="box-header with-border">
-          <h3 class="box-title">Статистика по товарам</h3>
+          <h3 class="box-title"><?= Yii::t('app', 'Статистика по товарам') ?></h3>
 
           <div class="box-tools pull-right">
             
@@ -197,20 +197,20 @@ $this->registerJs('
             $columns = [
                 [
                 'attribute' => 'name',
-                'label'=>'Товар',
+                'label'=>Yii::t('app', 'Товар'),
                 'value'=>'name',
 //                'contentOptions' => ['style' => 'vertical-align:middle;'],
                 ],
                 [
                 'attribute' => 'quantity',
-                'label'=>'Кол-во',
+                'label'=>Yii::t('app', 'Кол-во'),
                 'value'=>'quantity',
 //                'contentOptions' => ['style' => 'vertical-align:middle;width:18%'],
                 ],
                 [
                 'attribute' => 'sum_spent',
                 'format'=>'raw',
-                'label'=>'Итого',
+                'label'=>Yii::t('app', 'Итого'),
                 'value'=>function ($data) { return (float)$data['sum_spent']."<i class=\"fa fa-fw fa-rub\"></i>";},
 //                'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold;width:25%'],
                 ]
@@ -240,7 +240,7 @@ $this->registerJs('
         <!-- AREA CHART -->
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title">Статистика по подключенным ресторанам</h3>
+                <h3 class="box-title"><?= Yii::t('app', 'Статистика по подключенным ресторанам') ?></h3>
             </div>
             <div class="box-body" style="display: block;">
                 <?=
@@ -254,7 +254,7 @@ $this->registerJs('
                         'labels' => $clientsDayLabels,
                         'datasets' => [
                             [
-                                'label' => 'Все рестораны',
+                                'label' => Yii::t('app', 'Все рестораны'),
                                 'backgroundColor' => "rgba(54,140,191,.2)",
                                 'borderColor' => "rgba(54,140,191,.8)",
                                 'pointBackgroundColor' => "rgba(54,140,191,1)",

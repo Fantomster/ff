@@ -157,13 +157,13 @@ label {
 
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?=$catalogBaseGoods->isNewRecord ? 'ДОБАВЛЕНИЕ ТОВАРА':'РЕДАКТИРОВАНИЕ ТОВАРА'?></h4>
+    <h4 class="modal-title"><?=$catalogBaseGoods->isNewRecord ? Yii::t('app', 'ДОБАВЛЕНИЕ ТОВАРА'):Yii::t('app', 'РЕДАКТИРОВАНИЕ ТОВАРА')?></h4>
 </div>
 <div class="modal-body" style="background:#fff !important">
 	<div class="row">
 		<div class="col-md-12 text-center">
-                    <h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете
-                        <br><small>Товар будет доступен на площадке F-Market в течении 2 минут</small><h5>
+                    <h5 class="sub-h3-text"><?= Yii::t('app', 'Вы можете разместить Ваш товар в Маркете') ?>
+                        <br><small><?= Yii::t('app', 'Товар будет доступен на площадке F-Market в течении 2 минут') ?></small><h5>
 		</div>
 	</div>
 	<div class="row">
@@ -200,23 +200,23 @@ label {
                             'id' => 'deleteAvatar',
                         ]);
                     ?>
-                    <label for="upload" class="uploadButton">Загрузить файл</label>
+                    <label for="upload" class="uploadButton"><?= Yii::t('app', 'Загрузить файл') ?></label>
                     <!--input style="opacity: 0; z-index: -1;" type="file" accept="image/*" id="upload"-->
                     <?= $form->field($catalogBaseGoods, 'image',
                             ['template'=>'<div class="input-group">{input}</div>{error}'])
-                            ->fileInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','id'=>'upload','accept'=>'image/*','style'=>'opacity: 0; z-index: -1;position: absolute;left: -9999px;']) ?>
+                            ->fileInput(['placeholder' => Yii::t('app', 'НАИМЕНОВАНИЕ ТОВАРА'),'id'=>'upload','accept'=>'image/*','style'=>'opacity: 0; z-index: -1;position: absolute;left: -9999px;']) ?>
                     <?= Html::hiddenInput('CatalogBaseGoods[image]', null, ['id' => 'image-crop-result']) ?>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-md-12">
 			<div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
-                                <label class="control-label" for="dynamicmodel-sub1">Категория товара</label>
+                                <label class="control-label" for="dynamicmodel-sub1"><?= Yii::t('app', 'Категория товара') ?></label>
                             <?php
                             echo $form->field($catalogBaseGoods, 'sub1')->widget(Select2::classname(), [
                                 //'model'=>$categorys->sub1,
                                 'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(),'id', 'name'),
-                                'options' => ['placeholder' => 'Выберите...'],
+                                'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
                                 'theme' => "default",
                                 //'hideSearch' => true,
                                 'pluginOptions' => [
@@ -259,27 +259,27 @@ label {
 				<div class="col-md-6">
                                         <?= $form->field($catalogBaseGoods, 'product', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
-    textInput(['placeholder' => 'НАИМЕНОВАНИЕ ТОВАРА','style'=>'border-radius:3px']) ?>
+    textInput(['placeholder' => Yii::t('app', 'НАИМЕНОВАНИЕ ТОВАРА'),'style'=>'border-radius:3px']) ?>
 					<?= $form->field($catalogBaseGoods, 'article', 
     ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
-    title="Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара">
+    title="' . Yii::t('app', 'Артикул товара - это сочетание букв, цифр, символов, которое обозначает данную модель товара') . ' ">
     </span></span></div>{error}'])->
-    textInput(['placeholder' => 'АРТИКУЛ']) ?>
+    textInput(['placeholder' => Yii::t('app', 'АРТИКУЛ')]) ?>
                                     <?= $form->field($catalogBaseGoods, 'price', 
     ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign" 
     data-toggle="tooltip" 
-    title="Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)">
+    title="' . Yii::t('app', 'Цена за определенную количественную единицу (или за определенное число единиц) товара, указанную в обычно применяемых в торговле данным товаром единицах измерения (веса, длины, площади, объема, штук, комплектов и т. д.)') . ' ">
     </span></span></div>{error}'])->
-    textInput(['placeholder' => 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ']) ?>
-                                    <label class="control-label" for="">Ед измерения</label>
+    textInput(['placeholder' => Yii::t('app', 'ЦЕНА ЗА ЕД ИЗМЕРЕНИЯ')]) ?>
+                                    <label class="control-label" for=""><?= Yii::t('app', 'Ед измерения') ?></label>
                                     <?php
                                     echo $form->field($catalogBaseGoods, 'ed')->widget(Select2::classname(), [
                                         'model'=>$catalogBaseGoods->ed,
                                         'data' => ArrayHelper::map(\common\models\MpEd::find()->asArray()->all(),'name', 'name'),
-                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
                                         'theme' => Select2::THEME_DEFAULT,
                                         'pluginOptions' => [
                                             'allowClear' => true,
@@ -289,16 +289,16 @@ label {
     ['template'=>' {label}<div class="input-group">{input}<span class="input-group-addon">
     <span class="glyphicon glyphicon-question-sign"
     data-toggle="tooltip" 
-    title="Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)"></span></span></div>{error}'])->
-    textInput(['placeholder' => 'КРАТНОСТЬ ПОСТАВКИ']) ?>
+    title="' . Yii::t('app', 'Минимальная партия товара (если кратоность 10, а единица измерения Пакет - это значит, что минимальная партия поставки = 10 пакетов)') . ' "></span></span></div>{error}'])->
+    textInput(['placeholder' => Yii::t('app', 'КРАТНОСТЬ ПОСТАВКИ')]) ?>
 				</div>
 				<div class="col-md-6">
-                                    <label class="control-label" for="">Страна производитель</label>
+                                    <label class="control-label" for=""><?= Yii::t('app', 'Страна производитель') ?></label>
                                     <?php 
                                     echo $form->field($catalogBaseGoods, 'region')->widget(Select2::classname(), [
                                         'model'=>$catalogBaseGoods->region,
                                         'data' => ArrayHelper::map($countrys,'id', 'name'),
-                                        'options' => ['placeholder' => 'Выберите...'],
+                                        'options' => ['placeholder' => Yii::t('app', 'Выберите...')],
                                         'theme' => "default",
                                         'pluginOptions' => [
                                             'allowClear' => true,
@@ -309,10 +309,10 @@ label {
                                     
                                     <?= $form->field($catalogBaseGoods, 'brand', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
-    textInput(['placeholder' => 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ','style'=>'border-radius:3px']) ?>
+    textInput(['placeholder' => Yii::t('app', 'НАЗВАНИЕ ПРОИЗВОДИТЕЛЯ'),'style'=>'border-radius:3px']) ?>
                                     <?= $form->field($catalogBaseGoods, 'weight', 
     ['template'=>' {label}<div class="input-group">{input}</div>{error}'])->
-    textInput(['placeholder' => 'ВЕС УПАКОВКИ','style'=>'border-radius:3px']) ?>
+    textInput(['placeholder' => Yii::t('app', 'ВЕС УПАКОВКИ'),'style'=>'border-radius:3px']) ?>
                                     <?= $form->field($catalogBaseGoods, 'note')->textArea(['style' => 'height: 100%;min-height: 104px;']) ?>
 				
                                 </div>
@@ -322,7 +322,7 @@ label {
         
 	<div class="row">
                 <div class="col-md-12" style="padding: 0 28px;">
-                    <h5>Для того, чтобы разместиться на площадке F_MARKET, свяжитесь с нами</h5>
+                    <h5><?= Yii::t('app', 'Для того, чтобы разместиться на площадке F_MARKET, свяжитесь с нами') ?></h5>
                 </div>
 		<div class="col-md-12" style="padding: 15px 28px 4px 28px;">
                     <div class="pull-left" style="border: 2px dotted #84bf76;padding: 10px 10px 0px 10px;margin-top: 0;border-radius:8px;">
@@ -338,7 +338,7 @@ label {
                                 'size'=>'lg',
                                 ],
                             'labelSettings' => [
-                                'label' => 'РАЗМЕСТИТЬ В F-MARKET',
+                                'label' => Yii::t('app', 'РАЗМЕСТИТЬ В F-MARKET'),
                                 'position' => CheckboxX::LABEL_RIGHT,
                                 'options' =>['style'=>'font-weight: 700;']
                                 ]
@@ -358,7 +358,7 @@ label {
                                 'size'=>'lg',
                                 ],
                             'labelSettings' => [
-                                'label' => 'Показывать цену в F-MARKET',
+                                'label' => Yii::t('app', 'Показывать цену в F-MARKET'),
                                 'position' => CheckboxX::LABEL_RIGHT,
                                 'options' =>['style'=>'']
                                 ]
@@ -366,11 +366,11 @@ label {
                     </div>    
                     <div class="pull-right" style="margin-top: 10px;">
                     <?= Html::submitButton($catalogBaseGoods->isNewRecord ? 
-                        '<i class="icon fa fa-plus-circle"></i> Создать' : 
-                        '<i class="icon fa fa-save"></i> Сохранить', 
+                        '<i class="icon fa fa-plus-circle"></i> ' . Yii::t('app', 'Создать') . ' ' :
+                        '<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить') . ' ',
                         ['class' => $catalogBaseGoods->isNewRecord ? 
                         'btn btn-success edit' : 'btn btn-success edit']) ?>
-                        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+                        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('app', 'Отмена') ?></a>
                     </div>	
 		</div>
 	</div>

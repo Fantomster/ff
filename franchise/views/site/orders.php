@@ -20,8 +20,8 @@ kartik\select2\Select2Asset::register($this);
 ?>
     <section class="content-header">
         <h1>
-            <i class="fa fa-home"></i> Заказы ваших ресторанов
-            <small>Список заказов подключенных вами ресторанов и их статус</small>
+            <i class="fa fa-home"></i> <?= Yii::t('app', 'Заказы ваших ресторанов') ?>
+            <small><?= Yii::t('app', 'Список заказов подключенных вами ресторанов и их статус') ?></small>
         </h1>
     </section>
     <section class="content">
@@ -44,26 +44,26 @@ kartik\select2\Select2Asset::register($this);
                         <span class="input-group-addon">
                             <i class="fa fa-search"></i>
                         </span>
-                            <?= Html::input('text', 'OrderSearch[search]', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search', 'style' => 'width:300px']) ?>
+                            <?= Html::input('text', 'OrderSearch[search]', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => Yii::t('app', 'Поиск'), 'id' => 'search', 'style' => 'width:300px']) ?>
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-6">
                         <?=
                         $form->field($searchModel, 'status')
-                            ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilterID'])
+                            ->dropDownList(['0' => Yii::t('app', 'Все'), '1' => Yii::t('app', 'Новый'), '2' => Yii::t('app', 'Отменен'), '3' => Yii::t('app', 'Выполняется'), '4' => Yii::t('app', 'Завершен')], ['id' => 'statusFilterID'])
                             ->label('Статус', ['style' => 'color:#555'])
                         ?>
                     </div>
                     <div class="col-lg-5 col-md-6 col-sm-6">
-                        <?= Html::label('Начальная дата / Конечная дата', null, ['style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('app', 'Начальная дата / Конечная дата'), null, ['style' => 'color:#555']) ?>
                         <div class="form-group" style="width: 300px; height: 44px;">
                             <?=
                             DatePicker::widget([
                                 'model' => $searchModel,
                                 'attribute' => 'date_from',
                                 'attribute2' => 'date_to',
-                                'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
-                                'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                                'options' => ['placeholder' => Yii::t('app', 'Дата'), 'id' => 'dateFrom'],
+                                'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
                                 'separator' => '-',
                                 'type' => DatePicker::TYPE_RANGE,
                                 'pluginOptions' => [
@@ -83,13 +83,13 @@ kartik\select2\Select2Asset::register($this);
                             'dataProvider' => $dataProvider,
                             'columns' => $exportColumns,
                             'fontAwesome' => true,
-                            'filename' => 'Заказы - ' . date('Y-m-d'),
+                            'filename' => Yii::t('app', 'Заказы - ') . date('Y-m-d'),
                             'encoding' => 'UTF-8',
                             'target' => ExportMenu::TARGET_SELF,
                             'showConfirmAlert' => false,
                             'showColumnSelector' => false,
                             'dropdownOptions' => [
-                                'label' => '<span class="text-label">Скачать список</span>',
+                                'label' => '<span class="text-label">' . Yii::t('app', 'Скачать список') . ' </span>',
                                 'class' => ['btn btn-outline-default btn-sm'],
                                 'style' => 'margin-right:10px;',
                             ],
@@ -167,17 +167,17 @@ kartik\select2\Select2Asset::register($this);
                                 [
                                     'attribute' => 'clientName',
                                     'value' => 'client.name',
-                                    'label' => 'Ресторан',
+                                    'label' => Yii::t('app', 'Ресторан'),
                                 ],
                                 [
                                     'attribute' => 'vendorName',
                                     'value' => 'vendor.name',
-                                    'label' => 'Поставщик',
+                                    'label' => Yii::t('app', 'Поставщик'),
                                 ],
                                 [
                                     'attribute' => 'clientManager',
                                     'value' => 'createdByProfile.full_name',
-                                    'label' => 'Заказ создал',
+                                    'label' => Yii::t('app', 'Заказ создал'),
                                 ],
                                 [
                                     'attribute' => 'acceptedByProfile.full_name',
@@ -201,7 +201,7 @@ kartik\select2\Select2Asset::register($this);
 //                                        }
 //                                        return $string;
 //                                    },
-                                    'label' => 'Заказ принял',
+                                    'label' => Yii::t('app', 'Заказ принял'),
                                     'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                                 ],
                                 [
@@ -210,7 +210,7 @@ kartik\select2\Select2Asset::register($this);
                                     'value' => function ($data) {
                                         return (float)$data['total_price'] . '<i class="fa fa-fw fa-rub"></i>';
                                     },
-                                    'label' => 'Сумма',
+                                    'label' => Yii::t('app', 'Сумма'),
                                     'contentOptions' => ['style' => 'vertical-align:middle;font-weight:bold'],
                                 ],
                                 [
@@ -220,11 +220,11 @@ kartik\select2\Select2Asset::register($this);
                                         $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
                                         return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                     },
-                                    'label' => 'Дата создания',
+                                    'label' => Yii::t('app', 'Дата создания'),
                                 ],
                                 [
                                     'attribute' => 'status',
-                                    'label' => 'Статус',
+                                    'label' => Yii::t('app', 'Статус'),
                                     'format' => 'raw',
                                     'value' => function ($data) {
                                         $statusClass = "";

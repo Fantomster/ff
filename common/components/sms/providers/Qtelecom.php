@@ -68,6 +68,26 @@ class Qtelecom extends AbstractProvider
     }
 
     /**
+     * Проверка баланса
+     * @return mixed
+     */
+    public function getBalance()
+    {
+        $post = [
+            'action' => 'balance',
+            'user' => trim($this->user),
+            'pass' => trim($this->pass),
+            'CLIENTADR' => (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false),
+            'HTTP_ACCEPT_LANGUAGE' => (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : false)
+        ];
+        //УРЛ для запроса
+        $url = ($this->on_ssl ? 'https://go.qtelecom.ru' : 'http://' . $this->hostname) . $this->path;
+        //Посылаем запрос
+        $result = $this->xmlToArray($this->curlPost($url, $post, true));
+        return $result['balance']['AGT_BALANCE'];
+    }
+
+    /**
      * Проверка статуса СМС от провайдера
      * @param $sms_id
      * @return mixed

@@ -10,11 +10,11 @@ use common\models\Organization;
         <div class="row">
             <div class="col-md-6">
                 <fieldset>
-                    <legend>Данные <?= ($organizationType == Organization::TYPE_RESTAURANT) ? "ресторана" : "поставщика" ?></legend>
+                    <legend><?= Yii::t('app', 'Данные') ?> <?= ($organizationType == Organization::TYPE_RESTAURANT) ? Yii::t('app', "ресторана") : Yii::t('app', "поставщика") ?></legend>
                     <?= $form->field($organization, 'name')->textInput() ?>
                     <?= $form->field($organization, 'city')->textInput() ?>
                     <?= $form->field($organization, 'address')->textInput() ?>
-                    <?= $form->field($organization, 'contact_name')->textInput()->label("Контактное лицо") ?>
+                    <?= $form->field($organization, 'contact_name')->textInput()->label(Yii::t('app', "Контактное лицо")) ?>
                     <?=
                             $form->field($organization, 'phone', [
 //                                'addon' => ['prepend' => ['content' => '<i class="fa fa-phone"></i>']]
@@ -29,19 +29,19 @@ use common\models\Organization;
                                     'class' => 'form-control',
                                 ],
                             ])
-                            ->label('Телефон контактного лица')
+                            ->label(Yii::t('app', 'Телефон контактного лица'))
                     ?>   
 
-                    <?= $form->field($organization, 'email')->textInput()->label("Email контактного лица") ?>
+                    <?= $form->field($organization, 'email')->textInput()->label(Yii::t('app', "Email контактного лица")) ?>
                     <?= $form->field($organization, 'website')->textInput() ?>
                     <?= $form->field($organization, 'about')->textarea(['rows' => 6, 'style' => 'height: 96px;']) ?>
 
-                    <?= $form->field($organization, 'manager_id')->dropDownList($managersArray, ['prompt'=>'Выберите менеджера'])->label('Менеджер') ?>
+                    <?= $form->field($organization, 'manager_id')->dropDownList($managersArray, ['prompt'=>Yii::t('app', 'Выберите менеджера')])->label(Yii::t('app', 'Менеджер')) ?>
 
                     <br>
                     <?php if (isset($user)) { ?>
                         <fieldset>
-                            <legend>Первый пользователь (Менеджер)</legend>
+                            <legend><?= Yii::t('app', 'Первый пользователь (Менеджер)') ?></legend>
                             <?= $form->field($profile, 'full_name')->textInput() ?>
 
                             <?= $form->field($user, 'email')->textInput() ?>
@@ -60,7 +60,7 @@ use common\models\Organization;
                                             'class' => 'form-control',
                                         ],
                                     ])
-                                    ->label('Телефон')
+                                    ->label(Yii::t('app', 'Телефон'))
                                     ->textInput()
                             ?>
                         </fieldset>
@@ -68,10 +68,10 @@ use common\models\Organization;
             </div>
             <div class="col-md-6">
                 <fieldset>
-                    <legend>Реквизиты</legend>
+                    <legend><?= Yii::t('app', 'Реквизиты') ?></legend>
                     <?php
                     if ($organizationType == Organization::TYPE_SUPPLIER) {
-                        echo $form->field($buisinessInfo, 'reward')->textInput()->label("Процент с оборота");
+                        echo $form->field($buisinessInfo, 'reward')->textInput()->label(Yii::t('app', "Процент с оборота"));
                     }
                     ?>
                     <?= $form->field($buisinessInfo, 'signed')->textInput() ?>
@@ -104,7 +104,7 @@ use common\models\Organization;
 <div class="box-footer">
     <div class="form-group">
         <?php
-        $label = $organization->isNewRecord ? 'Добавить ' . (($organizationType == Organization::TYPE_RESTAURANT) ? "ресторан" : "поставщика") : "Сохранить";
+        $label = $organization->isNewRecord ? Yii::t('app', 'Добавить ') . (($organizationType == Organization::TYPE_RESTAURANT) ? Yii::t('app', "ресторан") : Yii::t('app', "поставщика")) : Yii::t('app', "Сохранить");
         echo Html::submitButton($label, ['class' => 'btn btn-success btn-sm'])
         ?>
     </div>

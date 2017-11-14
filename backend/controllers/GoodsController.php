@@ -48,7 +48,7 @@ class GoodsController extends Controller {
                         'roles' => [Role::ROLE_ADMIN],
                     ],
                     [
-                        'actions' => ['index', 'vendor', 'category', 'get-sub-cat', 'mp-country', 'uploaded-catalogs'],
+                        'actions' => ['index', 'vendor', 'view', 'category', 'get-sub-cat', 'mp-country', 'uploaded-catalogs'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN,
@@ -320,6 +320,14 @@ class GoodsController extends Controller {
                 $product->save();
             }
         }
+    }
+
+    public function actionView($id)
+    {
+        $model = CatalogBaseGoods::findOne($id);
+        return $this->render('view', [
+            'model' => $model
+        ]);
     }
 
     /**

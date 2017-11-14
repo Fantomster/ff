@@ -55,10 +55,11 @@ class MpCategory extends \yii\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    public function attributeLabels() {
+    public function attributeLabels()
+    {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'name' => Yii::t('app', 'Категория') . ' (MP)',
             'parent' => 'Parent',
         ];
     }

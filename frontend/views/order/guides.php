@@ -364,5 +364,6 @@ Modal::widget([
     'id' => 'guideModal',
     'clientOptions' => false,
     'size' => Modal::SIZE_LARGE,
+    'header' => '<span class=\'glyphicon-left glyphicon glyphicon-refresh spinning\'></span>',
 ])
 ?>

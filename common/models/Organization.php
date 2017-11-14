@@ -137,6 +137,16 @@ class Organization extends \yii\db\ActiveRecord {
         ];
     }
 
+    public function getRouteText()
+    {
+        return $this->route == 'undefined' ? '' : $this->route;
+    }
+
+    public function getStreetText()
+    {
+        return $this->street_number == 'undefined' ? '' : $this->street_number;
+    }
+
     /**
      * @inheritdoc
      */

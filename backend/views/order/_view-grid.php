@@ -5,7 +5,6 @@ use common\models\Order;
 use yii\helpers\Html;
 
 $dataProvider->sort = false;
-$discountTypes = Order::discountDropDown();
 
 echo GridView::widget([
     'dataProvider' => $dataProvider,

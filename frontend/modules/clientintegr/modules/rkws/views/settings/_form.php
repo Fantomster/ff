@@ -17,15 +17,40 @@ use common\models\User;
     
      <?php $org = User::findOne(Yii::$app->user->id)->organization_id; // var_dump($org); ?>
 
+     <?php $pConst = \api\common\models\RkDicconst::findOne(['id' => $model->const_id]); ?>
+
     <?php $form = ActiveForm::begin(); ?>
 
     <?php echo $form->errorSummary($model); ?>
 
-    <?php echo $form->field($model, 'id')->textInput(['maxlength' => true,'disabled' => 'disabled']) ?>
+    <?php // echo $form->field($model, 'id')->textInput(['maxlength' => true,'disabled' => 'disabled']) ?>
 
-    <?php echo $form->field($model, 'const_id')->textInput(['maxlength' => true,'disabled' => 'disabled']) ?>
+    <?php // echo $form->field($model, 'const_id')->textInput(['maxlength' => true,'disabled' => 'disabled']) ?>
 
-    <?php echo $form->field($model, 'value')->textInput(['maxlength' => true]) ?>
+    <?php switch ($pConst->type) {
+
+        case \api\common\models\RkDicconst::PC_TYPE_DROP : ?>
+
+            <?php if ($pConst->denom === 'taxVat') {
+
+                echo $form->field($model, 'value')->dropDownList([
+                    '0' => '0',
+                    '1000' => '10',
+                    '1800'=>'18'
+                ]);
+            } else {
+                echo $form->field($model, 'value')->dropDownList([
+                    '0' => 'Выключено',
+                    '1' => 'Включено',
+                ]);
+            } ?>
+    <?php break;
+        default: ?>
+
+        <?php echo $form->field($model, 'value')->textInput(['maxlength' => true]) ?>
+
+    <?php } ?>
+
 
     <div class="form-group">
         <?php echo Html::submitButton($model->isNewRecord ? 'Создать' : 'Сохранить', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

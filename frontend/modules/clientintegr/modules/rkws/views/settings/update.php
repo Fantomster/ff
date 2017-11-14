@@ -41,7 +41,7 @@ use api\common\models\RkWaybill;
 </section>
 <section class="content-header">
     <?= $this->render('/default/_menu.php'); ?>
-    Редактирование настройки
+    Редактирование настройки: <?php echo "<strong>" . \api\common\models\RkDicconst::findOne(['id' => $model->const_id])->comment ." </strong>"; ?>
 </section>
 <section class="content">
     <div class="catalog-index">

@@ -55,6 +55,18 @@ class RkDicconst extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getPconstValue() {
+
+        $pConst = \api\common\models\RkPconst::findOne(['const_id' => $this->id, 'org' => Yii::$app->user->identity->organization_id]);
+
+        $res =  (!empty($pConst)) ? $pConst->value : $this->def_value;
+
+        if ($pConst == 'taxVat')
+            $res = $res/100;
+
+        return $res;
+    }
+
 
     public static function getDb()
     {

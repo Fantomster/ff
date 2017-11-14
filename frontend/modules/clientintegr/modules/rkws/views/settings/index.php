@@ -71,28 +71,30 @@ use yii;
                             'columns' => [
                                 'denom',
                                 'comment',
-                                'def_value',
+                                // 'def_value',
                                 /*
-                                [
-                                    'attribute' => 'vendor.name',
-                                    'value' => 'vendor.name',
-                                    'label' => 'Поставщик',
-                                    //'headerOptions' => ['class'=>'sorting',],
-                                ],
-                               */
-
                                 [
                                     'value' => function ($data) {
 
-                                        $pConst = \api\common\models\RkPconst::findOne(['const_id' => $data->id, 'org' => Yii::$app->user->identity->organization_id]);
+                                        $model = \api\common\models\RkDicconst::findOne(['id' =>$data->id]);
+                                        return ($model->denom == 'taxVat') ? $model->def_value/100 : (($model->def_value == 1) ? "Включено" : "Выключено");
+                                    },
+                                    'label' => 'Значение по умолчанию',
+                                ],
+                                */
+                                [
+                                    'value' => function ($data) {
 
-                                        if (isset($pConst)) {
-                                            return $pConst->value;
-                                        } else {
-                                            return $data->def_value;
-                                        }
+                                        $model = \api\common\models\RkDicconst::findOne(['id' =>$data->id]);
+
+                                        $res = $model->getPconstValue();
+
+                                        // VAT храним в единицах * 100, нужно облагородить перед выводом. 0/1 конвертим в слова
+                                        return ($model->denom == 'taxVat') ? $res/100 : (($res == 1) ? "Включено" : "Выключено");
+
                                     },
                                     'label' => 'Текущее значение',
+                                    'contentOptions' =>['style'=>'font-weight:bold;'],
                                 ],
                                 [
                                     'class' => 'yii\grid\ActionColumn',
@@ -138,4 +140,6 @@ use yii;
         </div>
     </div>
 </section>
+
+
 

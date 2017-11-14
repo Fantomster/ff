@@ -24,7 +24,7 @@ class RkDicconstSearch extends RkDicconst
      */
     public function search($params)
     {
-        $query = RkDicconst::find();
+        $query = RkDicconst::find()->andWhere(['is_active' => 1]);
         
         // add conditions that should always apply here
 

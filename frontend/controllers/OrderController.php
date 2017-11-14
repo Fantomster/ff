@@ -1141,8 +1141,7 @@ class OrderController extends DefaultController {
 //                    if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
 //                        $text = $subject;
 //                        $target = $recipient->profile->phone;
-//                        $sms = new \common\components\QTSMS();
-//                        $sms->post_message($text, $target);
+//                        Yii::$app->sms->send($text, $target);
 //                    }
 //                }
                 $order->calculateTotalPrice();
@@ -1160,8 +1159,7 @@ class OrderController extends DefaultController {
 //                    if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
 //                        $text = $subject;
 //                        $target = $recipient->profile->phone;
-//                        $sms = new \common\components\QTSMS();
-//                        $sms->post_message($text, $target);
+//                        Yii::$app->sms->send($text, $target);
 //                    }
 //                }
             }
@@ -1649,8 +1647,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
                 $text = $senderOrg->name . " изменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1685,8 +1682,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
                 $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1723,8 +1719,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
                 $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1758,8 +1753,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
                 $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }
@@ -1793,8 +1787,7 @@ class OrderController extends DefaultController {
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
                 $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $recipient->profile->phone;
-                $sms = new \common\components\QTSMS();
-                $sms->post_message($text, $target);
+                Yii::$app->sms->send($text, $target);
             }
         }
     }

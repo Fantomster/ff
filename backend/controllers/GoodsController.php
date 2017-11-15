@@ -112,6 +112,7 @@ class GoodsController extends Controller {
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
             if ($catalogBaseGoods->load($post)) {
+                $catalogBaseGoods->status = CatalogBaseGoods::STATUS_ON;
                 $catalogBaseGoods->price = preg_replace("/[^-0-9\.]/", "", str_replace(',', '.', $catalogBaseGoods->price));
                 if($supp_org_id){
                     $catalogBaseGoods->supp_org_id = $supp_org_id;

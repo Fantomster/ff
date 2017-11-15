@@ -25,11 +25,12 @@ use yii\helpers\Html;
                             
                             <?= Html::a('Проверка', ['srequest/check'], ['class'=>'btn btn-md fk-button']); ?>    
                        -->
-                            <?= Html::a('Приходные накладные', ['waybill/index'], ['class'=>'btn btn-md fk-button']); ?>   
-                             
-                    <!--    <?= Html::a('Задачи', ['#'], ['class'=>'btn btn-md fk-button']); ?>    
-                            <?= Html::a('История', ['#'], ['class'=>'btn btn-md fk-button']); ?>                            
-                    -->
+                            <?= Html::a('Приходные накладные', ['waybill/index'], ['class'=>'btn btn-md fk-button']); ?>
+                            <?= Html::a('Настройки интеграции', ['settings/index'], ['class'=>'btn btn-md fk-button']); ?>
+
+                            <!--    <?= Html::a('Задачи', ['#'], ['class'=>'btn btn-md fk-button']); ?>
+                                    <?= Html::a('История', ['#'], ['class'=>'btn btn-md fk-button']); ?>
+                            -->
                         </div>
                         <div class="col-md-4 text-right">
                             <?= Html::a('<i class="fa fa-pencil" aria-hidden="true"></i> Документация', ['#'],['class'=>'btn btn-default btn-sm m-t']) ?>

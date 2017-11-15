@@ -126,7 +126,7 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
         }
 
         $dataProvider = new ActiveDataProvider(['query' => $records,
-            'sort' => false,
+            'sort' => ['defaultOrder' => ['munit_rid' => SORT_ASC]],
         ]);
         
         $lic = $this->checkLic();       
@@ -230,6 +230,29 @@ class WaybillController extends \frontend\modules\clientintegr\controllers\Defau
                     ->where('acc = :acc', [':acc' => User::findOne(Yii::$app->user->id)->organization_id])
                     ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
                     ->limit(20);
+
+            $command = $query->createCommand();
+            $command->db = Yii::$app->db_api;
+            $data = $command->queryAll();
+            $out['results'] = array_values($data);
+        }
+        //  $out['results'][] = ['id' => '0', 'text' => 'Создать контрагента'];
+        return $out;
+    }
+
+    public function actionAutocompleteagent($term = null, $org) {
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (!is_null($term)) {
+            $query = new \yii\db\Query;
+
+            // $query->select("`id`, CONCAT(`inn`,`denom`) AS `text`")
+            $query->select(['id' => 'rid', 'text' => 'denom'])
+                ->from('rk_agent')
+                ->where('acc = :acc', [':acc' => $org])
+                ->andwhere("denom like :denom ", [':denom' => '%' . $term . '%'])
+                ->limit(20);
 
             $command = $query->createCommand();
             $command->db = Yii::$app->db_api;

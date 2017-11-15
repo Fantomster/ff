@@ -581,13 +581,16 @@ class OrderController extends DefaultController {
         if ($product) {
             $baseProduct = $product->baseProduct;
             $price = $product->price;
+            $currencySymbol = $product->catalog->currency->symbol;
         } else {
             $baseProduct = CatalogBaseGoods::findOne(['id' => $get['id'], 'cat_id' => $get['cat_id']]);
             $price = $baseProduct->price;
+            $currencySymbol = $baseProduct->catalog->currency->symbol;
         }
         $vendor = $baseProduct->vendor;
+        
 
-        return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId'));
+        return $this->renderAjax("_order-details", compact('baseProduct', 'price', 'vendor', 'productId', 'catId', 'currencySymbol'));
     }
 
     public function actionAjaxRemovePosition($vendor_id, $product_id) {

@@ -12,7 +12,6 @@ use kartik\grid\GridView;
 use kartik\editable\Editable;
 use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
-use yii;
 
 
 ?>

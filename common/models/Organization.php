@@ -253,7 +253,7 @@ class Organization extends \yii\db\ActiveRecord
         if (!$all) {
             $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
         }
-        $query->where(['relation_supp_rest.deleted' => false]);
+        $query->andWhere(['relation_supp_rest.deleted' => false]);
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);
         }

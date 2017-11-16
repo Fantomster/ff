@@ -5,25 +5,12 @@ namespace market\controllers;
 use yii\web\HttpException;
 use Yii;
 use yii\web\Controller;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use common\models\User;
 use common\models\Order;
 use common\models\Organization;
-use common\models\Delivery;
-use common\models\Role;
-use common\models\Profile;
-use common\models\search\UserSearch;
 use common\models\RelationSuppRest;
-use common\models\RelationCategory;
-use common\models\Category;
-use common\models\Catalog;
-use common\models\CatalogGoods;
-use common\models\GoodsNotes;
 use common\models\CatalogBaseGoods;
 use common\models\OrderContent;
-use common\components\AccessRule;
-use yii\helpers\Url;
+use common\models\Catalog;
 use yii\helpers\Json;
 
 //ini_set('xdebug.max_nesting_level', 200);
@@ -605,8 +592,14 @@ class SiteController extends Controller {
             }
         }
         
+        $currency = '';
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $id, 'type' => Catalog::BASE_CATALOG]);
+        if (!empty($baseCatalog)) {
+            $currency = $baseCatalog->currency->symbol;
+        }
+        
         if ($vendor && !$relationSupplier) {
-            return $this->render('/site/supplier', compact('vendor'));
+            return $this->render('/site/supplier', compact('vendor', 'currency'));
         } else {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }

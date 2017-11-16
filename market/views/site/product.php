@@ -7,6 +7,7 @@ use yii\widgets\Breadcrumbs;
 
 $vendor = $product->vendor;
 $delivery = $vendor->delivery;
+$currency = $product->catalog->currency->symbol;
 ?>
 
 <?php
@@ -97,7 +98,7 @@ font-family: "HelveticaBold",Arial,sans-serif;
               <?php if(empty($product->mp_show_price)){ ?>
               <h2 style="color:#dfdfdf;padding-bottom:15px">договорная цена</h2>
               <?php } else {?>
-              <h2 style="padding-bottom:15px"><?=floatval($product->price); ?> <small><?= $product->catalog->currency->symbol; ?></small></h2>
+              <h2 style="padding-bottom:15px"><?=floatval($product->price); ?> <small><?= $currency ?></small></h2>
               <?php } ?>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-6 show-supp-info">
@@ -179,9 +180,9 @@ $this->registerJs($js2, \yii\web\View::POS_READY);
                     <h5><span class="title-param">Кратность поставки:</span> <?= empty($product->units) ? '<span class="noinfo">нет информации</span>':$product->units ?></h5>   
                 </div>
                 <div class="col-md-6">
-                    <h5><span class="title-param">Стоимость доставки:</span> <?= $delivery->delivery_charge ?> руб.</h5>    
-                    <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> руб.</h5> 
-                    <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> руб.</h5>   
+                    <h5><span class="title-param">Стоимость доставки:</span> <?= $delivery->delivery_charge ?> <?= $currency ?></h5>    
+                    <h5><span class="title-param">Бесплатная доставка от:</span> <?= $delivery->min_free_delivery_charge ?> <?= $currency ?></h5> 
+                    <h5><span class="title-param">Минимальный заказ:</span> <?= $delivery->min_order_price ?> <?= $currency ?></h5>   
                     <!--h5><span class="title-param">Адрес самовывоза:</span> </h5-->   
                     <h5><span class="title-param">Дни доставки:</span> <?= $delivery->getDaysString() ?></h5>  
                 </div>

@@ -189,59 +189,59 @@ Modal::end();
                     ])
                     ?>
                     <div class="btn-group pull-right" placement="left" style="margin-right: 10px">
-                    <?=
-                    ExportMenu::widget([
-                        'dataProvider' => $dataProvider,
-                        'columns' => $exportColumns,
-                        'fontAwesome' => true,
-                        'filename' => 'Главный каталог - ' . date('Y-m-d'),
-                        'encoding' => 'UTF-8',
-                        'target' => ExportMenu::TARGET_SELF,
-                        'showConfirmAlert' => false,
-                        'showColumnSelector' => false,
-                        'batchSize' => 200,
-                        'timeout' => 0,
-                        'dropdownOptions' => [
-                            'label' => '<span class="text-label">экспорт</span>',
-                            'class' => ['btn btn-outline-default btn-sm pull-right']
-                        ],
-                        'exportConfig' => [
-                            ExportMenu::FORMAT_HTML => false,
-                            ExportMenu::FORMAT_TEXT => false,
-                            ExportMenu::FORMAT_EXCEL => false,
-                            ExportMenu::FORMAT_PDF => false,
-                            ExportMenu::FORMAT_CSV => false,
-                            ExportMenu::FORMAT_EXCEL_X => [
-                                'label' => Yii::t('kvexport', 'Excel'),
-                                'icon' => 'file-excel-o',
-                                'iconOptions' => ['class' => 'text-success'],
-                                'linkOptions' => [],
-                                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
-                                'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
-                                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                'extension' => 'xlsx',
-                                'writer' => 'Excel2007',
-                                'styleOptions' => [
-                                    'font' => [
-                                        'bold' => true,
-                                        'color' => [
-                                            'argb' => 'FFFFFFFF',
-                                        ],
-                                    ],
-                                    'fill' => [
-                                        'type' => PHPExcel_Style_Fill::FILL_NONE,
-                                        'startcolor' => [
-                                            'argb' => 'FFFFFFFF',
-                                        ],
-                                        'endcolor' => [
-                                            'argb' => 'FFFFFFFF',
-                                        ],
-                                    ],
-                                ]
+                        <?=
+                        ExportMenu::widget([
+                            'dataProvider' => $dataProvider,
+                            'columns' => $exportColumns,
+                            'fontAwesome' => true,
+                            'filename' => 'Главный каталог - ' . date('Y-m-d'),
+                            'encoding' => 'UTF-8',
+                            'target' => ExportMenu::TARGET_SELF,
+                            'showConfirmAlert' => false,
+                            'showColumnSelector' => false,
+                            'batchSize' => 200,
+                            'timeout' => 0,
+                            'dropdownOptions' => [
+                                'label' => '<span class="text-label">экспорт</span>',
+                                'class' => ['btn btn-outline-default btn-sm pull-right']
                             ],
-                        ],
-                    ]);
-                    ?>
+                            'exportConfig' => [
+                                ExportMenu::FORMAT_HTML => false,
+                                ExportMenu::FORMAT_TEXT => false,
+                                ExportMenu::FORMAT_EXCEL => false,
+                                ExportMenu::FORMAT_PDF => false,
+                                ExportMenu::FORMAT_CSV => false,
+                                ExportMenu::FORMAT_EXCEL_X => [
+                                    'label' => Yii::t('kvexport', 'Excel'),
+                                    'icon' => 'file-excel-o',
+                                    'iconOptions' => ['class' => 'text-success'],
+                                    'linkOptions' => [],
+                                    'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                                    'alertMsg' => Yii::t('kvexport', 'Файл EXCEL( XLSX ) будет генерироваться для загрузки'),
+                                    'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    'extension' => 'xlsx',
+                                    'writer' => 'Excel2007',
+                                    'styleOptions' => [
+                                        'font' => [
+                                            'bold' => true,
+                                            'color' => [
+                                                'argb' => 'FFFFFFFF',
+                                            ],
+                                        ],
+                                        'fill' => [
+                                            'type' => PHPExcel_Style_Fill::FILL_NONE,
+                                            'startcolor' => [
+                                                'argb' => 'FFFFFFFF',
+                                            ],
+                                            'endcolor' => [
+                                                'argb' => 'FFFFFFFF',
+                                            ],
+                                        ],
+                                    ]
+                                ],
+                            ],
+                        ]);
+                        ?>
                     </div>
 
                     <?=
@@ -259,7 +259,7 @@ Modal::end();
                         ],
                     ])
                     ?>
-                    <?= 
+                    <?=
                     Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
@@ -326,9 +326,9 @@ Modal::end();
                                 $link = CheckboxX::widget([
                                             'name' => 'status_' . $data['id'],
                                             'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                            'value' => $data['status'] == 0 ? 0 : 1,
+                                            'value' => $data['status'],
                                             'autoLabel' => true,
-                                            'options' => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status'],
+                                            'options' => ['id' => 'status_' . $data['id'], 'data-id' => $data['id'], 'event-type' => 'set-status', 'value' => $data['status']],
                                             'pluginOptions' => [
                                                 'threeState' => false,
                                                 'theme' => 'krajee-flatblue',
@@ -457,12 +457,13 @@ Modal::end();
                         'format' => 'raw',
                         'contentOptions' => ['style' => 'width:50px;'],
                         'value' => function ($data) {
+                            $value = ($data->cat_id == Yii::$app->request->get('id')) ? 1 : 0;
                             $link = CheckboxX::widget([
                                         'name' => 'setcatalog_' . $data->id,
                                         'initInputType' => CheckboxX::INPUT_CHECKBOX,
-                                        'value' => $data->cat_id == Yii::$app->request->get('id') ? 1 : 0,
+                                        'value' => $value,
                                         'autoLabel' => true,
-                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog'],
+                                        'options' => ['id' => 'setcatalog_' . $data->id, 'data-id' => $data->rest_org_id, 'event-type' => 'set-catalog', 'value' => $value],
                                         'pluginOptions' => [
                                             'threeState' => false,
                                             'theme' => 'krajee-flatblue',

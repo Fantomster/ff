@@ -192,6 +192,8 @@ Modal::end();
                         'fontAwesome' => true,
                         'filename' => Yii::t('app', 'Главный каталог - ') . date('Y-m-d'),
                         'encoding' => 'UTF-8',
+                        'batchSize' => 200,
+                        'timeout' => 0,
                         'target' => ExportMenu::TARGET_SELF,
                         'showConfirmAlert' => false,
                         'showColumnSelector' => false,

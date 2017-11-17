@@ -87,6 +87,8 @@ $gridColumns = [
             ExportMenu::FORMAT_PDF => false,
             ExportMenu::FORMAT_EXCEL_X => false,
         ],
+        'batchSize' => 200,
+        'timeout' => 0
     ]);
     ?>
     <?php Pjax::begin(['enablePushState' => true, 'id' => 'userList', 'timeout' => 5000]); ?>    

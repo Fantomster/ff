@@ -390,13 +390,13 @@ $disabled = true;
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
-                            <?= 
-                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
-                        'class' => 'btn btn-default pull-left',
-                        'style' => ['margin'=>'0 5px;'],
-                        'id' => 'changeCurrency',
-                    ])
-                    ?>
+                <?=
+                Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                    'class' => 'btn btn-default pull-left',
+                    'style' => ['margin' => '0 5px;'],
+                    'id' => 'changeCurrency',
+                ])
+                ?>
                 <button type="button" class="btn btn-gray" data-dismiss="modal" id="btnCancel">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
             </div>
@@ -410,7 +410,7 @@ $disabled = true;
 
 
             <p class = "p_head">Добавьте информацию о Ваших поставщиках и их продуктов. Нажмите "Продолжить" для завершения настроек</p>
-            <button class = "button_head" id="continue" <?= $relations ? "" : "disabled"?>>Продолжить</button>
+            <button class = "button_head" id="continue" <?= $relations ? "" : "disabled" ?>>Продолжить</button>
         </div>
         <div class="col-lg-6 col-md-12">
             <div class="block_wrap_info">

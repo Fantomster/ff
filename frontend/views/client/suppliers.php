@@ -7,8 +7,9 @@ use yii\web\View;
 use kartik\form\ActiveForm;
 use yii\bootstrap\Modal;
 use yii\widgets\Pjax;
-use kartik\widgets\FileInput;
+use common\models\Currency;
 use yii\helpers\Url;
+use yii\helpers\Json;
 
 kartik\select2\Select2Asset::register($this);
 \frontend\assets\HandsOnTableAsset::register($this);
@@ -43,6 +44,11 @@ $this->registerCss('
 .file-input{width: 400px; float: left;}
 
 ');
+
+$currencySymbolListList = Currency::getSymbolList();
+$firstCurrency = $currencySymbolListList[1];
+$currencyList = Json::encode(Currency::getList());
+$currencySymbolList = Json::encode($currencySymbolListList);
 ?>
 <div id="modal_addProduct" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -60,6 +66,13 @@ $this->registerCss('
                 <div class="handsontable" id="CreateCatalog"></div>   
             </div>
             <div class="modal-footer">
+                <?=
+                Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                    'class' => 'btn btn-default pull-left',
+                    'style' => ['margin' => '0 5px;'],
+                    'id' => 'changeCurrency',
+                ])
+                ?>
                 <button id="btnCancel" type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
                 <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
             </div>

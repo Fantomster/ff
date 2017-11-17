@@ -113,10 +113,18 @@ class Qtelecom extends AbstractProvider
             switch ($result['MESSAGES']['MESSAGE']['SMSSTC_CODE']) {
                 case 'queued':
                 case 'wait':
-                case 'accepted': $status_id = 1; break;
-                case 'delivered': $status_id = 2; break;
-                case 'not_delivered': $status_id = 5; break;
-                case 'failed': $status_id = 21; break;
+                case 'accepted':
+                    $status_id = 1;
+                    break;
+                case 'delivered':
+                    $status_id = 2;
+                    break;
+                case 'not_delivered':
+                    $status_id = 5;
+                    break;
+                case 'failed':
+                    $status_id = 21;
+                    break;
             }
             if (isset($status_id)) {
                 $return = SmsStatus::findOne(['status' => $status_id]);
@@ -146,6 +154,7 @@ class Qtelecom extends AbstractProvider
             } else {
                 $this->setError($this->message, $this->target, $array['errors']['error']);
             }
+            return;
         }
         //Если отпавляли нескольким получателям
         if (isset($array['result'])) {
@@ -156,9 +165,6 @@ class Qtelecom extends AbstractProvider
             } elseif (count($array['result']['sms']) == 1) {
                 $this->sendSmsLog($this->message, $this->target, $array['result']['sms']['@attributes']['id']);
             }
-        } else {
-            //error_log
-            \Yii::error(print_r($result, true));
         }
     }
 }

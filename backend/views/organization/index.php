@@ -84,6 +84,10 @@ $gridColumns = [
         'target' => ExportMenu::TARGET_SELF,
         'batchSize' => 200,
         'timeout' => 0,
+        'hiddenColumns' => [
+            6,
+            7
+        ],
         'exportConfig' => [
             ExportMenu::FORMAT_PDF => false,
             ExportMenu::FORMAT_EXCEL => false,

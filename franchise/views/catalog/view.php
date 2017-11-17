@@ -240,6 +240,8 @@ $grid = [
                         'target' => ExportMenu::TARGET_SELF,
                         'showConfirmAlert' => false,
                         'showColumnSelector' => false,
+                        'batchSize' => 200,
+                        'timeout' => 0,
                         'dropdownOptions' => [
                             'label' => '<span class="text-label">' . Yii::t('app', 'Скачать каталог') . '</span>',
                             'class' => ['btn btn-outline-default btn-sm'],

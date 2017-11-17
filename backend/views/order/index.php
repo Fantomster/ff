@@ -90,9 +90,22 @@ $gridColumns = [
         'dataProvider' => $dataProvider,
         'columns' => $gridColumns,
         'target' => ExportMenu::TARGET_SELF,
+        'batchSize' => 200,
+        'timeout' => 0,
         'exportConfig' => [
             ExportMenu::FORMAT_PDF => false,
-            ExportMenu::FORMAT_EXCEL_X => false,
+            ExportMenu::FORMAT_EXCEL => false,
+            ExportMenu::FORMAT_EXCEL_X => [
+                'label' => Yii::t('kvexport', 'Excel 2007+ (xlsx)'),
+                'icon' => 'floppy-remove',
+                'iconOptions' => ['class' => 'text-success'],
+                'linkOptions' => [],
+                'options' => ['title' => Yii::t('kvexport', 'Microsoft Excel 2007+ (xlsx)')],
+                'alertMsg' => Yii::t('kvexport', 'The EXCEL 2007+ (xlsx) export file will be generated for download.'),
+                'mime' => 'application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'extension' => 'xlsx',
+                'writer' => 'Excel2007'
+            ],
         ],
     ]);
     ?>

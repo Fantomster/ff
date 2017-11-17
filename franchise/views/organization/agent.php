@@ -131,6 +131,8 @@ $this->registerCss("
                             'target' => ExportMenu::TARGET_SELF,
                             'showConfirmAlert' => false,
                             'showColumnSelector' => false,
+                            'batchSize' => 200,
+                            'timeout' => 0,
                             'dropdownOptions' => [
                                 'label' => '<span class="text-label">' . Yii::t('app', 'Скачать список') . ' </span>',
                                 'class' => ['btn btn-outline-default btn-sm'],

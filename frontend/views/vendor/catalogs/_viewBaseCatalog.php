@@ -48,8 +48,8 @@ $gridColumnsCatalog = [
     [
     'label'=>'Цена',
     'format' => 'raw',
-    'value'=>function ($data) {
-    return $data->price."<i class=\"fa fa-fw fa-rub\"></i>";
+    'value'=>function ($data) use ($currencySymbol) {
+    return $data->price." ".$currencySymbol;
     },
     'contentOptions' => ['style' => 'vertical-align:middle'],
     ],

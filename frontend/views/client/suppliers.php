@@ -365,7 +365,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (<span class="currency-symbol">'+currencies[currentCurrency-1]+'</span>)'],
+  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена'],
   columns: [
         {data: 'product', wordWrap:true},
         {data: 'ed', allowEmpty: false},

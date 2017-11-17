@@ -73,10 +73,9 @@ $gridColumns = [
 ?>
 <div class="organization-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?> .</h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
     <?php
     echo ExportMenu::widget([
         'dataProvider' => $dataProvider,
@@ -105,6 +104,8 @@ $gridColumns = [
         ],
     ]);
     ?>
+
+    <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,

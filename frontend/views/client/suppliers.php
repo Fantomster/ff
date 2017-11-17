@@ -328,6 +328,10 @@ $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
 $customJs = <<< JS
+        
+var currencies = $.map($currencySymbolList, function(el) { return el });
+var currentCurrency = 1;
+   
 $(".content").on("change keyup paste cut", "#searchString", function() {
     if (timer) {
         clearTimeout(timer);
@@ -361,7 +365,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (руб)'],
+  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (<span class="currency-symbol">'+currencies[currentCurrency-1]+'</span>)'],
   columns: [
         {data: 'product', wordWrap:true},
         {data: 'ed', allowEmpty: false},
@@ -578,6 +582,7 @@ $('#invite').click(function(e){
         var form = $("#SuppliersFormSend")[0];
         var formData = new FormData(form);
         formData.append('catalog', catalog);
+        formData.append('currency',currentCurrency);
 	$.ajax({
                     processData: false,
                     contentType: false,
@@ -709,6 +714,37 @@ $("#organization-name").keyup(function() {
     $(".client-manager-name").html("$clientName");
     $(".supplier-org-name").html($("#organization-name").val());
 });
+        
+    $(document).on("click", "#changeCurrency", function() {
+        swal({
+            title: 'Изменение валюты каталога',
+            input: 'select',
+            inputOptions: $currencyList,
+            inputPlaceholder: 'Выберите новую валюту каталога',
+            showCancelButton: true,
+            allowOutsideClick: false,
+            inputValidator: function (value) {
+                return new Promise(function (resolve, reject) {
+                    if (!value) {
+                        reject('Выберите валюту из списка')
+                    }
+                    if (value != currentCurrency) {
+                        currentCurrency = value;
+                        $(".currency-symbol").html(currencies[currentCurrency-1]);
+                        resolve();
+                    } else {
+                        reject('Данная валюта уже используется!')
+                    }
+                })
+            },
+        }).then(function (result) {
+            swal({
+                title: 'Валюта каталога изменена!',
+                type: 'success',
+                showCancelButton: false,
+            })
+        })        
+    });        
 JS;
 $this->registerJs($customJs, View::POS_READY);
 ?>

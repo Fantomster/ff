@@ -59,7 +59,7 @@ $gridColumns = [
         'label' => 'У франшизы',
         'format' => 'raw',
         'value' => function ($data) {
-            if(\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$data->id])->exists()){
+            if(!empty($data->franchiseeAssociate)){
               return '<span class="text-success">Да</span>';
             }
             return '';
@@ -73,10 +73,9 @@ $gridColumns = [
 ?>
 <div class="organization-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= Html::encode($this->title) ?> .</h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
     <?php
     echo ExportMenu::widget([
         'dataProvider' => $dataProvider,
@@ -84,6 +83,10 @@ $gridColumns = [
         'target' => ExportMenu::TARGET_SELF,
         'batchSize' => 200,
         'timeout' => 0,
+        'noExportColumns' => [
+            6,
+            7
+        ],
         'exportConfig' => [
             ExportMenu::FORMAT_PDF => false,
             ExportMenu::FORMAT_EXCEL => false,
@@ -101,6 +104,8 @@ $gridColumns = [
         ],
     ]);
     ?>
+
+    <?php Pjax::begin(['enablePushState' => true, 'id' => 'organizationList', 'timeout' => 5000]); ?>
     <?=
     GridView::widget([
         'dataProvider' => $dataProvider,

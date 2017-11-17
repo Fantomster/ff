@@ -260,12 +260,16 @@ class Order extends \yii\db\ActiveRecord {
             $free_delivery = 0;
         }
         if ((($free_delivery > 0) && ($total_price < $free_delivery)) || ($free_delivery == 0)) {
+            $test = $this->vendor->delivery->delivery_charge;
             return $this->vendor->delivery->delivery_charge;
         }
         return 0;
     }
 
     public function forFreeDelivery() {
+        if ($this->vendor->delivery->min_free_delivery_charge == 0) {
+            return -1;
+        }
         if (isset($this->vendor->delivery)) {
             $diff = $this->vendor->delivery->min_free_delivery_charge - $this->rawPrice;
         } else {

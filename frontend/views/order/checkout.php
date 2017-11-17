@@ -398,10 +398,12 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                             <div class="block_right_wrap_1">
                                 <?php if ($forMinOrderPrice) { ?>
                                     <p>до минимального заказа</p><p><?= $forMinOrderPrice ?> <?= $currencySymbol ?></p>
-                                <?php } elseif ($forFreeDelivery) { ?>
+                                <?php } elseif ($forFreeDelivery > 0) { ?>
                                     <p>до бесплатной доставки </p><p><?= $forFreeDelivery ?> <?= $currencySymbol ?></p>
-                                <?php } else { ?>
+                                <?php } elseif ($forFreeDelivery == 0) { ?>
                                     <p>бесплатная доставка!</p>
+                                <?php } else { ?>
+                                    <p>включая доставку</p><p><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
                                 <?php } ?>
                                 <?=
                                 Html::button('Оформить заказ', [

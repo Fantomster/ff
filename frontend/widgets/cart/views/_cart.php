@@ -41,6 +41,7 @@ $count = count($orders);
                 <?php } 
                     $forMinOrderPrice = $order->forMinOrderPrice();
                     $forFreeDelivery = $order->forFreeDelivery();
+                    $test = 1;
                 ?>
                 <div class="block_sum">
                     <div class="row">
@@ -51,9 +52,9 @@ $count = count($orders);
                         <div class="col-md-6 min_zakaz">
                         <?php if ($forMinOrderPrice) { ?>
                         до минимального заказа <br><span><?= $forMinOrderPrice ?> <?= $order->currency->symbol ?></span>
-                        <?php } elseif ($forFreeDelivery) { ?>
+                        <?php } elseif ($forFreeDelivery > 0) { ?>
                         до бесплатной доставки <br><span><?= $forFreeDelivery ?> <?= $order->currency->symbol ?></span>
-                        <?php } else { ?>
+                        <?php } elseif ($forFreeDelivery == 0) { ?>
                         бесплатная доставка!<br><span>&nbsp;</span>
                         <?php } ?>
                         </div>

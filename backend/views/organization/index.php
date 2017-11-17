@@ -59,7 +59,7 @@ $gridColumns = [
         'label' => 'У франшизы',
         'format' => 'raw',
         'value' => function ($data) {
-            if(\common\models\FranchiseeAssociate::find()->where(['organization_id'=>$data->id])->exists()){
+            if(!empty($data->franchiseeAssociate)){
               return '<span class="text-success">Да</span>';
             }
             return '';

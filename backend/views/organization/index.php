@@ -84,7 +84,7 @@ $gridColumns = [
         'target' => ExportMenu::TARGET_SELF,
         'batchSize' => 200,
         'timeout' => 0,
-        'hiddenColumns' => [
+        'noExportColumns' => [
             6,
             7
         ],

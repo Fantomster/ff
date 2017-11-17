@@ -79,9 +79,9 @@ $this->registerCss('
                 [
                     'attribute' => 'price',
                     'label' => 'Цена',
-                    'value' => function ($data) {
+                    'value' => function ($data) use ($baseCurrencySymbol) {
                         $price = preg_replace('/[^\d.,]/', '', $data['price']);
-                        return $price . " руб.";
+                        return $price . " ".$baseCurrencySymbol;
                     },
                 ],
                 [

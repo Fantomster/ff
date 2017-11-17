@@ -1459,6 +1459,7 @@ class VendorController extends DefaultController {
         if (empty($baseCatalog)) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
+        $baseCurrencySymbol = $baseCatalog->currency->symbol;
         $searchString = "";
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
             $searchString = "%" . trim(\Yii::$app->request->get('searchString')) . "%";
@@ -1501,12 +1502,14 @@ class VendorController extends DefaultController {
                 ]
             ],
         ]);
-        return $this->render('newcatalog/step-2', compact('searchModel', 'dataProvider', 'cat_id'));
+        return $this->render('newcatalog/step-2', compact('searchModel', 'dataProvider', 'cat_id', 'baseCurrencySymbol'));
     }
 
     public function actionStep3Copy($id) {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
+        $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
+        $baseCurrencySymbol = $baseCatalog->currency->symbol;
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         $currentCatalog = $model;
         if (empty($model)) {
@@ -1592,7 +1595,7 @@ class VendorController extends DefaultController {
             return $result;
             exit;
         }
-        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog'));
+        return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
     }
 
     public function actionStep3($id) {

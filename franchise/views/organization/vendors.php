@@ -225,9 +225,9 @@ $this->registerCss("
                             [
                                 'format' => 'raw',
                                 'attribute' => 'name',
-                                'value' => function($data) {
-                                    if($data['self_registered']==\common\models\FranchiseeAssociate::SELF_REGISTERED){
-                                        return $data['name'] . " &nbsp; <img src='/images/new.png' alt='Клиент самостоятельно зарегистрировался' title='Клиент самостоятельно зарегистрировался'>";
+                                'value' => function ($data) {
+                                    if ($data['self_registered'] == \common\models\FranchiseeAssociate::SELF_REGISTERED) {
+                                        return $data['name'] . " &nbsp; <i title='" . Yii::t('app', 'Клиент самостоятельно зарегистрировался') . "' class='text-success' aria-hidden='true'><img src='/images/new.png' alt='" . Yii::t('app', 'Клиент самостоятельно зарегистрировался') . "'></i>";
                                     }
                                     return $data['name'];
                                 },

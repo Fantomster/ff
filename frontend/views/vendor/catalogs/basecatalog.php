@@ -697,6 +697,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             inputPlaceholder: 'Выберите новую валюту каталога',
             showCancelButton: true,
             showLoaderOnConfirm: true,
+            confirmButtonText: 'Далее',
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {

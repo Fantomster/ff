@@ -81,6 +81,8 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                         </div>
                     </div> 
                     <div class="col-sm-8">
+                        <?php // Заглушка от 20.11.2017 при выкладе релиза. Скрываем кнопку Импорта т.к. не работают все функции
+                        /*
                         <?=
                         Modal::widget([
                             'id' => 'importToXls',
@@ -95,7 +97,10 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                                 'style' => 'margin-right:10px;',
                             ],
                         ])
-                        ?>    
+                        ?>
+                        // Конец заглушки
+                        */
+                        ?>
                         <?=
                         Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
                             'class' => 'btn btn-outline-default btn-sm pull-right',

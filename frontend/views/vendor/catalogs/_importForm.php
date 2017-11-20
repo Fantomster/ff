@@ -14,6 +14,10 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
     'options' => ['enctype' => 'multipart/form-data'],
     'action' => Url::toRoute(['vendor/import','id'=>Yii::$app->request->get('id')])])
 ?>
+
+<?php  // Заглушка до исправления функций загрузки каталога, надо было срочно выкладывать релиз (Roman, 20.11.2017)
+$importModel->importType = 1;  ?>
+
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h4 class="modal-title">Импорт из файла</h4>
@@ -24,7 +28,7 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
         '1' =>'Добавить новые товары',
         '2' =>'Обновить цены',
         '3' =>'Добавить на MixMarket'
-    ]); ?>
+    ],['disabled' => 'disabled']); ?>
 <?= $form->field($importModel, 'importFile',['template' => "{error}\n{label}\n{hint}\n{input}"])->fileInput()->label('Выберите .XLSX') ?>
 </div>
 <div class="modal-footer">
@@ -35,6 +39,10 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
        Url::to('@web/upload/template.xlsx'),
        ['class' => 'btn btn-default', 'style'=>'display:block;margin-bottom:5px;text-align:left']) 
     ?>
+
+    <?php  // Загрушка см выше от 20.11.2017, временно убраны шаблоны загрузки для неработающих методов
+    /*
+
     <?= Html::a(
        '<i class="fa fa-list-alt"></i> Шаблон - обновить цены',
        Url::to('@web/upload/template_update.xlsx'),
@@ -45,6 +53,9 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
        Url::to('@web/upload/template_market.xlsx'),
        ['class' => 'btn btn-default', 'style'=>'display:block;margin-left:0px;text-align:left']) 
     ?>
+
+*/ ?>
+
         </div>
         <div class="col-md-4">
     <?= Html::submitButton('<i class="glyphicon glyphicon-import"></i> Импорт',

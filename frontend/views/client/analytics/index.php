@@ -285,7 +285,9 @@ HTML;
                         [
                             'attribute' => 'quantity',
                             'label' => 'Кол-во',
-                            'value' => 'quantity',
+                            'value' => function ($data) {
+                                return number_format($data['quantity'], 2, '.', '');
+                            },
                             'contentOptions' => ['style' => 'vertical-align:middle;width:18%'],
                         ],
                         [

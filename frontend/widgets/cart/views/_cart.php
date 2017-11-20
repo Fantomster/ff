@@ -45,11 +45,11 @@ $count = count($orders);
                 ?>
                 <div class="block_sum">
                     <div class="row">
-                        <div class="col-md-4 name_s">Сумма</div>
-                        <div class="col-md-8 count_s"><?= $order->total_price ?> <?= $order->currency->symbol ?></div>
+                        <div class="col-md-4 col-xs-4 name_s">Сумма</div>
+                        <div class="col-md-8 col-xs-8 count_s"><?= $order->total_price ?> <?= $order->currency->symbol ?></div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 min_zakaz">
+                        <div class="col-md-6 col-xs-6 min_zakaz">
                         <?php if ($forMinOrderPrice) { ?>
                         до минимального заказа <br><span><?= $forMinOrderPrice ?> <?= $order->currency->symbol ?></span>
                         <?php } elseif ($forFreeDelivery > 0) { ?>
@@ -58,7 +58,7 @@ $count = count($orders);
                         бесплатная доставка!<br><span>&nbsp;</span>
                         <?php } ?>
                         </div>
-                        <div class="col-md-6 dost_min">включая доставку<br><span><?= $order->calculateDelivery() ?> <?= $order->currency->symbol ?></span></div>
+                        <div class="col-md-6 col-xs-6 dost_min">включая доставку<br><span><?= $order->calculateDelivery() ?> <?= $order->currency->symbol ?></span></div>
                     </div>
                 </div>
             <?php } ?>

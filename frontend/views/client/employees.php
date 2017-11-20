@@ -138,7 +138,10 @@ $this->registerJs(
                         ],
                         'email',
                         'profile.phone',
-                        'role.name',
+                        [
+                          'attribute' => 'role.name',
+                          'label' => \Yii::t('app', 'Роль')
+                        ],
                         [
                             'attribute' => 'status',
                             'label' => Yii::t('user', 'Status'),

@@ -13,6 +13,7 @@ $this->title = "Список шаблонов";
 yii\jui\JuiAsset::register($this);
 
 $guideUrl = Url::to(['order/ajax-create-guide']);
+$guideUrlRename = Url::to(['order/ajax-rename-guide']);
 
 $this->registerJs('
     $(document).on("click", ".delete-guide", function(e) {
@@ -259,6 +260,45 @@ $this->registerJs('
     
     $(document).on("loaded.bs.modal", "#guideModal", function(){
         $(".modal-dialog").removeAttr("style");
+    });
+    
+    $(document).on("click", ".rename-template", function(e) {
+        e.preventDefault();
+        var clicked = $(this);
+        var title = "'.Yii::t('app', 'Переименовать шаблон').'";
+        swal({
+            title: title,
+            input: "text",
+            inputValue: clicked.parent().find(".title a").text(),
+            showCancelButton: true,
+            cancelButtonText: "'.Yii::t('app', 'Отмена').'",
+            confirmButtonText: "'.Yii::t('app', 'Переименовать').'",
+            showLoaderOnConfirm: true,
+            allowOutsideClick: false,
+            showLoaderOnConfirm: true,
+            onClose: function() {
+                clicked.blur();
+                swal.resetDefaults()
+            },
+            preConfirm: function (text) {
+                return new Promise(function (resolve, reject) {
+                    $.post(
+                        "' . $guideUrlRename . '", {"name": text, "id": clicked.data("id")}
+                    ).done(function (result) {
+                        if (result) {
+                            clicked.parent().find(".title a").html(text);
+                            resolve(result);
+                        } else {
+                            resolve(false);
+                        }
+                    });
+                })
+            },
+        }).then(function (result) {
+            if (result.type !== "success") {
+               swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+            }
+        });
     });
 
 ', View::POS_READY);

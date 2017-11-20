@@ -2,19 +2,35 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
+
 ?>
 <div class="guid_block_title">
-    <p><?=
-        Html::a($model->name, ['/order/edit-guide', 'id' => $model->id], [
-            'class' => 'link-edit-guide',
-        ])
-        ?></p>
-</div>	
+    <p style="border-bottom: 1px dotted #ccc;" >
+        <span class="title">
+            <?=
+            Html::a($model->name, ['/order/edit-guide', 'id' => $model->id], [
+                'class' => 'link-edit-guide',
+            ])
+            ?>
+        </span>
+        <?=Html::tag(
+            'i',
+            '',
+            [
+                'class' => 'fa fa-edit pull-right text-warning rename-template',
+                'style' => 'cursor:pointer',
+                'title' => Yii::t('app', 'Переименовать'),
+                'data-id' => $model->id,
+                'data-title' => $model->name
+            ]
+        );?>
+    </p>
+</div>
 <div class="guid_block_counts">
-    <p>Кол-во товаров: <span><?= $model->productCount ?></span></p> 
+    <p>Кол-во товаров: <span><?= $model->productCount ?></span></p>
 </div>
 <div class="guid_block_updated">
-    <p>Изменен: <span><?= Yii::$app->formatter->asDatetime($model->updated_at, "php:j M Y") ?></span></p> 
+    <p>Изменен: <span><?= Yii::$app->formatter->asDatetime($model->updated_at, "php:j M Y") ?></span></p>
 </div>
 <div class="guid_block_buttons">
     <?=

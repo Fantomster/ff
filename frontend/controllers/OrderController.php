@@ -92,6 +92,7 @@ class OrderController extends DefaultController {
                             'ajax-set-delivery',
                             'ajax-show-details',
                             'ajax-create-guide',
+                            'ajax-rename-guide',
                             'ajax-add-to-guide',
                             'ajax-delete-guide',
                             'ajax-remove-from-guide',
@@ -241,6 +242,25 @@ class OrderController extends DefaultController {
         } else {
             return ['type' => 'fail'];
         }
+    }
+
+    public function actionAjaxRenameGuide()
+    {
+        if (Yii::$app->request->isAjax):
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+            $id = Yii::$app->request->post('id');
+            $name = Yii::$app->request->post('name');
+
+            $model = Guide::findOne($id);
+            $model->name = $name;
+
+            if ($model->validate() and $model->save()) {
+                return ['type' => 'success'];
+            } else {
+                return ['type' => 'fail'];
+            }
+        endif;
     }
 
     public function actionEditGuide($id) {

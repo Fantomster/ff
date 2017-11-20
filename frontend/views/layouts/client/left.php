@@ -7,6 +7,13 @@ use api\common\models\RkService;
 
 $user = Yii::$app->user->identity;
 
+$roles = [
+    \common\models\Role::ROLE_RESTAURANT_MANAGER,
+    \common\models\Role::ROLE_FKEEPER_MANAGER,
+    \common\models\Role::ROLE_ADMIN,
+    \common\models\Role::getFranchiseeEditorRoles(),
+];
+
 $franchiseeManager = $user->organization->getFranchiseeManagerInfo();
 if ($franchiseeManager && $franchiseeManager->phone_manager) {
     if ($franchiseeManager->additional_number_manager) {
@@ -74,10 +81,30 @@ foreach ($arrService as $key => $val) {
                             'url' => '#', //['client/settings'],
                             'options' => ['class' => "hidden-xs"],
                             'items' => [
-                                ['label' => 'Общие', 'icon' => 'circle-o', 'url' => ['/client/settings']],
-                                ['label' => 'Интеграции', 'icon' => 'circle-o', 'url' => ['/clientintegr/default'], 'visible' => (in_array($user->organization_id,$resArr))],
-                                ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/client/employees']],
-                                ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
+                                [
+                                    'label' => 'Общие',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/client/settings'],
+                                    'visible' => in_array($user->role_id,$roles)
+                                ],
+                                [
+                                    'label' => 'Интеграции',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/clientintegr/default'],
+                                    'visible' => (in_array($user->organization_id,$resArr))
+                                ],
+                                [
+                                    'label' => 'Сотрудники',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/client/employees'],
+                                    'visible' => in_array($user->role_id,$roles)
+                                ],
+                                [
+                                    'label' => 'Уведомления',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/settings/notifications'],
+                                    'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))
+                                ],
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],

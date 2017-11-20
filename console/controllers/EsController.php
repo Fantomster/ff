@@ -269,11 +269,13 @@ class EsController extends Controller
             $category_id = $name->parent;
             $category_sub_id = $name->id;
             $category_name = $name->name;
+            $category_slug = $name->slug;
             $category = new \common\models\ES\Category();
             $category->attributes = [
                 "category_id" => $category_id,
                 "category_sub_id" => $category_sub_id,
-                "category_name" => $category_name
+                "category_name" => $category_name,
+                "category_slug" => $category_slug,
             ];
             $category->save();
         }

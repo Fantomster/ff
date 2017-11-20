@@ -101,7 +101,7 @@ class Catalog extends \yii\db\ActiveRecord
     public static function GetCatalogs($type, $vendorId = null)
     {
 		$catalog = Catalog::find()
-		->select(['id','status','name','created_at'])
+		->select(['id','status','name','created_at','currency_id'])
 		->where(['supp_org_id' => $vendorId ? $vendorId : \common\models\User::getOrganizationUser(Yii::$app->user->id),'type'=>$type])->all();
 		return $catalog;
     }

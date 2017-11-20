@@ -15,8 +15,9 @@ $this->registerCss('.select2-container .select2-selection--single .select2-selec
     'action' => Url::toRoute(['vendor/import','id'=>Yii::$app->request->get('id')])])
 ?>
 
-<?php  // Заглушка до исправления функций загрузки каталога, надо было срочно выкладывать релиз (Roman, 20.11.2017)
-$importModel->importType = 1;  ?>
+<?php  // Заглушка до исправления функций загрузки каталога, надо было срочно выкладывать релиз (Roman, 20.11.2017) ?>
+
+<?= $form->field($importModel, 'importType')->hiddenInput(['value'=>'1'])->label(false); ?>
 
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

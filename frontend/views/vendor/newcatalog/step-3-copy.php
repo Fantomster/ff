@@ -89,7 +89,7 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                             'clientOptions' => false,
                             'size' => 'modal-md',
                             'toggleButton' => [
-                                'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Импорт</span>',
+                                'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (.xls)</span>',
                                 'tag' => 'a',
                                 'data-target' => '#importToXls',
                                 'class' => 'btn btn-outline-default btn-sm pull-right',
@@ -102,12 +102,14 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                         */
                         ?>
                         <?=
-                        Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
+                        Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>'.
+                            '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
                             'class' => 'btn btn-outline-default btn-sm pull-right',
                             'id' => 'changeCurrency',
                             'style' => 'margin-right: 5px;',
                         ])
                         ?>
+
                     </div>
                 </div>
             </div>
@@ -162,7 +164,7 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
   hot = new Handsontable(container, {
   data: JSON.parse(JSON.stringify(data)),
   //clickBeginsEditing : true,
-  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена ($baseCurrencySymbol)', 'Индивидуальная цена', 'Ед. измерения','Фикс. скидка','Скидка %','Итоговая цена'],
+  colHeaders : ['Артикул','id', 'Наименование', 'Базовая цена $baseCurrencySymbol', 'Индивидуальная цена', 'Ед. измерения','Фикс. скидка','Скидка %','Итоговая цена'],
   search: true,
   renderAllRows: false,
   maxRows: $arr_count,
@@ -356,6 +358,7 @@ return false;
                     ).done(function (response) {
                         if (response.result === 'success') {
                             $(".currency-symbol").html(response.symbol);
+                            $(".currency-iso").html(response.iso_code);
                             oldCurrency = currentCurrency;
                             currentCurrency = newCurrency;
                             resolve();

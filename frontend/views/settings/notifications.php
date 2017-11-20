@@ -253,11 +253,16 @@ $this->title = 'Уведомления';
 //                    ])->label(false)
                     ?>
                 </div>
+                <div class="panel-info settings">
+                    <div class="col-md-10" ><i><br><p>Если вы хотите добавить еще один email для получения уведомлений без заведения нового сотрудника, то вы можете сделать это в таблице ниже.<br>
+                            Для каждого добавленного email вы можете выбрать события, о которых будут приходить уведомления.</p><br></div></i></div>
+                </div>
                 <div class="col-md-6">
                     <?=$this->render('_additional_email', ['additional_email' => $additional_email])?>
                 </div>
             </div>
         </div>
+
         <div class="box-footer clearfix">
         <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success']) ?>
         </div>

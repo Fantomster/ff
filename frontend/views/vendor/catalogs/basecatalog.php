@@ -202,7 +202,7 @@ Modal::end();
                             'batchSize' => 200,
                             'timeout' => 0,
                             'dropdownOptions' => [
-                                'label' => '<span class="text-label">экспорт</span>',
+                                'label' => '<span class="text-label">Скачать каталог (.xls)</span>',
                                 'class' => ['btn btn-outline-default btn-sm pull-right']
                             ],
                             'exportConfig' => [
@@ -250,7 +250,7 @@ Modal::end();
                         'clientOptions' => false,
                         'size' => 'modal-md',
                         'toggleButton' => [
-                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">импорт</span>',
+                            'label' => '<i class="glyphicon glyphicon-import"></i> <span class="text-label">Загрузить каталог (.xls)</span>',
                             'tag' => 'a',
                             'data-target' => '#importToXls',
                             'class' => 'btn btn-outline-default btn-sm pull-right',
@@ -260,7 +260,8 @@ Modal::end();
                     ])
                     ?>
                     <?=
-                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>', [
+                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $currentCatalog->currency->symbol . '</span>'.
+                        '<span class="currency-iso"> (' . $currentCatalog->currency->iso_code . ')</span>', [
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
                         'id' => 'changeCurrency',
@@ -305,7 +306,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'price',
-                            'label' => 'Цена',
+                            'label' => 'Цена ('.$currentCatalog->currency->iso_code.')',
                             'value' => 'price',
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],
@@ -683,8 +684,11 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
         return false;
     });
   $('#add-product-market-place').removeAttr('tabindex');
-
-    var currencies = $.map($currencySymbolList, function(el) { return el });
+    
+    // var currencies = $.map($currencySymbolList, function(el) { return el });
+    var currencies = $currencySymbolList;
+    
+    console.log(currencies);
     var newCurrency = {$currentCatalog->currency->id};
     var currentCurrency = {$currentCatalog->currency->id};
     var oldCurrency = {$currentCatalog->currency->id};
@@ -720,6 +724,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                     ).done(function (response) {
                         if (response.result === 'success') {
                             $(".currency-symbol").html(response.symbol);
+                            $(".currency-iso").html(response.iso_code);
                             oldCurrency = currentCurrency;
                             currentCurrency = newCurrency;
                             resolve();
@@ -737,9 +742,9 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
                 title: 'Валюта каталога изменена!',
                 type: 'success',
                 html: 
-                    '<hr /><div>Пересчитать цены в каталоге?</div>' +
-                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency-1] + ' = ' +
-                    '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
+                    '<hr /><div>Пересчитать цены в каталоге?</div>' +                    
+                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency] + ' = ' +
+                    '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency],
                 showCancelButton: true,
                 showLoaderOnConfirm: true,
                 allowOutsideClick: false,

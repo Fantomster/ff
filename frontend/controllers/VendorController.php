@@ -327,7 +327,7 @@ class VendorController extends DefaultController {
                                     where(['in', 'id', \common\models\RelationSuppRest::find()->
                                         select('rest_org_id')->
                                         where(['supp_org_id' => $currentUser->organization_id, 'invite' => '1', 'deleted' => false])])->all(), 'id', 'name');
-            $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
+            $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
                             where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->all();
 
             if (Yii::$app->request->isPost) {
@@ -1509,7 +1509,7 @@ class VendorController extends DefaultController {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
-        $baseCurrencySymbol = $baseCatalog->currency->symbol;
+        $baseCurrencySymbol = ' ('.$baseCatalog->currency->iso_code.')';
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         $currentCatalog = $model;
         if (empty($model)) {
@@ -2106,7 +2106,7 @@ class VendorController extends DefaultController {
 
         $catalog->currency_id = $newCurrencyId;
         $catalog->save();
-        return ['result' => 'success', 'symbol' => $currency->symbol];
+        return ['result' => 'success', 'symbol' => $currency->symbol, 'iso_code' => ' (' . $currency->iso_code . ')'];
     }
 
     /**

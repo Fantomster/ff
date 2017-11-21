@@ -162,7 +162,8 @@ class OrderController extends DefaultController {
         }
     }
 
-    public function actionCreate() {
+    public function actionCreate()
+    {
         $session = Yii::$app->session;
         $client = $this->currentUser->organization;
         $searchModel = new OrderCatalogSearch();
@@ -177,7 +178,7 @@ class OrderController extends DefaultController {
         $selectedVendor = null;
 
         if (isset($params['OrderCatalogSearch'])) {
-            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int) $params['OrderCatalogSearch']['selectedVendor'] : null;
+            $selectedVendor = !empty($params['OrderCatalogSearch']['selectedVendor']) ? (int)$params['OrderCatalogSearch']['selectedVendor'] : null;
         }
 
         $vendors = $client->getSuppliers($selectedCategory);
@@ -195,6 +196,9 @@ class OrderController extends DefaultController {
         $dataProvider->pagination->params['OrderCatalogSearch[selectedCategory]'] = $selectedCategory;
 
         $orders = $client->getCart();
+
+        //Вывод по 10
+        $dataProvider->pagination->pageSize = 10;
 
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('create', compact('dataProvider', 'searchModel', 'orders', 'client', 'vendors'));

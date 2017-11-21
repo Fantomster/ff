@@ -171,6 +171,7 @@ var steps = [
   },
 ]
 swal.queue(steps).then(function (result) {
+    console.log(JSON.stringify(result));
     $.ajax({
     url: "' . Url::to(["request/add-callback"]) . '",
     type: "POST",

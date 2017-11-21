@@ -213,75 +213,108 @@ class RequestController extends DefaultController {
             return $this->render("view-vendor", compact('request','countComments','author','dataCallback','trueFalseCallback'));
         }
     }
-    public function actionSetResponsible(){
+
+    public function actionSetResponsible()
+    {
         $client = $this->currentUser;
-        
+
         if (Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON; 
-        
-        $id = Yii::$app->request->post('id');
-        $responsible_id = Yii::$app->request->post('responsible_id');
-        
-        if(!Request::find()->where(['rest_org_id' => $client->organization_id,'id'=>$id])->exists()){
-            return ['success'=>false];
-        }
-        if(!RequestCallback::find()->where([
-            'request_id' => $id, 
-            'supp_org_id'=>$responsible_id
-            ])->exists()){
-            return ['success'=>false];
-        }
-        $request = Request::find()->where(['id' => $id])->one();
-        
-        if($request->responsible_supp_org_id == $responsible_id){
-            $request->responsible_supp_org_id = null; 
-            $request->save();
-            //Отправка СМС
-            $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
-            foreach($rows as $row){
-                if($row->profile->phone && $row->profile->sms_allow){
-                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе';
-                    $target = $row->profile->phone;
-                    Yii::$app->sms->send($text, $target);
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $id = Yii::$app->request->post('id');
+            $responsible_id = Yii::$app->request->post('responsible_id');
+
+            if (!Request::find()->where(['rest_org_id' => $client->organization_id, 'id' => $id])->exists()) {
+                return ['success' => false];
+            }
+
+            if (!RequestCallback::find()->where(['request_id' => $id, 'supp_org_id' => $responsible_id])->exists()) {
+                return ['success' => false];
+            }
+
+            $request = Request::find()->where(['id' => $id])->one();
+            $vendors = \common\models\User::find()->where(['organization_id' => $responsible_id])->with('profile')->all();
+
+            if ($request->responsible_supp_org_id == $responsible_id) {
+                //Отправка почты ресторану, о снятии Поставщика с заявки
+                if ($client->email) {
+                    $mailer = Yii::$app->mailer;
+                    $email = $client->email;
+                    $subject = "mixcart.ru - заявка №" . $request->id;
+                    $mailer->htmlLayout = 'layouts/request';
+                    $mailer->compose('requestSetResponsibleReject', compact("request", "client"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+                }
+
+                if (isset($vendors)) {
+                    //Отправка СМС и Email поставщикам
+                    foreach ($vendors as $vendor) {
+                        //SMS
+                        if ($vendor->profile->phone && $vendor->profile->sms_allow) {
+                            $text = 'Вы сняты с исполнения по заявке №' . $id . ' в системе mixcart.ru';
+                            $target = $vendor->profile->phone;
+                            Yii::$app->sms->send($text, $target);
+                        }
+                        //Email
+                        if (!empty($vendor->email)) {
+                            $mailer = Yii::$app->mailer;
+                            $email = $vendor->email;
+                            $subject = "mixcart.ru - заявка №" . $request->id;
+                            $mailer->htmlLayout = 'layouts/request';
+                            $mailer->compose('requestSetResponsibleMailToSuppReject', compact("request", "vendor"))
+                                ->setTo($email)
+                                ->setSubject($subject)
+                                ->send();
+                        }
+                    }
+                }
+
+                $request->responsible_supp_org_id = null;
+                $request->save();
+
+            } else {
+                $request->responsible_supp_org_id = $responsible_id;
+                $request->save();
+                //Отправка почты ресторану, о назначении Поставщика на заявку
+                if ($client->email) {
+                    $mailer = Yii::$app->mailer;
+                    $email = $client->email;
+                    $subject = "mixcart.ru - заявка №" . $request->id;
+                    $mailer->htmlLayout = 'layouts/request';
+                    $mailer->compose('requestSetResponsible', compact("request", "client"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+                }
+                //Отправка СМС и Email поставщикам
+                foreach ($vendors as $vendor) {
+                    //SMS
+                    if ($vendor->profile->phone && $vendor->profile->sms_allow) {
+                        $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе mixcart.ru';
+                        $target = $vendor->profile->phone;
+                        Yii::$app->sms->send($text, $target);
+                    }
+                    //Email
+                    if (!empty($vendor->email)) {
+                        $mailer = Yii::$app->mailer;
+                        $email = $vendor->email;
+                        $subject = "mixcart.ru - заявка №" . $request->id;
+                        $mailer->htmlLayout = 'layouts/request';
+                        $mailer->compose('requestSetResponsibleMailToSupp', compact("request", "vendor"))
+                            ->setTo($email)
+                            ->setSubject($subject)
+                            ->send();
+                    }
                 }
             }
-        }else{
-            $request->responsible_supp_org_id = $responsible_id;
-            $request->save();
-            $vendors = \common\models\User::find()->where(['organization_id' => $request->responsible_supp_org_id])->all();
-            //Отправка почты
-            if($client->email){
-                $mailer = Yii::$app->mailer; 
-                $email = $client->email;
-                //$email = 'marshal1209448@gmail.com';
-                $subject = "mixcart.ru - заявка №" . $request->id;
-                $mailer->htmlLayout = 'layouts/request';
-                $result = $mailer->compose('requestSetResponsible', compact("request","client"))
-                        ->setTo($email)->setSubject($subject)->send();
-            }
-            //Отправка СМС
-            foreach($vendors as $vendor){
-                if($vendor->profile->phone && $vendor->profile->sms_allow){
-                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе mixcart.ru';
-                    $target = $vendor->profile->phone;
-                    Yii::$app->sms->send($text, $target);
-                }
-                if($vendor->email){
-                $mailer = Yii::$app->mailer; 
-                $email = $vendor->email;
-                //$email = 'marshal1209448@gmail.com';
-                $subject = "mixcart.ru - заявка №" . $request->id;
-                $mailer->htmlLayout = 'layouts/request';
-                $result = $mailer->compose('requestSetResponsibleMailToSupp', compact("request","vendor"))
-                        ->setTo($email)->setSubject($subject)->send();
-                }
-            }
-        }
-        
-        
-        return ['success'=>true];
+
+            return ['success' => true];
         }
     }
+
     public function actionAddSupplier(){
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;

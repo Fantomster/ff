@@ -168,11 +168,12 @@ swal({
     })
   }
 }).then(function (result){
-if (result.dismiss === "cancel") {
+    if (result.dismiss === "cancel") {
         swal.close();
     } else {
-        swal("Готово!",eNames["end"],"success")})
+        swal("Готово!",eNames["end"],"success");
     }
+});
 });
 $(document).on("click",".r-close", function(e){
 id = $(this).attr("data-id");

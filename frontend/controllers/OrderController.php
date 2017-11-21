@@ -562,6 +562,7 @@ class OrderController extends DefaultController {
             $newOrder->client_id = $client->id;
             $newOrder->vendor_id = $vendor->id;
             $newOrder->status = Order::STATUS_FORMING;
+            $newOrder->currency_id = $product->catalog->currency_id;
             $newOrder->save();
             $alteringOrder = $newOrder;
         }

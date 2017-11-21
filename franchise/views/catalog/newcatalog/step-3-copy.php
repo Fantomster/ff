@@ -270,7 +270,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
 $('#save').click(function(e){	
 e.preventDefault();
 });
-$(".set").live("click", function() {
+$(document).on("click", ".set", function() {
 var form = $("#set_discount_percent");
 $.post(
     form.attr("action"),

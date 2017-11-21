@@ -280,7 +280,7 @@ if (typeof jQuery.fn.live == 'undefined' || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }
-$('input[type=checkbox]').live('change', function(e) {
+$(document).on('change', 'input[type=checkbox]', function(e) {
     var id = $(this).attr('data-id');
     var elem = $(this).attr('name').substr(0, 9);
     var state = $(this).prop("checked");

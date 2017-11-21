@@ -615,7 +615,7 @@ $("#add-product").on("click", ".edit", function() {
         });
         return false;
     });
-$(".del-product").live("click", function(e){
+$(document).on("click", ".del-product", function(e){
     var id = $(this).attr('data-id');
         
 	bootbox.confirm({

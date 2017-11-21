@@ -174,7 +174,7 @@ if (typeof jQuery.fn.live == "undefined" || !(jQuery.isFunction(jQuery.fn.live))
       }
   });
 }
-$(".set").live("click", function() {
+$(document).on("click", ".set", function() {
 var form = $("#set_discount_percent");
 $.post(
     form.attr("action"),
@@ -189,7 +189,7 @@ e.preventDefault();
 var url = "' . Url::toRoute(['vendor/step-4','id'=>$cat_id]) . '";
 $.pjax({url: url, container: "#pjax-container"});
 });
-$(".edit").live("click", function() {
+$(document).on("click", ".edit", function() {
     var form = $("#product-form");
     $.post(
         form.attr("action"),

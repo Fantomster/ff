@@ -270,7 +270,7 @@ $(document).on('click', '.del', function (e){
 		}
 	}})
 });
-$('input[type=checkbox]').live('switchChange.bootstrapSwitch', function (event, state) {	
+$(document).on('switchChange.bootstrapSwitch', 'input[type=checkbox]', function (event, state) {	
 var e,id,state
 e = $(this).attr('name')
 id = e.replace('status_','')

@@ -353,7 +353,7 @@ class VendorController extends DefaultController {
                         }
                     }
                 } else {
-                    $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at'])->
+                    $arrCatalog = Catalog::find()->select(['id', 'status', 'name', 'created_at', 'currency_id'])->
                                     where(['supp_org_id' => $currentUser->organization_id, 'type' => 2])->
                                     andFilterWhere(['LIKE', 'name', $searchString])->all();
                 }

@@ -14,7 +14,7 @@ $this->title = 'Разместить заказ';
 yii\jui\JuiAsset::register($this);
 
 $this->registerJs(
-        '$(document).ready(function(){
+    '$(document).ready(function(){
             $(document).on("change", "#selectedCategory", function(e) {
                 var form = $("#searchForm");
                 form.submit();
@@ -102,12 +102,14 @@ $this->registerJs(
             <li class="active"><a href="#">Все продукты</a></li>
             <li>
                 <a href="<?= Url::to(['order/guides']) ?>">
-                    Шаблоны заказов <small class="label bg-yellow">new</small>
+                    Шаблоны заказов
+                    <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Часто заказываемые товары <small class="label bg-yellow">new</small>
+                    Часто заказываемые товары
+                    <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -117,37 +119,37 @@ $this->registerJs(
                     <div class="guid-header">
                         <?php
                         $form = ActiveForm::begin([
-                                    'options' => [
-                                        'id' => 'searchForm',
-                                        'class' => "navbar-form no-padding no-margin",
-                                        'role' => 'search',
-                                    ],
+                            'options' => [
+                                'id' => 'searchForm',
+                                'class' => "navbar-form no-padding no-margin",
+                                'role' => 'search',
+                            ],
                         ]);
                         ?>
                         <?=
-                                $form->field($searchModel, 'searchString', [
-                                    'addon' => [
-                                        'append' => [
-                                            'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
-                                            'options' => [
-                                                'class' => 'append',
-                                            ],
-                                        ],
-                                    ],
+                        $form->field($searchModel, 'searchString', [
+                            'addon' => [
+                                'append' => [
+                                    'content' => '<a class="btn-xs"><i class="fa fa-search"></i></a>',
                                     'options' => [
-                                        'class' => "margin-right-15 form-group",
+                                        'class' => 'append',
                                     ],
-                                ])
-                                ->textInput([
-                                    'id' => 'searchString',
-                                    'class' => 'form-control',
-                                    'placeholder' => 'Поиск'])
-                                ->label(false)
+                                ],
+                            ],
+                            'options' => [
+                                'class' => "margin-right-15 form-group",
+                            ],
+                        ])
+                            ->textInput([
+                                'id' => 'searchString',
+                                'class' => 'form-control',
+                                'placeholder' => 'Поиск'])
+                            ->label(false)
                         ?>
                         <?=
-                                $form->field($searchModel, 'selectedVendor')
-                                ->dropDownList($vendors, ['id' => 'selectedVendor'])
-                                ->label(false)
+                        $form->field($searchModel, 'selectedVendor')
+                            ->dropDownList($vendors, ['id' => 'selectedVendor'])
+                            ->label(false)
                         ?>
                         <?php ActiveForm::end(); ?>
                     </div>
@@ -155,7 +157,7 @@ $this->registerJs(
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <hr>	
+                    <hr>
                 </div>
             </div>
             <div class="row">
@@ -180,29 +182,29 @@ $this->registerJs(
                                 [
                                     'format' => 'raw',
                                     'attribute' => 'product',
-                                    'value' => function($data) {
+                                    'value' => function ($data) {
                                         $note = ""; //empty($data['note']) ? "" : "<div><i>" . $data['note'] . "</i></div>";
                                         $productUrl = Html::a(Html::decode(Html::decode($data['product'])), Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]), [
-                                                    'data' => [
-                                                        'target' => '#showDetails',
-                                                        'toggle' => 'modal',
-                                                        'backdrop' => 'static',
-                                                    ],
-                                                    'title' => 'Подробности',
+                                            'data' => [
+                                                'target' => '#showDetails',
+                                                'toggle' => 'modal',
+                                                'backdrop' => 'static',
+                                            ],
+                                            'title' => 'Подробности',
                                         ]);
 //                                        $productUrl = "<a title = 'Подробности' data-target='#showDetails' data-toggle='modal' data-backdrop='static' href='".
 //                                                Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]).
 //                                                "'>".$data['product']."</a>";
                                         return "<div class='grid-prod'>" . $productUrl . "</div>$note<div>Поставщик: "
-                                                . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
-                                                . $data['article'] . "</span></div>";
+                                            . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
+                                            . $data['article'] . "</span></div>";
                                     },
                                     'label' => 'Название продукта',
                                 ],
                                 [
                                     'format' => 'raw',
                                     'attribute' => 'price',
-                                    'value' => function($data) {
+                                    'value' => function ($data) {
                                         $unit = empty($data['ed']) ? '' : " / " . $data['ed'];
                                         return '<b>' . $data['price'] . '</b> ' . $data['symbol'] . $unit;
                                     },
@@ -217,22 +219,22 @@ $this->registerJs(
                                 ],
                                 [
                                     'format' => 'raw',
-                                    'value' => function($data) {
+                                    'value' => function ($data) {
                                         return TouchSpin::widget([
-                                                    'name' => '',
-                                                    'pluginOptions' => [
-                                                        'initval' => 0.100,
-                                                        'min' => (isset($data['units']) && ($data['units'] > 0)) ? $data['units'] : 0.001,
-                                                        'max' => PHP_INT_MAX,
-                                                        'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
-                                                        'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
-                                                        'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
-                                                        'buttonup_class' => 'btn btn-default',
-                                                        'buttondown_class' => 'btn btn-default',
-                                                        'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
-                                                        'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
-                                                    ],
-                                                    'options' => ['class' => 'quantity form-control '],
+                                            'name' => '',
+                                            'pluginOptions' => [
+                                                'initval' => 0.100,
+                                                'min' => (isset($data['units']) && ($data['units'] > 0)) ? $data['units'] : 0.001,
+                                                'max' => PHP_INT_MAX,
+                                                'step' => (isset($data['units']) && ($data['units'])) ? $data['units'] : 1,
+                                                'decimals' => (empty($data["units"]) || (fmod($data["units"], 1) > 0)) ? 3 : 0,
+                                                'forcestepdivisibility' => (isset($data['units']) && $data['units'] && (floor($data['units']) == $data['units'])) ? 'floor' : 'none',
+                                                'buttonup_class' => 'btn btn-default',
+                                                'buttondown_class' => 'btn btn-default',
+                                                'buttonup_txt' => '<i class="glyphicon glyphicon-plus-sign"></i>',
+                                                'buttondown_txt' => '<i class="glyphicon glyphicon-minus-sign"></i>'
+                                            ],
+                                            'options' => ['class' => 'quantity form-control '],
                                         ]);
                                     },
                                     'label' => 'Количество',
@@ -244,22 +246,22 @@ $this->registerJs(
                                     'format' => 'raw',
                                     'value' => function ($data) {
                                         $btnNote = Html::a('<i class="fa fa-comment m-r-xs"></i>', '#', [
-                                                    'class' => 'add-note btn btn-default margin-right-5',
-                                                    'data' => [
-                                                        'id' => $data['id'],
-                                                        'cat' => $data['cat_id'],
-                                                        'toggle' => 'tooltip',
-                                                        'original-title' => 'Добавить заметку к товару',
-                                                        'target' => "#changeQuantity",
-                                                        'toggle' => "modal",
-                                                        'backdrop' => "static",
-                                                    ],
+                                            'class' => 'add-note btn btn-default margin-right-5',
+                                            'data' => [
+                                                'id' => $data['id'],
+                                                'cat' => $data['cat_id'],
+                                                'toggle' => 'tooltip',
+                                                'original-title' => 'Добавить заметку к товару',
+                                                'target' => "#changeQuantity",
+                                                'toggle' => "modal",
+                                                'backdrop' => "static",
+                                            ],
                                         ]);
                                         $btnAdd = Html::a('<i class="fa fa-shopping-cart m-r-xs"></i>', '#', [
-                                                    'class' => 'add-to-cart btn btn-outline-success',
-                                                    'data-id' => $data['id'],
-                                                    'data-cat' => $data['cat_id'],
-                                                    'title' => 'Добавить в корзину',
+                                            'class' => 'add-to-cart btn btn-outline-success',
+                                            'data-id' => $data['id'],
+                                            'data-cat' => $data['cat_id'],
+                                            'title' => 'Добавить в корзину',
                                         ]);
                                         return $btnAdd;
                                     },
@@ -267,10 +269,8 @@ $this->registerJs(
                                     'headerOptions' => ['style' => 'width: 50px;']
                                 ],
                             ],
-                        ])
-                        ?>
+                        ]) ?>
                     </div>
-                    </form>
                     <?php Pjax::end(); ?>
                 </div>
             </div>

@@ -156,7 +156,7 @@ $this->registerCss("
                     <?php
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                         echo $form->field($searchModel, 'vendor_id')
-                                ->dropDownList($organization->getSuppliers('', true), ['id' => 'orgFilter'])
+                                ->dropDownList($organization->getSuppliers(), ['id' => 'orgFilter'])
                                 ->label('Поставщики', ['class' => 'label', 'style' => 'color:#555']);
                     } else {
                         echo $form->field($searchModel, 'client_id')

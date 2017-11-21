@@ -169,6 +169,8 @@ if (!Yii::$app->user->isGuest) {
         }).then(function (result) {
             if (result.success) {
                 swal({title: "Приглашение отправлено!", type: "success"});
+            } else if (result.dismiss === "cancel") {
+                swal.close();
             } else {
                 swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
             }

@@ -70,8 +70,12 @@ $js = <<<JS
                             showCancelButton: true,
                             confirmButtonText: "Уйти",
                             cancelButtonText: "Остаться",
-                        }).then(function() {
-                            document.location = link;
+                        }).then(function(result) {
+                            if (result.dismiss === "cancel") {
+                               swal.close();
+                            } else {
+                                document.location = link;
+                            }
                         });
                     }
                 }
@@ -125,8 +129,12 @@ $js = <<<JS
                         });
                     })
                 },
-            }).then(function() {
-                swal({title: "Товар удален из заказа!", type: "success"});
+            }).then(function(result) {
+                if (result.dismiss === "cancel") {
+                    swal.close();
+                } else {
+                    swal({title: "Товар удален из заказа!", type: "success"});
+                }
             });        
         });
 
@@ -159,8 +167,10 @@ $js = <<<JS
                     })
                 },
             }).then(function (result) {
-                if (result.type == "success") {
-                    swal(result);
+                if (result.value.type == "success") {
+                    swal(result.value);
+                } else if (result.dismiss == "cancel") {
+                    swal.close();
                 } else {
                     swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
                 }

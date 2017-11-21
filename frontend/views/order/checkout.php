@@ -53,8 +53,12 @@ $this->registerJs(
                             });
                         })
                     },
-                }).then(function() {
-                    swal({title: success, type: "success"});
+                }).then(function(result) {
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal({title: success, type: "success"});
+                    }
                 });
             });
 
@@ -97,8 +101,12 @@ $this->registerJs(
                             });
                         })
                     },
-                }).then(function() {
-                    swal({title: success, type: "success"});
+                }).then(function(result) {
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal({title: success, type: "success"});
+                    }
                 });
             });
 
@@ -132,7 +140,11 @@ $this->registerJs(
                         })
                     },
                 }).then(function(result) {
-                    swal(result);
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal(result);
+                    }
                 });
             });
             $("#checkout").on("change", ".delivery-date", function(e) {
@@ -183,13 +195,15 @@ $this->registerJs(
                         })
                     },
                 }).then(function (result) {
-                    if (result.type == "success") {
+                    if (result.value.type == "success") {
                         clicked.tooltip("hide")
-                            .attr("data-original-title", result.comment)
+                            .attr("data-original-title", result.value.comment)
                             .tooltip("fixTitle")
                             .blur();
-                        clicked.data("original-title", result.comment);
-                        swal(result);
+                        clicked.data("original-title", result.value.comment);
+                        swal(result.value);
+                    } else if (result.dismiss === "cancel") {
+                        swal.close();
                     } else {
                         swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
                     }
@@ -218,8 +232,12 @@ $this->registerJs(
                                 showCancelButton: true,
                                 confirmButtonText: "Уйти",
                                 cancelButtonText: "Остаться",
-                            }).then(function() {
-                                document.location = link;
+                            }).then(function(result) {
+                                if (result.dismiss === "cancel") {
+                                    swal.close()
+                                } else {
+                                    document.location = link;
+                                }
                             });
                         }
                     }

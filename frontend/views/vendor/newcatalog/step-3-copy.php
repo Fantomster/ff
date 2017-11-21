@@ -372,41 +372,49 @@ return false;
                 })
             },
         }).then(function (result) {
-            swal({
-                title: 'Валюта каталога изменена!',
-                type: 'success',
-                html: 
-                    '<hr /><div>Пересчитать цены в каталоге?</div>' +
-                    '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency-1] + ' = ' +
-                    '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
-                showCancelButton: true,
-                showLoaderOnConfirm: true,
-                allowOutsideClick: false,
-                preConfirm: function () {
-                    return new Promise(function (resolve) {
-                        $.post(
-                            '{$calculatePricesUrl}',
-                            {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
-                        ).done(function (response) {
-                            if (response.result === 'success') {
-                                $.pjax.reload("#pjax-container", {timeout:30000});
-                                resolve();
-                            } else {
-                                swal({
-                                    type: response.result,
-                                    title: response.message
-                                });
-                            }
-                        });
-                    })
-                }
-            }).then(function (result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
                 swal({
-                    type: "success",
-                    title: "Цены успешно изменены!",
-                    allowOutsideClick: true,
-                });
-            })
+                    title: 'Валюта каталога изменена!',
+                    type: 'success',
+                    html: 
+                        '<hr /><div>Пересчитать цены в каталоге?</div>' +
+                        '<input id="swal-curr1" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[oldCurrency-1] + ' = ' +
+                        '<input id="swal-curr2" class="swal2-input" style="width: 50px;display:inline;" value=1> ' + currencies[newCurrency-1],
+                    showCancelButton: true,
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false,
+                    preConfirm: function () {
+                        return new Promise(function (resolve) {
+                            $.post(
+                                '{$calculatePricesUrl}',
+                                {oldCurrencyUnits: $('#swal-curr1').val(), newCurrencyUnits: $('#swal-curr2').val()}
+                            ).done(function (response) {
+                                if (response.result === 'success') {
+                                    $.pjax.reload("#pjax-container", {timeout:30000});
+                                    resolve();
+                                } else {
+                                    swal({
+                                        type: response.result,
+                                        title: response.message
+                                    });
+                                }
+                            });
+                        })
+                    }
+                }).then(function (result) {
+                    if (result.dismiss === "cancel") {
+                        swal.close();
+                    } else {
+                        swal({
+                            type: "success",
+                            title: "Цены успешно изменены!",
+                            allowOutsideClick: true,
+                        });
+                    }
+                })
+            }
         })        
     });
 JS;

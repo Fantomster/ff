@@ -738,11 +738,15 @@ $("#organization-name").keyup(function() {
                 })
             },
         }).then(function (result) {
-            swal({
-                title: 'Валюта каталога изменена!',
-                type: 'success',
-                showCancelButton: false,
-            })
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                swal({
+                    title: 'Валюта каталога изменена!',
+                    type: 'success',
+                    showCancelButton: false,
+                })
+            }
         })        
     });        
 JS;

@@ -411,8 +411,12 @@ $customJs = <<< JS
             confirmButtonText: "Да",
             cancelButtonText: "Отмена",
             showLoaderOnConfirm: true,
-        }).then(function() {
-            document.location = clicked.data("url")
+        }).then(function(result) {
+            if (result.dismiss === "cancel") {
+                swal.close();
+            } else {
+                document.location = clicked.data("url")
+            }
         });
     });
 JS;

@@ -45,13 +45,15 @@ $this->registerJs('
                 })
             },
         }).then(function (result) {
-            if (result.type == "success") {
+            if (result.value.type == "success") {
                 clicked.tooltip("hide")
-                    .attr("data-original-title", result.comment)
+                    .attr("data-original-title", result.value.comment)
                     .tooltip("fixTitle")
                     .blur();
-                clicked.data("original-title", result.comment);
-                swal(result);
+                clicked.data("original-title", result.value.comment);
+                swal(result.value);
+            } else if (result.dismiss === "cancel") {
+                swal.close();
             } else {
                 swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
             }

@@ -167,7 +167,12 @@ swal({
         });
     })
   }
-}).then(function (e){swal("Готово!",eNames["end"],"success")})
+}).then(function (result){
+if (result.dismiss === "cancel") {
+        swal.close();
+    } else {
+        swal("Готово!",eNames["end"],"success")})
+    }
 });
 $(document).on("click",".r-close", function(e){
 id = $(this).attr("data-id");
@@ -195,7 +200,12 @@ swal({
         });
     })
   }
-}).then(function () {swal("Готово!","Заявка закрыта","success")
+}).then(function (result) {
+    if (result.dismiss === "cancel") {
+        swal.close();
+    } else {
+        swal("Готово!","Заявка закрыта","success")
+    }
 })
 });
 $(document).on("click",".add-supplier", function(e){
@@ -225,7 +235,12 @@ swal({
         });
     })
   }
-}).then(function () {swal("Готово!","Приглашение отправлено!","success")
+}).then(function (result) {
+    if (result.dismiss === "cancel") {
+        swal.close();
+    } else {
+        swal("Готово!","Приглашение отправлено!","success")
+    }
 })
 });
 ');?>

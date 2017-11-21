@@ -26,13 +26,7 @@ $this->registerJs('
             dataType: "json",
             url: "'.Url::to('/site/ajax-wizard-off').'",
             success: function (response) {
-                if (response.result == "moscow") {
-                    yaCounter44637517.reachGoal("regmoscow", function () {
-                        document.location = url;
-                    });
-                }else{
                 document.location = url;
-                }
             },
             async: false
         });

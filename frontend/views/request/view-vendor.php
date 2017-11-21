@@ -176,7 +176,7 @@ swal.queue(steps).then(function (result) {
     url: "' . Url::to(["request/add-callback"]) . '",
     type: "POST",
     dataType: "json",
-    data: "id=" + id +"&price=" + result[0].value + "&comment=" + result[1].value,
+    data: "id=" + id +"&price=" + result.value[0] + "&comment=" + result.value[1],
     cache: false,
     success: function (response) {
         $.pjax.reload({container:"#pjax-callback", async:false});

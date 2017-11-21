@@ -85,7 +85,7 @@ $this->registerJs('
             },
         }).then(function (result) {
             if (result.value.type == "success") {
-                document.location = result.url;
+                document.location = result.value.url;
             } else if (result.dismiss === "cancel") {
                 swal.close();
             } else {

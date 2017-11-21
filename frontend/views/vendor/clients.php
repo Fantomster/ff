@@ -85,20 +85,20 @@ $gridColumnsClients = [
         'format' => 'raw',
         'contentOptions' => ['style' => 'text-align:left'],
         'value' => function ($data) {
-//            $value = $data->invite == 0 ? 0 : 1;
-//            $link = CheckboxX::widget([
-//                        'name' => 'restOrgId_' . $data->rest_org_id,
-//                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
-//                        'value' => $value,
-//                        'autoLabel' => true,
-//                        'options' => ['id' => 'restOrgId_' . $data->rest_org_id, 'data-id' => $data->rest_org_id, 'value' => $value],
-//                        'pluginOptions' => [
-//                            'threeState' => false,
-//                            'theme' => 'krajee-flatblue',
-//                            'enclosedLabel' => true,
-//                            'size' => 'lg',
-//                        ]
-//            ]);
+            $value = $data->invite == 0 ? 0 : 1;
+            $link = CheckboxX::widget([
+                        'name' => 'restOrgId_' . $data->rest_org_id,
+                        'initInputType' => CheckboxX::INPUT_CHECKBOX,
+                        'value' => $value,
+                        'autoLabel' => true,
+                        'options' => ['id' => 'restOrgId_' . $data->rest_org_id, 'data-id' => $data->rest_org_id, 'value' => $value],
+                        'pluginOptions' => [
+                            'threeState' => false,
+                            'theme' => 'krajee-flatblue',
+                            'enclosedLabel' => true,
+                            'size' => 'lg',
+                        ]
+            ]);
             if (!empty($data->invite) && !empty($data->cat_id)) {
                 $result = Html::a($data->catalog->name, ['vendor/view-catalog', 'id' => $data->cat_id], [
                             'data' => [
@@ -119,7 +119,7 @@ $gridColumnsClients = [
                             'style' => 'color: #cccccc;'
                 ]);
             }
-            return $result;
+            return $link . " " .$result;
         },
     ],
     [

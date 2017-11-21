@@ -136,7 +136,7 @@ Modal::begin([
                                         <div class="col-md-4 text-left">
                                         <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
                                                 '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['data-pjax'=>'0']) ?>
-                                        <p class="small m-b-none">Валюта каталога:<?php  echo $catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?> <br>Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
+                                        <p class="small m-b-none">Валюта каталога:<?php  echo ' '.$catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?> <br>Создан: <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?></p>
                                         </div>
                                         <div class="col-md-8 text-right">
                                                 <?php echo $link = SwitchBox::widget([

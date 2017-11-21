@@ -302,10 +302,10 @@ $this->registerJs('
                     });
                 })
             },
-        }).then(function (result) {alert(result.type);
+        }).then(function (result) {
             if (result.dismiss === "cancel") {
                 swal.close();
-            } else if (result.type !== "success") {
+            } else if (result.value.type !== "success") {
                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
             }
         });

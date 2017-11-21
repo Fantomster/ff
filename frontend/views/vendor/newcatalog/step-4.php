@@ -65,8 +65,8 @@ $this->title = 'Назначить каталог';
 		'label'=>'Текущий каталог',
                 'format' => 'raw',
 		'value'=>function ($data) {
-		$catalog_name = $data->cat_id==0 ? '' : 
-                common\models\Catalog::get_value($data->cat_id)->name;
+                    $catalog = \common\models\Catalog::findOne(['id' => $data->cat_id]);
+                    $catalog_name = empty($catalog) ? '' : $catalog->name;
 		return $catalog_name;
 		}
 		],

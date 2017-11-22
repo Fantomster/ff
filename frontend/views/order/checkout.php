@@ -143,7 +143,7 @@ $this->registerJs(
                     if (result.dismiss === "cancel") {
                         swal.close();
                     } else {
-                        swal(result);
+                        swal(result.value);
                     }
                 });
             });
@@ -153,7 +153,7 @@ $this->registerJs(
                     {"order_id":$(this).data("order_id"), "delivery_date":$(this).val() }
                 ).done(function(result) {
                     if (result) {
-                        swal(result);
+                        swal(result.value);
                     }
                 });
             });

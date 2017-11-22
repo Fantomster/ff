@@ -50,8 +50,8 @@ class ServiceHelper extends AuthHelper {
         
         $nmodel->code = $obj['code'] ? $obj['code'] : 0;
         $nmodel->name = $obj['name'] ? $obj['name'] : 'Не задано';  
-        $nmodel->address = $obj['address'] ? $obj['address'] : 'Не задано';
-    //    $nmodel->phone = $obj['phone'] ? $obj['phone'] : 'Не задано';
+        $nmodel->address = isset($obj['address']) ? $obj['address'] : 'Не задано';
+        $nmodel->phone  = isset($obj['phone']) ? $obj['phone'] : 'Не задано';
         $nmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
         $nmodel->status_id=1;
         

@@ -240,6 +240,8 @@ class OrderContentController extends ActiveController {
         return $product;
     }
     
+    
+    
     /**
     * Checks the privilege of the current user.
     *

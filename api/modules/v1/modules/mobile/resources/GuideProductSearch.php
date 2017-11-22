@@ -9,6 +9,7 @@ class GuideProductSearch extends \common\models\search\GuideProductsSearch
 {
     public $count;
     public $page;
+    public $guide_id;
     
 
     /**
@@ -16,8 +17,8 @@ class GuideProductSearch extends \common\models\search\GuideProductsSearch
      */
     public function rules() {
         return [
-                [['page','count'], 'integer'],
-                [['searchString', 'guide_id', 'cbg_id', 'name'], 'safe'],
+                [['page','count', 'guide_id'], 'integer'],
+                [['searchString', 'cbg_id', 'name'], 'safe'],
         ];
     }
 

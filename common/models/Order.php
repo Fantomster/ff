@@ -390,11 +390,10 @@ class Order extends \yii\db\ActiveRecord {
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
+        
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if ($insert)
-                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder($this->id);
-            else
-                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder($this->id, false);
+            if(!empty($changedAttributes))
+                \api\modules\v1\modules\mobile\components\notifications\NotificationOrder::actionOrder($this->id, $insert);
         }
     }
 

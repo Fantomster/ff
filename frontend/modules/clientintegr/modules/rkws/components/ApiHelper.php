@@ -132,11 +132,12 @@ class ApiHelper  {
     
     $url = Yii::$app->params['rkeepCmdURL'] ? Yii::$app->params['rkeepCmdURL'] : 'http://ws.ucs.ru/WSClient/api/Client/Cmd';
     
-        if (empty($restr)) {
+      /*  if (empty($restr)) {
                    echo "SendCurl.Access is not found :(";
                    file_put_contents('runtime/logs/rk.log',PHP_EOL.'111111'.PHP_EOL,FILE_APPEND); 
                    exit;
         }
+      */
     
     $sess = RkSession::find()->andwhere('acc= :acc',[':acc'=>1])->andwhere('status=1')->one();
     
@@ -350,7 +351,7 @@ class ApiHelper  {
     
     }
 */
-    
+  /*
     public static function xml2array($xml) {
 
         $arr = array();
@@ -429,7 +430,7 @@ class ApiHelper  {
         return $arr;
     }
     
-    
+    */
 }
 
 

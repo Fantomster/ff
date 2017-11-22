@@ -77,7 +77,14 @@ class ProductSearchController extends ActiveController {
         $goodsNotesTable = GoodsNotes::tableName();
         $organizationTable = Organization::tableName();
         
+        $symbols_t = 'REPLACE(product, "&quot;", "\'"\) as product';
+        
         $query = CatalogBaseGoods::find();
+       /* $query->select(["$cbgTable.id", "$cbgTable.cat_id", "$cbgTable.article", "REPLACE(product, '&quot;', '\"'\) as product", 
+                "$cbgTable.status", "$cbgTable.market_place", "$cbgTable.deleted", "$cbgTable.created_at", "$cbgTable.updated_at", "$cbgTable.supp_org_id",
+                "$cbgTable.price", "$cbgTable.units", "$cbgTable.category_id", "$cbgTable.note", "$cbgTable.ed", "$cbgTable.omage", "$cbgTable.brand",
+                "$cbgTable.region", "$cbgTable.weight", "$cbgTable.es_status", "$cbgTable.mp_show_price",
+                "$cbgTable.rating", "$organizationTable.name as organization_name", "$goodsNotesTable.note as comment"]);*/
         $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment");
         $query->from("guide_product");
         $query->leftJoin($cbgTable,"$cbgTable.id = guide_product.cbg_id");
@@ -89,7 +96,13 @@ class ProductSearchController extends ActiveController {
         $ordContentTable = OrderContent::tableName();
 
         $query2 = CatalogBaseGoods::find();
+        /*$query2->select("$cbgTable.id", "$cbgTable.cat_id", "$cbgTable.article", "REPLACE(product, '&quot;', '\"'\) as product", 
+                "$cbgTable.status", "$cbgTable.market_place", "$cbgTable.deleted", "$cbgTable.created_at", "$cbgTable.updated_at", "$cbgTable.supp_org_id",
+                "$cbgTable.price", "$cbgTable.units", "$cbgTable.category_id", "$cbgTable.note", "$cbgTable.ed", "$cbgTable.omage", "$cbgTable.brand",
+                "$cbgTable.region", "$cbgTable.weight", "$cbgTable.es_status", "$cbgTable.mp_show_price",
+                "$cbgTable.rating", "$organizationTable.name as organization_name", "$goodsNotesTable.note as comment"]);*/
         $query2->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment");
+
         $query2->leftJoin($ordContentTable, "$cbgTable.id=$ordContentTable.product_id");
         $query2->leftJoin($orderTable, "$ordContentTable.order_id=$orderTable.id");
         $query2->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");

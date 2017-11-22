@@ -8,6 +8,8 @@ use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\Order;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
+use common\models\Organization;
+use common\models\OrderChat;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -162,6 +164,7 @@ class OrderController extends ActiveController {
             $newOrder = new \common\models\Order();
             $newOrder->load($post, 'Order');
             $newOrder->status = Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
+            $newOrder->currency_id = 1;
             if (!$newOrder->save()) {
                 echo json_encode(['Order' => $newOrder->getErrors()]);
                 $transaction->rollback();
@@ -196,6 +199,41 @@ class OrderController extends ActiveController {
           ] */
         $this->sendOrderCreated($user, $Order);
         return compact('Order', 'OrderContents', 'GoodsNotes');
+    }
+    
+    public function actionCancelOrder($order_id = null) {
+
+        $user = Yii::$app->user->getIdentity();
+        $initiator = $user->organization;
+
+        if (Yii::$app->request->post()) {
+            switch ($initiator->type_id) {
+                case Organization::TYPE_RESTAURANT:
+                    $order = Order::find()->where(['id' => $order_id, 'client_id' => $initiator->id])->one();
+                    break;
+                case Organization::TYPE_SUPPLIER:
+                    $order = $this->findOrder([Order::tableName() . '.id' => $order_id, 'vendor_id' => $initiator->id], Yii::$app->user->can('manage'));
+                    break;
+            }
+            if ($order) {
+                if (Yii::$app->request->post("comment")) {
+                    $order->comment = Yii::$app->request->post("comment");
+                }
+                $order->status = ($initiator->type_id == Organization::TYPE_RESTAURANT) ? Order::STATUS_CANCELLED : Order::STATUS_REJECTED;
+                $systemMessage = $initiator->name . ' отменил заказ!';
+                $danger = true;
+                $order->save();
+                if ($initiator->type_id == Organization::TYPE_RESTAURANT) {
+                    $this->sendOrderCanceled($order->client, $order);
+                } else {
+                    $this->sendOrderCanceled($order->vendor, $order);
+                }
+                $this->sendSystemMessage($user, $order->id, $systemMessage, $danger);
+                Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                return ["title" => "Заказ успешно отменен!", "type" => "success"];
+            }
+            return false;
+        }
     }
 
     /**
@@ -260,6 +298,99 @@ class OrderController extends ActiveController {
                 Yii::$app->sms->send($text, $target);
             }
         }
+    }
+    
+    /**
+     * Sends mail informing both sides about cancellation of order
+     * 
+     * @param Organization $senderOrg
+     * @param Order $order
+     */
+    private function sendOrderCanceled($senderOrg, $order) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $subject = "f-keeper: заказ №" . $order->id . " отменен!";
+
+        $searchModel = new \common\models\search\OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->order_canceled) {
+                $notification = $mailer->compose('orderCanceled', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+            
+            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+            
+            if ($profile->phone && $recipient->smsNotification->order_canceled) {
+                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $target = $profile->phone;
+                Yii::$app->sms->send($text, $target);
+            }
+        }
+    }
+    
+    private function sendSystemMessage($user, $order_id, $message, $danger = false) {
+        $order = Order::findOne(['id' => $order_id]);
+
+        $newMessage = new OrderChat();
+        $newMessage->order_id = $order_id;
+        $newMessage->message = $message;
+        $newMessage->is_system = 1;
+        $newMessage->sent_by_id = $user->id;
+        $newMessage->danger = $danger;
+        if ($order->client_id == $user->organization_id) {
+            $newMessage->recipient_id = $order->vendor_id;
+        } else {
+            $newMessage->recipient_id = $order->client_id;
+        }
+        $newMessage->save();
+        $body = $this->renderPartial('@frontend/views/order/_chat-message', [
+            'name' => '',
+            'message' => $newMessage->message,
+            'time' => $newMessage->created_at,
+            'isSystem' => 1,
+            'sender_id' => $user->id,
+            'ajax' => 1,
+            'danger' => $danger,
+        ]);
+
+        $clientUsers = $order->client->users;
+        $vendorUsers = $order->vendor->users;
+
+       /* foreach ($clientUsers as $clientUser) {
+            $channel = 'user' . $clientUser->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode([
+                    'body' => $body,
+                    'channel' => $channel,
+                    'isSystem' => 1,
+                    'order_id' => $order_id,
+                ])
+            ]);
+        }
+        foreach ($vendorUsers as $vendorUser) {
+            $channel = 'user' . $vendorUser->id;
+            Yii::$app->redis->executeCommand('PUBLISH', [
+                'channel' => 'chat',
+                'message' => Json::encode([
+                    'body' => $body,
+                    'channel' => $channel,
+                    'isSystem' => 1,
+                    'order_id' => $order_id,
+                ])
+            ]);
+        }*/
+
+        return true;
     }
 
 }

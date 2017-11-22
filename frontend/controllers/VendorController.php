@@ -594,16 +594,17 @@ class VendorController extends DefaultController {
                 ->vendor;
         if (Yii::$app->request->isPost) {
             $importType = \Yii::$app->request->post('UploadForm')['importType'];
-            $unique = 'product'; //уникальное поле
-            $sql_array_products = CatalogBaseGoods::find()->select($unique)->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
-            $count_array = count($sql_array_products);
-            $arr = [];
+            //$unique = 'product'; //уникальное поле
+            $sql_array_products = CatalogBaseGoods::find()->select(['id', 'product'])->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
+            $arr = \yii\helpers\ArrayHelper::map($sql_array_products, 'id', 'product');
+            //$count_array = count($sql_array_products);
+            $arr = array_map('strtolower', $arr);
             //массив уникального поля из базы
-            if (!empty($sql_array_products)) {
-                for ($i = 0; $i < $count_array; $i++) {
-                    array_push($arr, strtolower(trim($sql_array_products[$i][$unique])));
-                }
-            }
+//            if (!empty($sql_array_products)) {
+//                for ($i = 0; $i < $count_array; $i++) {
+//                    array_push($arr, strtolower(trim($sql_array_products[$i][$unique])));
+//                }
+//            }
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
@@ -655,7 +656,7 @@ class VendorController extends DefaultController {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                         $row_article = Html::encode(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
-                        $row_product = Html::encode(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
+                        $row_product = $worksheet->getCellByColumnAndRow(1, $row); //наименование
                         $row_units = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row)))); //количество
                         $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row)))); //цена
                         $row_ed = Html::encode(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
@@ -669,7 +670,7 @@ class VendorController extends DefaultController {
                                     $id,
                                     $vendor->id,
                                     $row_article,
-                                    $row_product,
+                                    Html::encode(trim($row_product)),
                                     $row_units,
                                     $row_price,
                                     $row_ed,
@@ -703,16 +704,17 @@ class VendorController extends DefaultController {
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = Html::encode(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
-                        $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
+                        $row_product = $worksheet->getCellByColumnAndRow(0, $row); //наименование
+                        $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row))); //цена
                         if (!empty($row_product && $row_price)) {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
                             }
-                            if (in_array($row_product, $arr)) {
+                            $cbg_id = array_search($row_product, $arr);
+                            if ($cbg_id) {
                                 $data_update .= "UPDATE $cbgTable set 
                                     `price` = $row_price
-                                     where cat_id=$id and product='{$row_product}';";
+                                     where cat_id=$id and id=$cbg_id;";
                             }
                         }
                     }

@@ -113,8 +113,8 @@ class ClientController extends DefaultController {
         if ($organization->load($post)) {
             if ($organization->validate()) {
                 $organization->address = $organization->formatted_address;
-                if(!$post['Organization']['is_allowed_for_franchisee']){
-                    User::updateAll(['organization_id'=>null], ['organization_id'=>$organization->id, 'role_id'=>Role::getFranchiseeEditorRoles()]);
+                if (!$post['Organization']['is_allowed_for_franchisee']) {
+                    User::updateAll(['organization_id' => null], ['organization_id' => $organization->id, 'role_id' => Role::getFranchiseeEditorRoles()]);
                 }
                 if ($organization->step == Organization::STEP_SET_INFO) {
                     $organization->step = Organization::STEP_ADD_VENDOR;
@@ -313,11 +313,11 @@ class ClientController extends DefaultController {
             $user->load($post); //user-email
             $profile->load($post); //profile-full_name
             $organization->load($post); //name
-            
+
             if (isset($post['currency'])) {
                 $currency = \common\models\Currency::findOne(['id' => $post['currency']]);
             }
-                        
+
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
             //$relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
@@ -632,7 +632,6 @@ class ClientController extends DefaultController {
                          * 2) Создаем базовый и каталог для ресторана
                          *    
                          * */
-                        
                         if ($check['eventType'] == 5) {
                             $newBaseCatalog = new Catalog();
                             $newBaseCatalog->supp_org_id = $get_supp_org_id;
@@ -1015,6 +1014,15 @@ class ClientController extends DefaultController {
         $catalog_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentCatalog = Catalog::find()->where(['id' => $catalog_id])->one();
+
+        if (empty($currentCatalog)) {
+            $result = ['success' => false, 'alert' => [
+                    'class' => 'danger-fk',
+                    'title' => 'УПС! Ошибка',
+                    'body' => 'Каталог пустой']];
+            return $result;
+        }
+
         $supp_org_id = $currentCatalog->supp_org_id;
         $catalogCurrency = $currentCatalog->currency;
         $supplier = Organization::find()->where(['id' => $supp_org_id])->one();
@@ -1036,7 +1044,6 @@ class ClientController extends DefaultController {
                         'title' => 'УПС! Ошибка',
                         'body' => 'Каталог пустой']];
                 return $result;
-                exit;
             }
             if (count($arrCatalog) > 5000) {
                 $result = ['success' => false, 'alert' => [
@@ -1045,7 +1052,6 @@ class ClientController extends DefaultController {
                         'body' => 'Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>']];
                 return $result;
-                exit;
             }
             $articleArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
@@ -1067,7 +1073,6 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => 'Ай ай ай как не хорошо!']];
                     return $result;
-                    exit;
                 }
                 if (
                         !empty($goods_id) &&
@@ -1078,7 +1083,6 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => 'Ай ай ай как не хорошо!']];
                     return $result;
-                    exit;
                 }
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => [
@@ -1086,7 +1090,6 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => '<strong>[Артикул]</strong> не указан']];
                     return $result;
-                    exit;
                 }
                 if (empty($product)) {
                     $result = ['success' => false, 'alert' => [
@@ -1094,7 +1097,6 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => 'Пустое поле <strong>[Наименование]</strong>!']];
                     return $result;
-                    exit;
                 }
                 if (empty($price)) {
                     $result = ['success' => false, 'alert' => [
@@ -1102,7 +1104,6 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => 'Пустое поле <strong>[Цена]</strong>!']];
                     return $result;
-                    exit;
                 }
                 $price = str_replace(',', '.', $price);
                 if (!preg_match($numberPattern, $price)) {
@@ -1111,7 +1112,6 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => '<strong>[Цена]</strong> в неверном формате!']];
                     return $result;
-                    exit;
                 }
                 if (empty($units) || $units < 0) {
                     $units = 0;
@@ -1123,7 +1123,6 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => '<strong>[Кратность]</strong> товара в неверном формате']];
                     return $result;
-                    exit;
                 }
                 if (empty($ed)) {
                     $result = ['success' => false, 'alert' => [
@@ -1131,13 +1130,11 @@ class ClientController extends DefaultController {
                             'title' => 'УПС! Ошибка',
                             'body' => 'Пустое поле <strong>[Единица измерения]</strong>!']];
                     return $result;
-                    exit;
                 }
             }
             if (max(array_count_values($articleArray)) > 1) {
                 $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
                 return $result;
-                exit;
             }
             $transaction = Yii::$app->db->beginTransaction();
             try {
@@ -1246,7 +1243,6 @@ class ClientController extends DefaultController {
                         'title' => 'Каталог обновлен',
                         'body' => 'Каталог был успешно обновлен']];
                 return $result;
-                exit;
             } catch (Exception $e) {
                 $transaction->rollback();
                 $result = ['success' => false, 'alert' => [
@@ -1254,7 +1250,6 @@ class ClientController extends DefaultController {
                         'title' => 'Ошибка сохранения',
                         'body' => 'Пожалуйста, повторите попытку сохранения']];
                 return $result;
-                exit;
             }
             //$message =  'Успех';   
             //return $this->renderAjax('suppliers/_success', ['message' => $message]);
@@ -1399,7 +1394,7 @@ class ClientController extends DefaultController {
         $vendors_total_price = [];
         $vendors_labels = [];
         $vendors_colors = [];
-        
+
         foreach ($vendors_total_price_sql as $vendors_total_price_sql_arr) {
 //            $arr = array(
 //                'value' => $vendors_total_price_sql_arr['total_price'],
@@ -1431,7 +1426,7 @@ class ClientController extends DefaultController {
                 "and status<>" . Order::STATUS_FORMING . " and client_id = " . $currentUser->organization_id .
                 $where .
                 ") group by product_id order by sum(price*quantity) desc");
-        $countQuery = "SELECT count(*) from (".$query->sql.") as a";
+        $countQuery = "SELECT count(*) from (" . $query->sql . ") as a";
         $count = Yii::$app->db->createCommand($countQuery)->queryScalar();
         $page = Yii::$app->request->get("page");
         $dataProvider = new \yii\data\SqlDataProvider([
@@ -1439,7 +1434,7 @@ class ClientController extends DefaultController {
             'totalCount' => $count,
             'pagination' => [
                 'pageSize' => 7,
-                'page' => isset($page) ? ($page-1) : 0,
+                'page' => isset($page) ? ($page - 1) : 0,
             ],
         ]);
         /*
@@ -1470,11 +1465,11 @@ class ClientController extends DefaultController {
          */
         if (Yii::$app->request->isPjax) {
             return $this->renderPartial('analytics/index', compact(
-                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price','vendors_labels','vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
             ));
         } else {
             return $this->render('analytics/index', compact(
-                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price','vendors_labels','vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
+                                    'header_info_zakaz', 'header_info_suppliers', 'header_info_purchases', 'header_info_items', 'filter_get_supplier', 'filter_get_employee', 'filter_supplier', 'filter_employee', 'filter_status', 'filter_from_date', 'filter_to_date', 'arr_create_at', 'arr_price', 'vendors_total_price', 'vendors_labels', 'vendors_colors', 'dataProvider', 'chart_bar_value', 'chart_bar_label'
             ));
         }
     }
@@ -1651,7 +1646,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
                 $organization = $vendorManager->organization;
                 $disabled = true;
                 //return ['errors' => false, 'form' => $this->renderAjax('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')), 'vendorFound' => true];
-                return ['errors' => false, 'organization_name' => $organization->name, 'phone' => $profile->phone, 'full_name'=>$profile->full_name, 'vendorFound' => true];
+                return ['errors' => false, 'organization_name' => $organization->name, 'phone' => $profile->phone, 'full_name' => $profile->full_name, 'vendorFound' => true];
             } elseif ($user->validate() && empty($relation)) {
                 $validated = true;
                 if (!$profile->load($post)) {

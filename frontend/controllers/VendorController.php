@@ -598,7 +598,7 @@ class VendorController extends DefaultController {
             $sql_array_products = CatalogBaseGoods::find()->select(['id', 'product'])->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
             $arr = \yii\helpers\ArrayHelper::map($sql_array_products, 'id', 'product');
             //$count_array = count($sql_array_products);
-            $arr = array_map('strtolower', $arr);
+            $arr = array_map('mb_strtolower', $arr);
             //массив уникального поля из базы
 //            if (!empty($sql_array_products)) {
 //                for ($i = 0; $i < $count_array; $i++) {
@@ -629,7 +629,7 @@ class VendorController extends DefaultController {
                 $rP = 1;
             }
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_unique = strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
+                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
                 if (!empty($row_unique)) {
                     if (!in_array($row_unique, $arr)) {
                         $newRows++;
@@ -665,7 +665,7 @@ class VendorController extends DefaultController {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
                             }
-                            if (!in_array(strtolower($row_product), $arr)) {
+                            if (!in_array(mb_strtolower($row_product), $arr)) {
                                 $data_insert[] = [
                                     $id,
                                     $vendor->id,
@@ -710,7 +710,7 @@ class VendorController extends DefaultController {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
                             }
-                            $cbg_id = array_search(strtolower($row_product), $arr);
+                            $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
                                 $data_update .= "UPDATE $cbgTable set 
                                     `price` = $row_price
@@ -789,7 +789,7 @@ class VendorController extends DefaultController {
             //массив уникального поля из базы
             if (!empty($sql_array_products)) {
                 for ($i = 0; $i < $count_array; $i++) {
-                    array_push($arr, strtolower(trim($sql_array_products[$i]['baseProduct'][$unique])));
+                    array_push($arr, mb_strtolower(trim($sql_array_products[$i]['baseProduct'][$unique])));
                 }
             }
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
@@ -811,7 +811,7 @@ class VendorController extends DefaultController {
             $xlsArray = [];
             //Проверяем наличие дублей в списке
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_unique = strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
                 if (!empty($row_unique)) {
                     if (!in_array($row_unique, $arr)) {
                         $newRows++;
@@ -837,7 +837,7 @@ class VendorController extends DefaultController {
                 try {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) {
-                        $row_product = Html::encode(strtolower(trim($worksheet->getCellByColumnAndRow(0, $row)))); //наименование
+                        $row_product = Html::encode(mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row)))); //наименование
                         $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
 
                         if (!empty($row_product && $row_price)) {

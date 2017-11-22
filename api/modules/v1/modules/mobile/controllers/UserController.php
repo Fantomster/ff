@@ -161,6 +161,7 @@ class UserController extends ActiveController {
             if ($userToken->type == $userToken::TYPE_EMAIL_ACTIVATE) {
                 //send welcome
                 $user->sendWelcome();
+                 \api\modules\v1\modules\mobile\components\notifications\NotificationUser::actionConfirm($user);
             }
             // set email and delete token
             $email = $newEmail ? : $user->email;

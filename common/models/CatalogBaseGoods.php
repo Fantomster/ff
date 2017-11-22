@@ -50,7 +50,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     const STATUS_OFF = 0;
     const MP_SHOW_PRICE = 1;
     const MP_HIDE_PRICE = 0;
-    const MAX_INSERT_FROM_XLS = 4000;
+    const MAX_INSERT_FROM_XLS = 1000;
     const MARKETPLACE_ON = 1;
     const MARKETPLACE_OFF = 0;
     const DELETED_ON = 1;
@@ -115,7 +115,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
 //            return !empty($model->cat_id);
 //            }],
             [['product', 'brand', 'region', 'weight'], 'string', 'max' => 255],
-            [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'],
+            [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
             [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => 'Размер файла не должен превышать 2 Мб'], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'

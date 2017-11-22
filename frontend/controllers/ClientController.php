@@ -292,6 +292,7 @@ class ClientController extends DefaultController {
     }
 
     public function actionCreate() {
+        set_time_limit(180);
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -521,6 +522,7 @@ class ClientController extends DefaultController {
                                 $price = str_replace('.', '', $price);
                             }
                             $newProduct = new CatalogBaseGoods();
+                            $newProduct->scenario = "import";
                             $newProduct->cat_id = $lastInsert_base_cat_id;
                             $newProduct->supp_org_id = $get_supp_org_id;
                             $newProduct->article = (string) $article;

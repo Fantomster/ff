@@ -253,7 +253,7 @@ class RequestController extends DefaultController {
                     //Отправка СМС и Email поставщикам
                     foreach ($vendors as $vendor) {
                         //SMS
-                        if ($vendor->profile->phone && $vendor->profile->sms_allow) {
+                        if ($vendor->profile->phone) {
                             $text = 'Вы сняты с исполнения по заявке №' . $id . ' в системе mixcart.ru';
                             $target = $vendor->profile->phone;
                             Yii::$app->sms->send($text, $target);
@@ -292,7 +292,7 @@ class RequestController extends DefaultController {
                 //Отправка СМС и Email поставщикам
                 foreach ($vendors as $vendor) {
                     //SMS
-                    if ($vendor->profile->phone && $vendor->profile->sms_allow) {
+                    if ($vendor->profile->phone) {
                         $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе mixcart.ru';
                         $target = $vendor->profile->phone;
                         Yii::$app->sms->send($text, $target);

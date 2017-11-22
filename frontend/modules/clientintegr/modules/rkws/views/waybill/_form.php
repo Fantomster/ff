@@ -20,7 +20,7 @@ use yii\web\JsExpression;
 
     <?php $org = User::findOne(Yii::$app->user->id)->organization_id; // var_dump($org); ?>
     <?php $agentModel = \api\common\models\RkAgent::findOne(['acc' => $org, 'rid' => $model->corr_rid]); ?>
-    <?php $data = [ $agentModel->rid => $agentModel->denom ]; ?>
+    <?php $data = ($agentModel) ? [ $agentModel->rid => $agentModel->denom ] : []; ?>
 
 
     <?php if (empty($model->store_rid)) $model->store_rid = 1; ?>

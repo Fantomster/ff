@@ -124,11 +124,11 @@ addEmail= function () {
         })
       },
       allowOutsideClick: false
-    }).then(function (email) {
+    }).then(function (result) {
       swal({
         type: 'success',
         title: '" . Yii::t('app', 'Готово') . "',
-        html: '" . Yii::t('app', 'Добавлен новый email') . ": ' + email,
+        html: '" . Yii::t('app', 'Добавлен новый email') . ": ' + result.value,
         timer: 1500
       }).catch(swal.noop);
     }).catch(swal.noop);

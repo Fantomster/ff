@@ -13,7 +13,7 @@ use dosamigos\switchinput\SwitchBox;
 $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога'
 ?>
 <section class="content-header">
-        <h1>
+        <h1 class="margin-right-300">
             <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
             'Создание нового каталога' : 
             'Редактирование каталога <small>'.common\models\Catalog::get_value($cat_id)->name.'</small>' ?>      

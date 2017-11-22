@@ -665,7 +665,7 @@ class VendorController extends DefaultController {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
                             }
-                            if (!in_array($row_product, $arr)) {
+                            if (!in_array(strtolower($row_product), $arr)) {
                                 $data_insert[] = [
                                     $id,
                                     $vendor->id,
@@ -710,7 +710,7 @@ class VendorController extends DefaultController {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
                             }
-                            $cbg_id = array_search($row_product, $arr);
+                            $cbg_id = array_search(strtolower($row_product), $arr);
                             if ($cbg_id) {
                                 $data_update .= "UPDATE $cbgTable set 
                                     `price` = $row_price

@@ -16,7 +16,7 @@ $this->registerCss('
     }');
 ?>
 <section class="content-header">
-    <h1 class="margin-right-300">
+    <h1 class="margin-right-350">
         <i class="fa fa-list-alt"></i> Редактирование каталога <?= '<strong>' . common\models\Catalog::get_value($cat_id)->name . '</strong>' ?>
         <small></small>
     </h1>

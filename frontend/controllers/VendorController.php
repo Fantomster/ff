@@ -657,7 +657,7 @@ class VendorController extends DefaultController {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                         $row_article = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
-                        $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
                         $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
                         $row_ed = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
@@ -671,7 +671,7 @@ class VendorController extends DefaultController {
                                     $id,
                                     $vendor->id,
                                     $row_article,
-                                    HtmlPurifier::process($row_product),
+                                    $row_product,
                                     $row_units,
                                     $row_price,
                                     $row_ed,
@@ -705,7 +705,7 @@ class VendorController extends DefaultController {
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = trim($worksheet->getCellByColumnAndRow(0, $row)); //наименование
+                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row))); //цена
                         if (!empty($row_product && $row_price)) {
                             if (empty($row_units) || $row_units < 0) {
@@ -739,7 +739,7 @@ class VendorController extends DefaultController {
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = trim($worksheet->getCellByColumnAndRow(0, $row)); //наименование
+                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
                         if (!empty($row_product)) {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;

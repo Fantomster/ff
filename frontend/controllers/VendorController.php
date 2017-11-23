@@ -22,6 +22,7 @@ use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\web\UploadedFile;
+use yii\helpers\HtmlPurifier;
 
 /**
  * Controller for supplier
@@ -655,12 +656,12 @@ class VendorController extends DefaultController {
                 try {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_article = Html::encode(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
+                        $row_article = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
                         $row_product = $worksheet->getCellByColumnAndRow(1, $row); //наименование
-                        $row_units = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row)))); //количество
-                        $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row)))); //цена
-                        $row_ed = Html::encode(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
-                        $row_note = Html::encode(trim($worksheet->getCellByColumnAndRow(5, $row)));  //Комментарий
+                        $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
+                        $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
+                        $row_ed = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
+                        $row_note = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(5, $row)));  //Комментарий
                         if (!empty($row_product && $row_price && $row_ed)) {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
@@ -670,7 +671,7 @@ class VendorController extends DefaultController {
                                     $id,
                                     $vendor->id,
                                     $row_article,
-                                    Html::encode(trim($row_product)),
+                                    HtmlPurifier::process(trim($row_product)),
                                     $row_units,
                                     $row_price,
                                     $row_ed,
@@ -960,12 +961,12 @@ class VendorController extends DefaultController {
                 $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                    $row_article = trim($worksheet->getCellByColumnAndRow(0, $row)); //артикул
-                    $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
+                    $row_article = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
+                    $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
                     $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
-                    $row_ed = trim($worksheet->getCellByColumnAndRow(4, $row)); //единица измерения
-                    $row_note = trim($worksheet->getCellByColumnAndRow(5, $row)); //коммент
+                    $row_ed = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
+                    $row_note = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(5, $row))); //коммент
                     if (!empty($row_product && $row_price && $row_ed)) {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;

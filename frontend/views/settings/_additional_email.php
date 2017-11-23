@@ -142,12 +142,17 @@ addEmail= function () {
       },
       allowOutsideClick: false
     }).then(function (result) {
-      swal({
-        type: 'success',
-        title: '" . Yii::t('app', 'Готово') . "',
-        html: '" . Yii::t('app', 'Добавлен новый email') . ": ' + result.value,
-        timer: 1500
-      }).catch(swal.noop);
+       
+      if(result.dismiss){
+        swal.hide();
+      } else {
+        swal({
+            type: 'success',
+            title: '" . Yii::t('app', 'Готово') . "',
+            html: '" . Yii::t('app', 'Добавлен новый email') . ": ' + result.value,
+            timer: 1500
+          }).catch(swal.noop);
+      }
     }).catch(swal.noop);
 };
 
@@ -173,12 +178,16 @@ deleteEmail= function (id) {
         })
       },
     }).then(function () {
-      swal({
-        type: 'success',
-        title: '" . Yii::t('app', 'Готово') . "',
-        html: '" . Yii::t('app', 'Email удален из списка получаетелей') . "',
-        timer: 1500
-      }).catch(swal.noop)
+        if(result.dismiss){
+            swal.hide();
+        } else {
+          swal({
+            type: 'success',
+            title: '" . Yii::t('app', 'Готово') . "',
+            html: '" . Yii::t('app', 'Email удален из списка получаетелей') . "',
+            timer: 1500
+          }).catch(swal.noop)
+        }
     }).catch(swal.noop);
 };
 

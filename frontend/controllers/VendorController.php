@@ -781,19 +781,20 @@ class VendorController extends DefaultController {
         if (Yii::$app->request->isPost) {
             $importType = \Yii::$app->request->post('UploadForm')['importType'];
             $unique = 'product'; //уникальное поле
-            $sql_array_products = CatalogGoods::find()
-                            //->select('catalog_base_goods.*')
-                            ->joinWith('baseProduct')
-                            ->where([
-                                'catalog_base_goods.supp_org_id' => $currentUser->organization->id])->asArray()->all();
-            $count_array = count($sql_array_products);
-            $arr = [];
-            //массив уникального поля из базы
-            if (!empty($sql_array_products)) {
-                for ($i = 0; $i < $count_array; $i++) {
-                    array_push($arr, mb_strtolower(trim($sql_array_products[$i]['baseProduct'][$unique])));
-                }
+            $sql_array_products = [];
+            if ($importType == 1) {
+                $sql_array_products = CatalogBaseGoods::find()->select(['id', 'product'])->where(['supp_org_id' => $currentUser->organization->id, 'deleted' => 0])->asArray()->all();
             }
+            if ($importType == 2) {
+                $sql_array_products = CatalogGoods::find()
+                                ->select(['catalog_base_goods.id', 'catalog_base_goods.product'])
+                                ->joinWith('baseProduct', false)
+                                ->where([
+                                    'catalog_base_goods.supp_org_id' => $currentUser->organization->id, 'catalog_goods.cat_id' => $id])->asArray()->all();
+            }
+            $arr = \yii\helpers\ArrayHelper::map($sql_array_products, 'id', 'product');
+            $arr = array_map('mb_strtolower', $arr);
+
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
@@ -839,19 +840,18 @@ class VendorController extends DefaultController {
                 try {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) {
-                        $row_product = Html::encode(mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row)))); //наименование
-                        $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
+                        $row_product = HtmlPurifier::process(mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row)))); //наименование
+                        $row_price = HtmlPurifier::process(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
 
                         if (!empty($row_product && $row_price)) {
-                            if (in_array($row_product, $arr)) {
-                                $baseGoods = CatalogBaseGoods::findOne([
-                                            'supp_org_id' => $currentUser->organization_id,
-                                            'deleted' => 0,
-                                            'product' => $row_product]);
-                                if ($baseGoods) {
+
+                            $cbg_id = array_search(mb_strtolower($row_product), $arr);
+                            if ($cbg_id) {
+                                $checkExisting = CatalogGoods::find()->where(['base_goods_id' => $cbg_id, 'cat_id' => $id])->exists();
+                                if (!$checkExisting) {
                                     $data_insert[] = [
                                         $id,
-                                        $baseGoods->id,
+                                        $cbg_id,
                                         $row_price
                                     ];
                                 }
@@ -880,21 +880,16 @@ class VendorController extends DefaultController {
                 $data_update = "";
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
-                    $cbgTable = CatalogGoods::tableName();
+                    $cgTable = CatalogGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = Html::encode(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
-                        $row_price = Html::encode(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
+                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+                        $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row))); //цена
                         if (!empty($row_product && $row_price)) {
-                            if (in_array($row_product, $arr)) {
-                                $baseGoods = CatalogBaseGoods::findOne([
-                                            'supp_org_id' => $currentUser->organization_id,
-                                            'deleted' => 0,
-                                            'product' => $row_product]);
-                                if ($baseGoods) {
-                                    $data_update .= "UPDATE $cbgTable set 
+                            $cbg_id = array_search(mb_strtolower($row_product), $arr);
+                            if ($cbg_id) {
+                                $data_update .= "UPDATE $cgTable set 
                                         `price` = $row_price
-                                         where cat_id=$id and base_goods_id=$baseGoods->id;";
-                                }
+                                         where cat_id=$id and base_goods_id=$cbg_id;";
                             }
                         }
                     }
@@ -1513,7 +1508,7 @@ class VendorController extends DefaultController {
         $cat_id = $id;
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
-        $baseCurrencySymbol = ' ('.$baseCatalog->currency->iso_code.')';
+        $baseCurrencySymbol = ' (' . $baseCatalog->currency->iso_code . ')';
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         $currentCatalog = $model;
         if (empty($model)) {

@@ -306,12 +306,12 @@ class OrderController extends ActiveController {
      * @param Organization $senderOrg
      * @param Order $order
      */
-    private function sendOrderCanceled($senderOrg, $order) {
+   private function sendOrderCanceled($senderOrg, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " отменен!";
+        $subject = "Заказ №" . $order->id . " отменен!";
 
         $searchModel = new \common\models\search\OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -330,7 +330,7 @@ class OrderController extends ActiveController {
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
             
             if ($profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
             }

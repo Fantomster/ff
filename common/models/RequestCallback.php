@@ -10,6 +10,7 @@ use Yii;
  * @property integer $id
  * @property integer $request_id
  * @property integer $supp_org_id
+ * @property integer $supp_user_id
  * @property string $price
  * @property string $comment
  * @property string $created_at
@@ -33,7 +34,7 @@ class RequestCallback extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['request_id', 'supp_org_id', 'price'], 'required'],
-            [['request_id', 'supp_org_id'], 'integer'],
+            [['request_id', 'supp_org_id', 'supp_user_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.1],
@@ -50,6 +51,7 @@ class RequestCallback extends \yii\db\ActiveRecord {
             'id' => 'ID',
             'request_id' => 'Request ID',
             'supp_org_id' => 'Supp Org ID',
+            'supp_user_id' => 'Supp User ID',
             'price' => 'Price',
             'comment' => 'Comment',
             'created_at' => 'Created At',
@@ -66,6 +68,10 @@ class RequestCallback extends \yii\db\ActiveRecord {
 
     public function getOrganization() {
         return $this->hasOne(Organization::className(), ['id' => 'supp_org_id']);
+    }
+
+    public function getUser() {
+        return $this->hasOne(User::className(), ['id' => 'supp_user_id']);
     }
 
     public function afterSave($insert, $changedAttributes) {

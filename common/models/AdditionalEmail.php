@@ -17,6 +17,7 @@ use Yii;
  * @property integer $order_changed
  * @property integer $order_processing
  * @property integer $order_done
+ * @property integer $request_accept
  *
  * @property Organization $organization
  */
@@ -37,7 +38,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
     {
         return [
             [['email', 'organization_id'], 'required'],
-            [['organization_id', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done'], 'integer'],
+            [['organization_id', 'order_created', 'order_canceled', 'order_changed', 'order_processing', 'order_done', 'request_accept'], 'integer'],
             [['email'], 'string', 'max' => 255],
             ['email', 'filter', 'filter' => 'trim'],
             ['email', 'required'],
@@ -60,6 +61,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
             'order_changed' => Yii::t('app', 'Изменение'),
             'order_processing' => Yii::t('app', 'В работе'),
             'order_done' => Yii::t('app', 'Выполнен'),
+            'request_accept' => Yii::t('app', 'Принятие заявки'),
         ];
     }
 

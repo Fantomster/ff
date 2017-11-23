@@ -94,7 +94,9 @@ class SettingsController extends DefaultController {
             'allModels' => $this->currentUser->organization->additionalEmail,
         ]);
 
-        return $this->render('notifications', compact('emailNotification', 'smsNotification', 'additional_email'));
+        $user = $this->currentUser;
+
+        return $this->render('notifications', compact('user', 'emailNotification', 'smsNotification', 'additional_email'));
     }
 
     /**

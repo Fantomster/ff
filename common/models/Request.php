@@ -23,7 +23,7 @@ use yii\db\ActiveRecord;
  * @property string $end
  * @property integer $rest_org_id
  * @property integer $active_status
- *
+ * @property integer $rest_user_id
  * @property string $regularName
  * @property Organization $vendor
  * @property Organization $client
@@ -76,7 +76,7 @@ class Request extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['category', 'product', 'amount', 'rest_org_id'], 'required'],
-            [['category', 'rush_order', 'payment_method', 'responsible_supp_org_id', 'count_views', 'rest_org_id', 'active_status'], 'integer'],
+            [['category', 'rush_order', 'payment_method', 'responsible_supp_org_id', 'count_views', 'rest_org_id', 'active_status', 'rest_user_id'], 'integer'],
             [['created_at', 'end'], 'safe'],
             [['product', 'comment', 'regular', 'amount', 'deferment_payment'], 'string', 'max' => 255],
         ];
@@ -102,6 +102,7 @@ class Request extends \yii\db\ActiveRecord {
             'end' => 'End',
             'rest_org_id' => 'Rest Org ID',
             'active_status' => 'Active Status',
+            'rest_user_id' => 'User Id',
         ];
     }
 

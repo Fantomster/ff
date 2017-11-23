@@ -657,7 +657,7 @@ class VendorController extends DefaultController {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                         $row_article = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
-                        $row_product = $worksheet->getCellByColumnAndRow(1, $row); //наименование
+                        $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
                         $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
                         $row_ed = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
@@ -671,7 +671,7 @@ class VendorController extends DefaultController {
                                     $id,
                                     $vendor->id,
                                     $row_article,
-                                    HtmlPurifier::process(trim($row_product)),
+                                    HtmlPurifier::process($row_product),
                                     $row_units,
                                     $row_price,
                                     $row_ed,
@@ -705,7 +705,7 @@ class VendorController extends DefaultController {
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = $worksheet->getCellByColumnAndRow(0, $row); //наименование
+                        $row_product = trim($worksheet->getCellByColumnAndRow(0, $row)); //наименование
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row))); //цена
                         if (!empty($row_product && $row_price)) {
                             if (empty($row_units) || $row_units < 0) {
@@ -739,17 +739,18 @@ class VendorController extends DefaultController {
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = Html::encode(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+                        $row_product = trim($worksheet->getCellByColumnAndRow(0, $row)); //наименование
                         if (!empty($row_product)) {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
                             }
-                            if (in_array($row_product, $arr)) {
+                            $cbg_id = array_search(mb_strtolower($row_product), $arr);
+                            if ($cbg_id) {
                                 $data_update .= "UPDATE $cbgTable set 
                                     `market_place` = 1,
                                     `mp_show_price` = 1,
                                     `es_status` = 1
-                                     where cat_id=$id and product='{$row_product}'"
+                                     where cat_id=$id and id='$cbg_id'"
                                         . " and `ed` is not null and `category_id` is not null;";
                             }
                         }

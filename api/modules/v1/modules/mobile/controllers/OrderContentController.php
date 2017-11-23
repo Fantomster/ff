@@ -380,7 +380,7 @@ class OrderContentController extends ActiveController {
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_changed) {
-                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider"))
+                $result = $mailer->compose('orderChange', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
                         ->setTo($email)
                         ->setSubject($subject)
                         ->send();

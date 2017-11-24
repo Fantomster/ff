@@ -320,7 +320,6 @@ class ClientController extends DefaultController {
             }
 
             $organization->type_id = Organization::TYPE_SUPPLIER; //org type_id
-            //$relationCategory->load($post); //array category
             $currentUser = User::findIdentity(Yii::$app->user->id);
 
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
@@ -330,41 +329,29 @@ class ClientController extends DefaultController {
                 if ($arrCatalog === Array()) {
                     $result = ['success' => false, 'message' => 'Каталог пустой!'];
                     return $result;
-                    exit;
                 }
                 $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
                 if (count($arrCatalog) > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                     $result = ['success' => false, 'message' => 'Чтобы добавить больше <strong>' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . '</strong> позиций, пожалуйста свяжитесь с нами '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="text-success">info@mixcart.ru</a>'];
                     return $result;
-                    exit;
                 }
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = trim($arrCatalogs['dataItem']['product']);
-                    //$article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
-                    //$units = trim($arrCatalogs['dataItem']['units']);
                     $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
                     $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
-//                    if (empty($article)) {
-//                        $result = ['success' => false, 'message' => 'Ошибка: <strong>[Артикул]</strong> не указан'];
-//                        return $result;
-//                        exit;
-//                    }
                     if (empty($product)) {
                         $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];
                         return $result;
-                        exit;
                     }
                     if (empty($price)) {
                         $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Цена]</strong>!'];
                         return $result;
-                        exit;
                     }
                     $price = str_replace(',', '.', $price);
                     if (!preg_match($numberPattern, $price)) {
                         $result = ['success' => false, 'message' => 'Ошибка: <strong>[Цена]</strong> в неверном формате!'];
                         return $result;
-                        exit;
                     }
                     if (empty($units) || $units < 0) {
                         $units = 0;
@@ -373,18 +360,15 @@ class ClientController extends DefaultController {
                     if (!empty($units) && !preg_match($numberPattern, $units)) {
                         $result = ['success' => false, 'message' => 'Ошибка: <strong>[Кратность]</strong> товара в неверном формате'];
                         return $result;
-                        exit;
                     }
                     if (empty($ed)) {
                         $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Единица измерения]</strong>!'];
                         return $result;
-                        exit;
                     }
                 }
                 $email = $user->email;
                 $fio = $profile->full_name;
                 $org = $organization->name;
-                //$categorys = $relationCategory['category_id'];
 
                 if ($check['eventType'] == 1) {
                     return $check;
@@ -587,7 +571,6 @@ class ClientController extends DefaultController {
                         $transaction->rollback();
                         $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
                         return $result;
-                        exit;
                     }
                 }
                 if ($check['eventType'] == 3 || $check['eventType'] == 5) {
@@ -778,22 +761,18 @@ class ClientController extends DefaultController {
                         $transaction->rollback();
                         $result = ['success' => false, 'message' => 'сбой сохранения, попробуйте повторить действие еще раз'];
                         return $result;
-                        exit;
                     }
                 } else {
                     $result = ['success' => false, 'message' => 'err: User уже есть в базе! Банить юзера за то, что вылезла подобная ошибка))!'];
                     return $result;
-                    exit;
                 }
             } else {
                 $result = ['success' => false, 'message' => 'Валидация не пройдена!!!'];
                 return $result;
-                exit;
             }
         } else {
             $result = ['success' => false, 'message' => 'err: форма передана не ajax-ом!'];
             return $result;
-            exit;
         }
     }
 
@@ -879,7 +858,6 @@ class ClientController extends DefaultController {
             } else {
                 $result = ['success' => true, 'message' => 'Валидация не пройдена!'];
                 return $result;
-                exit;
             }
         }
     }

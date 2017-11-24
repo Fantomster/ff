@@ -373,7 +373,6 @@ class VendorController extends DefaultController {
             if ($arrCatalog === Array()) {
                 $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Нельзя сохранить пустой каталог!']];
                 return $result;
-                exit;
             }
 
             //проверка на корректность введенных данных (цена)
@@ -391,46 +390,34 @@ class VendorController extends DefaultController {
                 if (empty($article)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
                     return $result;
-                    exit;
                 }
                 if (empty($product)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указано <strong>Наименование</strong>']];
                     return $result;
-                    exit;
                 }
                 if (empty($price)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указана <strong>Цена</strong> продукта']];
                     return $result;
-                    exit;
                 }
                 if (empty($ed)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указана <strong>Единица измерения</strong> товара']];
                     return $result;
-                    exit;
                 }
                 if (!in_array($ed, $arrEd)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверная <strong>Единица измерения</strong> товара']];
                     return $result;
-                    exit;
                 }
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
                     return $result;
-                    exit;
                 }
                 if (!empty($units) && !preg_match($numberPattern, $units)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный формат <strong>Кратность</strong><br><small>только число</small>']];
                     return $result;
-                    exit;
                 }
             }
-//            if (max(array_count_values($articleArray)) > 1) {
-//                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
-//                return $result;
-//                exit;
-//            }
 
             $currency = Currency::findOne(['id' => Yii::$app->request->post('currency')]);
 
@@ -502,7 +489,6 @@ class VendorController extends DefaultController {
                 $currentOrganization->save();
             }
             return $result;
-            exit;
         }
     }
 
@@ -1067,7 +1053,6 @@ class VendorController extends DefaultController {
 
             $result = ['success' => true];
             return $result;
-            exit;
         }
     }
 
@@ -1080,7 +1065,6 @@ class VendorController extends DefaultController {
 
             $result = ['success' => true];
             return $result;
-            exit;
         }
     }
 
@@ -1270,7 +1254,6 @@ class VendorController extends DefaultController {
                     }
                 }
                 return (['success' => true, 'Подписан']);
-                exit;
             } else {
                 $rest_org_id = $id;
                 $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $rest_org_id, 'supp_org_id' => $currentUser->organization_id]);
@@ -1278,7 +1261,6 @@ class VendorController extends DefaultController {
                 $relation_supp_rest->status = 0;
                 $relation_supp_rest->update();
                 return (['success' => true, 'Не подписан']);
-                exit;
             }
         }
     }
@@ -1349,11 +1331,9 @@ class VendorController extends DefaultController {
                 } else {
                     $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Укажите корректное  <strong>Имя</strong> каталога']];
                     return $result;
-                    exit;
                 }
             } else {
                 return (['success' => false, 'type' => 2, 'POST не определен']);
-                exit;
             }
         }
         $catalog = new Catalog();
@@ -1377,7 +1357,6 @@ class VendorController extends DefaultController {
                 } else {
                     $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Укажите корректное  <strong>Имя</strong> каталога']];
                     return $result;
-                    exit;
                 }
             }
         }
@@ -1430,11 +1409,9 @@ class VendorController extends DefaultController {
                 $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
                 $catalogGoods->save();
                 return (['success' => true, 'Добавлен']);
-                exit;
             } else {
                 CatalogGoods::deleteAll(['base_goods_id' => $product_id, 'cat_id' => $cat_id]);
                 return (['success' => true, 'Удален']);
-                exit;
             }
         }
     }
@@ -1449,7 +1426,6 @@ class VendorController extends DefaultController {
                     return (['success' => true, 'cat_id' => $cat_id]);
                 } else {
                     return (['success' => false, 'type' => 1, 'message' => 'Пустой каталог']);
-                    exit;
                 }
             }
         }
@@ -1569,7 +1545,6 @@ class VendorController extends DefaultController {
                 if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный товар']];
                     return $result;
-                    exit;
                 }
 
                 $price = str_replace(',', '.', $price);
@@ -1577,7 +1552,6 @@ class VendorController extends DefaultController {
                 if (!preg_match($numberPattern, $price)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
                     return $result;
-                    exit;
                 }
             }
             foreach ($arrCatalog as $arrCatalogs) {
@@ -1592,7 +1566,6 @@ class VendorController extends DefaultController {
             }
             $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Сохранено', 'body' => 'Данные успешно обновлены']];
             return $result;
-            exit;
         }
         return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
     }
@@ -1653,7 +1626,6 @@ class VendorController extends DefaultController {
                         }
                     }
                     return (['success' => true, 'Подписан']);
-                    exit;
                 } else {
                     $rest_org_id = Yii::$app->request->post('rest_org_id');
                     $relation_supp_rest = RelationSuppRest::findOne(['rest_org_id' => $rest_org_id, 'supp_org_id' => $currentUser->organization_id]);
@@ -1661,7 +1633,6 @@ class VendorController extends DefaultController {
                     $relation_supp_rest->status = 0;
                     $relation_supp_rest->update();
                     return (['success' => true, 'Не подписан']);
-                    exit;
                 }
             }
         }

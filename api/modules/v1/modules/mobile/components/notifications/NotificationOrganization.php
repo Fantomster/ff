@@ -46,6 +46,10 @@ class NotificationOrganization {
             return;*/
         
         $user = Yii::$app->user->getIdentity();
+        
+        if($user == null)
+            return;
+        
         $users=[];
         if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
             $users[]=$user;

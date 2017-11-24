@@ -241,7 +241,7 @@ class OrderController extends ActiveController {
             $currentUser = Yii::$app->user->getIdentity();
             $user_id = $currentUser->id;
             
-            $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
+            $order = Order::findOne(['id' => Yii::$app->request->post('id')]);
             $organizationType = $currentUser->organization->type_id;
             $danger = false;
             $edit = false;
@@ -270,7 +270,7 @@ class OrderController extends ActiveController {
             }
 
             if ($order->save()) {
-                $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
+                $this->sendSystemMessage($currentUser, $order->id, $systemMessage, $danger);
                 return ["title" => $systemMessage, "type" => "success"];
             }
         }

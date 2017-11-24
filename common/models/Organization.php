@@ -551,6 +551,7 @@ class Organization extends \yii\db\ActiveRecord
         $this->setFranchise();
         
         if (!is_a(Yii::$app, 'yii\console\Application'))
+                if(!$insert)
             \api\modules\v1\modules\mobile\components\notifications\NotificationOrganization::actionOrganization($this);
     }
 

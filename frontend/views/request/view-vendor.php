@@ -13,8 +13,8 @@ use yii\widgets\ListView;
 </style>
 <section class="content-header">
     <h1>
-        <i class="fa fa-paper-plane"></i> Заявка №<?=$request->id?>
-        <small>Следите за активностью заявки</small>
+        <i class="fa fa-paper-plane"></i> <?= Yii::t('message', 'frontend.views.request.request_no', ['ru'=>'Заявка №']) ?><?=$request->id?>
+        <small><?= Yii::t('message', 'frontend.views.request.request_activity', ['ru'=>'Следите за активностью заявки']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -23,10 +23,10 @@ use yii\widgets\ListView;
         ],
         'links' => [
             [
-                'label' => 'Список заявок',
+                'label' => Yii::t('message', 'frontend.views.request.request_list', ['ru'=>'Список заявок']),
                 'url' => ['request/list'],
             ],
-            'Заявка №' . $request->id,
+            Yii::t('message', 'frontend.views.request.request_no_two', ['ru'=>'Заявка №']) . $request->id,
         ],
     ])
     ?>
@@ -48,31 +48,31 @@ use yii\widgets\ListView;
               <div class="col-md-12">
 		<h3 class="text-success">№<?=$request->id?> <?=$request->product?>
                 <?php if ($request->rush_order){?>
-      <span style="color:#d9534f"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</span>
+      <span style="color:#d9534f"><i class="fa fa-fire" aria-hidden="true"></i> <?= Yii::t('message', 'frontend.views.request.common', ['ru'=>'СРОЧНО']) ?></span>
       <?php } ?>
                 </h3>
-                <h4><?=$request->comment?$request->comment:'<b>Нет информации</b>' ?></h4>
+                <h4><?=$request->comment?$request->comment:'<b>' . Yii::t('message', 'frontend.views.request.no_info', ['ru'=>'Нет информации']) . ' </b>' ?></h4>
               </div>
             </div>
-            <h6><b>Объем закупки:</b> <?=$request->amount?></h6>
-            <h6><b>Периодичность заказа:</b> <?=$request->regularName?></h6>
+            <h6><b><?= Yii::t('message', 'frontend.views.request.buying_value', ['ru'=>'Объем закупки:']) ?></b> <?=$request->amount?></h6>
+            <h6><b><?= Yii::t('message', 'frontend.views.request.frequency', ['ru'=>'Периодичность заказа:']) ?></b> <?=$request->regularName?></h6>
             <h6><b>Способ оплаты:</b> <?=$request->paymentMethodName ?></h6>
-            <div class="req-respons">Исполнитель: 
+            <div class="req-respons"><?= Yii::t('message', 'frontend.views.request.executor', ['ru'=>'Исполнитель:']) ?>
                 <?=$request->responsible_supp_org_id ? 
                       '<span style="color:#84bf76;text-decoration:underline">' . $request->vendor->name . '</span>' : 
                       '';
                 ?>
             </div>
-            <p style="margin:0;margin-top:15px"><b>Создана</b> <?=$request->created_at?></p>
-            <p style="margin:0;margin-bottom:15px"><b>Будет снята</b> <?=$request->end?></p>
+            <p style="margin:0;margin-top:15px"><b><?= Yii::t('message', 'frontend.views.request.created', ['ru'=>'Создана']) ?></b> <?=$request->created_at?></p>
+            <p style="margin:0;margin-bottom:15px"><b><?= Yii::t('message', 'frontend.views.request.will_delete', ['ru'=>'Будет снята']) ?></b> <?=$request->end?></p>
             <?php if(!$trueFalseCallback){?>
-                        <?= Html::button('Предложить свои услуги', 
+                        <?= Html::button(Yii::t('message', 'frontend.views.request.service', ['ru'=>'Предложить свои услуги']),
                                 ['class' => 'callback btn btn-success',
                                  'data-id'=>$request->id]) ?>
                         <?php } ?>
             <div class="pull-right" style="margin-top: 9px">
-                <span  data-toggle="tooltip" data-placement="bottom" data-original-title="Кол-во уникальных просмотров поставщиков"><i class="fa fa-eye" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->counter?></span>
-                <span  data-toggle="tooltip" data-placement="bottom" data-original-title="Предложений от поставщиков"><i class="fa fa-handshake-o" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->countCallback?></span>
+                <span  data-toggle="tooltip" data-placement="bottom" data-original-title="<?= Yii::t('message', 'frontend.views.request.amount', ['ru'=>'Кол-во уникальных просмотров поставщиков']) ?>"><i class="fa fa-eye" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->counter?></span>
+                <span  data-toggle="tooltip" data-placement="bottom" data-original-title="<?= Yii::t('message', 'frontend.views.request.vendors_offers', ['ru'=>'Предложений от поставщиков']) ?>"><i class="fa fa-handshake-o" style="font-size:19px !important" aria-hidden="true"></i> <?=$request->countCallback?></span>
 		</div>
 	  </div>
           <div class="col-md-6">
@@ -100,7 +100,7 @@ use yii\widgets\ListView;
                     ],
                     'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
                     'summary' => '',
-                    'emptyText' => '<h5>Предложите свою цену заявки! Находите новых, честных партнеров для своего бизнеса!</h5><small>Вы можете видеть только свое предложение</small>',
+                    'emptyText' => '<h5>' . Yii::t('message', 'frontend.views.request.offer', ['ru'=>'Предложите свою цену заявки! Находите новых, честных партнеров для своего бизнеса!']) . ' </h5><small>' . Yii::t('message', 'frontend.views.request.self_offer', ['ru'=>'Вы можете видеть только свое предложение']) . ' </small>',
                 ])?>
 	  </div>
         </div>
@@ -139,29 +139,29 @@ swal.setDefaults({
 })
 var steps = [
   {
-    title: "Цена",
-    text: "Установите цену услуги по данной заявке",
+    title: "' . Yii::t('message', 'frontend.views.request.price', ['ru'=>'Цена']) . ' ",
+    text: "' . Yii::t('message', 'frontend.views.request.set_price', ['ru'=>'Установите цену услуги по данной заявке']) . ' ",
     input: "text",
     animation: true,
-    confirmButtonText: "Далее",
-    cancelButtonText: "Отмена",
+    confirmButtonText: "' . Yii::t('message', 'frontend.views.request.continue', ['ru'=>'Далее']) . ' ",
+    cancelButtonText: "' . Yii::t('message', 'frontend.views.request.cancel', ['ru'=>'Отмена']) . ' ",
     showLoaderOnConfirm: true,
     preConfirm: function (price) {
     return new Promise(function (resolve, reject) {  
         if (!price.match(/^\s*-?[1-9]\d*(\.\d{1,2})?\s*$/)) {
-            reject("Неверный формат! Пример: 1220 , 1220.30");
+            reject("' . Yii::t('message', 'frontend.views.request.wrong_format', ['ru'=>'Неверный формат! Пример: 1220 , 1220.30']) . ' ");
         }
         resolve()  
       })
     }
   },
   {
-    title: "Комментарий",
-    text: "Оставьте комментарий по заявке",
+    title: "' . Yii::t('message', 'frontend.views.request.comment', ['ru'=>'Комментарий']) . ' ",
+    text: "' . Yii::t('message', 'frontend.views.request.enter_comment', ['ru'=>'Оставьте комментарий по заявке']) . ' ",
     input: "textarea",
     animation: false,
-    confirmButtonText: "Отправить",
-    cancelButtonText: "Отмена",
+    confirmButtonText: "' . Yii::t('message', 'frontend.views.request.send', ['ru'=>'Отправить']) . ' ",
+    cancelButtonText: "' . Yii::t('message', 'frontend.views.request.cancel_two', ['ru'=>'Отмена']) . ' ",
     showLoaderOnConfirm: true,
     preConfirm: function (comment) {
     return new Promise(function (resolve, reject) {
@@ -182,19 +182,19 @@ swal.queue(steps).then(function (result) {
         initMap();
         if(response["success"]){
             swal({
-            title: "Отправлено!",
+            title: "' . Yii::t('message', 'frontend.views.request.sent', ['ru'=>'Отправлено!']) . ' ",
             type: "success",
             progressSteps: false,
-            confirmButtonText: "Закрыть",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.request.close', ['ru'=>'Закрыть']) . ' ",
             showCancelButton: false
           })
           }else{
             swal({
-            title: "Ошибка!",
-            text: "Свяжитесь с нами для скорейшего устранения данной ошибки!",
+            title: "' . Yii::t('error', 'frontend.views.request.error', ['ru'=>'Ошибка!']) . ' ",
+            text: "' . Yii::t('error', 'frontend.views.request.contact_us', ['ru'=>'Свяжитесь с нами для скорейшего устранения данной ошибки!']) . ' ",
             type: "error",
             progressSteps: false,
-            confirmButtonText: "Закрыть",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.request.close', ['ru'=>'Закрыть']) . ' ",
             showCancelButton: false
           })
           }

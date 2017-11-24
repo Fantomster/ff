@@ -26,7 +26,7 @@ foreach($restaurants as $row){
     </div>
     <div class="col-md-12">
       <div class="supplier-button">
-        <?=Html::a('предложить услуги', ['send-service',
+        <?=Html::a(Yii::t('message', 'market.views.site.main.send_service', ['ru'=>'предложить услуги']), ['send-service',
                 'id' => $row->id], [
                 'data' => [
                     'target' => '#sendService',

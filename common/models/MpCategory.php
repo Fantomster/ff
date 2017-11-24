@@ -58,7 +58,7 @@ class MpCategory extends \yii\db\ActiveRecord {
     {
         return [
             'id' => 'ID',
-            'name' => Yii::t('app', 'Категория') . ' (MP)',
+            'name' => Yii::t('app', 'common.models.category_mp', ['ru'=>'Категория']) . ' (MP)',
             'parent' => 'Parent',
         ];
     }

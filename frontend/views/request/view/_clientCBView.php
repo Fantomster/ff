@@ -14,10 +14,10 @@ use yii\helpers\Url;
             <div class="col-md-12" style="padding-right: 5px;">
               <h4 class="text-success"><?=$model->organization->name?> 
                   <?php $model->request->responsible_supp_org_id == $model->supp_org_id? 
-            $n = ['value'=>'Убрать исполнителя',
+            $n = ['value'=>Yii::t('message', 'frontend.views.request.kill_executor', ['ru'=>'Убрать исполнителя']),
                 'class'=>'btn btn-danger',
                 'event'=>'exclude']: 
-            $n =['value'=>'Назначить исполнителем',
+            $n =['value'=>Yii::t('message', 'frontend.views.request.set_by_exec_two', ['ru'=>'Назначить исполнителем']),
                 'class'=>'btn btn-success',
                 'event'=>'appoint'];?>
             <?=Html::button($n['value'], ['class' => 'change pull-right ' . $n['class'],
@@ -31,11 +31,11 @@ use yii\helpers\Url;
                        'supp_org_id'=>$model->supp_org_id,
                        'rest_org_id'=>$model->request->rest_org_id,
                        'deleted'=>false])->exists()){
-                       $n = ['value'=>'Добавить поставщика',
+                       $n = ['value'=>Yii::t('message', 'frontend.views.request.add_two', ['ru'=>'Добавить поставщика']),
                         'class'=>'btn btn-success pull-right add-supplier',
                         'event'=>'add-supplier'];
                        }else{
-                       $n = ['value'=>'Поставщик добавлен',
+                       $n = ['value'=>Yii::t('message', 'frontend.views.request.vendor_added', ['ru'=>'Поставщик добавлен']),
                         'class'=>'btn btn-gray pull-right disabled',
                         'event'=>''];    
                        }
@@ -48,8 +48,8 @@ use yii\helpers\Url;
                  ?>
                   <!--a href="#" class="btn btn-gray pull-right disabled" style="font-size:16px;margin-top:-10px;margin-right:10px"><i class="fa fa-comment"></i></a-->
               </h4>
-              <h5>Стоимость услуги: <span class="text-bold"><?=$model->price?> руб.</span></h5>
-              <p><b>Комментарий поставщика:</b> <?=$model->comment?></p>
+              <h5><?= Yii::t('message', 'frontend.views.request.service_price', ['ru'=>'Стоимость услуги:']) ?> <span class="text-bold"><?=$model->price?> <?= Yii::t('message', 'frontend.views.request.rouble', ['ru'=>'руб.']) ?></span></h5>
+              <p><b><?= Yii::t('message', 'frontend.views.request.vendors_comment', ['ru'=>'Комментарий поставщика:']) ?></b> <?=$model->comment?></p>
             </div>
           </div>
         </div>

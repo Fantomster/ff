@@ -4,12 +4,12 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\checkbox\CheckboxX;
 
-$this->title = 'Уведомления';
+$this->title = Yii::t('message', 'frontend.views.settings.notifications_three', ['ru'=>'Уведомления']);
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> Уведомления
-        <small>Настройка уведомлений</small>
+        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.settings.notifications', ['ru'=>'Уведомления']) ?>
+        <small><?= Yii::t('message', 'frontend.views.settings.notifications_settings', ['ru'=>'Настройка уведомлений']) ?></small>
     </h1>
     <?=
     yii\widgets\Breadcrumbs::widget([
@@ -17,8 +17,8 @@ $this->title = 'Уведомления';
             'class' => 'breadcrumb',
         ],
         'links' => [
-            'Настройки',
-            'Уведомления',
+            Yii::t('message', 'frontend.views.settings.settings_two', ['ru'=>'Настройки']),
+            Yii::t('message', 'frontend.views.settings.notifications_two', ['ru'=>'Уведомления']),
         ],
     ])
     ?>
@@ -46,7 +46,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление о новом заказе по email',
+                            'label' => Yii::t('message', 'frontend.views.settings.new_order', ['ru'=>'Уведомление о новом заказе по email']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -64,7 +64,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление об отмене заказа по email',
+                            'label' => Yii::t('message', 'frontend.views.settings.order_cancel_notify', ['ru'=>'Уведомление об отмене заказа по email']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -82,7 +82,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление об изменениях в заказе по email',
+                            'label' => Yii::t('message', 'frontend.views.settings.notify_changes', ['ru'=>'Уведомление об изменениях в заказе по email']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -100,7 +100,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление о начале выполнения заказа по email',
+                            'label' => Yii::t('message', 'frontend.views.settings.notify_begin', ['ru'=>'Уведомление о начале выполнения заказа по email']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -118,7 +118,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление о завершении заказа по email',
+                            'label' => Yii::t('message', 'frontend.views.settings.notify_end', ['ru'=>'Уведомление о завершении заказа по email']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -156,7 +156,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление о новом заказе по sms',
+                            'label' => Yii::t('message', 'frontend.views.settings.sms_notify', ['ru'=>'Уведомление о новом заказе по sms']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -174,7 +174,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление об отмене заказа по sms',
+                            'label' => Yii::t('message', 'frontend.views.settings.sms_cancel_order', ['ru'=>'Уведомление об отмене заказа по sms']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -192,7 +192,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление об изменениях в заказе по sms',
+                            'label' => Yii::t('message', 'frontend.views.settings.sms_changes', ['ru'=>'Уведомление об изменениях в заказе по sms']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -210,7 +210,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление о начале выполнения заказа по sms',
+                            'label' => Yii::t('message', 'frontend.views.settings.order_sms_begin', ['ru'=>'Уведомление о начале выполнения заказа по sms']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -228,7 +228,7 @@ $this->title = 'Уведомления';
                             'size' => 'md',
                         ],
                         'labelSettings' => [
-                            'label' => 'Уведомление о завершении заказа по sms',
+                            'label' => Yii::t('message', 'frontend.views.settings.order_end_sms', ['ru'=>'Уведомление о завершении заказа по sms']),
                             'position' => CheckboxX::LABEL_RIGHT,
                             'options' => ['style' => '']
                         ]
@@ -259,7 +259,7 @@ $this->title = 'Уведомления';
             </div>
         </div>
         <div class="box-footer clearfix">
-        <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.settings.save_two', ['ru'=>'Сохранить']) . ' ', ['class' => 'btn btn-success']) ?>
         </div>
 <?php
 ActiveForm::end();

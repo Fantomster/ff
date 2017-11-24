@@ -8,7 +8,7 @@ use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 
-$this->title = "Список шаблонов";
+$this->title = Yii::t('message', 'frontend.views.order.guide_list', ['ru'=>"Список шаблонов"]);
 
 yii\jui\JuiAsset::register($this);
 
@@ -18,16 +18,16 @@ $this->registerJs('
     $(document).on("click", ".delete-guide", function(e) {
         e.preventDefault();
         clicked = $(this);
-        title = "Удаление шаблона";
-        text = "Вы уверены, что хотите удалить шаблон?";
-        success = "Шаблон удален!";
+        title = "' . Yii::t('message', 'frontend.views.order.deleting_guide', ['ru'=>'Удаление шаблона']) . ' ";
+        text = "' . Yii::t('message', 'frontend.views.order.del_guide', ['ru'=>'Вы уверены, что хотите удалить шаблон?']) . ' ";
+        success = "' . Yii::t('message', 'frontend.views.order.guide_deleted', ['ru'=>'Шаблон удален!']) . ' ";
         swal({
             title: title,
             text: text,
             type: "warning",
             showCancelButton: true,
-            confirmButtonText: "Да, удалить",
-            cancelButtonText: "Отмена",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep_delete', ['ru'=>'Да, удалить']) . ' ",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel_two', ['ru'=>'Отмена']) . ' ",
             showLoaderOnConfirm: true,
             preConfirm: function () {
                 return new Promise(function (resolve, reject) {
@@ -51,13 +51,13 @@ $this->registerJs('
     $(document).on("click", ".new-guid", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "Назовите ваш новый шаблон";
+        var title = "' . Yii::t('message', 'frontend.views.order.set_name_for_guide', ['ru'=>'Назовите ваш новый шаблон']) . ' ";
         swal({
             title: title,
             input: "text",
             showCancelButton: true,
-            cancelButtonText: "Отмена",
-            confirmButtonText: "Принять",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel_three', ['ru'=>'Отмена']) . ' ",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.accept', ['ru'=>'Принять']) . ' ",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -82,7 +82,7 @@ $this->registerJs('
             if (result.type == "success") {
                 document.location = result.url;
             } else {
-                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+                swal({title: "' . Yii::t('error', 'frontend.views.order.error', ['ru'=>'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again', ['ru'=>'Попробуйте еще раз']) . ' ", type: "error"});
             }
         });
     });
@@ -90,15 +90,15 @@ $this->registerJs('
     $(document).on("click", ".add-note", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "Комментарий к товару";
+        var title = "' . Yii::t('message', 'frontend.views.order.good_comment', ['ru'=>'Комментарий к товару']) . ' ";
         fixBootstrapModal();
         fixBootstrapModal();
         swal({
             title: title,
             input: "textarea",
             showCancelButton: true,
-            cancelButtonText: "Закрыть",
-            confirmButtonText: "Сохранить",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.close', ['ru'=>'Закрыть']) . ' ",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.save', ['ru'=>'Сохранить']) . ' ",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -131,7 +131,7 @@ $this->registerJs('
                 clicked.data("original-title", result.comment);
                 swal(result);
             } else {
-                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+                swal({title: "' . Yii::t('error', 'frontend.views.order.error_two', ['ru'=>'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again_two', ['ru'=>'Попробуйте еще раз']) . ' ", type: "error"});
             }
         });
     });
@@ -267,15 +267,15 @@ $this->registerJs('
 <section class="content circe_font">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
-            <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
+            <li><a href="<?= Url::to(['order/create']) ?>"><?= Yii::t('message', 'frontend.views.order.all_goods', ['ru'=>'Все продукты']) ?></a></li>
             <li class="active">
                 <a href="#">
-                    Шаблоны заказов <small class="label bg-yellow">new</small>
+                    <?= Yii::t('message', 'frontend.views.order.orders_guides', ['ru'=>'Шаблоны заказов']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Часто заказываемые товары <small class="label bg-yellow">new</small>
+                    <?= Yii::t('message', 'frontend.views.order.faq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -310,13 +310,13 @@ $this->registerJs('
                                     ->textInput([
                                         'id' => 'searchString',
                                         'class' => 'form-control',
-                                        'placeholder' => 'Поиск'])
+                                        'placeholder' => Yii::t('message', 'frontend.views.order.search', ['ru'=>'Поиск'])])
                                     ->label(false)
                             ?>
                             <?php ActiveForm::end(); ?>
                         </div>
                         <div class="pull-right">
-                            <?= Html::a('<i class="fa fa-plus"></i> Создать шаблон', '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
+                            <?= Html::a('<i class="fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.create_template', ['ru'=>'Создать шаблон']), '#', ['class' => 'btn btn-md btn-outline-success new-guid']) ?>
                         </div>
                     </div>
                 </div>
@@ -350,7 +350,7 @@ $this->registerJs('
                         ],
                         'layout' => "\n{items}\n<div class='pull-left'>{pager}</div><div class='pull-right summary-pages'>{summary}</div>",
                         'summary' => '',
-                        'emptyText' => 'Список пуст',
+                        'emptyText' => Yii::t('message', 'frontend.views.order.empty_list', ['ru'=>'Список пуст']),
                     ])
                     ?>
                     <?php Pjax::end(); ?>

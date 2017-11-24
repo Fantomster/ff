@@ -240,7 +240,7 @@ class RequestController extends DefaultController {
             $rows = \common\models\User::find()->where(['organization_id' => $responsible_id])->all();
             foreach($rows as $row){
                 if($row->profile->phone && $row->profile->sms_allow){
-                    $text = 'Вы больше не исполнитель по заявке №' . $id . ' в системе';
+                    $text = Yii::t('message', 'frontend.controllers.request.no_more', ['ru'=>'Вы больше не исполнитель по заявке № {id} в системе', 'id'=>$id]);
                     $target = $row->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target); 
@@ -255,7 +255,7 @@ class RequestController extends DefaultController {
                 $mailer = Yii::$app->mailer; 
                 $email = $client->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "mixcart.ru - заявка №" . $request->id;
+                $subject = Yii::t('message', 'frontend.controllers.request.mixcart', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestSetResponsible', compact("request","client"))
                         ->setTo($email)->setSubject($subject)->send();
@@ -263,7 +263,7 @@ class RequestController extends DefaultController {
             //Отправка СМС
             foreach($vendors as $vendor){
                 if($vendor->profile->phone && $vendor->profile->sms_allow){
-                    $text = 'Вы назначены исполнителем по заявке №' . $id . ' в системе mixcart.ru';
+                    $text = Yii::t('message', 'frontend.controllers.request.set_executer', ['ru'=>'Вы назначены исполнителем по заявке № {id} в системе mixcart.ru', 'id'=>$id]);
                     $target = $vendor->profile->phone;
                     $sms = new \common\components\QTSMS();
                     $sms->post_message($text, $target); 
@@ -272,7 +272,7 @@ class RequestController extends DefaultController {
                 $mailer = Yii::$app->mailer; 
                 $email = $vendor->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "mixcart.ru - заявка №" . $request->id;
+                $subject = Yii::t('message', 'frontend.controllers.request.request', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestSetResponsibleMailToSupp', compact("request","vendor"))
                         ->setTo($email)->setSubject($subject)->send();
@@ -314,14 +314,14 @@ class RequestController extends DefaultController {
                 $mailer = Yii::$app->mailer; 
                 $email = $client->email;
                 //$email = 'marshal1209448@gmail.com';
-                $subject = "mixcart.ru - заявка №" . $request->id;
+                $subject = Yii::t('message', 'frontend.controllers.request.request_two', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
                 $mailer->htmlLayout = 'layouts/request';
                 $result = $mailer->compose('requestInviteSupplierMailToRest', compact("request","client"))
                         ->setTo($email)->setSubject($subject)->send();
                 }
                 foreach($vendorUsers as $user){
                     if($user->profile->phone && $user->profile->sms_allow){
-                        $text = $client->organization->name . ' хочет работать с Вами в системе';
+                        $text = $client->organization->name . Yii::t('message', 'frontend.controllers.request.wanna_work', ['ru'=>' хочет работать с Вами в системе']);
                         $target = $user->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target); 
@@ -331,7 +331,7 @@ class RequestController extends DefaultController {
                     $mailer = Yii::$app->mailer;
                     $email = $user->email; 
                     //$email = 'marshal1209448@gmail.com';
-                    $subject = "mixcart.ru - заявка №" . $request->id;
+                    $subject = Yii::t('message', 'frontend.controllers.request.request_three', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
                     $mailer->htmlLayout = 'layouts/request';
                     $result = $mailer->compose('requestInviteSupplier', compact("request","user"))
                             ->setTo($email)->setSubject($subject)->send();
@@ -375,7 +375,7 @@ class RequestController extends DefaultController {
         $clients = \common\models\User::find()->where(['organization_id'=>$request->rest_org_id])->all();
         foreach($clients as $client){
             if($client->profile->phone && $client->profile->sms_allow){
-                        $text = "Новый отклик по Вашей заявке №" . $request->id . " от поставщика " . $vendor->organization->name;
+                        $text = Yii::t('message', 'frontend.controllers.request.new_response', ['ru'=>"Новый отклик по Вашей заявке № {req_id} от поставщика", 'req_id'=>$request->id]) . $vendor->organization->name;
                         $target = $client->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target); 
@@ -384,7 +384,7 @@ class RequestController extends DefaultController {
             $mailer = Yii::$app->mailer; 
             $email = $client->email;
             //$email = 'marshal1209448@gmail.com';
-            $subject = "mixcart.ru - заявка №" . $request->id;
+            $subject = Yii::t('message', 'frontend.controllers.request.request_four', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
             $mailer->htmlLayout = 'layouts/request';
             $result = $mailer->compose('requestNewCallback', compact("request","client","vendor"))
                     ->setTo($email)->setSubject($subject)->send();

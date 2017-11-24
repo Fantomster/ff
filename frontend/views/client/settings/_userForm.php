@@ -22,7 +22,7 @@ $form = ActiveForm::begin([
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= $user->isNewRecord ? 'Новый пользователь' : 'Редактировать пользователя' ?></h4>
+    <h4 class="modal-title"><?= $user->isNewRecord ? Yii::t('message', 'frontend.views.client.settings.new', ['ru'=>'Новый пользователь']) : Yii::t('message', 'frontend.views.client.settings.edit', ['ru'=>'Редактировать пользователя']) ?></h4>
 </div>
 <div class="modal-body">
     <input type="email" name="fake_email" style="position: absolute; top: -100%;">
@@ -47,24 +47,24 @@ $form = ActiveForm::begin([
     ])
     ?>
 
-    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType))->label("Роль") ?>
+    <?= $form->field($user, 'role_id')->dropDownList(Role::dropdown($organizationType))->label(Yii::t('message', 'frontend.views.client.settings.role', ['ru'=>"Роль"])) ?>
 
 </div>
 <div class="modal-footer">
     <?=
-    Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> Создать' : '<i class="icon fa fa-save"></i> Сохранить', [
+    Html::button($user->isNewRecord ? '<i class="icon fa fa-user-plus"></i> ' . Yii::t('message', 'frontend.views.client.settings.create', ['ru'=>'Создать']) : '<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.client.settings.save_two', ['ru'=>'Сохранить']), [
         'class' => 'btn btn-success edit',
-        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем..."])
+        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.client.settings.saving', ['ru'=>'Сохраняем...'])])
     ?>
     <?=
-    Html::button('<i class="fa fa-fw fa-trash-o"></i> Удалить', [
+    Html::button('<i class="fa fa-fw fa-trash-o"></i> ' . Yii::t('message', 'frontend.views.client.settings.del', ['ru'=>'Удалить']), [
         'class' => 'btn btn-danger delete',
         'data' => [
             'id' => $user->id,
             'action' => Url::to(["client/ajax-delete-user"]),
-            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Удаляем..."
+            'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.client.settings.deleting', ['ru'=>'Удаляем...'])
 ]])
     ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('message', 'frontend.views.client.settings.cancel_two', ['ru'=>'Отмена']) ?></a>
 </div>
 <?php ActiveForm::end(); ?>

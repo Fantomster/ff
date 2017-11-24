@@ -5,11 +5,11 @@ use yii\helpers\Url;
 use yii\web\View;
 use yii\bootstrap\Modal;
 
-$this->title = 'MixCart главная';
+$this->title = Yii::t('message', 'market.views.site.index.main', ['ru'=>'MixCart главная']);
 ?>
 <div class="row">
   <div class="col-md-12 min-padding">
-    <h3>Популярные товары</h3>  
+    <h3><?= Yii::t('message', 'market.views.site.index.popular', ['ru'=>'Популярные товары']) ?></h3>
   </div>
 </div>
 <div class="row">
@@ -47,16 +47,16 @@ $this->title = 'MixCart главная';
                 <div class="col-md-12">
                   <div class="product-price">
                       <?php if(empty($row->mp_show_price)){ ?>
-                      <h4 style="color:#dfdfdf">договорная цена</h4>
+                      <h4 style="color:#dfdfdf"><?= Yii::t('message', 'market.views.site.index.price', ['ru'=>'договорная цена']) ?></h4>
                       <?php } else {?>
-                      <h4><?=floatval($row->price); ?> <small>руб.</small></h4>
+                      <h4><?=floatval($row->price); ?> <small><?= Yii::t('message', 'market.views.site.index.rouble', ['ru'=>'руб.']) ?></small></h4>
                       <?php } ?>
                   </div>
                 </div>
                 <div class="col-md-12">
                   <div class="product-button">
                     <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>">
-                        <isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ
+                        <isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;<?= Yii::t('message', 'market.views.site.index.buy', ['ru'=>'КУПИТЬ']) ?>
                     </a>
                   </div>  
                 </div>
@@ -69,13 +69,13 @@ $this->title = 'MixCart главная';
     </div>
     <div class="row">
       <div class="col-md-12 min-padding" style="margin-bottom: 10px">
-        <a href="#" class="btn btn-100 btn-outline-default <?=$topProductsCount>6?'':'disabled'?>" id="product-more">ПОКАЗАТЬ ЕЩЕ</a>  
+        <a href="#" class="btn btn-100 btn-outline-default <?=$topProductsCount>6?'':'disabled'?>" id="product-more"><?= Yii::t('message', 'market.views.site.index.show_more', ['ru'=>'ПОКАЗАТЬ ЕЩЕ']) ?></a>
       </div>   
     </div>
     <div class="row">
       <div class="col-md-12 min-padding">
-        <h3 class="pull-left">Поставщики</h3>  
-        <a href="<?=Url::to(['/site/suppliers']);?>" class="pull-right text-success all-supplier-view">Все поставщики</a>
+        <h3 class="pull-left"><?= Yii::t('message', 'market.views.site.index.vendors', ['ru'=>'Поставщики']) ?></h3>
+        <a href="<?=Url::to(['/site/suppliers']);?>" class="pull-right text-success all-supplier-view"><?= Yii::t('message', 'market.views.site.index.all_vendors', ['ru'=>'Все поставщики']) ?></a>
       </div>
     </div>
     <div class="row" id="supplier-block">
@@ -107,7 +107,7 @@ $this->title = 'MixCart главная';
             </div>
             <div class="col-md-12">
               <div class="supplier-button">
-                <a href="#" class="btn btn-100 btn-success invite-vendor" data-vendor-id="<?= $row->id ?>" style="width: 100%">ДОБАВИТЬ</a>
+                <a href="#" class="btn btn-100 btn-success invite-vendor" data-vendor-id="<?= $row->id ?>" style="width: 100%"><?= Yii::t('message', 'market.views.site.info.add', ['ru'=>'ДОБАВИТЬ']) ?></a>
               </div>
             </div>
           </div>
@@ -119,7 +119,7 @@ $this->title = 'MixCart главная';
     </div>
     <div class="row">
       <div class="col-md-12 min-padding">
-        <a href="#" class="btn btn-100 btn-outline-default <?=$topSuppliersCount>6?'':'disabled'?>" id="supplier-more">Показать еще</a>  
+        <a href="#" class="btn btn-100 btn-outline-default <?=$topSuppliersCount>6?'':'disabled'?>" id="supplier-more"><?= Yii::t('message', 'market.views.site.info.show_more', ['ru'=>'Показать еще']) ?></a>
       </div>   
     </div>
   </div> 

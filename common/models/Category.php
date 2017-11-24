@@ -39,7 +39,7 @@ class Category extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => Yii::t('app', 'Категория'),
+            'name' => Yii::t('app', 'common.models.category_two', ['ru'=>'Категория']),
         ];
     }
     public static function allCategory() {

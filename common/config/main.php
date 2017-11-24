@@ -29,8 +29,23 @@ return [
         ],
         'i18n' => [
             'translations' => [
-                '*' => [
+                'kvexport' => [
                     'class' => 'yii\i18n\PhpMessageSource'
+                ],
+                'user' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
+                'backend' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
+                'prequest' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
+                'yii' => [
+                    'class' => 'yii\i18n\PhpMessageSource'
+                ],
+                '*' => [
+                    'class' => 'yii\i18n\DbMessageSource'
                 ],
             ],
         ],

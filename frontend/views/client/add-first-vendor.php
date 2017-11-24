@@ -54,6 +54,25 @@ $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
 $home = Url::to(['client/index']);
 
+$arr = [
+    Yii::t('message', 'frontend.views.client.add.var', ['ru'=>'Поставщик уже добавлен!']),
+    Yii::t('message', 'frontend.views.client.add.var1', ['ru'=>'Поставщик добавлен!']),
+    Yii::t('message', 'frontend.views.client.add.var2', ['ru'=>'Наименование товара']),
+    Yii::t('message', 'frontend.views.client.add.var3', ['ru'=>'Ед. измерения']),
+    Yii::t('message', 'frontend.views.client.add.var4', ['ru'=>'Цена']),
+    Yii::t('message', 'frontend.views.client.add.var5', ['ru'=>'Поставщик добавлен!']),
+    Yii::t('error', 'frontend.views.client.add.var6', ['ru'=>'Ошибка!']),
+    Yii::t('message', 'frontend.views.client.add.var7', ['ru'=>'Удалить поставщика?']),
+    Yii::t('message', 'frontend.views.client.add.var8', ['ru'=>'Поставщик будет удален из Вашего списка поставщиков']),
+    Yii::t('message', 'frontend.views.client.add.var9', ['ru'=>'Удалить']),
+    Yii::t('message', 'frontend.views.client.add.var10', ['ru'=>'Отмена']),
+    Yii::t('message', 'frontend.views.client.add.var11', ['ru'=>'Изменение валюты каталога']),
+    Yii::t('message', 'frontend.views.client.add.var12', ['ru'=>'Выберите новую валюту каталога']),
+    Yii::t('message', 'frontend.views.client.add.var13', ['ru'=>'Выберите валюту из списка']),
+    Yii::t('message', 'frontend.views.client.add.var14', ['ru'=>'Данная валюта уже используется!']),
+    Yii::t('message', 'frontend.views.client.add.var15', ['ru'=>'Валюта каталога изменена!']),
+];
+
 $customJs = <<< JS
     $(".modal").removeAttr("tabindex");
     $('#addProduct').click(function (e){
@@ -137,7 +156,7 @@ $customJs = <<< JS
             } else {
                 $("#addProduct").prop("disabled", true);
                 if (result.vendor_added) {
-                    $("#user-email").tooltip({title: "Поставщик уже добавлен!", placement: "auto right", container: "body"});
+                    $("#user-email").tooltip({title: "$arr[0]", placement: "auto right", container: "body"});
                     $("#user-email").tooltip();
                     $("#user-email").tooltip("show");
                     return;
@@ -167,7 +186,7 @@ $customJs = <<< JS
                 if(response.success){
                     $("#continue").prop("disabled", false);
                     swal({
-                        title: "Поставщик добавлен!", 
+                        title: "$arr[1]", 
                         text: response.message,
                         type: "success"}).then(
                         function(){ 
@@ -186,7 +205,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена (<span class="currency-symbol">'+currencies[currentCurrency-1]+'</span>)'],
+  colHeaders : ['$arr[2]', '$arr[3]', '$arr[4] (<span class="currency-symbol">'+currencies[currentCurrency-1]+'</span>)'],
   columns: [
         {data: 'product', wordWrap:true},
         {data: 'ed', allowEmpty: false},
@@ -260,7 +279,7 @@ $('#invite').click(function(e){
                     $("#invite").button("reset");
                     $("#btnCancel").prop( "disabled", false );
                     swal({
-                        title: "Поставщик добавлен!", 
+                        title: "$arr[5]", 
                         text: response.message,
                         type: "success"}).then(
                         function(){ 
@@ -270,7 +289,7 @@ $('#invite').click(function(e){
                     $("#invite").button("reset");
                     $("#btnCancel").prop( "disabled", false );
                     swal({
-                        title: "Ошибка!", 
+                        title: "$arr[6]", 
                         text: response.message,
                         type: "error"});
                 }
@@ -284,15 +303,15 @@ $('#invite').click(function(e){
 $(document).on("click",".del", function(e){
     var id = $(this).attr('data-id');
         bootbox.confirm({
-            title: "Удалить поставщика?",
-            message: "Поставщик будет удален из Вашего списка поставщиков", 
+            title: "$arr[7]",
+            message: "$arr[8]", 
             buttons: {
                 confirm: {
-                    label: 'Удалить',
+                    label: '$arr[9]',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$arr[10]',
                     className: 'btn-default'
                 }
             },
@@ -324,29 +343,29 @@ $(document).on("click", "#continue", function(e) {
 
     $(document).on("click", "#changeCurrency", function() {
         swal({
-            title: 'Изменение валюты каталога',
+            title: '$arr[11]',
             input: 'select',
             inputOptions: $currencyList,
-            inputPlaceholder: 'Выберите новую валюту каталога',
+            inputPlaceholder: '$arr[12]',
             showCancelButton: true,
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {
                     if (!value) {
-                        reject('Выберите валюту из списка')
+                        reject('$arr[13]')
                     }
                     if (value != currentCurrency) {
                         currentCurrency = value;
                         $(".currency-symbol").html(currencies[currentCurrency-1]);
                         resolve();
                     } else {
-                        reject('Данная валюта уже используется!')
+                        reject('$arr[14]')
                     }
                 })
             },
         }).then(function (result) {
             swal({
-                title: 'Валюта каталога изменена!',
+                title: '$arr[15]',
                 type: 'success',
                 showCancelButton: false,
             })
@@ -371,7 +390,7 @@ Modal::widget([
 ])
 ?>
 <?php
-$this->title = 'Поставщики';
+$this->title = Yii::t('message', 'frontend.views.client.add.vendors', ['ru'=>'Поставщики']);
 $disabled = true;
 ?>
 <div id="modal_addProduct" class="modal fade" role="dialog">
@@ -382,7 +401,7 @@ $disabled = true;
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
                     <h4 class="modal-title">
-                        Укажите товары, который Вы покупаете у поставщика
+                        <?= Yii::t('message', 'frontend.views.client.add.set_goods', ['ru'=>'Укажите товары, который Вы покупаете у поставщика']) ?>
                     </h4>
                 </div>
             </div>
@@ -391,14 +410,14 @@ $disabled = true;
             </div>
             <div class="modal-footer">
                             <?= 
-                    Html::button('<span class="text-label">Изменить валюту: </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
+                    Html::button('<span class="text-label">' . Yii::t('message', 'frontend.views.client.add.currency', ['ru'=>'Изменить валюту:']) . '  </span> <span class="currency-symbol">' . $firstCurrency . '</span>', [
                         'class' => 'btn btn-default pull-left',
                         'style' => ['margin'=>'0 5px;'],
                         'id' => 'changeCurrency',
                     ])
                     ?>
-                <button type="button" class="btn btn-gray" data-dismiss="modal" id="btnCancel">Отмена</button>
-                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
+                <button type="button" class="btn btn-gray" data-dismiss="modal" id="btnCancel"><?= Yii::t('message', 'frontend.views.client.add.cancel', ['ru'=>'Отмена']) ?></button>
+                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span><?= Yii::t('message', 'frontend.views.client.add.send', ['ru'=>'Отправить']) ?></span></button>
             </div>
         </div>
     </div>
@@ -406,16 +425,16 @@ $disabled = true;
 <div class="container1">
     <div class="row">
         <div class="col-lg-12">
-            <p class = "head_p">Добавьте своих поставщиков в Ваш аккаунт</p>
+            <p class = "head_p"><?= Yii::t('message', 'frontend.views.client.add.account', ['ru'=>'Добавьте своих поставщиков в Ваш аккаунт']) ?></p>
 
 
-            <p class = "p_head">Добавьте информацию о Ваших поставщиках и их продуктов. Нажмите "Продолжить" для завершения настроек</p>
-            <button class = "button_head" id="continue" <?= $relations ? "" : "disabled"?>>Продолжить</button>
+            <p class = "p_head"><?= Yii::t('message', 'frontend.views.client.add.info', ['ru'=>'Добавьте информацию о Ваших поставщиках и их продуктов. Нажмите "Продолжить" для завершения настроек']) ?></p>
+            <button class = "button_head" id="continue" <?= $relations ? "" : "disabled"?>><?= Yii::t('message', 'frontend.views.client.add.continue', ['ru'=>'Продолжить']) ?></button>
         </div>
         <div class="col-lg-6 col-md-12">
             <div class="block_wrap_info">
                 <div class="block_wrap_info_p">
-                    <p>Информация о поставщике</p>
+                    <p><?= Yii::t('message', 'frontend.views.client.add.vendor_info', ['ru'=>'Информация о поставщике']) ?></p>
                 </div>
                 <?= $this->render('suppliers/_vendorForm', compact('user', 'profile', 'organization', 'disabled')) ?>
             </div>
@@ -423,7 +442,7 @@ $disabled = true;
         <div class="col-lg-6 col-md-12">
             <div class="block_wrap_info">
                 <div class="block_wrap_info_p">
-                    <p>Пригласить поставщика</p>
+                    <p><?= Yii::t('message', 'frontend.views.client.add.invite_vendor', ['ru'=>'Пригласить поставщика']) ?></p>
                 </div>
                 <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'sp-list']) ?>
                 <?=

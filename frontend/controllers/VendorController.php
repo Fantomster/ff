@@ -260,7 +260,7 @@ class VendorController extends DefaultController {
                     $user->setOrganization($this->currentUser->organization)->save();
                     $this->currentUser->sendEmployeeConfirmation($user);
 
-                    $message = 'Пользователь добавлен!';
+                    $message = Yii::t('message', 'frontend.controllers.vendor.add', ['ru'=>'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -296,7 +296,7 @@ class VendorController extends DefaultController {
                     $user->save();
                     $profile->save();
 
-                    $message = 'Пользователь обновлен!';
+                    $message = Yii::t('message', 'frontend.controllers.vendor.refresh', ['ru'=>'Пользователь обновлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 } else {
                     $profile->validate();
@@ -370,7 +370,7 @@ class VendorController extends DefaultController {
 
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
             if ($arrCatalog === Array()) {
-                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Нельзя сохранить пустой каталог!']];
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty', ['ru'=>'Нельзя сохранить пустой каталог!'])]];
                 return $result;
                 exit;
             }
@@ -388,45 +388,45 @@ class VendorController extends DefaultController {
                 $note = htmlspecialchars(trim($arrCatalogs['dataItem']['note']));
                 array_push($articleArray, (string) $article);
                 if (empty($article)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указан <strong>Артикул</strong>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_two', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_art', ['ru'=>'Не указан <strong>Артикул</strong>'])]];
                     return $result;
                     exit;
                 }
                 if (empty($product)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указано <strong>Наименование</strong>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_three', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_name', ['ru'=>'Не указано <strong>Наименование</strong>'])]];
                     return $result;
                     exit;
                 }
                 if (empty($price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указана <strong>Цена</strong> продукта']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_four', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_price', ['ru'=>'Не указана <strong>Цена</strong> продукта'])]];
                     return $result;
                     exit;
                 }
                 if (empty($ed)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не указана <strong>Единица измерения</strong> товара']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_five', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.empty_ed', ['ru'=>'Не указана <strong>Единица измерения</strong> товара'])]];
                     return $result;
                     exit;
                 }
                 if (!in_array($ed, $arrEd)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверная <strong>Единица измерения</strong> товара']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_six', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_ed', ['ru'=>'Неверная <strong>Единица измерения</strong> товара'])]];
                     return $result;
                     exit;
                 }
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_seven', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_price', ['ru'=>'Не верный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
                     return $result;
                     exit;
                 }
                 if (!empty($units) && !preg_match($numberPattern, $units)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Не верный формат <strong>Кратность</strong><br><small>только число</small>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_eight', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_number', ['ru'=>'Не верный формат <strong>Кратность</strong><br><small>только число</small>'])]];
                     return $result;
                     exit;
                 }
             }
             if (max(array_count_values($articleArray)) > 1) {
-                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!']];
+                $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_nine', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_art', ['ru'=>'Вы пытаетесь загрузить одну или более позиций с одинаковым артикулом!'])]];
                 return $result;
                 exit;
             }
@@ -488,7 +488,7 @@ class VendorController extends DefaultController {
                 $command->execute();
                 $lastInsert_base_goods_id = Yii::$app->db->getLastInsertID();
             }
-            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Поздравляем!', 'body' => 'Вы успешно создали свой первый каталог!']];
+            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => Yii::t('message', 'frontend.controllers.vendor.congr', ['ru'=>'Поздравляем!']), 'body' => Yii::t('message', 'frontend.controllers.vendor.cat_cr', ['ru'=>'Вы успешно создали свой первый каталог!'])]];
             $currentOrganization = $currentUser->organization;
             if ($currentOrganization->step == Organization::STEP_ADD_CATALOG) {
                 $currentOrganization->step = Organization::STEP_OK;
@@ -529,7 +529,7 @@ class VendorController extends DefaultController {
         $searchString = "";
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($baseCatalog)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         $currentCatalog = $baseCatalog;
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
@@ -601,8 +601,8 @@ class VendorController extends DefaultController {
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.cat_error', ['ru'=>'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.error_repeat', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -628,14 +628,14 @@ class VendorController extends DefaultController {
             }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.cat_error_two', ['ru'=>'Ошибка загрузки каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.cat_error_three', ['ru'=>'<small>Вы пытаетесь загрузить каталог объемом больше {max} позиций (Новых позиций), обратитесь к нам и мы вам поможем', 'max'=>CatalogBaseGoods::MAX_INSERT_FROM_XLS])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.cat_error_four', ['ru'=>'Ошибка загрузки каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.cat_error_five', ['ru'=>'<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -682,8 +682,8 @@ class VendorController extends DefaultController {
             	} catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
-                    Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                    Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error', ['ru'=>'Ошибка сохранения, повторите действие'])
+                        . Yii::t('error', 'frontend.controllers.vendor.saving_error_two', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             	}
             }
@@ -715,8 +715,8 @@ class VendorController extends DefaultController {
             	} catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
-                    Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                    Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_three', ['ru'=>'Ошибка сохранения, повторите действие'])
+                        . Yii::t('error', 'frontend.controllers.vendor.saving_error_four', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             	}    
             }
@@ -750,8 +750,8 @@ class VendorController extends DefaultController {
             	} catch (Exception $e) {
                         unlink($path);
                         $transaction->rollback();
-                        Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                        Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_five', ['ru'=>'Ошибка сохранения, повторите действие'])
+                        . Yii::t('error', 'frontend.controllers.vendor.repeat_error', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             	}    
             }
@@ -783,8 +783,8 @@ class VendorController extends DefaultController {
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.file_error', ['ru'=>'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.error_repeat_two', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -809,14 +809,14 @@ class VendorController extends DefaultController {
             }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.cat_error_six', ['ru'=>'Ошибка загрузки каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.cat_error_seven', ['ru'=>'<small>Вы пытаетесь загрузить каталог объемом больше {max} позиций (Новых позиций), обратитесь к нам и мы вам поможем', 'max'=>CatalogBaseGoods::MAX_INSERT_FROM_XLS])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.cat_eight', ['ru'=>'Ошибка загрузки каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.cat_error_nine', ['ru'=>'<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -857,8 +857,8 @@ class VendorController extends DefaultController {
             	} catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
-                    Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                    Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_six', ['ru'=>'Ошибка сохранения, повторите действие'])
+                        . Yii::t('error', 'frontend.controllers.vendor.error_repeat_three', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             	}
             }
@@ -893,8 +893,8 @@ class VendorController extends DefaultController {
             	} catch (Exception $e) {
                     unlink($path);
                     $transaction->rollback();
-                    Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                    Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_seven', ['ru'=>'Ошибка сохранения, повторите действие'])
+                        . Yii::t('error', 'frontend.controllers.vendor.error_repeat_four', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             	}    
             }
@@ -910,8 +910,8 @@ class VendorController extends DefaultController {
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_eight', ['ru'=>'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.error_repeat_five', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -924,8 +924,8 @@ class VendorController extends DefaultController {
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
 
             if ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше '.CatalogBaseGoods::MAX_INSERT_FROM_XLS.' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.cat_error_ten', ['ru'=>'Ошибка загрузки каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.', ['ru'=>'<small>Вы пытаетесь загрузить каталог объемом больше {max} позиций (Новых позиций), обратитесь к нам и мы вам поможем', 'max'=>CatalogBaseGoods::MAX_INSERT_FROM_XLS])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -935,8 +935,8 @@ class VendorController extends DefaultController {
                 array_push($xlsArray, $row_product);
             }
             if (max(array_count_values($xlsArray)) > 1) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым названием! Проверьте файл на наличие дублей! '
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.cat_error_eleven', ['ru'=>'Ошибка загрузки каталога<br>'])
+                        . Yii::t('error', 'frontend.controllers.vendor.cat_error_twelve', ['ru'=>'<small>Вы пытаетесь загрузить один или более позиций с одинаковым названием! Проверьте файл на наличие дублей! '])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -989,8 +989,8 @@ class VendorController extends DefaultController {
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();
-                Yii::$app->session->setFlash('success', 'Ошибка сохранения, повторите действие'
-                        . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
+                Yii::$app->session->setFlash('success', Yii::t('error', 'frontend.controllers.vendor.saving_error_nine', ['ru'=>'Ошибка сохранения, повторите действие'])
+                        . Yii::t('error', 'frontend.controllers.vendor.error_repeat_six', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             }
         }
@@ -1094,7 +1094,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->es_status = 1;
                         $catalogBaseGoods->save();
-                        $message = 'Товар добавлен!';
+                        $message = Yii::t('message', 'frontend.controllers.vendor.good_added_three', ['ru'=>'Товар добавлен!']);
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 } else {
@@ -1102,7 +1102,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                         $catalogBaseGoods->market_place = 0;
                         $catalogBaseGoods->save();
-                        $message = 'Товар добавлен!';
+                        $message = Yii::t('message', 'frontend.controllers.vendor.good_added_two', ['ru'=>'Товар добавлен!']);
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }
@@ -1145,7 +1145,7 @@ class VendorController extends DefaultController {
                         $catalogBaseGoods->es_status = 2;
                         $catalogBaseGoods->save();
 
-                        $message = 'Товар обновлен!';
+                        $message = Yii::t('message', 'frontend.controllers.vendor.good_added', ['ru'=>'Товар обновлен!']);
                         return $this->renderAjax('catalogs/_success', ['message' => $message]);
                     }
                 }
@@ -1255,13 +1255,13 @@ class VendorController extends DefaultController {
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                 foreach ($rows as $row) {
                     if ($row->profile->phone && $row->profile->sms_allow) {
-                        $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе';
+                        $text = Yii::t('message', 'frontend.controllers.vendor.cat_for_you', ['ru'=>'Поставщик {vendor} назначил для Вас каталог в системе', 'vendor'=>$currentUser->organization->name]);
                         $target = $row->profile->phone;
                         $sms = new \common\components\QTSMS();
                         $sms->post_message($text, $target);
                     }
                 }
-                return (['success' => true, 'Подписан']);
+                return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.subscr', ['ru'=>'Подписан'])]);
                 exit;
             } else {
                 $rest_org_id = $id;
@@ -1269,7 +1269,7 @@ class VendorController extends DefaultController {
                 $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
                 $relation_supp_rest->status = 0;
                 $relation_supp_rest->update();
-                return (['success' => true, 'Не подписан']);
+                return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.subscr_not_two', ['ru'=>'Не подписан'])]);
                 exit;
             }
         }
@@ -1308,14 +1308,14 @@ class VendorController extends DefaultController {
                 $user = User::findOne(['id' => $post['id']]);
                 $usersCount = count($user->organization->users);
                 if ($user->id == $this->currentUser->id) {
-                    $message = 'Может воздержимся от удаления себя?';
+                    $message = Yii::t('message', 'frontend.controllers.vendor.delete_yourself', ['ru'=>'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1)) {
 //                    $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save()) {
-                        $message = 'Пользователь удален!';
+                        $message = Yii::t('message', 'frontend.controllers.vendor.user_added', ['ru'=>'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
@@ -1339,12 +1339,12 @@ class VendorController extends DefaultController {
                     $catalog->save();
                     return (['success' => true, 'cat_id' => $catalog->id]);
                 } else {
-                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Укажите корректное  <strong>Имя</strong> каталога']];
+                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_ten', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.cat_error_thirteen', ['ru'=>'Укажите корректное  <strong>Имя</strong> каталога'])]];
                     return $result;
                     exit;
                 }
             } else {
-                return (['success' => false, 'type' => 2, 'POST не определен']);
+                return (['success' => false, 'type' => 2, Yii::t('error', 'frontend.controllers.vendor.no_post', ['ru'=>'POST не определен'])]);
                 exit;
             }
         }
@@ -1367,7 +1367,7 @@ class VendorController extends DefaultController {
                     $catalog->save();
                     return (['success' => true, 'cat_id' => $catalog->id]);
                 } else {
-                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Укажите корректное  <strong>Имя</strong> каталога']];
+                    $result = ['success' => false, 'type' => 1, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_eleven', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.cat_error_fourteen', ['ru'=>'Укажите корректное  <strong>Имя</strong> каталога'])]];
                     return $result;
                     exit;
                 }
@@ -1382,7 +1382,7 @@ class VendorController extends DefaultController {
 
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         $model->id = null;
         $model->name = $model->name . ' ' . date('H:i:s');
@@ -1421,11 +1421,11 @@ class VendorController extends DefaultController {
                 $catalogGoods->cat_id = $cat_id;
                 $catalogGoods->price = CatalogBaseGoods::findOne(['id' => $product_id])->price;
                 $catalogGoods->save();
-                return (['success' => true, 'Добавлен']);
+                return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.added', ['ru'=>'Добавлен'])]);
                 exit;
             } else {
                 CatalogGoods::deleteAll(['base_goods_id' => $product_id, 'cat_id' => $cat_id]);
-                return (['success' => true, 'Удален']);
+                return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.deleted', ['ru'=>'Удален'])]);
                 exit;
             }
         }
@@ -1440,7 +1440,7 @@ class VendorController extends DefaultController {
                 if (CatalogGoods::find()->where(['cat_id' => $cat_id])->exists()) {
                     return (['success' => true, 'cat_id' => $cat_id]);
                 } else {
-                    return (['success' => false, 'type' => 1, 'message' => 'Пустой каталог']);
+                    return (['success' => false, 'type' => 1, 'message' => Yii::t('error', 'frontend.controllers.vendor.empty_cat', ['ru'=>'Пустой каталог'])]);
                     exit;
                 }
             }
@@ -1448,7 +1448,7 @@ class VendorController extends DefaultController {
 
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->organization_id, 'type' => Catalog::BASE_CATALOG]);
         if (empty($baseCatalog)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_three', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         $searchString = "";
         if (!empty(trim(\Yii::$app->request->get('searchString')))) {
@@ -1501,7 +1501,7 @@ class VendorController extends DefaultController {
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         $currentCatalog = $model;
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_four', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         // выборка для handsontable
         /* $arr = CatalogGoods::find()->select(['id', 'base_goods_id', 'price', 'discount', 'discount_percent'])->where(['cat_id' => $id])->
@@ -1556,7 +1556,7 @@ class VendorController extends DefaultController {
                 $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
 
                 if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный товар']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_twelve', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_good', ['ru'=>'Неверный товар'])]];
                     return $result;
                     exit;
                 }
@@ -1564,7 +1564,7 @@ class VendorController extends DefaultController {
                 $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
-                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];
+                    $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => Yii::t('error', 'frontend.controllers.vendor.oops_thirteen', ['ru'=>'УПС! Ошибка']), 'body' => Yii::t('error', 'frontend.controllers.vendor.wrong_price_two', ['ru'=>'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>'])]];
                     return $result;
                     exit;
                 }
@@ -1579,7 +1579,7 @@ class VendorController extends DefaultController {
                 $catalogGoods->price = $price;
                 $catalogGoods->update();
             }
-            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Сохранено', 'body' => 'Данные успешно обновлены']];
+            $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => Yii::t('message', 'frontend.controllers.vendor.saved', ['ru'=>'Сохранено']), 'body' => Yii::t('message', 'frontend.controllers.vendor.upd_data', ['ru'=>'Данные успешно обновлены'])]];
             return $result;
             exit;
         }
@@ -1591,7 +1591,7 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_five', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         $searchModel = new CatalogGoods();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $cat_id);
@@ -1607,7 +1607,7 @@ class VendorController extends DefaultController {
 
                     $catalogGoods->save();
 
-                    $message = 'Продукт обновлен!';
+                    $message = Yii::t('message', 'frontend.controllers.vendor.upd_good', ['ru'=>'Продукт обновлен!']);
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
                 }
             }
@@ -1620,7 +1620,7 @@ class VendorController extends DefaultController {
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $model = Catalog::findOne(['id' => $id, 'supp_org_id' => $currentUser->organization_id]);
         if (empty($model)) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.vendor.get_out_six', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         $searchModel = new RelationSuppRest;
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $currentUser, RelationSuppRest::PAGE_CATALOG);
@@ -1636,13 +1636,13 @@ class VendorController extends DefaultController {
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе';
+                            $text = Yii::t('message', 'frontend.controllers.vendor.cat_for_you_two', ['ru'=>'Поставщик {vendor} назначил для Вас каталог в системе', 'vendor'=>$currentUser->organization->name]);
                             $target = $row->profile->phone;
                             $sms = new \common\components\QTSMS();
                             $sms->post_message($text, $target);
                         }
                     }
-                    return (['success' => true, 'Подписан']);
+                    return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.subscr_two', ['ru'=>'Подписан'])]);
                     exit;
                 } else {
                     $rest_org_id = Yii::$app->request->post('rest_org_id');
@@ -1650,7 +1650,7 @@ class VendorController extends DefaultController {
                     $relation_supp_rest->cat_id = Catalog::NON_CATALOG;
                     $relation_supp_rest->status = 0;
                     $relation_supp_rest->update();
-                    return (['success' => true, 'Не подписан']);
+                    return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.subscr_not', ['ru'=>'Не подписан'])]);
                     exit;
                 }
             }
@@ -1665,7 +1665,7 @@ class VendorController extends DefaultController {
             if ($user->load($post)) {
                 if ($user->validate()) {
                     $this->currentUser->sendInviteToClient($user);
-                    $message = 'Приглашение отправлено!';
+                    $message = Yii::t('message', 'frontend.controllers.vendor.inv_sent', ['ru'=>'Приглашение отправлено!']);
                     return $this->renderAjax('clients/_success', ['message' => $message]);
                 }
             }
@@ -1683,7 +1683,7 @@ class VendorController extends DefaultController {
                 if ($catalogGoods->validate()) {
 
                     $catalogGoods = CatalogGoods::updateAll(['price' => 'price' - (('price' / 100) * $catalogGoods->discount_percent)], ['cat_id' => $cat_id]);
-                    $message = "Сохранено!";
+                    $message = Yii::t('message', 'frontend.controllers.vendor.saved_two', ['ru'=>"Сохранено!"]);
                     return $this->renderAjax('catalogs/_success', ['message' => $message]);
                 }
             }
@@ -1711,7 +1711,7 @@ class VendorController extends DefaultController {
                     if ($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)) {
                         foreach ($organization->users as $recipient) {
                             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                                $text = 'Поставщик ' . $currentUser->organization->name . ' назначил для Вас каталог в системе';
+                                $text = Yii::t('message', 'frontend.controllers.vendor.cat_for_you_three', ['ru'=>'Поставщик {vendor} назначил для Вас каталог в системе', 'vendor'=>$currentUser->organization->name]);
                                 $target = $recipient->profile->phone;
                                 $sms = new \common\components\QTSMS();
                                 $sms->post_message($text, $target);
@@ -2081,12 +2081,12 @@ class VendorController extends DefaultController {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         if (empty($catalog)) {
-            return ['result' => 'error', 'message' => 'Каталог не найден!'];
+            return ['result' => 'error', 'message' => Yii::t('error', 'frontend.controllers.vendor.empty_cat_two', ['ru'=>'Каталог не найден!'])];
         }
 
         $currency = Currency::findOne(['id' => $newCurrencyId]);
         if (empty($currency)) {
-            return ['result' => 'error', 'message' => 'Валюта не найдена!'];
+            return ['result' => 'error', 'message' => Yii::t('error', 'frontend.controllers.vendor.curr_not_found', ['ru'=>'Валюта не найдена!'])];
         }
 
         $catalog->currency_id = $newCurrencyId;
@@ -2103,13 +2103,13 @@ class VendorController extends DefaultController {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         if (empty($catalog)) {
-            return ['result' => 'error', 'message' => 'Каталог не найден!'];
+            return ['result' => 'error', 'message' => Yii::t('error', 'frontend.controllers.vendor.cat_not_found', ['ru'=>'Каталог не найден!'])];
         }
 
         $oldCurrencyUnits = Yii::$app->request->post('oldCurrencyUnits') + 0.0;
         $newCurrencyUnits = Yii::$app->request->post('newCurrencyUnits') + 0.0;
         if (($oldCurrencyUnits <= 0) || ($newCurrencyUnits <= 0)) {
-            return ['result' => 'error', 'message' => 'Некорректный курс!'];
+            return ['result' => 'error', 'message' => Yii::t('error', 'frontend.controllers.vendor.wrong_curr', ['ru'=>'Некорректный курс!'])];
         }
 
         $attributes = ['price' => new \yii\db\Expression('price * ' . $newCurrencyUnits / $oldCurrencyUnits)];

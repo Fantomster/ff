@@ -32,12 +32,12 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = isset($data->note->note) ? "<div class='grid-article'>Заметка: " . $data->note->note . "</div>" : "";
+                $note = isset($data->note->note) ? "<div class='grid-article'>" . Yii::t('message', 'frontend.views.order.article', ['ru'=>'Заметка:']) . $data->note->note . "</div>" : "";
                 return "<div class='grid-prod'>" . Html::decode(Html::decode($data->product_name)) . "</div>"
-                        . "<div class='grid-article'>Артикул: <span>"
+                        . "<div class='grid-article'>" . Yii::t('message', 'frontend.views.order.', ['ru'=>'Артикул:']) . "  <span>"
                         . $data->article . "</span></div>" . $note;
             },
-            'label' => 'Товар',
+            'label' => Yii::t('message', 'frontend.views.order.good', ['ru'=>'Товар']),
         ],
         [
             'attribute' => 'quantity',
@@ -88,7 +88,7 @@ echo GridView::widget([
             'value' => function($data) {
                 return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
             },
-            'label' => 'Цена',
+            'label' => Yii::t('message', 'frontend.views.order.price_three', ['ru'=>'Цена']),
             'contentOptions' => ['class' => 'width150'],
                 ],
         [
@@ -97,13 +97,13 @@ echo GridView::widget([
             'value' => function($data) {
                 return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
             },
-            'label' => 'Сумма',
+            'label' => Yii::t('message', 'frontend.views.order.sum_two', ['ru'=>'Сумма']),
             'contentOptions' => ['class' => 'width150'],
         ],
         [
             'format' => 'raw',
             'value' => function($data) {
-                return '<a href="#" class="deletePosition btn btn-outline-danger btn-sm" data-target="#qnty' . $data->id . '" title="Удалить позицию"><i class="fa fa-trash m-r-xxs"></i></a>';
+                return '<a href="#" class="deletePosition btn btn-outline-danger btn-sm" data-target="#qnty' . $data->id . '" title="' . Yii::t('message', 'frontend.views.order.del_position', ['ru'=>'Удалить позицию']) . ' "><i class="fa fa-trash m-r-xxs"></i></a>';
             },
             'contentOptions' => ['class' => 'text-center', 'style' => 'width: 50px;'],
         ],
@@ -120,7 +120,7 @@ if ($priceEditable) {
         </div>
         <?php if (!empty($order->comment)) { ?>
             <div class="row">
-                <div class="col-xs-4"><span>Комментарий к заказу</span></div>
+                <div class="col-xs-4"><span><?= Yii::t('message', 'frontend.views.order.order_comment_three', ['ru'=>'Комментарий к заказу']) ?></span></div>
                 <div class="col-xs-8"><?= $order->comment ?></div>
             </div>
         <?php } ?>
@@ -138,18 +138,18 @@ if ($priceEditable) {
         </div>
         <div class="row">
             <div class="col-xs-4 ">
-                <span>Стоимость доставки:</span>
+                <span><?= Yii::t('message', 'frontend.views.order.delivery_price_two', ['ru'=>'Стоимость доставки:']) ?></span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->calculateDelivery() . ' руб' ?></span>
+                <span><?= $order->calculateDelivery() . Yii::t('message', 'frontend.views.order.rouble_three', ['ru'=>' руб']) ?></span>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-4">
-                <span>Итого:</span>
+                <span><?= Yii::t('message', 'frontend.views.order.total', ['ru'=>'Итого:']) ?></span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->total_price . ' руб' ?></span>
+                <span><?= $order->total_price . Yii::t('message', 'frontend.views.order.rouble_four', ['ru'=>' руб']) ?></span>
             </div>
         </div>
     </div>
@@ -164,13 +164,13 @@ if ($priceEditable) {
         </div>
         <?php if (!empty($order->comment)) { ?>
             <div class="row">
-                <div class="col-xs-4"><span>Комментарий к заказу</span></div>
+                <div class="col-xs-4"><span><?= Yii::t('message', 'frontend.views.order.order_comment_four', ['ru'=>'Комментарий к заказу']) ?></span></div>
                 <div class="col-xs-8"><?= $order->comment ?></div>
             </div>
         <?php } ?>
         <div class="row">
             <div class="col-xs-4">
-                <span><?= ($order->discount_type) ? $discountTypes[$order->discount_type] : 'Скидка' ?></span>
+                <span><?= ($order->discount_type) ? $discountTypes[$order->discount_type] : Yii::t('message', 'frontend.views.order.discount', ['ru'=>'Скидка']) ?></span>
             </div>
             <div class="col-xs-8">
                 <span><?= ($order->discount) ? $order->discount : '-' ?></span>
@@ -178,28 +178,28 @@ if ($priceEditable) {
         </div>
         <div class="row">
             <div class="col-xs-4 ">
-                <span>Стоимость доставки:</span>
+                <span><?= Yii::t('message', 'frontend.views.order.delivery_price_three', ['ru'=>'Стоимость доставки:']) ?></span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->calculateDelivery() . ' руб' ?></span>
+                <span><?= $order->calculateDelivery() . Yii::t('message', 'frontend.views.order.rouble_five', ['ru'=>' руб']) ?></span>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-4">
-                <span>Итого:</span>
+                <span><?= Yii::t('message', 'frontend.views.order.total_two', ['ru'=>'Итого:']) ?></span>
             </div>
             <div class="col-xs-8">
-                <span><?= $order->total_price . ' руб' ?></span>
+                <span><?= $order->total_price . Yii::t('message', 'frontend.views.order.rouble_six', ['ru'=>' руб']) ?></span>
             </div>
         </div>
     </div>
     <?php
 }
-echo Html::button('<span><i class="icon fa fa-save"></i> Сохранить</span>', [
+echo Html::button('<span><i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.save_six', ['ru'=>'Сохранить']) . ' </span>', [
     'class' => 'btn btn-success pull-right btnSave',
-    'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+    'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.order.saving_three', ['ru'=>'Сохраняем...']),
 ]);
-echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> Повторить заказ', ['order/repeat', 'id' => $order->id], [
+echo $canRepeatOrder ? Html::a('<i class="icon fa fa-refresh"></i> ' . Yii::t('message', 'frontend.views.order.repeat_two', ['ru'=>'Повторить заказ']), ['order/repeat', 'id' => $order->id], [
             'class' => 'btn btn-default pull-right',
             'style' => 'margin-right: 7px;'
         ]) : "";

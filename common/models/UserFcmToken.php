@@ -44,8 +44,8 @@ class UserFcmToken extends \yii\db\ActiveRecord
             'id' => 'ID',
             'device_id' => 'Device Id',
             'token' => 'FCM Token',
-            'created_at' => 'Дата создания',
-            'updated_at' => 'Дата обновления'
+            'created_at' => Yii::t('app', 'Дата создания'),
+            'updated_at' => Yii::t('app', 'Дата обновления')
 
         ];
     }

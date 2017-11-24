@@ -5,7 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\form\ActiveForm;
 
-$this->title = "Редактирование шаблона";
+$this->title = Yii::t('message', 'frontend.views.order.guides.edit_templ', ['ru'=>"Редактирование шаблона"]);
 
 $this->registerJs('
     $(document).on("click", ".select-vendor", function() {
@@ -21,14 +21,14 @@ $this->registerJs('
                     .removeClass("disabled")
                     .removeClass("btn-gray")
                     .addClass("btn-success")
-                    .html(\'<i class="fa fa-hand-pointer-o"></i> Выбрать\');
+                    .html(\'<i class="fa fa-hand-pointer-o"></i> ' . Yii::t('message', 'frontend.views.order.guides.choose_two', ['ru'=>'Выбрать']) . ' \');
                 clicked
                     .addClass("selected-vendor")
                     .removeClass("select-vendor")
                     .addClass("disabled")
                     .removeClass("btn-success")
                     .addClass("btn-gray")
-                    .html(\'<i class="fa fa-thumbs-o-up"></i> Выбран\');
+                    .html(\'<i class="fa fa-thumbs-o-up"></i> ' . Yii::t('message', 'frontend.views.order.guides.changed_two', ['ru'=>'Выбран']) . ' \');
                 $.pjax.reload("#productList", {timeout:30000});
             }
         });
@@ -47,7 +47,7 @@ $this->registerJs('
                     .addClass("disabled")
                     .removeClass("btn-success")
                     .addClass("btn-gray")
-                    .html(\'<i class="fa fa-thumbs-o-up"></i> Продукт добавлен\');
+                    .html(\'<i class="fa fa-thumbs-o-up"></i> ' . Yii::t('message', 'frontend.views.order.guides.product_added', ['ru'=>'Продукт добавлен']) . ' \');
                 $.pjax.reload("#guideProductList", {timeout:30000});
             }
         });
@@ -67,7 +67,7 @@ $this->registerJs('
                     .removeClass("disabled")
                     .removeClass("btn-gray")
                     .addClass("btn-success")
-                    .html(\'<i class="fa fa-plus"></i> Добавить в шаблон\');
+                    .html(\'<i class="fa fa-plus"></i> ' . Yii::t('message', 'frontend.views.order.guides.add_to_templ_two', ['ru'=>'Добавить в шаблон']) . ' \');
             }
         });
     });
@@ -80,15 +80,15 @@ $this->registerJs('
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
-            <li><a href="<?= Url::to(['order/create']) ?>">Все продукты</a></li>
+            <li><a href="<?= Url::to(['order/create']) ?>"><?= Yii::t('message', 'frontend.views.order.guides.all_products', ['ru'=>'Все продукты']) ?></a></li>
             <li class="active">
                 <a href="#">
-                    Шаблоны заказов <small class="label bg-yellow">new</small>
+                    <?= Yii::t('message', 'frontend.views.order.guides.order_templates', ['ru'=>'Шаблоны заказов']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Часто заказываемые товары <small class="label bg-yellow">new</small>
+                    <?= Yii::t('message', 'frontend.views.order.guides.freq', ['ru'=>'Часто заказываемые товары']) ?> <small class="label bg-yellow">new</small>
                 </a>
             </li>
         </ul>
@@ -99,8 +99,8 @@ $this->registerJs('
                         <div class="col-md-6 col-lg-4">
                             <div class="guid_table_block">
                                 <div class="guid_table_block_title">
-                                    <div class="guid_block_title_r pull-left">Выберите поставщика</div>
-                                    <div class="guid_block_title_l pull-right">ШАГ 1</div>
+                                    <div class="guid_block_title_r pull-left"><?= Yii::t('message', 'frontend.views.order.guides.choose_vendor', ['ru'=>'Выберите поставщика']) ?></div>
+                                    <div class="guid_block_title_l pull-right"><?= Yii::t('message', 'frontend.views.order.guides.step_one', ['ru'=>'ШАГ 1']) ?></div>
                                 </div>
                                 <?php
                                 $form = ActiveForm::begin([
@@ -129,7 +129,7 @@ $this->registerJs('
                                         ->textInput([
                                             'id' => 'searchString',
                                             'class' => 'form-control',
-                                            'placeholder' => 'Поиск среди ваших поставщиков'])
+                                            'placeholder' => Yii::t('message', 'frontend.views.order.guides.search', ['ru'=>'Поиск среди ваших поставщиков'])])
                                         ->label(false)
                                 ?>
                                 <?php ActiveForm::end(); ?>
@@ -143,8 +143,8 @@ $this->registerJs('
                         <div class="col-md-6 col-lg-4">
                             <div class="guid_table_block">
                                 <div class="guid_table_block_title">
-                                    <div class="guid_block_title_r pull-left">Выберите его продукт</div>
-                                    <div class="guid_block_title_l pull-right">ШАГ 2</div>
+                                    <div class="guid_block_title_r pull-left"><?= Yii::t('message', 'frontend.views.order.guides.choose_product', ['ru'=>'Выберите его продукт']) ?></div>
+                                    <div class="guid_block_title_l pull-right"><?= Yii::t('message', 'frontend.views.order.guides.step_two', ['ru'=>'ШАГ 2']) ?></div>
                                 </div>
                                 <?php
                                 $form = ActiveForm::begin([
@@ -173,7 +173,7 @@ $this->registerJs('
                                         ->textInput([
                                             'id' => 'searchProductString',
                                             'class' => 'form-control',
-                                            'placeholder' => 'Поиск по продуктам выбранного поставщика'])
+                                            'placeholder' => Yii::t('message', 'frontend.views.order.guides.products_search', ['ru'=>'Поиск по продуктам выбранного поставщика'])])
                                         ->label(false)
                                 ?>
                                 <?php ActiveForm::end(); ?>
@@ -185,8 +185,8 @@ $this->registerJs('
                         <div class="col-md-12 col-lg-4">
                             <div class="guid_table_block">
                                 <div class="guid_table_block_title">
-                                    <div class="guid_block_title_r pull-left">Шаблон: <?= $guide->name ?></div>
-                                    <div class="guid_block_title_l pull-right">ШАГ 3</div>
+                                    <div class="guid_block_title_r pull-left"><?= Yii::t('message', 'frontend.views.order.guides.template', ['ru'=>'Шаблон:']) ?> <?= $guide->name ?></div>
+                                    <div class="guid_block_title_l pull-right"><?= Yii::t('message', 'frontend.views.order.guides.step_three', ['ru'=>'ШАГ 3']) ?></div>
                                 </div> 
                                 <?php
                                 $form = ActiveForm::begin([
@@ -215,7 +215,7 @@ $this->registerJs('
                                         ->textInput([
                                             'id' => 'searchGuideString',
                                             'class' => 'form-control',
-                                            'placeholder' => 'Поиск по набранному шаблону'])
+                                            'placeholder' => Yii::t('message', 'frontend.views.order.guides.templ_search', ['ru'=>'Поиск по набранному шаблону'])])
                                         ->label(false)
                                 ?>
                                 <?php ActiveForm::end(); ?>
@@ -224,10 +224,10 @@ $this->registerJs('
                                 <?php Pjax::end(); ?>
                                 <div style="width:100%;">
                                     <div style="width:50%;float:left;padding-right:2px;">
-                                        <?= Html::a('<i class="fa fa-save"></i> Сохранить', ['order/save-guide', 'id' => $guide->id], ['class' => 'btn btn-md btn-success guide-save']) ?>
+                                        <?= Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.order.guides.save', ['ru'=>'Сохранить']), ['order/save-guide', 'id' => $guide->id], ['class' => 'btn btn-md btn-success guide-save']) ?>
                                     </div>
                                     <div style="width:50%;float:left;padding-left:2px;">
-                                        <?= Html::a('<i class="fa fa-ban"></i> Отменить', ['order/reset-guide'], ['class' => 'btn btn-md btn-gray guide-cancel']) ?>
+                                        <?= Html::a('<i class="fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.order.guides.cancel', ['ru'=>'Отменить']), ['order/reset-guide'], ['class' => 'btn btn-md btn-gray guide-cancel']) ?>
                                     </div>
                                 </div>
                             </div> 

@@ -25,6 +25,18 @@ if (!Yii::$app->user->isGuest) {
 //    $("#checkout").on("pjax:complete", function() {
 //        $.pjax.reload("#side-cart", {url:"$cartUrl", replace: false});
 //    });
+
+    $arr = [
+        Yii::t('message', 'frontend.views.layouts.header.var1', ['ru'=>'Приглашение на MixCart']),
+        Yii::t('message', 'frontend.views.layouts.header.var2', ['ru'=>'Отмена']),
+        Yii::t('message', 'frontend.views.layouts.header.var3', ['ru'=>'Отправить']),
+        Yii::t('message', 'frontend.views.layouts.header.var4', ['ru'=>'Некорректный email!']),
+        Yii::t('message', 'frontend.views.layouts.header.var5', ['ru'=>'Приглашение отправлено!']),
+        Yii::t('error', 'frontend.views.layouts.header.var6', ['ru'=>'Ошибка!']),
+        Yii::t('message', 'frontend.views.layouts.header.var7', ['ru'=>'Попробуйте еще раз']),
+        Yii::t('message', 'frontend.views.layouts.header.var8', ['ru'=>'Непрочитанных сообщений:']),
+    ];
+
     $js = <<<JS
     
 
@@ -131,11 +143,11 @@ if (!Yii::$app->user->isGuest) {
         e.preventDefault();
         form = $("#inviteForm");
         swal({
-            title: "Приглашение на MixCart",
+            title: "$arr[0]",
             input: "text",
             showCancelButton: true,
-            cancelButtonText: "Отмена",
-            confirmButtonText: "Отправить",
+            cancelButtonText: "$arr[1]",
+            confirmButtonText: "$arr[2]",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -147,7 +159,7 @@ if (!Yii::$app->user->isGuest) {
                     if (email) {
                         resolve();
                     } else {
-                        reject('Некорректный email!');
+                        reject('$arr[3]');
                     }
                 })
             },
@@ -168,9 +180,9 @@ if (!Yii::$app->user->isGuest) {
             },
         }).then(function (result) {
             if (result.success) {
-                swal({title: "Приглашение отправлено!", type: "success"});
+                swal({title: "$arr[4]", type: "success"});
             } else {
-                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+                swal({title: "$arr[5]", text: "$arr[6]", type: "error"});
             }
         });            
     });
@@ -340,7 +352,7 @@ JS;
                             <span class="label label-danger unread-messages-count" style="display: <?= count($unreadMessages) ? 'block' : 'none' ?>"><?= count($unreadMessages) ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header">Непрочитанных сообщений: <span class="unread-messages-count"><?= count($unreadMessages) ?></span></li>
+                            <li class="header"><?= Yii::t('message', 'frontend.views.layouts.header.unread', ['ru'=>'Непрочитанных сообщений:']) ?> <span class="unread-messages-count"><?= count($unreadMessages) ?></span></li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-messages">
@@ -352,7 +364,7 @@ JS;
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setMessagesRead' => 1]); ?>"><?= Yii::t('message', 'frontend.views.layouts.header.check_as_read', ['ru'=>'Пометить как прочитанные']) ?></a>
                             </li>
                         </ul>
                     </li>
@@ -362,7 +374,7 @@ JS;
                             <span class="label label-warning unread-notifications-count" style="display: <?= count($unreadNotifications) ? 'block' : 'none' ?>"><?= count($unreadNotifications) ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header">Оповещений: <span class="unread-notifications-count"><?= count($unreadNotifications) ?></span></li>
+                            <li class="header"><?= Yii::t('message', 'frontend.views.layouts.header.messages', ['ru'=>'Оповещений:']) ?> <span class="unread-notifications-count"><?= count($unreadNotifications) ?></span></li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-notifications">
@@ -374,12 +386,12 @@ JS;
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>">Пометить как прочитанные</a>
+                                <a href="#" class="setRead" data-url="<?= Url::to(['/order/ajax-refresh-stats', 'setNotificationsRead' => 1]); ?>"><?= Yii::t('message', 'frontend.views.layouts.header.check_as_read_two', ['ru'=>'Пометить как прочитанные']) ?></a>
                             </li>
                         </ul>
                     </li>
                     <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
-                        <li data-toggle="tooltip" data-placement="bottom" data-original-title="Повторить обучение">
+                        <li data-toggle="tooltip" data-placement="bottom" data-original-title="<?= Yii::t('message', 'frontend.views.layouts.header.repeat_learning', ['ru'=>'Повторить обучение']) ?>">
                             <a href="#" class="repeat-tutorial">
                                 <i class="fa fa-question-circle"></i>
                             </a>
@@ -408,7 +420,7 @@ JS;
                                    $user->role_id == Role::ROLE_FKEEPER_MANAGER ||
                                     in_array($user->role_id, Role::getFranchiseeEditorRoles()))
                                 {
-                                    echo Html::a("БИЗНЕСЫ", ['user/change-form'], [
+                                    echo Html::a(Yii::t('message', 'frontend.views.layouts.header.businesses', ['ru'=>"БИЗНЕСЫ"]), ['user/change-form'], [
                                         'data' => [
                                             'target' => '#changeNetOrg',
                                             'toggle' => 'modal',
@@ -429,7 +441,7 @@ JS;
                         </ul>
                     </li>
                     <li class="dropdown tasks-menu">
-                        <?=Html::a('<i class="fa fa-sign-out"></i> Выход', ['/user/logout'], ['data-method' => 'post'])?>
+                        <?=Html::a('<i class="fa fa-sign-out"></i> ' . Yii::t('message', 'frontend.views.layouts.header.exit', ['ru'=>'Выход']), ['/user/logout'], ['data-method' => 'post'])?>
                     </li>
 
                 </ul>

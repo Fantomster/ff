@@ -12,7 +12,7 @@ use common\models\Category;
 kartik\select2\Select2Asset::register($this);
 ?>
 <?php
-$this->title = 'Поставщики';
+$this->title = Yii::t('message', 'frontend.views.client.supp.vendors', ['ru'=>'Поставщики']);
 $this->params['breadcrumbs'][] = $this->title;
 
 $this->registerCss('');	
@@ -33,8 +33,8 @@ Modal::widget([
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-users"></i> Поставщики
-        <small>Список всех ваших поставщиков</small>
+        <i class="fa fa-users"></i> <?= Yii::t('message', 'frontend.views.client.supp.vendors_two', ['ru'=>'Поставщики']) ?>
+        <small><?= Yii::t('message', 'frontend.views.client.supp.vendors_list_two', ['ru'=>'Список всех ваших поставщиков']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -42,7 +42,7 @@ Modal::widget([
             'class' => 'breadcrumb'
         ],
         'links' => [
-            'Поставщики'
+            Yii::t('message', 'frontend.views.client.supp.vendors_three', ['ru'=>'Поставщики'])
         ],
     ])
     ?>
@@ -55,7 +55,7 @@ Modal::widget([
         $gridColumnsCatalog = [
             [
             'attribute'=>'supp_org_id',
-            'label'=>'Организация',
+            'label'=>Yii::t('message', 'frontend.views.client.supp.org_two', ['ru'=>'Организация']),
             'format' => 'raw',
             'contentOptions' => ['class'=>'text-bold','style' => 'vertical-align:middle;width:45%;font-size:14px'],
             'value'=>function ($data) {
@@ -71,19 +71,19 @@ Modal::widget([
             ],
             [
             'attribute'=>'status',
-            'label'=>'Статус сотрудничества',
+            'label'=>Yii::t('message', 'frontend.views.client.supp.status', ['ru'=>'Статус сотрудничества']),
             'contentOptions' => ['style' => 'vertical-align:middle;width:45%;'],
             'format' => 'raw',
             'value'=>function ($data) {
                 if($data->invite==0){ 
-                $res = '<span class="text-primary"><i class="fa fa-circle-thin"></i> Ожидается подтверждение</span>';
+                $res = '<span class="text-primary"><i class="fa fa-circle-thin"></i> ' . Yii::t('message', 'frontend.views.client.supp.wait', ['ru'=>'Ожидается подтверждение']) . ' </span>';
                 }else{
                     if(\common\models\User::find()->where(['email'=>\common\models\Organization::find()->
                         where(['id'=>$data->supp_org_id])->one()->email])->exists())
                         {    
-                            $res = '<span class="text-yellow"><i class="fa fa-circle-thin"></i> Подтвержден / Не авторизован</span>';
+                            $res = '<span class="text-yellow"><i class="fa fa-circle-thin"></i> ' . Yii::t('message', 'frontend.views.client.supp.accepted', ['ru'=>'Подтвержден / Не авторизован']) . ' </span>';
                         }else{
-                            $res = '<span class="text-success"><i class="fa fa-circle-thin"></i> Подтвержден</span> ';
+                            $res = '<span class="text-success"><i class="fa fa-circle-thin"></i> ' . Yii::t('message', 'frontend.views.client.supp.accepted_two', ['ru'=>'Подтвержден']) . ' </span> ';
                         }
                     } 
                     return $res;
@@ -96,7 +96,7 @@ Modal::widget([
             'value'=>function ($data) {
             $cat = common\models\Catalog::find()->where(['id'=>$data->cat_id])->one();
             $data->invite==0 ? $result = '' :
-            $result = Html::a('Заказ', ['order/create',
+            $result = Html::a(Yii::t('message', 'frontend.views.client.supp.order', ['ru'=>'Заказ']), ['order/create',
                 'OrderCatalogSearch[searchString]'=>"",
                 'OrderCatalogSearch[selectedCategory]'=>"",
                 'OrderCatalogSearch[selectedVendor]'=>$data->supp_org_id,
@@ -106,8 +106,8 @@ Modal::widget([
                     'style'=>'margin-right:10px;text-center'
                   ]);
             $data->invite==0 ? $result .= '' :
-            $result .= $data->cat_id==0 ? 'Каталог не назначен' :
-                Html::a('Каталог', ['client/view-catalog', 'id' => $data->cat_id], [
+            $result .= $data->cat_id==0 ? Yii::t('message', 'frontend.views.client.supp.no_catalog', ['ru'=>'Каталог не назначен']) :
+                Html::a(Yii::t('message', 'frontend.views.client.supp.catalog_three', ['ru'=>'Каталог']), ['client/view-catalog', 'id' => $data->cat_id], [
                 'class'=>'btn btn-default btn-sm',
                 'style'=>'text-center',
                 'data-pjax'=>0,

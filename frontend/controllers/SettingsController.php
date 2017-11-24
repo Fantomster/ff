@@ -63,7 +63,7 @@ class SettingsController extends DefaultController {
 
         if ($loadedPost && $profile->validate() && isset($profile->dirtyAttributes['avatar']) && $profile->avatar) {
             $profile->save();
-            Yii::$app->session->setFlash('success', 'Аватар изменен!');
+            Yii::$app->session->setFlash('success', Yii::t('message', 'frontend.controllers.settings.avatar', ['ru'=>'Аватар изменен!']));
         }
 
         return $this->renderAjax('/settings/user/_change-avatar', compact('profile'));

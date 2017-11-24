@@ -30,7 +30,7 @@ $this->registerJs("
         <img width="90" height="90" src="<?= $profile->avatarUrl ?>" id="newAvatar" class="img-responsive" style="margin:0 auto;" />
     </div>
     <div class="modal-footer">
-        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Закрыть</a>
+        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('message', 'frontend.views.settings.close', ['ru'=>'Закрыть']) ?></a>
     </div>
 
 <?php else: ?>
@@ -48,7 +48,7 @@ $this->registerJs("
     ?>
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h4 class="modal-title">Установка аватара</h4>
+        <h4 class="modal-title"><?= Yii::t('message', 'frontend.views.settings.set_avatar', ['ru'=>'Установка аватара']) ?></h4>
     </div>
     <div class="modal-body">
         <div class="col-1-2">
@@ -60,8 +60,8 @@ $this->registerJs("
     <div class="modal-footer">
         <?= $form->field($profile, 'avatar')->fileInput(['accept' => 'image/*', 'id' => 'upload'])->label(false) ?>
         <?= Html::hiddenInput('Profile[avatar]', null, ['id' => 'image-crop-result']) ?>
-        <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success saveAva']) ?>
-        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+        <?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.settings.save_four', ['ru'=>'Сохранить']) . ' ', ['class' => 'btn btn-success saveAva']) ?>
+        <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('message', 'frontend.views.settings.cancel_three', ['ru'=>'Отмена']) ?></a>
     </div>
     <?php
     ActiveForm::end();

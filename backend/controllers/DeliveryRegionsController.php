@@ -105,7 +105,7 @@ class DeliveryRegionsController extends Controller
         if (($model = Organization::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.delivery.error', ['ru'=>'The requested page does not exist.']));
         }
     }
 }

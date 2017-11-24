@@ -13,10 +13,10 @@ use yii\helpers\Url;
 
 <p><img src="https://mixcart.ru/img/invite-to-client.jpg" style="width: 100%;" alt=""/></p>
 
-<h3 style="font-weight: 500;font-size: 27px;">Здравствуйте!</h3>
-<p>Мы, <u><?= $vendor ?></u>, стали использовать очень удобный инструмент для автоматизации работы с вами. 
+<h3 style="font-weight: 500;font-size: 27px;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.hello', ['ru'=>'Здравствуйте']) ?>!</h3>
+<p><?= Yii::t('app', 'common.mail.accept_vendor_invite.we', ['ru'=>'Мы, {vendor}, стали использовать очень удобный инструмент для автоматизации работы с вами', 'vendor'=>$vendor]) ?>.
     <br />
-    Я приглашаю Вас присоединиться и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу.</p>
+    <?= Yii::t('app', 'common.mail.accept_vendor_invite.i_invite', ['ru'=>'Я приглашаю Вас присоединиться и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу']) ?>.</p>
 
 <br />
 <div style="width: 100%; text-align: center;">
@@ -31,13 +31,13 @@ use yii\helpers\Url;
     cursor: pointer;
     display: inline-block;
     border-radius: 4px;
-    width: 80%;">Принять приглашение</a>
+    width: 80%;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.confirm', ['ru'=>'Принять приглашение']) ?></a>
 </div>
 
 <br /><br />
 
 
-<h5 align="center" style="font-weight: 900;font-size: 17px;">В MixCart очень широкие возможности для ресторанов, о некоторых из них несколько слов ниже.</h5>
+<h5 align="center" style="font-weight: 900;font-size: 17px;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.abilities', ['ru'=>'В MixCart очень широкие возможности для ресторанов, о некоторых из них несколько слов ниже']) ?>.</h5>
 <br /><br />
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
@@ -45,10 +45,10 @@ use yii\helpers\Url;
             <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Market Place</h6>
         </th>
         <th width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Прайсы и каталоги</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.prices', ['ru'=>'Прайсы и каталоги']) ?></h6>
         </th>
         <th width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Коммуникации</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.communications', ['ru'=>'Коммуникации']) ?></h6>
         </th>
     </tr>
     <tr align="center">
@@ -64,13 +64,13 @@ use yii\helpers\Url;
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Акции и распродажи</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.actions', ['ru'=>'Акции и распродажи']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Реклама</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.commercial', ['ru'=>'Реклама']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Оценки и отзывы</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.rating', ['ru'=>'Оценки и отзывы']) ?></h6>
         </td>
     </tr>
     <tr align="center">
@@ -86,13 +86,13 @@ use yii\helpers\Url;
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Аналитика</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.anal', ['ru'=>'Аналитика']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Участие в тендерах</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_vendor_invite.tenders', ['ru'=>'Участие в тендерах']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"header>Обработка заказов</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"header><?= Yii::t('app', 'common.mail.accept_vendor_invite.processing', ['ru'=>'Обработка заказов']) ?></h6>
         </td>
     </tr>
     <tr align="center">

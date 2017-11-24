@@ -6,7 +6,7 @@ use kartik\widgets\TouchSpin;
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Подробности о товаре</h4>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.views.order.product_details', ['ru'=>'Подробности о товаре']) ?></h4>
 </div>
 <div class="modal-body">
     <div class="row">
@@ -16,7 +16,7 @@ use kartik\widgets\TouchSpin;
                     <h4 class="text-bolt" style="margin-top: 0px;margin-bottom:0;">
                         <?= $baseProduct->product ?>
                     </h4> 
-                        <small>Артикул: 
+                        <small><?= Yii::t('message', 'frontend.views.order.art_three', ['ru'=>'Артикул:']) ?>
                             <b>
                             <?= $baseProduct->article ?>
                             </b>
@@ -31,7 +31,7 @@ use kartik\widgets\TouchSpin;
                     <div class="col-md-12">
                         <hr>
                         <h3>
-                        <?= $price ?> <i class="fa fa-fw fa-rub" style="font-size:20px"></i> за 1 <?= $baseProduct->ed ?>
+                        <?= $price ?> <i class="fa fa-fw fa-rub" style="font-size:20px"></i> <?= Yii::t('message', 'frontend.views.order.for_one', ['ru'=>'за 1']) ?> <?= $baseProduct->ed ?>
                         </h3>
                     </div>
                 </div>
@@ -42,41 +42,41 @@ use kartik\widgets\TouchSpin;
             <div class="row">
                 <div class="col-md-12 no-padding">
                     <div class="col-md-6">
-                        <h5>КОРОТКО О ТОВАРЕ</h5>
-                        <small>Производитель: 
+                        <h5><?= Yii::t('message', 'frontend.views.order.shortly', ['ru'=>'КОРОТКО О ТОВАРЕ']) ?></h5>
+                        <small><?= Yii::t('message', 'frontend.views.order.manufacturer', ['ru'=>'Производитель:']) ?>
                             <b>
                             <?= $baseProduct->brand ?>
                             </b>
                         </small><br>
-                        <small>Единица измерения: 
+                        <small><?= Yii::t('message', 'frontend.views.order.measure', ['ru'=>'Единица измерения:']) ?>
                             <b>
                             <?= $baseProduct->ed ?>
                             </b>
                         </small><br>
-                        <small>Вес: 
+                        <small><?= Yii::t('message', 'frontend.views.order.weight', ['ru'=>'Вес:']) ?>
                             <b>
                             <?= $baseProduct->weight ?>
                             </b>
                         </small><br>
-                        <small>Кратность: 
+                        <small><?= Yii::t('message', 'frontend.views.order.frequency', ['ru'=>'Кратность:']) ?>
                             <b>
                             <?= $baseProduct->units ?>
                             </b>
                         </small><br>
                     </div>   
                     <div class="col-md-6">
-                        <h5>УСЛОВИЯ ДОСТАВКИ</h5>
-                        <small>Стоимость доставки: <b><?= $vendor->delivery->delivery_charge ?></b></small><br>
-                        <small>Стоимость заказа для бесплатной доставки у поставщика: <b><?= $vendor->delivery->min_free_delivery_charge ?></b></small><br>
-                        <small>Минимальная стоимость заказа:<b><?= $vendor->delivery->min_order_price ?></b></small><br>
+                        <h5><?= Yii::t('message', 'frontend.views.order.delivery_conditions', ['ru'=>'УСЛОВИЯ ДОСТАВКИ']) ?></h5>
+                        <small><?= Yii::t('message', 'frontend.views.order.delivery_price', ['ru'=>'Стоимость доставки:']) ?> <b><?= $vendor->delivery->delivery_charge ?></b></small><br>
+                        <small><?= Yii::t('message', 'frontend.views.order.free_delivery_price', ['ru'=>'Стоимость заказа для бесплатной доставки у поставщика:']) ?> <b><?= $vendor->delivery->min_free_delivery_charge ?></b></small><br>
+                        <small><?= Yii::t('message', 'frontend.views.order.min_order_price', ['ru'=>'Минимальная стоимость заказа:']) ?><b><?= $vendor->delivery->min_order_price ?></b></small><br>
                         <!--<small>Адрес самовывоза: <b>0.00</b></small><br>-->
-                        <small>Дни доставки: <b><?= $vendor->delivery->getDaysString() ?></b></small>
+                        <small><?= Yii::t('message', 'frontend.views.order.delivery_days', ['ru'=>'Дни доставки:']) ?> <b><?= $vendor->delivery->getDaysString() ?></b></small>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <h5>КОММЕНТАРИЙ</h5>
+                    <h5><?= Yii::t('message', 'frontend.views.order.comment', ['ru'=>'КОММЕНТАРИЙ']) ?></h5>
                     <small>
                     <?= $baseProduct->note ?> 
                     </small>
@@ -105,11 +105,11 @@ use kartik\widgets\TouchSpin;
         'options' => ['class' => 'quantity form-control width100'],
     ])
     ?>
-    <?= Html::a('<i class="fa fa-shopping-cart m-r-xs" style="margin-top:-3px;"></i>&nbsp;&nbsp;Добавить в корзину', "#", 
+    <?= Html::a('<i class="fa fa-shopping-cart m-r-xs" style="margin-top:-3px;"></i>&nbsp;&nbsp;' . Yii::t('message', 'frontend.views.order.add_to_basket_two', ['ru'=>'Добавить в корзину']) . ' ', "#",
             ['id' => '#add', 'class' => 'btn btn-success add-to-cart', 'data' => [
                 'dismiss' => 'modal',
                 'id' => $productId,
                 'cat' => $catId,
                 ]]) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> Отмена</a>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-ban"></i> <?= Yii::t('message', 'frontend.views.order.cancel_six', ['ru'=>'Отмена']) ?></a>
 </div>

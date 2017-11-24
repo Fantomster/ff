@@ -24,7 +24,7 @@ class SnsEndpointController extends \yii\rest\Controller {
             $validator->validate($message);
         } catch (SnsException $ex) {
             Yii::error($ex->getMessage());
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('error', 'backend.controllers.sns.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         // Check the type of the message and handle the subscription.
         if ($message->get('Type') === 'SubscriptionConfirmation') {
@@ -58,7 +58,7 @@ class SnsEndpointController extends \yii\rest\Controller {
             $validator->validate($message);
         } catch (SnsException $ex) {
             Yii::error($ex->getMessage());
-            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new HttpException(404, Yii::t('error', 'backend.controllers.sns.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         // Check the type of the message and handle the subscription.
         if ($message->get('Type') === 'SubscriptionConfirmation') {

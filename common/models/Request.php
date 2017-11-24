@@ -88,20 +88,20 @@ class Request extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
-            'category' => 'Категория товара',
-            'product' => 'Товар',
-            'comment' => 'Комментарий',
-            'regular' => 'Регулярность заказа',
-            'amount' => 'Объем',
-            'rush_order' => 'Срочность',
-            'payment_method' => 'Способ оплаты',
-            'deferment_payment' => 'Отложенный платеж',
-            'responsible_supp_org_id' => 'Ответственный',
-            'count_views' => 'Count Views',
-            'created_at' => 'Created At',
-            'end' => 'End',
+            'category' => Yii::t('app', 'common.models.goods_category', ['ru'=>'Категория товара']),
+            'product' => Yii::t('app', 'common.models.good_two', ['ru'=>'Товар']),
+            'comment' => Yii::t('app', 'common.models.comment_two', ['ru'=>'Комментарий']),
+            'regular' => Yii::t('app', 'common.models.orders_regularity', ['ru'=>'Регулярность заказа']),
+            'amount' => Yii::t('app', 'common.models.value', ['ru'=>'Объем']),
+            'rush_order' => Yii::t('app', 'common.models.urgency', ['ru'=>'Срочность']),
+            'payment_method' => Yii::t('app', 'common.models.payment_variant', ['ru'=>'Способ оплаты']),
+            'deferment_payment' => Yii::t('app', 'common.models.deferred_payment', ['ru'=>'Отложенный платеж']),
+            'responsible_supp_org_id' => Yii::t('app', 'common.models.responsible', ['ru'=>'Ответственный']),
+            'count_views' => Yii::t('app', 'Count Views'),
+            'created_at' => Yii::t('app', 'Created At'),
+            'end' => Yii::t('app', 'End'),
             'rest_org_id' => 'Rest Org ID',
-            'active_status' => 'Active Status',
+            'active_status' => Yii::t('app', 'Active Status'),
         ];
     }
 
@@ -128,7 +128,7 @@ class Request extends \yii\db\ActiveRecord {
 
             $dif = $curTime - $dataTime;
 
-            $sArray = array("секунду", "секунды", "секунд");
+            $sArray = array(Yii::t('app', 'common.models.sec', ['ru'=>"секунду"]), Yii::t('app', 'common.models.secs', ['ru'=>"секунды"]), Yii::t('app', 'common.models.sec_two', ['ru'=>"секунд"]));
             $iArray = array("минуту", "минуты", "минут");
             $hArray = array("час", "часа", "часов");
 

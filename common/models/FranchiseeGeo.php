@@ -59,13 +59,13 @@ class FranchiseeGeo extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
-            'franchisee_id' => 'ID франши',
-            'country' => 'Страна',
-            'locality' => 'Город',
-            'exception' => 'Исключение',
-            'administrative_area_level_1' => 'Область',
-            'created_at' => 'Создано',
-            'updated_at' => 'Обновлено',
+            'franchisee_id' => Yii::t('app', 'common.models.franch_id', ['ru'=>'ID франши']),
+            'country' => Yii::t('app', 'common.models.country_two', ['ru'=>'Страна']),
+            'locality' => Yii::t('app', 'common.models.city_two', ['ru'=>'Город']),
+            'exception' => Yii::t('app', 'common.models.exception_two', ['ru'=>'Исключение']),
+            'administrative_area_level_1' => Yii::t('app', 'common.models.region_two', ['ru'=>'Область']),
+            'created_at' => Yii::t('app', 'common.models.created_three', ['ru'=>'Создано']),
+            'updated_at' => Yii::t('app', 'common.models.refreshed_four', ['ru'=>'Обновлено']),
         ];
     }
     

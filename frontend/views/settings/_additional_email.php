@@ -9,7 +9,7 @@ $labels = $labels->attributeLabels();
 <?php
 //Кнопка добавления, для встраивания в шаблон
 $buttonAdd = Html::tag('div',
-    Html::button('<i class="glyphicon glyphicon-edit"></i> ' . Yii::t('app', 'Добавить'),
+    Html::button('<i class="glyphicon glyphicon-edit"></i> ' . Yii::t('message', 'frontend.views.settings.add', ['ru'=>'Добавить']),
         [
             'class' => 'btn btn-success btn-xs',
             'onclick' => 'addEmail()',
@@ -89,7 +89,7 @@ echo \kartik\grid\GridView::widget([
     ',
     'panel' => [
         'type' => kartik\grid\GridView::TYPE_DEFAULT,
-        'heading' => \Yii::t('app', 'Дополнительные email'),
+        'heading' => Yii::t('message', 'frontend.views.settings.additional_email', ['ru'=>'Дополнительные email']),
         'after' => false,
         'footer' => false,
         'before' => false,
@@ -105,11 +105,11 @@ $this->registerJs("
 
 addEmail= function () {
     swal({
-      title: '" . Yii::t('app', 'Введите email') . "',
+      title: '" . Yii::t('message', 'frontend.views.settings.insert_email', ['ru'=>'Введите email']) . "',
       input: 'email',
       showCancelButton: true,
-      confirmButtonText: '" . Yii::t('app', 'Сохранить') . "',
-      cancelButtonText: '" . Yii::t('app', 'Отменить') . "',
+      confirmButtonText: '" . Yii::t('message', 'frontend.views.settings.save_three', ['ru'=>'Сохранить']) . "',
+      cancelButtonText: '" . Yii::t('message', 'frontend.views.settings.cancel', ['ru'=>'Отменить']) . "',
       showLoaderOnConfirm: true,
       preConfirm: function (email) {
         return new Promise(function (resolve, reject) {
@@ -127,8 +127,8 @@ addEmail= function () {
     }).then(function (email) {
       swal({
         type: 'success',
-        title: '" . Yii::t('app', 'Готово') . "',
-        html: '" . Yii::t('app', 'Добавлен новый email') . ": ' + email,
+        title: '" . Yii::t('message', 'frontend.views.settings.ready', ['ru'=>'Готово']) . "',
+        html: '" . Yii::t('message', 'frontend.views.settings.new_email', ['ru'=>'Добавлен новый email']) . ": ' + email,
         timer: 1500
       }).catch(swal.noop);
     }).catch(swal.noop);
@@ -137,11 +137,11 @@ addEmail= function () {
 deleteEmail= function (id) {
     var id = id;
     swal({
-      title: '" . Yii::t('app', 'Вы уверены что хотите удалить email') . "?',
+      title: '" . Yii::t('message', 'frontend.views.settings.delete_email', ['ru'=>'Вы уверены что хотите удалить email']) . "?',
       type: 'question',
       showCancelButton: true,
-      confirmButtonText: '" . Yii::t('app', 'Удалить') . "',
-      cancelButtonText: '" . Yii::t('app', 'Отменить') . "',
+      confirmButtonText: '" . Yii::t('message', 'frontend.views.settings.delete', ['ru'=>'Удалить']) . "',
+      cancelButtonText: '" . Yii::t('message', 'frontend.views.settings.cancel_two', ['ru'=>'Отменить']) . "',
       showLoaderOnConfirm: true,
       preConfirm: function () {
         return new Promise(function (resolve, reject) {
@@ -158,8 +158,8 @@ deleteEmail= function (id) {
     }).then(function () {
       swal({
         type: 'success',
-        title: '" . Yii::t('app', 'Готово') . "',
-        html: '" . Yii::t('app', 'Email удален из списка получаетелей') . "',
+        title: '" . Yii::t('message', 'frontend.views.settings.ready_two', ['ru'=>'Готово']) . "',
+        html: '" . Yii::t('message', 'frontend.views.settings.email_deleted', ['ru'=>'Email удален из списка получаетелей']) . "',
         timer: 1500
       }).catch(swal.noop)
     }).catch(swal.noop);
@@ -174,16 +174,16 @@ $(document).on('change', '#emails-pjax-container input[type=\"checkbox\"]', func
     $.post('" . Yii::$app->urlManager->createUrl(["/settings/ajax-change-email-notification"]) . "', params)
     .fail(function(xhr, status, error) {
         $(tih_s).prop('checked', (params.value == 1 ? false : true));
-        var text = '" . Yii::t('app', 'Сообщите текст ошибки в отдел технической поддержки: ') . "' + error;
+        var text = '" . Yii::t('app', 'frontend.views.settings.text', ['ru'=>'Сообщите текст ошибки в отдел технической поддержки: ']) . "' + error;
         
         if(error == 'Forbidden') {
-            text = '" . Yii::t('app', 'Доступ запрещен.') . "';
+            text = '" . Yii::t('error', 'frontend.views.settings.forbidden',['ru'=>'Доступ запрещен.']) . "';
         }
         
         swal({
           position: 'center',
           type: 'error',
-          title: '" . Yii::t('app', 'Ошибка') . "',
+          title: '" . Yii::t('error', 'frontend.views.settings.error', ['ru'=>'Ошибка']) . "',
           text: text,
           showConfirmButton: true
         });

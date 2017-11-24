@@ -53,13 +53,13 @@ class Profile extends \amnah\yii2\user\models\Profile {
     public function rules() {
         $rules = parent::rules();
         //$rules[] = [['full_name'], 'required'];
-        $rules[] = [['full_name'], 'required', 'on' => ['complete'], 'message' => 'Пожалуйста, напишите, как к вам обращаться'];
+        $rules[] = [['full_name'], 'required', 'on' => ['complete'], 'message' => Yii::t('app', 'common.models.please', ['ru'=>'Пожалуйста, напишите, как к вам обращаться'])];
         $rules[] = [['full_name'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process'];
         $rules[] = [['phone'], 'string', 'max' => 255];
-        $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className(), 'on' => ['register', 'invite'], 'message' => 'Некорректный номер'];
+        $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className(), 'on' => ['register', 'invite'], 'message' => Yii::t('app', 'common.models.incorrect_number', ['ru'=>'Некорректный номер'])];
         $rules[] = [['phone'], 'default', 'value' => null];
-        $rules[] = [['phone'], 'required', 'on' => ['register'], 'message' => 'Пожалуйста, введите свой номер телефона'];
-        $rules[] = [['phone'], 'required', 'on' => ['invite'], 'message' => 'Пожалуйста, введите номер телефона'];
+        $rules[] = [['phone'], 'required', 'on' => ['register'], 'message' => Yii::t('app', 'common.models.fill_phone', ['ru'=>'Пожалуйста, введите свой номер телефона'])];
+        $rules[] = [['phone'], 'required', 'on' => ['invite'], 'message' => Yii::t('app', 'common.models.plefse_phone', ['ru'=>'Пожалуйста, введите номер телефона'])];
         $rules[] = [['avatar'], 'image', 'extensions' => 'jpg, jpeg, gif, png'];
         $rules[] = [['sms_allow'], 'default', 'value' => 0];
 

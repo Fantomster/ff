@@ -45,8 +45,8 @@ class User extends \amnah\yii2\user\models\User {
             [['newPasswordConfirm'], 'required', 'on' => ['reset']],
             [['newPasswordConfirm'], 'compare', 'compareAttribute' => 'newPassword', 'message' => Yii::t('user', 'Passwords do not match')],
             // email rules invite client
-            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => 'Введите эл.почту партнера'],
-            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message' => 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!'],
+            [['email'], 'required', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'Введите эл.почту партнера')],
+            [['email'], 'unique', 'on' => ['sendInviteFromVendor'], 'message' => Yii::t('app', 'Пользователь с таким Email уже работает в системе MixCart, пожалуйста, свяжитесь с ним для сотрудничества!')],
             // account page
             [['currentPassword'], 'validateCurrentPassword', 'on' => ['account']],
             // admin crud rules
@@ -56,7 +56,7 @@ class User extends \amnah\yii2\user\models\User {
             [['banned_reason'], 'string', 'max' => 255, 'on' => 'admin'],
             [['role_id'], 'required', 'on' => ['manage', 'manageNew']],
             [['organization_id'], 'integer'],
-            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'message' => 'Организация не найдена'],
+            [['organization_id'], 'exist', 'skipOnEmpty' => true, 'targetClass' => Organization::className(), 'targetAttribute' => 'id', 'message' => Yii::t('app', 'Организация не найдена')],
         ];
 
         // add required for currentPassword on account page
@@ -221,7 +221,7 @@ class User extends \amnah\yii2\user\models\User {
         // send email
         $vendor = $this->organization->name;
         $email = $client->email;
-        $subject = "Приглашение на MixCart";
+        $subject = Yii::t('app', "Приглашение на MixCart");
         $result = $mailer->compose('acceptVendorInvite', compact("subject", "client", "vendor"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -246,7 +246,7 @@ class User extends \amnah\yii2\user\models\User {
         $mailer->viewPath = $this->module->emailViewPath;
         // send email
         $we = $this->organization->name;
-        $subject = "Приглашение на MixCart";
+        $subject = Yii::t('app', "Приглашение на MixCart");
         $result = $mailer->compose('friendInvite', compact("subject", "we"))
                 ->setTo($email)
                 ->setSubject($subject)
@@ -304,7 +304,7 @@ class User extends \amnah\yii2\user\models\User {
         $userToken = $this->module->model("UserToken");
         $userToken = $userToken::generate($user->id, $userToken::TYPE_EMAIL_ACTIVATE);
         $email = $user->email;
-        $subject = "Подтвердите аккаунт на MixCart";
+        $subject = Yii::t('app', "Подтвердите аккаунт на MixCart");
         $result = $mailer->compose('confirmEmail', compact("subject", "user", "profile", "userToken"))
                 ->setTo($email)
                 ->setSubject($subject)

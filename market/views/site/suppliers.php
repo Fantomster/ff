@@ -6,7 +6,7 @@ use yii\web\View;
 ?>
 <div class="row">
     <div class="col-md-12">
-      <h3>Поставщики <small></small></h3>
+      <h3><?= Yii::t('message', 'market.views.site.supp.vendors', ['ru'=>'Поставщики']) ?> <small></small></h3>
         <div class="row" id="supplier-block">
             <?php
             foreach($suppliers as $row){
@@ -36,7 +36,7 @@ use yii\web\View;
                 </div>
                 <div class="col-md-12">
                   <div class="supplier-button">
-                    <a href="#" class="btn btn-success invite-vendor" data-vendor-id="<?= $row->id ?>" style="width: 100%">Добавить</a>
+                    <a href="#" class="btn btn-success invite-vendor" data-vendor-id="<?= $row->id ?>" style="width: 100%"><?= Yii::t('message', 'market.views.site.supp.add', ['ru'=>'Добавить']) ?></a>
                   </div>
                 </div>
               </div>
@@ -48,7 +48,7 @@ use yii\web\View;
         </div>
         <div class="row">
           <div class="col-md-12 min-padding">
-            <a href="#" class="btn btn-outline-ajax <?=$suppliersCount>12?'':'disabled'?>" id="product-more">Показать еще</a>  
+            <a href="#" class="btn btn-outline-ajax <?=$suppliersCount>12?'':'disabled'?>" id="product-more"><?= Yii::t('message', 'market.views.site.supp.more', ['ru'=>'Показать еще']) ?></a>
           </div>   
         </div>
     </div>

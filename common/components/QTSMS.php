@@ -168,7 +168,7 @@ class QTSMS {
 			return $body;
 			
 		} else
-			return 'Невозможно соединиться с сервером.';
+			return Yii::t('app', 'Невозможно соединиться с сервером.');
 	}	
 	
 	################################################
@@ -212,7 +212,7 @@ class QTSMS {
 			fputs($fp,$headers);
 			$header = "";
 			$fp2 = fopen($file_data["path"], "rb"); //пытаемся открыть передаваемый файл
-			if(!$fp2) return "Невозможно открыть файл {$file_data['path']}";
+			if(!$fp2) return Yii::t('app', "Невозможно открыть файл")." {$file_data['path']}";
 			
 			while(!feof($fp2)) 
 				fputs($fp, fgets($fp2, 1024*100));
@@ -236,7 +236,7 @@ class QTSMS {
 			return $body;
 			
 		} else
-			return 'Невозможно соединиться с сервером.';
+			return Yii::t('app', 'Невозможно соединиться с сервером.');
 	}
 	
 	function decode_header ($str) {

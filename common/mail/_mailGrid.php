@@ -17,25 +17,25 @@ echo GridView::widget([
             'value' => function($data) {
                 $note = ""; //$data->product->note ? "<div class='grid-article'>Заметка: " . $data->product->note . "</div>" : ""; 
                 return "<div>" . $data->product_name . "</div>"
-                        . "<div>Артикул: " . $data->article . "</div>" . $note;
+                        . "<div>". Yii::t('app', 'common.mail.mail_grid.art', ['ru'=>'Артикул:']) . $data->article . "</div>" . $note;
             },
-            'label' => 'Товар',
+            'label' => Yii::t('app', 'common.mail.mail_grid.good', ['ru'=>'Товар']),
             'contentOptions' => ['style' => 'border: 1px solid; width: 55%;'],
             'headerOptions' => ['style' => 'border: 1px solid; width: 55%;'],
         ],
         [
             'attribute' => 'quantity',
             'value' => 'quantity',
-            'label' => 'Количество',
+            'label' => Yii::t('app', 'common.mail.mail_grid.amount', ['ru'=>'Количество']),
             'contentOptions' => ['style' => 'border: 1px solid; width: 15%;'],
             'headerOptions' => ['style' => 'border: 1px solid; width: 15%;'],
         ],
         [ 'format' => 'raw',
             'attribute' => 'price',
             'value' => function($data) {
-                return '<b>' . $data->price . ' руб</b>';
+                return '<b>' . $data->price . ' ' . Yii::t('app', 'common.mail.mail_grid.rouble', ['ru'=>'руб']) . ' </b>';
             },
-            'label' => 'Цена',
+            'label' => Yii::t('app', 'common.mail.mail_grid.price', ['ru'=>'Цена']),
             'contentOptions' => ['style' => 'border: 1px solid; width: 15%;'],
             'headerOptions' => ['style' => 'border: 1px solid; width: 15%;'],
         ],
@@ -43,9 +43,9 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'total',
             'value' => function($data) {
-                return '<b>' . $data->total . ' руб</b>';
+                return '<b>' . $data->total . ' ' . Yii::t('app', 'common.mail.mail_grid.rouble_two', ['ru'=>'руб']) . ' </b>';
             },
-            'label' => 'Сумма',
+            'label' => Yii::t('app', 'common.mail.mail_grid.sum', ['ru'=>'Сумма']),
             'contentOptions' => ['style' => 'border: 1px solid; width: 15%;'],
             'headerOptions' => ['style' => 'border: 1px solid; width: 15%;'],
         ],

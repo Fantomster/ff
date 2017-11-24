@@ -7,7 +7,7 @@ use kartik\form\ActiveForm;
 use kartik\grid\GridView;
 use kartik\widgets\TouchSpin;
 
-$this->title = "Часто заказываемые товары";
+$this->title = Yii::t('message', 'frontend.views.order.freq_goods', ['ru'=>"Часто заказываемые товары"]);
 
 yii\jui\JuiAsset::register($this);
 
@@ -15,13 +15,13 @@ $this->registerJs('
     $(document).on("click", ".add-note", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "Комментарий к товару";
+        var title = "' . Yii::t('message', 'frontend.views.order.good_comment_two', ['ru'=>'Комментарий к товару']) . ' ";
         swal({
             title: title,
             input: "textarea",
             showCancelButton: true,
-            cancelButtonText: "Закрыть",
-            confirmButtonText: "Сохранить",
+            cancelButtonText: "' . Yii::t('message', 'frontend.views.order.close_two', ['ru'=>'Закрыть']) . ' ",
+            confirmButtonText: "' . Yii::t('message', 'frontend.views.order.save_two', ['ru'=>'Сохранить']) . ' ",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,
@@ -53,7 +53,7 @@ $this->registerJs('
                 clicked.data("original-title", result.comment);
                 swal(result);
             } else {
-                swal({title: "Ошибка!", text: "Попробуйте еще раз", type: "error"});
+                swal({title: "' . Yii::t('error', 'frontend.views.order.error_three', ['ru'=>'Ошибка!']) . ' ", text: "' . Yii::t('message', 'frontend.views.order.try_again_three', ['ru'=>'Попробуйте еще раз']) . ' ", type: "error"});
             }
         });
     });

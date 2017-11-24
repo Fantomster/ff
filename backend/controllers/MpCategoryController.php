@@ -118,7 +118,7 @@ class MpCategoryController extends Controller
         if (($model = MpCategory::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.mp.page_error', ['ru'=>'The requested page does not exist.']));
         }
     }
 }

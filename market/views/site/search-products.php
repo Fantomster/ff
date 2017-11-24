@@ -9,7 +9,7 @@ use common\models\ES\Product;
 ?>
 
 <?php
-$this->title = 'MixCart результаты поиска';
+$this->title = Yii::t('message', 'market.views.site.search_prods.results', ['ru'=>'MixCart результаты поиска']);
 ?>
 <div class="row">
     <div class="col-md-12 no-padding">
@@ -20,7 +20,7 @@ $this->title = 'MixCart результаты поиска';
             ],
             'homeLink' => false,
             'links' => [
-                'Товаров найдено: ' . $count
+                Yii::t('message', 'market.views.site.search_prods.no_goods', ['ru'=>'Товаров найдено: ']) . $count
             ],
         ])
         ?>
@@ -66,16 +66,16 @@ $this->title = 'MixCart результаты поиска';
                                 <div class="product-price">
                                     <h4>
                                         <?php if (empty($row->product_show_price)) { ?>
-                                            <h4 style="color: #dfdfdf">договорная цена</h4>
+                                            <h4 style="color: #dfdfdf"><?= Yii::t('message', 'market.views.site.search_prods.price', ['ru'=>'договорная цена']) ?></h4>
                                         <?php } else { ?>
-                                            <h4><?= floatval($row->product_price); ?> <small>руб.</small></h4>
+                                            <h4><?= floatval($row->product_price); ?> <small><?= Yii::t('message', 'market.views.site.search_prods.rouble', ['ru'=>'руб.']) ?></small></h4>
                                         <?php } ?>
                                 </div>
 
                             </div>
                             <div class="col-md-12">
                                 <div class="product-button">
-                                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->product_id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> КУПИТЬ</a>
+                                    <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->product_id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc> <?= Yii::t('message', 'market.views.site.search_prods.to_buy', ['ru'=>'КУПИТЬ']) ?></a>
                                 </div>  
                             </div>
                         </div>
@@ -87,7 +87,7 @@ $this->title = 'MixCart результаты поиска';
         </div>
         <div class="row">
             <div class="col-md-12 min-padding">
-                <a href="#" class="btn btn-100 btn-outline-default <?= $count > 12 ? '' : 'disabled' ?>" id="product-more">Показать еще</a>  
+                <a href="#" class="btn btn-100 btn-outline-default <?= $count > 12 ? '' : 'disabled' ?>" id="product-more"><?= Yii::t('message', 'market.views.site.search_prods.show_more', ['ru'=>'Показать еще']) ?></a>
             </div>   
         </div>
     </div>

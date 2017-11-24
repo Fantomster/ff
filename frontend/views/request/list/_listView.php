@@ -7,15 +7,15 @@ use yii\helpers\Url;
     <div class="col-md-6">
       <span class="req-name">№<?=$model->id;?> <?=$model->product?></span>
       <?php if ($model->rush_order){?>
-      <span class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> СРОЧНО</span>
+      <span class="req-fire"><i class="fa fa-fire" aria-hidden="true"></i> <?= Yii::t('message', 'frontend.views.request.urgent', ['ru'=>'СРОЧНО']) ?></span>
       <?php } ?>
     </div>
     <div class="col-md-6">
       <div class="pull-right">
           <?php if (!$model->active_status){?>
-          <span class="btn btn-danger btn-sm" style="font-size: 11px;padding: 0px 4px;margin-right:5px">Закрыта</span>
+          <span class="btn btn-danger btn-sm" style="font-size: 11px;padding: 0px 4px;margin-right:5px"><?= Yii::t('message', 'frontend.views.request.closed_two', ['ru'=>'Закрыта']) ?></span>
           <?php }?>
-          <span class="req-cat">Категория:</span>
+          <span class="req-cat"><?= Yii::t('message', 'frontend.views.request.category_three', ['ru'=>'Категория:']) ?></span>
           <span class="req-cat-name"> <b><?=$model->categoryName->name ?></b></span>
           <span class="req-nal-besnal"><i class="fa fa-money" aria-hidden="true"></i> 
               <b>
@@ -28,23 +28,23 @@ use yii\helpers\Url;
   <div class="row" style="margin-top:5px;margin-bottom:5px;">
     <div class="col-md-12">  
         <span class="req-discription">
-            <?=$model->comment?$model->comment:'<span style="color:#ccc">Нет информации</span>' ?>
+            <?=$model->comment?$model->comment:'<span style="color:#ccc">' . Yii::t('message', 'frontend.views.request.no_info_three', ['ru'=>'Нет информации']) . ' </span>' ?>
         </span>
     </div>
   </div>
   <div class="row">
     <div class="col-md-8">
       <span class="req-created">
-          Создан: 
+          <?= Yii::t('message', 'frontend.views.request.created_three', ['ru'=>'Создан:']) ?>
       </span>
         <span class="req-created"><b><?=$model->modifyDate ?></b></span>
       
       <span class="req-created" style="margin-left:20px">  
-          Исполнитель: 
+          <?= Yii::t('message', 'frontend.views.request.executor_three', ['ru'=>'Исполнитель:']) ?>
       </span>
         <span class="req-created">
           <b>
-            <?=$model->responsible_supp_org_id ? $model->vendor->name : '<span style="color:#ccc">не назначен</span>';?>
+            <?=$model->responsible_supp_org_id ? $model->vendor->name : '<span style="color:#ccc">' . Yii::t('message', 'frontend.views.request.not_set_two', ['ru'=>'не назначен']) . ' </span>';?>
           </b>
         </span>
     </div>

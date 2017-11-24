@@ -20,7 +20,7 @@ echo GridView::widget([
             'value' => function($data) {
                 $note = isset($data->note->note) ? '<p style="line-height: 1;font-size: 11px;color: #999C9E;">Заметка: ' . $data->note->note . '</p>' : ""; 
                 return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . Html::decode(Html::decode($data->product_name)) . '</p>
-                    <p style="line-height: 1;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>'.$note;
+                    <p style="line-height: 1;font-size: 11px;color: #999C9E;">' . Yii::t('message', 'frontend.views.order.art_two', ['ru'=>'Артикул:']) . '  ' . $data->article . '</p>'.$note;
             },
             'label' => 'Товар',
             'headerOptions' => ['style' => "padding: 10px;width: 40%;border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
@@ -29,7 +29,7 @@ echo GridView::widget([
         [
             'attribute' => 'quantity',
             'value' => 'quantity',
-            'label' => 'Количество',
+            'label' => Yii::t('message', 'frontend.views.order.amount_two', ['ru'=>'Количество']),
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
             'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
@@ -38,7 +38,7 @@ echo GridView::widget([
             'value' => function($data) {
                 return '<b>' . $data->price . '</b> <i class="fa fa-fw fa-rub"></i>';
             },
-            'label' => 'Цена',
+            'label' => Yii::t('message', 'frontend.views.order.price_two', ['ru'=>'Цена']),
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
             'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
@@ -48,7 +48,7 @@ echo GridView::widget([
             'value' => function($data) {
                 return '<b>' . $data->total . '</b> <i class="fa fa-fw fa-rub"></i>';
             },
-            'label' => 'Сумма',
+            'label' => Yii::t('message', 'frontend.views.order.summ_three', ['ru'=>'Сумма']),
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
             'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],

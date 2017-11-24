@@ -81,7 +81,7 @@ class Catalog extends \yii\db\ActiveRecord
         if ($this->type == 1) {
             $baseCheck = self::find()->where(['supp_org_id' => $this->supp_org_id, 'type' => 1])->all();
             if ($baseCheck) {
-                $this->addError('type', 'Может быть только один базовый каталог');
+                $this->addError('type', Yii::t('app', 'common.models.one_catalog', ['ru'=>'Может быть только один базовый каталог']));
             }
         }
     }

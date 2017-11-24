@@ -69,4 +69,17 @@ class RequestCounters extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
+
+    /**
+     * @param $request_id
+     * @param $user_id
+     */
+    public static function hit($request_id, $user_id) {
+        if (!self::find()->where(['request_id' => $request_id, 'user_id' => $user_id])->exists()) {
+            $requestCounters = new self();
+            $requestCounters->request_id = $request_id;
+            $requestCounters->user_id = $user_id;
+            $requestCounters->save();
+        }
+    }
 }

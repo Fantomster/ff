@@ -161,17 +161,17 @@ swal({
             cache: false,
             success: function (response) {
             $.pjax.reload({container:"#pjax-callback", async:false});
-            initMap();
-            resolve()
+                initMap();
+                resolve(response)
             }
         });
     })
   }
 }).then(function (result){
-    if (result.dismiss === "cancel") {
-        swal.close();
-    } else {
+    if (result.value.success === true) {
         swal("Готово!",eNames["end"],"success");
+    } else {
+        swal("Ошибка!",result.value.error,"error");
     }
 });
 });

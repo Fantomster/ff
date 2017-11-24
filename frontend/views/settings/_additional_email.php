@@ -4,6 +4,15 @@ use yii\helpers\Html;
 
 $labels = new \common\models\AdditionalEmail();
 $labels = $labels->attributeLabels();
+
+if($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) {
+    $labels['request_accept'] = Yii::t('app', 'Исполнитель в заявке');
+}
+
+if($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT) {
+    $labels['request_accept'] = Yii::t('app', 'Новый отклик на заявку');
+}
+
 ?>
 
 <?php
@@ -23,6 +32,7 @@ $buttonAdd = Html::tag('div',
 <?php
 
 yii\widgets\Pjax::begin(['id' => 'emails-pjax-container']);
+
 
 echo \kartik\grid\GridView::widget([
     'dataProvider' => $additional_email,
@@ -61,6 +71,13 @@ echo \kartik\grid\GridView::widget([
             'class' => 'yii\grid\CheckboxColumn',
             'checkboxOptions' => function ($model) {
                 return ['checked' => $model->order_done, 'data-id' => $model->id, 'data-column' => 'order_done'];
+            }
+        ],
+        [
+            'header' =>  $labels['request_accept'],
+            'class' => 'yii\grid\CheckboxColumn',
+            'checkboxOptions' => function ($model) {
+                return ['checked' => $model->request_accept, 'data-id' => $model->id, 'data-column' => 'request_accept'];
             }
         ],
         [
@@ -125,12 +142,17 @@ addEmail= function () {
       },
       allowOutsideClick: false
     }).then(function (result) {
-      swal({
-        type: 'success',
-        title: '" . Yii::t('app', 'Готово') . "',
-        html: '" . Yii::t('app', 'Добавлен новый email') . ": ' + result.value,
-        timer: 1500
-      }).catch(swal.noop);
+       
+      if(result.dismiss){
+        swal.hide();
+      } else {
+        swal({
+            type: 'success',
+            title: '" . Yii::t('app', 'Готово') . "',
+            html: '" . Yii::t('app', 'Добавлен новый email') . ": ' + result.value,
+            timer: 1500
+          }).catch(swal.noop);
+      }
     }).catch(swal.noop);
 };
 
@@ -156,12 +178,16 @@ deleteEmail= function (id) {
         })
       },
     }).then(function () {
-      swal({
-        type: 'success',
-        title: '" . Yii::t('app', 'Готово') . "',
-        html: '" . Yii::t('app', 'Email удален из списка получаетелей') . "',
-        timer: 1500
-      }).catch(swal.noop)
+        if(result.dismiss){
+            swal.hide();
+        } else {
+          swal({
+            type: 'success',
+            title: '" . Yii::t('app', 'Готово') . "',
+            html: '" . Yii::t('app', 'Email удален из списка получаетелей') . "',
+            timer: 1500
+          }).catch(swal.noop)
+        }
     }).catch(swal.noop);
 };
 

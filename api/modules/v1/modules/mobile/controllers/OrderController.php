@@ -135,7 +135,7 @@ class OrderController extends ActiveController {
                 foreach ($post['GoodsNotes'] as $note) {
                     if (empty($note))
                         break;
-                        $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id', [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
+                    $notes = \common\models\GoodsNotes::find()->where('catalog_base_goods_id = :prod_id and rest_org_id = :org_id', [':prod_id' => $note['catalog_base_goods_id'], ':org_id' => $user->organization_id])->one();
 
                     if ($notes == null) {
                         $notes = new \common\models\GoodsNotes();
@@ -200,7 +200,7 @@ class OrderController extends ActiveController {
         $this->sendOrderCreated($user, $Order);
         return compact('Order', 'OrderContents', 'GoodsNotes');
     }
-    
+
     public function actionCancelOrder($order_id = null) {
 
         $user = Yii::$app->user->getIdentity();
@@ -236,6 +236,46 @@ class OrderController extends ActiveController {
         }
     }
 
+    public function actionConfirm() {
+        if (Yii::$app->request->post()) {
+            $currentUser = Yii::$app->user->getIdentity();
+            $user_id = $currentUser->id;
+            
+            $order = Order::findOne(['id' => Yii::$app->request->post('order_id')]);
+            $organizationType = $currentUser->organization->type_id;
+            $danger = false;
+            $edit = false;
+            $systemMessage = '';
+            if ($order->isObsolete) {
+                $systemMessage = $order->client->name . ' получил заказ!';
+                $order->status = Order::STATUS_DONE;
+                $order->actual_delivery = gmdate("Y-m-d H:i:s");
+                $this->sendOrderDone($order->createdBy, $order);
+            } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT)) {
+                $order->status = Order::STATUS_PROCESSING;
+                $systemMessage = $order->client->name . ' подтвердил заказ!';
+                $this->sendOrderProcessing($order->client, $order);
+                $edit = true;
+            } elseif (($organizationType == Organization::TYPE_SUPPLIER) && ($order->status == Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR)) {
+                $systemMessage = $order->vendor->name . ' подтвердил заказ!';
+                $order->accepted_by_id = $user_id;
+                $order->status = Order::STATUS_PROCESSING;
+                $edit = true;
+                $this->sendOrderProcessing($order->vendor, $order);
+            } elseif (($organizationType == Organization::TYPE_RESTAURANT) && ($order->status == Order::STATUS_PROCESSING)) {
+                $systemMessage = $order->client->name . ' получил заказ!';
+                $order->status = Order::STATUS_DONE;
+                $order->actual_delivery = gmdate("Y-m-d H:i:s");
+                $this->sendOrderDone($order->createdBy, $order);
+            }
+
+            if ($order->save()) {
+                $this->sendSystemMessage($this->currentUser, $order->id, $systemMessage, $danger);
+                return ["title" => $systemMessage, "type" => "success"];
+            }
+        }
+    }
+
     /**
      * Checks the privilege of the current user.
      *
@@ -260,6 +300,80 @@ class OrderController extends ActiveController {
     }
 
     /**
+     * Sends mail informing both sides that order is delivered and accepted
+     * 
+     * @param User $sender
+     * @param Order $order
+     */
+    private function sendOrderDone($sender, $order) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $senderOrg = $sender->organization;
+        $subject = "Заказ №" . $order->id . " выполнен!";
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->order_done) {
+                $result = $mailer->compose('orderDone', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+            
+            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+
+            if ($profile->phone && $recipient->smsNotification->order_created) {
+                $text = $order->vendor->name . " выполнил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
+                $target = $recipient->profile->phone;
+                Yii::$app->sms->send($text, $target);
+            }
+        }
+    }
+    
+    /**
+     * Sends mail informing both sides that vendor confirmed order
+     * 
+     * @param Organization $senderOrg
+     * @param Order $order
+     */
+    private function sendOrderProcessing($senderOrg, $order) {
+        /** @var Mailer $mailer */
+        /** @var Message $message */
+        $mailer = Yii::$app->mailer;
+        // send email
+        $subject = "Заказ №" . $order->id . " подтвержден!";
+
+        $searchModel = new OrderContentSearch();
+        $params['OrderContentSearch']['order_id'] = $order->id;
+        $dataProvider = $searchModel->search($params);
+        $dataProvider->pagination = false;
+
+        foreach ($order->recipientsList as $recipient) {
+            $email = $recipient->email;
+            if ($recipient->emailNotification->order_processing) {
+                $result = $mailer->compose('orderProcessing', compact("subject", "senderOrg", "order", "dataProvider", "recipient"))
+                        ->setTo($email)
+                        ->setSubject($subject)
+                        ->send();
+            }
+            $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
+
+            if ($profile->phone && $recipient->smsNotification->order_created) {
+                $text = "Заказ у ".$order->vendor->name." согласован ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
+                $target = $recipient->profile->phone;
+                Yii::$app->sms->send($text, $target);
+            }
+        }
+    }
+    
+    /**
      * Sends mail informing both sides about new order
      * 
      * @param Organization $sender
@@ -279,7 +393,7 @@ class OrderController extends ActiveController {
         $dataProvider->pagination = false;
 
         $test = $order->recipientsList;
-        
+
         foreach ($order->recipientsList as $recipient) {
             $email = $recipient->email;
             if ($recipient->emailNotification->order_created) {
@@ -288,25 +402,25 @@ class OrderController extends ActiveController {
                         ->setSubject($subject)
                         ->send();
             }
-            
+
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
-            
+
             if ($profile->phone && $recipient->smsNotification->order_created) {
                 //$text = $order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
-                $text = "Новый заказ от ".$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
+                $text = "Новый заказ от " . $senderOrg->name . ' ' . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
             }
         }
     }
-    
+
     /**
      * Sends mail informing both sides about cancellation of order
      * 
      * @param Organization $senderOrg
      * @param Order $order
      */
-   private function sendOrderCanceled($senderOrg, $order) {
+    private function sendOrderCanceled($senderOrg, $order) {
         /** @var Mailer $mailer */
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
@@ -326,17 +440,17 @@ class OrderController extends ActiveController {
                         ->setSubject($subject)
                         ->send();
             }
-            
+
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
-            
+
             if ($profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
+                $text = $senderOrg->name . " отменил заказ " . Yii::$app->google->shortUrl($order->getUrlForUser($recipient)); //$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
             }
         }
     }
-    
+
     private function sendSystemMessage($user, $order_id, $message, $danger = false) {
         $order = Order::findOne(['id' => $order_id]);
 
@@ -365,30 +479,30 @@ class OrderController extends ActiveController {
         $clientUsers = $order->client->users;
         $vendorUsers = $order->vendor->users;
 
-       /* foreach ($clientUsers as $clientUser) {
-            $channel = 'user' . $clientUser->id;
-            Yii::$app->redis->executeCommand('PUBLISH', [
-                'channel' => 'chat',
-                'message' => Json::encode([
-                    'body' => $body,
-                    'channel' => $channel,
-                    'isSystem' => 1,
-                    'order_id' => $order_id,
-                ])
-            ]);
-        }
-        foreach ($vendorUsers as $vendorUser) {
-            $channel = 'user' . $vendorUser->id;
-            Yii::$app->redis->executeCommand('PUBLISH', [
-                'channel' => 'chat',
-                'message' => Json::encode([
-                    'body' => $body,
-                    'channel' => $channel,
-                    'isSystem' => 1,
-                    'order_id' => $order_id,
-                ])
-            ]);
-        }*/
+        /* foreach ($clientUsers as $clientUser) {
+          $channel = 'user' . $clientUser->id;
+          Yii::$app->redis->executeCommand('PUBLISH', [
+          'channel' => 'chat',
+          'message' => Json::encode([
+          'body' => $body,
+          'channel' => $channel,
+          'isSystem' => 1,
+          'order_id' => $order_id,
+          ])
+          ]);
+          }
+          foreach ($vendorUsers as $vendorUser) {
+          $channel = 'user' . $vendorUser->id;
+          Yii::$app->redis->executeCommand('PUBLISH', [
+          'channel' => 'chat',
+          'message' => Json::encode([
+          'body' => $body,
+          'channel' => $channel,
+          'isSystem' => 1,
+          'order_id' => $order_id,
+          ])
+          ]);
+          } */
 
         return true;
     }

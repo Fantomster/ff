@@ -547,9 +547,11 @@ class Organization extends \yii\db\ActiveRecord
         }
 
         parent::afterSave($insert, $changedAttributes);
-
         //Определяем франча
         $this->setFranchise();
+        
+        if (!is_a(Yii::$app, 'yii\console\Application'))
+            \api\modules\v1\modules\mobile\components\notifications\NotificationOrganization::actionOrganization($this);
     }
 
     public function markViewed($orderId)

@@ -40,7 +40,7 @@ class RestaurantChecker
 					{
 	
 					//есть связь с поставщиком invite_on
-					$result = ['success'=>true,'eventType'=>self::RELATION_INVITED,'message'=>Yii::t('app', 'Данный поставщик уже имеется в вашем списке контактов!'),
+					$result = ['success'=>true,'eventType'=>self::RELATION_INVITED,'message'=>Yii::t('app', 'common.models.already_exists_two', ['ru'=>'Данный поставщик уже имеется в вашем списке контактов!']),
 					'fio' => $userProfileFullName,
                                         'phone' => $userProfilePhone,
 					'organization' => $userOrgName]; 
@@ -50,7 +50,7 @@ class RestaurantChecker
 					}else{
 	
 					//поставщику было отправлено приглашение, но поставщик еще не добавил этот ресторан
-					$result = ['success'=>true,'eventType'=>self::RELATION_INVITE_IN_PROGRESS,'message'=>Yii::t('app', 'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика'),
+					$result = ['success'=>true,'eventType'=>self::RELATION_INVITE_IN_PROGRESS,'message'=>Yii::t('app', 'common.models.already_sent', ['ru'=>'Вы уже отправили приглашение этому поставщику, ожидается подтверждение от поставщика']),
 					'fio' => $userProfileFullName,
                                         'phone' => $userProfilePhone,
 					'organization' => $userOrgName]; 
@@ -63,7 +63,7 @@ class RestaurantChecker
 					if($managersIsActive==0){
 					//поставщик не авторизован
 					//добавляем к базовому каталогу поставщика каталог ресторана и создаем связь    
-					$result = ['success'=>true,'eventType'=>self::NO_AUTH_ADD_RELATION_AND_CATALOG,'message'=>Yii::t('app', 'Поставщик еще не авторизован / добавляем каталог'),
+					$result = ['success'=>true,'eventType'=>self::NO_AUTH_ADD_RELATION_AND_CATALOG,'message'=>Yii::t('app', 'common.models.vendor_not_auth', ['ru'=>'Поставщик еще не авторизован / добавляем каталог']),
 					'fio' => $userProfileFullName,
                                         'phone' => $userProfilePhone,
 					'organization' => $userOrgName,
@@ -76,7 +76,7 @@ class RestaurantChecker
 					$result = [
                                             'success'=>true,
                                             'eventType'=>self::AUTH_SEND_INVITE,
-                                            'message'=>Yii::t('app', 'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>'),
+                                            'message'=>Yii::t('app', 'common.models.already_register', ['ru'=>'Поставщик уже зарегистрирован в системе, Вы можете его добавить нажав кнопку <strong>Пригласить</strong>']),
                                             'fio' => $userProfileFullName,
                                             'phone' => $userProfilePhone,
                                             'organization' => $userOrgName,
@@ -89,13 +89,13 @@ class RestaurantChecker
 				} 
 			}else{
 			//найден email ресторана
-			$result = ['success'=>true,'eventType'=>self::THIS_IS_RESTAURANT,'message'=>Yii::t('app', 'Данный email не может быть использован')];
+			$result = ['success'=>true,'eventType'=>self::THIS_IS_RESTAURANT,'message'=>Yii::t('app', 'common.models.already_in_use', ['ru'=>'Данный email не может быть использован'])];
 			return $result;
 	
 			}
 		}else{
 			//нет в базе такого email
-			$result = ['success'=>true,'eventType'=>self::NEW_VENDOR,'message'=>Yii::t('app', 'Нет совпадений по Email')];
+			$result = ['success'=>true,'eventType'=>self::NEW_VENDOR,'message'=>Yii::t('app', 'common.models.no_email_eq', ['ru'=>'Нет совпадений по Email'])];
 			return $result;
 			exit;  
 			  

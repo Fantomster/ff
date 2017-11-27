@@ -42,7 +42,7 @@ class LoginForm extends \amnah\yii2\user\models\forms\LoginForm {
 //            $user->sendEmailConfirmation($userToken);
 //            $this->addError("email", Yii::t("user", "Confirmation email resent"));
             $this->clearErrors();
-            $this->addError("email", Yii::t('app', 'Учетная запись не активирована!'));
+            $this->addError("email", Yii::t('app', 'common.models.not_activated', ['ru'=>'Учетная запись не активирована!']));
         }
     }
     

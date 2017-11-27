@@ -50,7 +50,7 @@ return [
             ],
         ],
         'formatter' => [
-            'locale' => 'ru_RU',
+            'locale' => 'en',
         ],
         'mailer' => [
             'viewPath' => '@common/mail',

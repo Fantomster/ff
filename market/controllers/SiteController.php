@@ -613,75 +613,72 @@ class SiteController extends Controller {
             throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
     }
-    public function actionAjaxProductMore($num) {
-        $session = Yii::$app->session;
+
+    /**
+     * Подгрузить еще товаров
+     * @param $num
+     * @return string
+     * @throws HttpException
+     */
+    public function actionAjaxProductMore($num)
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+        }
+
         $relationSuppliers = [];
-        $supplierRegion = [];
-        $oWhere = [];
         $cbgWhere = [];
-        
+
         if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
-            $client = $currentUser->organization;
-            if ($client->type_id == Organization::TYPE_RESTAURANT) {
+            if ($currentUser->organization->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
-                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
-                        ->asArray()
-                        ->all();  
+                    ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                    ->where(['rest_org_id' => $currentUser->organization->id, 'invite' => RelationSuppRest::INVITE_ON])
+                    ->asArray()
+                    ->all();
             }
         }
-        
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+
+        if (!empty(Yii::$app->request->cookies->get('locality'))) {
             $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->asArray()
-                            ->all();
-            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                ->select('supplier_id as id, supplier_id as supp_org_id')
+                ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
+                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                    . 'length(locality)<1)')
+                ->andWhere(['exception' => 0])
+                ->asArray()
+                ->all();
+            if (!empty($relationSuppliers) && !empty($supplierRegion)) {
                 $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                    return $a['id'] - $b['id'];
                 });
-                $oWhere = ['in', 'id', $r];
                 $cbgWhere = ['in', 'supp_org_id', $r];
-            }else{
-                $oWhere = ['in', 'id', $supplierRegion];
+            } else {
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
-        $cbgTable = CatalogBaseGoods::tableName();
-        $count = CatalogBaseGoods::find()
-                ->joinWith('vendor')
-                ->where([
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere('category_id is not null')
-                ->andWhere($cbgWhere)
-                ->offset($num)
-                ->limit(6)
-                ->count();
-        if ($count > 0) {
-            $pr = CatalogBaseGoods::find()
-                ->joinWith('vendor')
-                ->where([
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere('category_id is not null')
-                ->andWhere($cbgWhere)
-                ->orderBy([$cbgTable.'.rating'=>SORT_DESC])
-                ->offset($num)
-                ->limit(6)
-                ->all();
+
+        $models = CatalogBaseGoods::find()
+            ->joinWith('vendor')
+            ->where([
+                'organization.white_list' => Organization::WHITE_LIST_ON,
+                'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                'status' => CatalogBaseGoods::STATUS_ON,
+                'deleted' => CatalogBaseGoods::DELETED_OFF
+            ])
+            ->andWhere('category_id is not null')
+            ->andWhere($cbgWhere)
+            ->orderBy([CatalogBaseGoods::tableName() . '.rating' => SORT_DESC])
+            ->offset($num)
+            ->limit(6);
+
+        if ($models->count() > 0) {
+            $pr = $models->all();
             return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
         }
     }
+
     public function actionAjaxSuppProductMore($num,$supp_org_id) {
         $session = Yii::$app->session;
         $relationSuppliers = [];
@@ -867,175 +864,177 @@ class SiteController extends Controller {
          
     }
 
-    public function actionCategory($slug) {
-        $category = \common\models\MpCategory::find()->where(['slug'=>$slug])->one();
-        if(empty($category)){
-          throw new HttpException(404 ,'Нет здесь ничего такого, проходите, гражданин');
+    /**
+     * Просмотр категории
+     * @param $slug
+     * @return string
+     * @throws HttpException
+     */
+    public function actionCategory($slug)
+    {
+        $category = \common\models\MpCategory::find()->where(['slug' => $slug])->one();
+
+        if (empty($category)) {
+            throw new HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
+
         $id = $category->id;
-        $session = Yii::$app->session;
         $relationSuppliers = [];
-        $supplierRegion = [];
-        $oWhere = [];
         $cbgWhere = [];
         $filter = "rating-up";
         $filterWhere = "rating desc";
-        if(Yii::$app->request->get('filter') == "price-up"){
-             $filter = "price-down"; $filterWhere = "price ASC";
+
+        switch (Yii::$app->request->get('filter')) {
+            case 'price-up':
+                $filter = "price-down";
+                $filterWhere = "price ASC";
+                break;
+            case 'price-down':
+                $filter = "price-up";
+                $filterWhere = "price DESC";
+                break;
+            case 'rating-up':
+                $filter = "rating-down";
+                $filterWhere = "rating ASC";
+                break;
+            case 'rating-down':
+                $filter = "rating-up";
+                $filterWhere = "rating DESC";
+                break;
         }
-        if(Yii::$app->request->get('filter') == "price-down"){
-             $filter = "price-up"; $filterWhere = "price DESC";
-        }
-        if(Yii::$app->request->get('filter') == "rating-up"){
-             $filter = "rating-down"; $filterWhere = "rating  ASC";
-        }
-        if(Yii::$app->request->get('filter') == "rating-down"){
-             $filter = "rating-up"; $filterWhere = "rating DESC";
-        }
+
+        //Записываем в сессию чтобы сортировка учитывалась по аяксу
+        Yii::$app->session->set('cat_filter_where', $filterWhere);
+
         if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
                 $relationSuppliers = RelationSuppRest::find()
-                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
-                        ->asArray()
-                        ->all();  
+                    ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                    ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
+                    ->asArray()
+                    ->all();
             }
         }
-        
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+
+        if (!empty(Yii::$app->request->cookies->get('locality'))) {
             $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->asArray()
-                            ->all();
-            if(!empty($relationSuppliers) && !empty($supplierRegion)){
+                ->select('supplier_id as id, supplier_id as supp_org_id')
+                ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
+                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                    . 'length(locality)<1)')
+                ->andWhere(['exception' => 0])
+                ->asArray()
+                ->all();
+            if (!empty($relationSuppliers) && !empty($supplierRegion)) {
                 $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                return $a['id'] - $b['id'];
+                    return $a['id'] - $b['id'];
                 });
-                $oWhere = ['in', 'id', $r];
                 $cbgWhere = ['in', 'supp_org_id', $r];
-            }else{
-                $oWhere = ['in', 'id', $supplierRegion];
+            } else {
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
-        $cbgTable = CatalogBaseGoods::tableName();
-        $count = CatalogBaseGoods::find()
-                ->joinWith('vendor')
-                ->where([
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere(['category_id' => $id])
-                ->andWhere($cbgWhere)
-                ->limit(12)
-                ->count();
-        $products = CatalogBaseGoods::find()
-                ->joinWith('vendor')
-                ->where([
-                    'category_id' => $id,
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                ->andWhere(['category_id' => $id])
-                ->andWhere($cbgWhere)
-                ->orderBy($filterWhere)
-                ->limit(12)
-                ->all();
-        
-        if ($products) {
-            return $this->render('category', compact('products', 'id', 'count', 'category','filter'));
+
+        $models = CatalogBaseGoods::find()
+            ->joinWith('vendor')
+            ->where([
+                'category_id' => $id,
+                'organization.white_list' => Organization::WHITE_LIST_ON,
+                'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
+                'status' => CatalogBaseGoods::STATUS_ON,
+                'deleted' => CatalogBaseGoods::DELETED_OFF])
+            ->andWhere(['category_id' => $id])
+            ->andWhere($cbgWhere)
+            ->orderBy($filterWhere)
+            ->limit(12);
+
+        $products = $models->all();
+        $count = $models->count();
+
+        if ($count > 0) {
+            return $this->render('category', compact('products', 'id', 'count', 'category', 'filter'));
         } else {
-            //$title = $category->title;//'F-MARKET категории';
             $breadcrumbs = \yii\widgets\Breadcrumbs::widget([
                 'options' => [
                     'class' => 'breadcrumb',
-                    ],
+                ],
                 'homeLink' => false,
                 'links' => [
-                \common\models\MpCategory::getCategory($category->parent),
-                \common\models\MpCategory::getCategory($category->id),
+                    \common\models\MpCategory::getCategory($category->parent),
+                    \common\models\MpCategory::getCategory($category->id),
                 ],
             ]);
             $message = 'В данной категории товаров нет';
-            return $this->render('not-found', compact('breadcrumbs','message','products','category'));
+            return $this->render('not-found', compact('breadcrumbs', 'message', 'products', 'category'));
         }
     }
-    
-    public function actionAjaxProductCatLoader($num, $category) {
-        $session = Yii::$app->session;
-        $relationSuppliers = [];
-        $supplierRegion = [];
-        $oWhere = [];
-        $cbgWhere = [];
-        $cbgTable = CatalogBaseGoods::tableName();
-        if (!\Yii::$app->user->isGuest) {
-            $currentUser = Yii::$app->user->identity;
-            $client = $currentUser->organization;
-            if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSuppliers = RelationSuppRest::find()
-                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
-                        ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
-                        ->asArray()
-                        ->all();  
-            }
-        }
-        
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->asArray()
-                            ->all();
-            if(!empty($relationSuppliers) && !empty($supplierRegion)){
-                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                return $a['id'] - $b['id'];
-                });
-                $oWhere = ['in', 'id', $r];
-                $cbgWhere = ['in', 'supp_org_id', $r];
-            }else{
-                $oWhere = ['in', 'id', $supplierRegion];
-                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
-            }
-        }
-        if (Yii::$app->request->isAjax) {
-            $count = CatalogBaseGoods::find()
-                    ->joinWith('vendor')
-                    ->where([
-                    'category_id' => $category, 
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
-                    'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
-                    'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                    ->andWhere($cbgWhere)
-                    ->offset($num)
-                    ->limit(6)
-                    ->count();
 
-            if ($count > 0) {
-                $pr = CatalogBaseGoods::find()
-                    ->joinWith('vendor')
-                    ->where([
-                    'category_id' => $category, 
-                    'organization.white_list'=>  Organization::WHITE_LIST_ON,
+    /**
+     * Список товаров в категории по 6 штук
+     * @param $num сколько пропускаем записей
+     * @param $category категория
+     * @return string
+     */
+    public function actionAjaxProductCatLoader($num, $category)
+    {
+        if (Yii::$app->request->isAjax) {
+
+            $relationSuppliers = [];
+            $cbgWhere = [];
+
+            if (!\Yii::$app->user->isGuest) {
+                $currentUser = Yii::$app->user->identity;
+                if ($currentUser->organization->type_id == Organization::TYPE_RESTAURANT) {
+                    $relationSuppliers = RelationSuppRest::find()
+                        ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                        ->where([
+                            'rest_org_id' => $currentUser->organization->id,
+                            'invite' => RelationSuppRest::INVITE_ON
+                        ])->asArray()
+                        ->all();
+                }
+            }
+
+            if (!empty(Yii::$app->request->cookies->get('locality'))) {
+                $supplierRegion = \common\models\DeliveryRegions::find()
+                    ->select('supplier_id as id, supplier_id as supp_org_id')
+                    ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
+                        . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
+                        . 'length(locality)<1)')
+                    ->andWhere(['exception' => 0])
+                    ->asArray()
+                    ->all();
+                if (!empty($relationSuppliers) && !empty($supplierRegion)) {
+                    $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                        return $a['id'] - $b['id'];
+                    });
+                    $cbgWhere = ['in', 'supp_org_id', $r];
+                } else {
+                    $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
+                }
+            }
+
+            //Берем сортировку сохраненную в сессии
+            $filterWhere = Yii::$app->session->get('cat_filter_where', 'rating desc');
+
+            $query = CatalogBaseGoods::find()
+                ->joinWith('vendor')
+                ->where([
+                    'category_id' => $category,
+                    'organization.white_list' => Organization::WHITE_LIST_ON,
                     'market_place' => CatalogBaseGoods::MARKETPLACE_ON,
                     'status' => CatalogBaseGoods::STATUS_ON,
-                    'deleted'=>CatalogBaseGoods::DELETED_OFF])
-                    ->andWhere($cbgWhere)
-                    ->offset($num)
-                        ->limit(6)
-                        ->all();
-                return $this->renderPartial('/site/main/_ajaxProductMore', compact('pr'));
+                    'deleted' => CatalogBaseGoods::DELETED_OFF
+                ])
+                ->andWhere($cbgWhere)
+                ->orderBy($filterWhere)
+                ->offset($num)
+                ->limit(6);
+
+            if ($query->count() > 0) {
+                return $this->renderPartial('/site/main/_ajaxProductMore', ['pr' => $query->all()]);
             }
         }
     }

@@ -254,6 +254,9 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 }
                                 ?>
                             </div>
+                            <ul style="position: absolute;top: 2px;right: 35px;">
+                                <?=\common\widgets\LangSwitch::widget();?>
+                            </ul>
                         </div>
                         <div class="nav__block">
                             <span id="menu__burger"><?= Yii::t('message', 'frontend.views.layouts.main.menu', ['ru'=>'Меню']) ?></span>

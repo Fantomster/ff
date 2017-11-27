@@ -1,9 +1,16 @@
 <?php
 
+//Если домен .ru то язык русский, в остальных случаях en
+if (strstr($_SERVER['HTTP_HOST'], '.ru')) {
+    $lang = ['ru_ru', 'ru'];
+} else {
+    $lang = ['en_en', 'en'];
+}
+
 return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
-    'sourceLanguage' => 'ru_ru',
-    'language' => 'ru',
+    'sourceLanguage' => $lang[0],
+    'language' => $lang[1],
     'timeZone' => 'Asia/Baghdad',
     'charset' => 'utf-8',
     'components' => [
@@ -66,7 +73,13 @@ return [
             ],
         ],
         'urlManager' => [
-            'class' => 'yii\web\UrlManager',
+            'class' => 'codemix\localeurls\UrlManager',
+            //Список языков, какая тут очередность, так и будет выводиться в виджите
+            'languages' => ['en','ru','es'],
+            //Определение языка по заголовкам
+            'enableLanguageDetection' => false,
+            //Выводить язык по умолчанию в URL
+            'enableDefaultLanguageUrlCode' => false,
             // Hide index.php
             'showScriptName' => false,
             // Use pretty URLs

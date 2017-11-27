@@ -90,19 +90,27 @@ if (!Yii::$app->user->isGuest) {
                             <li><a href="<?= Yii::$app->urlManagerFrontend->createUrl(['site/contacts']) ?>"><?= Yii::t('message', 'market.views.layouts.header.contacts', ['ru'=>'Контакты']) ?></a></li>
                         </ul>
                       </li>
-                    
+
                     <?php if (Yii::$app->user->isGuest) { ?>
-                        <li><a class="btn-navbar" href="<?= Url::to(['/user/login']) ?>"><?= Yii::t('message', 'market.views.layouts.header.enter', ['ru'=>'войти / регистрация']) ?></a></li>
+                        <li><a class="btn-navbar"
+                               href="<?= Url::to(['/user/login']) ?>"><?= Yii::t('message', 'market.views.layouts.header.enter', ['ru' => 'войти / регистрация']) ?></a>
+                        </li>
                     <?php } else { ?>
                         <?php if ($organization->type_id == Organization::TYPE_RESTAURANT) { ?>
                             <li>
                                 <a href="<?= Yii::$app->urlManagerFrontend->createUrl(['order/checkout']) ?>">
-                                    <?= Yii::t('message', 'market.views.layouts.header.basket', ['ru'=>'КОРЗИНА']) ?> <sup><span class="badge cartCount"><?= $organization->getCartCount() ?></span></sup>
+                                    <?= Yii::t('message', 'market.views.layouts.header.basket', ['ru' => 'КОРЗИНА']) ?>
+                                    <sup><span class="badge cartCount"><?= $organization->getCartCount() ?></span></sup>
                                 </a>
                             </li>
                         <?php } ?>
-                        <li><a class="btn-navbar" href="<?= Url::to(['/user/logout']) ?>" data-method="post"><?= $user->profile->full_name ?> [<?= Yii::t('message', 'market.views.layouts.header.exit', ['ru'=>'выход']) ?>]</a></li>
-                        <?php } ?>
+                        <li><a class="btn-navbar" href="<?= Url::to(['/user/logout']) ?>"
+                               data-method="post"><?= $user->profile->full_name ?>
+                                [<?= Yii::t('message', 'market.views.layouts.header.exit', ['ru' => 'выход']) ?>]</a>
+                        </li>
+                    <?php } ?>
+
+                    <?=\common\widgets\LangSwitch::widget()?>
                 </ul>
             </div>
             <!--/.nav-collapse -->

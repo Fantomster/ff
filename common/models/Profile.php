@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use Yii;
 use common\behaviors\ImageUploadBehavior;
 use Imagine\Image\ManipulatorInterface;
 use yii\helpers\ArrayHelper;

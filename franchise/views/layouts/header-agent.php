@@ -80,6 +80,7 @@ if (!Yii::$app->user->isGuest) {
 
                         </ul>
                     </li>
+                    <?=\common\widgets\LangSwitch::widget();?>
                     <li class="dropdown tasks-menu">
                         <?=
                         Html::a(

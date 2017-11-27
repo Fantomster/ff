@@ -62,7 +62,7 @@ class NotificationOrganization {
         if ($organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
             array_merge ($orgs, $organization->getSuppliers(null));
 
-        if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
+        if ($organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
         {
             array_merge ($orgs,$organization->getClients());
         }

@@ -40,12 +40,16 @@ class NotificationOrganization {
     {
         
         $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
-        $rel = \common\models\RelationSuppRest::findOne(['id' => $rel_id]);
+       /*$rel = \common\models\RelationSuppRest::findOne(['id' => $rel_id]);
 
         if($rel === null)
-            return;
+            return;*/
         
         $user = Yii::$app->user->getIdentity();
+        
+        if($user == null)
+            return;
+        
         $users=[];
         if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
             $users[]=$user;

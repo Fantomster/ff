@@ -45,20 +45,22 @@ class NotificationOrganization {
         if($rel === null)
             return;*/
         
-        $user = Yii::$app->user->getIdentity();
+        /*$user = Yii::$app->user->getIdentity();
         
         if($user == null)
-            return;
+            return;*/
         
         $users=[];
-        if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-            $users[]=$user;
+        
+        /*if($user->organization == null)
+            return;*/
+        
+        if ($organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
+            array_merge ($users,$organization->getSuppliers(null));
 
         if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
         {
-            $rels = \common\models\RelationSuppRest::find()->where(['supp_org_id' => $organization->id])->all();
-            foreach ($els as $rel)
-                array_merge ($users,$rel->client->users);
+            array_merge ($users,$organization->getClients());
         }
 
         
@@ -88,7 +90,7 @@ class NotificationOrganization {
         if($rel === null)
             return;
         
-        $user = Yii::$app->user->getIdentity();
+        //$user = Yii::$app->user->getIdentity();
         $users=[];
 
         $rels = \common\models\RelationSuppRest::find()->where(['supp_org_id' => $delivery->vendor_id])->all();

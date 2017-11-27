@@ -241,7 +241,7 @@ class Organization extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getSuppliers($category_id = '', $all = false)
+    public function getSuppliers($category_id = '', $all = true)
     {
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
@@ -260,7 +260,9 @@ class Organization extends \yii\db\ActiveRecord
         $vendors = ArrayHelper::map($query->orderBy(['organization.name' => SORT_ASC])
             ->asArray()
             ->all(), 'id', 'name');
-        if (!$all) $vendors[''] = 'Все поставщики';
+        if ($all) {
+            $vendors[''] = 'Все поставщики';
+        }
         ksort($vendors);
         return $vendors;
     }
@@ -270,7 +272,7 @@ class Organization extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getClients()
+    public function getClients($all = true)
     {
         if ($this->type_id !== Organization::TYPE_SUPPLIER) {
             return [];
@@ -285,7 +287,10 @@ class Organization extends \yii\db\ActiveRecord
         $clients = ArrayHelper::map($query
             ->asArray()
             ->all(), 'id', 'name');
-        $clients[''] = 'Все рестораны';
+        
+        if ($all) {
+            $clients[''] = 'Все рестораны';
+        }
         ksort($clients);
         return $clients;
     }

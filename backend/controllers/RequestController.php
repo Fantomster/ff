@@ -131,7 +131,7 @@ class RequestController extends Controller
     public function actionUpdateCallback($id, $request_id)
     {
         $model = RequestCallback::find()->with('organization')->where(['id'=>$id])->one();
-        $suppliersArray = (new Organization())->getSuppliers(0, true);
+        $suppliersArray = (new Organization())->getSuppliers(0, false);
         if(!$model){
             throw new NotFoundHttpException('The requested page does not exist.');
         }

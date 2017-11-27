@@ -40,36 +40,22 @@ class NotificationOrganization {
     {
         
         $device_id = (Yii::$app->request->headers->get("Device_id") != null) ? Yii::$app->request->headers->get("Device_id") : 1;
-       /*$rel = \common\models\RelationSuppRest::findOne(['id' => $rel_id]);
 
-        if($rel === null)
-            return;*/
-        
-        /*$user = Yii::$app->user->getIdentity();
-        
-        if($user == null)
-            return;*/
-        
-        $users = [];
-        
-        /*if($user->organization == null)
-            return;*/
-        
-        $users[] = $organization->users;
+        $users = $organization->users;
         
         $orgs = [];
         
-        if ($organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-            array_merge ($orgs, $organization->getSuppliers(null));
-
+        if ($organization->type_id == \common\models\Organization::TYPE_RESTAURANT) {
+            $orgs = $organization->getSuppliers(null, false);
+        }
         if ($organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
         {
-            array_merge ($orgs,$organization->getClients());
+            $orgs = $organization->getClients(false);
         }
 
         $orgs = array_keys($orgs);
         
-        $users = array_merge($users, \common\models\User::find()->where('organization id in ('.implode(',', $orgs).')'))->all();
+        $users = array_merge($users, \common\models\User::find()->where(['organization_id' => $orgs])->all());
         
         foreach ($users as $user)
         {

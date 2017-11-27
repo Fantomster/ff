@@ -69,7 +69,7 @@ class NotificationOrganization {
 
         $orgs = array_keys($orgs);
         
-        $users = array_merge($users, \common\models\User::find()->where('organization id in ('.implode(',', Json::decode($orgs)).')'));
+        $users = array_merge($users, \common\models\User::find()->where('organization id in ('.implode(',', $orgs).')'));
         
         foreach ($users as $user)
         {

@@ -38,7 +38,8 @@ class NotificationRequest {
             return;
 
         $users = \common\models\User::find()->where('organization_id = :client', [':client' => $request->rest_org_id])->all();
-        $vendor = Yii::$app->user->getIdentity();
+        //$vendor = Yii::$app->user->getIdentity();
+        $vendor = $requestCallback->user;
 
         foreach ($users as $user) {
             $fcm = UserFcmToken::find()->where('user_id = :user_id and device_id <> :device_id', [':user_id' => $user->id, ':device_id' => $device_id])->all();

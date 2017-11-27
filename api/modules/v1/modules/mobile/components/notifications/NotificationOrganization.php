@@ -50,19 +50,26 @@ class NotificationOrganization {
         if($user == null)
             return;*/
         
-        $users=[];
+        $users = [];
         
         /*if($user->organization == null)
             return;*/
         
+        $users[] = $organization->users();
+        
+        $orgs = [];
+        
         if ($organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
-            array_merge ($users,$organization->getSuppliers(null));
+            array_merge ($orgs, $organization->getSuppliers(null));
 
         if ($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER)
         {
-            array_merge ($users,$organization->getClients());
+            array_merge ($orgs,$organization->getClients());
         }
 
+        $orgs = array_keys($orgs);
+        
+        $users = array_merge($users, \common\models\User::find()->where('organization id in ('.implode(',', Json::decode($orgs)).')'));
         
         foreach ($users as $user)
         {

@@ -440,6 +440,7 @@ JS;
 
                         </ul>
                     </li>
+                    <?=\common\widgets\LangSwitch::widget();?>
                     <li class="dropdown tasks-menu">
                         <?=Html::a('<i class="fa fa-sign-out"></i> ' . Yii::t('message', 'frontend.views.layouts.header.exit', ['ru'=>'Выход']), ['/user/logout'], ['data-method' => 'post'])?>
                     </li>

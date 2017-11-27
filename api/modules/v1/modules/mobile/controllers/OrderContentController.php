@@ -333,7 +333,7 @@ class OrderContentController extends ActiveController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: заказ №" . $order->id . " отменен!";
+        $subject = "Заказ №" . $order->id . " отменен!";
 
         $searchModel = new \common\models\search\OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -352,7 +352,7 @@ class OrderContentController extends ActiveController {
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
             
             if ($profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . " отменил заказ в системе f-keeper №" . $order->id;
+                $text = $senderOrg->name . " отменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
             }
@@ -370,7 +370,7 @@ class OrderContentController extends ActiveController {
         /** @var Message $message */
         $mailer = Yii::$app->mailer;
         // send email
-        $subject = "f-keeper: измененения в заказе №" . $order->id;
+        $subject = "Измененения в заказе №" . $order->id;
 
         $searchModel = new \common\models\search\OrderContentSearch();
         $params['OrderContentSearch']['order_id'] = $order->id;
@@ -389,7 +389,7 @@ class OrderContentController extends ActiveController {
             $profile = \common\models\Profile::findOne(['user_id' => $recipient->id]);
             
             if ($profile->phone && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                $text = $subject;
+                $text = $senderOrg->name . " изменил заказ ".Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
                 $target = $profile->phone;
                 Yii::$app->sms->send($text, $target);
            }

@@ -137,7 +137,7 @@ class RelationSuppRestController extends ActiveController {
 
                 foreach($vendorUsers as $user){
                     if($user->profile->phone && $user->profile->sms_allow){
-                        $text = $client->organization->name . ' хочет работать с Вами в системе f-keeper.ru';
+                        $text = $client->organization->name . ' хочет работать с Вами в системе';
                         $target = $user->profile->phone;
                         Yii::$app->sms->send($text, $target);
                     }

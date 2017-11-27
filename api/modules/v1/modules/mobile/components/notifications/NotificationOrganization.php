@@ -55,7 +55,7 @@ class NotificationOrganization {
         /*if($user->organization == null)
             return;*/
         
-        $users[] = $organization->users();
+        $users[] = $organization->users;
         
         $orgs = [];
         

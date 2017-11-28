@@ -139,7 +139,7 @@ $form = ActiveForm::begin([
                     'labels' => $dayLabels,
                     'datasets' => [
                         [
-                            'label' => Yii::t('app', 'Все заказы'),
+                            'label' => Yii::t('app', 'franchise.views.anal.all_orders', ['ru'=>'Все заказы']),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,.8)",
                             'pointBackgroundColor' => "rgba(54,140,191,1)",

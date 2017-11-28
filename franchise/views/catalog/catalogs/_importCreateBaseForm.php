@@ -13,18 +13,18 @@ use yii\web\View;
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= Yii::t('app', 'ИМПОРТ ГЛАВНОГО КАТАЛОГА') ?></h4>
+    <h4 class="modal-title"><?= Yii::t('app', 'franchise.views.catalog.catalogs.main_cat_import', ['ru'=>'ИМПОРТ ГЛАВНОГО КАТАЛОГА']) ?></h4>
 </div>
 <div class="modal-body">
-<?= $form->field($importModel, 'importFile',['template' => "{error}\n{label}\n{hint}\n{input}"])->fileInput()->label(Yii::t('app', 'Выберите .XLSX')) ?>
+<?= $form->field($importModel, 'importFile',['template' => "{error}\n{label}\n{hint}\n{input}"])->fileInput()->label(Yii::t('app', 'franchise.views.catalog.catalogs.choose_six', ['ru'=>'Выберите .XLSX'])) ?>
 </div>
 <div class="modal-footer">
     <?= Html::a(
-       '<i class="fa fa-list-alt"></i> ' . Yii::t('app', 'Скачать шаблон (XLS)') . ' ',
+       '<i class="fa fa-list-alt"></i> ' . Yii::t('app', 'franchise.views.catalog.catalogs.download_template', ['ru'=>'Скачать шаблон (XLS)']) . ' ',
        Url::to('@web/upload/template.xlsx'),
        ['class' => 'btn btn-default btn-sm pull-left','style' => ['margin-right'=>'10px;']]
    ) ?> 
-    <?= Html::submitButton('<i class="glyphicon glyphicon-import"></i> ' . Yii::t('app', 'Импорт') . ' ',['class' => 'btn btn-success import']) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="fa fa-ban"></i> <?= Yii::t('app', 'Отмена') ?></a>
+    <?= Html::submitButton('<i class="glyphicon glyphicon-import"></i> ' . Yii::t('app', 'franchise.views.catalog.catalogs.import', ['ru'=>'Импорт']) . ' ',['class' => 'btn btn-success import']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="fa fa-ban"></i> <?= Yii::t('app', 'franchise.views.catalog.catalogs.cancel_three', ['ru'=>'Отмена']) ?></a>
 </div>
 <?php ActiveForm::end(); ?>

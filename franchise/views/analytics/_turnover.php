@@ -40,7 +40,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title"><?= Yii::t('app', 'Оборот за период') ?> &nbsp;<span class="text-bold text-success"><?= $total ?> руб</span></h3>
+            <h3 class="box-title"><?= Yii::t('app', 'franchise.views.anal.turnover', ['ru'=>'Оборот за период']) ?> &nbsp;<span class="text-bold text-success"><?= $total ?> <?= Yii::t('app', 'franchise.views.anal.rouble', ['ru'=>'руб']) ?></span></h3>
         </div>
         <div class="form-group" style="width: 350px;">
             <?=
@@ -49,8 +49,8 @@ $form = ActiveForm::begin([
                 'name2' => 'date2',
                 'value' => $dateFilterFrom,
                 'value2' => $dateFilterTo,
-                'options' => ['placeholder' => Yii::t('app', 'Начальная Дата'), 'id' => 'dateFrom'],
-                'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
+                'options' => ['placeholder' => Yii::t('app', 'franchise.views.anal.date_from', ['ru'=>'Начальная Дата']), 'id' => 'dateFrom'],
+                'options2' => ['placeholder' => Yii::t('app', 'franchise.views.anal.date_to_two', ['ru'=>'Конечная дата']), 'id' => 'dateTo'],
                 'separator' => '-',
                 'type' => DatePicker::TYPE_RANGE,
                 'pluginOptions' => [
@@ -74,7 +74,7 @@ $form = ActiveForm::begin([
                     'labels' => $dayLabels,
                     'datasets' => [
                         [
-                            'label' => Yii::t('app', 'Все заказы'),
+                            'label' => Yii::t('app', 'franchise.views.anal.all_orders_two', ['ru'=>'Все заказы']),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,.8)",
                             'pointBackgroundColor' => "rgba(54,140,191,1)",
@@ -96,7 +96,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title"><?= Yii::t('app', 'Общий оборот по месяцам') ?></h3>
+            <h3 class="box-title"><?= Yii::t('app', 'franchise.views.anal.full_turnover', ['ru'=>'Общий оборот по месяцам']) ?></h3>
         </div>
             <?=
             ChartJs::widget([
@@ -109,7 +109,7 @@ $form = ActiveForm::begin([
                     'labels' => $monthLabels,
                     'datasets' => [
                         [
-                            'label' => Yii::t('app', 'Общий оборот'),
+                            'label' => Yii::t('app', 'franchise.views.anal.full_turnover_two', ['ru'=>'Общий оборот']),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,1)",
                             'data' => $totalSpent,
@@ -123,7 +123,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title"><?= Yii::t('app', 'Средний оборот в месяц (на 1 ресторан)') ?></h3>
+            <h3 class="box-title"><?= Yii::t('app', 'franchise.views.anal.middle_turnover', ['ru'=>'Средний оборот в месяц (на 1 ресторан)']) ?></h3>
         </div>
             <?=
             ChartJs::widget([
@@ -136,7 +136,7 @@ $form = ActiveForm::begin([
                     'labels' => $monthLabels,
                     'datasets' => [
                         [
-                            'label' => Yii::t('app', 'Средний оборот'),
+                            'label' => Yii::t('app', 'franchise.views.anal.middle_turnover_two', ['ru'=>'Средний оборот']),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,1)",
                             'data' => $averageSpent,
@@ -150,7 +150,7 @@ $form = ActiveForm::begin([
 <div class="row" style="margin-top:50px">
     <div class="col-md-12"> 
         <div class="box-header with-border">
-            <h3 class="box-title"><?= Yii::t('app', 'Средний чек на 1 заказ') ?></h3>
+            <h3 class="box-title"><?= Yii::t('app', 'franchise.views.anal.middle_check', ['ru'=>'Средний чек на 1 заказ']) ?></h3>
         </div>
             <?=
             ChartJs::widget([
@@ -163,7 +163,7 @@ $form = ActiveForm::begin([
                     'labels' => $monthLabels,
                     'datasets' => [
                         [
-                            'label' => Yii::t('app', 'Средний чек'),
+                            'label' => Yii::t('app', 'franchise.views.anal.middle_check_two', ['ru'=>'Средний чек']),
                             'backgroundColor' => "rgba(54,140,191,.2)",
                             'borderColor' => "rgba(54,140,191,1)",
                             'data' => $averageCheque,

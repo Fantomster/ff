@@ -15,8 +15,8 @@ use yii\helpers\Url;
               <h4 class="text-success"><?=$model->organization->name?> 
                 <!--a href="#" class="btn btn-gray pull-right disabled" style="font-size:16px;margin-top:-10px;margin-right:10px"><i class="fa fa-comment"></i></a-->
               </h4>
-              <h5>Стоимость услуги: <span class="text-bold"><?=$model->price?> руб.</span></h5>
-              <p><b>Комментарий поставщика:</b> <?=$model->comment?></p>
+              <h5><?= Yii::t('message', 'frontend.views.request.service_price_nine', ['ru'=>'Стоимость услуги:']) ?> <span class="text-bold"><?=$model->price?> <?= Yii::t('message', 'frontend.views.request.rouble_two', ['ru'=>'руб.']) ?></span></h5>
+              <p><b><?= Yii::t('message', 'frontend.views.request.vendors_comment_two', ['ru'=>'Комментарий поставщика:']) ?></b> <?=$model->comment?></p>
             </div>
           </div>
         </div>

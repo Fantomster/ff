@@ -36,7 +36,7 @@ Modal::widget([
 ])
 ?>
 <?php
-$this->title = 'Поставщики';
+$this->title = Yii::t('message', 'frontend.views.client.suppliers.vendors', ['ru'=>'Поставщики']);
 $this->params['breadcrumbs'][] = $this->title;
 $this->registerCss('
 .Handsontable_table{position: relative;width: 100%;height:400px;overflow: hidden;}
@@ -58,7 +58,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="text-center">
                     <h5 class="modal-title">
-                        <b class="client-manager-name"></b>, укажите товары, которые Вы покупаете у поставщика <b class="supplier-org-name"></b>
+                        <b class="client-manager-name"></b><?= Yii::t('message', 'frontend.views.client.suppliers.set_goods', ['ru'=>', укажите товары, которые Вы покупаете у поставщика']) ?> <b class="supplier-org-name"></b>
                     </h5>
                 </div>
             </div>
@@ -73,16 +73,16 @@ $currencySymbolList = Json::encode($currencySymbolListList);
                     'id' => 'changeCurrency',
                 ])
                 ?>
-                <button id="btnCancel" type="button" class="btn btn-gray" data-dismiss="modal">Отмена</button>
-                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Отправляем..."><span>Отправить</span></button>
+                <button id="btnCancel" type="button" class="btn btn-gray" data-dismiss="modal"><?= Yii::t('message', 'frontend.views.client.suppliers.cancel', ['ru'=>'Отмена']) ?></button>
+                <button id="invite" type="button" class="btn btn-success" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> <?= Yii::t('message', 'frontend.views.client.suppliers.sending', ['ru'=>'Отправляем...']) ?>"><span><?= Yii::t('message', 'frontend.views.client.suppliers.send', ['ru'=>'Отправить']) ?></span></button>
             </div>
         </div>
     </div>
 </div>
 <section class="content-header">
     <h1>
-        <i class="fa fa-users"></i> Поставщики
-        <small>Находите и добавляйте в Вашу систему новых поставщиков</small>
+        <i class="fa fa-users"></i> <?= Yii::t('message', 'frontend.views.client.suppliers.vendors_two', ['ru'=>'Поставщики']) ?>
+        <small><?= Yii::t('message', 'frontend.views.client.suppliers.vendors_search', ['ru'=>'Находите и добавляйте в Вашу систему новых поставщиков']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -90,7 +90,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
             'class' => 'breadcrumb'
         ],
         'links' => [
-            'Поставщики'
+            Yii::t('message', 'frontend.views.client.suppliers.vendors_three', ['ru'=>'Поставщики'])
         ],
     ])
     ?>
@@ -101,7 +101,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
 $gridColumnsCatalog = [
     [
         'attribute' => 'vendor_name',
-        'label' => 'Организация',
+        'label' => Yii::t('message', 'frontend.views.client.suppliers.organization', ['ru'=>'Организация']),
         'format' => 'raw',
         'contentOptions' => ['class' => 'text-bold', 'style' => 'vertical-align:middle;width:45%;font-size:14px'],
         'value' => function ($data) {
@@ -116,16 +116,16 @@ $gridColumnsCatalog = [
     ],
     [
         'attribute' => 'status',
-        'label' => 'Статус сотрудничества',
+        'label' => Yii::t('message', 'frontend.views.client.suppliers.status', ['ru'=>'Статус сотрудничества']),
         'contentOptions' => ['style' => 'vertical-align:middle;min-width:180px;'],
         'format' => 'raw',
         'value' => function ($data) {
             if ($data->invite == 0) {
-                return '<span class="text-danger">Приглашение<br>отправлено</span>';
+                return '<span class="text-danger">' . Yii::t('message', 'frontend.views.client.suppliers.sent', ['ru'=>'Приглашение<br>отправлено']) . ' </span>';
             } elseif (isset($data->catalog) && $data->catalog->status == 1) {
-                return '<span class="text-success">Партнер</span>';
+                return '<span class="text-success">' . Yii::t('message', 'frontend.views.client.suppliers.partner', ['ru'=>'Партнер']) . ' </span>';
             } else {
-                return '<span class="text-yellow">Партнер<br> Каталог не назначен</span>';
+                return '<span class="text-yellow">' . Yii::t('message', 'frontend.views.client.suppliers.not_set', ['ru'=>'Партнер<br> Каталог не назначен']) . ' </span>';
             }
         }
     ],
@@ -138,7 +138,7 @@ $gridColumnsCatalog = [
             $result = "";
             if ($data->invite == 0 || $data->cat_id == 0 || $data->catalog->status == 0) {
                 //заблокировать кнопку ЗАКАЗ если не подтвержден INVITE от поставщика
-                $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', [
+                $result .= Html::tag('span', '<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order', ['ru'=>'Заказ']), [
                             'class' => 'btn btn-success btn-sm',
                             'disabled' => 'disabled']);
                 $result .= Html::tag('span', '<i class="fa fa-eye m-r-xs"></i>', [
@@ -149,7 +149,7 @@ $gridColumnsCatalog = [
                             'disabled' => 'disabled']);
             } else {
                 if (!$data->vendor->hasActiveUsers()) {
-                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
+                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_two', ['ru'=>'Заказ']) . ' ', ['order/create',
                                 'OrderCatalogSearch[searchString]' => "",
                                 'OrderCatalogSearch[selectedCategory]' => "",
                                 'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
@@ -174,7 +174,7 @@ $gridColumnsCatalog = [
                                 'class' => 'btn btn-default btn-sm resend-invite',
                                 'data-pjax' => 0,]);
                 } else {
-                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказ', ['order/create',
+                    $result .= Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.suppliers.order_three', ['ru'=>'Заказ']), ['order/create',
                                 'OrderCatalogSearch[searchString]' => "",
                                 'OrderCatalogSearch[selectedCategory]' => "",
                                 'OrderCatalogSearch[selectedVendor]' => $data["supp_org_id"],
@@ -212,7 +212,7 @@ $gridColumnsCatalog = [
         <div class="col-sm-12 col-md-8">
             <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Список поставщиков</h3>
+                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.suppliers.vendors_list', ['ru'=>'Список поставщиков']) ?></h3>
                 </div>
                 <div class="box-body">
                     <div class="row">
@@ -271,12 +271,12 @@ $gridColumnsCatalog = [
             <?php $form = ActiveForm::begin(['id' => 'SuppliersFormSend']); ?>
             <div class="box box-info">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Добавить поставщика</h3>
+                    <h3 class="box-title"><?= Yii::t('message', 'frontend.views.client.suppliers.vendor_add', ['ru'=>'Добавить поставщика']) ?></h3>
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
                     <?= $form->field($user, 'email') ?>
-                    <?= $form->field($profile, 'full_name')->label('ФИО') ?>
+                    <?= $form->field($profile, 'full_name')->label(Yii::t('message', 'frontend.views.client.suppliers.fio', ['ru'=>'ФИО'])) ?>
                     <?=
                             $form->field($profile, 'phone')
                             ->widget(\common\widgets\PhoneInput::className(), [
@@ -289,15 +289,15 @@ $gridColumnsCatalog = [
                                     'class' => 'form-control',
                                 ],
                             ])
-                            ->label('Телефон')
+                            ->label(Yii::t('message', 'frontend.views.client.suppliers.phone', ['ru'=>'Телефон']))
                             ->textInput()
                     ?>
-                    <?= $form->field($organization, 'name')->label('Организация') ?>
+                    <?= $form->field($organization, 'name')->label(Yii::t('message', 'frontend.views.client.suppliers.org', ['ru'=>'Организация'])) ?>
                 </div> 
                 <div class="box-footer">
                     <div class="form-group">
                         <?=
-                        Html::a('Добавить товары', ['#'], [
+                        Html::a(Yii::t('message', 'frontend.views.client.suppliers.add_goods', ['ru'=>'Добавить товары']), ['#'], [
                             'class' => 'btn btn-success btn-sm',
                             'disabled' => 'disabled',
                             'name' => 'addProduct',
@@ -311,7 +311,7 @@ $gridColumnsCatalog = [
                         ?>
                     </div>
                     <div class="form-group">
-                        <?= Html::submitButton('Пригласить', ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier']) ?>
+                        <?= Html::submitButton(Yii::t('message', 'frontend.views.client.suppliers.invite', ['ru'=>'Пригласить']), ['class' => 'btn btn-success hide', 'readonly' => 'readonly', 'name' => 'inviteSupplier', 'id' => 'inviteSupplier']) ?>
                     </div>	    
                 </div>
             </div>
@@ -327,6 +327,27 @@ $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
+
+$arr = [
+    Yii::t('message', 'frontend.views.client.suppliers.var', ['ru'=>'Уведомление']),
+    Yii::t('message', 'frontend.views.client.suppliers.var1', ['ru'=>'Окей!']),
+    Yii::t('message', 'frontend.views.client.suppliers.var2', ['ru'=>'Наименование товара']),
+    Yii::t('message', 'frontend.views.client.suppliers.var3', ['ru'=>'Ед. измерения']),
+    Yii::t('message', 'frontend.views.client.suppliers.var4', ['ru'=>'Цена (руб)']),
+    Yii::t('message', 'frontend.views.client.suppliers.var5', ['ru'=>'Уведомление']),
+    Yii::t('message', 'frontend.views.client.suppliers.var6', ['ru'=>'Завершить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var7', ['ru'=>'Уведомление']),
+    Yii::t('message', 'frontend.views.client.suppliers.var8', ['ru'=>'Завершить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var9', ['ru'=>'Приглашение на MixCart']),
+    Yii::t('message', 'frontend.views.client.suppliers.var10', ['ru'=>'Отправить приглашение повторно?']),
+    Yii::t('message', 'frontend.views.client.suppliers.var11', ['ru'=>'Закрыть']),
+    Yii::t('message', 'frontend.views.client.suppliers.var12', ['ru'=>'Отправить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var13', ['ru'=>'Удалить поставщика?']),
+    Yii::t('message', 'frontend.views.client.suppliers.var14', ['ru'=>'Поставщик будет удален из Вашего списка поставщиков']),
+    Yii::t('message', 'frontend.views.client.suppliers.var15', ['ru'=>'Удалить']),
+    Yii::t('message', 'frontend.views.client.suppliers.var16', ['ru'=>'Отмена']),
+];
+
 $customJs = <<< JS
         
 var currencies = $.map($currencySymbolList, function(el) { return el });
@@ -344,10 +365,10 @@ $(".modal").removeAttr("tabindex");
 function bootboxDialogShow(msg){
 bootbox.dialog({
     message: msg,
-    title: 'Уведомление',
+    title: '$arr[0]',
     buttons: {
         success: {
-          label: "Окей!",
+          label: "$arr[1]",
           className: "btn-success btn-md",
           callback: function() {
             //location.reload();    
@@ -365,7 +386,7 @@ for ( var i = 0; i < 60; i++ ) {
   var container = document.getElementById('CreateCatalog');
   var hot = new Handsontable(container, {
   data: data,
-  colHeaders : ['Наименование товара', 'Ед. измерения', 'Цена'],
+  colHeaders : ['$arr[2]', '$arr[3]', '$arr[4]'],
   columns: [
         {data: 'product', wordWrap:true},
         {data: 'ed', allowEmpty: false},
@@ -537,10 +558,10 @@ e.preventDefault();
             if(response.success){
             bootbox.dialog({
                       message: response.message,
-                      title: "Уведомление",
+                      title: "$arr[5]",
                       buttons: {
                         success: {
-                          label: "Завершить",
+                          label: "$arr[6]",
                           className: "btn-success",
                           callback: function() {
                                 $("#invite").button("reset");
@@ -600,10 +621,10 @@ $('#invite').click(function(e){
 			  $('#modal_addProduct').modal('hide'); 
                           bootbox.dialog({
 			  message: response.message,
-			  title: "Уведомление",
+			  title: "$arr[7]",
 			  buttons: {
 			    success: {
-			      label: "Завершить",
+			      label: "$arr[8]",
 			      className: "btn-success",
 			      callback: function() {
                                location.reload();     
@@ -646,15 +667,15 @@ $(document).on("click", ".resend-invite", function(e) {
     var url = $(this).attr('href');
     console.log(url);
     bootbox.confirm({
-        title:"Приглашение на MixCart",
-        message: "Отправить приглашение повторно?",
+        title:"$arr[9]",
+        message: "$arr[10]",
         buttons: {
             cancel: {
-                label: 'Закрыть',
+                label: '$arr[11]',
                 className: 'btn-gray'
             },
             confirm: {
-                label: 'Отправить',
+                label: '$arr[12]',
                 className: 'btn-success'
             }
             
@@ -667,15 +688,15 @@ $(document).on("click", ".resend-invite", function(e) {
 $(document).on("click",".del", function(e){
     var id = $(this).attr('data-id');
         bootbox.confirm({
-            title: "Удалить поставщика?",
-            message: "Поставщик будет удален из Вашего списка поставщиков", 
+            title: "$arr[13]",
+            message: "$arr[14]", 
             buttons: {
                 confirm: {
-                    label: 'Удалить',
+                    label: '$arr[15]',
                     className: 'btn-success'
                 },
                 cancel: {
-                    label: 'Отмена',
+                    label: '$arr[16]',
                     className: 'btn-default'
                 }
             },

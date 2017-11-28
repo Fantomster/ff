@@ -10,13 +10,13 @@ use yii\helpers\ArrayHelper;
 use yii\web\View;
 use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
-$catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->title = 'Редактирование каталога'
+$catalog->isNewRecord ? $this->title = Yii::t('message', 'frontend.views.vendor.new_cat_two', ['ru'=>'Новый каталог']) : $this->title = Yii::t('message', 'frontend.views.vendor.edit_cat', ['ru'=>'Редактирование каталога'])
 ?>
 <section class="content-header">
         <h1 class="margin-right-350">
             <i class="fa fa-list-alt"></i> <?= $catalog->isNewRecord? 
-            'Создание нового каталога' : 
-            'Редактирование каталога <small>'.common\models\Catalog::get_value($cat_id)->name.'</small>' ?>      
+            Yii::t('message', 'frontend.views.vendor.create_cat_two', ['ru'=>'Создание нового каталога']) :
+            Yii::t('message', 'frontend.views.vendor.edit_cat_two', ['ru'=>'Редактирование каталога']) . '  <small>'.common\models\Catalog::get_value($cat_id)->name.'</small>' ?>
         </h1>
         <?=
         Breadcrumbs::widget([
@@ -25,12 +25,12 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
             ],
             'links' => [
                 [
-                'label' => 'Каталоги',
+                'label' => Yii::t('message', 'frontend.views.vendor.catalogs_five', ['ru'=>'Каталоги']),
                 'url' => ['vendor/catalogs'],
                 ],
                 $catalog->isNewRecord? 
-            'Шаг 1. Создание нового каталога' : 
-            'Шаг 1. Редактирование каталога',
+            Yii::t('message', 'frontend.views.vendor.step_one', ['ru'=>'Шаг 1. Создание нового каталога']) :
+            Yii::t('message', 'frontend.views.vendor.step_edit', ['ru'=>'Шаг 1. Редактирование каталога']),
             ],
         ])
         ?>
@@ -41,26 +41,26 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
             <div class="panel-body">
                 <ul class="nav fk-tab nav-tabs  pull-left">
                     <?=$catalog->isNewRecord?
-                    '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>':
-                    '<li class="active">'.Html::a('Название <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1','id'=>$cat_id]).'</li>' 
+                    '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.vendor.name_of_good_three', ['ru'=>'Название']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1'],['class'=>'btn btn-default']).'</li>':
+                    '<li class="active">'.Html::a(Yii::t('message', 'frontend.views.vendor.name_of_good_four', ['ru'=>'Название']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['vendor/step-1','id'=>$cat_id]).'</li>'
                     ?>
                     <?=$catalog->isNewRecord?
-                    '<li class="disabled">'.Html::a('Добавить товары').'</li>':
-                    '<li>'.Html::a('Добавить товары',['vendor/step-2','id'=>$cat_id]).'</li>' 
+                    '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.vendor.add_goods_two', ['ru'=>'Добавить товары'])).'</li>':
+                    '<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.goods_three', ['ru'=>'Добавить товары']),['vendor/step-2','id'=>$cat_id]).'</li>'
                     ?>
                     <?=$catalog->isNewRecord?
-                    '<li class="disabled">'.Html::a('Изменить цены').'</li>':
-                    '<li>'.Html::a('Изменить цены',['vendor/step-3-copy','id'=>$cat_id]).'</li>' 
+                    '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.vendor.change_prices', ['ru'=>'Изменить цены'])).'</li>':
+                    '<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.change_prices_two', ['ru'=>'Изменить цены']),['vendor/step-3-copy','id'=>$cat_id]).'</li>'
                     ?>
                     <?=$catalog->isNewRecord?
-                    '<li class="disabled">'.Html::a('Назначить ресторану').'</li>':
-                    '<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>' 
+                    '<li class="disabled">'.Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_two', ['ru'=>'Назначить ресторану'])).'</li>':
+                    '<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_three', ['ru'=>'Назначить ресторану']),['vendor/step-4','id'=>$cat_id]).'</li>'
                     ?>
                 </ul>
         
             
                 <ul class="fk-prev-next pull-right">
-                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> Далее',['#'],['class' => 'step-2']).'</li>'?>
+                  <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Далее']) . ' ',['#'],['class' => 'step-2']).'</li>'?>
                 </ul>
         </div>
         <?php Pjax::begin(['id' => 'pjax-container'])?>  
@@ -70,8 +70,8 @@ $catalog->isNewRecord ? $this->title = 'Новый каталог' : $this->titl
         ?>
         <div class="panel-body">
             <div class="callout callout-fk-info">
-                <h4>ШАГ 1</h4>
-                <p><?=$catalog->isNewRecord ? 'Введите название для нового каталога':'Изменить название каталога' ?></p>
+                <h4><?= Yii::t('message', 'frontend.views.vendor.step_one_two', ['ru'=>'ШАГ 1']) ?></h4>
+                <p><?=$catalog->isNewRecord ? Yii::t('message', 'frontend.views.vendor.enter_cat_name', ['ru'=>'Введите название для нового каталога']):Yii::t('message', 'frontend.views.vendor.change_cat_name', ['ru'=>'Изменить название каталога']) ?></p>
             </div>
             <?= $form->field($catalog, 'name')->textInput(['class' => 'form-control input-md'])->label(false) ?>
         </div>
@@ -119,7 +119,7 @@ $.ajax({
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Окей",
+                          label: "' . Yii::t('message', 'frontend.views.vendor.ok_three', ['ru'=>'Окей']) . ' ",
                           className: "btn-success btn-md",
                         },
                     },

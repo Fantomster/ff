@@ -33,8 +33,8 @@ use yii\helpers\Html;
                                     <td style="margin: 0; padding: 0;text-align:center;"><img src="<?= Yii::$app->params['pictures']['bill-logo'] ?>" style="max-width: 100%; margin: 0; padding: 0;" width="200px" height="58px" alt="" /></td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small>Революция в работе с поставщиками.
-                                            Закупка в 2 клика.</small></td>
+                                    <td style="text-align:center; padding-top:20px; color: #787878;"><small><?= Yii::t('app', 'common.mail.layouts.revolution', ['ru'=>'Революция в работе с поставщиками.']) ?>
+                                            <?= Yii::t('app', 'common.mail.layouts.two_click', ['ru'=>'Закупка в 2 клика.']) ?></small></td>
                                 </tr>
                             </table>
                         </div>
@@ -72,7 +72,7 @@ use yii\helpers\Html;
                     <td style="margin: 0; padding: 0;">
                         <div style="margin: 0; padding: 0;">
                             <ul style="width: 100%; text-align: center; font-weight: normal; font-size: 14px; line-height: 1.6; list-style-type: none; margin: 0 0 10px; padding: 0;">
-                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://mixcart.ru/img/phone.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><span style="color: #3f3e3e; margin: 0; padding: 0; text-decoration: underline;">8-499-404-10-18</span></li>
+                                <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://mixcart.ru/img/phone.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><span style="color: #3f3e3e; margin: 0; padding: 0; text-decoration: underline;"><?= Yii::t('app', 'common.mail.layouts.phone', ['ru'=>'8-499-404-10-18']) ?></span></li>
                                 <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://mixcart.ru/img/mail.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="mailto:info@mixcart.ru" style="color: #3f3e3e; margin: 0; padding: 0;">info@mixcart.ru</a></li>
                                 <li style="display: inline-block; text-align: center; list-style-position: inside; margin: 0 0 0 5px; padding: 0;"><img src="https://mixcart.ru/img/web.png" alt="" style="max-width: 100%; margin: 0; padding: 0 5px 0 0;" /><a href="https://mixcart.ru" style="color: #3f3e3e; margin: 0; padding: 0;">www.mixcart.ru</a></li>
                             </ul>
@@ -93,7 +93,7 @@ use yii\helpers\Html;
                                 <tr style="margin: 0; padding: 0;">
                                     <td align="center" style="margin: 0; padding: 0;">
                                         <p style="font-size: 11px; font-weight: normal; line-height: 1.6; margin: 0 0 10px; padding: 0;">
-                                            © 2016 MixCart — ООО «Онлайн Маркет»
+                                            © 2016 MixCart — <?= Yii::t('app', 'common.mail.layouts.revolution.market', ['ru'=>'ООО «Онлайн Маркет»']) ?>
                                         </p>
                                     </td>
                                 </tr>

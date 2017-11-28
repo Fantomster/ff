@@ -1,18 +1,18 @@
 <br style="margin: 0; padding: 0;"/>
 <div style="width: 100%; margin: 0; padding: 20px;">
-    <h2>Название организации: <?= $organization->name ?></h2>
+    <h2><?= Yii::t('app', 'common.mail.franchisee_associate_added.org_name', ['ru'=>'Название организации:']) ?> <?= $organization->name ?></h2>
     <ul>
         <li>
-            Адрес: <?= $organization->address ?>
+            <?= Yii::t('app', 'common.mail.franchisee_associate_added.address', ['ru'=>'Адрес:']) ?> <?= $organization->address ?>
         </li>
         <li>
-            Телефон: <?= $organization->phone ?>
+            <?= Yii::t('app', 'common.mail.franchisee_associate_added.phone', ['ru'=>'Телефон:']) ?> <?= $organization->phone ?>
         </li>
         <li>
-            Тип организации: <?= $organization->type->name ?>
+            <?= Yii::t('app', 'common.mail.franchisee_associate_added.org_type', ['ru'=>'Тип организации:']) ?> <?= $organization->type->name ?>
         </li>
         <li>
-            Ссылка на просмотр: <a href="<?= $route ?>"
+            <?= Yii::t('app', 'common.mail.franchisee_associate_added.link', ['ru'=>'Ссылка на просмотр:']) ?> <a href="<?= $route ?>"
                                    style="text-decoration: none;
                                             color: #FFF;
                                             background-color: #84bf76;
@@ -24,7 +24,7 @@
                                             display: inline-block;
                                             border-radius: 4px;
                                             width: 80%;">
-                Перейти
+                <?= Yii::t('app', 'common.mail.franchisee_associate_added.go', ['ru'=>'Перейти']) ?>
             </a>
         </li>
     </ul>

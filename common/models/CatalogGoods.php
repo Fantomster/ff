@@ -79,12 +79,12 @@ class CatalogGoods extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
-            'cat_id' => 'Cat ID',
-            'base_goods_id' => 'Cat Base Goods ID',
-            'price' => 'Цена',
-            'discount' => 'Скидка (руб.)',
-            'discount_percent' => 'Скидка %',
-            'discount_fixed' => 'Фиксированная цена',
+            'cat_id' => Yii::t('app', 'Cat ID'),
+            'base_goods_id' => Yii::t('app', 'Cat Base Goods ID'),
+            'price' => Yii::t('app', 'common.models.price_two', ['ru'=>'Цена']),
+            'discount' => Yii::t('app', 'common.models.discount_rouble', ['ru'=>'Скидка (руб.)']),
+            'discount_percent' => Yii::t('app', 'common.models.discount_percent', ['ru'=>'Скидка %']),
+            'discount_fixed' => Yii::t('app', 'common.models.fix_price', ['ru'=>'Фиксированная цена']),
         ];
     }
 

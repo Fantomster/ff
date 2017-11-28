@@ -13,10 +13,10 @@ use yii\helpers\Url;
 
 <p><img src="https://mixcart.ru/img/invite-to-client.jpg" style="width: 100%;"/></p>
 
-<h3 style="font-weight: 500;font-size: 27px;">Здравствуйте!</h3>
-<p>Мы, <u><?= $we ?></u>, стали использовать очень удобный инструмент для автоматизации работы с вами. 
+<h3 style="font-weight: 500;font-size: 27px;"><?= Yii::t('app', 'common.mail.friend_invite.hello', ['ru'=>'Здравствуйте!']) ?></h3>
+<p><?= Yii::t('app', 'common.mail.friend_invite.we', ['ru'=>'Мы, <u>{we}</u>, стали использовать очень удобный инструмент для автоматизации работы с вами', 'we'=>$we]) ?>.
     <br />
-    MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.
+    <?= Yii::t('app', 'common.mail.friend_invite.instrument', ['ru'=>'MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок']) ?>.
 
 </p>
 
@@ -33,13 +33,13 @@ use yii\helpers\Url;
     cursor: pointer;
     display: inline-block;
     border-radius: 4px;
-    width: 80%;">Принять приглашение</a>
+    width: 80%;"><?= Yii::t('app', 'common.mail.friend_invite.accept', ['ru'=>'Принять приглашение']) ?></a>
 </div>
 
 <br /><br />
 
 
-<h5 align="center" style="font-weight: 900;font-size: 17px;">В MixCart очень широкие возможности для ресторанов и поставщиков, о некоторых из них несколько слов ниже.</h5>
+<h5 align="center" style="font-weight: 900;font-size: 17px;"><?= Yii::t('app', 'common.mail.friend_invite.abilities', ['ru'=>'В MixCart очень широкие возможности для ресторанов и поставщиков, о некоторых из них несколько слов ниже']) ?>.</h5>
 <br /><br />
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
@@ -47,10 +47,10 @@ use yii\helpers\Url;
             <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Market Place</h6>
         </th>
         <th width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Прайсы и каталоги</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.friend_invite.prices_and_catalogs', ['ru'=>'Прайсы и каталоги']) ?></h6>
         </th>
         <th width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Коммуникации</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.friend_invite.communications', ['ru'=>'Коммуникации']) ?></h6>
         </th>
     </tr>
     <tr align="center">
@@ -66,13 +66,13 @@ use yii\helpers\Url;
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Акции и распродажи</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.friend_invite.actions', ['ru'=>'Акции и распродажи']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Реклама</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.friend_invite.commercial', ['ru'=>'Реклама']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Оценки и отзывы</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.friend_invite.responses', ['ru'=>'Оценки и отзывы']) ?></h6>
         </td>
     </tr>
     <tr align="center">
@@ -88,13 +88,13 @@ use yii\helpers\Url;
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Аналитика</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.friend_invite.anal', ['ru'=>'Аналитика']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Участие в тендерах</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.friend_invite.tenders', ['ru'=>'Участие в тендерах']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"header>Обработка заказов</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"header><?= Yii::t('app', 'common.mail.friend_invite.orders_processing', ['ru'=>'Обработка заказов']) ?></h6>
         </td>
     </tr>
     <tr align="center">

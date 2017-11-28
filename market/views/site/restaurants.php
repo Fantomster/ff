@@ -8,7 +8,7 @@ use yii\bootstrap\Modal;
 
 <div class="row">
     <div class="col-md-12">
-      <h3>Рестораны <small></small></h3>
+      <h3><?= Yii::t('message', 'market.views.site.rest.rest', ['ru'=>'Рестораны']) ?> <small></small></h3>
         <div class="row" id="supplier-block">
             <?php
             foreach($restaurants as $row){
@@ -31,7 +31,7 @@ use yii\bootstrap\Modal;
                 </div>
                 <div class="col-md-12">
                   <div class="supplier-button">
-                    <?=Html::a('предложить услуги', ['send-service',
+                    <?=Html::a(Yii::t('message', 'market.views.site.rest.get_service', ['ru'=>'предложить услуги']), ['send-service',
                             'id' => $row->id], [
                             'data' => [
                                 'target' => '#sendService',
@@ -54,7 +54,7 @@ use yii\bootstrap\Modal;
         </div>
         <div class="row">
           <div class="col-md-12 min-padding">
-            <a href="#" class="btn btn-outline-ajax <?=$restaurantsCount>12?'':'disabled'?>" id="product-more">Показать еще</a>  
+            <a href="#" class="btn btn-outline-ajax <?=$restaurantsCount>12?'':'disabled'?>" id="product-more"><?= Yii::t('message', 'market.views.site.rest.show_more', ['ru'=>'Показать еще']) ?></a>
           </div>   
         </div>
     </div>

@@ -68,7 +68,7 @@ if (!empty($success) || !empty($invalidToken)) {
 
         <div class="success-message"><a href="<?= Yii::$app->homeUrl; ?>" class="success-message__ico"></a>
             <div class="success-message__text">
-                <p>Вход по данной разовой ссылке заблокирован. Вы можете зайти под своим логином и паролем, либо запросить свой пароль на почту</p>
+                <p><?= Yii::t('message', 'frontend.views.user.default.block', ['ru'=>'Вход по данной разовой ссылке заблокирован. Вы можете зайти под своим логином и паролем, либо запросить свой пароль на почту']) ?></p>
             </div>
         </div>
 
@@ -78,7 +78,7 @@ if (!empty($success) || !empty($invalidToken)) {
             <div class="auth-sidebar__content">
                 <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
 
-                <div class="auth-sidebar__annotation">Введите новый пароль</div>
+                <div class="auth-sidebar__annotation"><?= Yii::t('message', 'frontend.views.user.default.enter_pass', ['ru'=>'Введите новый пароль']) ?></div>
                 <?php
                 $form = ActiveForm::begin([
                             'id' => 'reset-form',
@@ -95,7 +95,7 @@ if (!empty($success) || !empty($invalidToken)) {
                         <?=
                                 $form->field($user, 'newPassword')
                                 ->label(false)
-                                ->passwordInput(['class' => 'form-control', 'placeholder' => 'Пароль'])
+                                ->passwordInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.pass_three', ['ru'=>'Пароль'])])
                         ?>
                         <i class="fa fa-lock"></i>
                     </label>
@@ -103,7 +103,7 @@ if (!empty($success) || !empty($invalidToken)) {
     <?=
             $form->field($user, 'newPasswordConfirm')
             ->label(false)
-            ->passwordInput(['class' => 'form-control', 'placeholder' => 'Повторите пароль'])
+            ->passwordInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.pass_repeat', ['ru'=>'Повторите пароль'])])
     ?>
                         <i class="fa fa-lock"></i>
                     </label>
@@ -119,7 +119,7 @@ if (!empty($success) || !empty($invalidToken)) {
 <?php endif; ?>
     <div class="present-wrapper">
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
-        <h1>Онлайн-сервис для автоматизации закупок</h1>
+        <h1><?= Yii::t('message', 'frontend.views.user.default.auto', ['ru'=>'Онлайн-сервис для автоматизации закупок']) ?></h1>
         <div class="present__media clearfix">
             <div class="present__image"><img src="/images/tmp_file/flowers.png" alt=""></div>
 <!--            <a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a>

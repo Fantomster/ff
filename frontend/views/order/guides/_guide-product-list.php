@@ -23,7 +23,7 @@
                 'class' => 'col-lg-12 list-wrapper inline no-padding'
             ],
             'layout' => "{items}<tr><td>{pager}</td></tr>",
-            'emptyText' => '<tr><td>Список пуст</td></tr>',
+            'emptyText' => '<tr><td>' . Yii::t('message', 'frontend.views.order.guides.empty_list', ['ru'=>'Список пуст']) . ' </td></tr>',
         ])
         ?>
     </tbody>

@@ -18,14 +18,14 @@ $form = ActiveForm::begin([
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Информация об организации</h4>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.views.vendor.org_info_three', ['ru'=>'Информация об организации']) ?></h4>
 </div>
 <div class="modal-body">
     <?php if(empty($relation_supp_rest->cat_id)){?>
     <div class="alert alert-warning alert-dismissible" style="margin: -15px -15px 15px -15px;">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true" style="right: -16px;">×</button>
-                <h4><i class="icon fa fa-warning"></i> Внимание! </h4>
-                Необходимо назначить каталог для данного клиента.
+                <h4><i class="icon fa fa-warning"></i> <?= Yii::t('message', 'frontend.views.vendor.attention', ['ru'=>'Внимание!']) ?> </h4>
+                <?= Yii::t('message', 'frontend.views.vendor.catalog_needs', ['ru'=>'Необходимо назначить каталог для данного клиента.']) ?>
     </div>
     <?php } ?>
     <div class="row">
@@ -86,7 +86,7 @@ $form = ActiveForm::begin([
                 'value' => array_keys($organization->getAssociatedManagersList($vendor->id)),
                 'theme' => 'krajee',
                 'hideSearch' => true,
-                'options' => ['multiple' => true, 'placeholder' => 'Выберите менеджера'],
+                'options' => ['multiple' => true, 'placeholder' => Yii::t('message', 'frontend.views.vendor.choose_manager', ['ru'=>'Выберите менеджера'])],
                 'pluginOptions' => [
                     'allowClear' => true,
                 ],
@@ -97,7 +97,7 @@ $form = ActiveForm::begin([
     <?php } ?>
 </div>
 <div class="modal-footer">
-<?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success save-form']) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
+<?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.save_seven', ['ru'=>'Сохранить']) . ' ', ['class' => 'btn btn-success save-form']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.vendor.close_four', ['ru'=>'Закрыть']) ?></a>
 </div>
 <?php ActiveForm::end(); ?>

@@ -11,7 +11,7 @@ use yii\web\View;
                   <span class="input-group-addon" id="basic-addon1" style="background-color: #fff;border: none;">
                         <i class="fa fa-search" style="color:rgba(63,62,62,0.3);font-size: 18px"></i>
                   </span>
-                  <input  id="search" type="text" class="form-control search-block" placeholder="Поиск товаров и поставщиков" aria-describedby="basic-addon1">
+                  <input  id="search" type="text" class="form-control search-block" placeholder="<?= Yii::t('message', 'market.views.layouts.header.search', ['ru'=>'Поиск товаров и поставщиков']) ?>" aria-describedby="basic-addon1">
                 </div> 
             </div>
         </div>

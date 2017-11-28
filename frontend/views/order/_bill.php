@@ -9,7 +9,7 @@ $currencySymbol = $order->currency->symbol;
             <div class="block_new">
                 <div style="width: 100%;">
                     <div class="block_name" style="width: 60%;float:left;">
-                        <p class = "z_1" style="font-family: Circe_Bold; text-transform: uppercase;font-size: 16px; text-align: left;">Заказчик</p>
+                        <p class = "z_1" style="font-family: Circe_Bold; text-transform: uppercase;font-size: 16px; text-align: left;"><?= Yii::t('message', 'frontend.views.order.customer', ['ru'=>'Заказчик']) ?></p>
                         <p class= "name_dashed" style="font-family: sans-serif;font-size: 18px;border-bottom: 1px dashed #000; width: 100%;text-align: left;font-weight: 100;" ><?= $order->client->name ?></p>
                     </div>
                     <div class="block_img" >
@@ -17,12 +17,12 @@ $currencySymbol = $order->currency->symbol;
                     </div>
                 </div>
                 <div class="block_spisok" style="margin-top: 20px; display: block;width:100%; float:left;">
-                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;" >Город: <?= $order->client->locality ?></p>
-                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;">Адрес: <?= $order->client->route ?>, <?= $order->client->street_number ?></p>
-                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;">Телефон: <?= $order->createdByProfile->phone ?></p>
-                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;">Размещен: <?= $order->createdByProfile->full_name ?></p>
-                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;">Email:  <?= $order->createdBy->email ?></p>
-                    <p style="font-family: Circe_Bold;padding-top: 20px;	text-align: left;color: #999C9E;flex-wrap: bold;">Запрошенная дата доставки: <?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:j M Y") : '' ?></p>
+                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;" ><?= Yii::t('message', 'frontend.views.order.city_three', ['ru'=>'Город:']) ?> <?= $order->client->locality ?></p>
+                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;"><?= Yii::t('message', 'frontend.views.order.address_three', ['ru'=>'Адрес:']) ?> <?= $order->client->route ?>, <?= $order->client->street_number ?></p>
+                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;"><?= Yii::t('message', 'frontend.views.order.phone_three', ['ru'=>'Телефон:']) ?> <?= $order->createdByProfile->phone ?></p>
+                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;"><?= Yii::t('message', 'frontend.views.order.settled', ['ru'=>'Размещен:']) ?> <?= $order->createdByProfile->full_name ?></p>
+                    <p style="font-family: Circe_Bold;	color: #999C9E;flex-wrap: bold;text-align: left;"><?= Yii::t('message', 'frontend.views.order.email_two', ['ru'=>'Email:']) ?>  <?= $order->createdBy->email ?></p>
+                    <p style="font-family: Circe_Bold;padding-top: 20px;	text-align: left;color: #999C9E;flex-wrap: bold;"><?= Yii::t('message', 'frontend.views.order.requested_delivery', ['ru'=>'Запрошенная дата доставки:']) ?> <?= $order->requested_delivery ? Yii::$app->formatter->asDatetime($order->requested_delivery, "php:j M Y") : '' ?></p>
                 </div>
             </div>
             <div class="block_new2">
@@ -31,16 +31,16 @@ $currencySymbol = $order->currency->symbol;
                         <img  class = "img_i pull-right" src="<?= $order->vendor->pictureUrl ?>" alt="" width="93" height="52">
                     </div>
                     <div class="block_name" style="width: 60%;float:left;">
-                        <p  class= "name_p" style="font-family: Circle_Regular; text-transform: uppercase;font-weight: bold;font-size: 16px; text-align: right;">Поставщик</p>
+                        <p  class= "name_p" style="font-family: Circle_Regular; text-transform: uppercase;font-weight: bold;font-size: 16px; text-align: right;"><?= Yii::t('message', 'frontend.views.order.vendor_four', ['ru'=>'Поставщик']) ?></p>
                         <p  class= "name_dashed" style="font-family: sans-serif;font-size: 18px;border-bottom: 1px dashed #000; width: 100%;text-align: right;" ><?= $order->vendor->name ?></p>
                     </div>
                 </div>
                 <div class="block_spisok" style="margin-top: 20px; display: block;width:100%;float:left;">
-                    <p class = "spisok_p" style="font-family: Circle_Regular;	color: #999C9E;text-align: right;" >Город: <?= $order->vendor->locality ?></p>
-                    <p class = "spisok_p" style="font-family: Circle_Regular;	color: #999C9E; text-align: right;">Адрес: <?= $order->vendor->route ?>, <?= $order->vendor->street_number ?></p>
-                    <p class = "spisok_p"  style="font-family: Circle_Regular;	color: #999C9E;text-align: right;">Телефон: <?= $order->vendor->phone ?></p>
-                    <p class = "spisok_p"  style="font-family: Circle_Regular;	color: #999C9E;text-align: right;">Дата создания заказа: <?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>
-                    <p class = "spisok_p"  style="font-family: Circle_Regular;	color: #999C9E;text-align: right;">Дата доставки: <?= $order->actual_delivery ? Yii::$app->formatter->asDatetime($order->actual_delivery, "php:j M Y") : '' ?></p>
+                    <p class = "spisok_p" style="font-family: Circle_Regular;	color: #999C9E;text-align: right;" ><?= Yii::t('message', 'frontend.views.order.city_four', ['ru'=>'Город:']) ?> <?= $order->vendor->locality ?></p>
+                    <p class = "spisok_p" style="font-family: Circle_Regular;	color: #999C9E; text-align: right;"><?= Yii::t('message', 'frontend.views.order.address_four', ['ru'=>'Адрес:']) ?> <?= $order->vendor->route ?>, <?= $order->vendor->street_number ?></p>
+                    <p class = "spisok_p"  style="font-family: Circle_Regular;	color: #999C9E;text-align: right;"><?= Yii::t('message', 'frontend.views.order.phone_four', ['ru'=>'Телефон:']) ?> <?= $order->vendor->phone ?></p>
+                    <p class = "spisok_p"  style="font-family: Circle_Regular;	color: #999C9E;text-align: right;"><?= Yii::t('message', 'frontend.views.order.creating_date_four', ['ru'=>'Дата создания заказа:']) ?> <?= Yii::$app->formatter->asDatetime($order->created_at, "php:j M Y") ?></p>
+                    <p class = "spisok_p"  style="font-family: Circle_Regular;	color: #999C9E;text-align: right;"><?= Yii::t('message', 'frontend.views.order.delivery_date', ['ru'=>'Дата доставки:']) ?> <?= $order->actual_delivery ? Yii::$app->formatter->asDatetime($order->actual_delivery, "php:j M Y") : '' ?></p>
                 </div>
             </div>
         </div>
@@ -57,14 +57,14 @@ $currencySymbol = $order->currency->symbol;
         <div style="width: 100%; height: 170px;">
             <div class = "sp_cen" style="width: 300px;float: right;">
                 <?php if ($order->discount) { ?>
-                    <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: <?= $order->getFormattedDiscount() ?></p>
+                    <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold"><?= Yii::t('message', 'frontend.views.order.discount_two', ['ru'=>'Скидка:']) ?> <?= $order->getFormattedDiscount() ?></p>
                 <?php } ?>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: <?= $order->total_price ?> <?= $currencySymbol ?></p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold"><?= Yii::t('message', 'frontend.views.order.delivery_price_four', ['ru'=>'Стоимость доставки:']) ?> <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold"><?= Yii::t('message', 'frontend.views.order.total_price', ['ru'=>'Итого:']) ?> <?= $order->total_price ?><?= $currencySymbol ?></p>
             </div>
         </div>
         <div style="padding-bottom: 20px;width:100%;">
-            <div class = "but_p_1" style="color: #999C9E;display: block;float: left">Подпись: ______________ &nbsp;&nbsp;Дата: _________________</div>
+            <div class = "but_p_1" style="color: #999C9E;display: block;float: left"><?= Yii::t('message', 'frontend.views.order.sign', ['ru'=>'Подпись:']) ?> ______________ &nbsp;&nbsp;<?= Yii::t('message', 'frontend.views.order.date', ['ru'=>'Дата:']) ?> _________________</div>
         </div>
     </div>
 </div>

@@ -427,7 +427,7 @@ class RequestController extends DefaultController
                     $vendorUsers = \common\models\User::find()->where(['organization_id' => $vendor->id])->all();
                     if ($client->email) {
                         $mailer = Yii::$app->mailer;
-                        $subject = "mixcart.ru - заявка №" . $request->id;
+                        $subject = Yii::t('message', 'frontend.controllers.request.request_two', ['ru'=>"mixcart.ru - заявка №"]) . $request->id;
                         $mailer->htmlLayout = 'layouts/request';
                         $mailer->compose('requestInviteSupplierMailToRest', compact("request", "client"))
                             ->setTo($client->email)

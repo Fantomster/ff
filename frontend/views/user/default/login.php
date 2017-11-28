@@ -8,7 +8,7 @@ use yii\widgets\ActiveForm;
  * @var yii\widgets\ActiveForm $form
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
-$this->title = "Вход / регистрация";
+$this->title = Yii::t('message', 'frontend.views.user.default.enter_register_two', ['ru'=>"Вход / регистрация"]);
 
 $this->registerJs(
         '
@@ -88,7 +88,7 @@ $this->registerCss(
         <button type="button" class="call-menu-but visible-xs visible-sm visible-md"><span></span><span></span><span></span></button>
         <div class="auth-sidebar__content">
             <div class="auth-sidebar__logo"><a href="<?= Yii::$app->homeUrl; ?>"><img src="/images/tmp_file/logo.png" alt=""></a></div>
-            <div class="auth-sidebar__annotation">Заполните поля<br>для входа в систему</div>
+            <div class="auth-sidebar__annotation"><?= Yii::t('message', 'frontend.views.user.default.fill_fields', ['ru'=>'Заполните поля<br>для входа в систему']) ?></div>
             <div class="form-slider">
                 <?= $registerFirst ? $this->render('_register-form', compact('user', 'profile', 'organization')) : $this->render('_login-form', compact('model')) ?>
                 <?= $registerFirst ? $this->render('_login-form', compact('model')) : $this->render('_register-form', compact('user', 'profile', 'organization')) ?>
@@ -101,7 +101,7 @@ $this->registerCss(
     </div>
     <div class="present-wrapper">
         <button type="button" class="close-menu-but visible-xs visible-sm visible-md"><span></span><span></span></button>
-        <h1>Онлайн-сервис для автоматизации закупок</h1>
+        <h1><?= Yii::t('message', 'frontend.views.user.default.online_service_two', ['ru'=>'Онлайн-сервис для автоматизации закупок']) ?></h1>
         <div class="present__media clearfix">
             <div class="present__image"><img src="/images/tmp_file/flowers.png" alt=""></div>
             <!--<a href="#" class="appstore"><img src="images/tmp_file/appstore.png" alt=""></a><a href="#" class="gplay"><img src="images/tmp_file/gplay.png" alt=""></a>-->

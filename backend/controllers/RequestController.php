@@ -110,7 +110,7 @@ class RequestController extends Controller
     {
         $model = Request::findOne($id);
         if(!$model){
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.request.page_error', ['ru'=>'The requested page does not exist.']));
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {

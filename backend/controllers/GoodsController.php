@@ -240,7 +240,7 @@ class GoodsController extends Controller {
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('fail', 'Ошибка загрузки файла!');
+                Yii::$app->session->setFlash('fail', Yii::t('error', 'backend.controllers.goods.file_error', ['ru'=>'Ошибка загрузки файла!']));
                 return $this->render("import-catalog", compact("relation", "importModel"));
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -290,7 +290,7 @@ class GoodsController extends Controller {
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();
-                Yii::$app->session->setFlash('fail', 'Ошибка сохранения, повторите действие!');
+                Yii::$app->session->setFlash('fail', Yii::t('error', 'backend.controllers.goods.save_error', ['ru'=>'Ошибка сохранения, повторите действие!']));
             }
         }
         return $this->render("import-catalog", compact("relation", "importModel"));
@@ -342,7 +342,7 @@ class GoodsController extends Controller {
         if (($model = CatalogBaseGoods::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.goods.page_error', ['ru'=>'The requested page does not exist.']));
         }
     }
 

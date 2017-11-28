@@ -11,7 +11,7 @@ frontend\assets\AppAsset::register($this);
  * @var yii\widgets\ActiveForm $form
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
-$this->title = "Вход / регистрация";
+$this->title = Yii::t('message', 'frontend.views.user.default.enter_register_three', ['ru'=>"Вход / регистрация"]);
 $redirect = empty($returnUrl) ? Url::to(['/site/index']) : $returnUrl;
 $changeNetworkUrl = Url::to(['/user/change']);
 $js = <<<JS
@@ -120,9 +120,9 @@ $grid = [
     'format' => 'raw',
     'value'=>function ($data) {
             if($data['type_id']==\common\models\Organization::TYPE_RESTAURANT){
-            return "<span style='color: #cacaca;'>Закупщик</span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+            return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.buyer_three', ['ru'=>'Закупщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
             }        
-        return "<span style='color: #cacaca;'>Поставщик</span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
+        return "<span style='color: #cacaca;'>" . Yii::t('message', 'frontend.views.user.default.vendor_three', ['ru'=>'Поставщик']) . " </span><br><span style='color:#84bf76'><b>" . $data['name'] . "</b></span>";
         },
     ],
     [
@@ -149,8 +149,8 @@ $grid = [
         <div class="row">
             <div class="col-md-offset-3 col-md-6">
                 <div class="block">
-                    <h5 class="business-title">Выберите бизнес-профиль</h5>
-                    <p class="business-p-title">Выберите из имеющихся для доступа в Ваш бизнес-профиль</p>
+                    <h5 class="business-title"><?= Yii::t('message', 'frontend.views.user.default.choose_profile', ['ru'=>'Выберите бизнес-профиль']) ?></h5>
+                    <p class="business-p-title"><?= Yii::t('message', 'frontend.views.user.default.choose_list', ['ru'=>'Выберите из имеющихся для доступа в Ваш бизнес-профиль']) ?></p>
                     <div class="row">
                         <div class="col-md-12">
                             <?php Pjax::begin(['id' => 'pjax-network-list', 'enablePushState' => false,'timeout' => 10000])?>
@@ -172,7 +172,7 @@ $grid = [
                             <?php Pjax::end(); ?> 
                         </div>
                     </div>
-                    <?=Html::a('ПРОДОЛЖИТЬ', $redirect, [
+                    <?=Html::a(Yii::t('message', 'frontend.views.user.default.continue', ['ru'=>'ПРОДОЛЖИТЬ']), $redirect, [
                         'class' => 'btn-continue',
                     ]);?>
                 </div>  

@@ -6,7 +6,7 @@ use yii\widgets\Pjax;
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Редактирование каталога</h4>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.views.client.supp.edit', ['ru'=>'Редактирование каталога']) ?></h4>
 </div>
 <div class="modal-body">
     <?php Pjax::begin(['enablePushState' => false,'timeout' => 10000, 'id' => 'pjax-edit-catalog'])?>
@@ -14,18 +14,29 @@ use yii\widgets\Pjax;
     <?php Pjax::end(); ?>
 </div>
 <div class="modal-footer">
-    <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', [
+    <?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.client.supp.save', ['ru'=>'Сохранить']), [
         'class' => 'btn btn-success',
         'id'=>'save-catalog-supplier',
-        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Сохраняем...",
+        'data-loading-text' => "<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> " . Yii::t('message', 'frontend.views.client.supp.saving', ['ru'=>'Сохраняем...']),
         ]) ?>
-    <button class="btn btn-gray" data-dismiss="modal" id="btnClose"><span><i class="icon fa fa-remove"></i> Закрыть</span></button>
+    <button class="btn btn-gray" data-dismiss="modal" id="btnClose"><span><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.client.supp.close', ['ru'=>'Закрыть']) ?></span></button>
 </div>
 <?php
 $arr= $array;
 $arr_count = count($array);
 
 $editCatalogUrl = Url::to(['client/edit-catalog', 'id' => $id]);
+
+$arr = [
+    Yii::t('message', 'frontend.views.client.supp.var', ['ru'=>'Артикул']),
+    Yii::t('message', 'frontend.views.client.supp.var1', ['ru'=>'Наименование товара']),
+    Yii::t('message', 'frontend.views.client.supp.var2', ['ru'=>'Кратность']),
+    Yii::t('message', 'frontend.views.client.supp.var3', ['ru'=>'Цена']),
+    Yii::t('message', 'frontend.views.client.supp.var4', ['ru'=>'Ед. измерения']),
+    Yii::t('message', 'frontend.views.client.supp.var5', ['ru'=>'Комментарий']),
+    Yii::t('message', 'frontend.views.client.supp.var6', ['ru'=>'Закрыть!']),
+    Yii::t('message', 'frontend.views.client.supp.var7', ['ru'=>'Окей!']),
+];
 
 $customJs = <<< JS
 var data = $arr;
@@ -34,7 +45,7 @@ var save = document.getElementById('save-catalog-supplier'), hot, originalColWid
 hot = new Handsontable(container, {
 removeRowPlugin: true,
 data: JSON.parse(JSON.stringify(data)),
-colHeaders : ['base_goods_id', 'goods_id', 'Артикул', 'Наименование товара', 'Кратность', 'Цена (<span class="currency-symbol">{$catalogCurrency->symbol}</span>)', 'Ед. измерения', 'Комментарий'],
+colHeaders : ['base_goods_id', 'goods_id', '$arr[0]', '$arr[1]', '$arr[2]', '$arr[3] (<span class="currency-symbol">{$catalogCurrency->symbol}</span>)', '$arr[4]', '$arr[5]'],
 colWidths: [0, 0, 50, 60, 40, 30, 40, 60],
 columns: [
         
@@ -120,7 +131,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Закрыть!",
+                          label: "$arr[6]",
                           className: "btn-success btn-md",
                           callback: function() {
                             
@@ -137,7 +148,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "Окей!",
+                          label: "$arr[7]",
                           className: "btn-success btn-md",
                           callback: function() {
                             console.log("err");

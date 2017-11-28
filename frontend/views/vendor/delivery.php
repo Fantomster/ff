@@ -5,7 +5,7 @@ use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
 use kartik\checkbox\CheckboxX;
 use yii\widgets\Pjax;
-$this->title = 'Настройки';
+$this->title = Yii::t('message', 'frontend.views.vendor.settings_two', ['ru'=>'Настройки']);
 $this->registerJs(
         '$("document").ready(function(){
             $(".delivery").on("click", "#cancelDlv", function() {
@@ -28,8 +28,8 @@ section>h3>small {
 ?>
 <section class='content-header'>
     <h1>
-        <i class="fa fa-gears"></i> Доставка
-        <small>Настройки условий доставки</small>
+        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.vendor.delivery', ['ru'=>'Доставка']) ?>
+        <small><?= Yii::t('message', 'frontend.views.vendor.deliv_cond', ['ru'=>'Настройки условий доставки']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -37,8 +37,8 @@ section>h3>small {
             'class' => 'breadcrumb',
         ],
         'links' => [
-            'Настройки',
-            'Общие',
+            Yii::t('message', 'frontend.views.vendor.settings_three', ['ru'=>'Настройки']),
+            Yii::t('message', 'frontend.views.vendor.cust_two', ['ru'=>'Общие']),
         ],
     ])
     ?>
@@ -107,7 +107,7 @@ section>h3>small {
         ?>
         <div class="box-body">
             <div class="form-group">
-                <label class="col-sm-4 control-label">Дни доставки</label>
+                <label class="col-sm-4 control-label"><?= Yii::t('message', 'frontend.views.vendor.deliv_days', ['ru'=>'Дни доставки']) ?></label>
                 <div class="col-sm-5">
                     <?php
                     echo CheckboxX::widget([
@@ -116,57 +116,57 @@ section>h3>small {
                         'pluginOptions' => ['threeState' => false],
                         'value' => $delivery->mon,
                     ]);
-                    echo '<label class="control-label" for="Delivery[mon]">Пн</label>';
+                    echo '<label class="control-label" for="Delivery[mon]">' . Yii::t('message', 'frontend.views.vendor.mon', ['ru'=>'Пн']) . ' </label>';
                     echo CheckboxX::widget([
                         'name' => 'Delivery[tue]',
                         'id' => 'tue',
                         'pluginOptions' => ['threeState' => false],
                         'value' => $delivery->tue,
                     ]);
-                    echo '<label class="control-label" for="Delivery[tue]">Вт</label>';
+                    echo '<label class="control-label" for="Delivery[tue]">' . Yii::t('message', 'frontend.views.vendor.tue', ['ru'=>'Вт']) . ' </label>';
                     echo CheckboxX::widget([
                         'name' => 'Delivery[wed]',
                         'id' => 'wed',
                         'pluginOptions' => ['threeState' => false],
                         'value' => $delivery->wed,
                     ]);
-                    echo '<label class="control-label" for="Delivery[wed]">Ср</label>';
+                    echo '<label class="control-label" for="Delivery[wed]">' . Yii::t('message', 'frontend.views.vendor.wed', ['ru'=>'Ср']) . ' </label>';
                     echo CheckboxX::widget([
                         'name' => 'Delivery[thu]',
                         'id' => 'thu',
                         'pluginOptions' => ['threeState' => false],
                         'value' => $delivery->thu
                     ]);
-                    echo '<label class="control-label" for="Delivery[thu]">Чт</label>';
+                    echo '<label class="control-label" for="Delivery[thu]">' . Yii::t('message', 'frontend.views.vendor.thu', ['ru'=>'Чт']) . ' </label>';
                     echo CheckboxX::widget([
                         'name' => 'Delivery[fri]',
                         'id' => 'fri',
                         'pluginOptions' => ['threeState' => false],
                         'value' => $delivery->fri,
                     ]);
-                    echo '<label class="control-label" for="Delivery[fri]">Пт</label>';
+                    echo '<label class="control-label" for="Delivery[fri]">' . Yii::t('message', 'frontend.views.vendor.fri', ['ru'=>'Пт']) . ' </label>';
                     echo CheckboxX::widget([
                         'name' => 'Delivery[sat]',
                         'id' => 'sat',
                         'pluginOptions' => ['threeState' => false],
                         'value' => $delivery->sat,
                     ]);
-                    echo '<label class="control-label" for="Delivery[sat]">Сб</label>';
+                    echo '<label class="control-label" for="Delivery[sat]">' . Yii::t('message', 'frontend.views.vendor.sat', ['ru'=>'Сб']) . ' </label>';
                     echo CheckboxX::widget([
                         'name' => 'Delivery[sun]',
                         'id' => 'sun',
                         'pluginOptions' => ['threeState' => false],
                         'value' => $delivery->sun,
                     ]);
-                    echo '<label class="control-label" for="Delivery[sun]">Вс</label>';
+                    echo '<label class="control-label" for="Delivery[sun]">' . Yii::t('message', 'frontend.views.vendor.sun', ['ru'=>'Вс']) . ' </label>';
                     ?>
                 </div>
             </div>
         </div>
         
         <div class="box-footer">
-            <?= Html::submitButton('<i class="icon fa fa-save"></i> Сохранить изменения', ['class' => 'btn btn-success', 'id' => 'saveDlv', 'disabled' => true]) ?>
-            <?= Html::button('<i class="icon fa fa-ban"></i> Отменить изменения', ['class' => 'btn btn-gray', 'id' => 'cancelDlv', 'disabled' => true]) ?>
+            <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.vendor.save_changes', ['ru'=>'Сохранить изменения']) . ' ', ['class' => 'btn btn-success', 'id' => 'saveDlv', 'disabled' => true]) ?>
+            <?= Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('message', 'frontend.views.vendor.cancel', ['ru'=>'Отменить изменения']) . ' ', ['class' => 'btn btn-gray', 'id' => 'cancelDlv', 'disabled' => true]) ?>
         </div>				
         <?php
         ActiveForm::end();
@@ -176,7 +176,7 @@ section>h3>small {
 </section>
 <section class='content'>
     <h3>
-        <i class="fa fa-gears"></i> Регионы доставки
+        <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.vendor.regions', ['ru'=>'Регионы доставки']) ?>
         <small>Добавьте регионы в которые Вы доставляете</small>
     </h3>
     <div class="box box-info delivery">

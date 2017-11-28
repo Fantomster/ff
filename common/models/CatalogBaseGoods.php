@@ -118,7 +118,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
-            [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => 'Размер файла не должен превышать 2 Мб'], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
+            [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => Yii::t('app', 'Размер файла не должен превышать 2 Мб')], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.01],
@@ -129,7 +129,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 'whenClient' => 'function(attribute, value) {
                     return ($("#catalogbasegoods-market_place").val() == ' . self::MARKETPLACE_ON . ');
                 }',
-                'message' => 'Укажите категорию товара',
+                'message' => Yii::t('app', 'Укажите категорию товара'),
                 'on' => 'marketPlace',
             ],
             [['category_id'], 'required',
@@ -156,24 +156,24 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function attributeLabels() {
         return [
             'id' => 'ID',
-            'cat_id' => 'Каталог',
-            'category_id' => 'Категория',
-            'article' => 'Артикул',
-            'product' => 'Товар',
-            'supp_org_id' => 'id поставщика',
-            'units' => 'Кратность',
-            'price' => 'Цена',
-            'status' => 'Статус',
-            'market_place' => 'Размещен на F-MARKET',
-            'deleted' => 'Deleted',
-            'note' => 'Комментарий',
-            'ed' => 'Единица измерения',
-            'image' => 'Картинка продукта',
-            'brand' => 'Производитель',
-            'region' => 'Страна производитель',
-            'weight' => 'Вес',
-            'mp_show_price' => 'Показывать цену в F-MARKET',
-            'rating' => 'Рейтинг'
+            'cat_id' => Yii::t('app', 'common.models.catalog', ['ru'=>'Каталог']),
+            'category_id' => Yii::t('app', 'common.models.category', ['ru'=>'Категория']),
+            'article' => Yii::t('app', 'common.models.art', ['ru'=>'Артикул']),
+            'product' => Yii::t('app', 'common.models.good', ['ru'=>'Товар']),
+            'supp_org_id' => Yii::t('app', 'common.models.vendors_id', ['ru'=>'id поставщика']),
+            'units' => Yii::t('app', 'common.models.multiplicity', ['ru'=>'Кратность']),
+            'price' => Yii::t('app', 'common.models.price', ['ru'=>'Цена']),
+            'status' => Yii::t('app', 'common.models.status', ['ru'=>'Статус']),
+            'market_place' => Yii::t('app', 'common.models.settled_on_f_market', ['ru'=>'Размещен на F-MARKET']),
+            'deleted' => Yii::t('app', 'Deleted'),
+            'note' => Yii::t('app', 'common.models.comment', ['ru'=>'Комментарий']),
+            'ed' => Yii::t('app', 'common.models.measure', ['ru'=>'Единица измерения']),
+            'image' => Yii::t('app', 'common.models.products_image', ['ru'=>'Картинка продукта']),
+            'brand' => Yii::t('app', 'common.models.vendor', ['ru'=>'Производитель']),
+            'region' => Yii::t('app', 'common.models.country_vendor', ['ru'=>'Страна производитель']),
+            'weight' => Yii::t('app', 'common.models.weight', ['ru'=>'Вес']),
+            'mp_show_price' => Yii::t('app', 'common.models.show_price_in_f_market', ['ru'=>'Показывать цену в F-MARKET']),
+            'rating' => Yii::t('app', 'common.models.rating', ['ru'=>'Рейтинг'])
                 //'importCatalog'=>'Files'
         ];
     }

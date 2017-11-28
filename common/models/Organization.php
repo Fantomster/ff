@@ -241,7 +241,7 @@ class Organization extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getSuppliers($category_id = '', $all = true)
+    public function getSuppliers($category_id = '', $all = false)
     {
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];

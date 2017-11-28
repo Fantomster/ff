@@ -300,10 +300,10 @@ class OrderController extends DefaultController {
         $vendorDataProvider->pagination = ['pageSize' => 8];
 
         $productSearchModel = new OrderCatalogSearch();
-        $vendors = $client->getSuppliers(null);
+        $vendors = $client->getSuppliers(null, false);
         $selectedVendor = $session['selectedVendor'];
         if (empty($selectedVendor)) {
-            $selectedVendor = isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+            $selectedVendor = isset(array_keys($vendors)[0]) ? array_keys($vendors)[0] : null;
         }
         //isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";

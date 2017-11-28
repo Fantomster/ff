@@ -59,7 +59,7 @@ $this->registerJs('
         <div class="modal-content">
             <div class="first-step">
                 <div class="data-modal__logo"><img src="images/tmp_file/logo.png" alt=""></div>
-                <div class="data-modal__sub-txt">Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.</div>
+                <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.vendor.sorry', ['ru'=>'Простите за неудобства, но для корректной работы в системе<br>нам требуется получить от Вас еще несколько данных.']) ?></div>
                 <?php
                 $form = ActiveForm::begin([
                             'id' => 'complete-form',
@@ -87,7 +87,7 @@ $this->registerJs('
                         <?=
                                 $form->field($profile, 'full_name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => 'ФИО']);
+                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.fio_two', ['ru'=>'ФИО'])]);
                         ?>
                         <i class="fa fa-user"></i>
                     </label>
@@ -95,7 +95,7 @@ $this->registerJs('
                         <?=
                                 $form->field($organization, 'name')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', 'placeholder' => 'Название организации']);
+                                ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.org_name', ['ru'=>'Название организации'])]);
                         ?>
                         <i class="fa fa-bank"></i>
                     </label>
@@ -103,13 +103,13 @@ $this->registerJs('
                         <?=
                                 $form->field($organization, 'address')
                                 ->label(false)
-                                ->textInput(['class' => 'form-control', ' onsubmit' => 'return false', 'placeholder' => 'Адрес'])
+                                ->textInput(['class' => 'form-control', ' onsubmit' => 'return false', 'placeholder' => Yii::t('message', 'frontend.views.vendor.address', ['ru'=>'Адрес'])])
                         ?>
                         <i class="fa fa-map-marker"></i>
                     </label>
                 </div>
                 <div id="map" class="modal-map"></div>
-                <button type="submit" class="but but_green complete-reg"><span>Продолжить работу</span><i class="ico"></i></button>
+                <button type="submit" class="but but_green complete-reg"><span><?= Yii::t('message', 'frontend.views.vendor.continue', ['ru'=>'Продолжить работу']) ?></span><i class="ico"></i></button>
                 <?php ActiveForm::end(); ?>
             </div>
             <div class="second-step">
@@ -118,9 +118,9 @@ $this->registerJs('
                         <div class="col-md-12 col-xs-12"><i class="ico ico-catalog"></i></div>
                     </div>
                 </div>
-                <div class="data-modal__sub-txt">Создайте свой каталог с товарами</div>
+                <div class="data-modal__sub-txt"><?= Yii::t('message', 'frontend.views.vendor.create_cat', ['ru'=>'Создайте свой каталог с товарами']) ?></div>
                 <div class="data-modal__buts-wrp">
-                    <a href="<?= Url::to('/vendor/catalogs') ?>" class="but but_green wizard-off"><span>Заполнить свой каталог</span></a>
+                    <a href="<?= Url::to('/vendor/catalogs') ?>" class="but but_green wizard-off"><span><?= Yii::t('message', 'frontend.views.vendor.fill_cat', ['ru'=>'Заполнить свой каталог']) ?></span></a>
                 </div>
             </div>
         </div>

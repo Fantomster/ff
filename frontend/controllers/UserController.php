@@ -62,7 +62,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
     public function actionAjaxRegister() {
         if (!Yii::$app->request->isAjax) {
-            throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
+            throw new \yii\web\HttpException(404, Yii::t('error', 'frontend.controllers.user.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -81,7 +81,7 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
 
             // validate for existing email
             if (User::findOne(['email' => $user->email])) {
-                return ['result' => 'fail', 'message' => 'Email занят'];
+                return ['result' => 'fail', 'message' => Yii::t('message', 'frontend.controllers.user.email_busy', ['ru'=>'Email занят'])];
             }
 
             // validate for normal request
@@ -96,14 +96,14 @@ class UserController extends \amnah\yii2\user\controllers\DefaultController {
                     if ($profile->setUser($user->id)->save() && $organization->save() && $user->setOrganization($organization, true)->save()) {
                         $transaction->commit();
                         $this->afterRegister($user);
-                        return ['result' => 'success', 'message' => 'Регистрация прошла успешно'];
+                        return ['result' => 'success', 'message' => Yii::t('message', 'frontend.controllers.user.success', ['ru'=>'Регистрация прошла успешно'])];
                     } else {
                         $transaction->rollBack();
-                        return ['result' => 'fail', 'message' => 'Неизвестная ошибка'];
+                        return ['result' => 'fail', 'message' => Yii::t('error', 'frontend.controllers.user.error', ['ru'=>'Неизвестная ошибка'])];
                     }
                 } catch (Exception $ex) {
                     $transaction->rollBack();
-                    return ['result' => 'fail', 'message' => 'Неизвестная ошибка'];
+                    return ['result' => 'fail', 'message' => Yii::t('error', 'frontend.controllers.user.error_two', ['ru'=>'Неизвестная ошибка'])];
                 }
             }
         }

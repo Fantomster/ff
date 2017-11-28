@@ -9,7 +9,7 @@ use kartik\form\ActiveForm;
 use yii\widgets\Breadcrumbs;
 use kartik\widgets\TouchSpin;
 
-$this->title = 'Разместить заказ';
+$this->title = Yii::t('message', 'frontend.views.order.set_order', ['ru'=>'Разместить заказ']);
 
 yii\jui\JuiAsset::register($this);
 
@@ -99,16 +99,16 @@ $this->registerJs(
 <section class="content">
     <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#">Все продукты</a></li>
+            <li class="active"><a href="#"><?= Yii::t('message', 'frontend.views.order.all_goods_two', ['ru'=>'Все продукты']) ?></a></li>
             <li>
                 <a href="<?= Url::to(['order/guides']) ?>">
-                    Шаблоны заказов
+                    <?= Yii::t('message', 'frontend.views.order.orders_guides_two', ['ru'=>'Шаблоны заказов']) ?>
                     <small class="label bg-yellow">new</small>
                 </a>
             </li>
             <li>
                 <a href="<?= Url::to(['order/favorites']) ?>">
-                    Часто заказываемые товары
+                    <?= Yii::t('message', 'frontend.views.order.freq_goods_two', ['ru'=>'Часто заказываемые товары']) ?>
                     <small class="label bg-yellow">new</small>
                 </a>
             </li>
@@ -143,7 +143,8 @@ $this->registerJs(
                             ->textInput([
                                 'id' => 'searchString',
                                 'class' => 'form-control',
-                                'placeholder' => 'Поиск'])
+                                'placeholder' => Yii::t('message', 'frontend.views.order.search_two', ['ru'=>'Поиск'])])
+                            ])
                             ->label(false)
                         ?>
                         <?=
@@ -190,16 +191,16 @@ $this->registerJs(
                                                 'toggle' => 'modal',
                                                 'backdrop' => 'static',
                                             ],
-                                            'title' => 'Подробности',
+                                            'title' => Yii::t('message', 'frontend.views.order.details', ['ru'=>'Подробности']),
                                         ]);
 //                                        $productUrl = "<a title = 'Подробности' data-target='#showDetails' data-toggle='modal' data-backdrop='static' href='".
 //                                                Url::to(['order/ajax-show-details', 'id' => $data['id'], 'cat_id' => $data['cat_id']]).
 //                                                "'>".$data['product']."</a>";
-                                        return "<div class='grid-prod'>" . $productUrl . "</div>$note<div>Поставщик: "
-                                            . $data['name'] . "</div><div class='grid-article'>Артикул: <span>"
-                                            . $data['article'] . "</span></div>";
+                                        return "<div class='grid-prod'>" . $productUrl . "</div>$note<div>" . Yii::t('message', 'frontend.views.order.vendor_two', ['ru'=>'Поставщик:']) . "  "
+                                                . $data['name'] . "</div><div class='grid-article'>" . Yii::t('message', 'frontend.views.order.art', ['ru'=>'Артикул:']) . "  <span>"
+                                                . $data['article'] . "</span></div>";
                                     },
-                                    'label' => 'Название продукта',
+                                    'label' => Yii::t('message', 'frontend.views.order.product_name', ['ru'=>'Название продукта']),
                                 ],
                                 [
                                     'format' => 'raw',
@@ -208,14 +209,14 @@ $this->registerJs(
                                         $unit = empty($data['ed']) ? '' : " / " . $data['ed'];
                                         return '<b>' . $data['price'] . '</b> ' . $data['symbol'] . $unit;
                                     },
-                                    'label' => 'Цена',
+                                    'label' => Yii::t('message', 'frontend.views.order.price', ['ru'=>'Цена']),
                                     'contentOptions' => ['class' => 'width150'],
                                     'headerOptions' => ['class' => 'width150']
                                 ],
                                 [
                                     'attribute' => 'units',
                                     'value' => 'units',
-                                    'label' => 'Кратность',
+                                    'label' => Yii::t('message', 'frontend.views.order.freq', ['ru'=>'Кратность']),
                                 ],
                                 [
                                     'format' => 'raw',
@@ -237,7 +238,7 @@ $this->registerJs(
                                             'options' => ['class' => 'quantity form-control '],
                                         ]);
                                     },
-                                    'label' => 'Количество',
+                                    'label' => Yii::t('message', 'frontend.views.order.amount', ['ru'=>'Количество']),
                                     'contentOptions' => ['class' => 'width150'],
                                     'headerOptions' => ['class' => 'width150']
                                 ],
@@ -251,7 +252,7 @@ $this->registerJs(
                                                 'id' => $data['id'],
                                                 'cat' => $data['cat_id'],
                                                 'toggle' => 'tooltip',
-                                                'original-title' => 'Добавить заметку к товару',
+                                                'original-title' => Yii::t('message', 'frontend.views.order.add_check', ['ru'=>'Добавить заметку к товару']),
                                                 'target' => "#changeQuantity",
                                                 'toggle' => "modal",
                                                 'backdrop' => "static",
@@ -261,7 +262,7 @@ $this->registerJs(
                                             'class' => 'add-to-cart btn btn-outline-success',
                                             'data-id' => $data['id'],
                                             'data-cat' => $data['cat_id'],
-                                            'title' => 'Добавить в корзину',
+                                            'title' => Yii::t('message', 'frontend.views.order.add_to_basket', ['ru'=>'Добавить в корзину']),
                                         ]);
                                         return $btnAdd;
                                     },

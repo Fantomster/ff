@@ -46,7 +46,7 @@ class MpCountry extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => Yii::t('app', 'Страна'),
+            'name' => Yii::t('app', 'common.models.country_three', ['ru'=>'Страна']),
             'full_name' => 'Full Name',
             'en_name' => 'En Name',
             'alpha2' => 'Alpha2',

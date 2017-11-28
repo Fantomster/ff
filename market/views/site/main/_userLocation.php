@@ -37,12 +37,11 @@ yii\web\View::POS_READY);
                 ?>
                   <?php if (Yii::$app->session->hasFlash('warning')): ?>
                 <div class="alert alert-danger">
-                <strong>Ошибка!</strong> Извините, данный город не поддерживается системой MixCart!<br>
-                    Обратитесь в службу поддержки, и мы обязательно вам поможем!
+                <?= Yii::t('error', 'market.views.site.main.city_error', ['ru'=>'<strong>Ошибка!</strong> Извините, данный город не поддерживается системой MixCart!<br> Обратитесь в службу поддержки, и мы обязательно вам поможем!']) ?>
                 </div>
                   <?php endif; ?>
-                    <h3><i class="fa fa-location-arrow"></i> ВАШ ГОРОД <span id="setLocality" class="loc-h-city"><?=Yii::$app->request->cookies->get('locality')?></span>?</h3>
-                    <h5>Если мы неверно определили Ваш город, пожалуйста, найдите его самостоятельно</h5>
+                    <h3><i class="fa fa-location-arrow"></i> <?= Yii::t('message', 'market.views.site.main.your_city', ['ru'=>'ВАШ ГОРОД']) ?> <span id="setLocality" class="loc-h-city"><?=Yii::$app->request->cookies->get('locality')?></span>?</h3>
+                    <h5><?= Yii::t('message', 'market.views.site.main.wrong_city', ['ru'=>'Если мы неверно определили Ваш город, пожалуйста, найдите его самостоятельно']) ?></h5>
                     <?php
 //                    echo CheckboxX::widget([
 //                        'name'=>'s_11',
@@ -59,12 +58,12 @@ yii\web\View::POS_READY);
 //                      Yii::$app->request->cookies->get('region') 
 //                    . '</span>?</label>';
                     ?>
-                    <input type="text" class="form-control autocomplete" id="search_out" name="search_out" placeholder="Поиск">
+                    <input type="text" class="form-control autocomplete" id="search_out" name="search_out" placeholder="<?= Yii::t('message', 'market.views.site.main.search', ['ru'=>'Поиск']) ?>">
                     <input type="hidden" id="country" name="country" value="<?=Yii::$app->request->cookies->get('country')?>">
                     <input type="hidden" id="administrative_area_level_1" name="administrative_area_level_1" value="<?=Yii::$app->request->cookies->get('region')?>">
                     <input type="hidden" id="locality" name="locality" value="<?=Yii::$app->request->cookies->get('locality')?>">
                     <input type="hidden" id="currentUrl" name="currentUrl" value="<?=Yii::$app->getRequest()->getUrl()?>">
-                    <button type="submit" class="btn btn-md btn-success loc-submit">Подтвердить</button>
+                    <button type="submit" class="btn btn-md btn-success loc-submit"><?= Yii::t('message', 'market.views.site.main.confirm', ['ru'=>'Подтвердить']) ?></button>
                 <?php ActiveForm::end(); ?>
             </div>
         </div>

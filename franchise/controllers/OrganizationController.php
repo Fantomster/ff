@@ -190,7 +190,7 @@ class OrganizationController extends DefaultController {
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_RESTAURANT])
                 ->one();
         if (empty($client)) {
-            throw new HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
+            throw new HttpException(404, Yii::t('app', 'franchise.controllers.get_out_seven', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         if (empty($client->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
@@ -378,7 +378,7 @@ class OrganizationController extends DefaultController {
                 ->where(['franchisee_associate.franchisee_id' => $this->currentFranchisee->id, 'organization.id' => $id, 'organization.type_id' => Organization::TYPE_SUPPLIER])
                 ->one();
         if (empty($vendor)) {
-            throw new HttpException(404, Yii::t('app', 'Нет здесь ничего такого, проходите, гражданин'));
+            throw new HttpException(404, Yii::t('app', 'franchise.controllers.get_out_eight', ['ru'=>'Нет здесь ничего такого, проходите, гражданин']));
         }
         if (empty($vendor->buisinessInfo)) {
             $buisinessInfo = new BuisinessInfo();
@@ -476,7 +476,7 @@ class OrganizationController extends DefaultController {
             ->where(['organization.id' => $organization_id, 'franchisee_associate.franchisee_id' => $this->currentFranchisee->id])
             ->one();
         if(!$organization || !$organization->is_allowed_for_franchisee){
-            throw new HttpException(403, Yii::t('app', 'Организация закрыла доступ к своему кабинету'));
+            throw new HttpException(403, Yii::t('app', 'franchise.controllers.no_access', ['ru'=>'Организация закрыла доступ к своему кабинету']));
         }
         $user_id = $this->currentUser->id;
         $user = User::findOne($user_id);

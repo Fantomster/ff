@@ -80,7 +80,7 @@ class AgentRequestController extends Controller
     {
         $model = AgentRequest::findOne($id);
         if(!$model){
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.agent_error', ['ru'=>'The requested page does not exist.']));
         }
         $searchModel = new UserSearch();
         if(!isset(\Yii::$app->request->queryParams['UserSearch'])){
@@ -132,7 +132,7 @@ class AgentRequestController extends Controller
         if ($query !== null) {
             return $query;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.agent_error_two', ['ru'=>'The requested page does not exist.']));
         }
     }
 }

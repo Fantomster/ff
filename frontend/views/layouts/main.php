@@ -240,34 +240,37 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         </div>
                         <div class="phone__block">
                             <span class="phone__block-number">
-                                <span class="glyphicon glyphicon-phone"></span><a style="color:#fff;text-decoration:none;" href="tel:84994041018">8-499-404-10-18</a>
-                                <span class="header_callback_btn callback_form" data-modal="callback" data-lead="Заказать звонок">заказать звонок</span>
+                                <span class="glyphicon glyphicon-phone"></span><a style="color:#fff;text-decoration:none;" href="tel:84994041018"><?= Yii::t('message', 'frontend.views.layouts.main.phone', ['ru'=>'8-499-404-10-18']) ?></a>
+                                <span class="header_callback_btn callback_form" data-modal="callback" data-lead="Заказать звонок"><?= Yii::t('message', 'frontend.views.layouts.main_call', ['ru'=>'заказать звонок']) ?></span>
                             </span>
                         </div>
                         <div class="registr-block">
                             <div class="registr__block">
                                 <?php
                                 if (Yii::$app->user->isGuest) {
-                                    echo Html::a('вход / регистрация', ["/user/login"]);
+                                    echo Html::a(Yii::t('message', 'frontend.views.layouts.main.enter', ['ru'=>'вход / регистрация']), ["/user/login"]);
                                 } else {
-                                    echo Html::a(Yii::$app->user->identity->profile->full_name . ' [выход]', ["/user/logout"], ["data-method" => "post"]);
+                                    echo Html::a(Yii::$app->user->identity->profile->full_name . ' [' . Yii::t('message', 'frontend.views.layouts.main.out', ['ru'=>'выход']) . ' ]', ["/user/logout"], ["data-method" => "post"]);
                                 }
                                 ?>
                             </div>
+                            <ul style="position: absolute;top: 2px;right: 35px;">
+                                <?=\common\widgets\LangSwitch::widget();?>
+                            </ul>
                         </div>
                         <div class="nav__block">
-                            <span id="menu__burger">Меню</span>
+                            <span id="menu__burger"><?= Yii::t('message', 'frontend.views.layouts.main.menu', ['ru'=>'Меню']) ?></span>
                             <?=
                             yii\widgets\Menu::widget([
                                 'options' => ['class' => 'nav_menu'],
                                 'items' => [
-                                    ['label' => 'Главная', 'url' => ['/site/index']],
+                                    ['label' => Yii::t('message', 'frontend.views.layouts.main.main', ['ru'=>'Главная']), 'url' => ['/site/index']],
                                     ['label' => 'MIXMARKET', 'url' => 'https://market.mixcart.ru'],
-                                    ['label' => 'Франшиза', 'url' => 'http://fr.mixcart.ru'],
+                                    ['label' => Yii::t('message', 'frontend.views.layouts.main.franchisee', ['ru'=>'Франшиза']), 'url' => 'http://fr.mixcart.ru'],
                                    // ['label' => 'Новости', 'url' => 'http://blog.mixcart.ru?news'],
-                                    ['label' => 'Вопрос / ответ', 'url' => ['/site/faq']],
-                                    ['label' => 'О компании', 'url' => ['/site/about']],
-                                    ['label' => 'Контакты', 'url' => ['/site/contacts']],
+                                    ['label' => Yii::t('message', 'frontend.views.layouts.main.faq', ['ru'=>'Вопрос / ответ']), 'url' => ['/site/faq']],
+                                    ['label' => Yii::t('message', 'frontend.views.layouts.main.about', ['ru'=>'О компании']), 'url' => ['/site/about']],
+                                    ['label' => Yii::t('message', 'frontend.views.layouts.main.contacts', ['ru'=>'Контакты']), 'url' => ['/site/contacts']],
                                 ]
                             ])
                             ?>
@@ -283,32 +286,32 @@ $this->registerJs($js, \yii\web\View::POS_READY);
 
                         <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
-                                <span class="title__menu">Карта сайта</span>
+                                <span class="title__menu"><?= Yii::t('message', 'frontend.views.layouts.main.sitemap', ['ru'=>'Карта сайта']) ?></span>
                                 <ul class="links">
 <!--                                    <li><?= ''//Html::a('Новости', "http://blog.mixcart.ru?news") ?></li>-->
-                                    <li><?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?></li>
-                                    <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
-                                    <li><?= Html::a('О компании', ["/site/about"]) ?></li>
-                                    <li><?= Html::a('Контакты', ["/site/contacts"]) ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_rest', ['ru'=>'Для ресторанов']), "https://client.mixcart.ru") ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.for_vendors', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.about_two', ['ru'=>'О компании']), ["/site/about"]) ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.contacts_two', ['ru'=>'Контакты']), ["/site/contacts"]) ?></li>
                                 </ul>
                             </div>	
                         </div>
                         <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
-                                <span class="title__menu">связаться с нами</span>
+                                <span class="title__menu"><?= Yii::t('message', 'frontend.views.layouts.main.contact_us', ['ru'=>'связаться с нами']) ?></span>
                                 <ul class="contacts">
-                                    <li><span class="phone"><span class="glyphicon glyphicon-phone"></span> 8-499-404-10-18</span></li>
+                                    <li><span class="phone"><span class="glyphicon glyphicon-phone"></span> <?= Yii::t('message', 'frontend.views.layouts.main.phone_two', ['ru'=>'8-499-404-10-18']) ?></span></li>
                                     <li><a href="mailto:info@mixcart.ru"><span class="email"><span class="glyphicon glyphicon-envelope"></span>info@mixcart.ru</span></a></li>
-                                    <li><span class="address"><span class="glyphicon glyphicon-map-marker"></span>Москва, ул.Привольная, 70</li>
+                                    <li><span class="address"><span class="glyphicon glyphicon-map-marker"></span><?= Yii::t('message', 'frontend.views.layouts.main.address', ['ru'=>'Москва, ул.Привольная, 70']) ?></li>
                                 </ul>
                             </div>	
                         </div>
                         <div class="col-md-4 col-sm-4">
                             <div class="footer__menu_block">
-                                <span class="title__menu">Вход / регистрация</span>
+                                <span class="title__menu"><?= Yii::t('message', 'frontend.views.layouts.main.enter_reg', ['ru'=>'Вход / регистрация']) ?></span>
                                 <ul class="links">
-                                    <li><?= Html::a('Вход', ["/user/login"]) ?></li>
-                                    <li><?= Html::a('Регистрация', ["/user/register"]) ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.login', ['ru'=>'Вход']), ["/user/login"]) ?></li>
+                                    <li><?= Html::a(Yii::t('message', 'frontend.views.layouts.main.reg', ['ru'=>'Регистрация']), ["/user/register"]) ?></li>
                                 </ul>
                             </div>	
                         </div>
@@ -322,7 +325,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                 </div>
                                 <div class="col-md-4 col-sm-4">
                                     <div class="copy">
-                                        <span>© <?= date('Y') ?> MixCart — ООО «Онлайн Маркет» </span>
+                                        <span>© <?= date('Y') ?> MixCart — <?= Yii::t('message', 'frontend.views.layouts.main.online', ['ru'=>'ООО «Онлайн Маркет»']) ?> </span>
                                     </div>
                                 </div>
                                 <div class="col-md-4 col-sm-4">
@@ -344,33 +347,33 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                     <div class="modalCell">
                         <div class="modalWindow">
                             <span class="modalWindowClose"></span>
-                            <span class="modal_title">Заказать звонок</span>
+                            <span class="modal_title"><?= Yii::t('message', 'frontend.views.layouts.main.order_call', ['ru'=>'Заказать звонок']) ?></span>
                             <form action="https://partner.mixcart.ru/fr/post" class="callbackwidget-call-form">
                                 <div class="contact_us__form__row">
                                     <select class="input_text type__form" name="FIELDS[formtype]" id="formtype" required>
-                                        <option value="1">Стать партнером</option>
-                                        <option selected="true" value="2">Ресторан</option>
-                                        <option value="3">Поставщик</option>
+                                        <option value="1"><?= Yii::t('message', 'frontend.views.layouts.main.become', ['ru'=>'Стать партнером']) ?></option>
+                                        <option selected="true" value="2"><?= Yii::t('message', 'frontend.views.layouts.main.rest', ['ru'=>'Ресторан']) ?></option>
+                                        <option value="3"><?= Yii::t('message', 'frontend.views.layouts.main.vendor', ['ru'=>'Поставщик']) ?></option>
                                     </select>
                                 </div>
                                 <div class="contact_us__form__row partner__form" style="display:none">
                                     <select class="input_text" name="FIELDS[partner]" required>
-                                        <option value="1">Тариф 50 000</option>
-                                        <option value="2">Тариф 500 000</option>
-                                        <option value="3">Тариф 900 000</option>
+                                        <option value="1"><?= Yii::t('message', 'frontend.views.layouts.main.tax', ['ru'=>'Тариф']) ?> 50 000</option>
+                                        <option value="2"><?= Yii::t('message', 'frontend.views.layouts.main.tax_two', ['ru'=>'Тариф']) ?> 500 000</option>
+                                        <option value="3"><?= Yii::t('message', 'frontend.views.layouts.main.tax_three', ['ru'=>'Тариф']) ?> 900 000</option>
                                     </select>
                                 </div>
                                 <div class="contact_us__form__row">
-                                    <input type="text" class="input_text" name="FIELDS[name]" placeholder="Имя" required>
+                                    <input type="text" class="input_text" name="FIELDS[name]" placeholder="<?= Yii::t('message', 'frontend.views.layouts.main.name', ['ru'=>'Имя']) ?>" required>
                                 </div>
                                 <div class="contact_us__form__row">
-                                    <input type="text" class="input_text user_phone_mask" minlength="7" name="FIELDS[phone]" placeholder="Телефон" required>
+                                    <input type="text" class="input_text user_phone_mask" minlength="7" name="FIELDS[phone]" placeholder="<?= Yii::t('message', 'frontend.views.layouts.main.phone_three', ['ru'=>'Телефон']) ?>" required>
                                 </div>
                                 <div class="contact_us__form__row">
-                                    <input type="text" class="input_text" name="FIELDS[email]" placeholder="Почта">
+                                    <input type="text" class="input_text" name="FIELDS[email]" placeholder="<?= Yii::t('message', 'frontend.views.layouts.main.email', ['ru'=>'Почта']) ?>">
                                 </div>
                                 <div class="contact_us__form__row">
-                                    <input type="text" class="input_text" placeholder="Город" name="FIELDS[city]" required>
+                                    <input type="text" class="input_text" placeholder="<?= Yii::t('message', 'frontend.views.layouts.main.city', ['ru'=>'Город']) ?>" name="FIELDS[city]" required>
                                 </div>
                                 <div class="contact_us__form__row">
                                     <button type="submit" class="send-form-callback" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Получаем..."><span>Отправить</span></button>
@@ -382,6 +385,16 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                 </div>
             </div>
             <?php
+            $arr = [
+                Yii::t('message', 'frontend.views.layouts.main.var1', ['ru'=>'Заявка успешно отправлена!']),
+                Yii::t('message', 'frontend.views.layouts.main.var2', ['ru'=>'Мы свяжемся с вами в ближайшее время.']),
+                Yii::t('error', 'frontend.views.layouts.main.var3', ['ru'=>'Ошибка']),
+                Yii::t('message', 'frontend.views.layouts.main.var4', ['ru'=>'Заявка не отправлена']),
+                Yii::t('error', 'frontend.views.layouts.main.var5', ['ru'=>'Ошибка']),
+                Yii::t('message', 'frontend.views.layouts.main.var6', ['ru'=>'Вы уже отправляли заявку']),
+                Yii::t('error', 'frontend.views.layouts.main.var7', ['ru'=>'Ошибка']),
+                Yii::t('message', 'frontend.views.layouts.main.var8', ['ru'=>'Заявка не отправлена']),
+            ];
 $js = <<<JS
 $(".type__form").on("change", function(e){
  if($( this ).val() == 1){
@@ -417,19 +430,19 @@ $("form.callbackwidget-call-form").on("submit", function (h) {
                     if($("#formtype").val() == 3){
                       yaCounter38868410.reachGoal('postav');  
                     }
-                    (swal("Заявка успешно отправлена!", "Мы свяжемся с вами в ближайшее время.", "success"), form.trigger( 'reset' ));
+                    (swal("$arr[0]", "$arr[1]", "success"), form.trigger( 'reset' ));
                 }
                 if (response.result == "error") {
-                    (swal("Ошибка", "Заявка не отправлена", "error"), form.trigger( 'reset' ));
+                    (swal("$arr[2]", "$arr[3]", "error"), form.trigger( 'reset' ));
                 }
                 if (response.result == "errorPhone") {
-                    (swal("Ошибка", "Вы уже отправляли заявку", "error"));
+                    (swal("$arr[4]", "$arr[5]", "error"));
                 }
             },
             error: function () {
                 modalClose();
                 $('button[type="submit"]').button("reset");
-                swal("Ошибка", "Заявка не отправлена", "error")
+                swal("$arr[6]", "$arr[7]", "error")
             }
         });
         return false;

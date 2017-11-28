@@ -64,7 +64,7 @@ class FrController extends \yii\rest\Controller {
 
             if (!empty($type) && $type == 'restaurant') {
                 $lpartner = '';
-                $lead_name = Yii::t('app', 'Заявка ресторана');
+                $lead_name = Yii::t('app', 'franchise.controllers.rest_request', ['ru'=>'Заявка ресторана']);
                 $responsible_user_id = 1427371;
                 $lead_status_id = 465729;
             }
@@ -211,7 +211,7 @@ class FrController extends \yii\rest\Controller {
 //        }
         //ДОБАВЛЯЕМ СДЕЛКУ
         $post = Yii::$app->request->post();
-        $roistat_cookie = isset($post['roi']) ? $post['roi'] : Yii::t('app', "неизвестно");
+        $roistat_cookie = isset($post['roi']) ? $post['roi'] : Yii::t('app', 'franchise.controllers.undefined', ['ru'=>"неизвестно"]);
         $leads['request']['leads']['add'] = array(
             array(
                 'name' => $lead_name,

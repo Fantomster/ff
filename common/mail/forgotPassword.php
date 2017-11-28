@@ -4,7 +4,7 @@ if (empty($toFrontEnd)) {
     $toFrontEnd = false;
 }
 ?>
-<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Пройдите по ссылке для установки нового пароля:</p>
+<p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;"><?= Yii::t('app', 'common.mail.forgot_password.link_for_pass', ['ru'=>'Пройдите по ссылке для установки нового пароля:']) ?></p>
 <br style="margin: 0; padding: 0;" />
 <div style="text-align: center; width: 100%; margin: 0; padding: 0;" align="center">
     <?php
@@ -29,5 +29,5 @@ if (empty($toFrontEnd)) {
     cursor: pointer;
     display: inline-block;
     border-radius: 4px;
-    width: 80%;">Подтвердить</a>
+    width: 80%;"><?= Yii::t('app', 'common.mail.forgot_password.confirm', ['ru'=>'Подтвердить']) ?></a>
 </div>

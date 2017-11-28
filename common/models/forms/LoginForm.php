@@ -23,7 +23,7 @@ class LoginForm extends \amnah\yii2\user\models\forms\LoginForm {
             } else {
                 $attribute = $this->module->loginEmail ? "Email" : "Username";
             }
-            $this->addError("email", Yii::t("user", "$attribute not found"));
+            $this->addError("email", Yii::t("user", "{attribute} not found", ['attr'=>$attribute]));
             // do we need to check $user->userAuths ???
         }
 
@@ -42,7 +42,7 @@ class LoginForm extends \amnah\yii2\user\models\forms\LoginForm {
 //            $user->sendEmailConfirmation($userToken);
 //            $this->addError("email", Yii::t("user", "Confirmation email resent"));
             $this->clearErrors();
-            $this->addError("email", 'Учетная запись не активирована!');
+            $this->addError("email", Yii::t('app', 'common.models.not_activated', ['ru'=>'Учетная запись не активирована!']));
         }
     }
     

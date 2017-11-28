@@ -20,18 +20,18 @@ echo GridView::widget([
             'format' => 'raw',
             'attribute' => 'product.product',
             'value' => function($data) {
-                $note = isset($data->note->note) ? '<p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">Заметка: ' . $data->note->note . '</p>' : ""; 
+                $note = isset($data->note->note) ? '<p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">' . Yii::t('app', 'common.mail.view_grid.article', ['ru'=>'Заметка: ']) . $data->note->note . '</p>' : "";
                 return '<p style="font-size: 16px;color: #2C9EE5; font-family: Circe_Bold">' . Html::decode(Html::decode($data->product_name)) . '</p>
-                    <p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">Артикул: ' . $data->article . '</p>'.$note;
+                    <p style="mso-line-height-rule: exactly;line-height:11px;font-size: 11px;color: #999C9E;">' . Yii::t('app', 'common.mail.view_grid.art', ['ru'=>'Артикул:']) . '  ' . $data->article . '</p>'.$note;
             },
-            'label' => 'Товар',
+            'label' => Yii::t('app', 'common.mail.view_grid.good', ['ru'=>'Товар']),
             'headerOptions' => ['style' => "padding: 10px;width: 40%;border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
             'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
         [
             'attribute' => 'quantity',
             'value' => 'quantity',
-            'label' => 'Количество',
+            'label' => Yii::t('app', 'common.mail.view_grid.amount', ['ru'=>'Количество']),
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
             'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
@@ -40,7 +40,7 @@ echo GridView::widget([
             'value' => function($data) use ($currencySymbol) {
                 return '<b>' . $data->price . ' ' . $currencySymbol . '</b>';
             },
-            'label' => 'Цена',
+            'label' => Yii::t('app', 'common.mail.view_grid.price', ['ru'=>'Цена']),
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
             'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],
@@ -50,7 +50,7 @@ echo GridView::widget([
             'value' => function($data) use ($currencySymbol) {
                 return '<b>' . $data->total . ' ' . $currencySymbol . '</b>';
             },
-            'label' => 'Сумма',
+            'label' => Yii::t('app', 'common.mail.view_grid.sum', ['ru'=>'Сумма']),
             'headerOptions' => ['style' => "border-top: 1px solid #ddd;border-bottom: 1px solid #ddd;"],
             'contentOptions' => ['style' => 'border-top: 1px solid #ddd;'],
         ],

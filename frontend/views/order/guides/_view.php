@@ -12,7 +12,7 @@ use kartik\form\ActiveForm;
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">×</span></button>
     <h4 class="modal-title"><?= $guide->name ?></h4>
-    <span>Вы можете управлять шаблоном в данном заказе</span>
+    <span><?= Yii::t('message', 'frontend.views.order.guides.can_manage', ['ru'=>'Вы можете управлять шаблоном в данном заказе']) ?></span>
     <div class="guid-header">
         <?php
         $form = ActiveForm::begin([
@@ -40,7 +40,7 @@ use kartik\form\ActiveForm;
                 ->textInput([
                     'id' => 'searchString',
                     'class' => 'form-control',
-                    'placeholder' => 'Поиск по названию'])
+                    'placeholder' => Yii::t('message', 'frontend.views.order.guides.search', ['ru'=>'Поиск по названию'])])
                 ->label(false)
         ?>
         <?php ActiveForm::end(); ?>
@@ -110,7 +110,7 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function($data) {
-                            return Html::button('<i class="fa fa-comment"> <span class="circe_font"> Комментарий</span></i>', [
+                            return Html::button('<i class="fa fa-comment"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.comment_two', ['ru'=>'Комментарий']) . ' </span></i>', [
                                         'class' => 'add-note btn btn-md btn-gray pull-right',
                                         'data' => [
                                             'id' => $data["cbg_id"],
@@ -126,11 +126,11 @@ use kartik\form\ActiveForm;
                     [
                         'format' => 'raw',
                         'value' => function ($data) {
-                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font"> В корзину</span></i>', [
+                            return Html::button('<i class="fa fa-shopping-cart"> <span class="circe_font">' . Yii::t('message', 'frontend.views.order.guides.in_basket_two', ['ru'=>'В корзину']) . ' </span></i>', [
                                         'class' => 'add-to-cart btn btn-md btn-success pull-right disabled',
                                         'data-id' => $data["cbg_id"],
                                         'data-cat' => $data["cat_id"],
-                                        'title' => 'Добавить в корзину',
+                                        'title' => Yii::t('message', 'frontend.views.order.guides.add_in_basket', ['ru'=>'Добавить в корзину']),
                             ]);
                         },
                         'contentOptions' => ['style' => 'width: 5%;'],
@@ -140,7 +140,7 @@ use kartik\form\ActiveForm;
             ?>
             <?php ActiveForm::end(); ?>
             <?php Pjax::end(); ?>
-            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right add-guide-to-cart" data-url="<?= Url::to(['order/ajax-add-guide-to-cart', 'id' => $guide->id]) ?>"><i class="fa fa-paper-plane-o"></i> Добавить все</button> 
+            <button style="margin-top: 20px;margin-right: 7px;" class="btn btn-md btn-success pull-right add-guide-to-cart" data-url="<?= Url::to(['order/ajax-add-guide-to-cart', 'id' => $guide->id]) ?>"><i class="fa fa-paper-plane-o"></i> <?= Yii::t('message', 'frontend.views.order.guides.add_all', ['ru'=>'Добавить все']) ?></button>
         </div>
     </div>
 </div>

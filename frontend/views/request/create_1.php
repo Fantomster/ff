@@ -177,21 +177,21 @@ Pjax::begin([
                 
                 <i class="flaticon-cross-out form-close" data-dismiss="modal" style="top: 10px;"></i>
 		<div style="display: inline-block;position: absolute;left:0">
-		<h4 class="f-title">Разместить заявку</h4>
-		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы MixCart! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!">Что такое разместить заявку?</h4>
+		<h4 class="f-title"><?= Yii::t('message', 'frontend.views.request.set_req_four', ['ru'=>'Разместить заявку']) ?></h4>
+		<h4 class="text-small text-left" data-toggle="tooltip" data-placement="right" title="<?= Yii::t('message', 'frontend.views.request.for_example', ['ru'=>'Например, вам срочно нужен какой-то товар, но у Ваших поставщиков его нет в наличии...что делать? Размещайте заявку на необходимый товар и вас увидят все поставщики системы MixCart! Это отличная возможность преобрести Честного партнера на долгосрочное сотрудничество!']) ?>"><?= Yii::t('message', 'frontend.views.request.what_is_it', ['ru'=>'Что такое разместить заявку?']) ?></h4>
 		</div>
 	</div>
 	<!-- progressbar -->
 	<ul id="progressbar">
-		<li class="active"><span class="li-text">Продукт</span></li>
-		<li><span class="li-text">Условия</span></li>
-		<li><span class="li-text">Оплата</span></li>
+		<li class="active"><span class="li-text"><?= Yii::t('message', 'frontend.views.request.product', ['ru'=>'Продукт']) ?></span></li>
+		<li><span class="li-text"><?= Yii::t('message', 'frontend.views.request.conditions', ['ru'=>'Условия']) ?></span></li>
+		<li><span class="li-text"><?= Yii::t('message', 'frontend.views.request.payment', ['ru'=>'Оплата']) ?></span></li>
                 <!--li><span class="li-text">Контакты</span></li-->
 	</ul>
 	<!-- fieldsets -->
 	<fieldset class="text-left">
             <span <?php if($organization->place_id){ echo "style='display:none'"; }?>>
-                <h5>Адрес организации<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+                <h5><?= Yii::t('message', 'frontend.views.request.address', ['ru'=>'Адрес организации']) ?><span style="font-size:24px;color:#dd4b39;margin-left:5px" title="<?= Yii::t('message', 'frontend.views.request.required', ['ru'=>'Обязательное поле']) ?>">*</span></h5>
                 <?= $form->field($organization, 'address',['template'=>'<div style="position:relative">{input}<span class="clear-input">×</span></div>{error}'])->textInput(['maxlength' => 255,'style'=>'padding-right:22px'])->label(false) ?>
                 <div id="map"></div>
             </span>
@@ -224,47 +224,47 @@ $(this).next().toggle(Boolean($(this).val()));
 })
 ",yii\web\View::POS_END);
 ?>
-            <h5>Выберите категорию товара<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+            <h5><?= Yii::t('message', 'frontend.views.request.category_two', ['ru'=>'Выберите категорию товара']) ?><span style="font-size:24px;color:#dd4b39;margin-left:5px" title="<?= Yii::t('message', 'frontend.views.request.required_field', ['ru'=>'Обязательное поле']) ?>">*</span></h5>
             <?php 
             echo $form->field($request, 'category',['template'=>'{input}{error}'])->widget(Select2::classname(), [
                 'model'=>$request->category,
                 'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
-                'options' => ['placeholder' => 'Мясо'],
+                'options' => ['placeholder' => Yii::t('message', 'frontend.views.request.meat', ['ru'=>'Мясо'])],
                 'pluginOptions' => [
                     'allowClear' => true
                 ],
             ])->label(false);
             ?>
-            <h5>Что вы хотите купить?<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+            <h5><?= Yii::t('message', 'frontend.views.request.what_to_buy', ['ru'=>'Что вы хотите купить?']) ?><span style="font-size:24px;color:#dd4b39;margin-left:5px" title="<?= Yii::t('message', 'frontend.views.request.required_field_two', ['ru'=>'Обязательное поле']) ?>">*</span></h5>
             <?= $form->field($request, 'product', 
     ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => 'Помидоры Азербайджанские']) ?>
-            <h5>Комментарий к заказу</h5>
+    textInput(['placeholder' => Yii::t('message', 'frontend.views.request.tomatos', ['ru'=>'Помидоры Азербайджанские'])]) ?>
+            <h5><?= Yii::t('message', 'frontend.views.request.order_comment', ['ru'=>'Комментарий к заказу']) ?></h5>
             <?= $form->field($request, 'comment', 
     ['template'=>'{input}{error}'])->
     textInput(['placeholder' => '']) ?>
-            <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>1]) ?>
-            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться к списку заявок</a>
+            <?= Html::button(Yii::t('message', 'frontend.views.request.continue_two', ['ru'=>'Продолжить']), ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>1]) ?>
+            <a href="#" data-dismiss="modal" class="close-h pull-right"><?= Yii::t('message', 'frontend.views.request.back_to_list', ['ru'=>'Вернуться к списку заявок']) ?></a>
         </fieldset>
         <!-- fieldsets 2 -->
 	<fieldset class="text-left">
             
-            <h5>Как часто?</h5>
+            <h5><?= Yii::t('message', 'frontend.views.request.how_often', ['ru'=>'Как часто?']) ?></h5>
             <?php 
             echo $form->field($request, 'regular',['template'=>'{input}{error}'])->widget(Select2::classname(), [
                 'model'=>$request->regular,
                 'hideSearch' => true,
-                'data' => [1=>'Разово',2=>'Ежедневно',3=>'Каждую неделю',4=>'Каждый месяц'],
+                'data' => [1=>Yii::t('message', 'frontend.views.request.once', ['ru'=>'Разово']),2=>Yii::t('message', 'frontend.views.request.daily', ['ru'=>'Ежедневно']),3=>Yii::t('message', 'frontend.views.request.weekly', ['ru'=>'Каждую неделю']),4=>Yii::t('message', 'frontend.views.request.monthly', ['ru'=>'Каждый месяц'])],
                 //'options' => ['placeholder' => 'Разово'],
 //                'pluginOptions' => [
 //                    'allowClear' => true
 //                ],
             ])->label(false);
             ?>
-            <h5>Объем закупки?<span style="font-size:24px;color:#dd4b39;margin-left:5px" title="Обязательное поле">*</span></h5>
+            <h5><?= Yii::t('message', 'frontend.views.request.buying_value_three', ['ru'=>'Объем закупки?']) ?><span style="font-size:24px;color:#dd4b39;margin-left:5px" title="<?= Yii::t('message', 'frontend.views.request.required_field_three', ['ru'=>'Обязательное поле']) ?>">*</span></h5>
             <?= $form->field($request, 'amount', 
     ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => '15 кг']) ?>
+    textInput(['placeholder' => Yii::t('message', 'frontend.views.request.fifteen', ['ru'=>'15 кг'])]) ?>
             <?=$form->field($request, 'rush_order')->widget(CheckboxX::classname(), [
                             'autoLabel' => true,
                             'model' => $request,
@@ -276,38 +276,38 @@ $(this).next().toggle(Boolean($(this).val()));
                                 'size'=>'lg',
                                 ],
                             'labelSettings' => [
-                                'label' => 'Срочный заказ <span style="font-size:14px;color:#ccc;margin-left:5px">доставить в течении 24 часов</span>',
+                                'label' => Yii::t('message', 'frontend.views.request.urgent_order', ['ru'=>'Срочный заказ']) . '  <span style="font-size:14px;color:#ccc;margin-left:5px">' . Yii::t('message', 'frontend.views.request.twenty_four', ['ru'=>'доставить в течении 24 часов']) . ' </span>',
                                 'position' => CheckboxX::LABEL_RIGHT,
                                 'options' =>['style'=>'font-size: 20px;color: #3f3e3e;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 500;']
                                 ]
                             ])->label(false);?>
-            <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
-            <?= Html::button('Продолжить', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>2]) ?>
-            <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться к списку заявок</a>
+            <?= Html::button(Yii::t('message', 'frontend.views.request.back', ['ru'=>'Назад']), ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
+            <?= Html::button(Yii::t('message', 'frontend.views.request.continue_three', ['ru'=>'Продолжить']), ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>2]) ?>
+            <a href="#" data-dismiss="modal" class="close-h pull-right"><?= Yii::t('message', 'frontend.views.request.to_list', ['ru'=>'Вернуться к списку заявок']) ?></a>
         </fieldset>
         <!-- fieldsets 3 -->
 	<fieldset class="text-left">
-            <h5>Способ оплаты?</h5>
+            <h5><?= Yii::t('message', 'frontend.views.request.payment_variant_two', ['ru'=>'Способ оплаты?']) ?></h5>
             <?php 
             echo $form->field($request, 'payment_method',['template'=>'{input}{error}'])->widget(Select2::classname(), [
                 'model'=>$request->payment_method,
                 'hideSearch' => true,
-                'data' => [1=>'Наличный расчет',2=>'Безналичный расчет'],
+                'data' => [1=>Yii::t('message', 'frontend.views.request.cash', ['ru'=>'Наличный расчет']),2=>Yii::t('message', 'frontend.views.request.no_cash', ['ru'=>'Безналичный расчет'])],
             ])->label(false);
             ?>
             
-		<h5>Желаемая отсрочка платежа?</h5>
+		<h5><?= Yii::t('message', 'frontend.views.request.postponement', ['ru'=>'Желаемая отсрочка платежа?']) ?></h5>
                 <?= $form->field($request, 'deferment_payment', 
     ['template'=>'{input}{error}'])->
-    textInput(['placeholder' => '7 дней']) ?>
+    textInput(['placeholder' => Yii::t('message', 'frontend.views.request.seven', ['ru'=>'7 дней'])]) ?>
             
 		<!--h5>Поделиться заявкой в группах MixCart</h5-->
                 <div style="color:#ccc;font-size:13px;margin-top: 32px;margin-bottom: -32px;">
-                    * Заявка будет существовать в системе MixCart один месяц, или пока вы ее не закроете
+                    * <?= Yii::t('message', 'frontend.views.request.until_close', ['ru'=>'Заявка будет существовать в системе MixCart один месяц, или пока вы ее не закроете']) ?>
                 </div>
-                <?= Html::button('Назад', ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
-                <?= Html::button('Разместить заявку', ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
-        <a href="#" data-dismiss="modal" class="close-h pull-right">Вернуться к списку заявок</a>        
+                <?= Html::button(Yii::t('message', 'frontend.views.request.back_two', ['ru'=>'Назад']), ['class' => 'previous btn btn-lg btn-default btn-outline']) ?>
+                <?= Html::button(Yii::t('message', 'frontend.views.request.set_req_six', ['ru'=>'Разместить заявку']), ['class' => 'next btn btn-lg btn-success btn-outline','data-step'=>3]) ?>
+        <a href="#" data-dismiss="modal" class="close-h pull-right"><?= Yii::t('message', 'frontend.views.request.back_to_list_two', ['ru'=>'Вернуться к списку заявок']) ?></a>
         </fieldset>
 <?php ActiveForm::end(); ?>
 

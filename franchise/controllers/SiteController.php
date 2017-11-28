@@ -362,7 +362,7 @@ class SiteController extends DefaultController
                     // send email
                     $model = new Organization();
                     $model->sendGenerationPasswordEmail($user, true);
-                    $message = Yii::t('app', 'Пользователь добавлен!');
+                    $message = Yii::t('app', 'franchise.controllers.user_added', ['ru'=>'Пользователь добавлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -406,7 +406,7 @@ class SiteController extends DefaultController
                     }else{
                         $rel->save();
                     }
-                    $message = 'Пользователь обновлен!';
+                    $message = Yii::t('app', 'franchise.controllers.user_updated', ['ru'=>'Пользователь обновлен!']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
             }
@@ -434,20 +434,20 @@ class SiteController extends DefaultController
                     ->one();
                 $usersCount = count($this->currentFranchisee->franchiseeUsers);
                 if ($user->id == $this->currentUser->id) {
-                    $message = Yii::t('app', 'Может воздержимся от удаления себя?');
+                    $message = Yii::t('app', 'franchise.controllers.remove_yourself', ['ru'=>'Может воздержимся от удаления себя?']);
                     return $this->renderAjax('settings/_success', ['message' => $message]);
                 }
                 if ($user && ($usersCount > 1) && ($user->role_id !== Role::ROLE_FRANCHISEE_AGENT)) {
                     $user->role_id = Role::ROLE_USER;
                     $user->organization_id = null;
                     if ($user->save() && $user->franchiseeUser->delete()) {
-                        $message = Yii::t('app', 'Пользователь удален!');
+                        $message = Yii::t('app', 'franchise.controllers.removed', ['ru'=>'Пользователь удален!']);
                         return $this->renderAjax('settings/_success', ['message' => $message]);
                     }
                 }
             }
         }
-        $message = Yii::t('app', 'Не удалось удалить пользователя!');
+        $message = Yii::t('app', 'franchise.controllers.cant_remove', ['ru'=>'Не удалось удалить пользователя!']);
         return $this->renderAjax('settings/_success', ['message' => $message]);
     }
 
@@ -507,7 +507,7 @@ class SiteController extends DefaultController
                     $catalogBaseGoods->category_id = $catalogBaseGoods->sub2;
                     $catalogBaseGoods->save();
 
-                    $message = Yii::t('app', 'Продукт обновлен!');
+                    $message = Yii::t('app', 'franchise.controllers.product_updated', ['ru'=>'Продукт обновлен!']);
                     return $this->renderAjax('catalog/_success', ['message' => $message]);
                 }
             }
@@ -588,8 +588,8 @@ class SiteController extends DefaultController
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
             if (!is_readable($path)) {
-                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>')
-                    . Yii::t('app', '<small>Если ошибка повторяется, пожалуйста, сообщите нам')
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.download_error', ['ru'=>'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'])
+                    . Yii::t('app', 'franchise.controllers.repeat_error', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -610,14 +610,14 @@ class SiteController extends DefaultController
                 }
             }
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка загрузки каталога<br>')
-                    . Yii::t('app', '<small>Вы пытаетесь загрузить каталог объемом больше ') . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', ' позиций (Новых позиций), обратитесь к нам и мы вам поможем')
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.upload_error', ['ru'=>'Ошибка загрузки каталога<br>'])
+                    . Yii::t('app', 'franchise.controllers.trying_to_upload', ['ru'=>'<small>Вы пытаетесь загрузить каталог объемом больше ']) . CatalogBaseGoods::MAX_INSERT_FROM_XLS . Yii::t('app', 'franchise.controllers.positions', ['ru'=>' позиций (Новых позиций), обратитесь к нам и мы вам поможем'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
-                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка загрузки каталога<br>')
-                    . Yii::t('app', '<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! ')
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.upload_error_two', ['ru'=>'Ошибка загрузки каталога<br>'])
+                    . Yii::t('app', 'franchise.controllers.same_art', ['ru'=>'<small>Вы пытаетесь загрузить один или более позиций с одинаковым артикулом! Проверьте файл на наличие одинаковых артикулов! '])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
@@ -676,8 +676,8 @@ class SiteController extends DefaultController
             } catch (Exception $e) {
                 unlink($path);
                 $transaction->rollback();
-                Yii::$app->session->setFlash('success', Yii::t('app', 'Ошибка сохранения, повторите действие')
-                    . Yii::t('app', '<small>Если ошибка повторяется, пожалуйста, сообщите нам')
+                Yii::$app->session->setFlash('success', Yii::t('app', 'franchise.controllers.saving_error', ['ru'=>'Ошибка сохранения, повторите действие'])
+                    . Yii::t('app', 'franchise.controllers.error_repeat', ['ru'=>'<small>Если ошибка повторяется, пожалуйста, сообщите нам'])
                     . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
             }
         }

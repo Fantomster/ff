@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
 use common\models\Organization;
 use common\models\OrderChat;
+use common\models\search\OrderContentSearch;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>

@@ -194,7 +194,7 @@ class UtilsController extends Controller {
     public function actionMassDecode() {
         set_time_limit(180);
         do {
-            $products = \common\models\CatalogBaseGoods::find()->where("product like '%quot;%' ")->limit(100)->all();
+            $products = \common\models\CatalogBaseGoods::find()->where("product like '%&#039;%' ")->limit(100)->all();
             foreach ($products as $cbg) {
                 $cbg->product = \yii\helpers\Html::decode($cbg->product);
                 $cbg->save(false);

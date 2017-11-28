@@ -106,7 +106,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             
-            [['cat_id', 'price', 'product', 'ed','article'], 'required'],
+            [['cat_id', 'price', 'product', 'ed'], 'required'],
             [['cat_id', 'category_id', 'supp_org_id', 'status', 'deleted', 'rating'], 'integer'],
             [['market_place', 'mp_show_price'], 'default', 'value' => 0],
             //[['article'], 'required', 'on' => 'uniqueArticle'],

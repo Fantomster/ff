@@ -345,14 +345,14 @@ class OrderController extends DefaultController {
             return $this->redirect(['order/guides']);
         }
 
-        $guideProductList = $session['guideProductList'];
+        $guideProductList = isset($session['guideProductList']) ?  $session['guideProductList'] : [];
 
         foreach ($guide->guideProducts as $guideProduct) {
             if (!in_array($guideProduct->cbg_id, $guideProductList)) {
                 $guideProduct->delete();
             } else {
                 $position = array_search($guideProduct->cbg_id, $guideProductList);
-                if ($position !== FALSE) {
+                if (!$position) {
                     unset($guideProductList[$position]);
                 }
             }

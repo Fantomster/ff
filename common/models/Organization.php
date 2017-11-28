@@ -241,7 +241,7 @@ class Organization extends \yii\db\ActiveRecord
      *
      * @return array
      */
-    public function getSuppliers($category_id = '', $all = false)
+    public function getSuppliers($category_id = '', $all = true)
     {
         if ($this->type_id !== Organization::TYPE_RESTAURANT && !$all) {
             return [];
@@ -250,9 +250,9 @@ class Organization extends \yii\db\ActiveRecord
             ->select(['organization.id', 'organization.name'])
             ->leftJoin('organization', 'organization.id = relation_supp_rest.supp_org_id')
             ->leftJoin('relation_category', 'relation_category.supp_org_id = relation_supp_rest.supp_org_id');
-        if (!$all) {
+//        if (!$all) {
             $query->where(['relation_supp_rest.rest_org_id' => $this->id]);
-        }
+//        }
         $query->andWhere(['relation_supp_rest.deleted' => false]);
         if ($category_id) {
             $query = $query->andWhere(['relation_category.category_id' => $category_id]);

@@ -236,7 +236,7 @@ class OrderController extends ActiveController {
         }
     }
 
-    public function actionConfirm() {
+    public function actionConfirmOrder() {
         if (Yii::$app->request->post()) {
             $currentUser = Yii::$app->user->getIdentity();
             $user_id = $currentUser->id;

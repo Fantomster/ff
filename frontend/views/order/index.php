@@ -11,7 +11,7 @@ use kartik\date\DatePicker;
 use yii\widgets\Breadcrumbs;
 use common\models\Role;
 
-$this->title = 'Заказы';
+$this->title = Yii::t('message', 'frontend.views.order.order_four', ['ru'=>'Заказы']);
 $urlExport = Url::to(['/order/export-to-xls']);
 $this->registerJs('
     $("document").ready(function(){
@@ -54,8 +54,8 @@ $this->registerJs('
                 title: clicked.data("original-title") + "?",
                 type: "warning",
                 showCancelButton: true,
-                confirmButtonText: "Да",
-                cancelButtonText: "Отмена",
+                confirmButtonText: "' . Yii::t('message', 'frontend.views.order.yep', ['ru'=>'Да']) . ' ",
+                cancelButtonText: "' . Yii::t('message', 'frontend.views.order.cancel', ['ru'=>'Отмена']) . ' ",
                 showLoaderOnConfirm: true,
             }).then(function(result) {
                 if (result.dismiss === "cancel") {
@@ -78,8 +78,8 @@ $this->registerCss("
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-history"></i>  Заказы
-        <small>Список всех созданных заказов</small>
+        <i class="fa fa-history"></i>  <?= Yii::t('message', 'frontend.views.order.orders', ['ru'=>'Заказы']) ?>
+        <small><?= Yii::t('message', 'frontend.views.order.orders_list', ['ru'=>'Список всех созданных заказов']) ?></small>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -87,7 +87,7 @@ $this->registerCss("
             'class' => 'breadcrumb',
         ],
         'links' => [
-            'История заказов',
+            Yii::t('message', 'frontend.views.order.orders_history', ['ru'=>'История заказов']),
         ],
     ])
     ?>
@@ -100,7 +100,7 @@ $this->registerCss("
                 <div class="info-box">
                     <div class="info-box-content">
                         <span class="info-box-number status new"><?= $newCount ?></span>
-                        <span class="info-box-text">Новые</span>
+                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.new', ['ru'=>'Новые']) ?></span>
                     </div>
                 </div>
             </div>
@@ -108,7 +108,7 @@ $this->registerCss("
                 <div class="info-box">
                     <div class="info-box-content">
                         <span class="info-box-number status processing"><?= $processingCount ?></span>
-                        <span class="info-box-text">Выполняются</span>
+                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.in_process', ['ru'=>'Выполняются']) ?></span>
                     </div>
                 </div>
             </div>
@@ -116,7 +116,7 @@ $this->registerCss("
                 <div class="info-box">
                     <div class="info-box-content">
                         <span class="info-box-number status done"><?= $fulfilledCount ?></span>
-                        <span class="info-box-text">Завершено</span>
+                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.ended', ['ru'=>'Завершено']) ?></span>
                     </div>
                 </div>    
             </div>
@@ -124,7 +124,7 @@ $this->registerCss("
                 <div class="info-box bg-total-price">
                     <div class="info-box-content">
                         <span class="info-box-number"><?= isset($totalPrice) ? $totalPrice : '0' ?> <i class="fa fa-fw fa-rub"></i></span>
-                        <span class="info-box-text">Всего выполнено на сумму</span>
+                        <span class="info-box-text"><?= Yii::t('message', 'frontend.views.order.summ_completed', ['ru'=>'Всего выполнено на сумму']) ?></span>
                     </div>
                 </div>    
             </div>
@@ -152,8 +152,8 @@ $this->registerCss("
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <?=
                             $form->field($searchModel, 'status')
-                            ->dropDownList(['0' => 'Все', '1' => 'Новый', '2' => 'Отменен', '3' => 'Выполняется', '4' => 'Завершен'], ['id' => 'statusFilter'])
-                            ->label('Статус', ['class' => 'label', 'style' => 'color:#555'])
+                            ->dropDownList(['0' => Yii::t('message', 'frontend.views.order.all', ['ru'=>'Все']), '1' => Yii::t('message', 'frontend.views.order.new', ['ru'=>'Новый']), '2' => Yii::t('message', 'frontend.views.order.canceled', ['ru'=>'Отменен']), '3' => Yii::t('message', 'frontend.views.order.in_process_two', ['ru'=>'Выполняется']), '4' => Yii::t('message', 'frontend.views.order.completed', ['ru'=>'Завершен'])], ['id' => 'statusFilter'])
+                            ->label(Yii::t('message', 'frontend.views.order.status', ['ru'=>'Статус']), ['class' => 'label', 'style' => 'color:#555'])
                     ?>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
@@ -161,24 +161,24 @@ $this->registerCss("
                     if ($organization->type_id == Organization::TYPE_RESTAURANT) {
                         echo $form->field($searchModel, 'vendor_id')
                                 ->dropDownList($organization->getSuppliers(), ['id' => 'orgFilter'])
-                                ->label('Поставщики', ['class' => 'label', 'style' => 'color:#555']);
+                                ->label(Yii::t('message', 'frontend.views.order.vendors', ['ru'=>'Поставщики']), ['class' => 'label', 'style' => 'color:#555']);
                     } else {
                         echo $form->field($searchModel, 'client_id')
                                 ->dropDownList($organization->getClients(), ['id' => 'orgFilter'])
-                                ->label('Рестораны', ['class' => 'label', 'style' => 'color:#555']);
+                                ->label(Yii::t('message', 'frontend.views.order.rest', ['ru'=>'Рестораны']), ['class' => 'label', 'style' => 'color:#555']);
                     }
                     ?>
                 </div>
                 <div class="col-lg-5 col-md-6 col-sm-6"> 
-                        <?= Html::label('Начальная дата / Конечная дата', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('message', 'frontend.views.order.begin_end', ['ru'=>'Начальная дата / Конечная дата']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
                         <?=
                         DatePicker::widget([
                             'model' => $searchModel,
                             'attribute' => 'date_from',
                             'attribute2' => 'date_to',
-                            'options' => ['placeholder' => 'Дата', 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => 'Конечная дата', 'id' => 'dateTo'],
+                            'options' => ['placeholder' => Yii::t('message', 'frontend.views.order.date', ['ru'=>'Дата']), 'id' => 'dateFrom'],
+                            'options2' => ['placeholder' => Yii::t('message', 'frontend.views.order.date_to', ['ru'=>'Конечная дата']), 'id' => 'dateTo'],
                             'separator' => '-',
                             'type' => DatePicker::TYPE_RANGE,
                             'pluginOptions' => [
@@ -230,17 +230,17 @@ $this->registerCss("
                                 'attribute' => 'vendor.name',
                                 'value' => 'vendor.name',
                                 'contentOptions'   =>   ['class' => 'small_cell_supp'],
-                                'label' => 'Поставщик',
+                                'label' => Yii::t('message', 'frontend.views.order.vendor', ['ru'=>'Поставщик']),
                                     //'headerOptions' => ['class'=>'sorting',],
                                     ] : [
                                 'attribute' => 'client.name',
                                 'value' => 'client.name',
-                                'label' => 'Ресторан',
+                                'label' => Yii::t('message', 'frontend.views.order.rest_two', ['ru'=>'Ресторан']),
                                     ],
                             [
                                 'attribute' => 'createdByProfile.full_name',
                                 'value' => 'createdByProfile.full_name',
-                                'label' => 'Заказ создал',
+                                'label' => Yii::t('message', 'frontend.views.order.order_created_by', ['ru'=>'Заказ создал']),
                                 'contentOptions'   =>   ['class' => 'small_cell_sozdal'],
                             ],
                             [
@@ -265,7 +265,7 @@ $this->registerCss("
 //                                    }
 //                                    return $string;
 //                                },
-                                'label' => 'Заказ принял',
+                                'label' => Yii::t('message', 'frontend.views.order.accepted_by', ['ru'=>'Заказ принял']),
                                 'contentOptions'   =>   ['class' => 'small_cell_prinyal'],
                             ],
                             [
@@ -274,7 +274,7 @@ $this->registerCss("
                                 'value' => function($data) {
                                     return "<b>$data->total_price</b> " . $data->currency->symbol;
                                 },
-                                'label' => 'Сумма',
+                                'label' => Yii::t('message', 'frontend.views.order.summ', ['ru'=>'Сумма']),
                                 'contentOptions'   =>   ['class' => 'small_cell_sum'],
                             ],
                             [
@@ -284,7 +284,7 @@ $this->registerCss("
                                     $date = Yii::$app->formatter->asDatetime($data->created_at, "php:j M Y");
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
-                                'label' => 'Дата создания',
+                                'label' => Yii::t('message', 'frontend.views.order.creating_date', ['ru'=>'Дата создания']),
                                 'contentOptions'   =>   ['style' => 'min-width:120px;'],
                                
                             ],
@@ -310,7 +310,7 @@ $this->registerCss("
                                     }
                                     return '<span class="status ' . $statusClass . '">' . Order::statusText($data->status) . '</span>'; //<i class="fa fa-circle-thin"></i> 
                                 },
-                                'label' => 'Статус',
+                                'label' => Yii::t('message', 'frontend.views.order.status_two', ['ru'=>'Статус']),
                                 'contentOptions'   =>   ['class' => 'small_cell_status'],
                             ],
                             [
@@ -321,11 +321,11 @@ $this->registerCss("
                                         case Order::STATUS_DONE:
                                         case Order::STATUS_REJECTED:
                                         case Order::STATUS_CANCELLED:
-                                            return Html::a('Повторить', '#', [
+                                            return Html::a(Yii::t('message', 'frontend.views.order.repeat', ['ru'=>'Повторить']), '#', [
                                                         'class' => 'reorder btn btn-outline-processing',
                                                         'data' => [
                                                             'toggle' => 'tooltip',
-                                                            'original-title' => 'Повторить заказ',
+                                                            'original-title' => Yii::t('message', 'frontend.views.order.repeat_order', ['ru'=>'Повторить заказ']),
                                                             'url' => Url::to(['order/repeat', 'id' => $data->id])
                                                         ],
                                             ]);
@@ -334,11 +334,11 @@ $this->registerCss("
                                         case Order::STATUS_AWAITING_ACCEPT_FROM_CLIENT:
                                         case Order::STATUS_PROCESSING:
                                             if ($data->isObsolete) {
-                                                return Html::a('Завершить', '#', [
+                                                return Html::a(Yii::t('message', 'frontend.views.order.complete', ['ru'=>'Завершить']), '#', [
                                                             'class' => 'complete btn btn-outline-success',
                                                             'data' => [
                                                                 'toggle' => 'tooltip',
-                                                                'original-title' => 'Завершить заказ',
+                                                                'original-title' => Yii::t('message', 'frontend.views.order.complete_order', ['ru'=>'Завершить заказ']),
                                                                 'url' => Url::to(['order/complete-obsolete', 'id' => $data->id])
                                                             ],
                                                 ]);

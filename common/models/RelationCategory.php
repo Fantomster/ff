@@ -49,7 +49,7 @@ class RelationCategory extends \yii\db\ActiveRecord
             'id' => 'ID',
             'supp_org_id' => 'Relation Supp org ID',
             'rest_org_id' => 'Relation Rest org ID',
-            'category_id' => 'Категория',
+            'category_id' => Yii::t('app', 'common.models.category_three', ['ru'=>'Категория']),
         ];
     }
     

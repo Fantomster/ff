@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model common\models\AgentRequest */
 
-$this->title = Yii::t('app', "Заявка №") . $model->id;
+$this->title = Yii::t('app', 'franchise.views.agent-request.req_no', ['ru'=>"Заявка №"]) . $model->id;
 ?>
 <section class="content-header">
     <h1>

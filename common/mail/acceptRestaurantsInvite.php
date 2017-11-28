@@ -10,12 +10,12 @@
 
 <p><img src="https://mixcart.ru/images/invite-to-vendor.jpg" style="width: 100%;" alt=""/></p>
 
-<h3 style="font-weight: 500;font-size: 27px;">Здравствуйте, <small style="font-size: 60%;color: #787878;line-height: 0;text-transform: none;"><?= $vendor->profile->full_name ?>.</small></h3>
-<p>Наш ресторан, <u><?= $restaurant ?></u>, стал использовать очень удобный инструмент для автоматизации работы с вами. 
+<h3 style="font-weight: 500;font-size: 27px;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.helo', ['ru'=>'Здравствуйте']) ?>, <small style="font-size: 60%;color: #787878;line-height: 0;text-transform: none;"><?= $vendor->profile->full_name ?>.</small></h3>
+<p><?= Yii::t('app', 'common.mail.accept_restaurant_invite.rest', ['ru'=>'Наш ресторан, {rest}, стал использовать очень удобный инструмент для автоматизации работы с вами', 'rest'=>$restaurant]) ?>.
     <br />
-    Я приглашаю Вас, <u><?= $vendor->organization->name ?></u>, присоединиться, и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу.</p>
+    <?= Yii::t('app', 'common.mail.accept_restaurant_invite.i_invite', ['ru'=>'Я приглашаю Вас, {org}, присоединиться, и начать использовать данный сервис. Использование этого инструмента значительно упростит нашу с вами работу', 'org'=>$vendor->organization->name]) ?>.</p>
 
-<p>При отправке этого письма, автоматически был создан аккаунт для вас в <a href="https://mixcart.ru" style="color: #84bf76;">MixCart</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения.</p>
+<p><?= Yii::t('app', 'common.mail.accept_restaurant_invite.sending_email', ['ru'=>'При отправке этого письма, автоматически был создан аккаунт для вас в <a href="https://mixcart.ru" style="color: #84bf76;">MixCart</a>, подтвердите пожалуйста получение данного приглашения, перейдя подтверждаю получение приглашения']) ?>.</p>
 <br />
 <div style="width: 100%; text-align: center;">
     <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/user/reset", "token" => $userToken->token]); ?>"
@@ -29,24 +29,24 @@
     cursor: pointer;
     display: inline-block;
     border-radius: 4px;
-    width: 80%;">Принять приглашение</a>
+    width: 80%;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.accept_invitation', ['ru'=>'Принять приглашение']) ?></a>
 </div>
 
 <br /><br />
 
 
-<h5 align="center" style="font-weight: 900;font-size: 17px;">В MixCart очень широкие возможности для поставщиков, о некоторых из них несколько слов ниже.</h5>
+<h5 align="center" style="font-weight: 900;font-size: 17px;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.abilities', ['ru'=>'В MixCart очень широкие возможности для поставщиков, о некоторых из них несколько слов ниже']) ?>.</h5>
 <br /><br />
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
         <th width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Каталог поставщиков</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.vendors_catalog', ['ru'=>'Каталог поставщиков']) ?></h6>
         </th>
         <th width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Оценки, отзывы</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.ratings', ['ru'=>'Оценки, отзывы']) ?></h6>
         </th>
         <th width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Закупка в 2 клика</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.two_clicks', ['ru'=>'Закупка в 2 клика']) ?></h6>
         </th>
     </tr>
     <tr align="center">
@@ -62,13 +62,13 @@
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Подробная аналитика</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.anal', ['ru'=>'Подробная аналитика']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">История заказов</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.order_history', ['ru'=>'История заказов']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Распродажи поставщиков</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.vendors_sales', ['ru'=>'Распродажи поставщиков']) ?></h6>
         </td>
     </tr>
     <tr align="center">
@@ -84,13 +84,13 @@
 <table style="display: table;border-spacing: 0px;border-color: grey;width: 100%;">
     <tr align="center">
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Выставление лимитов</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.limits_set', ['ru'=>'Выставление лимитов']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;">Размещение тендеров</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"><?= Yii::t('app', 'common.mail.accept_restaurant_invite.tenders', ['ru'=>'Размещение тендеров']) ?></h6>
         </td>
         <td width="33%">
-            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"header>Коммуникации в одном месте</h6>
+            <h6 style="font-weight: 900;font-size: 14px;color: #787878;"header><?= Yii::t('app', 'common.mail.accept_restaurant_invite.one_place_communications', ['ru'=>'Коммуникации в одном месте']) ?></h6>
         </td>
     </tr>
     <tr align="center">

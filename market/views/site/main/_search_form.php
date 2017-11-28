@@ -28,7 +28,7 @@ if($i > 0){
 ?>">
   <div id="result">
     <div class="res-block shadow-bottom-light">
-        <h5>по запросу <span class="badge"><?=$search ?></span></h5>
+        <h5><?= Yii::t('message', 'market.views.site.main.on_request', ['ru'=>'по запросу']) ?> <span class="badge"><?=$search ?></span></h5>
         <hr>
         <div class="row">
             <div class="search-block">
@@ -74,7 +74,7 @@ if($i > 0){
                     if($i==3){echo "col-md-4";}
                 };?>">
                     <div class="search-block-1">
-                    <h5 class="title-search-result">Товаров <span class="badge"><?=$search_products_count;?></span></h5>
+                    <h5 class="title-search-result"><?= Yii::t('message', 'market.views.site.main.goods', ['ru'=>'Товаров']) ?> <span class="badge"><?=$search_products_count;?></span></h5>
                     <?php 
                     if(!empty($search_products)){
                     foreach ($search_products as $arr) {
@@ -93,7 +93,7 @@ if($i > 0){
                           <h5 class="media-heading"><?=$arr['_source']['product_name']?></h5>
                           </a>
                             <?php if (empty($arr['_source']['product_show_price'])){ ?>
-                            <h5 class="media-price" style="color: #dfdfdf">договорная цена</h5>
+                            <h5 class="media-price" style="color: #dfdfdf"><?= Yii::t('message', 'market.views.site.main.price_three', ['ru'=>'договорная цена']) ?></h5>
                             <?php } else {?>
                             <h5 class="media-price"><?=floatval($arr['_source']['product_price']); ?> <small><?= $arr['_source']['product_currency'] ?></small></h5>
                             <?php } ?>                 
@@ -106,7 +106,7 @@ if($i > 0){
                       <div class="row">
                         <div class="col-md-12" style="margin-top: 10px">
                             
-                          <a href="<?=Url::to(['/site/search-products', 'search' => $search]);?>" class="btn btn-outline-ajax">Показать еще</a>  
+                          <a href="<?=Url::to(['/site/search-products', 'search' => $search]);?>" class="btn btn-outline-ajax"><?= Yii::t('message', 'market.views.site.main.show_more', ['ru'=>'Показать еще']) ?></a>
                         </div>   
                       </div>
                     <?php
@@ -124,7 +124,7 @@ if($i > 0){
                     if($i==3){echo "col-md-4";}
                 };?>">
                     <div class="search-block-1">
-                    <h5 class="title-search-result">Поставщиков <span class="badge"><?=$search_suppliers_count;?></span></h5>
+                    <h5 class="title-search-result"><?= Yii::t('message', 'market.views.site.main.vendors', ['ru'=>'Поставщиков']) ?> <span class="badge"><?=$search_suppliers_count;?></span></h5>
                     <?php 
                     if(!empty($search_suppliers)){
                     foreach ($search_suppliers as $arr) {
@@ -148,7 +148,7 @@ if($i > 0){
                     ?>
                       <div class="row">
                         <div class="col-md-12" style="margin-top: 10px">
-                          <a href="<?=Url::to(['/site/search-suppliers', 'search' => $search]);?>" class="btn btn-outline-ajax">Показать еще</a>  
+                          <a href="<?=Url::to(['/site/search-suppliers', 'search' => $search]);?>" class="btn btn-outline-ajax"><?= Yii::t('message', 'market.views.site.main.show_more_two', ['ru'=>'Показать еще']) ?></a>
                         </div>   
                       </div>
                     <?php

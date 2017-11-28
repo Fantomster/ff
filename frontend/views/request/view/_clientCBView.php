@@ -9,7 +9,7 @@ use yii\helpers\Url;
 
 if ($model->request->responsible_supp_org_id == $model->supp_org_id) {
     $n = [
-        'value' => 'Убрать исполнителя',
+        'value' => Yii::t('message', 'frontend.views.request.kill_executor', ['ru'=>'Убрать исполнителя']),
         'class' => 'btn btn-danger btn-md',
         'event' => 'exclude'
     ];
@@ -22,20 +22,20 @@ if ($model->request->responsible_supp_org_id == $model->supp_org_id) {
 
     if (!common\models\RelationSuppRest::find()->where($where)->exists()) {
         $n_1 = [
-            'value' => 'Добавить поставщика',
+            'value' => Yii::t('message', 'frontend.views.request.add_two', ['ru'=>'Добавить поставщика']),
             'class' => 'btn btn-success  btn-md add-supplier',
             'event' => 'add-supplier'
         ];
     } else {
         $n_1 = [
-            'value' => 'Поставщик добавлен',
+            'value' => Yii::t('message', 'frontend.views.request.vendor_added', ['ru'=>'Поставщик добавлен']),
             'class' => 'btn btn-gray  btn-md disabled',
             'event' => ''
         ];
     }
 } else {
     $n = [
-        'value' => 'Назначить исполнителем',
+        'value' => Yii::t('message', 'frontend.views.request.set_by_exec_two', ['ru'=>'Назначить исполнителем']),
         'class' => 'btn btn-success  btn-md ',
         'event' => 'appoint'
     ];
@@ -58,8 +58,8 @@ if ($model->request->responsible_supp_org_id == $model->supp_org_id) {
             <div class="media-heading">
                 <h4 class="text-success" ><?= $model->organization->name ?></h4>
             </div>
-            <p>Стоимость услуги: <span class="text-bold"><?= $model->price ?> руб.</span></p>
-            <p><b>Комментарий поставщика:</b> <?= $model->comment ?></p>
+            <p><?= Yii::t('message', 'frontend.views.request.service_price', ['ru'=>'Стоимость услуги:']) ?> <span class="text-bold"><?= $model->price ?> <?= Yii::t('message', 'frontend.views.request.rouble', ['ru'=>'руб.']) ?></span></p>
+            <p><b><?= Yii::t('message', 'frontend.views.request.vendors_comment', ['ru'=>'Комментарий поставщика:']) ?></b> <?= $model->comment ?></p>
         </div>
         <div class="col-xs-12 col-sm-12 col-md-12" >
             <div class="pull-right text-center" >

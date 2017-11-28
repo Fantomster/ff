@@ -37,15 +37,15 @@ foreach ($pr as $row) {
                 <div class="col-md-12">
                     <div class="product-price">
                         <?php if (empty($row->mp_show_price)) { ?>
-                            <h4 style="color:#dfdfdf">договорная цена</h4>
+                            <h4 style="color:#dfdfdf"><?= Yii::t('message', 'market.views.site.main.price_two', ['ru'=>'договорная цена']) ?></h4>
                         <?php } else { ?>
-                            <h4><?= floatval($row->price); ?> <small><?= $row->catalog->currency->symbol; ?></small></h4>
+                            <h4><?= floatval($row->price); ?> <small><?= $row->catalog->currency->symbol ?></small></h4>
                         <?php } ?>
                     </div>
                 </div>
                 <div class="col-md-12">
                     <div class="product-button">
-                        <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;КУПИТЬ</a>
+                        <a href="#" class="btn btn-100 btn-outline-success add-to-cart" data-product-id="<?= $row->id ?>"><isc class="icon-shopping-cart" aria-hidden="true"></isc>&nbsp;&nbsp;<?= Yii::t('message', 'market.views.site.main.buy_two', ['ru'=>'КУПИТЬ']) ?></a>
                     </div>  
                 </div>
             </div>

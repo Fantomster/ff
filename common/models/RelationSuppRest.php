@@ -89,7 +89,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
             'id' => 'ID',
             'rest_org_id' => 'Rest Org ID',
             'supp_org_id' => 'Supp Org ID',
-            'cat_id' => 'Каталог',
+            'cat_id' => Yii::t('app', 'common.models.catalogue', ['ru'=>'Каталог']),
         ];
     }
     

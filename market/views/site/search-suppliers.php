@@ -8,11 +8,11 @@ use common\models\ES\Supplier;
 ?>
 
 <?php
-$this->title = 'MixCart Поставщики';
+$this->title = Yii::t('message', 'market.views.site.search_supp.vendors', ['ru'=>'MixCart Поставщики']);
 ?>
 <div class="row">
     <div class="col-md-12">
-      <h3>Поставщики <small><?=$count?></small></h3>
+      <h3><?= Yii::t('message', 'market.views.site.search_supp.vendors_two', ['ru'=>'Поставщики']) ?> <small><?=$count?></small></h3>
      <div class="row" id="mp-product-block">
       <?php
 foreach($sp as $row){
@@ -43,7 +43,7 @@ foreach($sp as $row){
     </div>
     <div class="col-md-12">
       <div class="supplier-button">
-        <a href="#" class="btn btn-100 btn-success invite-vendor" style="width: 100%" data-vendor-id="<?= $row->supplier_id ?>">Добавить</a>
+        <a href="#" class="btn btn-100 btn-success invite-vendor" style="width: 100%" data-vendor-id="<?= $row->supplier_id ?>"><?= Yii::t('message', 'market.views.site.search_supp.add', ['ru'=>'Добавить']) ?></a>
       </div>
     </div>
   </div>
@@ -55,7 +55,7 @@ foreach($sp as $row){
     </div>
     <div class="row">
       <div class="col-md-12 min-padding">
-        <a href="#" class="btn btn-100 btn-outline-default <?=$count>12?'':'disabled'?>" id="product-more">Показать еще</a>  
+        <a href="#" class="btn btn-100 btn-outline-default <?=$count>12?'':'disabled'?>" id="product-more"><?= Yii::t('message', 'market.views.site.search_supp.more', ['ru'=>'Показать еще']) ?></a>
       </div>   
     </div>
   </div>

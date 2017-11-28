@@ -68,17 +68,17 @@ class Delivery extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'vendor_id' => 'Vendor ID',
-            'delivery_charge' => 'Стоимость доставки',
-            'min_free_delivery_charge' => 'Cтоимость заказа для бесплатной доставки',
-            'mon' => 'Пн',
-            'tue' => 'Вт',
-            'wed' => 'Ср',
-            'thu' => 'Чт',
-            'fri' => 'Пт',
-            'sat' => 'Сб',
-            'sun' => 'Вс',
-            'min_order_price' => 'Минимальная стоимость заказа',
+            'vendor_id' => Yii::t('app', 'Vendor ID'),
+            'delivery_charge' => Yii::t('app', 'common.models.delivery_price', ['ru'=>'Стоимость доставки']),
+            'min_free_delivery_charge' => Yii::t('app', 'common.models.free_delivery', ['ru'=>'Cтоимость заказа для бесплатной доставки']),
+            'mon' => Yii::t('app', 'common.models.mon', ['ru'=>'Пн']),
+            'tue' => Yii::t('app', 'common.models.tue', ['ru'=>'Вт']),
+            'wed' => Yii::t('app', 'common.models.wed', ['ru'=>'Ср']),
+            'thu' => Yii::t('app', 'common.models.thu', ['ru'=>'Чт']),
+            'fri' => Yii::t('app', 'common.models.fri', ['ru'=>'Пт']),
+            'sat' => Yii::t('app', 'common.models.sat', ['ru'=>'Сб']),
+            'sun' => Yii::t('app', 'common.models.sun', ['ru'=>'Вс']),
+            'min_order_price' => Yii::t('app', 'common.models.min_price', ['ru'=>'Минимальная стоимость заказа']),
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
@@ -87,25 +87,25 @@ class Delivery extends \yii\db\ActiveRecord
     public function getDaysString() {
         $days = [];
         if ($this->mon) {
-            $days[] = 'Пн';
+            $days[] = Yii::t('app', 'common.models.mon_two', ['ru'=>'Пн']);
         }
         if ($this->tue) {
-            $days[] = 'Вт'; 
+            $days[] = Yii::t('app', 'common.models.tue_two', ['ru'=>'Вт']);
         }
         if ($this->wed) {
-            $days[] = 'Ср';
+            $days[] = Yii::t('app', 'common.models.wed_two', ['ru'=>'Ср']);
         }
         if ($this->thu) {
-            $days[] = 'Чт';
+            $days[] = Yii::t('app', 'common.models.thu_two', ['ru'=>'Чт']);
         }
         if ($this->fri) {
-            $days[] = 'Пт';
+            $days[] = Yii::t('app', 'common.models.fri_two', ['ru'=>'Пт']);
         }
         if ($this->sat) {
-            $days[] = 'Сб';
+            $days[] = Yii::t('app', 'common.models.sat_two', ['ru'=>'Сб']);
         }
         if ($this->sun) {
-            $days[] = 'Вс';
+            $days[] = Yii::t('app', 'common.models.sun_two', ['ru'=>'Вс']);
         }
         return implode(", ", $days);
     }

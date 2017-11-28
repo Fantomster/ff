@@ -18,7 +18,7 @@ $form = ActiveForm::begin([
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title">Информация об организации</h4>
+    <h4 class="modal-title"><?= Yii::t('message', 'frontend.views.client.supp.info', ['ru'=>'Информация об организации']) ?></h4>
 </div>
 <div class="modal-body">
     <div class="row">
@@ -95,7 +95,7 @@ $form = ActiveForm::begin([
     </div>
 </div>
 <div class="modal-footer">
-    <?= Html::button('<i class="icon fa fa-save"></i> Сохранить', ['class' => 'btn btn-success save-form']) ?>
-    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> Закрыть</a>
+    <?= Html::button('<i class="icon fa fa-save"></i> ' . Yii::t('message', 'frontend.views.client.supp.save_two', ['ru'=>'Сохранить']), ['class' => 'btn btn-success save-form']) ?>
+    <a href="#" class="btn btn-gray" data-dismiss="modal"><i class="icon fa fa-remove"></i> <?= Yii::t('message', 'frontend.views.client.supp.close_four', ['ru'=>'Закрыть']) ?></a>
 </div>
 <?php ActiveForm::end(); ?>

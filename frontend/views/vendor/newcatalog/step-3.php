@@ -11,44 +11,44 @@ use common\models\Users;
 use kartik\export\ExportMenu;
 use kartik\editable\Editable;
 $this->registerCss('.panel-body {padding: 15px;}h1, .h1, h2, .h2, h3, .h3 {margin-top: 10px;}');
-$this->title = 'Редактировать продукты';
+$this->title = Yii::t('message', 'frontend.views.vendor.edit_goods', ['ru'=>'Редактировать продукты']);
 ?>
 
 
 <div class="panel-body">
-    <h3 class="font-light"><i class="fa fa-list-alt"></i> Редактирование каталога <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
+    <h3 class="font-light"><i class="fa fa-list-alt"></i> <?= Yii::t('message', 'frontend.views.vendor.edit_cat_four', ['ru'=>'Редактирование каталога']) ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?></h3>
 </div>
 <div class="panel-body">
     <ul class="nav nav-tabs">
-        <?='<li>'.Html::a('Имя каталога',['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Добавить продукты',['vendor/step-2','id'=>$cat_id]).'</li>'?>
-        <?='<li class="active">'.Html::a('Редактировать',['vendor/step-3','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.cat_name', ['ru'=>'Имя каталога']),['vendor/step-1-update','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.add_goods_four', ['ru'=>'Добавить продукты']),['vendor/step-2','id'=>$cat_id]).'</li>'?>
+        <?='<li class="active">'.Html::a(Yii::t('message', 'frontend.views.vendor.edit', ['ru'=>'Редактировать']),['vendor/step-3','id'=>$cat_id]).'</li>'?>
         <?='<li>'.Html::a('test',['vendor/step-3-copy','id'=>$cat_id]).'</li>'?>
-        <?='<li>'.Html::a('Назначить ресторану',['vendor/step-4','id'=>$cat_id]).'</li>'?>
+        <?='<li>'.Html::a(Yii::t('message', 'frontend.views.vendor.set_for_rest_five', ['ru'=>'Назначить ресторану']),['vendor/step-4','id'=>$cat_id]).'</li>'?>
     </ul>
 </div>
 <?php Pjax::begin(['id' => 'pjax-container']); ?>
 <?php 
 $gridColumnsCatalog = [
     [
-    'label'=>'Артикул',
+    'label'=>Yii::t('message', 'frontend.views.vendor.art_nine', ['ru'=>'Артикул']),
     'value'=>function ($data) {return common\models\CatalogBaseGoods::get_value($data->base_goods_id)->article;},
     ],
     [
-    'label'=>'Продукт',
+    'label'=>Yii::t('message', 'frontend.views.vendor.product_four', ['ru'=>'Продукт']),
     'value'=>function ($data) {return common\models\CatalogBaseGoods::get_value($data->base_goods_id)->product;},
     ],
     [
-    'label'=>'Базовая цена',
+    'label'=>Yii::t('message', 'frontend.views.vendor.base_price_two', ['ru'=>'Базовая цена']),
     'value'=>function ($data) { 
     $price = common\models\CatalogBaseGoods::find()->where(['id'=>$data->base_goods_id])->one()->price;
-    return $price." руб.";
+    return $price.Yii::t('message', 'frontend.views.vendor.rouble_four', ['ru'=>" руб."]);
     },
     ],
     [
-    'label'=>'Цена',
+    'label'=>Yii::t('message', 'frontend.views.vendor.price_eight', ['ru'=>'Цена']),
     'value'=>function ($data) {
-    return $data->price." руб.";
+    return $data->price.Yii::t('message', 'frontend.views.vendor.rouble_five', ['ru'=>" руб."]);
     },
     ],
     /*[
@@ -67,11 +67,11 @@ $gridColumnsCatalog = [
     ],*/
     
     [
-    'label'=>'Скидка (руб)',
-    'value'=>function ($data) {return $data->discount!=0?$data->discount." руб.":'0 руб.';},
+    'label'=>Yii::t('message', 'frontend.views.vendor.discount', ['ru'=>'Скидка (руб)']),
+    'value'=>function ($data) {return $data->discount!=0?$data->discount.Yii::t('message', 'frontend.views.vendor.rouble_six', ['ru'=>" руб."]):Yii::t('message', 'frontend.views.vendor.zero', ['ru'=>'0 руб.']);},
     ],
     [
-    'header' => 'Скидка (%)'.Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['vendor/ajax-set-percent','id'=>$cat_id], [
+    'header' => Yii::t('message', 'frontend.views.vendor.discount_percent', ['ru'=>'Скидка (%)']).Html::a('<i class="fa fa-pencil m-r-xs"></i>', ['vendor/ajax-set-percent','id'=>$cat_id], [
             'data' => [
             'target' => '#discount-all-product',
             'toggle' => 'modal',
@@ -80,11 +80,11 @@ $gridColumnsCatalog = [
     'value'=>function ($data) {return $data->discount_percent!=0?$data->discount_percent." %":'0 %';},
     ],
     [
-    'label'=>'Фиксированная цена',
-    'value'=>function ($data) {return $data->discount_fixed!=0?$data->discount_fixed." руб.":'-';},
+    'label'=>Yii::t('message', 'frontend.views.vendor.fix_price', ['ru'=>'Фиксированная цена']),
+    'value'=>function ($data) {return $data->discount_fixed!=0?$data->discount_fixed.Yii::t('message', 'frontend.views.vendor.rouble_seven', ['ru'=>" руб."]):'-';},
     ],
     [
-    'label'=>'Итоговая',
+    'label'=>Yii::t('message', 'frontend.views.vendor.total_three', ['ru'=>'Итоговая']),
     'format' => 'raw',
     'value'=>function ($data) {
         $price = preg_replace('/[^\d.,]/','',$data->price);
@@ -104,7 +104,7 @@ $gridColumnsCatalog = [
                 }
             }
             $price = number_format((float)$price,2, '.', '');
-            return '<span class="text-success-fk">'.$price.' руб.</span>';
+            return '<span class="text-success-fk">'.$price.Yii::t('message', 'frontend.views.vendor.rouble_eight', ['ru'=>' руб.']) . ' </span>';
         },
     ],
     [
@@ -142,7 +142,7 @@ $gridColumnsCatalog = [
         [
             'neverTimeout'=>true,
             'options'=>['id'=>'w0'],
-        ], 
+        ],
 ]);
 ?>
 </div>

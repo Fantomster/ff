@@ -161,7 +161,7 @@ class BuisinessInfoController extends Controller {
         if (($model = BuisinessInfo::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.buisiness_error', ['ru'=>'The requested page does not exist.']));
         }
     }
 

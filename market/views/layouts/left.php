@@ -46,7 +46,7 @@ $left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is n
 </style>
 <div class="row">
     <div class="col-md-12">
-        <h3>Каталог <span class="badge pull-right"><?=$count_products_from_mp;?> товаров</span></h3>  
+        <h3><?= Yii::t('message', 'market.views.layouts.left.catalog', ['ru'=>'Каталог']) ?> <span class="badge pull-right"><?=$count_products_from_mp;?> <?= Yii::t('message', 'market.views.layouts.left.goods', ['ru'=>'товаров']) ?></span></h3>
     </div>
 </div>
 <div class="row">

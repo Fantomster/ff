@@ -5,11 +5,11 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model common\models\AgentRequest */
 
-$this->title = Yii::t('app', 'Редактировать заявку №') . $model->id;
+$this->title = Yii::t('app', 'franchise.views.agent-request.edit_request', ['ru'=>'Редактировать заявку №']) . $model->id;
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i> <?= Yii::t('app', 'Редактировать заявку') ?>
+        <i class="fa fa-home"></i> <?= Yii::t('app', 'franchise.views.agent-request.edit_request_two', ['ru'=>'Редактировать заявку']) ?>
     </h1>
 </section>
 <section class="content">

@@ -88,7 +88,7 @@ class ClientController extends Controller {
             Yii::$app->session->set('new_pass_session', 'true');
             $newPassModel->sendForgotEmail();
             // set flash (which will show on the current page)
-            Yii::$app->session->setFlash("Forgot-success", 'Письмо отправлено пользователю');
+            Yii::$app->session->setFlash("Forgot-success", Yii::t('message', 'backend.controllers.client.sent', ['ru'=>'Письмо отправлено пользователю']));
         }
 
         return $this->render('view', [
@@ -126,21 +126,21 @@ class ClientController extends Controller {
         $profile = Profile::findOne(['user_id' => $id]);
 
         if(in_array($user->role_id, Role::getExceptionArray())){
-            throw new HttpException(403, 'Редактирование этого аккаунта отключено во имя Луны!');
+            throw new HttpException(403, Yii::t('error', 'backend.controllers.client.moon', ['ru'=>'Редактирование этого аккаунта отключено во имя Луны!']));
         }
 
         if (empty($user)) {
-            throw new NotFoundHttpException('Нет здесь ничего такого, проходите, гражданин!');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.get_out', ['ru'=>'Нет здесь ничего такого, проходите, гражданин!']));
         }
 
         if (($user->id === 2) && (Yii::$app->user->identity->id !== 76)) {
-            throw new NotFoundHttpException('Редактирование этого аккаунта отключено во имя Луны!');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.moon_two', ['ru'=>'Редактирование этого аккаунта отключено во имя Луны!']));
         }
 
         try {
             if ($user->load(Yii::$app->request->post()) && $profile->load(Yii::$app->request->post()) && $user->validate() && $profile->validate()) {
                 if (($user->organization_id == 1) && (Yii::$app->user->identity->id !== 76)) {
-                    throw new NotFoundHttpException('Добавление пользователей в эту организацию отключено во имя Луны!');
+                    throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.moon_three', ['ru'=>'Добавление пользователей в эту организацию отключено во имя Луны!']));
                 }
                 $user->save();
                 $profile->save();
@@ -149,7 +149,7 @@ class ClientController extends Controller {
                 return $this->render('update', compact('user', 'profile'));
             }
         } catch (Exception $e) {
-            throw new NotFoundHttpException('Ошибочка вышла!');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.this_is_it', ['ru'=>'Ошибочка вышла!']));
         }
     }
 
@@ -163,7 +163,7 @@ class ClientController extends Controller {
         $model = User::findOne(['id' => $id, 'role_id' => Role::ROLE_FKEEPER_MANAGER]);
 
         if (empty($model)) {
-            throw new NotFoundHttpException('Нет здесь ничего такого, проходите, гражданин!');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.get_out_two', ['ru'=>'Нет здесь ничего такого, проходите, гражданин!']));
         }
 
         $model->role_id = Role::ROLE_USER;
@@ -185,7 +185,7 @@ class ClientController extends Controller {
         if (($model = User::findOne($id)) !== null) {
             return $model;
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new NotFoundHttpException(Yii::t('error', 'backend.controllers.client.this_is_it_two', ['ru'=>'The requested page does not exist.']));
         }
     }
 

@@ -22,7 +22,7 @@ class UploadForm extends Model
     }
     public function attributeLabels() {
         return [
-            'importType' => 'Тип импорта',
+            'importType' => Yii::t('app', 'common.models.import_type', ['ru'=>'Тип импорта']),
         ];
     }
     public function upload()

@@ -25,11 +25,11 @@ class ServiceDesk extends \yii\base\Model
     public function attributeLabels()
     {
         return [
-            'priority' => Yii::t('app', 'Приоритет'),
-            'region' => Yii::t('app', 'Регион клиента'),
-            'fio' => Yii::t('app', 'ФИО клиента'),
-            'phone' => Yii::t('app', 'Контактный телефон'),
-            'body' => Yii::t('app', 'Сообщение'),
+            'priority' => Yii::t('app', 'common.models.forms.service_desk.priority', ['ru'=>'Приоритет']),
+            'region' => Yii::t('app', 'common.models.forms.service_desk.region', ['ru'=>'Регион клиента']),
+            'fio' => Yii::t('app', 'common.models.forms.service_desk.clients_fio', ['ru'=>'ФИО клиента']),
+            'phone' => Yii::t('app', 'common.models.forms.service_desk.contact_phone', ['ru'=>'Контактный телефон']),
+            'body' => Yii::t('app', 'common.models.forms.service_desk.message', ['ru'=>'Сообщение']),
         ];
     }
 }

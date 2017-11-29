@@ -193,7 +193,7 @@ $form = ActiveForm::begin([
                             ],
                         ])
                         ->textInput(['prompt' => Yii::t('message', 'frontend.views.vendor.', ['ru'=>'Поиск']), 'class' => 'form-control', 'id' => 'search_string'])
-                        ->label(Yii::t('message', 'frontend.views.vendor.search_two', ['ru'=>'Поиск']), ['class' => 'label search_string', 'style' => 'color:#555']
+                        ->label(Yii::t('message', 'frontend.views.vendor.search_two', ['ru'=>'Поиск']), ['class' => 'label search_string', 'style' => 'color:#555'])
                 ?>
                 </div>
                 <div class="col-sm-3">

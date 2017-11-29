@@ -65,7 +65,13 @@ return [
                 'yii' => [
                     'class' => 'yii\i18n\PhpMessageSource'
                 ],
-                '*' => [
+                'app' => [
+                    'class' => 'yii\i18n\DbMessageSource'
+                ],
+                'message' => [
+                    'class' => 'yii\i18n\DbMessageSource'
+                ],
+                'error' => [
                     'class' => 'yii\i18n\DbMessageSource'
                 ],
             ],

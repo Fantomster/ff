@@ -1098,7 +1098,7 @@ class OrderController extends DefaultController {
                         $product->quantity = $position['quantity'];
                     }
                     if ($priceChanged) {
-                        $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru'=>"<br/>изменил цену {prod} с {productPrice} {currencySymbol} на ", 'prod'=>$product->product_name, 'productPrice'=>$product->price], 'currencySymbol' => $currencySymbol) . $position['price'] . $currencySymbol;
+                        $message .= Yii::t('message', 'frontend.controllers.order.change_price', ['ru'=>"<br/>изменил цену {prod} с {productPrice} {currencySymbol} на ", 'prod'=>$product->product_name, 'productPrice'=>$product->price, 'currencySymbol' => $currencySymbol]) . $position['price'] . $currencySymbol;
                         $product->price = $position['price'];
                         if ($user->organization->type_id == Organization::TYPE_RESTAURANT && !$order->vendor->hasActiveUsers()) {
                             $prodFromCat = $product->getProductFromCatalog();

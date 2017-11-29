@@ -303,19 +303,19 @@ class RequestController extends DefaultController
 
                 //Тут пошли уведомления
                 //Для начала подготовим текст уведомлений и шаблоны email
-                $sms_text = Yii::t('app', "Вы назначены исполнителем по заявке №%s");
+                $sms_text = 'sms.request_set_responsible';
                 $subject = Yii::t('app', "mixcart.ru - заявка №%s");
                 $email_template = 'requestSetResponsibleMailToSupp';
                 $client_email_template = 'requestSetResponsible';
                 //Если $reject значит сняли с заявки
                 if ($reject) {
-                    $sms_text = 'Вы сняты с исполнения по заявке №%s';
+                    $sms_text = 'sms.request_unset_responsible';
                     $email_template = 'requestSetResponsibleMailToSuppReject';
                     $client_email_template = 'requestSetResponsibleReject';
                 }
                 //Данные тексты для рассылки
                 $templateMessage = [
-                    'sms_text' => sprintf($sms_text, $request->id),
+                    'sms_text' => Yii::$app->sms->prepareText($sms_text, ['request_id' => $request->id]),
                     'email_template' => $email_template,
                     'email_subject' => sprintf($subject, $request->id),
                     'client_email_template' => $client_email_template
@@ -438,9 +438,10 @@ class RequestController extends DefaultController
                     if (!empty($vendorUsers)) {
                         foreach ($vendorUsers as $user) {
                             if ($user->profile->phone) {
-                                $text = $client->organization->name . ' хочет работать с Вами в системе';
-                                $target = $user->profile->phone;
-                                Yii::$app->sms->send($text, $target);
+                                $text = Yii::$app->sms->prepareText('sms.request_add_supplier', [
+                                    'client_name' => $client->organization->name
+                                ]);
+                                Yii::$app->sms->send($text, $user->profile->phone);
                             }
                             if (!empty($user->email)) {
                                 $mailer = Yii::$app->mailer;
@@ -510,8 +511,10 @@ class RequestController extends DefaultController
                     $text = Yii::t('app', 'mixcart.ru - заявка №%s');
                     $subject = sprintf($text, $request->id);
                     //Сообщение SMS
-                    $text = Yii::t('app', 'Новый отклик по Вашей заявке №%s от поставщика %s');
-                    $sms_text = sprintf($text, $request->id, $vendor->organization->name);
+                    $sms_text = Yii::$app->sms->prepareText('sms.request_new_callback', [
+                        'request_id' => $request->id,
+                        'vendor_name' => $vendor->organization->name
+                    ]);
                     //Найдем всех сотрудников ресторана, кому должны отправить уведомления
                     $clients = User::find()->where([
                         'role_id' => Role::ROLE_RESTAURANT_MANAGER

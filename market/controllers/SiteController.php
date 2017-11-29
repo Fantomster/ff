@@ -1324,9 +1324,10 @@ class SiteController extends Controller {
     private function sendInvite($client, $vendor) {
         foreach($vendor->users as $recipient){
             if($recipient->profile->phone && $recipient->profile->sms_allow){
-                $text = Yii::t('message', 'market.controllers.site.rest', ['ru'=>"Ресторан "]) . $client->name . Yii::t('message', 'market.controllers.site.market', ['ru'=>" добавил Вас через торговую площадку market.mixcart.ru"]);
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.add_market', [
+                    'client_name' => $client->name
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             } 
         }
     }

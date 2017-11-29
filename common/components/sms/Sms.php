@@ -1,4 +1,11 @@
 <?php
+
+namespace common\components\sms;
+
+use Yii;
+use yii\base\Component;
+use yii\db\Exception;
+
 /**
  * Created by PhpStorm.
  * User: MikeN
@@ -7,14 +14,16 @@
  *
  * Отправка СМС через компонент Yii
  * Yii::$app->sms->send('test','+79162221133');
- *
  */
 
-namespace common\components\sms;
-
-use yii\db\Exception;
-
-class Sms extends \yii\base\Component
+/**
+ * @inheritdoc
+ *
+ * @property $provider
+ * @property array $attributes
+ * @property \common\components\sms\AbstractProvider $sender
+ */
+class Sms extends Component
 {
     /**
      *  Класс с реализацией общения с API
@@ -29,7 +38,7 @@ class Sms extends \yii\base\Component
     public $attributes;
 
     /**
-     * instance $provider
+     * instance $provider AbstractProvider
      */
     private $sender;
 
@@ -107,5 +116,46 @@ class Sms extends \yii\base\Component
         } catch (Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Сборщик текста СМС
+     * @param $source_message
+     * @param array $params
+     * @param bool $truncate 70 chars
+     * @return string
+     */
+    public function prepareText($source_message, $params = [], $truncate = true)
+    {
+        $url = null;
+        if(isset($params['url'])) {
+            $url = Yii::$app->google->shortUrl(trim($params['url']));
+        }
+        //Получаем текст смс в текущей локализации
+        $text = Yii::t('sms_message', $source_message, $params);
+        //Если включена обрезка
+        if ($truncate === true) {
+            //Если есть урл, отрезаем текст СМС + url
+            if ($url !== null) {
+                //Если текст смс + url не лезет в 70 символов, отрезаем
+                if (mb_strlen($text . ' ' . $url) > 70) {
+                    $text = mb_substr($text, 0, 70 - strlen($url) - 4) . '... ' . $url;
+                } else {
+                    $text .= ' ' . $url;
+                }
+            } else {
+                //Если текст не лезет в 70 символов, отрезаем на 67 и добавляем ...
+                if (mb_strlen($text) > 70) {
+                    $text = mb_substr($text, 0, 67) . '...';
+                }
+            }
+        } else {
+            //Необходимо отправить смс полностью, чтобы то не стоило
+            if($url !== null) {
+                $text .= ' ' . $url;
+            }
+        }
+        //Возвращаем подготовленный текст
+        return $text;
     }
 }

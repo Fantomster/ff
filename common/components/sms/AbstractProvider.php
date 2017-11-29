@@ -10,7 +10,6 @@ namespace common\components\sms;
 
 
 use yii\db\Exception;
-use yii\db\Expression;
 
 abstract class AbstractProvider
 {

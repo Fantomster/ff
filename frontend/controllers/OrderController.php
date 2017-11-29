@@ -1656,9 +1656,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                $text = $senderOrg->name . Yii::t('message', 'frontend.controllers.order.changed', ['ru'=>" изменил заказ "]).Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$subject;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1691,9 +1693,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_done) {
-                $text = $order->vendor->name . Yii::t('message', 'frontend.controllers.order.complete_order', ['ru'=>" выполнил заказ "]).Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->vendor->name . " выполнил заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_done', [
+                    'name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1728,9 +1732,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_created) {
-                $text = Yii::t('message', 'frontend.controllers.order.new_order_two', ['ru'=>"Новый заказ от "]).$senderOrg->name . ' '.Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$order->client->name . " сформировал для Вас заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_new', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1762,9 +1768,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_processing) {
-                $text = Yii::t('message', 'frontend.controllers.order.accepted_order_two', ['ru'=>"Заказ у {vendor_name} согласован", 'vendor_name'=>$order->vendor->name]) . Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//"Заказ в системе №" . $order->id . " согласован.";
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_processing', [
+                    'vendor_name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }
@@ -1796,9 +1804,11 @@ class OrderController extends DefaultController {
                         ->send();
             }
             if ($recipient->profile->phone && $recipient->smsNotification->order_canceled) {
-                $text = $senderOrg->name . Yii::t('message', 'frontend.controllers.order.cancelled_order_seven', ['ru'=>" отменил заказ "]).Yii::$app->google->shortUrl($order->getUrlForUser($recipient));//$senderOrg->name . " отменил заказ в системе №" . $order->id;
-                $target = $recipient->profile->phone;
-                Yii::$app->sms->send($text, $target);
+                $text = Yii::$app->sms->prepareText('sms.order_canceled', [
+                    'name' => $senderOrg->name,
+                    'url' => $order->getUrlForUser($recipient)
+                ]);
+                Yii::$app->sms->send($text, $recipient->profile->phone);
             }
         }
     }

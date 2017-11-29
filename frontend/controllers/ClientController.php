@@ -555,9 +555,10 @@ class ClientController extends DefaultController {
                         $currentOrganization->save();
 
                         if (!empty($profile->phone)) {
-                            $text = Yii::t('message', 'frontend.controllers.client.rest', ['ru'=>'Ресторан ']) . $currentUser->organization->name . Yii::t('message', 'frontend.controllers.client.invite', ['ru'=>' приглашает Вас в систему']);
-                            $target = $profile->phone;
-                            Yii::$app->sms->send($text, $target);
+                            $text = Yii::$app->sms->prepareText('sms.client_invite', [
+                                'name' => $currentUser->organization->name
+                            ]);
+                            Yii::$app->sms->send($text, $profile->phone);
                         }
                         $transaction->commit();
                         if ($check['eventType'] == 5) {
@@ -745,9 +746,10 @@ class ClientController extends DefaultController {
                         $currentOrganization->save();
 
                         if (!empty($profile->phone)) {
-                            $text = Yii::t('message', 'frontend.controllers.client.rest_two', ['ru'=>'Ресторан ']) . $currentUser->organization->name . Yii::t('message', 'frontend.controllers.client.invites', ['ru'=>' приглашает Вас в систему']);
-                            $target = $profile->phone;
-                            Yii::$app->sms->send($text, $target);
+                            $text = Yii::$app->sms->prepareText('sms.client_invite', [
+                                'name' => $currentUser->organization->name
+                            ]);
+                            Yii::$app->sms->send($text, $profile->phone);
                         }
                         $transaction->commit();
                         if ($check['eventType'] == 5) {
@@ -837,9 +839,10 @@ class ClientController extends DefaultController {
 
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = Yii::t('message', 'frontend.controllers.client.rest_three', ['ru'=>'Ресторан ']) . $currentUser->organization->name . Yii::t('message', 'frontend.controllers.client.wanna_work', ['ru'=>' хочет работать с Вами в системе']);
-                            $target = $row->profile->phone;
-                            Yii::$app->sms->send($text, $target);
+                            $text = Yii::$app->sms->prepareText('sms.client_want_to_work', [
+                                'name' => $currentUser->organization->name
+                            ]);
+                            Yii::$app->sms->send($text, $row->profile->phone);
                         }
                         $email = $row->email;
                         $subject = Yii::t('message', 'frontend.controllers.client.rest_four', ['ru'=>"Ресторан "]) . $currentOrganization->name . Yii::t('message', 'frontend.controllers.client.invites_you', ['ru'=>" приглашает вас в систему"]);
@@ -926,9 +929,10 @@ class ClientController extends DefaultController {
             foreach ($organization->users as $recipient) {
                 $currentUser->sendInviteToVendor($recipient);
                 if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                    $text = Yii::t('message', 'frontend.controllers.client.second_inv', ['ru'=>"Повторное приглашение в систему от "]) . $currentUser->organization->name;
-                    $target = $recipient->profile->phone;
-                    Yii::$app->sms->send($text, $target);
+                    $text = Yii::$app->sms->prepareText('sms.client_invite_repeat', [
+                        'name' => $currentUser->organization->name
+                    ]);
+                    Yii::$app->sms->send($text, $recipient->profile->phone);
                 }
             }
         }

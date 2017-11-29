@@ -37,7 +37,7 @@ use yii\helpers\Url;
       <span class="req-created">
           <?= Yii::t('message', 'frontend.views.request.created_three', ['ru'=>'Создан:']) ?>
       </span>
-        <span class="req-created"><b><?=$model->modifyDate ?></b></span>
+        <span class="req-created"><b><?=Yii::$app->formatter->format($model->created_at, 'datetime') ?></b></span>
       
       <span class="req-created" style="margin-left:20px">  
           <?= Yii::t('message', 'frontend.views.request.executor_three', ['ru'=>'Исполнитель:']) ?>

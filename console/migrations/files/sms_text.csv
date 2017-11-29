@@ -1,0 +1,48 @@
+sms.designated_catalog;ru;Поставщик {vendor_name} назначил для Вас каталог в системе
+sms.designated_catalog;en;
+sms.designated_catalog;es;
+sms.changed_catalog;ru;Поставщик изменил для Вас каталог в системе http://mixcart.ru
+sms.changed_catalog;en;
+sms.changed_catalog;es;
+sms.changed_order_detail;ru;{client_name} изменил детали заказа №{order_id}:{message}
+sms.changed_order_detail;en;
+sms.changed_order_detail;es;
+sms.request_set_responsible;ru;Вы назначены исполнителем по заявке №{request_id}
+sms.request_set_responsible;en;
+sms.request_set_responsible;es;
+sms.request_unset_responsible;ru;Вы сняты с исполнения по заявке №{request_id}
+sms.request_unset_responsible;en;
+sms.request_unset_responsible;es;
+sms.request_add_supplier;ru;{client_name} хочет работать с Вами в системе
+sms.request_add_supplier;en;
+sms.request_add_supplier;es;
+sms.request_new_callback;ru;Новый отклик по Вашей заявке №{request_id} от поставщика {vendor_name}
+sms.request_new_callback;en;
+sms.request_new_callback;es;
+sms.client_invite;ru;Ресторан {name} приглашает Вас в систему
+sms.client_invite;en;
+sms.client_invite;es;
+sms.client_invite_repeat;ru;Повторное приглашение в систему от {name}
+sms.client_invite_repeat;en;
+sms.client_invite_repeat;es;
+sms.client_want_to_work;ru;Ресторан {name} хочет работать с Вами в системе
+sms.client_want_to_work;en;
+sms.client_want_to_work;es;
+sms.order_changed;ru;{name} изменил заказ
+sms.order_changed;en;
+sms.order_changed;es;
+sms.order_done;ru;{name} выполнил заказ
+sms.order_done;en;
+sms.order_done;es;
+sms.order_new;ru;Новый заказ от {name}
+sms.order_new;en;
+sms.order_new;es;
+sms.order_processing;ru;Заказ у {vendor_name} согласован
+sms.order_processing;en;
+sms.order_processing;es;
+sms.order_canceled;ru;{name} отменил заказ
+sms.order_canceled;en;
+sms.order_canceled;es;
+sms.add_market;ru;Ресторан {client_name} добавил Вас через торговую площадку market.mixcart.ru
+sms.add_market;en;
+sms.add_market;es;

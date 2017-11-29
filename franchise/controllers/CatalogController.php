@@ -497,9 +497,10 @@ class CatalogController extends DefaultController
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = Yii::t('app', 'franchise.controllers.vendor', ['ru'=>'Поставщик ']) . $currentUser->organization->name . Yii::t('app', 'franchise.controllers.settled_catalog', ['ru'=>' назначил для Вас каталог в системе f-keeper.ru']);
-                            $target = $row->profile->phone;
-                            Yii::$app->sms->send($text, $target);
+                            $text = Yii::$app->sms->prepareText('sms.designated_catalog', [
+                                'vendor_name' => $currentUser->organization->name
+                            ]);
+                            Yii::$app->sms->send($text, $row->profile->phone);
                         }
                     }
                     return (['success' => true, Yii::t('app', 'franchise.controllers.subscribed', ['ru'=>'Подписан'])]);
@@ -576,9 +577,10 @@ class CatalogController extends DefaultController
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                 foreach ($rows as $row) {
                     if ($row->profile->phone && $row->profile->sms_allow) {
-                        $text = Yii::t('app', 'franchise.controllers.vendor_two', ['ru'=>'Поставщик ']) . $currentUser->organization->name . Yii::t('app', 'franchise.controllers.settled_catalog_two', ['ru'=>' назначил для Вас каталог в системе f-keeper.ru']);
-                        $target = $row->profile->phone;
-                        Yii::$app->sms->send($text, $target);
+                        $text = Yii::$app->sms->prepareText('sms.designated_catalog', [
+                            'vendor_name' => $currentUser->organization->name
+                        ]);
+                        Yii::$app->sms->send($text, $row->profile->phone);
                     }
                 }
                 return (['success' => true, Yii::t('app', 'franchise.controllers.subscribed_two', ['ru'=>'Подписан'])]);

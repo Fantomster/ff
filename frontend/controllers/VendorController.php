@@ -1252,9 +1252,10 @@ class VendorController extends DefaultController {
                 $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                 foreach ($rows as $row) {
                     if ($row->profile->phone && $row->profile->sms_allow) {
-                        $text = Yii::t('message', 'frontend.controllers.vendor.cat_for_you', ['ru'=>'Поставщик {vendor} назначил для Вас каталог в системе', 'vendor'=>$currentUser->organization->name]);
-                        $target = $row->profile->phone;
-                        Yii::$app->sms->send($text, $target);
+                        $text = Yii::$app->sms->prepareText('sms.designated_catalog', [
+                            'vendor_name' => $currentUser->organization->name
+                        ]);
+                        Yii::$app->sms->send($text, $row->profile->phone);
                     }
                 }
                 return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.subscr', ['ru'=>'Подписан'])]);
@@ -1624,9 +1625,10 @@ class VendorController extends DefaultController {
                     $rows = User::find()->where(['organization_id' => $rest_org_id])->all();
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = Yii::t('message', 'frontend.controllers.vendor.cat_for_you_two', ['ru'=>'Поставщик {vendor} назначил для Вас каталог в системе', 'vendor'=>$currentUser->organization->name]);
-                            $target = $row->profile->phone;
-                            Yii::$app->sms->send($text, $target);
+                            $text = Yii::$app->sms->prepareText('sms.designated_catalog', [
+                                'vendor_name' => $currentUser->organization->name
+                            ]);
+                            Yii::$app->sms->send($text, $row->profile->phone);
                         }
                     }
                     return (['success' => true, Yii::t('message', 'frontend.controllers.vendor.subscr_two', ['ru'=>'Подписан'])]);
@@ -1696,9 +1698,10 @@ class VendorController extends DefaultController {
                     if ($relation_supp_rest->cat_id != $curCatalog && !empty($relation_supp_rest->cat_id)) {
                         foreach ($organization->users as $recipient) {
                             if ($recipient->profile->phone && $recipient->profile->sms_allow) {
-                                $text = Yii::t('message', 'frontend.controllers.vendor.cat_for_you_three', ['ru'=>'Поставщик {vendor} назначил для Вас каталог в системе', 'vendor'=>$currentUser->organization->name]);
-                                $target = $recipient->profile->phone;
-                                Yii::$app->sms->send($text, $target);
+                                $text = Yii::$app->sms->prepareText('sms.designated_catalog', [
+                                    'vendor_name' => $currentUser->organization->name
+                                ]);
+                                Yii::$app->sms->send($text, $recipient->profile->phone);
                             }
                         }
                     }

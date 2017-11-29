@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 use common\assets\CroppieAsset;
 
 CroppieAsset::register($this);
-$this->title = Yii::t('app', 'Настройки');
+$this->title = Yii::t('app', 'franchise.views.site.settings_two', ['ru'=>'Настройки']);
 $this->registerJs(
         '$("document").ready(function(){
             $(".settings").on("click", "#cancelOrg", function() {
@@ -112,7 +112,7 @@ $this->registerCss("
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-gears"></i> <?= Yii::t('app', 'Общие') ?>
+        <i class="fa fa-gears"></i> <?= Yii::t('app', 'franchise.views.site.custom', ['ru'=>'Общие']) ?>
     </h1>
     <?=
     Breadcrumbs::widget([
@@ -120,8 +120,8 @@ $this->registerCss("
             'class' => 'breadcrumb',
         ],
         'links' => [
-            Yii::t('app', 'Настройки'),
-            Yii::t('app', 'Общие'),
+            Yii::t('app', 'franchise.views.site.settings_three', ['ru'=>'Настройки']),
+            Yii::t('app', 'franchise.views.site.common', ['ru'=>'Общие']),
         ],
     ])
     ?>
@@ -143,7 +143,7 @@ $this->registerCss("
             <div class="row">
 
                 <div class="col-md-12">
-                    <h3><?= Yii::t('app', 'Настройки менеджера франшизы') ?> <small><?= Yii::t('app', 'Помошник клиентов в регионе') ?></small></h3>
+                    <h3><?= Yii::t('app', 'franchise.views.site.managers_settings', ['ru'=>'Настройки менеджера франшизы']) ?> <small><?= Yii::t('app', 'franchise.views.site.clients_helper', ['ru'=>'Помошник клиентов в регионе']) ?></small></h3>
                     <!--div class="row">
                         <div class="col-md-12">
                             <div class="avatar-option" style="">
@@ -174,7 +174,7 @@ $this->registerCss("
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
                                             ->label('Менеджер <span style="font-size:12px; color: #dd4b39;"></span>')
-                                            ->textInput(['placeholder' => Yii::t('app', 'ФИО менеджера')])
+                                            ->textInput(['placeholder' => Yii::t('app', 'franchise.views.site.managers_fio', ['ru'=>'ФИО менеджера'])])
                                     ?>
                             </div>
                         </div>
@@ -192,7 +192,7 @@ $this->registerCss("
                                         'class' => 'form-control',
                                     ],
                                 ])
-                                        ->label(Yii::t('app', 'Телефон менеджера'))
+                                        ->label(Yii::t('app', 'franchise.views.site.managers_phone', ['ru'=>'Телефон менеджера']))
                                 ?>                           
                             </div>
                         </div>
@@ -200,7 +200,7 @@ $this->registerCss("
                             <div class="form-group">
                                     <?=
                                             $form->field($franchisee, 'additional_number_manager')
-                                            ->label(Yii::t('app', 'Добавочный номер'))
+                                            ->label(Yii::t('app', 'franchise.views.site.additional_number', ['ru'=>'Добавочный номер']))
                                             ->textInput(['placeholder' => ''])
                                     ?>
                             </div>
@@ -211,8 +211,8 @@ $this->registerCss("
             
         </div>
         <div class="box-footer clearfix">
-            <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('app', 'Сохранить изменения') . ' ', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
-            <?= Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('app', 'Отменить изменения') . ' ', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
+            <?= Html::submitButton('<i class="icon fa fa-save"></i> ' . Yii::t('app', 'franchise.views.site.save_changes', ['ru'=>'Сохранить изменения']) . ' ', ['class' => 'btn btn-success margin-right-15', 'id' => 'saveOrg', 'disabled' => true]) ?>
+            <?= Html::button('<i class="icon fa fa-ban"></i> ' . Yii::t('app', 'franchise.views.site.cancel_changes', ['ru'=>'Отменить изменения']) . ' ', ['class' => 'btn btn-gray', 'id' => 'cancelOrg', 'disabled' => true]) ?>
         </div>
         <?php
         ActiveForm::end();

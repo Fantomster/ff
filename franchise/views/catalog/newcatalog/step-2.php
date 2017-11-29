@@ -11,7 +11,7 @@ use yii\web\View;
 use common\models\Users;
 use dosamigos\switchinput\SwitchBox;
 use kartik\checkbox\CheckboxX;
-$this->title = 'Добавить продукты';
+$this->title = Yii::t('app', 'franchise.views.catalog.newcatalog.add_goods_three', ['ru'=>'Добавить продукты']);
 $this->registerCss('
     @media (max-width: 1300px){
        th{
@@ -22,7 +22,7 @@ $this->registerCss('
 ?>
 <section class="content-header">
     <h1>
-        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'Редактирование каталога') ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
+        <i class="fa fa-list-alt"></i> <?= Yii::t('app', 'franchise.views.catalog.newcatalog.editing_cat', ['ru'=>'Редактирование каталога']) ?> <?='<strong>'.common\models\Catalog::get_value($cat_id)->name.'</strong>'?>
         <small></small>
     </h1>
     <?=
@@ -32,10 +32,10 @@ $this->registerCss('
         ],
         'links' => [
             [
-            'label' => Yii::t('app', 'Каталоги'),
+            'label' => Yii::t('app', 'franchise.views.catalog.newcatalog.catalogs_two', ['ru'=>'Каталоги']),
             'url' => ['catalog/index', 'vendor_id'=>$vendor_id],
             ],
-            Yii::t('app', 'Шаг 2. Редактирование каталога'),
+            Yii::t('app', 'franchise.views.catalog.newcatalog.step_two_editing', ['ru'=>'Шаг 2. Редактирование каталога']),
         ],
     ])
     ?>
@@ -45,14 +45,14 @@ $this->registerCss('
     <div class="box-body">
         <div class="panel-body">
             <ul class="nav fk-tab nav-tabs pull-left">
-                <?='<li>'.Html::a(Yii::t('app', 'Название'),['catalog/step-1-update', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
-                <?='<li class="active">'.Html::a(' ' . Yii::t('app', 'Добавить товары') . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-2', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a(Yii::t('app', 'Изменить цены'),['catalog/step-3-copy', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
-                <?='<li>'.Html::a(Yii::t('app', 'Назначить ресторану'),['catalog/step-4', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.name', ['ru'=>'Название']),['catalog/step-1-update', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
+                <?='<li class="active">'.Html::a(' ' . Yii::t('app', 'franchise.views.catalog.newcatalog.add_goods_four', ['ru'=>'Добавить товары']) . '  <i class="fa fa-fw fa-hand-o-right"></i>',['catalog/step-2', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.change_prices_three', ['ru'=>'Изменить цены']),['catalog/step-3-copy', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
+                <?='<li>'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.set_for_rest', ['ru'=>'Назначить ресторану']),['catalog/step-4', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
             </ul>
             <ul class="fk-prev-next pull-right">
-              <?='<li class="fk-prev">'.Html::a(Yii::t('app', 'Назад'),['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
-              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'Далее') . ' ',['catalog/step-3-copy', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-prev">'.Html::a(Yii::t('app', 'franchise.views.catalog.newcatalog.back', ['ru'=>'Назад']),['catalog/step-1-update', 'vendor_id'=>$vendor_id,'id'=>$cat_id]).'</li>'?>
+              <?='<li class="fk-next">'.Html::a('<i class="fa fa-save"></i> ' . Yii::t('app', 'franchise.views.catalog.newcatalog.farther_two', ['ru'=>'Далее']) . ' ',['catalog/step-3-copy', 'vendor_id'=>$vendor_id, 'id'=>$cat_id]).'</li>'?>
             </ul>
         </div>
         
@@ -60,37 +60,37 @@ $this->registerCss('
         $gridColumnsBaseCatalog = [
             [
             'attribute' => 'article',
-            'label'=>Yii::t('app', 'Артикул'),
+            'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.art', ['ru'=>'Артикул']),
             'value'=>'article',
             'contentOptions' => ['style' => 'vertical-align:middle;'],
             ],
             [
             'attribute' => 'product',
-            'label'=>Yii::t('app', 'Наименование'),
+            'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.title_three', ['ru'=>'Наименование']),
             'value'=>'product',
             'contentOptions' => ['style' => 'vertical-align:middle;width:20%'],
             ],
             [
             'attribute' => 'units',
-            'label'=>Yii::t('app', 'Кратность'),
+            'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.multiplicity', ['ru'=>'Кратность']),
             'value'=>function ($data) { return empty($data['units'])?'':$data['units'];},
             'contentOptions' => ['style' => 'vertical-align:middle;width:120px;'],    
             ],
             [
             'attribute' => 'price',
-            'label'=>Yii::t('app', 'Цена'),
+            'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.price', ['ru'=>'Цена']),
             'value'=>function ($data) {
             $price = preg_replace('/[^\d.,]/','',$data['price']);
-            return $price.Yii::t('app', " руб.");
+            return $price.Yii::t('app', 'franchise.views.catalog.newcatalog.rouble', ['ru'=>" руб."]);
             },
             ],
             [
             'attribute' => 'ed',
-            'label'=>Yii::t('app', 'Ед. измерения'),
+            'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.measure', ['ru'=>'Ед. измерения']),
             'value'=>function ($data) { return $data['ed'];},
             ],
             [
-            'label'=>Yii::t('app', 'Категория'),
+            'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.category', ['ru'=>'Категория']),
             'value'=>function ($data) {
                         $data['category_id']==0 ? $category_name='':$category_name=\common\models\MpCategory::find()->where(['id'=>$data['category_id']])->one()->name;
                             return $category_name;
@@ -98,17 +98,17 @@ $this->registerCss('
             ],        
             [
             'attribute' => 'status',
-            'label'=>Yii::t('app', 'Наличие'),
+            'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.in_stock', ['ru'=>'Наличие']),
             'format' => 'raw',
             'contentOptions' => ['style' => ''],    
             'value'=>function ($data) {$data['status']==common\models\CatalogBaseGoods::STATUS_OFF?
-                    $product_status='<span class="text-danger">' . Yii::t('app', 'Нет') . ' </span>':
-                    $product_status='<span class="text-success">' . Yii::t('app', 'Есть') . ' </span>';
+                    $product_status='<span class="text-danger">' . Yii::t('app', 'franchise.views.catalog.newcatalog.nope', ['ru'=>'Нет']) . ' </span>':
+                    $product_status='<span class="text-success">' . Yii::t('app', 'franchise.views.catalog.newcatalog.yep', ['ru'=>'Есть']) . ' </span>';
                     return $product_status;
                 },
             ],
             [
-            'attribute' => Yii::t('app', 'Добавить'),
+            'attribute' => Yii::t('app', 'franchise.views.catalog.newcatalog.add', ['ru'=>'Добавить']),
             'format' => 'raw',
             'contentOptions' => ['style' => 'width:50px;'],
             'value' => function ($data) use($cat_id){
@@ -158,9 +158,9 @@ $this->registerCss('
         ?>
         <div class="panel-body">
             <div class="callout callout-fk-info" style="margin-bottom:0">
-                <h4><?= Yii::t('app', 'ШАГ 2') ?></h4>
+                <h4><?= Yii::t('app', 'franchise.views.catalog.newcatalog.step_two', ['ru'=>'ШАГ 2']) ?></h4>
 
-                <p><?= Yii::t('app', 'Отлично. Теперь выберите товары для каталога, просто проставив галочки в колонке <strong>Добавить</strong>') ?>. </p>
+                <p><?= Yii::t('app', 'franchise.views.catalog.newcatalog.perfect', ['ru'=>'Отлично. Теперь выберите товары для каталога, просто проставив галочки в колонке <strong>Добавить</strong>']) ?>. </p>
             </div>
         </div>
         <div class="panel-body">
@@ -170,7 +170,7 @@ $this->registerCss('
                             <span class="input-group-addon">
                               <i class="fa fa-search"></i>
                             </span>
-                    <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>Yii::t('app', 'Поиск'),'id'=>'search']) ?>
+                    <?=Html::input('text', 'search', null, ['class' => 'form-control','placeholder'=>Yii::t('app', 'franchise.views.catalog.newcatalog.search', ['ru'=>'Поиск']),'id'=>'search']) ?>
                       </div>
                 </div> 
             </div>

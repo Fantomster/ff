@@ -1,6 +1,6 @@
 <?php
 
-$this->title = Yii::t('app', 'Ваши поставщики');
+$this->title = Yii::t('app', 'franchise.views.organization.your_vendors', ['ru'=>'Ваши поставщики']);
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -54,7 +54,7 @@ $this->registerJs('
         });
         $("body").on("click", ".f-delete", function(e){
             e.preventDefault();
-            if(!confirm("Вы уверены, что хотите удалить поставщика?")){
+            if(!confirm("'. Yii::t('app', 'franchise.views.organization.sure_two', ['ru'=>'Вы уверены, что хотите удалить поставщика?']) .'")){
                 return false;
             }
             var url = $(this).attr("url");
@@ -74,8 +74,8 @@ $this->registerCss("
 
 <section class="content-header">
     <h1>
-        <i class="fa fa-home"></i>  <?= Yii::t('app', 'Ваши поставщики') ?>
-        <small><?= Yii::t('app', 'Подключенные Вами поставщики и информация о них') ?></small>
+        <i class="fa fa-home"></i>  <?= Yii::t('app', 'franchise.views.organization.your_vendors_two', ['ru'=>'Ваши поставщики']) ?>
+        <small><?= Yii::t('app', 'franchise.views.organization.plugged_vendors', ['ru'=>'Подключенные Вами поставщики и информация о них']) ?></small>
     </h1>
     <?=
     ''
@@ -104,25 +104,25 @@ $this->registerCss("
             ?>
             <div class="row">
                 <div class="col-lg-3 col-md-3 col-sm-6">
-                    <?= Html::label(Yii::t('app', 'Поиск'), null, ['style' => 'color:#555']) ?>
+                    <?= Html::label(Yii::t('app', 'franchise.views.organization.search_five', ['ru'=>'Поиск']), null, ['style' => 'color:#555']) ?>
                     <div class="input-group  pull-left">
                         <span class="input-group-addon">
                             <i class="fa fa-search"></i>
                         </span>
-                        <?= Html::input('text', 'search', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => Yii::t('app', 'Поиск'), 'id' => 'search', 'style'=>'width:300px']) ?>
+                        <?= Html::input('text', 'search', $searchModel['searchString'], ['class' => 'form-control', 'placeholder' => Yii::t('app', 'franchise.views.organization.search_six', ['ru'=>'Поиск']), 'id' => 'search', 'style'=>'width:300px']) ?>
                     </div>
                 </div>
 
                 <div class="col-lg-5 col-md-6 col-sm-6">
-                        <?= Html::label(Yii::t('app', 'Начальная дата / Конечная дата'), null, ['style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('app', 'franchise.views.organization.date_from_to_two', ['ru'=>'Начальная дата / Конечная дата']), null, ['style' => 'color:#555']) ?>
                     <div class="form-group" style="width: 300px; height: 44px;">
                         <?=
                         DatePicker::widget([
                             'model' => $searchModel,
                             'attribute' => 'date_from',
                             'attribute2' => 'date_to',
-                            'options' => ['placeholder' => Yii::t('app', 'Дата'), 'id' => 'dateFrom'],
-                            'options2' => ['placeholder' => Yii::t('app', 'Конечная дата'), 'id' => 'dateTo'],
+                            'options' => ['placeholder' => Yii::t('app', 'franchise.views.organization.date_four', ['ru'=>'Дата']), 'id' => 'dateFrom'],
+                            'options2' => ['placeholder' => Yii::t('app', 'franchise.views.organization.date_to_three', ['ru'=>'Конечная дата']), 'id' => 'dateTo'],
                             'separator' => '-',
                             'type' => DatePicker::TYPE_RANGE,
                             'pluginOptions' => [
@@ -142,7 +142,7 @@ $this->registerCss("
                         'dataProvider' => $dataProvider,
                         'columns' => $exportColumns,
                         'fontAwesome' => true,
-                        'filename' => Yii::t('app', 'Поставщики - ') . date('Y-m-d'),
+                        'filename' => Yii::t('app', 'franchise.views.organization.vendor_six', ['ru'=>'Поставщики - ']) . date('Y-m-d'),
                         'encoding' => 'UTF-8',
                         'target' => ExportMenu::TARGET_SELF,
                         'showConfirmAlert' => false,
@@ -150,7 +150,7 @@ $this->registerCss("
                         'batchSize' => 200,
                         'timeout' => 0,
                         'dropdownOptions' => [
-                            'label' => '<span class="text-label">' . Yii::t('app', 'Скачать список') . ' </span>',
+                            'label' => '<span class="text-label">' . Yii::t('app', 'franchise.views.organization.download_list_two', ['ru'=>'Скачать список']) . ' </span>',
                             'class' => ['btn btn-outline-default btn-sm'],
                             'style' => 'margin-right:10px;',
                         ],
@@ -227,11 +227,11 @@ $this->registerCss("
                                 'attribute' => 'name',
                                 'value' => function ($data) {
                                     if ($data['self_registered'] == \common\models\FranchiseeAssociate::SELF_REGISTERED) {
-                                        return $data['name'] . " &nbsp; <i title='" . Yii::t('app', 'Клиент самостоятельно зарегистрировался') . "' class='text-success' aria-hidden='true'><img src='/images/new.png' alt='" . Yii::t('app', 'Клиент самостоятельно зарегистрировался') . "'></i>";
+                                        return $data['name'] . " &nbsp; <i title='" . Yii::t('app', 'franchise.views.organization.self_registered_six', ['ru'=>'Клиент самостоятельно зарегистрировался']) . "' class='text-success' aria-hidden='true'><img src='/images/new.png' alt='" . Yii::t('app', 'franchise.views.organization.self_registered_seven', ['ru'=>'Клиент самостоятельно зарегистрировался']) . "'></i>";
                                     }
                                     return $data['name'];
                                 },
-                                'label' => Yii::t('app', 'Имя поставщика'),
+                                'label' => Yii::t('app', 'franchise.views.organization.vendors_name_three', ['ru'=>'Имя поставщика']),
                             ],
                             [
                                 'format' => 'raw',
@@ -249,7 +249,7 @@ $this->registerCss("
                                     }
                                     return $data["clientCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                'label' => Yii::t('app', 'Кол-во ресторанов'),
+                                'label' => Yii::t('app', 'franchise.views.organization.rest_quantity_two', ['ru'=>'Кол-во ресторанов']),
                             ],
                             [
                                 'format' => 'raw',
@@ -267,7 +267,7 @@ $this->registerCss("
                                     }
                                     return $data["orderCount"] . " <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                'label' => Yii::t('app', 'Кол-во заказов'),
+                                'label' => Yii::t('app', 'franchise.views.organization.orders_quan_five', ['ru'=>'Кол-во заказов']),
                             ],
                             [
                                 'format' => 'raw',
@@ -285,7 +285,7 @@ $this->registerCss("
                                     }
                                     return ($data["orderSum"] ? $data["orderSum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                'label' => Yii::t('app', 'Сумма заказов'),
+                                'label' => Yii::t('app', 'franchise.views.organization.orders_sum_three', ['ru'=>'Сумма заказов']),
                             ],
                             [
                                 'format' => 'raw',
@@ -294,17 +294,17 @@ $this->registerCss("
                                     $date = Yii::$app->formatter->asDatetime($data['created_at'], "php:j M Y");
                                     return '<i class="fa fa-fw fa-calendar""></i> ' . $date;
                                 },
-                                'label' => Yii::t('app', 'Дата регистрации'),
+                                'label' => Yii::t('app', 'franchise.views.organization.reg_date_three', ['ru'=>'Дата регистрации']),
                             ],
                             [
                                 'attribute' => 'contact_name',
                                 'value' => 'contact_name',
-                                'label' => Yii::t('app', 'Контакт'),
+                                'label' => Yii::t('app', 'franchise.views.organization.contact_five', ['ru'=>'Контакт']),
                             ],
                             [
                                 'attribute' => 'phone',
                                 'value' => 'phone',
-                                'label' => Yii::t('app', 'Телефон'),
+                                'label' => Yii::t('app', 'franchise.views.organization.phone_eight', ['ru'=>'Телефон']),
                             ],
                             [
                                 'format' => 'raw',
@@ -318,7 +318,7 @@ $this->registerCss("
                                 'buttons' => [
                                     'delete' => function ($url, $data) {
                                         return Html::a(
-                                            '<span class="glyphicon glyphicon-trash text-red" title="' . Yii::t('app', 'Удалить') . ' "></span>',
+                                            '<span class="glyphicon glyphicon-trash text-red" title="' . Yii::t('app', 'franchise.views.organization.del', ['ru'=>'Удалить']) . ' "></span>',
                                             null, ['data-pjax'=>'0', 'class' => 'f-delete', 'url'=>Url::to(['organization/delete', 'id' => $data["franchisee_associate_id"]])]);
                                     },
                                 ],

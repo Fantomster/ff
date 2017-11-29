@@ -40,7 +40,7 @@ if (!Yii::$app->user->isGuest) {
                             <span class="label label-warning unread-notifications-count" style="display: <?= false ? 'block' : 'none' ?>"><?= 0 ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header"><?= Yii::t('app', 'Оповещений:') ?> <span class="unread-notifications-count"><?= 0 ?></span></li>
+                            <li class="header"><?= Yii::t('app', 'franchise.views.layouts.messages_two', ['ru'=>'Оповещений:']) ?> <span class="unread-notifications-count"><?= 0 ?></span></li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-notifications">
@@ -52,7 +52,7 @@ if (!Yii::$app->user->isGuest) {
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-msg="0" data-ntf="1"><?= Yii::t('app', 'Пометить как прочитанные') ?></a>
+                                <a href="#" class="setRead" data-msg="0" data-ntf="1"><?= Yii::t('app', 'franchise.views.layouts.check_as_read_two', ['ru'=>'Пометить как прочитанные']) ?></a>
                             </li>
                         </ul>
                     </li>
@@ -84,7 +84,7 @@ if (!Yii::$app->user->isGuest) {
                     <li class="dropdown tasks-menu">
                         <?=
                         Html::a(
-                                '<i class="fa fa-sign-out"></i> ' . Yii::t('app', 'Выход') . ' ', ['/user/logout'], ['data-method' => 'post']
+                                '<i class="fa fa-sign-out"></i> ' . Yii::t('app', 'franchise.views.layouts.exit_two', ['ru'=>'Выход']) . ' ', ['/user/logout'], ['data-method' => 'post']
                         )
                         ?>
                     </li>

@@ -8,7 +8,7 @@
                     'options' => ['class' => 'sidebar-menu'],
                     'encodeLabels' => false,
                     'items' => [
-                        ['label' => Yii::t('app', 'Финансы'), 'icon' => 'money', 'url' => ['finance/index'], 'options' => ['class' => 'hidden-xs']],
+                        ['label' => Yii::t('app', 'franchise.views.layouts.fin_two', ['ru'=>'Финансы']), 'icon' => 'money', 'url' => ['finance/index'], 'options' => ['class' => 'hidden-xs']],
                     ],
                 ]
             )

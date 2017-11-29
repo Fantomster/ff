@@ -7,8 +7,8 @@
             <div class="col-md-12" style="padding-right: 5px;">
               <h4 class="text-success"><?=$model->organization->name?>
               </h4>
-              <h5><?= Yii::t('app', 'Стоимость услуги:') ?> <span class="text-bold"><?=$model->price?> руб.</span></h5>
-              <p><b><?= Yii::t('app', 'Комментарий поставщика:') ?></b> <?=$model->comment?></p>
+              <h5><?= Yii::t('app', 'franchise.views.site.request.view.service_price', ['ru'=>'Стоимость услуги:']) ?> <span class="text-bold"><?=$model->price?> <?= Yii::t('app', 'franchise.views.site.view.rouble', ['ru'=>'руб.']) ?></span></h5>
+              <p><b><?= Yii::t('app', 'franchise.views.site.request.view.comment', ['ru'=>'Комментарий поставщика:']) ?></b> <?=$model->comment?></p>
             </div>
           </div>
         </div>

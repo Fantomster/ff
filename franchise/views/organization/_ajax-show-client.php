@@ -28,19 +28,19 @@ use yii\helpers\Html;
                       </div>-->
                       
                       <div class="form-group">
-                        <label for="exampleInputEmail1"><?= Yii::t('app', 'Название юр. лица:') ?></label>
+                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.jur_name', ['ru'=>'Название юр. лица:']) ?></label>
                         <p><?= $client->legal_entity ?></p>
                       </div>
                       <div class="form-group">
-                        <label for="exampleInputEmail1"><?= Yii::t('app', 'Город:') ?></label>
+                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.city', ['ru'=>'Город:']) ?></label>
                         <p><?= $client->city ?></p>
                       </div>
                       <div class="form-group">
-                        <label for="exampleInputEmail1"><?= Yii::t('app', 'Адрес:') ?></label>
+                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.address', ['ru'=>'Адрес:']) ?></label>
                         <p><?= $client->address ?></p>
                       </div>
                       <div class="form-group">
-                        <label for="exampleInputEmail1"><?= Yii::t('app', 'Краткая информация:') ?></label>
+                        <label for="exampleInputEmail1"><?= Yii::t('app', 'franchise.views.organization.short_info', ['ru'=>'Краткая информация:']) ?></label>
                         <p><?= $client->about ?></p>
                       </div>
                       
@@ -53,7 +53,7 @@ use yii\helpers\Html;
                   <div class="col-md-4">
                     <img width="163" height="100" src="<?= $client->pictureUrl ?>">
                     <div class="btn-edite">
-                      <?= Html::a(Yii::t('app', 'Аналитика'), ['analytics/client-stats', 'id' => $client->id], ['class' => "btn btn-strip-green btn-block"]) ?>
+                      <?= Html::a(Yii::t('app', 'franchise.views.organization.anal', ['ru'=>'Аналитика']), ['analytics/client-stats', 'id' => $client->id], ['class' => "btn btn-strip-green btn-block"]) ?>
                     </div>
                   </div>
                   <div class="col-md-8">
@@ -105,10 +105,10 @@ use yii\helpers\Html;
                   <p><?= $client->buisinessInfo->info ?></p>
               </div>-->
               <div class="modal-footer" style="background-color: #fff; border-top: 1px solid #e5e5e5;">
-                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i class="fa fa-fw fa-close"></i> <?= Yii::t('app', 'Закрыть') ?></button>
-                  <?= Html::a('<i class="fa fa-fw fa-mail-forward"></i> ' . Yii::t('app', 'Просмотр') . ' ', ['organization/show-client', 'id' => $client->id], ['class' => 'btn btn-info']) ?>
+                  <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i class="fa fa-fw fa-close"></i> <?= Yii::t('app', 'franchise.views.organization.close', ['ru'=>'Закрыть']) ?></button>
+                  <?= Html::a('<i class="fa fa-fw fa-mail-forward"></i> ' . Yii::t('app', 'franchise.views.organization.watch', ['ru'=>'Просмотр']) . ' ', ['organization/show-client', 'id' => $client->id], ['class' => 'btn btn-info']) ?>
                   <?php if ($showEditButton): ?>
-                  <?= Html::a('<i class="fa fa-fw fa-pencil"></i> ' . Yii::t('app', 'Редактировать') . ' ', ['organization/update-client', 'id' => $client->id], ['class' => 'btn btn-primary']) ?>
+                  <?= Html::a('<i class="fa fa-fw fa-pencil"></i> ' . Yii::t('app', 'franchise.views.organization.edit', ['ru'=>'Редактировать']) . ' ', ['organization/update-client', 'id' => $client->id], ['class' => 'btn btn-primary']) ?>
                   <?php endif; ?>
               </div>
             </div>

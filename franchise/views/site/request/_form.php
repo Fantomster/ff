@@ -13,7 +13,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 ?>
 
 <section class="content">
-    <h3><?= Yii::t('app', 'Редактирование заявки №') ?> <?= $model->id ?></h3>
+    <h3><?= Yii::t('app', 'franchise.views.site.request.edit', ['ru'=>'Редактирование заявки №']) ?> <?= $model->id ?></h3>
     <div class="box box-info order-history">
         <div class="box-body">
 
@@ -27,13 +27,13 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
 
             <?= $form->field($model, 'comment')->textarea(['rows' => 6]) ?>
 
-            <?= $form->field($model, 'regular')->dropDownList([1=>Yii::t('app', 'Разово'),2=>Yii::t('app', 'Ежедневно'),3=>Yii::t('app', 'Каждую неделю'),4=>Yii::t('app', 'Каждый месяц')]); ?>
+            <?= $form->field($model, 'regular')->dropDownList([1=>Yii::t('app', 'franchise.views.site.request.once', ['ru'=>'Разово']),2=>Yii::t('app', 'franchise.views.site.request.daily', ['ru'=>'Ежедневно']),3=>Yii::t('app', 'franchise.views.site.request.weekly', ['ru'=>'Каждую неделю']),4=>Yii::t('app', 'franchise.views.site.request.monthly', ['ru'=>'Каждый месяц'])]); ?>
 
             <?= $form->field($model, 'rush_order')->checkbox();?>
 
-            <?= $form->field($model, 'payment_method')->dropDownList([1=>Yii::t('app', 'Наличный расчет'),2=>Yii::t('app', 'Безналичный расчет')]); ?>
+            <?= $form->field($model, 'payment_method')->dropDownList([1=>Yii::t('app', 'franchise.views.site.request.cash', ['ru'=>'Наличный расчет']),2=>Yii::t('app', 'franchise.views.site.request.no_cash', ['ru'=>'Безналичный расчет'])]); ?>
 
-            <?= $form->field($model, 'deferment_payment')->textInput()->label(Yii::t('app', 'Отложенный платеж(дней)')) ?>
+            <?= $form->field($model, 'deferment_payment')->textInput()->label(Yii::t('app', 'franchise.views.site.request.deferred', ['ru'=>'Отложенный платеж(дней)'])) ?>
 
             <hr>
             <?=$form->field($model, 'active_status')->widget(CheckboxX::classname(), [
@@ -47,7 +47,7 @@ kartik\checkbox\KrajeeFlatBlueThemeAsset::register($this);
                     'size'=>'lg',
                 ],
                 'labelSettings' => [
-                    'label' => ' ' . Yii::t('app', 'Заявка открыта') . '  <span style="font-size:14px;color:#ccc;margin-left:5px"> ' . Yii::t('app', 'уберите галочку, чтобы закрыть заявку') . ' </span>',
+                    'label' => ' ' . Yii::t('app', 'franchise.views.site.request.req_opened', ['ru'=>'Заявка открыта']) . '  <span style="font-size:14px;color:#ccc;margin-left:5px"> ' . Yii::t('app', 'franchise.views.site.request.uncheck', ['ru'=>'уберите галочку, чтобы закрыть заявку']) . ' </span>',
                     'position' => CheckboxX::LABEL_RIGHT,
                     'options' =>['style'=>'font-size: 20px;color: red;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: 500;']
                 ]

@@ -36,11 +36,11 @@ if (!Yii::$app->user->isGuest) {
                 <ul class="nav navbar-nav">
                     <li class="dropdown btn-add-menu">
                         <a class="btn-add-client dropdown-toggle" data-toggle="dropdown" href="#" style="background: rgba(0, 0, 0, 0.1);" aria-expanded="false">
-                            <i class="fa fa-user-plus"></i> <?= Yii::t('app', 'Добавить клиента') ?> <i class="fa fa-caret-down"></i>
+                            <i class="fa fa-user-plus"></i> <?= Yii::t('app', 'franchise.views.layouts.add_client', ['ru'=>'Добавить клиента']) ?> <i class="fa fa-caret-down"></i>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="<?= Url::to(['organization/create-vendor']) ?>"><?= Yii::t('app', 'Добавить поставщика') ?></a></li>
-                            <li><a href="<?= Url::to(['organization/create-client']) ?>"><?= Yii::t('app', 'Добавить ресторан') ?></a></li>
+                            <li><a href="<?= Url::to(['organization/create-vendor']) ?>"><?= Yii::t('app', 'franchise.views.layouts.add_vendor', ['ru'=>'Добавить поставщика']) ?></a></li>
+                            <li><a href="<?= Url::to(['organization/create-client']) ?>"><?= Yii::t('app', 'franchise.views.layouts.add_rest', ['ru'=>'Добавить ресторан']) ?></a></li>
                         </ul>
                     </li>
                     <li class="dropdown messages-menu">
@@ -49,7 +49,7 @@ if (!Yii::$app->user->isGuest) {
                             <span class="label label-warning unread-notifications-count" style="display: <?= false ? 'block' : 'none' ?>"><?= 0 ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="header"><?= Yii::t('app', 'Оповещений:') ?> <span class="unread-notifications-count"><?= 0 ?></span></li>
+                            <li class="header"><?= Yii::t('app', 'franchise.views.layouts.messages', ['ru'=>'Оповещений:']) ?> <span class="unread-notifications-count"><?= 0 ?></span></li>
                             <li>
                                 <!-- inner menu: contains the actual data -->
                                 <ul class="menu unread-notifications">
@@ -61,7 +61,7 @@ if (!Yii::$app->user->isGuest) {
                                 </ul>
                             </li>
                             <li class="footer">
-                                <a href="#" class="setRead" data-msg="0" data-ntf="1"><?= Yii::t('app', 'Пометить как прочитанные') ?></a>
+                                <a href="#" class="setRead" data-msg="0" data-ntf="1"><?= Yii::t('app', 'franchise.views.layouts.check_as_read', ['ru'=>'Пометить как прочитанные']) ?></a>
                             </li>
                         </ul>
                     </li>
@@ -93,7 +93,7 @@ if (!Yii::$app->user->isGuest) {
                     <li class="dropdown tasks-menu">
                         <?=
                         Html::a(
-                                '<i class="fa fa-sign-out"></i> ' . Yii::t('app', 'Выход') . ' ', ['/user/logout'], ['data-method' => 'post']
+                                '<i class="fa fa-sign-out"></i> ' . Yii::t('app', 'franchise.views.layouts.exit', ['ru'=>'Выход']) . ' ', ['/user/logout'], ['data-method' => 'post']
                         )
                         ?>
                     </li>

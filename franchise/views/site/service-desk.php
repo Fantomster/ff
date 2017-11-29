@@ -4,10 +4,10 @@ use yii\widgets\Breadcrumbs;
 use yii\helpers\Html;
 use kartik\form\ActiveForm;
 use yii\widgets\Pjax;
-$this->title = Yii::t('app', 'Техническая поддержка');
+$this->title = Yii::t('app', 'franchise.views.site.tech_two', ['ru'=>'Техническая поддержка']);
 ?>
 <section class="content-header">
-    <h1><?= Yii::t('app', 'Запрос техническому отделу') ?><small> <?= Yii::t('app', 'Ваш запрос будет обработан в порядке очереди и приоритета') ?></small>
+    <h1><?= Yii::t('app', 'franchise.views.site.req', ['ru'=>'Запрос техническому отделу']) ?><small> <?= Yii::t('app', 'franchise.views.site.req_will', ['ru'=>'Ваш запрос будет обработан в порядке очереди и приоритета']) ?></small>
     </h1>
 </section>
 <section class="content">
@@ -26,15 +26,15 @@ $this->title = Yii::t('app', 'Техническая поддержка');
             <div id="collapseOne" class="panel-collapse collapse in" aria-expanded="true">
                 <div class="box-body">
                     <?= $form->field($model, 'priority')->dropDownList([
-                        '1'=>Yii::t('app', 'Низкий (пожелание, просьба)'),
-                        '2'=>Yii::t('app', 'Ниже среднего (замечание)'),
-                        '3'=>Yii::t('app', 'Средний (функционал работает, но не в штатном режиме)'),
-                        '4'=>Yii::t('app', 'Выше среднего (Не работает не критичный бизнес процесс)'),
-                        '5'=>Yii::t('app', 'Высокий (Система не работает)'),
+                        '1'=>Yii::t('app', 'franchise.views.site.low', ['ru'=>'Низкий (пожелание, просьба)']),
+                        '2'=>Yii::t('app', 'franchise.views.site.lower', ['ru'=>'Ниже среднего (замечание)']),
+                        '3'=>Yii::t('app', 'franchise.views.site.middle', ['ru'=>'Средний (функционал работает, но не в штатном режиме)']),
+                        '4'=>Yii::t('app', 'franchise.views.site.more_mid', ['ru'=>'Выше среднего (Не работает не критичный бизнес процесс)']),
+                        '5'=>Yii::t('app', 'franchise.views.site.high', ['ru'=>'Высокий (Система не работает)']),
                         ]);?>
                     <?= $form->field($model, 'body')->textInput() ?> 
                     <div class="form-group">
-                        <?= Html::submitButton(Yii::t('app', 'Отправить'), ['id'=>'send','class'=>'btn btn-success']) ?>
+                        <?= Html::submitButton(Yii::t('app', 'franchise.views.site.send', ['ru'=>'Отправить']), ['id'=>'send','class'=>'btn btn-success']) ?>
                     </div>
                 </div>
             </div>

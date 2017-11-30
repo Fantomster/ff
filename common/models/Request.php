@@ -64,7 +64,7 @@ class Request extends \yii\db\ActiveRecord {
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
                 ],
                 'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
+                    return date("Y-m-d H:i:s");
                 },
             ],
         ];
@@ -107,12 +107,13 @@ class Request extends \yii\db\ActiveRecord {
     }
 
     public function getModifyDate() {
-        $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at), 'php:Y-m-d H:i:s');
-        $m = Yii::$app->formatter->asDatetime($date, 'php:n');
-        $ypd = Yii::$app->formatter->asDatetime($date, 'php:yy');
-        $mpd = Yii::$app->formatter->asDatetime($date, 'php:m.y');
-        $dpd = Yii::$app->formatter->asDatetime($date, 'php:j');
-        $tpd = Yii::$app->formatter->asDatetime($date, 'php:H:i');
+        $date_stamp = strtotime($this->created_at);
+        $date = Yii::$app->formatter->asDatetime($date_stamp, 'php:Y-m-d H:i:s');
+        $m = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
+        $ypd = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
+        $mpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
+        $dpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:j');
+        $tpd = Yii::$app->formatter->asDatetime($date_stamp, 'H:i');
         $yy = Yii::$app->formatter->asDatetime('now', 'php:yy');
         $md = Yii::$app->formatter->asDatetime('now', 'php:m.y');
         $dd = Yii::$app->formatter->asDatetime('now', 'php:j');
@@ -160,9 +161,9 @@ class Request extends \yii\db\ActiveRecord {
             9 => 'Сентября', 10 => 'Октября', 11 => 'Ноября', 12 => 'Декабря'
         );
         if (($today == false) & ($yesterday == false) & ($ypd == $yy)) {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ', в HH:mm');
+            return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ', в HH:mm');
         } else {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ' Y, в HH:mm');
+            return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ' Y, в HH:mm');
         }
     }
 

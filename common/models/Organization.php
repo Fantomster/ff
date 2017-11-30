@@ -331,6 +331,47 @@ class Organization extends \yii\db\ActiveRecord
     }
 
     /**
+     * Список регионов доставки и исключения
+     * @return array
+     */
+    public function getDeliveryRegionAsArray()
+    {
+        $result = [];
+
+        if(isset($this->deliveryRegionsAllow)) {
+            foreach ($this->deliveryRegionsAllow as $row) {
+                $result['allow'][] = $row->attributes;
+            }
+        }
+        if(isset($this->deliveryRegionsExclude)) {
+            foreach ($this->deliveryRegionsExclude as $row) {
+                $result['exclude'][] = $row->attributes;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDeliveryRegionsAllow()
+    {
+        if ($this->type_id == Organization::TYPE_SUPPLIER) {
+            return $this->hasMany(DeliveryRegions::className(), ['supplier_id' => 'id'])->andWhere(['exception' => 0]);
+        }
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDeliveryRegionsExclude()
+    {
+        if ($this->type_id == Organization::TYPE_SUPPLIER) {
+            return $this->hasMany(DeliveryRegions::className(), ['supplier_id' => 'id'])->andWhere(['exception' => 1]);
+        }
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getCart()

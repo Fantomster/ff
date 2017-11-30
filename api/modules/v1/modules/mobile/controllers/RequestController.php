@@ -244,6 +244,7 @@ class RequestController extends ActiveController {
         $this->checkAccess('update', $model);
 
         $model->scenario = $this->updateScenario;
+        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
         if ($model->save() === false && !$model->hasErrors()) {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }

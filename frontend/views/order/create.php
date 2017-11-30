@@ -143,7 +143,7 @@ $this->registerJs(
                             ->textInput([
                                 'id' => 'searchString',
                                 'class' => 'form-control',
-                                'placeholder' => Yii::t('message', 'frontend.views.order.search_two', ['ru'=>'Поиск'])])
+                                'placeholder' => Yii::t('message', 'frontend.views.order.search_two', ['ru'=>'Поиск'])
                             ])
                             ->label(false)
                         ?>

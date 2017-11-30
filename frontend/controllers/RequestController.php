@@ -569,7 +569,7 @@ class RequestController extends DefaultController
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
-            return ['success' => false, 'error' => $e->getMessage()];
+            throw new \Exception($e->getTraceAsString());
         }
     }
 }

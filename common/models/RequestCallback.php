@@ -77,11 +77,11 @@ class RequestCallback extends \yii\db\ActiveRecord {
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
 
-//        if (!is_a(Yii::$app, 'yii\console\Application')) {
-//            if ($insert) {
-//                \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequestCallback($this->id);
-//            }
-//        }
+        if (!is_a(Yii::$app, 'yii\console\Application')) {
+            if ($insert) {
+                \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequestCallback($this->id);
+            }
+        }
     }
 
 }

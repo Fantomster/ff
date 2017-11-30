@@ -66,4 +66,38 @@ class DeliveryRegions extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Organization::className(), ['id' => 'supplier_id']);
     }
+
+    /**
+     * Вернет [id] организаций, с доступной доставкой в этом регионе
+     * @return array
+     */
+    public static function getSuppRegion() {
+        $tableName = static::tableName();
+        $sql = "SELECT supplier_id
+                FROM $tableName
+                WHERE ( locality = :locality
+                       OR ( administrative_area_level_1 = :region
+                           AND length(locality) < 1 ) )
+                  AND
+                  exception = :exception";
+
+        $command = Yii::$app->db->createCommand($sql)
+            ->bindValue(':locality', Yii::$app->request->cookies->get('locality'))
+            ->bindValue(':region', Yii::$app->request->cookies->get('region'));
+
+        $supplierRegion = $command->bindValue(':exception', 0)->queryColumn();
+        $exclude_region = $command->bindValue(':exception', 1)->queryColumn();
+
+        if(!empty($supplierRegion)){
+            if(!empty($exclude_region)) {
+                $supplierRegion = \array_udiff($supplierRegion, $exclude_region, function ($a, $b) {
+                    return $a - $b;
+                });
+            }
+
+            return $supplierRegion;
+        } else {
+            return [];
+        }
+    }
 }

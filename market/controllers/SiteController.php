@@ -2,6 +2,7 @@
 
 namespace market\controllers;
 
+use common\models\DeliveryRegions;
 use yii\web\HttpException;
 use Yii;
 use yii\web\Controller;
@@ -120,21 +121,14 @@ class SiteController extends Controller {
         }
         
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->asArray()
-                            ->all();
-            if(!empty($relationSuppliers) && !empty($supplierRegion)){
-                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                return $a['id'] - $b['id'];
-                });
-                $oWhere = ['in', 'id', $r];
-                $cbgWhere = ['in', 'supp_org_id', $r];
-            }else{
+            $supplierRegion = DeliveryRegions::getSuppRegion();
+
+            if(!empty($supplierRegion)){
+                if(!empty($relationSuppliers)) {
+                    $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                        return $a - $b['id'];
+                    });
+                }
                 $oWhere = ['in', 'id', $supplierRegion];
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
@@ -234,20 +228,10 @@ class SiteController extends Controller {
             }
         }
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->all();
-            $regions = [];
-            foreach ($supplierRegion AS $region) {
-                    $regions[] = $region->supplier_id;
-                }
+            $regions = DeliveryRegions::getSuppRegion();
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
-                return $a - $b;
+                    return $a - $b;
                 });
                 $where = $r;
             }else{
@@ -297,17 +281,7 @@ class SiteController extends Controller {
             }
         }
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->all();
-            $regions = [];
-            foreach ($supplierRegion AS $region) {
-                    $regions[] = $region->supplier_id;
-                }
+            $regions = DeliveryRegions::getSuppRegion();
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
                 return $a - $b;
@@ -364,17 +338,7 @@ class SiteController extends Controller {
             }
         }
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->all();
-            $regions = [];
-            foreach ($supplierRegion AS $region) {
-                    $regions[] = $region->supplier_id;
-                }
+            $regions = DeliveryRegions::getSuppRegion();
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
                 return $a - $b;
@@ -433,17 +397,7 @@ class SiteController extends Controller {
             }
         }
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->all();
-            $regions = [];
-            foreach ($supplierRegion AS $region) {
-                    $regions[] = $region->supplier_id;
-                }
+            $regions = DeliveryRegions::getSuppRegion();
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
                 return $a - $b;
@@ -641,20 +595,14 @@ class SiteController extends Controller {
         }
 
         if (!empty(Yii::$app->request->cookies->get('locality'))) {
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                ->select('supplier_id as id, supplier_id as supp_org_id')
-                ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                    . 'length(locality)<1)')
-                ->andWhere(['exception' => 0])
-                ->asArray()
-                ->all();
-            if (!empty($relationSuppliers) && !empty($supplierRegion)) {
-                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                    return $a['id'] - $b['id'];
-                });
-                $cbgWhere = ['in', 'supp_org_id', $r];
-            } else {
+            $supplierRegion = DeliveryRegions::getSuppRegion();
+
+            if(!empty($supplierRegion)){
+                if(!empty($relationSuppliers)) {
+                    $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                        return $a - $b['id'];
+                    });
+                }
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
@@ -699,22 +647,14 @@ class SiteController extends Controller {
         }
         
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->asArray()
-                            ->all();
-            if(!empty($relationSuppliers) && !empty($supplierRegion)){
-                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                return $a['id'] - $b['id'];
-                });
-                $oWhere = ['in', 'id', $r];
-                $cbgWhere = ['in', 'supp_org_id', $r];
-            }else{
-                $oWhere = ['in', 'id', $supplierRegion];
+            $supplierRegion = DeliveryRegions::getSuppRegion();
+
+            if(!empty($supplierRegion)){
+                if(!empty($relationSuppliers)) {
+                    $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                        return $a - $b['id'];
+                    });
+                }
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
@@ -820,23 +760,15 @@ class SiteController extends Controller {
         }
         
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->asArray()
-                            ->all();
-            if(!empty($relationSuppliers) && !empty($supplierRegion)){
-                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                return $a['id'] - $b['id'];
-                });
-                $oWhere = ['in', 'id', $r];
-                $cbgWhere = ['in', 'supp_org_id', $r];
-            }else{
+            $supplierRegion = DeliveryRegions::getSuppRegion();
+
+            if(!empty($supplierRegion)){
+                if(!empty($relationSuppliers)) {
+                    $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                        return $a - $b['id'];
+                    });
+                }
                 $oWhere = ['in', 'id', $supplierRegion];
-                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         
@@ -910,29 +842,27 @@ class SiteController extends Controller {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSuppliers = RelationSuppRest::find()
-                    ->select('supp_org_id as id,supp_org_id as supp_org_id')
+                $result = RelationSuppRest::find()
+                    ->select('supp_org_id as id')
                     ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                     ->asArray()
                     ->all();
+                foreach($result as $row){
+                    $relationSuppliers[] = $row['id'];
+                }
             }
         }
 
         if (!empty(Yii::$app->request->cookies->get('locality'))) {
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                ->select('supplier_id as id, supplier_id as supp_org_id')
-                ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                    . 'length(locality)<1)')
-                ->andWhere(['exception' => 0])
-                ->asArray()
-                ->all();
-            if (!empty($relationSuppliers) && !empty($supplierRegion)) {
-                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                    return $a['id'] - $b['id'];
-                });
-                $cbgWhere = ['in', 'supp_org_id', $r];
-            } else {
+
+            $supplierRegion = DeliveryRegions::getSuppRegion();
+
+            if(!empty($supplierRegion)){
+                if(!empty($relationSuppliers)) {
+                    $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                        return $a - $b;
+                    });
+                }
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
@@ -998,20 +928,14 @@ class SiteController extends Controller {
             }
 
             if (!empty(Yii::$app->request->cookies->get('locality'))) {
-                $supplierRegion = \common\models\DeliveryRegions::find()
-                    ->select('supplier_id as id, supplier_id as supp_org_id')
-                    ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                        . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                        . 'length(locality)<1)')
-                    ->andWhere(['exception' => 0])
-                    ->asArray()
-                    ->all();
-                if (!empty($relationSuppliers) && !empty($supplierRegion)) {
-                    $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                        return $a['id'] - $b['id'];
-                    });
-                    $cbgWhere = ['in', 'supp_org_id', $r];
-                } else {
+                $supplierRegion = DeliveryRegions::getSuppRegion();
+
+                if(!empty($supplierRegion)){
+                    if(!empty($relationSuppliers)) {
+                        $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                            return $a - $b['id'];
+                        });
+                    }
                     $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
                 }
             }
@@ -1059,23 +983,15 @@ class SiteController extends Controller {
         }
         
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id as id, supplier_id as supp_org_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->asArray()
-                            ->all();
-            if(!empty($relationSuppliers) && !empty($supplierRegion)){
-                $r = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                return $a['id'] - $b['id'];
-                });
-                $oWhere = ['in', 'id', $r];
-                $cbgWhere = ['in', 'supp_org_id', $r];
-            }else{
+            $supplierRegion = DeliveryRegions::getSuppRegion();
+
+            if(!empty($supplierRegion)){
+                if(!empty($relationSuppliers)) {
+                    $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
+                        return $a - $b['id'];
+                    });
+                }
                 $oWhere = ['in', 'id', $supplierRegion];
-                $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
             }
         }
         $suppliers = Organization::find()
@@ -1115,17 +1031,8 @@ class SiteController extends Controller {
             }
         }
         if(!empty(Yii::$app->request->cookies->get('locality'))){
-            $supplierRegion = \common\models\DeliveryRegions::find()
-                            ->select('supplier_id')
-                            ->where('locality = "' . Yii::$app->request->cookies->get('locality') . '" || '
-                                    . '(administrative_area_level_1 = "' . Yii::$app->request->cookies->get('region') . '" and '
-                                    . 'length(locality)<1)')
-                            ->andWhere(['exception'=>0])
-                            ->all();
-            $regions = [];
-            foreach ($supplierRegion AS $region) {
-                    $regions[] = $region->supplier_id;
-                }
+            $regions = DeliveryRegions::getSuppRegion();
+
             if(!empty($regions) && !empty($filterNotIn)){
                 $r = \array_udiff($regions, $filterNotIn, function ($a, $b) {
                 return $a - $b;

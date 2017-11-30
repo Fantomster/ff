@@ -106,9 +106,9 @@ class Request extends \yii\db\ActiveRecord {
         ];
     }
 
-    public function getModifyDate() {
+    public function getModifyDate()
+    {
         $date_stamp = strtotime($this->created_at);
-        $date = Yii::$app->formatter->asDatetime($date_stamp, 'php:Y-m-d H:i:s');
         $m = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
         $ypd = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
         $mpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
@@ -122,13 +122,8 @@ class Request extends \yii\db\ActiveRecord {
         $yesterday = false;
 
         if (($mpd == $md) & ($dpd == $dd)) {
-            $today = true;
-            $yesterday = false;
 
-            $dataTime = Yii::$app->formatter->asTimestamp($date, 'php:H:i:s');
-            $curTime = Yii::$app->formatter->asTimestamp('now', 'php:H:i:s');
-
-            $dif = $curTime - $dataTime;
+            $dif = time() - $date_stamp;
 
             $sArray = array("секунду", "секунды", "секунд");
             $iArray = array("минуту", "минуты", "минут");
@@ -150,16 +145,17 @@ class Request extends \yii\db\ActiveRecord {
                 return 'Сегодня, в ' . $tpd;
             }
         }
+
         if (($mpd == $md) & ($dpd == $dd - 1)) {
-            $today = false;
-            $yesterday = true;
             return 'Вчера, в ' . $tpd;
         }
-        $monthes = array(
+
+        $monthes = [
             1 => 'Января', 2 => 'Февраля', 3 => 'Марта', 4 => 'Апреля',
             5 => 'Мая', 6 => 'Июня', 7 => 'Июля', 8 => 'Августа',
             9 => 'Сентября', 10 => 'Октября', 11 => 'Ноября', 12 => 'Декабря'
-        );
+        ];
+
         if (($today == false) & ($yesterday == false) & ($ypd == $yy)) {
             return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ', в HH:mm');
         } else {

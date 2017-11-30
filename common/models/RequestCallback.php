@@ -79,7 +79,7 @@ class RequestCallback extends \yii\db\ActiveRecord {
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
              if ($insert) {
-                \api\modules\v1\modules\mobile\components\notifications\NotificationRequest::actionRequestCallback($requestCallback, $is_new);
+                \api\modules\v1\modules\mobile\components\notifications\NotificationRequest::actionRequestCallback($this, true);
             }
         }
     }

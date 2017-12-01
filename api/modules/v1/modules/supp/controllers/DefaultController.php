@@ -1262,8 +1262,9 @@ class DefaultController extends Controller {
            $sess->ver = 1;
            $sess->status = 1;           
            $sess->ip = $this->ip;
-           $sess->extimefrom = $this->extimefrom;
-           
+           $sess->extimefrom = gmdate('Y-m-d H:i:s');
+           // $sess->extimefrom = $this->extimefrom; Потом посмотреть что с форматом
+
            if(!$sess->save())
            {
                 return $sess->errors;

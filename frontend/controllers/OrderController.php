@@ -1141,11 +1141,13 @@ class OrderController extends DefaultController {
                 $discountChanged = (($order->discount_type != $discount['discount_type']) || ($order->discount != $discount['discount']));
                 if ($discountChanged) {
                     $order->discount_type = $discount['discount_type'];
-                    $order->discount = $order->discount_type ? abs($discount['discount']) : null;
+                    $order->discount = null;
                     $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
+                        $order->discount = round($discount['discount'], 2);
                         $discountValue = $order->discount . " $currencySymbol";
                     } else {
+                        $order->discount = abs($discount['discount']);
                         $discountValue = $order->discount . "%";
                     }
                     $message .= "<br/> сделал скидку на заказ №$order->id в размере: $discountValue";

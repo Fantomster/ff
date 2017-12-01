@@ -112,7 +112,11 @@ class Order extends \yii\db\ActiveRecord {
 
     public function beforeSave($insert) {
         $result = parent::beforeSave($insert);
-        $this->discount = abs((int) $this->discount);
+        if ($this->discount_type == Order::DISCOUNT_FIXED) {
+            $this->discount = round($this->discount, 2);
+        } else {
+            $this->discount = abs((int) $this->discount);
+        }
         return $result;
     }
 

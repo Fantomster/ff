@@ -190,7 +190,9 @@ class OrderContent extends \yii\db\ActiveRecord
         }
         
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContent($this->id);
+            }
         }
     }
 
@@ -202,7 +204,9 @@ class OrderContent extends \yii\db\ActiveRecord
         parent::afterDelete();
         
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+            if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+                \api\modules\v1\modules\mobile\components\NotificationHelper::actionOrderContentDelete($this);
+            }
         }
     }
 }

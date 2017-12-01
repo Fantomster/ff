@@ -516,6 +516,7 @@ class RequestController extends DefaultController
     /**
      * Оставить отклик на заявку, отправляет уведомления
      * @return array
+     * @throws \Exception
      */
     public function actionAddCallback()
     {

@@ -113,7 +113,7 @@ class GuideProduct extends \yii\db\ActiveRecord
     public function afterSave() {
         parent::afterDelete();
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionGuideProduct($this->id);
+//            \api\modules\v1\modules\mobile\components\NotificationHelper::actionGuideProduct($this->id);
         }
     }
     

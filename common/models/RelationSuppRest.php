@@ -196,7 +196,7 @@ class RelationSuppRest extends \yii\db\ActiveRecord {
         parent::afterSave($insert, $changedAttributes);
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
+//            \api\modules\v1\modules\mobile\components\NotificationHelper::actionRelation($this->id);
         }
     }
 }

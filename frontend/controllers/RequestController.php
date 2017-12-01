@@ -175,14 +175,12 @@ class RequestController extends DefaultController
                 if(!empty($deliveryRegions['allow'])) {
                     foreach ($deliveryRegions['allow'] as $row) {
                         if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
-                            $query->orWhere(['AND',
-                                ['IN', 'administrative_area_level_1', $row['administrative_area_level_1']],
-                                ['IN', 'locality',  $row['locality']],
-                            ]);
+                            $p = $row['administrative_area_level_1'].$row['locality'];
+                            $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p',[':p' => $p]);
                         } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
-                            $query->orWhere(['IN', 'locality', $row['locality']]);
+                            $query->orWhere(['=', 'locality', $row['locality']]);
                         } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
-                            $query->orWhere(['IN', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                            $query->orWhere(['=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
                         }
                     }
                 }
@@ -191,14 +189,12 @@ class RequestController extends DefaultController
                     if(!empty($deliveryRegions['exclude'])) {
                         foreach ($deliveryRegions['exclude'] as $row) {
                             if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
-                                $query->andWhere(['AND',
-                                    ['NOT IN', 'administrative_area_level_1', $row['administrative_area_level_1']],
-                                    ['NOT IN', 'locality',  $row['locality']],
-                                ]);
+                                $p = $row['administrative_area_level_1'].$row['locality'];
+                                $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s',[':s' => $p]);
                             } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
-                                $query->andWhere(['NOT IN', 'locality', $row['locality']]);
+                                $query->andWhere(['!=', 'locality', $row['locality']]);
                             } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
-                                $query->andWhere(['NOT IN', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                                $query->andWhere(['!=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
                             }
                         }
                     }

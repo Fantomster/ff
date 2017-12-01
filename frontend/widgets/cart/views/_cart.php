@@ -12,7 +12,7 @@ $count = count($orders);
     <?php if ($count) { ?>
         <div class="block_pus">
             <div class="block_baasket_head">
-                <?= Html::a('Корзина', ['order/checkout'], ['class' => 'a_basket', 'data-pjax' => 0]) ?>
+                <?= Html::a(Yii::t('message', 'frontend.widgets.cart.views.basket', ['ru'=>'Корзина']), ['order/checkout'], ['class' => 'a_basket', 'data-pjax' => 0]) ?>
                 <span class="col_vo"><?= $count ?></span>
                 <img class="hide_basket" src="<?= $baseUrl ?>/img/bask_del1.png" alt="">
             </div>

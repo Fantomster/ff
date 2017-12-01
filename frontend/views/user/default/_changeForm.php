@@ -120,7 +120,7 @@ $grid = [
                     ->label(false)
                     ->textInput(['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.user.default.org_name', ['ru'=>'Название организации'])]);
             ?>
-            <?= Html::submitButton('Создать бизнес', ['class' => 'btn btn-md btn-success new-network']) ?>
+            <?= Html::submitButton(Yii::t('message', 'frontend.views.user.default.create_business', ['ru'=>'Создать бизнес']), ['class' => 'btn btn-md btn-success new-network']) ?>
           <?php ActiveForm::end(); ?>
         </div>
     </div>

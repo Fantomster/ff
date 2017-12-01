@@ -100,6 +100,7 @@ $menuItems[] = ['label' => Yii::t('message', 'frontend.views.layouts.left.send_i
         </form>
         <ul class="sidebar-menu personal-manager">
             <li class="header"><span style="text-transform: uppercase;"><?= Yii::t('message', 'frontend.views.layouts.left.techno', ['ru'=>'ТЕХНИЧЕСКАЯ ПОДДЕРЖКА']) ?></span></li>
+            <br>
             <div style="text-align: center; color: #d8d7d7;">
                 <p><a href="tel:<?= $phoneUrl ?>"><i class="fa fa-phone"></i> <?= $phone ?></a></p>
             </div>

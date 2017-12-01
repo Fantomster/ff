@@ -39,7 +39,7 @@ kartik\select2\Select2Asset::register($this);
                 ?>
                 <div class="row">
                     <div class="col-lg-3 col-md-3 col-sm-6">
-                        <?= Html::label('franchise.views.site.search', ['ru'=>'Поиск'], null, ['style' => 'color:#555']) ?>
+                        <?= Html::label(Yii::t('app', 'franchise.views.site.search', ['ru'=>'Поиск']), null, ['style' => 'color:#555']) ?>
                         <div class="input-group  pull-left">
                         <span class="input-group-addon">
                             <i class="fa fa-search"></i>

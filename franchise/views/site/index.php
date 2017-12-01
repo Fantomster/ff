@@ -135,7 +135,7 @@ use dosamigos\chartjs\ChartJs;
                                     <td style="text-align: right; font-size: 18px; color: #7EBC59; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-plus"></i></span> <?= Yii::t('app', 'franchise.views.site.zero', ['ru'=>'0 руб.']) ?></td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.site.me_to_mix', ['ru'=>'Я MixCart\'у:']) ?></td>
+                                    <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.site.me_to_mix', ['ru'=>"Я MixCart\'у:"]) ?></td>
                                     <td style="text-align: right; font-size: 18px; color: #FB3640; font-weight: bold;"><span style="font-size: 14px;"><i class="fa fa-fw fa-minus"></i></span> <?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> <?= Yii::t('app', 'franchise.views.site.rouble_three', ['ru'=>'руб.']) ?></td>
                                 </tr>
                                 <tr style="border-top: 1px dotted rgba(51, 54, 59, 0.1);">

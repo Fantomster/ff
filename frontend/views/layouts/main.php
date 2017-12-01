@@ -241,7 +241,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                         <div class="phone__block">
                             <span class="phone__block-number">
                                 <span class="glyphicon glyphicon-phone"></span><a style="color:#fff;text-decoration:none;" href="tel:84994041018"><?= Yii::t('message', 'frontend.views.layouts.main.phone', ['ru'=>'8-499-404-10-18']) ?></a>
-                                <span class="header_callback_btn callback_form" data-modal="callback" data-lead="Заказать звонок"><?= Yii::t('message', 'frontend.views.layouts.main_call', ['ru'=>'заказать звонок']) ?></span>
+                                <span class="header_callback_btn callback_form" data-modal="callback" data-lead="<?= Yii::t('message', 'frontend.views.layouts.main_call_two', ['ru'=>'заказать звонок']) ?>"><?= Yii::t('message', 'frontend.views.layouts.main_call', ['ru'=>'заказать звонок']) ?></span>
                             </span>
                         </div>
                         <div class="registr-block">

@@ -77,7 +77,7 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                            <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => 'Поиск', 'id' => 'search_field']) ?>
+                            <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.search_six', ['ru'=>'Поиск']), 'id' => 'search_field']) ?>
                         </div>
                     </div> 
                     <div class="col-sm-8">

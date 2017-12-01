@@ -10,7 +10,7 @@ use yii\helpers\Url;
 ?>
 
 <div style="display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;mso-hide:all;font-family: sans-serif;">
-    <?= Yii::t('app', 'Изменение Вашей заявки') ?>
+    <?= Yii::t('app', 'common.mail.request_set_responsible.change', ['ru'=>'Изменение Вашей заявки']) ?>
 </div>
 <!-- Visually Hidden Preheader Text : END -->
 <!-- Email Header : BEGIN -->
@@ -60,14 +60,14 @@ use yii\helpers\Url;
     <tr>
         <td style="text-align: center; font-family: 'Open Sans', sans-serif;  mso-height-rule: exactly; color: #555555;">
             <h1 style="margin-bottom: 0;font-size: 16px;line-height: 27px;font-weight: 500;padding-top: 25px">
-                <?= Yii::t('app', 'Уважаемый(ая)') ?> <?= $vendor->profile->full_name; ?>!
+                <?= Yii::t('app', 'common.mail.request_set_responsible.dear', ['ru'=>'Уважаемый(ая)']) ?> <?= $vendor->profile->full_name; ?>!
             </h1>
         </td>
     </tr>
 
     <tr>
         <td style="padding: 10px 30px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 14px; mso-height-rule: exactly; line-height: 20px; color: #555;">
-            <b>&laquo;<?= $request->client->name; ?>&raquo;</b> <?= Yii::t('app', 'снял Вас с исполнения заявки') ?>
+            <b>&laquo;<?= $request->client->name; ?>&raquo;</b> <?= Yii::t('app', 'common.mail.request_set_responsible.took_off', ['ru'=>'снял Вас с исполнения заявки']) ?>
             <b>&laquo;<?= $request->product; ?>&raquo;</b>
             <br><br>
 
@@ -75,14 +75,14 @@ use yii\helpers\Url;
     </tr>
     <tr>
         <td style="text-align: center;padding: 15px 0; padding-top: 0;font-family: 'Open Sans', sans-serif;color: #b7b7b7; font-size: 14px">
-            <span><?= Yii::t('app', 'Дата') ?>: <?= date('Y-m-d H:i'); ?></span>
+            <span><?= Yii::t('app', 'common.mail.request_set_responsible.date', ['ru'=>'Дата']) ?>: <?= date('Y-m-d H:i'); ?></span>
         </td>
     </tr>
     <tr>
         <td style="padding: 10px 30px; padding-bottom: 40px; text-align: center; font-family: 'Open Sans', sans-serif; font-size: 16px; mso-height-rule: exactly; line-height: 16px; color: #555;">
             <a href="<?= Yii::$app->urlManagerFrontend->createAbsoluteUrl(["/request/view", 'id' => $request->id]) ?>"
                style="background-color: #66BC75; padding: 10px 30px; border-radius: 30px; color: #fff; text-decoration: none; cursor: pointer;">
-                <?= Yii::t('app', 'Перейти к заявке') ?>
+                <?= Yii::t('app', 'common.mail.request_set_responsible.to_request', ['ru'=>'Перейти к заявке']) ?>
             </a>
             <br>
             <br>

@@ -172,7 +172,7 @@ Modal::end();
                             <span class="input-group-addon">
                                 <i class="fa fa-search"></i>
                             </span>
-                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => 'Поиск', 'id' => 'search']) ?>
+                            <?= Html::input('text', 'search', $searchString, ['class' => 'form-control pull-left', 'placeholder' => Yii::t('message', 'frontend.views.vendor.search_five', ['ru'=>'Поиск']), 'id' => 'search']) ?>
                         </div>
                     </div>   
                     <?=
@@ -180,7 +180,7 @@ Modal::end();
                         'id' => 'add-product',
                         'clientOptions' => ['style' => 'margin-top:13.2px;'],
                         'toggleButton' => [
-                            'label' => '<i class="fa fa-plus-circle"></i> Новый товар',
+                            'label' => '<i class="fa fa-plus-circle"></i> '. Yii::t('message', 'frontend.views.vendor.new_good', ['ru'=>'Новый товар']),
                             'tag' => 'a',
                             'data-target' => '#add-product-market-place',
                             'class' => 'btn btn-fk-success btn-sm pull-right',
@@ -265,7 +265,7 @@ Modal::end();
                         'class' => 'btn btn-outline-default btn-sm pull-right',
                         'style' => ['margin-right' => '10px;'],
                         'id' => 'changeCurrency',
-                    ])
+                    ]])
                     ?>
 
                 </div>
@@ -289,7 +289,7 @@ Modal::end();
                         ],
                         [
                             'attribute' => 'units',
-                            'label' => 'Кратность',
+                            'label' => Yii::t('message', 'frontend.views.vendor.multiplicity_six', ['ru'=>'Кратность']),
                             'value' => function ($data) {
                                 return empty($data['units']) ? '' : $data['units'];
                             },
@@ -522,6 +522,7 @@ $var9 = Yii::t('message', 'frontend.views.vendor.in_use', ['ru'=>'Данная �
 $var10 = Yii::t('message', 'frontend.views.vendor.curr_changed', ['ru'=>'Валюта каталога изменена!']);
 $var11 = Yii::t('message', 'frontend.views.vendor.set_prices', ['ru'=>'Пересчитать цены в каталоге?']);
 $var12 = Yii::t('message', 'frontend.views.vendor.prices_changed', ['ru'=>'Цены успешно изменены!']);
+$var13 = Yii::t('message', 'frontend.views.vendor.farther', ['ru'=>'Далее']);
 
 $customJs = <<< JS
 var timer;
@@ -714,7 +715,7 @@ $(document).on("submit", "#marketplace-product-form", function(e) {
             inputPlaceholder: '$var7',
             showCancelButton: true,
             showLoaderOnConfirm: true,
-            confirmButtonText: 'Далее',
+            confirmButtonText: '$var13',
             allowOutsideClick: false,
             inputValidator: function (value) {
                 return new Promise(function (resolve, reject) {

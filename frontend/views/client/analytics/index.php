@@ -83,7 +83,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
                 </div>
             </div>
             <div class="col-lg-2 col-md-3 col-sm-6">
-                <?= Html::label('Поставщик', null, ['class' => 'label', 'style' => 'color:#555']) ?>
+                <?= Html::label(Yii::t('message', 'frontend.views.client.anal.vendor', ['ru'=>'Поставщик']), null, ['class' => 'label', 'style' => 'color:#555']) ?>
 <?= Html::dropDownList('filter_supplier', null, $filter_get_supplier, ['prompt' => Yii::t('message', 'frontend.views.client.anal.all', ['ru'=>'Все поставщики']), 'class' => 'form-control', 'id' => 'filter_supplier'])
 ?>        
             </div>

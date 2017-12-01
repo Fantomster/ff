@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Handles the creation of table `source_message_and_message`.
  */
-class m171129_143659_create_source_message_and_message_table extends Migration
+class m171127_143659_create_source_message_and_message_table extends Migration
 {
 
 

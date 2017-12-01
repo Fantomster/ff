@@ -177,7 +177,7 @@ section>h3>small {
 <section class='content'>
     <h3>
         <i class="fa fa-gears"></i> <?= Yii::t('message', 'frontend.views.vendor.regions', ['ru'=>'Регионы доставки']) ?>
-        <small>Добавьте регионы в которые Вы доставляете</small>
+        <small><?= Yii::t('message', 'frontend.views.vendor.delivery_regions', ['ru'=>'Добавьте регионы в которые Вы доставляете']) ?></small>
     </h3>
     <div class="box box-info delivery">
         <div class="box-header">
@@ -187,8 +187,8 @@ section>h3>small {
                 <div class="col-md-6">
                     <div class="row">
                         <div class="col-md-12">
-                            <label>Поиск</label>
-                            <input type="text" class="form-control autocomplete" id="search_in" name="search_in" placeholder="Поиск">    
+                            <label><?= Yii::t('message', 'frontend.views.vendor.search_seven', ['ru'=>'Поиск']) ?></label>
+                            <input type="text" class="form-control autocomplete" id="search_in" name="search_in" placeholder="<?= Yii::t('message', 'frontend.views.vendor.search_eight', ['ru'=>'Поиск']) ?>">
                         </div>
                     </div>
                     <?php
@@ -213,7 +213,7 @@ section>h3>small {
                                 </div>
                                 <div class="col-md-12">
                                     <?= $form->field($deliveryRegions, 'exception')->hiddenInput(['value' => 0])->label(false);?>
-                                    <button type="submit" class="save btn btn-success">Добавить</button>  
+                                    <button type="submit" class="save btn btn-success"><?= Yii::t('message', 'frontend.views.vendor.add_five', ['ru'=>'Добавить']) ?></button>
                                 </div>
                             </div>
                         </div>
@@ -229,13 +229,13 @@ section>h3>small {
                         <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-4">
-                                    <strong>Страна</strong>
+                                    <strong><?= Yii::t('message', 'frontend.views.vendor.country_two', ['ru'=>'Страна']) ?></strong>
                                 </div>
                                 <div class="col-md-4">
-                                    <strong>Область</strong>
+                                    <strong><?= Yii::t('message', 'frontend.views.vendor.region', ['ru'=>'Область']) ?></strong>
                                 </div>
                                 <div class="col-md-4">
-                                    <strong>Город</strong>
+                                    <strong><?= Yii::t('message', 'frontend.views.vendor.city', ['ru'=>'Город']) ?></strong>
                                 </div>
                                 <hr>
                             </div>

@@ -119,7 +119,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                     <h3><?= Yii::t('message', 'frontend.views.client.index.create', ['ru'=>'Создать заказ']) ?></h3>
                                     <p><?= Yii::t('message', 'frontend.views.client.index.self', ['ru'=>'у своих поставщиков']) ?></p>
                                 </div>
-<?= Html::a('Создать', ['order/create'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+<?= Html::a(Yii::t('message', 'frontend.views.client.index.create_two', ['ru'=>'Создать']), ['order/create'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash.png) no-repeat bottom right;
                                      background-size: 140px;">
@@ -134,7 +134,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                     <h3><?= Yii::t('message', 'frontend.views.client.index.basket', ['ru'=>'Корзина']) ?> </h3>
                                     <p>заказов <b><?= $totalCart ?></b></p>
                                 </div>
-<?= Html::a('Корзина', ['order/checkout'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+<?= Html::a(Yii::t('message', 'frontend.views.client.index.basket_two', ['ru'=>'Корзина']), ['order/checkout'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
                                      background: url(/images/dash3.png) no-repeat center right;
                                      background-size: 150px;">
@@ -153,7 +153,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                     <h3><?= Yii::t('message', 'frontend.views.client.index.request', ['ru'=>'Создать заявку']) ?></h3>
                                     <p><?= Yii::t('message', 'frontend.views.client.index.for_vendors', ['ru'=>'для поставщиков']) ?></p>
                                 </div>
-<?= Html::a('Заявки', '#', ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
+<?= Html::a(Yii::t('message', 'frontend.views.client.index.requests', ['ru'=>'Заявки']), '#', ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
 <?= ''//Html::a('Заявки', ['request/list'],['class'=>'btn btn-outline-success','style' => 'font-size:14px;position:relative;z-index:2'])  ?>
                                 <div class="bg" style="
                                      background: url(/images/dash1.png) no-repeat top right;
@@ -196,7 +196,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                     }],
                                 ['attribute' => 'name', 'value' => 'name', 'label' => Yii::t('message', 'frontend.views.client.index.vendors', ['ru'=>'Поставщики'])],
                                 ['attribute' => '', 'format' => 'raw', 'header' => false, 'value' => function($data) {
-                                        return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> Заказать', ['order/create',
+                                        return Html::a('<i class="fa fa-shopping-cart m-r-xs"></i> ' . Yii::t('message', 'frontend.views.client.index.order', ['ru'=>'Заказать']), ['order/create',
                                                     'OrderCatalogSearch[searchString]' => "",
                                                     'OrderCatalogSearch[selectedCategory]' => "",
                                                     'OrderCatalogSearch[selectedVendor]' => $data['supp_org_id'],

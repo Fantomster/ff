@@ -61,7 +61,7 @@ class AdditionalEmail extends \yii\db\ActiveRecord
             'order_changed' => Yii::t('app', 'common.models.additional_email.changing', ['ru'=>'Изменение']),
             'order_processing' => Yii::t('app', 'common.models.additional_email.working', ['ru'=>'В работе']),
             'order_done' => Yii::t('app', 'common.models.additional_email.ready', ['ru'=>'Выполнен']),
-            'request_accept' => Yii::t('app', 'Принятие заявки'),
+            'request_accept' => Yii::t('app', 'common.models.additional_email.ready.accepted_two', ['ru'=>'Принятие заявки']),
         ];
     }
 

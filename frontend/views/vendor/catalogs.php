@@ -74,7 +74,7 @@ Modal::begin([
                             <?= Html::a('<h4 class="m-b-xs text-info">' . Yii::t('message', 'frontend.views.vendor.main_catalog', ['ru'=>'Главный каталог']) . ' </h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
 
                             <p class="small">
-								 Валюта каталога: <?php  echo $catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?>
+                                <?= Yii::t('message', 'frontend.views.vendor.currency', ['ru'=>'Валюта каталога:']) ?> <?php  echo $catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?>
 								 <br>
                             	<?= Yii::t('message', 'frontend.views.vendor.this_cat', ['ru'=>'Этот каталог содержит все ваши продукты доступные на MixCart']) ?>
                             </p>
@@ -141,7 +141,7 @@ Modal::begin([
                                         <?= Html::a('<h4 class="text-info"> '.$arrCatalogs->name.
                                                 '</h4>', ['vendor/step-3-copy', 'id' => $arrCatalogs->id],['data-pjax'=>'0']) ?>
                                         <p class="small m-b-none">
-                                        	Валюта каталога:<?php  echo ' '.$catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?> <br>
+                                            <?= Yii::t('message', 'frontend.views.vendor.currency_two', ['ru'=>'Валюта каталога:']) ?> <?php  echo ' '.$catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?> <br>
                                         	<?= Yii::t('message', 'frontend.views.vendor.created_at', ['ru'=>'Создан:']) ?> <?=Yii::$app->formatter->asDatetime($arrCatalogs->created_at, "php:j M Y"); ?>
                                         </p>
                                         </div>

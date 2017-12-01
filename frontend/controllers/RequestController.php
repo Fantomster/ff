@@ -165,44 +165,51 @@ class RequestController extends DefaultController
                 $my = \Yii::$app->request->get('myOnly') == 2 ? ['responsible_supp_org_id' => $organization->id] : [];
                 $rush = \Yii::$app->request->get('rush') == 2 ? ['rush_order' => 1] : [];
 
-                $query = Request::find()->where(['active_status' => Request::ACTIVE])
+                $query = Request::find()
                     ->joinWith('client')
-                    ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
-                    ->andWhere($search)
-                    ->andWhere($category)
-                    ->andWhere($my)
-                    ->andWhere($rush)
                     ->orderBy('id DESC');
 
                 //Массив в достывками
                 $deliveryRegions = $organization->deliveryRegionAsArray;
                 //Доступные для доставки регионы
                 if(!empty($deliveryRegions['allow'])) {
-                    foreach ($deliveryRegions['allow'] as $allow) {
-                        if(!empty($allow['locality'])) {
-                            $query->andWhere(['AND',
-                                ['IN', 'administrative_area_level_1', $allow['administrative_area_level_1']],
-                                ['IN', 'locality',  $allow['locality']],
+                    foreach ($deliveryRegions['allow'] as $row) {
+                        if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                            $query->orWhere(['AND',
+                                ['IN', 'administrative_area_level_1', $row['administrative_area_level_1']],
+                                ['IN', 'locality',  $row['locality']],
                             ]);
-                        } else {
-                            $query->andWhere(['IN', 'administrative_area_level_1', $allow['administrative_area_level_1']]);
+                        } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
+                            $query->orWhere(['IN', 'locality', $row['locality']]);
+                        } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
+                            $query->orWhere(['IN', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                        }
+                    }
+                }
+                //Условия для исключения доставки с регионов
+                if(!empty($deliveryRegions['exclude'])) {
+                    if(!empty($deliveryRegions['exclude'])) {
+                        foreach ($deliveryRegions['exclude'] as $row) {
+                            if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                                $query->andWhere(['AND',
+                                    ['NOT IN', 'administrative_area_level_1', $row['administrative_area_level_1']],
+                                    ['NOT IN', 'locality',  $row['locality']],
+                                ]);
+                            } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
+                                $query->andWhere(['NOT IN', 'locality', $row['locality']]);
+                            } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
+                                $query->andWhere(['NOT IN', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                            }
                         }
                     }
                 }
 
-                //Условия для исключения доставки с регионов
-                if(!empty($deliveryRegions['exclude'])) {
-                    foreach ($deliveryRegions['exclude'] as $exclude) {
-                        if(!empty($exclude['locality'])) {
-                            $query->andWhere(['OR',
-                                ['NOT IN', 'administrative_area_level_1', $exclude['administrative_area_level_1']],
-                                ['NOT IN', 'locality',  $exclude['locality']],
-                            ]);
-                        } else {
-                            $query->andWhere(['NOT IN', 'administrative_area_level_1', $exclude['administrative_area_level_1']]);
-                        }
-                    }
-                }
+                $query->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
+                    ->andWhere(['active_status' => Request::ACTIVE])
+                    ->andWhere($search)
+                    ->andWhere($category)
+                    ->andWhere($my)
+                    ->andWhere($rush);
 
                 $dataListRequest = new ActiveDataProvider([
                     'query' => $query,

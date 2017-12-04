@@ -570,7 +570,6 @@ class VendorController extends DefaultController {
     }
 
     public function actionImport($id) {
-        set_time_limit(180);
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         $vendor = \common\models\Catalog::find()->where([
@@ -598,6 +597,7 @@ class VendorController extends DefaultController {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
                         . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -629,12 +629,14 @@ class VendorController extends DefaultController {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if ($importType == 1) {
@@ -642,12 +644,12 @@ class VendorController extends DefaultController {
                 try {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_article = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
-                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
+                        $row_article = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
+                        $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
                         $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
-                        $row_ed = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
-                        $row_note = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(5, $row)));  //Комментарий
+                        $row_ed = strip_tags(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
+                        $row_note = strip_tags(trim($worksheet->getCellByColumnAndRow(5, $row)));  //Комментарий
                         if (!empty($row_product && $row_price && $row_ed)) {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
@@ -691,7 +693,7 @@ class VendorController extends DefaultController {
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+                        $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row))); //цена
                         if (!empty($row_product && $row_price)) {
                             if (empty($row_units) || $row_units < 0) {
@@ -725,7 +727,7 @@ class VendorController extends DefaultController {
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+                        $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
                         if (!empty($row_product)) {
                             if (empty($row_units) || $row_units < 0) {
                                 $row_units = 0;
@@ -760,7 +762,6 @@ class VendorController extends DefaultController {
     }
 
     public function actionImportRestaurant($id) {
-        set_time_limit(180);
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $importModel = new \common\models\upload\UploadForm();
         $baseCatalog = Catalog::findOne(['supp_org_id' => $currentUser->id, 'type' => Catalog::BASE_CATALOG]);
@@ -787,6 +788,7 @@ class VendorController extends DefaultController {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
                         . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -813,12 +815,14 @@ class VendorController extends DefaultController {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if (max(array_count_values($xlsArray)) > 1) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             if ($importType == 1) {
@@ -908,6 +912,7 @@ class VendorController extends DefaultController {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки файла, посмотрите инструкцию по загрузке каталога<br>'
                         . '<small>Если ошибка повторяется, пожалуйста, сообщите нам'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
@@ -922,6 +927,7 @@ class VendorController extends DefaultController {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $xlsArray = [];
@@ -933,6 +939,7 @@ class VendorController extends DefaultController {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым названием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             $transaction = Yii::$app->db->beginTransaction();

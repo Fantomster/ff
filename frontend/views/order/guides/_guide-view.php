@@ -19,7 +19,7 @@ use yii\helpers\Url;
             [
                 'class' => 'fa fa-edit pull-right text-warning rename-template',
                 'style' => 'cursor:pointer',
-                'title' => Yii::t('app', 'Переименовать'),
+                'title' => Yii::t('app', 'frontend.views.order.guides.rename_five', ['ru'=>'Переименовать']),
                 'data-id' => $model->id,
                 'data-title' => $model->name
             ]

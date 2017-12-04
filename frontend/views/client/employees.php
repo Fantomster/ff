@@ -140,7 +140,7 @@ $this->registerJs(
                         'profile.phone',
                         [
                           'attribute' => 'role.name',
-                          'label' => \Yii::t('app', 'Роль')
+                          'label' => \Yii::t('app', 'frontend.views.client.emp.role', ['ru'=>'Роль'])
                         ],
                         [
                             'attribute' => 'status',

@@ -133,7 +133,7 @@ class CatalogController extends DefaultController
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $currentOrganization = Organization::findOne($vendor_id);
         if($currentOrganization->franchisee->id!=$currentUser->franchiseeUser->franchisee_id){
-            throw new HttpException(403, Yii::t('app', 'Доступ запрещен'));
+            throw new HttpException(403, Yii::t('app', 'franchise.controllers.catalog.no_access', ['ru'=>'Доступ запрещен']));
         }
         if (!Catalog::find()->where(['supp_org_id' => $vendor_id, 'type' => Catalog::BASE_CATALOG])->exists()) {
             $step = $currentUser->organization->step;

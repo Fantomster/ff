@@ -118,7 +118,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             [['product', 'brand', 'ed'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process', 'except' => 'import'],
             [['note'], 'string', 'max' => 255],
             [['ed'], 'string', 'max' => 255],
-            [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => Yii::t('app', 'Размер файла не должен превышать 2 Мб')], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
+            [['image'], 'image', 'extensions' => 'jpg, jpeg, png', 'maxSize' => 2097152, 'tooBig' => Yii::t('app', 'common.models.catalog_base.file', ['ru'=>'Размер файла не должен превышать 2 Мб'])], //, 'maxSize' => 4194304, 'tooBig' => 'Размер файла не должен превышать 4 Мб'
             [['units'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?(NULL)?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'numberPattern' => '/^\s*[-+]?[0-9]*[.,]?[0-9]+([eE][-+]?[0-9]+)?\s*$/'],
             [['price'], 'number', 'min' => 0.01],
@@ -129,7 +129,7 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
                 'whenClient' => 'function(attribute, value) {
                     return ($("#catalogbasegoods-market_place").val() == ' . self::MARKETPLACE_ON . ');
                 }',
-                'message' => Yii::t('app', 'Укажите категорию товара'),
+                'message' => Yii::t('app', 'common.models.catalog_base.category', ['ru'=>'Укажите категорию товара']),
                 'on' => 'marketPlace',
             ],
             [['category_id'], 'required',

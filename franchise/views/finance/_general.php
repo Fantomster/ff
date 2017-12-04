@@ -24,7 +24,7 @@
                             <td style="text-align: right; font-size: 18px;"> 0 <?= Yii::t('app', 'franchise.views.finance.rouble_two', ['ru'=>'руб.']) ?></td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.finance.me_mix', ['ru'=>'Я MixCart\'у:']) ?></td>
+                            <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.finance.me_mix', ['ru'=>"Я MixCart\'у:"]) ?></td>
                             <td style="text-align: right; font-size: 18px;"><?= number_format($vendorsStats['turnoverCut'] * (100 - $franchiseeType->share) / 100, 2, '.', ' ') ?> <?= Yii::t('app', 'franchise.views.finance.rouble_three', ['ru'=>'руб.']) ?></td>
                         </tr>
 <!--                        <tr>

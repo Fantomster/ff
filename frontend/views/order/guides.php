@@ -273,14 +273,14 @@ $this->registerJs('
     $(document).on("click", ".rename-template", function(e) {
         e.preventDefault();
         var clicked = $(this);
-        var title = "'.Yii::t('app', 'Переименовать шаблон').'";
+        var title = "'.Yii::t('app', 'frontend.views.order.guides.rename', ['ru'=>'Переименовать шаблон']).'";
         swal({
             title: title,
             input: "text",
             inputValue: clicked.parent().find(".title a").text(),
             showCancelButton: true,
-            cancelButtonText: "'.Yii::t('app', 'Отмена').'",
-            confirmButtonText: "'.Yii::t('app', 'Переименовать').'",
+            cancelButtonText: "'.Yii::t('app', 'frontend.views.order.guides.cancel', ['ru'=>'Отмена']).'",
+            confirmButtonText: "'.Yii::t('app', 'frontend.views.order.guides.rename_two', ['ru'=>'Переименовать']).'",
             showLoaderOnConfirm: true,
             allowOutsideClick: false,
             showLoaderOnConfirm: true,

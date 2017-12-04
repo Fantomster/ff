@@ -266,10 +266,10 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                     $label = '';
                     switch($user->organization->type_id){
                         case \common\models\Organization::TYPE_RESTAURANT:
-                            $label = Yii::t('app', 'Уведомления по новым откликам на заявку по sms');
+                            $label = Yii::t('app', 'frontend.views.settings.notifications.note_three', ['ru'=>'Уведомления по новым откликам на заявку по sms']);
                             break;
                         case \common\models\Organization::TYPE_SUPPLIER:
-                            $label = Yii::t('app', 'Уведомления о назначении исполнителем заявки по sms');
+                            $label = Yii::t('app', 'frontend.views.settings.notifications.note_four', ['ru'=>'Уведомления о назначении исполнителем заявки по sms']);
                             break;
                     };
 

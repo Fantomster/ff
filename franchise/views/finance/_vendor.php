@@ -15,7 +15,7 @@
                             <td style="text-align: right; font-size: 18px;">123000 <?= Yii::t('app', 'franchise.views.finance.rouble_five', ['ru'=>'руб.']) ?></td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.finance.me_mix_two', ['ru'=>'Я MixCart\'у:']) ?></td>
+                            <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.finance.me_mix_two', ['ru'=>"Я MixCart\'у:"]) ?></td>
                             <td style="text-align: right; font-size: 18px;">180000 <?= Yii::t('app', 'franchise.views.finance.rouble_six', ['ru'=>'руб.']) ?></td>
                         </tr>
                         <tr>
@@ -55,7 +55,7 @@
                             <td style="text-align: right; font-size: 18px;">180000 <?= Yii::t('app', 'franchise.views.finance.rouble_nine', ['ru'=>'руб.']) ?></td>
                         </tr>
                         <tr>
-                            <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.finance.me_to_mix', ['ru'=>'MixCart\'у:']) ?></td>
+                            <td style="text-align: left;"><?= Yii::t('app', 'franchise.views.finance.me_to_mix', ['ru'=>"MixCart\'у:"]) ?></td>
                             <td style="text-align: right; font-size: 18px;">180000 <?= Yii::t('app', 'franchise.views.finance.rouble_ten', ['ru'=>'руб.']) ?></td>
                         </tr>
                         <tr>

@@ -304,7 +304,7 @@ class RequestController extends DefaultController
                 //Тут пошли уведомления
                 //Для начала подготовим текст уведомлений и шаблоны email
                 $sms_text = 'sms.request_set_responsible';
-                $subject = Yii::t('app', "mixcart.ru - заявка №%s");
+                $subject = Yii::t('app', 'frontend.controllers.request.mix', ['ru'=>"mixcart.ru - заявка №%s"]);
                 $email_template = 'requestSetResponsibleMailToSupp';
                 $client_email_template = 'requestSetResponsible';
                 //Если $reject значит сняли с заявки
@@ -508,7 +508,7 @@ class RequestController extends DefaultController
                     $request = Request::findOne($id);
                     #Готовим сообщения
                     //Тема Email
-                    $text = Yii::t('app', 'mixcart.ru - заявка №%s');
+                    $text = Yii::t('app', 'frontend.controllers.request.mix_two', ['ru'=>'mixcart.ru - заявка №%s']);
                     $subject = sprintf($text, $request->id);
                     //Сообщение SMS
                     $sms_text = Yii::$app->sms->prepareText('sms.request_new_callback', [

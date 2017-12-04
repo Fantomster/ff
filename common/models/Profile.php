@@ -69,8 +69,8 @@ class Profile extends \amnah\yii2\user\models\Profile {
 
     public function attributeLabels() {
         return [
-            'full_name' => 'ФИО',
-            'phone' => 'Телефон',
+            'full_name' => Yii::t('app', 'franchise.models.profile', ['ru'=>'ФИО']),
+            'phone' => Yii::t('app', 'franchise.models.profile.phone', ['ru'=>'Телефон']),
         ];
     }
     

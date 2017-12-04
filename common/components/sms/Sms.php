@@ -78,11 +78,11 @@ class Sms extends Component
         try {
             //Если пустой получатель, игнорируем
             if (empty($target)) {
-                throw new Exception('Поле получатель не может быть пустым. ');
+                throw new Exception(Yii::t('app', 'common.components.sms.empty', ['ru'=>'Поле получатель не может быть пустым. ']));
             }
             //Если пустое сообщение, игнорируем
             if (empty($message)) {
-                throw new Exception('Сообщение не может быть пустым. ');
+                throw new Exception(Yii::t('app', 'common.components.sms.cant_be', ['ru'=>'Сообщение не может быть пустым. ']));
             }
             //Отправка смс
             $this->sender->send($message, $target);

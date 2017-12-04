@@ -16,7 +16,7 @@ $form = ActiveForm::begin([
 ?>
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord? Yii::t('app', 'franchise.views.catalog.catalogs.new_good', ['ru'=>'Новый товар']) : Yii::t('app', 'Корректировка товара') ?></h4>
+    <h4 class="modal-title"><?= $catalogBaseGoods->isNewRecord? Yii::t('app', 'franchise.views.catalog.catalogs.new_good', ['ru'=>'Новый товар']) : Yii::t('app', 'franchise.views.catalogs.catalog.base.edit_good', ['ru'=>'Корректировка товара']) ?></h4>
 </div>
 <div class="modal-body">
     <?= $form->field($catalogBaseGoods, 'article') ?>

@@ -141,7 +141,7 @@ use yii\widgets\Breadcrumbs;
                                 'format' => 'raw',
                                 'attribute' => 'toFkeeper',
                                 'value' => 'toFkeeper',
-                                'label' => Yii::t('app', 'franchise.views.finance.me_mix_three', ['ru'=>'Я MixCart\'у']),
+                                'label' => Yii::t('app', 'franchise.views.finance.me_mix_three', ['ru'=>"Я MixCart\'у"]),
                             ],
                             [
                                 'format' => 'raw',

@@ -6,11 +6,11 @@ $labels = new \common\models\AdditionalEmail();
 $labels = $labels->attributeLabels();
 
 if($user->organization->type_id == \common\models\Organization::TYPE_SUPPLIER) {
-    $labels['request_accept'] = Yii::t('app', 'Исполнитель в заявке');
+    $labels['request_accept'] = Yii::t('app', 'frontend.views.settings.executor', ['ru'=>'Исполнитель в заявке']);
 }
 
 if($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT) {
-    $labels['request_accept'] = Yii::t('app', 'Новый отклик на заявку');
+    $labels['request_accept'] = Yii::t('app', 'frontend.views.settings.new_response', ['ru'=>'Новый отклик на заявку']);
 }
 
 ?>

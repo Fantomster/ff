@@ -208,18 +208,16 @@ class OrderContentController extends ActiveController {
             }
             if (($orderChanged > 0) && ($organizationType == Organization::TYPE_RESTAURANT)) {
                 $order->status = ($order->status === Order::STATUS_PROCESSING) ? Order::STATUS_PROCESSING : Order::STATUS_AWAITING_ACCEPT_FROM_VENDOR;
-                $text_system = Yii::$app->sms->prepareText('sms.changed_order_detail', [
-                    'client_name' => $order->client->name,
-                    'order_id' => $order->id,
-                    'message' => $message
+                $text_system = Yii::$app->sms->prepareText('sms.order_changed', [
+                    'name' => $order->client->name,
+                    'url' => $order->getUrlForUser($user)
                 ]);
                 $this->sendSystemMessage($user, $order->id, $text_system);
                 foreach ($order->recipientsList as $recipient) {
                     if (($recipient->organization_id == $order->vendor_id) && $recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                        $text = Yii::$app->sms->prepareText('sms.changed_order_detail', [
-                            'client_name' => $order->client->name,
-                            'order_id' => $order->id,
-                            'message' => str_replace('<br/>', ' ', $message)
+                        $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                            'name' => $order->client->name,
+                            'url' => $order->getUrlForUser($recipient)
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }
@@ -232,19 +230,17 @@ class OrderContentController extends ActiveController {
                 $order->accepted_by_id = $user->id;
                 $order->calculateTotalPrice();
                 $order->save();
-                $text_system = Yii::$app->sms->prepareText('sms.changed_order_detail', [
-                    'client_name' => $order->vendor->name,
-                    'order_id' => $order->id,
-                    'message' => $message
+                $text_system = Yii::$app->sms->prepareText('sms.order_changed', [
+                    'name' => $order->vendor->name,
+                    'url' => $order->getUrlForUser($user)
                 ]);
                 $this->sendSystemMessage($user, $order->id, $text_system);
                 $this->sendOrderChange($order->vendor, $order);
                 foreach ($order->client->users as $recipient) {
                     if ($recipient->profile->phone && $recipient->smsNotification->order_changed) {
-                        $text = Yii::$app->sms->prepareText('sms.changed_order_detail', [
-                            'client_name' => $order->vendor->name,
-                            'order_id' => $order->id,
-                            'message' => str_replace('<br/>', ' ', $message)
+                        $text = Yii::$app->sms->prepareText('sms.order_changed', [
+                            'name' => $order->vendor->name,
+                            'url' => $order->getUrlForUser($recipient)
                         ]);
                         Yii::$app->sms->send($text, $recipient->profile->phone);
                     }

@@ -22,7 +22,6 @@ use yii\web\Response;
 use common\components\AccessRule;
 use yii\filters\AccessControl;
 use yii\web\UploadedFile;
-use yii\helpers\HtmlPurifier;
 
 /**
  * Controller for supplier
@@ -830,8 +829,8 @@ class VendorController extends DefaultController {
                 try {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) {
-                        $row_product = HtmlPurifier::process(mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row)))); //наименование
-                        $row_price = HtmlPurifier::process(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
+                        $row_product = strip_tags(mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row)))); //наименование
+                        $row_price = strip_tags(floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row)))); //цена
 
                         if (!empty($row_product && $row_price)) {
 
@@ -872,7 +871,7 @@ class VendorController extends DefaultController {
                 try {
                     $cgTable = CatalogGoods::tableName();
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                        $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+                        $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row))); //цена
                         if (!empty($row_product && $row_price)) {
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
@@ -950,12 +949,12 @@ class VendorController extends DefaultController {
                 $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                    $row_article = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
-                    $row_product = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
+                    $row_article = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
+                    $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
                     $row_units = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(2, $row))); //количество
                     $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(3, $row))); //цена
-                    $row_ed = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
-                    $row_note = HtmlPurifier::process(trim($worksheet->getCellByColumnAndRow(5, $row))); //коммент
+                    $row_ed = strip_tags(trim($worksheet->getCellByColumnAndRow(4, $row))); //единица измерения
+                    $row_note = strip_tags(trim($worksheet->getCellByColumnAndRow(5, $row))); //коммент
                     if (!empty($row_product && $row_price && $row_ed)) {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;

@@ -601,6 +601,12 @@ class VendorController extends DefaultController {
             }
             $localFile = \PHPExcel_IOFactory::identify($path);
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
+            //Память для Кэширования
+            $cacheMethod = \PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
+            $cacheSettings = array( 'memoryCacheSize ' => '64MB');
+            \PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
+            //Оптимизируем чтение файла
+            $objReader->setReadDataOnly(true);
             $objPHPExcel = $objReader->load($path);
 
             $worksheet = $objPHPExcel->getSheet(0);

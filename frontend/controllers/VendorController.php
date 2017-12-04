@@ -603,7 +603,7 @@ class VendorController extends DefaultController {
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             //Память для Кэширования
             $cacheMethod = \PHPExcel_CachedObjectStorageFactory::cache_to_phpTemp;
-            $cacheSettings = array( 'memoryCacheSize ' => '64MB');
+            $cacheSettings = array('memoryCacheSize ' => '64MB');
             \PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
             //Оптимизируем чтение файла
             $objReader->setReadDataOnly(true);
@@ -965,30 +965,26 @@ class VendorController extends DefaultController {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
                         }
-                        $sql = "insert into {{%catalog_base_goods}}" .
-                                "(`cat_id`,`category_id`,`supp_org_id`,`article`,`product`,"
-                                . "`units`,`price`,`ed`,`note`,`status`,`created_at`) VALUES ("
-                                . ":cat_id,"
-                                . "NULL,"
-                                . $currentUser->organization_id . ","
-                                . ":article,"
-                                . ":product,"
-                                . ":units,"
-                                . ":price,"
-                                . ":ed,"
-                                . ":note,"
-                                . CatalogBaseGoods::STATUS_ON . ","
-                                . "NOW())";
-                        $command = \Yii::$app->db->createCommand($sql);
-                        $command->bindParam(":cat_id", $lastInsert_base_cat_id, \PDO::PARAM_INT);
-                        $command->bindParam(":article", $row_article, \PDO::PARAM_STR);
-                        $command->bindParam(":product", $row_product, \PDO::PARAM_STR);
-                        $command->bindParam(":units", $row_units);
-                        $command->bindParam(":price", $row_price);
-                        $command->bindParam(":ed", $row_ed, \PDO::PARAM_STR);
-                        $command->bindParam(":note", $row_note, \PDO::PARAM_STR);
-                        $command->execute();
+                        $data_insert[] = [
+                            $lastInsert_base_cat_id,
+                            $currentUser->organization_id,
+                            $row_article,
+                            $row_product,
+                            $row_units,
+                            $row_price,
+                            $row_ed,
+                            $row_note,
+                            CatalogBaseGoods::STATUS_ON,
+                            new \yii\db\Expression('NOW()'),
+                        ];
                     }
+                }
+                if (!empty($data_insert)) {
+                    $db = Yii::$app->db;
+                    $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
+                        'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status', 'created_at'
+                            ], $data_insert);
+                    Yii::$app->db->createCommand($sql)->execute();
                 }
                 $transaction->commit();
                 unlink($path);

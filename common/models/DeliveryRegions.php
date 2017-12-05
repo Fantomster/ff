@@ -97,7 +97,7 @@ class DeliveryRegions extends \yii\db\ActiveRecord
 
             return $supplierRegion;
         } else {
-            return [];
+            return [0];
         }
     }
 }

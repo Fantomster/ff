@@ -1000,7 +1000,7 @@ class SiteController extends Controller {
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->request->cookies->get('locality'))) {
             $supplierRegion = DeliveryRegions::getSuppRegion();
 
             if(!empty($supplierRegion)){
@@ -1018,17 +1018,11 @@ class SiteController extends Controller {
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere($oWhere)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->limit(12)
-                ->all();
-        $suppliersCount = Organization::find()
-                ->where([
-                    'type_id' => Organization::TYPE_SUPPLIER,
-                    'white_list'=>  Organization::WHITE_LIST_ON
-                    ])
-                ->andWhere($oWhere)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->count();
+                ->orderBy(['rating'=>SORT_DESC]);
+
+        $suppliersCount = $suppliers->count();
+        $suppliers = $suppliers->limit(12)->all();
+
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
     }
     

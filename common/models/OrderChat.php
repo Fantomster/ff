@@ -104,7 +104,9 @@ class OrderChat extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if (!is_a(Yii::$app, 'yii\console\Application')) {
-            \api\modules\v1\modules\mobile\components\NotificationHelper::actionSendMessage($this->id);
+            if(class_exists('api\modules\v1\modules\mobile\components\NotificationHelper')) {
+                \api\modules\v1\modules\mobile\components\NotificationHelper::actionSendMessage($this->id);
+            }
         }
     }
 }

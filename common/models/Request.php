@@ -64,7 +64,7 @@ class Request extends \yii\db\ActiveRecord {
                     ActiveRecord::EVENT_BEFORE_INSERT => ['created_at']
                 ],
                 'value' => function ($event) {
-                    return gmdate("Y-m-d H:i:s");
+                    return date("Y-m-d H:i:s");
                 },
             ],
         ];
@@ -106,13 +106,14 @@ class Request extends \yii\db\ActiveRecord {
         ];
     }
 
-    public function getModifyDate() {
-        $date = Yii::$app->formatter->asDatetime(strtotime($this->created_at), 'php:Y-m-d H:i:s');
-        $m = Yii::$app->formatter->asDatetime($date, 'php:n');
-        $ypd = Yii::$app->formatter->asDatetime($date, 'php:yy');
-        $mpd = Yii::$app->formatter->asDatetime($date, 'php:m.y');
-        $dpd = Yii::$app->formatter->asDatetime($date, 'php:j');
-        $tpd = Yii::$app->formatter->asDatetime($date, 'php:H:i');
+    public function getModifyDate()
+    {
+        $date_stamp = strtotime($this->created_at);
+        $m = Yii::$app->formatter->asDatetime($date_stamp, 'php:n');
+        $ypd = Yii::$app->formatter->asDatetime($date_stamp, 'php:yy');
+        $mpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:m.y');
+        $dpd = Yii::$app->formatter->asDatetime($date_stamp, 'php:j');
+        $tpd = Yii::$app->formatter->asDatetime($date_stamp, 'H:i');
         $yy = Yii::$app->formatter->asDatetime('now', 'php:yy');
         $md = Yii::$app->formatter->asDatetime('now', 'php:m.y');
         $dd = Yii::$app->formatter->asDatetime('now', 'php:j');
@@ -121,13 +122,8 @@ class Request extends \yii\db\ActiveRecord {
         $yesterday = false;
 
         if (($mpd == $md) & ($dpd == $dd)) {
-            $today = true;
-            $yesterday = false;
 
-            $dataTime = Yii::$app->formatter->asTimestamp($date, 'php:H:i:s');
-            $curTime = Yii::$app->formatter->asTimestamp('now', 'php:H:i:s');
-
-            $dif = $curTime - $dataTime;
+            $dif = time() - $date_stamp;
 
             $sArray = array(Yii::t('app', 'common.models.sec', ['ru'=>"секунду"]), Yii::t('app', 'common.models.secs', ['ru'=>"секунды"]), Yii::t('app', 'common.models.sec_two', ['ru'=>"секунд"]));
             $iArray = array(Yii::t('app', 'common.models.minute', ['ru'=>"минуту"]), Yii::t('app', 'common.models.minutes', ['ru'=>"минуты"]), Yii::t('app', 'common.models.minute_two', ['ru'=>"минут"]));
@@ -149,6 +145,7 @@ class Request extends \yii\db\ActiveRecord {
                 return Yii::t('app', 'common.models.today_in', ['ru'=>'Сегодня, в ']) . $tpd;
             }
         }
+
         if (($mpd == $md) & ($dpd == $dd - 1)) {
             $today = false;
             $yesterday = true;
@@ -169,9 +166,9 @@ class Request extends \yii\db\ActiveRecord {
             12 => Yii::t('app', 'common.models.dec', ['ru'=>'Декабря'])
         );
         if (($today == false) & ($yesterday == false) & ($ypd == $yy)) {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ', в HH:mm');
+            return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ', в HH:mm');
         } else {
-            return Yii::$app->formatter->asDatetime($date, 'd ' . $monthes[($m)] . ' Y, в HH:mm');
+            return Yii::$app->formatter->asDatetime($date_stamp, 'd ' . $monthes[($m)] . ' Y, в HH:mm');
         }
     }
 
@@ -247,10 +244,11 @@ class Request extends \yii\db\ActiveRecord {
 
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
-
-        if (!is_a(Yii::$app, 'yii\console\Application')) {
-            if ($insert) {
-                \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
+        if ($insert) {
+            if (!is_a(Yii::$app, 'yii\console\Application')) {
+                if(class_exists('\api\modules\v1\modules\mobile\components\NotificationHelper')) {
+                    \api\modules\v1\modules\mobile\components\NotificationHelper::actionRequest($this->id, $insert);
+                }
             }
         }
     }

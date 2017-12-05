@@ -300,10 +300,10 @@ class OrderController extends DefaultController {
         $vendorDataProvider->pagination = ['pageSize' => 8];
 
         $productSearchModel = new OrderCatalogSearch();
-        $vendors = $client->getSuppliers(null);
+        $vendors = $client->getSuppliers(null, false);
         $selectedVendor = $session['selectedVendor'];
         if (empty($selectedVendor)) {
-            $selectedVendor = isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
+            $selectedVendor = isset(array_keys($vendors)[0]) ? array_keys($vendors)[0] : null;
         }
         //isset($session['selectedVendor']) ? $session['selectedVendor'] : isset(array_keys($vendors)[1]) ? array_keys($vendors)[1] : null;
         $catalogs = $vendors ? $client->getCatalogs($selectedVendor, null) : "(0)";
@@ -345,14 +345,14 @@ class OrderController extends DefaultController {
             return $this->redirect(['order/guides']);
         }
 
-        $guideProductList = $session['guideProductList'];
+        $guideProductList = isset($session['guideProductList']) ?  $session['guideProductList'] : [];
 
         foreach ($guide->guideProducts as $guideProduct) {
             if (!in_array($guideProduct->cbg_id, $guideProductList)) {
                 $guideProduct->delete();
             } else {
                 $position = array_search($guideProduct->cbg_id, $guideProductList);
-                if ($position !== FALSE) {
+                if (!$position) {
                     unset($guideProductList[$position]);
                 }
             }
@@ -1141,11 +1141,13 @@ class OrderController extends DefaultController {
                 $discountChanged = (($order->discount_type != $discount['discount_type']) || ($order->discount != $discount['discount']));
                 if ($discountChanged) {
                     $order->discount_type = $discount['discount_type'];
-                    $order->discount = $order->discount_type ? abs($discount['discount']) : null;
+                    $order->discount = null;
                     $order->calculateTotalPrice();
                     if ($order->discount_type == Order::DISCOUNT_FIXED) {
-                        $discountValue = $order->discount . $currencySymbol;
+                        $order->discount = round($discount['discount'], 2);
+                        $discountValue = $order->discount . " $currencySymbol";
                     } else {
+                        $order->discount = abs($discount['discount']);
                         $discountValue = $order->discount . "%";
                     }
                     $message .= Yii::t('message', 'frontend.controllers.order.made_discount', ['ru'=>"<br/> сделал скидку на заказ № {order_id} в размере:", 'order_id'=>$order->id]) . $position['price'] . $currencySymbol;

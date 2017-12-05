@@ -91,7 +91,7 @@ $this->title = 'MixCart';
                     <div class="how_its_work">
                         <h3><?= Yii::t('message', 'frontend.views.site.how_it_works', ['ru'=>'как это работает']) ?></h3>
                         <p><?= Yii::t('message', 'frontend.views.site.mixcart', ['ru'=>'MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.']) ?></p>
-<?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?> / <?= Html::a('Для поставщиков', ["/site/supplier"]) ?>
+<?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
                     <div class="callback_form call_back_button2" data-modal="callback" data-lead="Оставить заявку"><?= Yii::t('message', 'frontend.views.site.set_request', ['ru'=>'оставить заявку']) ?></div>
                     </div>
                 </div>	

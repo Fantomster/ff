@@ -45,6 +45,11 @@ $this->title = Yii::t('user', 'Login');
             <div class="regist">
                 <?= Html::a(Yii::t('app', 'franchise.views.site.user.default.pass', ['ru'=>"Восcтановить пароль"]), ["/user/forgot"], ['class' => 'small-login']) ?>
             </div>
+            <div class="header-nav default pull-right">
+                <ul style="list-style-type:none" >
+                    <?=\common\widgets\LangSwitch::widget();?>
+                </ul>
+            </div>
             <?php ActiveForm::end(); ?>
         </div>
     </div>

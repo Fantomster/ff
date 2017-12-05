@@ -10,7 +10,7 @@ class GoogleMapsAsset extends AssetBundle {
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $js = [
-        'js/helpers/googleApiLocation.js',
+        'js/helpers/googleApiLocation.js?v=1',
     ];
     public static function register($view) {
         parent::register($view);

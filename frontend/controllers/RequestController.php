@@ -160,31 +160,60 @@ class RequestController extends DefaultController
             }
         }
         if ($organization->type_id == Organization::TYPE_SUPPLIER) {
-            if (\common\models\DeliveryRegions::find()->where(['supplier_id' => $organization->id])->exists()) {
-                $deliveryRegions = \common\models\DeliveryRegions::find()
-                    ->select('administrative_area_level_1, locality')
-                    ->where(['supplier_id' => $organization->id])
-                    ->asArray()
-                    ->all();
+            if (\common\models\DeliveryRegions::find()->where(['supplier_id' => $organization->id, 'exception' => 0])->exists()) {
+
                 $my = \Yii::$app->request->get('myOnly') == 2 ? ['responsible_supp_org_id' => $organization->id] : [];
                 $rush = \Yii::$app->request->get('rush') == 2 ? ['rush_order' => 1] : [];
+
+                $query = Request::find()
+                    ->joinWith('client')
+                    ->orderBy('id DESC');
+
+                //Массив в достывками
+                $deliveryRegions = $organization->deliveryRegionAsArray;
+                //Доступные для доставки регионы
+                if(!empty($deliveryRegions['allow'])) {
+                    foreach ($deliveryRegions['allow'] as $row) {
+                        if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                            $p = $row['administrative_area_level_1'].$row['locality'];
+                            $query->orWhere('CONCAT(`administrative_area_level_1`, `locality`) = :p',[':p' => $p]);
+                        } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
+                            $query->orWhere(['=', 'locality', $row['locality']]);
+                        } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
+                            $query->orWhere(['=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                        }
+                    }
+                }
+                //Условия для исключения доставки с регионов
+                if(!empty($deliveryRegions['exclude'])) {
+                    if(!empty($deliveryRegions['exclude'])) {
+                        foreach ($deliveryRegions['exclude'] as $row) {
+                            if(!empty($row['administrative_area_level_1']) && !empty($row['locality'])) {
+                                $p = $row['administrative_area_level_1'].$row['locality'];
+                                $query->andWhere('CONCAT(`administrative_area_level_1`, `locality`) <> :s',[':s' => $p]);
+                            } elseif ((empty($row['administrative_area_level_1']) || $row['administrative_area_level_1'] == 'undefined')  && !empty($row['locality'])) {
+                                $query->andWhere(['!=', 'locality', $row['locality']]);
+                            } elseif (!empty($row['administrative_area_level_1']) && empty($row['locality'])){
+                                $query->andWhere(['!=', 'administrative_area_level_1', $row['administrative_area_level_1']]);
+                            }
+                        }
+                    }
+                }
+
+                $query->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
+                    ->andWhere(['active_status' => Request::ACTIVE])
+                    ->andWhere($search)
+                    ->andWhere($category)
+                    ->andWhere($my)
+                    ->andWhere($rush);
+
                 $dataListRequest = new ActiveDataProvider([
-                    'query' => Request::find()->where(['active_status' => Request::ACTIVE])
-                        ->joinWith('client')
-                        ->andWhere(['>=', 'end', new \yii\db\Expression('NOW()')])
-                        ->andWhere($search)
-                        ->andWhere($category)
-                        ->andWhere($my)
-                        ->andWhere($rush)
-                        ->andWhere(['OR',
-                            ['IN', 'administrative_area_level_1', $deliveryRegions],
-                            ['IN', 'locality', $deliveryRegions],
-                        ])
-                        ->orderBy('id DESC'),
+                    'query' => $query,
                     'pagination' => [
                         'pageSize' => 15,
                     ],
                 ]);
+
                 if (Yii::$app->request->isPjax) {
                     return $this->renderPartial("list-vendor", compact('dataListRequest', 'organization'));
                 } else {
@@ -481,6 +510,7 @@ class RequestController extends DefaultController
     /**
      * Оставить отклик на заявку, отправляет уведомления
      * @return array
+     * @throws \Exception
      */
     public function actionAddCallback()
     {
@@ -566,7 +596,7 @@ class RequestController extends DefaultController
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
-            return ['success' => false, 'error' => $e->getMessage()];
+            throw new \Exception($e->getTraceAsString());
         }
     }
 }

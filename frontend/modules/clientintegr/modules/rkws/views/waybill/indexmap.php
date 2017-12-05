@@ -14,6 +14,7 @@ use kartik\checkbox\CheckboxX;
 use api\common\models\RkAccess;
 use api\common\models\RkWaybill;
 use yii\web\JsExpression;
+use api\common\models\RkDicconst;
 
 
 ?>
@@ -47,7 +48,7 @@ Breadcrumbs::widget([
 ?>
 </section>
 <section class="content-header">
-<?= $this->render('/default/_menu.php'); ?>   
+<?= $this->render('/default/_menu.php'); ?>
 
 
     СОПОСТАВЛЕНИЕ НОМЕНКЛАТУРЫ
@@ -262,10 +263,21 @@ GridView::widget([
                 'format'=>['decimal',2],
 
                 'pageSummary'=>true
-                ], 
-                 [
+                ],
+                [
+                 'attribute' => 'vat',
+                 'format' => 'raw',
+                 'label' => 'Ставка НДС',
+                 'contentOptions' => ['class' => 'text-right'],
+                 'value' => function($model) {
+                    $exportVAT = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue()/100;
+                    return $exportVAT;
+                 }
+                ],
+               /*  [
                 'class'=>'kartik\grid\EditableColumn',
                 'attribute'=>'vat',
+             //   'data' => $exportVAT;
                 'label' => 'Ставка НДС',
                 'value' => function ($model) {
                          return $model->vat/100;
@@ -286,7 +298,7 @@ GridView::widget([
                 'format'=>['decimal'],
 
                 'pageSummary'=>true
-                ],       
+                ], */
                 
                 [        
                 'class' => 'yii\grid\ActionColumn',

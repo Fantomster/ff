@@ -7,6 +7,9 @@ use yii\rest\ActiveController;
 use yii\web\NotFoundHttpException;
 use api\modules\v1\modules\mobile\resources\Request;
 use yii\data\ActiveDataProvider;
+use api\modules\v1\modules\mobile\models\User;
+use common\models\Role;
+use common\models\AdditionalEmail;
 
 /**
  * @author Eugene Terentev <eugene@terentev.net>
@@ -39,12 +42,12 @@ class RequestController extends ActiveController {
                 'modelClass' => $this->modelClass,
                 'prepareDataProvider' => [$this, 'prepareDataProvider']
             ],
-            'update' => [
+            /*'update' => [
                 'class' => 'yii\rest\UpdateAction',
                 'modelClass' => 'common\models\Request',
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->updateScenario,
-            ],
+            ],*/
             'create' => [
                 'class' => 'yii\rest\CreateAction',
                 'modelClass' => 'common\models\Request',
@@ -143,6 +146,7 @@ class RequestController extends ActiveController {
        // throw ForbiddenHttpException if access should be denied
        if ($action === 'update' || $action === 'delete' || $action === 'view') {
            $user = Yii::$app->user->identity;
+
            if ($model->rest_org_id !== $user->organization_id)
                throw new \yii\web\ForbiddenHttpException(sprintf('You can only %s articles that you\'ve created.', $action));
        }
@@ -154,12 +158,165 @@ class RequestController extends ActiveController {
         $model = $this->findModel($id);
 
         $this->checkAccess('update', $model);
+        
+        $supp_org_id = $model->responsible_supp_org_id;
 
         $model->scenario = $this->updateScenario;
         $model->responsible_supp_org_id = null;
         if ($model->save() === false && !$model->hasErrors()) {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }
+
+        $request = $model;
+
+            //Тут пошли уведомления
+                //Для начала подготовим текст уведомлений и шаблоны email
+                $subject = Yii::t('app', "mixcart.ru - заявка №%s");
+                    $sms_text = 'Вы сняты с исполнения по заявке №%s';
+                    $email_template = 'requestSetResponsibleMailToSuppReject';
+                    $client_email_template = 'requestSetResponsibleReject';
+                
+                //Данные тексты для рассылки
+                $templateMessage = [
+                    'sms_text' => sprintf($sms_text, $request->id),
+                    'email_template' => $email_template,
+                    'email_subject' => sprintf($subject, $request->id),
+                    'client_email_template' => $client_email_template
+                ];
+                //Для начала соберем сотрудников постовщика, которым необходимо разослать уведомления
+                //Это руководители, и сотрудник который создал отклик
+                $vendor_users = User::find()->where([
+                    'role_id' => Role::ROLE_SUPPLIER_MANAGER
+                ])/*->orWhere([
+                    'id' => $request_callback->supp_user_id
+                ])*/->andWhere([
+                    'organization_id' => $supp_org_id,
+                    'status' => User::STATUS_ACTIVE
+                ])->all();
+
+              if (!empty($vendor_users)) {
+                    //Поехали рассылать
+                    foreach ($vendor_users as $user) {
+                        //Отправляем смс поставщику, о принятии решения по его отклику
+                        if ($user->profile->phone && $user->smsNotification->request_accept == 1) {
+                            Yii::$app->sms->send($templateMessage['sms_text'], $user->profile->phone);
+                        }
+                        //Отправляем емайлы поставщику, о принятии решения по его отклику
+                        if ($user->email && $user->emailNotification->request_accept == 1) {
+                            $mailer = Yii::$app->mailer;
+                            $mailer->htmlLayout = 'layouts/request';
+                            $mailer->compose($templateMessage['email_template'], [
+                                "request" => $request,
+                                "vendor" => $user
+                            ])->setTo($user->email)
+                                ->setSubject($templateMessage['email_subject'])
+                                ->send();
+                        }
+                    }
+                }
+                //Так же необходимо отправить емейлы, на доп.адреса
+                //только те, которые хотят получать эти уведомления
+               /* $additional_email = AdditionalEmail::find()->where([
+                    'organization_id' => $request->supp_org_id,
+                    'request_accept' => 1
+                ])->all();
+                //Если есть такие емайлы, шлем туда
+                if (!empty($additional_email)) {
+                    $vendor = User::findOne($request_callback->supp_user_id);
+                    foreach ($additional_email as $add_email) {
+                        $mailer = Yii::$app->mailer;
+                        $mailer->htmlLayout = 'layouts/request';
+                        $mailer->compose($templateMessage['email_template'], compact("request", "vendor"))
+                            ->setTo($add_email->email)
+                            ->setSubject($templateMessage['email_subject'])
+                            ->send();
+                    }
+                }      */      
+        
+        return $model;
+    }
+    
+    public function actionUpdate($id)
+    {
+        /* @var $model ActiveRecord */
+        $model = $this->findModel($id);
+
+        $this->checkAccess('update', $model);
+
+        $model->scenario = $this->updateScenario;
+        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+        if ($model->save() === false && !$model->hasErrors()) {
+            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
+        }
+        
+        if($model->responsible_supp_org_id == null)
+            return $model;
+        
+        $request = $model;
+        
+         //Тут пошли уведомления
+                //Для начала подготовим текст уведомлений и шаблоны email
+                $sms_text = Yii::t('app', "Вы назначены исполнителем по заявке №%s");
+                $subject = Yii::t('app', "mixcart.ru - заявка №%s");
+                $email_template = 'requestSetResponsibleMailToSupp';
+                $client_email_template = 'requestSetResponsible';
+                
+                 //Данные тексты для рассылки
+                $templateMessage = [
+                    'sms_text' => sprintf($sms_text, $request->id),
+                    'email_template' => $email_template,
+                    'email_subject' => sprintf($subject, $request->id),
+                    'client_email_template' => $client_email_template
+                ];
+                //Для начала соберем сотрудников постовщика, которым необходимо разослать уведомления
+                //Это руководители, и сотрудник который создал отклик
+                $vendor_users = User::find()->where([
+                    'role_id' => Role::ROLE_SUPPLIER_MANAGER
+                ])/*->orWhere([
+                    'id' => $request_callback->supp_user_id
+                ])*/->andWhere([
+                    'organization_id' => $model->responsible_supp_org_id,
+                    'status' => User::STATUS_ACTIVE
+                ])->all();
+        
+         if (!empty($vendor_users)) {
+                    //Поехали рассылать
+                    foreach ($vendor_users as $user) {
+                        //Отправляем смс поставщику, о принятии решения по его отклику
+                        if ($user->profile->phone && $user->smsNotification->request_accept == 1) {
+                            Yii::$app->sms->send($templateMessage['sms_text'], $user->profile->phone);
+                        }
+                        //Отправляем емайлы поставщику, о принятии решения по его отклику
+                        if ($user->email && $user->emailNotification->request_accept == 1) {
+                            $mailer = Yii::$app->mailer;
+                            $mailer->htmlLayout = 'layouts/request';
+                            $mailer->compose($templateMessage['email_template'], [
+                                "request" => $request,
+                                "vendor" => $user
+                            ])->setTo($user->email)
+                                ->setSubject($templateMessage['email_subject'])
+                                ->send();
+                        }
+                    }
+                }
+                //Так же необходимо отправить емейлы, на доп.адреса
+                //только те, которые хотят получать эти уведомления
+             /*   $additional_email = AdditionalEmail::find()->where([
+                    'organization_id' => $request->responsible_supp_org_id,
+                    'request_accept' => 1
+                ])->all();
+                //Если есть такие емайлы, шлем туда
+                if (!empty($additional_email)) {
+                    $vendor = User::findOne($request_callback->supp_user_id);
+                    foreach ($additional_email as $add_email) {
+                        $mailer = Yii::$app->mailer;
+                        $mailer->htmlLayout = 'layouts/request';
+                        $mailer->compose($templateMessage['email_template'], compact("request", "vendor"))
+                            ->setTo($add_email->email)
+                            ->setSubject($templateMessage['email_subject'])
+                            ->send();
+                    }
+                }       */     
 
         return $model;
     }

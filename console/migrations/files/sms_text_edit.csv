@@ -1,0 +1,42 @@
+sms.designated_catalog;ru;Поставщик {vendor_name} назначил для вас каталог на mixcart.ru
+sms.designated_catalog;en;
+sms.designated_catalog;es;
+sms.changed_catalog;ru;Поставщик  {vendor_name} изменил для вас каталог на mixcart.ru
+sms.changed_catalog;en;
+sms.changed_catalog;es;
+sms.request_set_responsible;ru;Вы назначены исполнителем по заявке №{request_id} на mixcart.ru
+sms.request_set_responsible;en;
+sms.request_set_responsible;es;
+sms.request_unset_responsible;ru;Вы сняты с исполнения по заявке №{request_id} на mixcart.ru
+sms.request_unset_responsible;en;
+sms.request_unset_responsible;es;
+sms.request_add_supplier;ru;{client_name} хочет работать с вами на mixcart.ru
+sms.request_add_supplier;en;
+sms.request_add_supplier;es;
+sms.request_new_callback;ru;{vendor_name} оставил отклик на вашу заявку №{request_id} на mixcart.ru
+sms.request_new_callback;en;
+sms.request_new_callback;es;
+sms.client_invite;ru;Ресторан {name} приглашает вас работать с ним через mixcart.ru
+sms.client_invite;en;
+sms.client_invite;es;
+sms.client_invite_repeat;ru;{name} повторно приглашает вас работать с ним через mixcart.ru
+sms.client_invite_repeat;en;
+sms.client_invite_repeat;es;
+sms.order_changed;ru;{client_name} изменил детали заказа
+sms.order_changed;en;
+sms.order_changed;es;
+sms.order_done;ru;{name} завершил заказ
+sms.order_done;en;
+sms.order_done;es;
+sms.order_new;ru;Поступил новый заказ от {name}:
+sms.order_new;en;
+sms.order_new;es;
+sms.order_processing;ru;{vendor_name} согласовал заказ
+sms.order_processing;en;
+sms.order_processing;es;
+sms.order_canceled;ru;{name} отменил заказ
+sms.order_canceled;en;
+sms.order_canceled;es;
+sms.add_market;ru;Ресторан {client_name} нашел вас на market.mixcart.ru и приглашает работать с ним через mixcart.ru
+sms.add_market;en;
+sms.add_market;es;

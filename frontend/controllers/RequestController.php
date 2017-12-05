@@ -352,13 +352,10 @@ class RequestController extends DefaultController
                 //Для начала соберем сотрудников постовщика, которым необходимо разослать уведомления
                 //Это руководители, и сотрудник который создал отклик
                 $vendor_users = User::find()->where([
-                    'role_id' => Role::ROLE_SUPPLIER_MANAGER
-                ])->orWhere([
-                    'id' => $request_callback->supp_user_id
-                ])->andWhere([
                     'organization_id' => $request_callback->supp_org_id,
-                    'status' => User::STATUS_ACTIVE
-                ])->all();
+                    'status' => User::STATUS_ACTIVE,
+                    'role_id' => Role::ROLE_SUPPLIER_MANAGER
+                ])->orWhere(['id' => $request_callback->supp_user_id])->all();
 
                 if (!empty($vendor_users)) {
                     //Поехали рассылать
@@ -420,7 +417,7 @@ class RequestController extends DefaultController
             }
         } catch (\Exception $e) {
             $transaction->rollBack();
-            return ['success' => false, 'error' => $e->getMessage()];
+            return ['success' => false, 'error' => $e->getCode()];
         }
     }
 
@@ -547,13 +544,10 @@ class RequestController extends DefaultController
                     ]);
                     //Найдем всех сотрудников ресторана, кому должны отправить уведомления
                     $clients = User::find()->where([
-                        'role_id' => Role::ROLE_RESTAURANT_MANAGER
-                    ])->orWhere([
-                        'id' => $request->rest_user_id
-                    ])->andWhere([
-                        'organization_id' => $request->rest_org_id,
-                        'status' => User::STATUS_ACTIVE
-                    ])->all();
+                            'organization_id' => $request->rest_org_id,
+                            'status' => User::STATUS_ACTIVE,
+                            'role_id' => Role::ROLE_RESTAURANT_MANAGER
+                        ])->orWhere(['id' => $request->rest_user_id])->all();
                     //Если есть клиенты, а они должн быть :)
                     if (!empty($clients)) {
                         foreach ($clients as $client) {

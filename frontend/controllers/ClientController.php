@@ -839,7 +839,7 @@ class ClientController extends DefaultController {
 
                     foreach ($rows as $row) {
                         if ($row->profile->phone && $row->profile->sms_allow) {
-                            $text = Yii::$app->sms->prepareText('sms.client_want_to_work', [
+                            $text = Yii::$app->sms->prepareText('sms.client_invite', [
                                 'name' => $currentUser->organization->name
                             ]);
                             Yii::$app->sms->send($text, $row->profile->phone);

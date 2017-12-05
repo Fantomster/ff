@@ -352,7 +352,7 @@ class OrderController extends DefaultController {
                 $guideProduct->delete();
             } else {
                 $position = array_search($guideProduct->cbg_id, $guideProductList);
-                if (!$position) {
+                if ($position !== false) {
                     unset($guideProductList[$position]);
                 }
             }

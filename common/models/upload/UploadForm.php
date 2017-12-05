@@ -3,6 +3,7 @@ namespace common\models\upload;
 
 use yii\base\Model;
 use yii\web\UploadedFile;
+use Yii;
 
 class UploadForm extends Model
 {

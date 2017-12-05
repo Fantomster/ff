@@ -49,7 +49,7 @@
 }
 .a_basket{
     font-size: 18px;
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     color: #000;
 }
 .block_right_basket{
@@ -82,7 +82,7 @@
     border-bottom: 1px solid #E0E0E0;
 }
 .block_name_copmain p{
-    font-family: "Circe_Regular";
+/*    font-family: "Circe_Regular";*/
     text-align: center;
     padding-top: 15px;
     padding-bottom: 5px;
@@ -95,20 +95,20 @@
     border-bottom: 1px solid #E0E0E0;
 }
 .count{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     color: #95989A;
     font-size: 16px;
     padding-right: 10px;
 }
 .name_tovar{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 16px;
     padding-top: 20px;
     padding-right: 30px;
     padding-left: 25px;
 }
 .name_tovar1{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 16px;
     padding-right: 30px;
     padding-left: 25px;
@@ -132,14 +132,14 @@
     overflow: hidden;
 }
 .name_s{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 20px;
     padding-left: 30px;
     padding-top: 10px;
     text-align: left;
 }
 .count_s{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 20px;
     padding-right: 30px;
     padding-top: 10px;
@@ -152,7 +152,7 @@
     font-size: 20px;
     border: none;
     outline: none;
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
 }
 .maska1{
     position: fixed;
@@ -166,7 +166,7 @@
     cursor: pointer;
 }
 .min_zakaz{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     color: #95989A;
     line-height: 18px;
     padding-left: 30px;
@@ -174,7 +174,7 @@
     text-align: left;
 }
 .dost_min{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     color: #95989A;
     padding-right: 30px;
     padding-bottom: 10px;
@@ -186,11 +186,11 @@
     padding: 30px;
 }
 .block_wrap_dont_tovar_name{
-    font-family: "Circe_Bold";
+    /*font-family: "Circe_Bold";*/
     font-size: 18px;
 }
 .block_wrap_dont_tovar_p{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 15px;
 }
 .block_wrap_dont_tovar_p span{
@@ -224,7 +224,7 @@
 }
 @media (max-width: 460px) {
     .min_zakaz{
-        font-family: "Circe_Regular";
+        /*font-family: "Circe_Regular";*/
         color: #95989A;
         float: none;
         width: 100%;
@@ -237,7 +237,7 @@
         float: left;
     }
     .dost_min{
-        font-family: "Circe_Regular";
+        /*font-family: "Circe_Regular";*/
         color: #95989A;
         float: left;
         padding-right: 10px;
@@ -260,11 +260,11 @@
         padding: 10px;
     }
     .block_wrap_dont_tovar_name{
-        font-family: "Circe_Bold";
+        /*font-family: "Circe_Bold";*/
         font-size: 18px;
     }
     .block_wrap_dont_tovar_p{
-        font-family: "Circe_Regular";
+        /*font-family: "Circe_Regular";*/
         font-size: 14px;
     }
     .block_wrap_dont_tovar_p span{

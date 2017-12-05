@@ -112,11 +112,14 @@ class SiteController extends Controller {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSuppliers = RelationSuppRest::find()
+                $result = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
-                        ->all();  
+                        ->all();
+                foreach($result as $row){
+                    $relationSuppliers[] = $row['id'];
+                }
             }
         }
         
@@ -126,7 +129,7 @@ class SiteController extends Controller {
             if(!empty($supplierRegion)){
                 if(!empty($relationSuppliers)) {
                     $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                        return $a - $b['id'];
+                        return $a - $b;
                     });
                 }
                 $oWhere = ['in', 'id', $supplierRegion];
@@ -586,11 +589,14 @@ class SiteController extends Controller {
         if (!\Yii::$app->user->isGuest) {
             $currentUser = Yii::$app->user->identity;
             if ($currentUser->organization->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSuppliers = RelationSuppRest::find()
+                $result = RelationSuppRest::find()
                     ->select('supp_org_id as id,supp_org_id as supp_org_id')
                     ->where(['rest_org_id' => $currentUser->organization->id, 'invite' => RelationSuppRest::INVITE_ON])
                     ->asArray()
                     ->all();
+                foreach($result as $row){
+                    $relationSuppliers[] = $row['id'];
+                }
             }
         }
 
@@ -600,7 +606,7 @@ class SiteController extends Controller {
             if(!empty($supplierRegion)){
                 if(!empty($relationSuppliers)) {
                     $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                        return $a - $b['id'];
+                        return $a - $b;
                     });
                 }
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
@@ -638,11 +644,14 @@ class SiteController extends Controller {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSuppliers = RelationSuppRest::find()
+                $result = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
-                        ->all();  
+                        ->all();
+                foreach($result as $row){
+                    $relationSuppliers[] = $row['id'];
+                }
             }
         }
         
@@ -652,7 +661,7 @@ class SiteController extends Controller {
             if(!empty($supplierRegion)){
                 if(!empty($relationSuppliers)) {
                     $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                        return $a - $b['id'];
+                        return $a - $b;
                     });
                 }
                 $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
@@ -751,11 +760,14 @@ class SiteController extends Controller {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSuppliers = RelationSuppRest::find()
+                $result = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
-                        ->all();  
+                        ->all();
+                foreach($result as $row){
+                    $relationSuppliers[] = $row['id'];
+                }
             }
         }
         
@@ -765,7 +777,7 @@ class SiteController extends Controller {
             if(!empty($supplierRegion)){
                 if(!empty($relationSuppliers)) {
                     $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                        return $a - $b['id'];
+                        return $a - $b;
                     });
                 }
                 $oWhere = ['in', 'id', $supplierRegion];
@@ -917,13 +929,16 @@ class SiteController extends Controller {
             if (!\Yii::$app->user->isGuest) {
                 $currentUser = Yii::$app->user->identity;
                 if ($currentUser->organization->type_id == Organization::TYPE_RESTAURANT) {
-                    $relationSuppliers = RelationSuppRest::find()
+                    $result = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where([
                             'rest_org_id' => $currentUser->organization->id,
                             'invite' => RelationSuppRest::INVITE_ON
                         ])->asArray()
                         ->all();
+                    foreach($result as $row){
+                        $relationSuppliers[] = $row['id'];
+                    }
                 }
             }
 
@@ -933,7 +948,7 @@ class SiteController extends Controller {
                 if(!empty($supplierRegion)){
                     if(!empty($relationSuppliers)) {
                         $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                            return $a - $b['id'];
+                            return $a - $b;
                         });
                     }
                     $cbgWhere = ['in', 'supp_org_id', $supplierRegion];
@@ -974,21 +989,24 @@ class SiteController extends Controller {
             $currentUser = Yii::$app->user->identity;
             $client = $currentUser->organization;
             if ($client->type_id == Organization::TYPE_RESTAURANT) {
-                $relationSuppliers = RelationSuppRest::find()
+                $result = RelationSuppRest::find()
                         ->select('supp_org_id as id,supp_org_id as supp_org_id')
                         ->where(['rest_org_id' => $client->id, 'invite' => RelationSuppRest::INVITE_ON])
                         ->asArray()
-                        ->all();  
+                        ->all();
+                foreach($result as $row){
+                    $relationSuppliers[] = $row['id'];
+                }
             }
         }
         
-        if(!empty(Yii::$app->request->cookies->get('locality'))){
+        if(!empty(Yii::$app->request->cookies->get('locality'))) {
             $supplierRegion = DeliveryRegions::getSuppRegion();
 
             if(!empty($supplierRegion)){
                 if(!empty($relationSuppliers)) {
                     $supplierRegion = \array_udiff($supplierRegion, $relationSuppliers, function ($a, $b) {
-                        return $a - $b['id'];
+                        return $a - $b;
                     });
                 }
                 $oWhere = ['in', 'id', $supplierRegion];
@@ -1000,17 +1018,11 @@ class SiteController extends Controller {
                     'white_list'=>  Organization::WHITE_LIST_ON
                     ])
                 ->andWhere($oWhere)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->limit(12)
-                ->all();
-        $suppliersCount = Organization::find()
-                ->where([
-                    'type_id' => Organization::TYPE_SUPPLIER,
-                    'white_list'=>  Organization::WHITE_LIST_ON
-                    ])
-                ->andWhere($oWhere)
-                ->orderBy(['rating'=>SORT_DESC])
-                ->count();
+                ->orderBy(['rating'=>SORT_DESC]);
+
+        $suppliersCount = $suppliers->count();
+        $suppliers = $suppliers->limit(12)->all();
+
         return $this->render('suppliers', compact('suppliers', 'suppliersCount'));
     }
     

@@ -64,7 +64,7 @@ yii\web\View::POS_READY);
                     <input type="hidden" id="administrative_area_level_1" name="administrative_area_level_1" value="<?=Yii::$app->request->cookies->get('region')?>">
                     <input type="hidden" id="locality" name="locality" value="<?=Yii::$app->request->cookies->get('locality')?>">
                     <input type="hidden" id="currentUrl" name="currentUrl" value="<?=Yii::$app->getRequest()->getUrl()?>">
-                    <button type="submit" class="btn btn-md btn-success loc-submit">Подтвердить</button>
+                    <button class="btn btn-md btn-success loc-submit">Подтвердить</button>
                 <?php ActiveForm::end(); ?>
             </div>
         </div>

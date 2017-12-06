@@ -71,6 +71,9 @@ return [
                 'message' => [
                     'class' => 'yii\i18n\DbMessageSource'
                 ],
+                'sms_message' => [
+                    'class' => 'yii\i18n\DbMessageSource'
+                ],
                 'error' => [
                     'class' => 'yii\i18n\DbMessageSource'
                 ],

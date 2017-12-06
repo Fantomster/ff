@@ -29,7 +29,7 @@ Modal::widget([
 <?php
 $gridColumnsClients = [
     [
-        'label' => 'Ресторан',
+        'label' => Yii::t('app', 'frontend.views.vendor.clients.rest', ['ru'=>'Ресторан']),
         'format' => 'raw',
         'attribute' => 'client_name',
         'value' => function ($data) {
@@ -236,7 +236,7 @@ $form = ActiveForm::begin([
                     'responsive' => false,
                     'hover' => false,
                 ]);
-                ?> 
+                ?>
                 <?php Pjax::end(); ?> 
             </div>
         </div>

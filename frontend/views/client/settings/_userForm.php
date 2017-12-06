@@ -30,7 +30,7 @@ $form = ActiveForm::begin([
 
     <?= $form->field($user, 'email') ?>
 
-    <?= $form->field($user, 'newPassword')->passwordInput() ?>
+    <?= $form->field($user, 'newPassword')->label(Yii::t('app', 'frontend.views.user_form.new_pass', ['ru'=>'Новый пароль']))->passwordInput() ?>
 
     <?= $form->field($profile, 'full_name') ?>
 

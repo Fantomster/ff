@@ -197,7 +197,7 @@ $this->registerCss("
             </div>
             <?php ActiveForm::end(); ?>
             <?php if($organization->type_id == Organization::TYPE_SUPPLIER ){ ?>
-            <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> отчет xls', ['class' => 'btn btn-success export-to-xls']) ?>
+            <?= Html::submitButton('<i class="fa fa-file-excel-o"></i> ' . Yii::t('app', 'frontend.views.order.index.report', ['ru'=>'отчет xls']), ['class' => 'btn btn-success export-to-xls']) ?>
             <?php }?>
             <div class="row">
                 <div class="col-md-12">

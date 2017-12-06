@@ -246,6 +246,11 @@ $form = ActiveForm::begin([
 $inviteRestOrgUrl = Url::to(['vendor/ajax-invite-rest-org-id']);
 $removeClientUrl = Url::to(['vendor/remove-client']);
 
+$one = Yii::t('message', 'frontend.views.vendor.del_client', ['ru'=>'Удалить клиента?']);
+$two = Yii::t('message', 'frontend.views.vendor.client_will_delete', ['ru'=>'Клиент будет удален из Вашего списка клиентов']);
+$three = Yii::t('message', 'frontend.views.vendor.del_six', ['ru'=>'Удалить']);
+$four = Yii::t('message', 'frontend.views.vendor.cancel', ['ru'=>'Отмена']);
+
 $customJs = <<< JS
     $(document).on("change keyup paste cut", "#search_string", function() {
         if (timer) {

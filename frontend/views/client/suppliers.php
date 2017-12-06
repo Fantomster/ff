@@ -89,6 +89,7 @@ $currencySymbolList = Json::encode($currencySymbolListList);
         'options' => [
             'class' => 'breadcrumb'
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.client.suppliers.vendors_three', ['ru'=>'Поставщики'])
         ],

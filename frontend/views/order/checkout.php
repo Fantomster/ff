@@ -274,6 +274,7 @@ $this->title = Yii::t('message', 'frontend.views.order.basket', ['ru'=>"Корз
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
                 'label' => Yii::t('message', 'frontend.views.order.set_order_two', ['ru'=>'Разместить заказ']),

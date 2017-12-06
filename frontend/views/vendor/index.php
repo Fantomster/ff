@@ -37,6 +37,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
     ])
     ?>
 </section>

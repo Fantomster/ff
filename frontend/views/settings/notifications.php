@@ -16,6 +16,7 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.settings.settings_two', ['ru'=>'Настройки']),
             Yii::t('message', 'frontend.views.settings.notifications_two', ['ru'=>'Уведомления']),

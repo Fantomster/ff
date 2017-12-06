@@ -222,6 +222,7 @@ if ($organizationType == Organization::TYPE_RESTAURANT) {
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
                 'label' => Yii::t('message', 'frontend.views.order.orders_history', ['ru'=>'История заказов']),

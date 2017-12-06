@@ -21,6 +21,7 @@ use yii\widgets\ListView;
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
                 'label' => Yii::t('message', 'frontend.views.request.request_list', ['ru'=>'Список заявок']),

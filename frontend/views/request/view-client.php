@@ -22,6 +22,7 @@ $this->title = Yii::t('message', 'frontend.views.request.request_no_two', ['ru'=
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
                 'label' => Yii::t('message', 'frontend.views.request.request_two', ['ru'=>'Список заявок']),

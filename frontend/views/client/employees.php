@@ -64,6 +64,7 @@ $this->registerJs(
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.client.emp.settings_two', ['ru'=>'Настройки']),
             Yii::t('message', 'frontend.views.client.emp.employees_two', ['ru'=>'Сотрудники']),

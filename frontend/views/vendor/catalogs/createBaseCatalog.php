@@ -72,6 +72,7 @@ if (false) {
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.vendor.new_cat_create', ['ru'=>'Создание главного каталога'])
         ],

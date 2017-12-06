@@ -40,6 +40,7 @@ box-shadow: 0px 0px 34px -11px rgba(0,0,0,0.41);}
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.vendor.anal_four', ['ru'=>'Аналитика'])
         ],

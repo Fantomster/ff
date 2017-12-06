@@ -36,6 +36,7 @@ section>h3>small {
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.vendor.settings_three', ['ru'=>'Настройки']),
             Yii::t('message', 'frontend.views.vendor.cust_two', ['ru'=>'Общие']),

@@ -93,6 +93,7 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.request.req_list_two', ['ru'=>'Список заявок'])
         ],

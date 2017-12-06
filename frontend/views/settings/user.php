@@ -112,6 +112,7 @@ $this->registerJs("
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.settings.settings', ['ru'=>'Настройки']),
             Yii::t('message', 'frontend.views.settings.personal_two', ['ru'=>'Личные']),

@@ -135,6 +135,7 @@ if ($organization->step == common\models\Organization::STEP_SET_INFO) {
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.vendor.set', ['ru'=>'Настройки']),
             Yii::t('message', 'frontend.views.vendor.cust', ['ru'=>'Общие']),

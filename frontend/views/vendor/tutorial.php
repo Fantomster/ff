@@ -14,6 +14,7 @@ $this->title = Yii::t('message', 'frontend.views.vendor.video', ['ru'=>'Обуч
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('message', 'frontend.views.vendor.video_three', ['ru'=>'Обучающие видео']),
         ],

@@ -146,6 +146,7 @@ Breadcrumbs::widget([
     'options' => [
         'class' => 'breadcrumb',
     ],
+    'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
     'links' => [
       Yii::t('message', 'frontend.views.vendor.my_clients_three', ['ru'=>'Мои клиенты'])
     ],

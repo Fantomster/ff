@@ -31,7 +31,7 @@ $this->title = Yii::t('user', 'Forgot password');
                     ?>
                 </div>
                 <?=
-                Html::a(Yii::t('user', 'Submit'), '#', [
+                Html::a(Yii::t('user', Yii::t('app', 'franchise.views.user.default.forgot.submit', ['ru'=>'Подтвердить'])), '#', [
                     'data' => [
                         'method' => 'post',
                     ],

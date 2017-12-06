@@ -141,6 +141,7 @@ Modal::end();
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'frontend.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
                 'label' => Yii::t('message', 'frontend.views.vendor.catalogs_four', ['ru'=>'Каталоги']),

@@ -145,7 +145,7 @@ $this->registerJs(
                         ],
                         [
                             'attribute' => 'status',
-                            'label' => Yii::t('user', 'Status'),
+                            'label' => Yii::t('app', 'frontend.views.client.emp.status', ['ru'=>'Статус']),
                             'filter' => $user::statusDropdown(),
                             'value' => function($model, $index, $dataColumn) use ($user) {
                                 $statusDropdown = $user::statusDropdown();

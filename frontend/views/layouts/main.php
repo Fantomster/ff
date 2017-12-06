@@ -376,7 +376,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                     <input type="text" class="input_text" placeholder="<?= Yii::t('message', 'frontend.views.layouts.main.city', ['ru'=>'Город']) ?>" name="FIELDS[city]" required>
                                 </div>
                                 <div class="contact_us__form__row">
-                                    <button type="submit" class="send-form-callback" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> Получаем..."><span>Отправить</span></button>
+                                    <button type="submit" class="send-form-callback" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> <?= Yii::t('app', 'frontend.views.layouts.main.accept', ['ru'=>'Получаем...']) ?>"><span><?= Yii::t('app', 'frontend.views.layouts.main.send', ['ru'=>'Отправить']) ?></span></button>
                                 </div>
                                 <input type="hidden" name="FIELDS[sitepage]" value="fkeeper">
                             </form>

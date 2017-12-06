@@ -22,7 +22,7 @@ $form = ActiveForm::begin([
     <?=
             $form->field($organization, 'type_id')
             ->radioList(
-                    [Organization::TYPE_RESTAURANT => 'Я покупаю', Organization::TYPE_SUPPLIER => 'Я продаю'], 
+                    [Organization::TYPE_RESTAURANT => Yii::t('app', 'frontend.views.user.default.i_buy.', ['ru'=>'Я покупаю']), Organization::TYPE_SUPPLIER => Yii::t('app', 'frontend.views.user.default.i_sell', ['ru'=>'Я продаю'])],
                     [
                         'item' => function($index, $label, $name, $checked, $value) use ($organization) {
 

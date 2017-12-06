@@ -75,7 +75,7 @@ $this->title = 'MixCart';
                 </a>
             </div>-->
             <div class="error__block">
-                <p><a class="callback_form" data-modal="callback" data-lead="Оставить заявку"><?= Yii::t('message', 'frontend.views.site.request', ['ru'=>'оставить заявку']) ?></a></p>
+                <p><a class="callback_form" data-modal="callback" data-lead="<?= Yii::t('app', 'frontend.views.site.index.set_request', ['ru'=>'Оставить заявку']) ?>"><?= Yii::t('message', 'frontend.views.site.request', ['ru'=>'оставить заявку']) ?></a></p>
             </div>
         </div>
     </div>
@@ -91,8 +91,8 @@ $this->title = 'MixCart';
                     <div class="how_its_work">
                         <h3><?= Yii::t('message', 'frontend.views.site.how_it_works', ['ru'=>'как это работает']) ?></h3>
                         <p><?= Yii::t('message', 'frontend.views.site.mixcart', ['ru'=>'MixCart это инструмент для автоматизации процесса взаимодействия между поставщиком и рестораном. Рестораны создают заказы, в несколько кликов. Поставщики получают и обрабатывают заказы. Обработка всех заказов, происходит в одном месте. Минимум человеческого фактора. MixCart, сокращает время на обработку заказов в несколько раз. Уменьшает количество возвратов и ошибок.']) ?></p>
-<?= Html::a('Для ресторанов', "https://client.mixcart.ru") ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
-                    <div class="callback_form call_back_button2" data-modal="callback" data-lead="Оставить заявку"><?= Yii::t('message', 'frontend.views.site.set_request', ['ru'=>'оставить заявку']) ?></div>
+<?= Html::a(Yii::t('app', 'frontend.views.site.index.for_rest', ['ru'=>'Для ресторанов']), "https://client.mixcart.ru") ?> / <?= Html::a(Yii::t('app', 'frontend.views.site.index.for_vendors_two', ['ru'=>'Для поставщиков']), ["/site/supplier"]) ?>
+                    <div class="callback_form call_back_button2" data-modal="callback" data-lead="<?= Yii::t('app', 'frontend.views.site.index.set_request_two', ['ru'=>'Оставить заявку']) ?>"><?= Yii::t('message', 'frontend.views.site.set_request', ['ru'=>'оставить заявку']) ?></div>
                     </div>
                 </div>	
                 <div class="col-md-7">

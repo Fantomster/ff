@@ -9,7 +9,7 @@ use yii\widgets\ActiveForm;
  * @var yii\widgets\ActiveForm $form
  * @var amnah\yii2\user\models\forms\LoginForm $model
  */
-$this->title = Yii::t('user', 'Forgot password');
+$this->title = Yii::t('app', 'frontend.views.user.forgot.forgot_two', ['ru'=>'Забыли пароль']);
 
 $this->registerJs(
         '
@@ -94,12 +94,12 @@ if ($flash = Yii::$app->session->getFlash('Forgot-success')) {
                         ?><i class="fa fa-user"></i>
                     </label>
                 </div>
-                <button type="submit" id="btnSend" class="but but_green" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> <?= Yii::t('message', 'frontend.views.user.default.sending', ['ru'=>'Отправляем..']) ?>."><span>Отправить</span><i class="ico"></i></button>
+                <button type="submit" id="btnSend" class="but but_green" data-loading-text="<span class='glyphicon-left glyphicon glyphicon-refresh spinning'></span> <?= Yii::t('message', 'frontend.views.user.default.sending', ['ru'=>'Отправляем..']) ?>."><span><?= Yii::t('app', 'frontend.views.user.forgot.send', ['ru'=>'Отправить']) ?></span><i class="ico"></i></button>
                     <?= Html::a(Yii::t('message', 'frontend.views.user.default.enter_register', ['ru'=>"Войти / зарегистрироваться"]), ["/user/login"], ["class" => "reestablish-link"]) ?>
                 <?php ActiveForm::end(); ?>
                 <div class="auth-sidebar__contacts">
-                    <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:84994041018">8-499-404-10-18</a></div>
-                    <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@mixcart.ru">info@mixcart.ru</a></div>
+                    <div class="auth-sidebar__contacts-item"><i class="fa fa-phone"></i><a href="tel:<?= Yii::t('app', 'frontend.views.user.forgot.phone_two', ['ru'=>'84994041018']) ?>"><?= Yii::t('app', 'frontend.views.user.forgot.phone', ['ru'=>'8-499-404-10-18']) ?></a></div>
+                    <div class="auth-sidebar__contacts-item"><i class="fa fa-envelope-o"></i><a href="mailto:info@mixcart.ru"><?= Yii::t('app', 'frontend.views.user.forgot.email', ['ru'=>'info@mixcart.ru']) ?></a></div>
                 </div>
             </div>
         </div>

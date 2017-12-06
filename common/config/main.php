@@ -81,6 +81,7 @@ return [
         ],
         'formatter' => [
             'locale' => 'en',
+            'class' => 'yii\i18n\Formatter','nullDisplay' => Yii::t('app', 'common.config.main.empty', ['ru'=>'пусто'])
         ],
         'mailer' => [
             'viewPath' => '@common/mail',

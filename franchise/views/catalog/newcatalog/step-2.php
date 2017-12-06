@@ -30,6 +30,7 @@ $this->registerCss('
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
             'label' => Yii::t('app', 'franchise.views.catalog.newcatalog.catalogs_two', ['ru'=>'Каталоги']),

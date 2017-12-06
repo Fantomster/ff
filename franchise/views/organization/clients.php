@@ -292,7 +292,7 @@ $this->registerCss("
                                     }
                                     return ($data["orderSum"] ? $data["orderSum"] : 0) . " руб. <span class='description-percentage $class'>$divider $progress%";
                                 },
-                                'label' => 'Сумма заказов',
+                                'label' => Yii::t('app', 'franchise.views.organization.clients.sum', ['ru'=>'Сумма заказов']),
                             ],
                             [
                                 'format' => 'raw',

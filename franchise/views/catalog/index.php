@@ -48,6 +48,7 @@ Modal::begin([
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('app', 'franchise.views.catalog.my_catalogs_two', ['ru'=>'Мои каталоги'])
         ],

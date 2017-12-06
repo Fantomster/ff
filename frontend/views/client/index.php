@@ -132,7 +132,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                             <div class="dash-small-box step-cart" data-target="checkout">
                                 <div class="inner" style="position:relative;z-index:2">
                                     <h3><?= Yii::t('message', 'frontend.views.client.index.basket', ['ru'=>'Корзина']) ?> </h3>
-                                    <p>заказов <b><?= $totalCart ?></b></p>
+                                    <p><?= Yii::t('app', 'frontend.views.client.index.orders', ['ru'=>'заказов']) ?> <b><?= $totalCart ?></b></p>
                                 </div>
 <?= Html::a(Yii::t('message', 'frontend.views.client.index.basket_two', ['ru'=>'Корзина']), ['order/checkout'], ['class' => 'btn btn-outline-success', 'style' => 'font-size:14px;position:relative;z-index:2']) ?>
                                 <div class="bg" style="
@@ -315,7 +315,7 @@ if ($organization->step == Organization::STEP_SET_INFO) {
                                     case Order::STATUS_DONE:
                                     case Order::STATUS_REJECTED:
                                     case Order::STATUS_CANCELLED:
-                                        return Html::a('Повторить', '#', [
+                                        return Html::a(Yii::t('app', 'frontend.views.client.index.repeat', ['ru'=>'Повторить']), '#', [
                                                     'class' => 'reorder btn btn-outline-processing',
                                                     'data' => [
                                                         'toggle' => 'tooltip',

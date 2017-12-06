@@ -119,6 +119,7 @@ $this->registerCss("
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('app', 'franchise.views.site.settings_three', ['ru'=>'Настройки']),
             Yii::t('app', 'franchise.views.site.common', ['ru'=>'Общие']),
@@ -173,7 +174,7 @@ $this->registerCss("
                                             $form->field($franchisee, 'fio_manager', [
                                                 'addon' => ['prepend' => ['content' => '<i class="fa fa-users"></i>']]
                                             ])
-                                            ->label('Менеджер <span style="font-size:12px; color: #dd4b39;"></span>')
+                                            ->label(Yii::t('app', 'franchise.views.site.settings.manager', ['ru'=>'Менеджер']).' <span style="font-size:12px; color: #dd4b39;"></span>')
                                             ->textInput(['placeholder' => Yii::t('app', 'franchise.views.site.managers_fio', ['ru'=>'ФИО менеджера'])])
                                     ?>
                             </div>

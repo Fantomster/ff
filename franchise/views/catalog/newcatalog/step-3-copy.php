@@ -32,6 +32,7 @@ $this->title = Yii::t('app', 'franchise.views.catalog.newcatalog.edit_products_t
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             [
             'label' => Yii::t('app', 'franchise.views.catalog.newcatalog.catalogs_three', ['ru'=>'Каталоги']),

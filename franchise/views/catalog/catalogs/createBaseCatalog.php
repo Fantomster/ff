@@ -102,6 +102,7 @@ if (false) {//$step == common\models\Organization::STEP_ADD_CATALOG
         'options' => [
             'class' => 'breadcrumb',
         ],
+        'homeLink' => ['label' => Yii::t('app', 'franchise.views.to_main', ['ru'=>'Главная']), 'url' => '/'],
         'links' => [
             Yii::t('app', 'franchise.views.catalog.catalogs.new_cat_creating_two', ['ru'=>'Создание главного каталога'])
         ],

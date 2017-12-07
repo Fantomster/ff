@@ -42,6 +42,13 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
     ?>
 </section>
 <section class="content">
+    <?php if (Yii::$app->session->hasFlash('success')): ?>
+        <div class="alert alert-danger alert-dismissable">
+            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+            <h4><i class="icon fa fa-check"></i>Ошибка</h4>
+            <?= Yii::$app->session->getFlash('success') ?>
+        </div>
+    <?php endif; ?>
     <div class="box box-info">
         <!-- /.box-header -->
         <div class="box-body">

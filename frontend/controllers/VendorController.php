@@ -613,22 +613,17 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
-//            $xlsArray = [];
-//            //Проверяем наличие дублей в списке
-//            if ($importType == 2 || $importType == 3) {
-//                $rP = 0;
-//            } else {
-//                $rP = 1;
-//            }
-//            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-//                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
-//                if (!empty($row_unique)) {
-//                    if (!in_array($row_unique, $arr)) {
-//                        $newRows++;
-//                    }
-//                    array_push($xlsArray, (string) $row_unique);
-//                }
-//            }
+            $xlsArray = [];
+            //Проверяем наличие дублей в списке
+            if ($importType == 2 || $importType == 3) {
+                $rP = 0;
+            } else {
+                $rP = 1;
+            }
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
+                array_push($xlsArray, (string) $row_unique);
+            }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
@@ -638,7 +633,8 @@ class VendorController extends DefaultController {
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
             //if (max(array_count_values($xlsArray)) > 1) {
-            if (count($arr) !== count(array_flip($arr))) {
+            
+            if (count($xlsArray) !== count(array_flip($xlsArray))) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -811,17 +807,12 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
-//            $xlsArray = [];
-//            //Проверяем наличие дублей в списке
-//            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-//                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
-//                if (!empty($row_unique)) {
-//                    if (!in_array($row_unique, $arr)) {
-//                        $newRows++;
-//                    }
-//                    array_push($xlsArray, (string) $row_unique);
-//                }
-//            }
+            $xlsArray = [];
+            //Проверяем наличие дублей в списке
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+                array_push($xlsArray, (string) $row_unique);
+            }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
@@ -830,9 +821,11 @@ class VendorController extends DefaultController {
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
+            
             $flipArr = array_flip($arr);
+            
             //if (max(array_count_values($xlsArray)) > 1) {
-            if (count($arr) !== count($flipArr)) {
+            if (count($xlsArray) !== count(array_flip($xlsArray))) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');

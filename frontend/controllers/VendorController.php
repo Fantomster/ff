@@ -622,7 +622,12 @@ class VendorController extends DefaultController {
             }
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                 $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
-                array_push($xlsArray, (string) $row_unique);
+                if (!empty($row_unique)) {
+                    if (!in_array($row_unique, $arr)) {
+                        $newRows++;
+                    }
+                    array_push($xlsArray, (string) $row_unique);
+                }
             }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
@@ -634,7 +639,7 @@ class VendorController extends DefaultController {
             }
             //if (max(array_count_values($xlsArray)) > 1) {
             
-            if (count($xlsArray) !== count(array_flip($xlsArray))) {
+            if (max(array_count_values($xlsArray)) > 1) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -811,7 +816,12 @@ class VendorController extends DefaultController {
             //Проверяем наличие дублей в списке
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                 $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
-                array_push($xlsArray, (string) $row_unique);
+                if (!empty($row_unique)) {
+                    if (!in_array($row_unique, $arr)) {
+                        $newRows++;
+                    }
+                    array_push($xlsArray, (string) $row_unique);
+                }
             }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
@@ -825,7 +835,7 @@ class VendorController extends DefaultController {
             $flipArr = array_flip($arr);
             
             //if (max(array_count_values($xlsArray)) > 1) {
-            if (count($xlsArray) !== count(array_flip($xlsArray))) {
+            if (max(array_count_values($xlsArray)) > 1) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');

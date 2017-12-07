@@ -31,7 +31,7 @@ class ProductHelper extends AuthHelper {
     $guid = UUID::uuid4();
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/product'.'">
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/product'.'" timeout="900">
     <PARAM name="object_id" val="'.$this->restr->code.'" />
     <PARAM name="goodgroup_rid" val="1" />
     <PARAM name="include_goods" val="1" />    

@@ -35,7 +35,7 @@ class TasksController extends Controller {
 
 public function actionSendlogin() {
         
-    $licReq = "TaS1MFk5aRk=tuKE2zLI2eqnCJnATjuErPNyIFl/vTQ1+IgJj7Rhx+nnoNq+k1K90kqofh4qDg+g4Lo4mlIg2tCQfxnDmitpzKkIyUIDFy4J6tud0pZf9nahgfFcwiGtZNFUM1I3h/J+Vu78vxp9wHkWRQ3sI9yy7A/o1QKKOyGi03S5/9TMA1v92TdYURdb8jdUcQJgui1dQIgHzE56O9OqV/DGVT5DhqjSfsvZIOmaj0+0FHJSrQZt7cO628h6UrA916dDTECb9fDWjprydt+oYPudzcwx02m7CmEDBSEn7CJcY+OE0y3+Q3vBUZNuEQ=="; 
+    $licReq = "9esxMHxqak0=vV4JTgF/Wi1QkUKPcvFogDYFvSd9rHd4KTeTcsvi2VsHBRN56mZoAAGTeRfgds+D7LVrcGoNh8EA+mrhg5gm3QcaG2Rv+Zw24DNBPKfkzn4LXNtlLSREUrXXu4nvJPt9YB4jUvVLTElH3Xqais5UM1m6M75FLEBtgnFve6Zg7O8RdvSXgdCyYcv90QtIC9dp0h6BuIvuiVGplqIa9aUMvxQSCA2oUEduifmHKNgc9zYprkRjsO+4FmSJ1qRkWw8QuFjYHvKkJF+3pqCqM6pqJGF9Zfe9QnLWK82TsJxV/q0Y6dC0ziGOtQ==";
     $rlogin = '5889';
     $rpass = 'uqbihcj';
     $rtoken = '48eabe9e-fc50-4b12-833c-ccc41480852d';

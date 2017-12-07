@@ -84,7 +84,7 @@ class ProductHelper extends AuthHelper {
     
     public function callback()
     {       
-    
+
     $getr = Yii::$app->request->getRawBody();
     
     
@@ -127,11 +127,24 @@ class ProductHelper extends AuthHelper {
                                      
                 
     }
-    
 
-                        
-                        
-    
+
+
+    if (empty($array)) {
+
+        foreach ($myXML->ERROR as $err) {
+
+            foreach($err->attributes() as $e => $h) {
+                if ($e == 'code') $array['code'] = strval($h[0]);
+                if ($e == 'text') $array['text'] = strval($h[0]);
+            }
+
+        }
+
+    }
+
+
+
     /* Работает без едизм
     foreach ($myXML->ITEM as $goodsgroup) {
             foreach($goodsgroup->attributes() as $c => $d) {
@@ -157,75 +170,90 @@ class ProductHelper extends AuthHelper {
     }
     */
     
-    $cmdguid = $myXML['cmdguid']; 
-    $posid = $myXML['posid']; 
+    $cmdguid = $myXML['cmdguid'] ? $myXML['cmdguid'] : $myXML['taskguid'];
+    $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-' ;
+
     
-    if (!empty($array) && !empty($cmdguid) && !empty($posid))  {
-        
-     // Заполнение tasks
-             $tmodel = RkTasks::find()->andWhere('guid= :guid',[':guid'=>$cmdguid])->one();
-        
+    if (!empty($array) && !empty($cmdguid)) {
+
+        // Заполнение tasks
+        $tmodel = RkTasks::find()->andWhere('guid= :guid', [':guid' => $cmdguid])->one();
+
+
         if (!$tmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======AGENT==EVENT==START================='.PHP_EOL,FILE_APPEND);  
-        file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-        file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);      
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'TASK TMODEL NOT FOUND.!'.$cmdguid.'!'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
-        exit;
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . '=======AGENT==EVENT==START=================' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . date("Y-m-d H:i:s") . ':REQUEST:' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . '===========================================' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'CMDGUID:' . $cmdguid . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'POSID:' . $posid . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', print_r($getr, true), FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', print_r($array, true), FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'TASK TMODEL NOT FOUND.!' . $cmdguid . '!' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
+
+            echo "Не найдена задача с id: ".$cmdguid;
+            exit;
         }
-        
+
         $tmodel->intstatus_id = 3;
         $tmodel->isactive = 0;
         $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-        
-        $acc= $tmodel->acc;
-        
-            if (!$tmodel->save()) {
-                $er2 = $tmodel->getErrors();
-            } else $er2 = "Данные task успешно сохранены (ID:".$tmodel->id." )";
-        
-     // Заполнение номенклатуры
-           
-             $icount =0; 
-     
-        foreach ($array as $a)   {
-            
+        $tmodel->wsstatus_id = isset($array['code']) ? $array['code'] : 0;
 
-            
-                $checks = RkProduct::find()->andWhere('acc = :acc',[':acc' => $acc])
-                                           ->andWhere('rid = :rid',[':rid' => $a['product_rid']])
-                                           ->andWhere('unit_rid = :unit_rid',[':unit_rid' => $a['unit_rid']])
-                                           ->one();
-                if (!$checks) {
-                    
-            $amodel = new RkProduct();
-                    
-            $amodel->acc = $acc; 
-            $amodel->rid = $a['product_rid'];
-            $amodel->denom = $a['product_name'];
-            $amodel->unit_rid = $a['unit_rid'];
-            $amodel->unitname = $a['unit_name'];
-            $amodel->group_rid = $a['group_rid'];
-            $amodel->group_name = $a['group_name'];
-            
-        //    $amodel->agent_type = $a['type'];
-            $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');  
-            
-            if (!$amodel->save()) {
-                $er = $amodel->getErrors();
-            } else $er = "Данные продуктов успешно сохранены.(ID:".$amodel->id." )";
-            
-                }
-           $icount++;          
+        $acc = $tmodel->acc;
+
+        if (!$tmodel->save()) {
+            $er2 = $tmodel->getErrors();
+        } else $er2 = "Данные task успешно сохранены (ID:" . $tmodel->id . " )";
+
+        // Заполнение номенклатуры
+
+        if (!empty($array[1]['group_rid'])) {
+
+        $icount = 0;
+
+        foreach ($array as $a) {
+
+
+            $checks = RkProduct::find()->andWhere('acc = :acc', [':acc' => $acc])
+                ->andWhere('rid = :rid', [':rid' => $a['product_rid']])
+                ->andWhere('unit_rid = :unit_rid', [':unit_rid' => $a['unit_rid']])
+                ->one();
+            if (!$checks) {
+
+                $amodel = new RkProduct();
+
+                $amodel->acc = $acc;
+                $amodel->rid = $a['product_rid'];
+                $amodel->denom = $a['product_name'];
+                $amodel->unit_rid = $a['unit_rid'];
+                $amodel->unitname = $a['unit_name'];
+                $amodel->group_rid = $a['group_rid'];
+                $amodel->group_name = $a['group_name'];
+
+                //    $amodel->agent_type = $a['type'];
+                $amodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
+                if (!$amodel->save()) {
+                    $er = $amodel->getErrors();
+                } else $er = "Данные продуктов успешно сохранены.(ID:" . $amodel->id . " )";
+
+              }
+             $icount++;
+          }
+                        echo "Данные номенклатуры успешно распознаны и сохранены. (Count: ".sizeof($array).")";
+        } else {
+            if (isset($array['code']))
+
+                echo "Код ошибки принят и сохранен.";
+            else
+                echo "Неизвестная ошибка";
         }
-     
+
+
     }
     
        
@@ -241,7 +269,7 @@ class ProductHelper extends AuthHelper {
             
             $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
             $rmodel->dicstatus_id= 6;
-            $rmodel->obj_count = $icount;
+            $rmodel->obj_count = isset($icount) ? $icount : 0;
     
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
@@ -267,6 +295,7 @@ class ProductHelper extends AuthHelper {
     if (empty($cmdguid)) $cmdguid = 'пусто';     
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
+    $er = (isset($array['code'])) ? 'Ошибка :'.$array['code'].', '.$array['text'] : '-Код ошибки не опознан-';
         
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
@@ -279,9 +308,7 @@ class ProductHelper extends AuthHelper {
     file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
     file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);  
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);  
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);   
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);
               
     }
 

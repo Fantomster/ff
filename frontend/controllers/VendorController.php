@@ -824,7 +824,7 @@ class VendorController extends DefaultController {
                 }
             }
 
-            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
+            if ((($newRows == 0) && ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS)) || ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS)) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -833,6 +833,8 @@ class VendorController extends DefaultController {
             }
             
             $flipArr = array_flip($arr);
+            
+            $test = max(array_count_values($xlsArray));
             
             //if (max(array_count_values($xlsArray)) > 1) {
             if (max(array_count_values($xlsArray)) > 1) {

@@ -1,6 +1,9 @@
 <?php
 //use yii\base\Model;
 namespace common\models\forms;
+
+use Yii;
+
 class ServiceDesk extends \yii\base\Model
 {
     public $region;

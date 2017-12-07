@@ -268,7 +268,7 @@ $gridColumnsCatalog = [
         </div>
         <div class="col-sm-12 col-md-4">
             <?php Pjax::begin(['enablePushState' => false, 'timeout' => 10000, 'id' => 'add-supplier-list']) ?>
-            <?php $form = ActiveForm::begin(['id' => 'SuppliersFormSend']); ?>
+            <?php $form = ActiveForm::begin(['id' => 'SuppliersFormSend', 'enableClientValidation' => true]); ?>
             <div class="box box-info">
                 <div class="box-header with-border">
                     <h3 class="box-title">Добавить поставщика</h3>
@@ -276,7 +276,6 @@ $gridColumnsCatalog = [
                 <!-- /.box-header -->
                 <div class="box-body">
                     <?= $form->field($user, 'email') ?>
-                    <?= $form->field($profile, 'full_name')->label('ФИО') ?>
                     <?=
                             $form->field($profile, 'phone')
                             ->widget(\common\widgets\PhoneInput::className(), [
@@ -292,6 +291,7 @@ $gridColumnsCatalog = [
                             ->label('Телефон')
                             ->textInput()
                     ?>
+                    <?= $form->field($profile, 'full_name')->label('ФИО') ?>
                     <?= $form->field($organization, 'name')->label('Организация') ?>
                 </div> 
                 <div class="box-footer">
@@ -406,7 +406,6 @@ $('#modal_addProduct').on('hidden.bs.modal', function (e) {
 * 6 поставщик авторизован, связи не найдено, invite	
 */
 $('#profile-full_name').attr('readonly','readonly');
-$('#profile-phone').attr('readonly','readonly');
 $('#organization-name').attr('readonly','readonly');
 $('#relationcategory-category_id').attr('disabled','disabled');
 $('.select2-search__field').css('width','100%');
@@ -484,12 +483,12 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 	                }
                         // Нет совпадений по Email (Новый поставщик и новый каталог)(#addSupplier)
 	                if(response.eventType==5){
-		            $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
+		                    $('#relationcategory-category_id,#addProduct').removeAttr('disabled');
                             $('#addProduct').removeClass('hide');
                             $('#inviteSupplier').addClass('hide').attr('disabled','disabled');
-		            $('#profile-full_name,#profile-phone,#organization-name').removeAttr('readonly');
-                            console.log('type = 5');    
-	                }
+                            $('#profile-full_name,#organization-name').removeAttr('readonly');
+                                    console.log('type = 5');    
+                    }
                         // 
 	                if(response.eventType==6){
 		        var fio = response.fio;
@@ -504,6 +503,13 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
                             $('#relationcategory-category_id,#inviteSupplier').removeAttr('disabled');
 		            console.log('type = 6');    
 	                }
+	                
+	                if($('#profile-phone').val().length < 2) {
+                         $('#addProduct').attr('disabled','disabled');                 
+                    } else {
+                        $('#addProduct').removeAttr('disabled');                      
+                    }
+                    
                 }else{
 		    console.log(response.message); 
                 }
@@ -512,19 +518,30 @@ $('#SuppliersFormSend').on('afterValidateAttribute', function (event, attribute,
 		    console.log(response.message); 
             }
         }); 
-	}
+	}	 
+	
+	if($('#profile-phone').val().length <= 0) {
+         $('#addProduct').attr('disabled','disabled');                 
+    } else {
+        $('#addProduct').removeAttr('disabled');                      
+    }
 });
 $('#profile-full_name,#organization-name').on('keyup paste put', function(e){
         console.log('ok');
     if($('#profile-full_name').val().length<2 || $('#organization-name').val().length<2){
-        $('#inviteSupplier').attr('disabled','disabled');
-        $('#addProduct').attr('disabled','disabled'); 
-        }else{
+            $('#inviteSupplier').attr('disabled','disabled');
+            $('#addProduct').attr('disabled','disabled'); 
+    }else{
         $('#inviteSupplier').removeAttr('disabled');
         $('#addProduct').removeAttr('disabled');   
-        }
-});
-        
+    }
+    
+    if($('#profile-phone').val().length < 2) {
+         $('#addProduct').attr('disabled','disabled');                 
+    } else {
+        $('#addProduct').removeAttr('disabled');                      
+    }
+});   
 $('#inviteSupplier').click(function(e){
 e.preventDefault();	
     $.ajax({

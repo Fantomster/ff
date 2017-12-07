@@ -71,7 +71,8 @@ class DeliveryRegions extends \yii\db\ActiveRecord
      * Вернет [id] организаций, с доступной доставкой в этом регионе
      * @return array
      */
-    public static function getSuppRegion() {
+    public static function getSuppRegion()
+    {
         $tableName = static::tableName();
         $sql = "SELECT supplier_id
                 FROM $tableName
@@ -88,16 +89,15 @@ class DeliveryRegions extends \yii\db\ActiveRecord
         $supplierRegion = $command->bindValue(':exception', 0)->queryColumn();
         $exclude_region = $command->bindValue(':exception', 1)->queryColumn();
 
-        if(!empty($supplierRegion)){
-            if(!empty($exclude_region)) {
+        if (!empty($supplierRegion)) {
+            if (!empty($exclude_region)) {
                 $supplierRegion = \array_udiff($supplierRegion, $exclude_region, function ($a, $b) {
                     return $a - $b;
                 });
             }
-
-            return $supplierRegion;
+            return (empty($supplierRegion) ? [0] : $supplierRegion);
         } else {
-            return [];
+            return [0];
         }
     }
 }

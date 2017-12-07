@@ -613,22 +613,22 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
-            $xlsArray = [];
-            //Проверяем наличие дублей в списке
-            if ($importType == 2 || $importType == 3) {
-                $rP = 0;
-            } else {
-                $rP = 1;
-            }
-            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
-                if (!empty($row_unique)) {
-                    if (!in_array($row_unique, $arr)) {
-                        $newRows++;
-                    }
-                    array_push($xlsArray, (string) $row_unique);
-                }
-            }
+//            $xlsArray = [];
+//            //Проверяем наличие дублей в списке
+//            if ($importType == 2 || $importType == 3) {
+//                $rP = 0;
+//            } else {
+//                $rP = 1;
+//            }
+//            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+//                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
+//                if (!empty($row_unique)) {
+//                    if (!in_array($row_unique, $arr)) {
+//                        $newRows++;
+//                    }
+//                    array_push($xlsArray, (string) $row_unique);
+//                }
+//            }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
@@ -637,7 +637,8 @@ class VendorController extends DefaultController {
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
-            if (max(array_count_values($xlsArray)) > 1) {
+            //if (max(array_count_values($xlsArray)) > 1) {
+            if (count($arr) !== count(array_flip($arr))) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -697,6 +698,7 @@ class VendorController extends DefaultController {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
                     $cbgTable = CatalogBaseGoods::tableName();
+                    $batch = 0;
                     for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                         $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
                         $row_price = floatval(preg_replace("/[^-0-9\.]/", "", $worksheet->getCellByColumnAndRow(1, $row))); //цена
@@ -706,9 +708,14 @@ class VendorController extends DefaultController {
                             }
                             $cbg_id = array_search(mb_strtolower($row_product), $arr);
                             if ($cbg_id) {
-                                $data_update .= "UPDATE $cbgTable set 
-                                    `price` = $row_price
-                                     where cat_id=$id and id=$cbg_id;";
+                                if ($batch < 1000) {
+                                    $data_update .= "UPDATE $cbgTable set `price` = $row_price where cat_id=$id and id=$cbg_id;";
+                                    $batch ++;
+                                } else {
+                                    Yii::$app->db->createCommand($data_update)->execute();
+                                    $data_update = "UPDATE $cbgTable set `price` = $row_price where cat_id=$id and id=$cbg_id;";
+                                    $batch = 0;
+                                }
                             }
                         }
                     }
@@ -784,8 +791,8 @@ class VendorController extends DefaultController {
                                 ->where([
                                     'catalog_base_goods.supp_org_id' => $currentUser->organization->id, 'catalog_goods.cat_id' => $id])->asArray()->all();
             }
-            $arr = \yii\helpers\ArrayHelper::map($sql_array_products, 'id', 'product');
-            $arr = array_map('mb_strtolower', $arr);
+            $arr = array_map('mb_strtolower', \yii\helpers\ArrayHelper::map($sql_array_products, 'id', 'product'));
+            unset($sql_array_products);
 
             $importModel->importFile = UploadedFile::getInstance($importModel, 'importFile'); //загрузка файла на сервер
             $path = $importModel->upload();
@@ -804,17 +811,17 @@ class VendorController extends DefaultController {
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
-            $xlsArray = [];
-            //Проверяем наличие дублей в списке
-            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
-                if (!empty($row_unique)) {
-                    if (!in_array($row_unique, $arr)) {
-                        $newRows++;
-                    }
-                    array_push($xlsArray, (string) $row_unique);
-                }
-            }
+//            $xlsArray = [];
+//            //Проверяем наличие дублей в списке
+//            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+//                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
+//                if (!empty($row_unique)) {
+//                    if (!in_array($row_unique, $arr)) {
+//                        $newRows++;
+//                    }
+//                    array_push($xlsArray, (string) $row_unique);
+//                }
+//            }
 
             if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
@@ -823,7 +830,9 @@ class VendorController extends DefaultController {
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
-            if (max(array_count_values($xlsArray)) > 1) {
+            $flipArr = array_flip($arr);
+            //if (max(array_count_values($xlsArray)) > 1) {
+            if (count($arr) !== count($flipArr)) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
@@ -832,6 +841,12 @@ class VendorController extends DefaultController {
             }
             if ($importType == 1) {
                 $transaction = Yii::$app->db->beginTransaction();
+                $catalogGoods = CatalogGoods::find()
+                                ->select(['catalog_goods.id', 'catalog_goods.base_goods_id as cbg_id'])
+                                ->joinWith('baseProduct', false)
+                                ->where([
+                                    'catalog_base_goods.supp_org_id' => $currentUser->organization->id, 'catalog_goods.cat_id' => $id])->asArray()->all();
+                $catalogGoods = \yii\helpers\ArrayHelper::map($catalogGoods, 'cbg_id', 'id');
                 try {
                     $data_insert = [];
                     for ($row = 1; $row <= $highestRow; ++$row) {
@@ -840,10 +855,10 @@ class VendorController extends DefaultController {
 
                         if (!empty($row_product && $row_price)) {
 
-                            $cbg_id = array_search(mb_strtolower($row_product), $arr);
+                            $cbg_id = isset($flipArr[mb_strtolower($row_product)]) ? $flipArr[mb_strtolower($row_product)] : null;
                             if ($cbg_id) {
-                                $checkExisting = CatalogGoods::find()->where(['base_goods_id' => $cbg_id, 'cat_id' => $id])->exists();
-                                if (!$checkExisting) {
+                                //$checkExisting = CatalogGoods::find()->where(['base_goods_id' => $cbg_id, 'cat_id' => $id])->exists();
+                                if (!isset($catalogGoods[$cbg_id])) {
                                     $data_insert[] = [
                                         $id,
                                         $cbg_id,
@@ -1546,11 +1561,17 @@ class VendorController extends DefaultController {
             $post = Yii::$app->request->post();
             $arrCatalog = json_decode(Yii::$app->request->post('catalog'), JSON_UNESCAPED_UNICODE);
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
+            $catalogGoods = CatalogGoods::find()
+                            ->select(['catalog_goods.id', 'catalog_goods.price'])
+                            ->joinWith('baseProduct', false)
+                            ->where([
+                                'catalog_base_goods.supp_org_id' => $currentUser->organization_id, 'catalog_goods.cat_id' => $id])->asArray()->all();
+            $catalogGoods = \yii\helpers\ArrayHelper::map($catalogGoods, 'id', 'price');
             foreach ($arrCatalog as $arrCatalogs) {
-                $goods_id = htmlspecialchars(trim($arrCatalogs['dataItem']['goods_id']));
-                $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
+                $goods_id = (int) (trim($arrCatalogs['dataItem']['goods_id']));
+                $price = floatval(trim($arrCatalogs['dataItem']['total_price']));
 
-                if (!CatalogGoods::find()->where(['id' => $goods_id])->exists()) {
+                if (!isset($goods_id)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный товар']];
                     return $result;
                 }
@@ -1562,15 +1583,27 @@ class VendorController extends DefaultController {
                     return $result;
                 }
             }
+
+            $cgTable = CatalogGoods::tableName();
+            $data_update = '';
+            $batch = 0;
             foreach ($arrCatalog as $arrCatalogs) {
-                $goods_id = htmlspecialchars(trim($arrCatalogs['dataItem']['goods_id']));
-                $price = htmlspecialchars(trim($arrCatalogs['dataItem']['total_price']));
+                $goods_id = (int) (trim($arrCatalogs['dataItem']['goods_id']));
+                $price = floatval(str_replace(',', '.', trim($arrCatalogs['dataItem']['total_price'])));
 
-                $price = str_replace(',', '.', $price);
-
-                $catalogGoods = CatalogGoods::findOne(['id' => $goods_id]);
-                $catalogGoods->price = $price;
-                $catalogGoods->update();
+                if ($price != $catalogGoods[$goods_id]) {
+                    if ($batch < 1000) {
+                        $data_update .= "UPDATE $cgTable set `price` = $price where cat_id=$id and id=$goods_id;";
+                        $batch ++;
+                    } else {
+                        Yii::$app->db->createCommand($data_update)->execute();
+                        $data_update = "UPDATE $cgTable set `price` = $price where cat_id=$id and id=$goods_id;";
+                        $batch = 0;
+                    }
+                }
+            }
+            if (!empty($data_update)) {
+                Yii::$app->db->createCommand($data_update)->execute();
             }
             $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Сохранено', 'body' => 'Данные успешно обновлены']];
             return $result;

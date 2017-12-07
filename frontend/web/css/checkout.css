@@ -162,7 +162,7 @@
     font-weight: bold;
 }
 .block_right p {
-    font-family: "Circe_Regular";
+/*    font-family: "Circe_Regular";*/
     font-size: 20px;
     display: block;
 }
@@ -304,7 +304,7 @@
     opacity: 0.6;
 }
 .block_cena_p{
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 28px;
     padding-right: 30px;
     margin-right: 20px;
@@ -312,7 +312,7 @@
 .block_cena_p1{
     color: #95989A;
 
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 16px;
 }
 .block_right_wrap_1{
@@ -323,7 +323,7 @@
 }
 .block_right_wrap_1 p{
     color: #95989A;
-    font-family: "Circe_Regular";
+    /*font-family: "Circe_Regular";*/
     font-size: 14px;
     padding-left: 10px;
     padding-right: 10px;
@@ -432,7 +432,7 @@
         font-size: 13px;
     }
     .block_cena_p{
-        font-family: "Circe_Regular";
+        /*font-family: "Circe_Regular";*/
         font-size: 22px;
         padding-right: 30px;
         margin-right: 10px;
@@ -440,7 +440,7 @@
     .block_cena_p1{
         color: #95989A;
 
-        font-family: "Circe_Regular";
+        /*font-family: "Circe_Regular";*/
         font-size: 16px;
     }
 }

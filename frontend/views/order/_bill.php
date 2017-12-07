@@ -59,8 +59,8 @@ $currencySymbol = $order->currency->symbol;
                 <?php if ($order->discount) { ?>
                     <p style="text-align: right; color: #82C073;font-size: 16px;background: #F7F7F7;border-bottom: 1px solid #DDDDDD; border-top: 1px solid #DDDDDD; padding: 7px 0;font-family: Circe_Bold">Скидка: <?= $order->getFormattedDiscount() ?></p>
                 <?php } ?>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Стоимость доставки: <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
-                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px; font-family: Circe_Bold">Итого: <?= $order->total_price ?> <?= $currencySymbol ?></p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD; padding: 7px 0;padding-top: 2px;">Стоимость доставки: <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
+                <p  style="text-align: right;color: #82C073;font-size: 16px;border-bottom: 1px solid #DDDDDD;  padding: 7px 0;padding-top: 2px;">Итого: <?= $order->total_price ?> <?= $currencySymbol ?></p>
             </div>
         </div>
         <div style="padding-bottom: 20px;width:100%;">

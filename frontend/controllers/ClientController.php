@@ -337,9 +337,9 @@ class ClientController extends DefaultController {
                     return $result;
                 }
                 foreach ($arrCatalog as $arrCatalogs) {
-                    $product = trim($arrCatalogs['dataItem']['product']);
-                    $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
-                    $ed = htmlspecialchars(trim($arrCatalogs['dataItem']['ed']));
+                    $product = strip_tags(trim($arrCatalogs['dataItem']['product']));
+                    $price = floatval(trim($arrCatalogs['dataItem']['price']));
+                    $ed = strip_tags(trim($arrCatalogs['dataItem']['ed']));
                     if (empty($product)) {
                         $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];
                         return $result;
@@ -480,7 +480,7 @@ class ClientController extends DefaultController {
                         foreach ($arrCatalog as $arrCatalogs) {
                             $article_create++;
                             $article = $article_create; //trim($arrCatalogs['dataItem']['article']);
-                            $product = trim($arrCatalogs['dataItem']['product']);
+                            $product = strip_tags(trim($arrCatalogs['dataItem']['product']));
                             //htmlspecialchars(trim($arrCatalogs['dataItem']['units']));
                             $units = str_replace(',', '.', $units);
                             $units = null;
@@ -494,9 +494,9 @@ class ClientController extends DefaultController {
                             if (empty($units) || $units < 0) {
                                 $units = null;
                             }
-                            $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                            $price = strip_tags(trim($arrCatalogs['dataItem']['price']));
                             //$note = trim($arrCatalogs['dataItem']['note']);
-                            $ed = trim($arrCatalogs['dataItem']['ed']);
+                            $ed = strip_tags(trim($arrCatalogs['dataItem']['ed']));
                             $price = str_replace(',', '.', $price);
                             if (substr($price, -3, 1) == '.') {
                                 $price = explode('.', $price);
@@ -685,7 +685,7 @@ class ClientController extends DefaultController {
                             if (empty($units) || $units < 0) {
                                 $units = null;
                             }
-                            $price = htmlspecialchars(trim($arrCatalogs['dataItem']['price']));
+                            $price = floatval(trim($arrCatalogs['dataItem']['price']));
                             //$note = trim($arrCatalogs['dataItem']['note']);
                             $ed = trim($arrCatalogs['dataItem']['ed']);
                             $price = str_replace(',', '.', $price);
@@ -1551,6 +1551,7 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         $currentUser = User::findIdentity(Yii::$app->user->id);
         $user = new User();
         $profile = new Profile();
+        $profile->scenario = 'supplier';
         //$relationCategory = new RelationCategory();
         $relationSuppRest = new RelationSuppRest();
         $organization = new Organization();

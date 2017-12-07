@@ -59,7 +59,7 @@ class Profile extends \amnah\yii2\user\models\Profile {
         $rules[] = [['phone'], \borales\extensions\phoneInput\PhoneInputValidator::className(), 'on' => ['register', 'invite'], 'message' => 'Некорректный номер'];
         $rules[] = [['phone'], 'default', 'value' => null];
         $rules[] = [['phone'], 'required', 'on' => ['register'], 'message' => 'Пожалуйста, введите свой номер телефона'];
-        $rules[] = [['phone'], 'required', 'on' => ['invite'], 'message' => 'Пожалуйста, введите номер телефона'];
+        $rules[] = [['phone'], 'required', 'on' => ['invite', 'supplier'], 'message' => 'Пожалуйста, введите номер телефона'];
         $rules[] = [['avatar'], 'image', 'extensions' => 'jpg, jpeg, gif, png'];
         $rules[] = [['sms_allow'], 'default', 'value' => 0];
 

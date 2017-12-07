@@ -28,23 +28,24 @@ use kartik\checkbox\CheckboxX;
     ]) ?>
 
     <?=
-    $form->field($user, 'status')->widget(CheckboxX::classname(), [
-        //'initInputType' => CheckboxX::INPUT_CHECKBOX,
-        'autoLabel' => true,
-        'model' => $user,
-        'attribute' => 'status',
-        'pluginOptions' => [
-            'threeState' => false,
-            'theme' => 'krajee-flatblue',
-            'enclosedLabel' => false,
-            'size' => 'md',
-        ],
-        'labelSettings' => [
-            'label' => 'Активен',
-            'position' => CheckboxX::LABEL_RIGHT,
-            'options' => ['style' => '']
-        ]
-    ])->label(false);
+            $form->field($user, 'status')->dropDownList(common\models\User::statusDropdown());
+//    $form->field($user, 'status')->widget(CheckboxX::classname(), [
+//        //'initInputType' => CheckboxX::INPUT_CHECKBOX,
+//        'autoLabel' => true,
+//        'model' => $user,
+//        'attribute' => 'status',
+//        'pluginOptions' => [
+//            'threeState' => false,
+//            'theme' => 'krajee-flatblue',
+//            'enclosedLabel' => false,
+//            'size' => 'md',
+//        ],
+//        'labelSettings' => [
+//            'label' => 'Активен',
+//            'position' => CheckboxX::LABEL_RIGHT,
+//            'options' => ['style' => '']
+//        ]
+//    ])->label(false);
     ?>
 
     <?= $user->role_id === common\models\Role::ROLE_FKEEPER_MANAGER ? $form->field($user, 'organization_id')->textInput(['maxlength' => true]) : '' ?>

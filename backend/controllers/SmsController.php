@@ -120,6 +120,11 @@ class SmsController extends \yii\web\Controller
         ]);
     }
 
+    /**
+     * Обновление перевода
+     * @param $id
+     * @return array
+     */
     public function actionMessageUpdate($id)
     {
         if (Yii::$app->request->isAjax) {
@@ -135,9 +140,6 @@ class SmsController extends \yii\web\Controller
             } else {
                 return ['success' => false];
             }
-        } else {
-            $model = SourceMessage::find()->with('messages')->where(['id' => $id])->one();
-            return $this->render('update', ['model' => $model]);
         }
     }
 }

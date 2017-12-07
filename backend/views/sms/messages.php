@@ -9,6 +9,9 @@ use yii\grid\GridView;
 
 $this->title = 'Переводы смс сообщений';
 $this->params['breadcrumbs'][] = $this->title;
+
+\common\assets\SweetAlertAsset::register($this);
+
 ?>
 <div class="sms-send-index">
 
@@ -16,7 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'message'
             ],
@@ -24,24 +26,76 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Шаблон',
                 'format' => 'raw',
                 'value' => function($data){
-                    $message = '';
+                    $message = '<table class="table table-bordered table-hover" style="margin-bottom: 0px;">';
                     foreach($data->messages as $m) {
-                        $message .= $m->language.': '.$m->translation.'<br>';
+                        $message .= '<tr>';
+                        $message .= '<td width="36" >';
+                        $message .= \common\widgets\LangSwitch::getFlag($m->language);
+                        $message .= '</td>';
+                        $message .= '<td class="translation" >';
+                        $message .= (!empty($m->translation) ? $m->translation : Html::tag('span','Пусто...', ['style' => 'color:grey']));
+                        $message .= '</td>';
+                        $message .= '<td width="36" >';
+                        $message .= '
+                            <a href="#edit"
+                               class="edit-message glyphicon glyphicon-edit"
+                               data-id="'.$m->id.'"
+                               data-language="'.$m->language.'"
+                               data-translation="'.$m->translation.'"
+                               data-message="'.$data->message.'"
+                            ></a>
+                        ';
+                        $message .= '</td>';
+                        $message .= '</tr>';
                     }
+                    $message .= '</table>';
                     return $message;
                 }
-            ],
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{edit}',
-                'buttons' => [
-                    'edit' => function ($url, $model, $key) {
-                        $customurl = Yii::$app->getUrlManager()->createUrl(['sms/message-update','id'=>$model->id]);
-                        return \yii\helpers\Html::a( '<span class="glyphicon glyphicon-pencil"></span>', $customurl,
-                            ['title' => Yii::t('yii', 'View'), 'data-pjax' => '0']);
-                    },
-                ],
             ],
         ],
     ]); ?>
 </div>
+
+<?php
+$js = "
+    $(function(){
+        $('.edit-message').click(function(){
+            var link = $(this);
+            swal({
+              input: 'textarea',
+              title: link.data('message') + ':' + link.data('language'),
+              inputValue: link.data('translation'),
+              showCancelButton: true,
+              confirmButtonText: 'Сохранить',
+              cancelButtonText: 'Отмена',
+              showLoaderOnConfirm: true,
+              preConfirm: (text) => {
+                link.data('new_translation', text);
+                return new Promise((resolve) => {
+                  $.post('/sms/message-update/' + link.data('id'),{'translation':text, 'language': link.data('language')}, function(data){
+                     resolve(data);   
+                  });
+                })
+              },
+              allowOutsideClick: false
+            }).then((result) => {
+              if (result.value.success === true) {
+                link.data('translation', link.data('new_translation'));
+                link.parent().parent().find('.translation').text(link.data('new_translation'));
+                swal({
+                  type: 'success',
+                  title: 'Готово!',
+                });
+              } else {
+                link.data('new_translation', null);
+                swal({
+                  type: 'error',
+                  title: 'Ошибка!',
+                })
+              }
+            })
+        });
+    });";
+
+$this->registerJs($js);
+?>

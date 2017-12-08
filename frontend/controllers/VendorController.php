@@ -932,8 +932,11 @@ class VendorController extends DefaultController {
             $localFile = \PHPExcel_IOFactory::identify($path);
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
-
             $worksheet = $objPHPExcel->getSheet(0);
+            
+            unset($objReader);
+            unset($objPHPExcel);
+            
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
 
@@ -949,13 +952,14 @@ class VendorController extends DefaultController {
                 $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
                 array_push($xlsArray, $row_product);
             }
-            if (max(array_count_values($xlsArray)) > 1) {
+            if (count($xlsArray) !== count(array_flip($xlsArray))) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым названием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
+            unset($xlsArray);
             $transaction = Yii::$app->db->beginTransaction();
             try {
 
@@ -988,7 +992,10 @@ class VendorController extends DefaultController {
                         ];
                     }
                 }
+                unset($worksheet);
                 if (!empty($data_insert)) {
+//                    $data_chunks = array_chunk($data_insert, 1000);
+//                    unset($data_insert);
                     $db = Yii::$app->db;
                     $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
                         'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status', 'created_at'

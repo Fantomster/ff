@@ -1026,7 +1026,7 @@ class VendorController extends DefaultController {
                         $data_chunks[$chunk] = [];
                     }
                 }
-                $transaction->rollback();//$transaction->commit();
+                $transaction->commit();
                 unlink($path);
                 return $this->redirect(['vendor/basecatalog', 'id' => $lastInsert_base_cat_id]);
             } catch (Exception $e) {

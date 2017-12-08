@@ -75,10 +75,12 @@ class GuideProductSearchController extends ActiveController {
         $cbgTable = CatalogBaseGoods::tableName();
         $goodsNotesTable = GoodsNotes::tableName();
         $organizationTable = Organization::tableName();
+        $currency = \common\models\Currency::tableName();
         
         $query = CatalogBaseGoods::find();
-        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment");
+        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");
         $query->from("guide_product");
+        $query->leftJoin($currency,"$currency.id = guide_product.currency_id");
         $query->leftJoin($cbgTable,"$cbgTable.id = guide_product.cbg_id");
         $query->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");
         $query->leftJoin($goodsNotesTable, "$goodsNotesTable.catalog_base_goods_id = $cbgTable.id and $goodsNotesTable.rest_org_id = $organizationTable.id");

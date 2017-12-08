@@ -31,7 +31,7 @@ class ProductHelper extends AuthHelper {
     $guid = UUID::uuid4();
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/product'.'" timeout="900">
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/product'.'" timeout="3600">
     <PARAM name="object_id" val="'.$this->restr->code.'" />
     <PARAM name="goodgroup_rid" val="1" />
     <PARAM name="include_goods" val="1" />
@@ -181,7 +181,7 @@ class ProductHelper extends AuthHelper {
 
 
         if (!$tmodel) {
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . '=======AGENT==EVENT==START=================' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . '=======PRODUCT==EVENT==START=================' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . date("Y-m-d H:i:s") . ':REQUEST:' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . '===========================================' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'CMDGUID:' . $cmdguid . PHP_EOL, FILE_APPEND);
@@ -297,7 +297,7 @@ class ProductHelper extends AuthHelper {
     if (empty($array)) $array=array(0 => '0');
     $er = (isset($array['code'])) ? 'Ошибка :'.$array['code'].', '.$array['text'] : '-Код ошибки не опознан-';
         
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========STORE==EVENT==START==============='.PHP_EOL,FILE_APPEND);  
+    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========PRODUCT==EVENT==START==============='.PHP_EOL,FILE_APPEND);
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 

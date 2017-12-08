@@ -609,8 +609,11 @@ class VendorController extends DefaultController {
             //Оптимизируем чтение файла
             $objReader->setReadDataOnly(true);
             $objPHPExcel = $objReader->load($path);
-
             $worksheet = $objPHPExcel->getSheet(0);
+
+            unset($objPHPExcel);
+            unset($objReader);
+
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
@@ -671,12 +674,17 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
+                    unset($worksheet);
                     if (!empty($data_insert)) {
                         $db = Yii::$app->db;
-                        $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
-                            'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status'
-                                ], $data_insert);
-                        Yii::$app->db->createCommand($sql)->execute();
+                        $data_chunks = array_chunk($data_insert, 1000);
+                        unset($data_insert);
+                        foreach ($data_chunks as $data_insert) {
+                            $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
+                                'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status'
+                                    ], $data_insert);
+                            Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     $transaction->commit();
                     unlink($path);
@@ -802,8 +810,11 @@ class VendorController extends DefaultController {
             $localFile = \PHPExcel_IOFactory::identify($path);
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
-
             $worksheet = $objPHPExcel->getSheet(0);
+
+            unset($objPHPExcel);
+            unset($objReader);
+
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
@@ -862,12 +873,17 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
+                    unset($worksheet);
                     if (!empty($data_insert)) {
                         $db = Yii::$app->db;
-                        $sql = $db->queryBuilder->batchInsert(CatalogGoods::tableName(), [
-                            'cat_id', 'base_goods_id', 'price'
-                                ], $data_insert);
-                        Yii::$app->db->createCommand($sql)->execute();
+                        $data_chunks = array_chunk($data_insert, 1000);
+                        unset($data_insert);
+                        foreach ($data_chunks as $data_insert) {
+                            $sql = $db->queryBuilder->batchInsert(CatalogGoods::tableName(), [
+                                'cat_id', 'base_goods_id', 'price'
+                                    ], $data_insert);
+                            Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     $transaction->commit();
                     unlink($path);

@@ -1009,7 +1009,7 @@ class VendorController extends DefaultController {
                             new \yii\db\Expression('NOW()'),
                         ];
                         $batch++;
-                        if ($batch === 500) {
+                        if ($batch === 250) {
                             $batch = 0;
                             $batchNum++;
                         }
@@ -1025,7 +1025,7 @@ class VendorController extends DefaultController {
                         Yii::$app->db->createCommand($sql)->execute();
                     }
                 }
-                $transaction->commit();
+                $transaction->rollback();//$transaction->commit();
                 unlink($path);
                 return $this->redirect(['vendor/basecatalog', 'id' => $lastInsert_base_cat_id]);
             } catch (Exception $e) {

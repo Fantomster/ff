@@ -158,11 +158,11 @@ class OrderContentController extends ActiveController {
             if ($quantityChanged) {
                 $ed = isset($product->product->ed) ? ' ' . $product->product->ed : '';
                 if ($position['quantity'] == 0) {
-                    $message .= "<br/> удалил $product->product_name из заказа";
+                    $message .= Yii::t('app', 'api.modules.v1.modules.mobile.controllers.prod', ['ru'=>"<br/> удалил {prod} из заказа", 'prod'=>$product->product_name]);
                 } else {
                     $oldQuantity = $product->quantity + 0;
                     $newQuantity = $position["quantity"] + 0;
-                    $message .= "<br/> изменил количество $product->product_name с $oldQuantity" . $ed . " на $newQuantity" . $ed;
+                    $message .= Yii::t('app', 'api.modules.v1.modules.mobile.controllers.', ['ru'=>"<br/> изменил количество {prod} с {old} {ed} на ", "prod"=>$product->product_name, "old"=>$oldQuantity, "ed"=>$ed]) . $newQuantity . ' ' . $ed;
                 }
                 $product->quantity = $position['quantity'];
             }

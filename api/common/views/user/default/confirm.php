@@ -7,7 +7,7 @@ use yii\helpers\Html;
  * @var bool $success
  * @var string $email
  */
-$this->title = Yii::t('user', $success ? 'Confirmed' : 'Error');
+$this->title = $success ? Yii::t('user', 'Confirmed') : Yii::t('user', 'Error');
 ?>
 <div class="login__block">
     <div class="login__inside">
@@ -38,7 +38,7 @@ $this->title = Yii::t('user', $success ? 'Confirmed' : 'Error');
 
             <?php else: ?>
 
-                <div class="alert alert-danger">Вход по данной разовой ссылке заблокирован. Вы можете зайти под своим логином и паролем, либо запросить свой пароль на почту</div>
+                <div class="alert alert-danger"><?= Yii::t('app', 'api.common.views.blocked', ['ru'=>'Вход по данной разовой ссылке заблокирован. Вы можете зайти под своим логином и паролем, либо запросить свой пароль на почту']) ?></div>
                 <div class="regist">
                 <?= Html::a(Yii::t("user", "Login"), ["/user/login"]) ?>
                 <?= Html::a(Yii::t("user", "Forgot password") . "?", ["/user/forgot"]) ?>

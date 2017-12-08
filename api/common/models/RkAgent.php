@@ -63,8 +63,8 @@ class RkAgent extends \yii\db\ActiveRecord
             'id' => 'ID',
             'fid' => 'FID',
             'rid' => 'RID Store House',
-            'denom' => 'Наименование Store House',
-            'updated_at' => 'Обновлено',
+            'denom' => Yii::t('app', 'api.common.models.store', ['ru'=>'Наименование Store House']),
+            'updated_at' => Yii::t('app', 'api.common.models.updated', ['ru'=>'Обновлено']),
 
         ];
     }
@@ -72,8 +72,8 @@ class RkAgent extends \yii\db\ActiveRecord
     
     public static function getStatusArray() {
         return [
-        RkAccess::STATUS_UNLOCKED  => 'Активен',
-        RkAccess::STATUS_LOCKED => 'Отключен',    
+        RkAccess::STATUS_UNLOCKED  => Yii::t('app', 'api.common.models.active_two', ['ru'=>'Активен']),
+        RkAccess::STATUS_LOCKED => Yii::t('app', 'api.common.models.off_two', ['ru'=>'Отключен']),
         ];
     }
 

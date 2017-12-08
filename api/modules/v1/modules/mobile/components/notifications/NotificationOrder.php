@@ -35,7 +35,7 @@ class NotificationOrder {
                 if($is_new)
                 {
                     $message->setData(['action' => 'order',
-                            'title' => "MixCart: новый заказ №" . $order->id . "!",
+                            'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.new_order', ['ru'=>"MixCart: новый заказ №"]) . $order->id . "!",
                             'data' => $order->id,
                             'vendor' => $vendor,
                             'activity' => "Work"]);
@@ -43,7 +43,7 @@ class NotificationOrder {
                 else 
                 {
                     $message->setData(['action' => 'order',
-                            'title' => 'Изменения в заказе №'.$order_id,
+                            'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.change_order', ['ru'=>'Изменения в заказе №']).$order_id,
                             'data' => $order->id,
                             'vendor' => $vendor,
                             'activity' => "Work"]);
@@ -81,14 +81,14 @@ class NotificationOrder {
                 if($is_new)
                 {
                     $message->setData(['action' => 'orderContent',
-                            'title' => 'Новая позиция в заказе №'.$order->id,
+                            'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.new_position', ['ru'=>'Новая позиция в заказе №']).$order->id,
                             'data' => $order->id,
                             'activity' => "Work"]);
                 }
                 else 
                 {
                     $message->setData(['action' => 'orderContent',
-                            'title' => 'Изменения в позиции '.$orderContent->product_name.', заказ №'.$order->id,
+                            'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.change_position', ['ru'=>'Изменения в позиции ']).$orderContent->product_name.Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.order_no', ['ru'=>', заказ №']).$order->id,
                             'data' => $order->id,
                             'activity' => "Work"]);
                 }
@@ -121,7 +121,7 @@ class NotificationOrder {
                 $message = Yii::$app->fcm->createMessage();
                 $message->addRecipient(new Device($row->token));
                 $message->setData(['action' => 'orderContentDelete',
-                            'title' => 'Удалена позиция в заказе №'.$order->id,
+                            'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.deleted_position', ['ru'=>'Удалена позиция в заказе №']).$order->id,
                             'data' => $orderContent->id,
                             'activity' => "Work"]);
 

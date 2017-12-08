@@ -19,10 +19,10 @@ class NotificationUser {
         $message = Yii::$app->fcm->createMessage();
         $message->addRecipient(new Device($fcm->token));
         $message->setData(['action' => 'confirm',
-                        'title' => 'Приветствую, '.$user->email,
+                        'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.greetings', ['ru'=>'Приветствую, ']).$user->email,
                         'message' => 
-'Меня зовут Шамалов Артур, я являюсь сооснователем сервиса MixCart.
-Благодарю за подтверждение Вашей учетной записи.',
+Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.artur', ['ru'=>'Меня зовут Шамалов Артур, я являюсь сооснователем сервиса MixCart.
+Благодарю за подтверждение Вашей учетной записи.']),
                         'data' => $user->access_token]);
 
         $response = Yii::$app->fcm->send($message);
@@ -39,10 +39,10 @@ class NotificationUser {
         $message = Yii::$app->fcm->createMessage();
         $message->addRecipient(new Device($fcm->token));
         $message->setData(['action' => 'forgot',
-                        'title' => 'Здравствуйте, '.$user->email,
+                        'title' => Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.hello', ['ru'=>'Здравствуйте, ']).$user->email,
                         'message' => 
-'Пароль Вашей учетной записи в системе MixCart изменен. '
-.'Теперь Вы можете авторизоваться с новым паролем.']);
+Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.pass_changed', ['ru'=>'Пароль Вашей учетной записи в системе MixCart изменен. '])
+.Yii::t('app', 'api.modules.v1.modules.mobile.components.notifications.auth_new', ['ru'=>'Теперь Вы можете авторизоваться с новым паролем.'])]);
 
         $response = Yii::$app->fcm->send($message);
     }

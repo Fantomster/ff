@@ -171,8 +171,8 @@ class RequestController extends ActiveController {
 
             //Тут пошли уведомления
                 //Для начала подготовим текст уведомлений и шаблоны email
-                $subject = Yii::t('app', "mixcart.ru - заявка №%s");
-                    $sms_text = 'Вы сняты с исполнения по заявке №%s';
+                $subject = Yii::t('app', 'api.modules.v1.modules.mobile.controllers.req', ['ru'=>"mixcart.ru - заявка №%s"]);
+                    $sms_text = Yii::t('app', 'api.modules.v1.modules.mobile.controllers.you_dismissed', ['ru'=>'Вы сняты с исполнения по заявке №%s']);
                     $email_template = 'requestSetResponsibleMailToSuppReject';
                     $client_email_template = 'requestSetResponsibleReject';
                 
@@ -256,8 +256,8 @@ class RequestController extends ActiveController {
         
          //Тут пошли уведомления
                 //Для начала подготовим текст уведомлений и шаблоны email
-                $sms_text = Yii::t('app', "Вы назначены исполнителем по заявке №%s");
-                $subject = Yii::t('app', "mixcart.ru - заявка №%s");
+                $sms_text = Yii::t('app', 'api.modules.v1.modules.mobile.controllers.you_set', ['ru'=>"Вы назначены исполнителем по заявке №%s"]);
+                $subject = Yii::t('app', 'api.modules.v1.modules.mobile.controllers.mix', ['ru'=>"mixcart.ru - заявка №%s"]);
                 $email_template = 'requestSetResponsibleMailToSupp';
                 $client_email_template = 'requestSetResponsible';
                 

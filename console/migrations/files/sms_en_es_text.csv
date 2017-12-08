@@ -1,0 +1,42 @@
+sms.designated_catalog;ru;Поставщик {vendor_name} назначил для вас каталог на mixcart.ru
+sms.designated_catalog;en;Supplier assigned a catalogue for you at mix-cart.com
+sms.designated_catalog;es;El proveedor {vendor_name} te ha asignado un catálogo en mix-cart.com
+sms.changed_catalog;ru;Поставщик {vendor_name} изменил для вас каталог на mixcart.ru
+sms.changed_catalog;en;Supplier changed a catalogue for you at mix-cart.com
+sms.changed_catalog;es;El proveedor {vendor_name} ha modificado el catálogo para ti en mix-cart.com
+sms.request_set_responsible;ru;Вы назначены исполнителем по заявке №{request_id} на mixcart.ru
+sms.request_set_responsible;en;You are appointed as a Performer of the request  No.{request_id} at mix-cart.com
+sms.request_set_responsible;es;Estás asignado como proveedor del pedido No.{request_id} en mix-cart.com
+sms.request_unset_responsible;ru;Вы сняты с исполнения по заявке №{request_id} на mixcart.ru
+sms.request_unset_responsible;en;You are removed from the perform of request No.{request_id} at mix-cart.com
+sms.request_unset_responsible;es;Estás anulado como proveedor del pedido No.{request_id} en mix-cart.com
+sms.request_add_supplier;ru;{client_name} хочет работать с вами на mixcart.ru
+sms.request_add_supplier;en;{client_name} will working with you via mix-cart.com
+sms.request_add_supplier;es;{client_name} desea trabajar contigo en mix-cart.com
+sms.request_new_callback;ru;{vendor_name} оставил отклик на вашу заявку №{request_id} на mixcart.ru
+sms.request_new_callback;en;{vendor_name} responded to you request No.{request_id} at mix-cart.com
+sms.request_new_callback;es;{vendor_name} ha dejado un comentario respecto a tu orden No.{request_id} en mix-cart.com
+sms.client_invite;ru;Ресторан {name} приглашает вас работать с ним через mixcart.ru
+sms.client_invite;en;Restaurant invites you to work via mix-cart.com
+sms.client_invite;es;El restaurante {name} te invita a colaborar a través de mix-cart.com
+sms.client_invite_repeat;ru;{name} повторно приглашает вас работать с ним через mixcart.ru
+sms.client_invite_repeat;en;Restaurant sent you a repeat invitation  to work via mix-cart.com
+sms.client_invite_repeat;es;{name} vuelve a invitarte a colaborar a través de mix-cart.com
+sms.order_changed;ru;{client_name} изменил детали заказа
+sms.order_changed;en;{client_name} modified order details at
+sms.order_changed;es;{client_name} ha cambiado los detalles del pedido
+sms.order_done;ru;{name} завершил заказ
+sms.order_done;en;{name} completed order at
+sms.order_done;es;{name} ha completado el pedido
+sms.order_new;ru;Поступил новый заказ от {name}:
+sms.order_new;en;New order from {name}:
+sms.order_new;es;Has recibido un nuevo pedido de {name}:
+sms.order_processing;ru;{vendor_name} согласовал заказ
+sms.order_processing;en;{vendor_name} agreed order at
+sms.order_processing;es;{vendor_name} ha concertado el pedido
+sms.order_canceled;ru;{name} отменил заказ
+sms.order_canceled;en;{name} canceled order at
+sms.order_canceled;es;{name} ha cancelado el pedido
+sms.add_market;ru;Ресторан {client_name} нашел вас на market.mixcart.ru и приглашает работать с ним через mixcart.ru
+sms.add_market;en;Restaurant {name} found you at market.mix-cart.com and invites working via mix-cart.com
+sms.add_market;es;El restaurante {name} te encontró en market.mix-cart.com y te invita a colaborar a través de mix-cart.com

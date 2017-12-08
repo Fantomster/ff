@@ -2,15 +2,17 @@
 
 namespace backend\controllers;
 
-use common\models\SmsSend;
-use common\models\SmsStatus;
+use common\models\Message;
+use common\models\SourceMessage;
 use Yii;
 use common\models\Role;
 use common\models\SmsSendSearch;
+use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
 use common\components\AccessRule;
 use yii\filters\VerbFilter;
 use yii\helpers\Html;
+use yii\web\Response;
 
 class SmsController extends \yii\web\Controller
 {
@@ -44,7 +46,7 @@ class SmsController extends \yii\web\Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'ajax-balance'],
+                        'actions' => ['index', 'ajax-balance', 'message', 'message-update'],
                         'allow' => true,
                         'roles' => [
                             Role::ROLE_ADMIN
@@ -101,31 +103,42 @@ class SmsController extends \yii\web\Controller
     }
 
     /**
-     * Смена статуса СМС сообщения, принимает параметры от сервера провайдера Qtelecom
-     * POST [
-     *    ORDID = SmsSend->sms_id,
-     *    STATUS = SmsStatus->status
-     * ]
+     * Список сообщений
      */
-    public function actionChangeStatus()
+    public function actionMessage()
     {
-        /**
-         * Добавить проверку, на то откуда пришел запрос
-         **/
+        $query = SourceMessage::find()
+            ->joinWith('messages')
+            ->where(['category' => 'sms_message'])->orderBy('language ASC')->all();
 
-        //Проверяем, получили мы ID смс или нет
-        if ($sms_id = Yii::$app->request->post('ORDID')) {
-            $model = SmsSend::findOne(['sms_id' => $sms_id]);
-            //ищем эту смс у нас
-            if (!empty($model)) {
-                //Если сервер знает эту смс едем дальше
-                if ($statusModel = SmsStatus::findOne(['status' => Yii::$app->request->post('STATUS')])) {
-                    //Полуичили ответ идем обновлять ее статус
-                    $model->setAttribute('status_id', $statusModel->status);
-                    if ($model->validate()) {
-                        $model->save();
-                    }
-                }
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $query
+        ]);
+
+        return $this->render('messages', [
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Обновление перевода
+     * @param $id
+     * @return array
+     */
+    public function actionMessageUpdate($id)
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $params = [];
+            $params['id'] = $id;
+            $params['language'] = Yii::$app->request->post('language');
+            $translation = Yii::$app->request->post('translation');
+            $model = Message::find()->where($params)->one();
+            if($model) {
+                $model->translation = $translation;
+                return ['success' => $model->save()];
+            } else {
+                return ['success' => false];
             }
         }
     }

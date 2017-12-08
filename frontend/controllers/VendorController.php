@@ -983,6 +983,8 @@ class VendorController extends DefaultController {
                 \Yii::$app->db->createCommand($sql)->execute();
                 $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 
+                $batch = 0;
+                $batchNum = 0;
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                     $row_article = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
                     $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
@@ -994,7 +996,7 @@ class VendorController extends DefaultController {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
                         }
-                        $data_insert[] = [
+                        $data_chunks[$batchNum][] = [
                             $lastInsert_base_cat_id,
                             $currentUser->organization_id,
                             $row_article,
@@ -1006,17 +1008,20 @@ class VendorController extends DefaultController {
                             CatalogBaseGoods::STATUS_ON,
                             new \yii\db\Expression('NOW()'),
                         ];
+                        $batch++;
+                        if ($batch === 1000) {
+                            $batch = 0;
+                            $batchNum++;
+                        }
                     }
                 }
                 unset($worksheet);
-                if (!empty($data_insert)) {
-                    $data_chunks = array_chunk($data_insert, 1000);
-                    unset($data_insert);
-                    foreach ($data_chunks as $data_insert) {
+                if (!empty($data_chunks)) {
+                    for ($chunk = 0; $chunk < count($data_chunks); ++$chunk) {
                         $db = Yii::$app->db;
                         $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
                             'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status', 'created_at'
-                                ], $data_insert);
+                                ], $data_chunks[$chunk]);
                         Yii::$app->db->createCommand($sql)->execute();
                     }
                 }

@@ -76,9 +76,12 @@ class FavoritesController extends ActiveController {
         $ordContentTable = OrderContent::tableName();
         $goodsNotesTable = GoodsNotes::tableName();
         $organizationTable = Organization::tableName();
+        $currency = \common\models\Currency::tableName();
 
         $query = CatalogBaseGoods::find();
-        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment");
+        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");
+        $query2->leftJoin($catalog,"$catalog.id in (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=catalog_base_goods.supp_org_id) AND (rest_org_id = $client->id))");
+        $query2->leftJoin($currency,"$currency.id = $catalog.currency_id");
         $query->leftJoin($ordContentTable, "$cbgTable.id=$ordContentTable.product_id");
         $query->leftJoin($orderTable, "$ordContentTable.order_id=$orderTable.id");
         $query->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");

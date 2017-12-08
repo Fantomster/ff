@@ -77,6 +77,7 @@ class FavoritesController extends ActiveController {
         $goodsNotesTable = GoodsNotes::tableName();
         $organizationTable = Organization::tableName();
         $currency = \common\models\Currency::tableName();
+        $catalog = \common\models\Catalog::tableName();
 
         $query = CatalogBaseGoods::find();
         $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");

@@ -76,6 +76,10 @@ class ProductSearchController extends ActiveController {
         $cbgTable = CatalogBaseGoods::tableName();
         $goodsNotesTable = GoodsNotes::tableName();
         $organizationTable = Organization::tableName();
+        $currency = \common\models\Currency::tableName();
+        $catalog = \common\models\Catalog::tableName();
+        
+        $symbols_t = 'REPLACE(product, "&quot;", "\'"\) as product';
         
         $symbols_t = 'REPLACE(product, "&quot;", "\'"\) as product';
         
@@ -85,9 +89,12 @@ class ProductSearchController extends ActiveController {
                 "$cbgTable.price", "$cbgTable.units", "$cbgTable.category_id", "$cbgTable.note", "$cbgTable.ed", "$cbgTable.omage", "$cbgTable.brand",
                 "$cbgTable.region", "$cbgTable.weight", "$cbgTable.es_status", "$cbgTable.mp_show_price",
                 "$cbgTable.rating", "$organizationTable.name as organization_name", "$goodsNotesTable.note as comment"]);*/
-        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment");
+        $query->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");
+
         $query->from("guide_product");
         $query->leftJoin($cbgTable,"$cbgTable.id = guide_product.cbg_id");
+        $query->leftJoin($catalog,"$catalog.id in (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=catalog_base_goods.supp_org_id) AND (rest_org_id = $client->id))");
+        $query->leftJoin($currency,"$currency.id = $catalog.currency_id");
         $query->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");
         $query->leftJoin($goodsNotesTable, "$goodsNotesTable.catalog_base_goods_id = $cbgTable.id and $goodsNotesTable.rest_org_id = $organizationTable.id");
         // add conditions that should always apply here
@@ -101,8 +108,10 @@ class ProductSearchController extends ActiveController {
                 "$cbgTable.price", "$cbgTable.units", "$cbgTable.category_id", "$cbgTable.note", "$cbgTable.ed", "$cbgTable.omage", "$cbgTable.brand",
                 "$cbgTable.region", "$cbgTable.weight", "$cbgTable.es_status", "$cbgTable.mp_show_price",
                 "$cbgTable.rating", "$organizationTable.name as organization_name", "$goodsNotesTable.note as comment"]);*/
-        $query2->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment");
 
+        $query2->select("$cbgTable.*, $organizationTable.name as organization_name, $goodsNotesTable.note as comment, $currency.symbol as symbol");
+        $query2->leftJoin($catalog,"$catalog.id in (SELECT cat_id FROM relation_supp_rest WHERE (supp_org_id=catalog_base_goods.supp_org_id) AND (rest_org_id = $client->id))");
+        $query2->leftJoin($currency,"$currency.id = $catalog.currency_id");
         $query2->leftJoin($ordContentTable, "$cbgTable.id=$ordContentTable.product_id");
         $query2->leftJoin($orderTable, "$ordContentTable.order_id=$orderTable.id");
         $query2->leftJoin($organizationTable, "$organizationTable.id = $cbgTable.supp_org_id");

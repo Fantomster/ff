@@ -1009,7 +1009,7 @@ class VendorController extends DefaultController {
                             new \yii\db\Expression('NOW()'),
                         ];
                         $batch++;
-                        if ($batch === 1000) {
+                        if ($batch === 500) {
                             $batch = 0;
                             $batchNum++;
                         }

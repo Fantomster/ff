@@ -582,6 +582,7 @@ class VendorController extends DefaultController {
             //$unique = 'product'; //уникальное поле
             $sql_array_products = CatalogBaseGoods::find()->select(['id', 'product'])->where(['cat_id' => $id, 'deleted' => 0])->asArray()->all();
             $arr = \yii\helpers\ArrayHelper::map($sql_array_products, 'id', 'product');
+            unset($sql_array_products);
             //$count_array = count($sql_array_products);
             $arr = array_map('mb_strtolower', $arr);
             //массив уникального поля из базы
@@ -614,6 +615,14 @@ class VendorController extends DefaultController {
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
             $xlsArray = [];
+
+            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
+                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций, обратитесь к нам и мы вам поможем'
+                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
+                unlink($path);
+                return $this->redirect(\Yii::$app->request->getReferrer());
+            }
             //Проверяем наличие дублей в списке
             if ($importType == 2 || $importType == 3) {
                 $rP = 0;
@@ -621,31 +630,17 @@ class VendorController extends DefaultController {
                 $rP = 1;
             }
             for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))); //наименование
-                if (!empty($row_unique)) {
-                    if (!in_array($row_unique, $arr)) {
-                        $newRows++;
-                    }
-                    array_push($xlsArray, (string) $row_unique);
-                }
+                array_push($xlsArray, mb_strtolower(trim($worksheet->getCellByColumnAndRow($rP, $row))));
             }
-
-            if ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
-                Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
-                        . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
-                unlink($path);
-                return $this->redirect(\Yii::$app->request->getReferrer());
-            }
-            //if (max(array_count_values($xlsArray)) > 1) {
-            
-            if (max(array_count_values($xlsArray)) > 1) {
+            if (count($xlsArray) !== count(array_flip($xlsArray))) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
+            unset($xlsArray);
+
             if ($importType == 1) {
                 $transaction = Yii::$app->db->beginTransaction();
                 try {
@@ -813,37 +808,31 @@ class VendorController extends DefaultController {
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
             $xlsArray = [];
-            //Проверяем наличие дублей в списке
-            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
-                $row_unique = mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))); //наименование
-                if (!empty($row_unique)) {
-                    if (!in_array($row_unique, $arr)) {
-                        $newRows++;
-                    }
-                    array_push($xlsArray, (string) $row_unique);
-                }
-            }
 
-            if ((($newRows == 0) && ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS)) || ($newRows > CatalogBaseGoods::MAX_INSERT_FROM_XLS)) {
+            if ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций, обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
-            
-            $flipArr = array_flip($arr);
-            
-            $test = max(array_count_values($xlsArray));
-            
-            //if (max(array_count_values($xlsArray)) > 1) {
-            if (max(array_count_values($xlsArray)) > 1) {
+
+
+            //Проверяем наличие дублей в списке
+            for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
+                array_push($xlsArray, mb_strtolower(trim($worksheet->getCellByColumnAndRow(0, $row))));
+            }
+
+            if (count($xlsArray) !== count(array_flip($xlsArray))) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить одну или более позиций с одинаковым наименованием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
+
+            $flipArr = array_flip($arr);
+
             if ($importType == 1) {
                 $transaction = Yii::$app->db->beginTransaction();
                 $catalogGoods = CatalogGoods::find()
@@ -950,7 +939,7 @@ class VendorController extends DefaultController {
 
             if ($highestRow > CatalogBaseGoods::MAX_INSERT_FROM_XLS) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
-                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций (Новых позиций), обратитесь к нам и мы вам поможем'
+                        . '<small>Вы пытаетесь загрузить каталог объемом больше ' . CatalogBaseGoods::MAX_INSERT_FROM_XLS . ' позиций, обратитесь к нам и мы вам поможем'
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
@@ -1518,49 +1507,6 @@ class VendorController extends DefaultController {
         if (empty($model)) {
             throw new \yii\web\HttpException(404, 'Нет здесь ничего такого, проходите, гражданин');
         }
-        // выборка для handsontable
-        /* $arr = CatalogGoods::find()->select(['id', 'base_goods_id', 'price', 'discount', 'discount_percent'])->where(['cat_id' => $id])->
-          andWhere(['not in', 'base_goods_id', CatalogBaseGoods::find()->select('id')->
-          where(['supp_org_id' => $currentUser->organization_id, 'deleted' => 1])])->all();
-          $arr = \yii\helpers\ArrayHelper::toArray($arr); */
-
-        $sql = "SELECT "
-                . "catalog.id as id,"
-                . "article,"
-                . "catalog_base_goods.product as product,"
-                . "catalog_base_goods.id as base_goods_id,"
-                . "catalog_goods.id as goods_id,"
-                . "units,"
-                . "ed,"
-                . "catalog_base_goods.price as base_price,"
-                . "catalog_goods.price as price,"
-                . "catalog_base_goods.status"
-                . " FROM `catalog` "
-                . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
-                . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
-                . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";
-        $arr = \Yii::$app->db->createCommand($sql)->queryAll();
-
-        $array = [];
-        foreach ($arr as $arrs) {
-            $c_article = $arrs['article'];
-            $c_product = Html::decode(Html::decode(Html::decode($arrs['product'])));
-            $c_base_goods_id = $arrs['base_goods_id'];
-            $c_goods_id = $arrs['goods_id'];
-            $c_base_price = $arrs['base_price'];
-            $c_ed = $arrs['ed'];
-            $c_price = $arrs['price'];
-
-            array_push($array, [
-                'article' => $c_article,
-                'product' => $c_product,
-                'base_goods_id' => $c_base_goods_id,
-                'goods_id' => $c_goods_id,
-                'base_price' => $c_base_price,
-                'price' => $c_price,
-                'ed' => $c_ed,
-                'total_price' => $c_price]);
-        }
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $post = Yii::$app->request->post();
@@ -1612,6 +1558,44 @@ class VendorController extends DefaultController {
             }
             $result = ['success' => true, 'alert' => ['class' => 'success-fk', 'title' => 'Сохранено', 'body' => 'Данные успешно обновлены']];
             return $result;
+        } else {
+            $sql = "SELECT "
+                    . "catalog.id as id,"
+                    . "article,"
+                    . "catalog_base_goods.product as product,"
+                    . "catalog_base_goods.id as base_goods_id,"
+                    . "catalog_goods.id as goods_id,"
+                    . "units,"
+                    . "ed,"
+                    . "catalog_base_goods.price as base_price,"
+                    . "catalog_goods.price as price,"
+                    . "catalog_base_goods.status"
+                    . " FROM `catalog` "
+                    . "LEFT JOIN catalog_goods on catalog.id = catalog_goods.cat_id "
+                    . "LEFT JOIN catalog_base_goods on catalog_goods.base_goods_id = catalog_base_goods.id "
+                    . "WHERE catalog.id = $id and catalog_base_goods.deleted != 1";
+            $arr = \Yii::$app->db->createCommand($sql)->queryAll();
+
+            $array = [];
+            foreach ($arr as $arrs) {
+                $c_article = $arrs['article'];
+                $c_product = Html::decode(Html::decode(Html::decode($arrs['product'])));
+                $c_base_goods_id = $arrs['base_goods_id'];
+                $c_goods_id = $arrs['goods_id'];
+                $c_base_price = $arrs['base_price'];
+                $c_ed = $arrs['ed'];
+                $c_price = $arrs['price'];
+
+                array_push($array, [
+                    'article' => $c_article,
+                    'product' => $c_product,
+                    'base_goods_id' => $c_base_goods_id,
+                    'goods_id' => $c_goods_id,
+                    'base_price' => $c_base_price,
+                    'price' => $c_price,
+                    'ed' => $c_ed,
+                    'total_price' => $c_price]);
+            }
         }
         return $this->render('newcatalog/step-3-copy', compact('array', 'cat_id', 'currentCatalog', 'baseCurrencySymbol'));
     }

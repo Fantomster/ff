@@ -1009,7 +1009,7 @@ class VendorController extends DefaultController {
                             new \yii\db\Expression('NOW()'),
                         ];
                         $batch++;
-                        if ($batch === 250) {
+                        if ($batch === 1000) {
                             $batch = 0;
                             $batchNum++;
                         }
@@ -1023,6 +1023,7 @@ class VendorController extends DefaultController {
                             'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status', 'created_at'
                                 ], $data_chunks[$chunk]);
                         Yii::$app->db->createCommand($sql)->execute();
+                        $data_chunks[$chunk] = [];
                     }
                 }
                 $transaction->rollback();//$transaction->commit();

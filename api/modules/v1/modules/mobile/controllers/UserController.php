@@ -217,7 +217,6 @@ class UserController extends ActiveController {
         /*$user = Yii::$app->user->identity;
         \api\modules\v1\modules\mobile\components\NotificationHelper::actionConfirm($user->email, $user->id);*/
         
-        //\api\modules\v1\modules\mobile\components\NotificationHelper::actionOrder(29);
     }
     
     public function actionRefreshFcmToken() {

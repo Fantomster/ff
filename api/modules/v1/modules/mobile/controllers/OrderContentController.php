@@ -88,6 +88,7 @@ class OrderContentController extends ActiveController {
         $user = Yii::$app->user->getIdentity();
         
         $query = OrderContent::find();
+        
 
         if ($user->organization->type_id == \common\models\Organization::TYPE_RESTAURANT)
         $query = OrderContent::find()->where(['in','order_id', Order::find()->select('id')->where(['client_id' => $user->organization_id])]);

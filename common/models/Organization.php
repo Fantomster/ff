@@ -1318,4 +1318,9 @@ class Organization extends \yii\db\ActiveRecord
         }
         return $result;
     }
+
+    public function getPayments()
+    {
+        return $this->hasMany(Payment::className(), ['organization_id' => 'id'])->orderBy('payment.payment_id DESC');
+    }
 }

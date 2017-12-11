@@ -124,6 +124,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                     'label' => 'Заявки на регистрацию орг-ий',
                                     'url' => ['/agent-request/index'],
                                 ],
+                                [
+                                    'label' => 'Платежи',
+                                    'url' => ['/payment'],
+                                ],
                             ],
                         ],
                         [

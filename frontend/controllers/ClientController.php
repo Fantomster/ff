@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\PaymentSearch;
 use Yii;
 use yii\web\UploadedFile;
 use common\models\User;
@@ -83,6 +84,7 @@ class ClientController extends DefaultController {
                             'support',
                             'view-catalog',
                             'view-supplier',
+                            'payments'
                         ],
                         'allow' => true,
                         // Allow restaurant managers
@@ -1655,6 +1657,18 @@ on `relation_supp_rest`.`supp_org_id` = `organization`.`id` WHERE "
         Yii::$app->session->get('sidebar-collapse') ?
                         Yii::$app->session->set('sidebar-collapse', false) :
                         Yii::$app->session->set('sidebar-collapse', true);
+    }
+
+    public function actionPayments()
+    {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchModel = new PaymentSearch();
+
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->query->orderBy('date desc');
+        $dataProvider->query->andFilterWhere(['organization_id' => $currentUser->organization->id]);
+
+        return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
     }
 
 }

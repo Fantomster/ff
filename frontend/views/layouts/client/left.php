@@ -105,6 +105,12 @@ foreach ($arrService as $key => $val) {
                                     'url' => ['/settings/notifications'],
                                     'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))
                                 ],
+                                [
+                                    'label' => 'Платежи',
+                                    'icon' => 'circle-o',
+                                    'url' => ['/client/payments'],
+                                    'visible' => in_array($user->role_id,$roles)
+                                ],
                             ]
                         ],
                         // ['label' => 'Поддержка', 'icon' => 'support', 'url' => ['client/support']],

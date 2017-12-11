@@ -60,6 +60,7 @@ if (Yii::$app->user->can('manage')) {
             ['label' => 'Сотрудники', 'icon' => 'circle-o', 'url' => ['/vendor/employees']],
             ['label' => 'Уведомления', 'icon' => 'circle-o', 'url' => ['/settings/notifications'], 'visible' => (!in_array($user->role_id, \common\models\Role::getFranchiseeEditorRoles()))],
             ['label' => 'Доставка', 'icon' => 'circle-o', 'url' => ['/vendor/delivery']],
+            ['label' => 'Платежи', 'icon' => 'circle-o', 'url' => ['/vendor/payments']],
         ]
     ];
 } else {

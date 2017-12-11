@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\PaymentSearch;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -54,6 +55,7 @@ class VendorController extends DefaultController {
                             'ajax-update-user',
                             'ajax-validate-user',
                             'remove-client',
+                            'payments'
                         ],
                         'allow' => true,
                         // Allow suppliers managers
@@ -2171,6 +2173,18 @@ class VendorController extends DefaultController {
         }
 
         return ['result' => 'success'];
+    }
+
+    public function actionPayments()
+    {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchModel = new PaymentSearch();
+
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->query->orderBy('date desc');
+        $dataProvider->query->andFilterWhere(['organization_id' => $currentUser->organization->id]);
+
+        return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
     }
 
 }

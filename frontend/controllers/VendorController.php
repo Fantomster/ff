@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\PaymentSearch;
 use Yii;
 use yii\helpers\Json;
 use yii\helpers\Html;
@@ -54,6 +55,7 @@ class VendorController extends DefaultController {
                             'ajax-update-user',
                             'ajax-validate-user',
                             'remove-client',
+                            'payments'
                         ],
                         'allow' => true,
                         // Allow suppliers managers
@@ -609,8 +611,11 @@ class VendorController extends DefaultController {
             //Оптимизируем чтение файла
             $objReader->setReadDataOnly(true);
             $objPHPExcel = $objReader->load($path);
-
             $worksheet = $objPHPExcel->getSheet(0);
+
+            unset($objPHPExcel);
+            unset($objReader);
+
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
@@ -671,12 +676,17 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
+                    unset($worksheet);
                     if (!empty($data_insert)) {
                         $db = Yii::$app->db;
-                        $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
-                            'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status'
-                                ], $data_insert);
-                        Yii::$app->db->createCommand($sql)->execute();
+                        $data_chunks = array_chunk($data_insert, 1000);
+                        unset($data_insert);
+                        foreach ($data_chunks as $data_insert) {
+                            $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
+                                'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status'
+                                    ], $data_insert);
+                            Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     $transaction->commit();
                     unlink($path);
@@ -802,8 +812,11 @@ class VendorController extends DefaultController {
             $localFile = \PHPExcel_IOFactory::identify($path);
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
-
             $worksheet = $objPHPExcel->getSheet(0);
+
+            unset($objPHPExcel);
+            unset($objReader);
+
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
             $newRows = 0;
@@ -862,12 +875,17 @@ class VendorController extends DefaultController {
                             }
                         }
                     }
+                    unset($worksheet);
                     if (!empty($data_insert)) {
                         $db = Yii::$app->db;
-                        $sql = $db->queryBuilder->batchInsert(CatalogGoods::tableName(), [
-                            'cat_id', 'base_goods_id', 'price'
-                                ], $data_insert);
-                        Yii::$app->db->createCommand($sql)->execute();
+                        $data_chunks = array_chunk($data_insert, 1000);
+                        unset($data_insert);
+                        foreach ($data_chunks as $data_insert) {
+                            $sql = $db->queryBuilder->batchInsert(CatalogGoods::tableName(), [
+                                'cat_id', 'base_goods_id', 'price'
+                                    ], $data_insert);
+                            Yii::$app->db->createCommand($sql)->execute();
+                        }
                     }
                     $transaction->commit();
                     unlink($path);
@@ -932,8 +950,11 @@ class VendorController extends DefaultController {
             $localFile = \PHPExcel_IOFactory::identify($path);
             $objReader = \PHPExcel_IOFactory::createReader($localFile);
             $objPHPExcel = $objReader->load($path);
-
             $worksheet = $objPHPExcel->getSheet(0);
+
+            unset($objReader);
+            unset($objPHPExcel);
+
             $highestRow = $worksheet->getHighestRow(); // получаем количество строк
             $highestColumn = $worksheet->getHighestColumn(); // а так можно получить количество колонок
 
@@ -949,13 +970,14 @@ class VendorController extends DefaultController {
                 $row_product = trim($worksheet->getCellByColumnAndRow(1, $row)); //наименование
                 array_push($xlsArray, $row_product);
             }
-            if (max(array_count_values($xlsArray)) > 1) {
+            if (count($xlsArray) !== count(array_flip($xlsArray))) {
                 Yii::$app->session->setFlash('success', 'Ошибка загрузки каталога<br>'
                         . '<small>Вы пытаетесь загрузить один или более позиций с одинаковым названием! Проверьте файл на наличие дублей! '
                         . '<a href="mailto://info@mixcart.ru" target="_blank" class="alert-link" style="background:none">info@mixcart.ru</a></small>');
                 unlink($path);
                 return $this->redirect(\Yii::$app->request->getReferrer());
             }
+            unset($xlsArray);
             $transaction = Yii::$app->db->beginTransaction();
             try {
 
@@ -963,6 +985,8 @@ class VendorController extends DefaultController {
                 \Yii::$app->db->createCommand($sql)->execute();
                 $lastInsert_base_cat_id = Yii::$app->db->getLastInsertID();
 
+                $batch = 0;
+                $batchNum = 0;
                 for ($row = 1; $row <= $highestRow; ++$row) { // обходим все строки
                     $row_article = strip_tags(trim($worksheet->getCellByColumnAndRow(0, $row))); //артикул
                     $row_product = strip_tags(trim($worksheet->getCellByColumnAndRow(1, $row))); //наименование
@@ -974,7 +998,7 @@ class VendorController extends DefaultController {
                         if (empty($row_units) || $row_units < 0) {
                             $row_units = 0;
                         }
-                        $data_insert[] = [
+                        $data_chunks[$batchNum][] = [
                             $lastInsert_base_cat_id,
                             $currentUser->organization_id,
                             $row_article,
@@ -986,14 +1010,23 @@ class VendorController extends DefaultController {
                             CatalogBaseGoods::STATUS_ON,
                             new \yii\db\Expression('NOW()'),
                         ];
+                        $batch++;
+                        if ($batch === 1000) {
+                            $batch = 0;
+                            $batchNum++;
+                        }
                     }
                 }
-                if (!empty($data_insert)) {
-                    $db = Yii::$app->db;
-                    $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
-                        'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status', 'created_at'
-                            ], $data_insert);
-                    Yii::$app->db->createCommand($sql)->execute();
+                unset($worksheet);
+                if (!empty($data_chunks)) {
+                    for ($chunk = 0; $chunk < count($data_chunks); ++$chunk) {
+                        $db = Yii::$app->db;
+                        $sql = $db->queryBuilder->batchInsert(CatalogBaseGoods::tableName(), [
+                            'cat_id', 'supp_org_id', 'article', 'product', 'units', 'price', 'ed', 'note', 'status', 'created_at'
+                                ], $data_chunks[$chunk]);
+                        Yii::$app->db->createCommand($sql)->execute();
+                        $data_chunks[$chunk] = [];
+                    }
                 }
                 $transaction->commit();
                 unlink($path);
@@ -2140,6 +2173,18 @@ class VendorController extends DefaultController {
         }
 
         return ['result' => 'success'];
+    }
+
+    public function actionPayments()
+    {
+        $currentUser = User::findIdentity(Yii::$app->user->id);
+        $searchModel = new PaymentSearch();
+
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->query->orderBy('date desc');
+        $dataProvider->query->andFilterWhere(['organization_id' => $currentUser->organization->id]);
+
+        return $this->render('payments', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
     }
 
 }

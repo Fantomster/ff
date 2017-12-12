@@ -10,12 +10,13 @@ class CatalogBaseGoods extends \common\models\CatalogBaseGoods
     public $list;
     public $organization_name;
     public $comment;
+    public $symbol;
     
     public function fields()
     {
         return ['id', 'cat_id', 'article', 'product', 'status', 'units', 'market_place', 'deleted', 'created_at', 'supp_org_id', 
                 'updated_at', 'category_id', 'note', 'ed', 'image', 'brand', 'region', 'weight', 'es_status', 'mp_show_price', 'rating', 'price', 
-            'organization_name' , 'comment'];
+            'organization_name' , 'comment', 'symbol'];
     }
     
      /**

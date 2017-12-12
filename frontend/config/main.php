@@ -59,4 +59,9 @@ return [
     ],
 
     'params' => $params,
+    'modules' => [
+        'billing' => [
+            'class' => 'frontend\modules\billing\Module',
+        ],
+    ],
 ];

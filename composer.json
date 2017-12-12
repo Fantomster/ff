@@ -64,7 +64,8 @@
         "branchonline/yii2-lightbox": "*",
         "npm-asset/readmore.js": "*",
         "insolita/yii2-migration-generator": "~2.3",
-        "xj/yii2-user-agent": "^1.0.0"
+        "xj/yii2-user-agent": "^1.0.0",
+        "yandex-money/yandex-checkout-sdk-php": "*"
     },
     "require-dev": {
         "yiisoft/yii2-codeception": "*",

@@ -29,11 +29,13 @@ class ProductHelper extends AuthHelper {
     }    
     
     $guid = UUID::uuid4();
+
+    $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
           
     $xml = '<?xml version="1.0" encoding="utf-8"?>
     <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/product'.'" timeout="3600">
     <PARAM name="object_id" val="'.$this->restr->code.'" />
-    <PARAM name="goodgroup_rid" val="1" />
+    <PARAM name="goodgroup_rid" val="'.$defGoodGroup.'" />
     <PARAM name="include_goods" val="1" />
     </RQ>'; 
        
@@ -83,7 +85,9 @@ class ProductHelper extends AuthHelper {
     }
     
     public function callback()
-    {       
+    {
+
+     ini_set('MAX_EXECUTION_TIME',-1);
 
     $getr = Yii::$app->request->getRawBody();
 

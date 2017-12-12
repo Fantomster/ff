@@ -86,7 +86,7 @@ class ProductHelper extends AuthHelper {
     {       
 
     $getr = Yii::$app->request->getRawBody();
-    
+
     
     $myXML   = simplexml_load_string($getr);
     $gcount = 0;        
@@ -313,3 +313,4 @@ class ProductHelper extends AuthHelper {
     }
 
 }
+

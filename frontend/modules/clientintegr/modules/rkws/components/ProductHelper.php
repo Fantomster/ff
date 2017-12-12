@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\components;
 
+use api\common\models\RkDicconst;
 use yii;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
@@ -10,6 +11,7 @@ use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkProduct;
 use api\common\models\RkDic;
+
 
 /* 
  * To change this license header, choose License Headers in Project Properties.

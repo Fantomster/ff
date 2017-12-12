@@ -195,7 +195,7 @@ class ProductHelper extends AuthHelper {
             file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', print_r($getr, true), FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', print_r($array, true), FILE_APPEND);
+        //    file_put_contents('runtime/logs/callback.log', print_r($array, true), FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'TASK TMODEL NOT FOUND.!' . $cmdguid . '!' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
@@ -251,12 +251,16 @@ class ProductHelper extends AuthHelper {
              $icount++;
           }
                         echo "Данные номенклатуры успешно распознаны и сохранены. (Count: ".sizeof($array).")";
+                        file_put_contents('runtime/logs/callback.log',PHP_EOL.' Продуктов сохранено:'.sizeof($array).PHP_EOL,FILE_APPEND);
         } else {
-            if (isset($array['code']))
-
+            if (isset($array['code'])) {
                 echo "Код ошибки принят и сохранен.";
-            else
+                file_put_contents('runtime/logs/callback.log',PHP_EOL.'Код ошибки принят и сохранен'.PHP_EOL,FILE_APPEND);
+            } else {
                 echo "Неизвестная ошибка";
+                file_put_contents('runtime/logs/callback.log',PHP_EOL.'Неизвестная ошибка'.PHP_EOL,FILE_APPEND);
+            }
+
         }
 
 

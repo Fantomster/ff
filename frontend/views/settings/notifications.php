@@ -311,8 +311,8 @@ $this->title = Yii::t('message', 'frontend.views.settings.notifications_three', 
                     ?>
                 </div>
                 <div class="panel-info settings">
-                    <div class="col-md-10" ><i><br><p>Если вы хотите добавить еще один email для получения уведомлений без заведения нового сотрудника, то вы можете сделать это в таблице ниже.<br>
-                            Для каждого добавленного email вы можете выбрать события, о которых будут приходить уведомления.</p><br></div></i></div>
+                    <div class="col-md-10" ><i><br><p><?= Yii::t('app', 'frontend.views.settings.if_you_wanna', ['ru'=>'Если вы хотите добавить еще один email для получения уведомлений без заведения нового сотрудника, то вы можете сделать это в таблице ниже.']) ?><br>
+                            <?= Yii::t('app', 'frontend.views.settings.if_you_wanna_two', ['ru'=>'Для каждого добавленного email вы можете выбрать события, о которых будут приходить уведомления.']) ?></p><br></div></i></div>
                 </div>
                 <div class="col-md-6">
                     <?=$this->render('_additional_email', ['additional_email' => $additional_email, 'user' => $user])?>

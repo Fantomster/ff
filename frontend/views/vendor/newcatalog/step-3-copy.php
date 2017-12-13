@@ -71,7 +71,7 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                 <div class="callout callout-fk-info">
                     <h4><?= Yii::t('message', 'frontend.views.vendor.step_three', ['ru'=>'ШАГ 3']) ?></h4>
                     <p><?= Yii::t('message', 'frontend.views.vendor.excellent_two', ['ru'=>'Отлично. Теперь осталось установить цены на товары в новом каталоге.<br>Это можно сделать задав фиксированную скидку, процент скидки или просто указав новую цену.']) ?></p>
-                </div> 
+                </div>
                 <div class="row">
                     <div class="col-sm-4">
                         <div class="input-group">
@@ -80,7 +80,7 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
                             </span>
                             <?= Html::input('text', 'search_field', null, ['class' => 'form-control', 'placeholder' => Yii::t('message', 'frontend.views.vendor.search_six', ['ru'=>'Поиск']), 'id' => 'search_field']) ?>
                         </div>
-                    </div> 
+                    </div>
                     <div class="col-sm-8">
                         <?=
                         Modal::widget([
@@ -110,8 +110,8 @@ $currencySymbolList = Json::encode(Currency::getSymbolList());
             </div>
             <div class="panel-body">
                 <?php Pjax::begin(['id' => 'pjax-container']); ?>
-                <div class="handsontable" id="handsontable"></div> 
-                <?php Pjax::end(); ?>   
+                <div class="handsontable" id="handsontable"></div>
+                <?php Pjax::end(); ?>
             </div>
         </div>
     </div>

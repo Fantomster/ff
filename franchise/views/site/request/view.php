@@ -56,7 +56,7 @@ use yii\widgets\ListView;
                             <h6><b><?= Yii::t('app', 'franchise.views.site.request.rest_address', ['ru'=>'Адрес ресторана:']) ?></b> <?=$author->address?></h6>
 
                             <h6><b><?= Yii::t('app', 'franchise.views.site.request.buy_value', ['ru'=>'Объем закупки:']) ?></b> <?=$request->amount?></h6>
-                            <h6><b><?= Yii::t('app', 'franchise.views.site.request.category_two', ['ru'=>'Категория:']) ?></b> <?=$request->categoryName->name ?></h6>
+                            <h6><b><?= Yii::t('app', 'franchise.views.site.request.category_two', ['ru'=>'Категория:']) ?></b> <?=Yii::t('app', $request->categoryName->name) ?></h6>
                             <h6><b><?= Yii::t('app', 'franchise.views.site.request.order_period', ['ru'=>'Периодичность заказа:']) ?></b> <?=$request->regularName?></h6>
                             <h6><b><?= Yii::t('app', 'franchise.views.site.request.payment_method', ['ru'=>'Способ оплаты:']) ?></b> <?=$request->paymentMethodName ?></h6>
                             <h6><b><?= Yii::t('app', 'franchise.views.site.request.deferred_payment', ['ru'=>'Отложенный платеж(дней):']) ?></b> <?=$request->deferment_payment ?></h6>

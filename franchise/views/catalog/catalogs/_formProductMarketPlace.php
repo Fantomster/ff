@@ -30,13 +30,16 @@ use yii\widgets\Pjax;
 }
 </style>
 <?php
+$mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name');
+foreach ($mpCat as &$item){
+    $item['name'] = Yii::t('app', $item);
+}
 echo Select2::widget([
     'theme' => Select2::THEME_DEFAULT,
     'name'=>'catag-ids',
     'value'=>0,
     'data' => array_merge([0 => Yii::t('app', 'franchise.views.catalog.catalogs.choose_four', ['ru'=>"Выберите..."])],
-            ArrayHelper::map(\common\models\MpCategory::find()->
-                    where('parent IS NULL')->asArray()->all(), 'id', 'name')),
+        $mpCat),
     'options' => ['placeholder' => Yii::t('app', 'franchise.views.catalog.catalogs.choose_five', ['ru'=>'Выберите...']), 'id' => 'catag-ids','style'=>'margin-top:10px'],
     'hideSearch' => true,
     'pluginOptions' => [

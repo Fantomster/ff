@@ -17,12 +17,20 @@ $count_products_from_mp = CatalogBaseGoods::find()
                 ->andWhere('category_id is not null')
                 ->count();
 $left_menu_categorys     = \common\models\MpCategory::getDb()->cache(function ($db) {
-    return \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
+    $cat = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
+    foreach ($cat as &$item){
+        $item['name'] = Yii::t('app', $item['name']);
+    }
+    return $cat;
 });
 //$left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($db) {
 //    return \common\models\MpCategory::find()->where('parent is not null')->all();
 //});
-$left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is not null')->all();
+$cat = \common\models\MpCategory::find()->where('parent is not null')->all();;
+foreach ($cat as &$item){
+    $item['name'] = Yii::t('app', $item['name']);
+}
+$left_menu_categorys_sub = $cat;
 ?>
 <style>
 .panel-group {margin-bottom: 0px;overflow: hidden;}  

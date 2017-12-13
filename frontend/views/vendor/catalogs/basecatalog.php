@@ -102,7 +102,9 @@ $exportColumns = [
     ],
     [
         'label' => Yii::t('message', 'frontend.views.vendor.measure_two', ['ru'=>'Единица измерения']),
-        'value' => 'ed',
+        'value' => function($data){
+            return Yii::t('app', $data['ed']);
+        },
     ],
     [
         'label' => Yii::t('message', 'frontend.views.vendor.comment', ['ru'=>'Комментарий']),
@@ -300,7 +302,7 @@ Modal::end();
                             'attribute' => 'category_id',
                             'label' => Yii::t('message', 'frontend.views.vendor.category_two', ['ru'=>'Категория']),
                             'value' => function ($data) {
-                                $data['category_id'] == 0 ? $category_name = '' : $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
+                                $data['category_id'] == 0 ? $category_name = '' : $category_name = Yii::t('app', \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name);
                                 return $category_name;
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
@@ -315,7 +317,7 @@ Modal::end();
                             'attribute' => 'ed',
                             'label' => Yii::t('message', 'frontend.views.vendor.measure_three', ['ru'=>'Ед. измерения']),
                             'value' => function ($data) {
-                                return $data['ed'];
+                                return Yii::t('app', $data['ed']);
                             },
                             'contentOptions' => ['style' => 'vertical-align:middle;'],
                         ],

@@ -236,7 +236,7 @@ class DefaultController extends Controller {
      $goodsModel->deleted = 0;
      $goodsModel->market_place = 0;
      $goodsModel->status = 1;
-     $goodsModel->ed = MpEd::find()->andwhere('id='.$units_fid)->one()->name;
+     $goodsModel->ed = Yii::t('app', MpEd::find()->andwhere('id='.$units_fid)->one()->name);
      $goodsModel->supp_org_id = $org;
      $goodsModel->es_status = 1;
      $goodsModel->category_id = $category_fid;

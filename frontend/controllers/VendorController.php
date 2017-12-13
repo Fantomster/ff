@@ -376,7 +376,11 @@ class VendorController extends DefaultController {
 
             //проверка на корректность введенных данных (цена)
             $numberPattern = '/^\s*[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?\s*$/';
-            $arrEd = \yii\helpers\ArrayHelper::getColumn(\common\models\MpEd::find()->all(), 'name');
+            $mp_ed = \common\models\MpEd::find()->all();
+            foreach ($mp_ed as &$item){
+                $item['name'] = Yii::t('app', $item['name']);
+            }
+            $arrEd = \yii\helpers\ArrayHelper::getColumn($mp_ed, 'name');
             //$articleArray = [];
             foreach ($arrCatalog as $arrCatalogs) {
                 $article = htmlspecialchars(trim($arrCatalogs['dataItem']['article']));
@@ -1086,6 +1090,9 @@ class VendorController extends DefaultController {
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+        foreach ($countrys as &$country){
+            $country['name'] = Yii::t('app', $country['name']);
+        }
 
         if (Yii::$app->request->isAjax) {
             $post = Yii::$app->request->post();
@@ -1123,6 +1130,9 @@ class VendorController extends DefaultController {
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+        foreach ($countrys as &$country){
+            $country['name'] = Yii::t('app', $country['name']);
+        }
 
         if (!empty($catalogBaseGoods->category_id)) {
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
@@ -1185,7 +1195,7 @@ class VendorController extends DefaultController {
                     $id1 = $params[0]; // get the value of 1
                     $id2 = $params[1]; // get the value of 2
                     foreach ($list as $i => $cat) {
-                        $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
+                        $out[] = ['id' => $cat['id'], 'name' => Yii::t('app', $cat['name'])];
                         //if ($i == 0){$aux = $cat['id'];}
                         //($cat['id'] == $id1) ? $selected = $id1 : $selected = $aux;
                         //$selected = $id1; 
@@ -1533,7 +1543,7 @@ class VendorController extends DefaultController {
             $c_base_goods_id = $arrs['base_goods_id'];
             $c_goods_id = $arrs['goods_id'];
             $c_base_price = $arrs['base_price'];
-            $c_ed = $arrs['ed'];
+            $c_ed = Yii::t('app', $arrs['ed']);
             $c_price = $arrs['price'];
 
             array_push($array, [

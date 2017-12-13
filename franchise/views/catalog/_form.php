@@ -210,9 +210,13 @@ $form = ActiveForm::begin([
             <div class="col-md-12" id="b-category" style="border: 1px dashed #77c497; padding: 15px;margin-top: 20px;margin-bottom: 10px">
                 <label class="control-label" for="dynamicmodel-sub1"><?= Yii::t('app', 'franchise.views.catalog.good_category', ['ru'=>'Категория товара']) ?></label>
                 <?php
+                $mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name');
+                foreach ($mpCat as &$item){
+                    $item = Yii::t('app', $item);
+                }
                 echo $form->field($catalogBaseGoods, 'sub1')->widget(Select2::classname(), [
                     //'model'=>$categorys->sub1,
-                    'data' => ArrayHelper::map(\common\models\MpCategory::find()->where('parent IS NULL')->asArray()->all(), 'id', 'name'),
+                    'data' => $mpCat,
                     'options' => ['placeholder' => Yii::t('app', 'franchise.views.catalog.choose', ['ru'=>'Выберите...'])],
                     'theme' => "default",
                     //'hideSearch' => true,
@@ -276,9 +280,13 @@ $form = ActiveForm::begin([
                     ?>
                     <label class="control-label" for=""><?= Yii::t('app', 'franchise.views.catalog.measure', ['ru'=>'Ед измерения']) ?></label>
                     <?php
+                    $mp_ed = \common\models\MpEd::find()->asArray()->all();
+                    foreach ($mp_ed as &$item){
+                        $item['name'] = Yii::t('app', $item['name']);
+                    }
                     echo $form->field($catalogBaseGoods, 'ed')->widget(Select2::classname(), [
                         'model' => $catalogBaseGoods->ed,
-                        'data' => ArrayHelper::map(\common\models\MpEd::find()->asArray()->all(), 'name', 'name'),
+                        'data' => ArrayHelper::map($mp_ed, 'name', 'name'),
                         'options' => ['placeholder' => Yii::t('app', 'franchise.views.catalog.choose_two', ['ru'=>'Выберите...'])],
                         'theme' => Select2::THEME_DEFAULT,
                         'pluginOptions' => [

@@ -151,6 +151,9 @@ Modal::end();
 
 $mped = \yii\helpers\ArrayHelper::getColumn(common\models\MpEd::find()->all(), 'name');
 array_unshift($mped,"");
+foreach ($mped as &$item){
+    $item = Yii::t('app', $item);
+}
 $mped = json_encode($mped, JSON_UNESCAPED_UNICODE);
 
 $supplierStartCatalogCreateUrl = \yii\helpers\Url::to(['vendor/supplier-start-catalog-create']);

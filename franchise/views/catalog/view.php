@@ -126,7 +126,7 @@ $grid = [
         'label' => Yii::t('app', 'franchise.views.catalog.category_three', ['ru'=>'Категория']),
         'value' => function ($data) {
             $data['category_id'] == 0 ? $category_name = '' :
-                            $category_name = \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name;
+                            $category_name = Yii::t('app', \common\models\MpCategory::find()->where(['id' => $data['category_id']])->one()->name);
             return $category_name;
         },
                 'contentOptions' => ['style' => 'vertical-align:middle;'],

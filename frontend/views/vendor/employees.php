@@ -149,7 +149,10 @@ $this->registerJs(
                         'profile.phone',
                         [
                             'attribute' => 'role.name',
-                            'label' => \Yii::t('app', 'frontend.views.vendor.empl.role', ['ru'=>'Роль'])
+                            'label' => \Yii::t('app', 'frontend.views.vendor.empl.role', ['ru'=>'Роль']),
+                            'value' => function($model){
+                                return Yii::t('app', $model['role']['name']);
+                            }
                         ],
                         [
                             'attribute' => 'status',

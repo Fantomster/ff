@@ -165,6 +165,9 @@ kartik\select2\Select2Asset::register($this);
                             [
                                 'attribute' => 'categoryName.name',
                                 'label' => Yii::t('app', 'franchise.views.site.request.category', ['ru'=>'Категория']),
+                                'value' => function ($data) {
+                                    return Yii::t('app', $data['categoryName']['name']);
+                                },
                             ],
                             'amount',
                             'comment',

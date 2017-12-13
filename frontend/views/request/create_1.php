@@ -225,10 +225,14 @@ $(this).next().toggle(Boolean($(this).val()));
 ",yii\web\View::POS_END);
 ?>
             <h5><?= Yii::t('message', 'frontend.views.request.category_two', ['ru'=>'Выберите категорию товара']) ?><span style="font-size:24px;color:#dd4b39;margin-left:5px" title="<?= Yii::t('message', 'frontend.views.request.required_field', ['ru'=>'Обязательное поле']) ?>">*</span></h5>
-            <?php 
+            <?php
+            $mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name');
+            foreach ($mpCat as &$item){
+                $item['name'] = Yii::t('app', $item);
+            }
             echo $form->field($request, 'category',['template'=>'{input}{error}'])->widget(Select2::classname(), [
                 'model'=>$request->category,
-                'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
+                'data' => $mpCat,
                 'options' => ['placeholder' => Yii::t('message', 'frontend.views.request.meat', ['ru'=>'Мясо'])],
                 'pluginOptions' => [
                     'allowClear' => true

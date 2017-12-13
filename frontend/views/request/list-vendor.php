@@ -123,10 +123,15 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
               </div>
               <div class="col-xs-12 col-sm-12 col-md-6 col-lg-12">
                     <?= Html::label(Yii::t('message', 'frontend.views.request.category', ['ru'=>'Категория']), null, ['class' => 'label','style'=>'color:#555']) ?>
+                    <?php
+                    $mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name');
+                    foreach ($mpCat as &$item){
+                        $item['name'] = Yii::t('app', $item);
+                    }; ?>
                     <?=Select2::widget([
                         'name' => 'category',
                         'value' => '',
-                        'data' => ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name'),
+                        'data' => $mpCat,
                         'options' => ['id'=>'category','multiple' => false, 'placeholder' => Yii::t('message', 'frontend.views.request.product_category', ['ru'=>'Категория товара'])],
                         'pluginOptions' => [
                             'allowClear' => true

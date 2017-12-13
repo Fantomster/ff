@@ -107,7 +107,7 @@ class Role extends \amnah\yii2\user\models\Role {
                 $models = static::find()->all();
             }
             foreach ($models as $model) {
-                $dropdown[$model->id] = $model->name;
+                $dropdown[$model->id] = \Yii::t('app', $model->name);
             }
         }
         return $dropdown;

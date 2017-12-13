@@ -664,6 +664,9 @@ class CatalogController extends DefaultController
         $sql = "SELECT id, name FROM mp_country WHERE name = \"Россия\"
 	UNION SELECT id, name FROM mp_country WHERE name <> \"Россия\"";
         $countrys = \Yii::$app->db->createCommand($sql)->queryAll();
+        foreach ($countrys as &$country){
+            $country['name'] = Yii::t('app', $country['name']);
+        }
         if (!empty($catalogBaseGoods->category_id)) {
             $catalogBaseGoods->sub1 = \common\models\MpCategory::find()->select(['parent'])->where(['id' => $catalogBaseGoods->category_id])->one()->parent;
             $catalogBaseGoods->sub2 = $catalogBaseGoods->category_id;
@@ -715,7 +718,7 @@ class CatalogController extends DefaultController
                     $id1 = $params[0]; // get the value of 1
                     $id2 = $params[1]; // get the value of 2
                     foreach ($list as $i => $cat) {
-                        $out[] = ['id' => $cat['id'], 'name' => $cat['name']];
+                        $out[] = ['id' => $cat['id'], 'name' => Yii::t('app', $cat['name'])];
                         if ($cat['id'] == $id1) {
                             $selected = $cat['id'];
                         }

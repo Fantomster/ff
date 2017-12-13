@@ -93,7 +93,7 @@ $this->registerCss('
             [
             'label'=>Yii::t('app', 'franchise.views.catalog.newcatalog.category', ['ru'=>'Категория']),
             'value'=>function ($data) {
-                        $data['category_id']==0 ? $category_name='':$category_name=\common\models\MpCategory::find()->where(['id'=>$data['category_id']])->one()->name;
+                        $data['category_id']==0 ? $category_name='':Yii::t('app', $category_name=\common\models\MpCategory::find()->where(['id'=>$data['category_id']])->one()->name);
                             return $category_name;
                         }
             ],        

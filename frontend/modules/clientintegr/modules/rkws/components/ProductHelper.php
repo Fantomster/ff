@@ -200,8 +200,8 @@ class ProductHelper extends AuthHelper {
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'TASK TMODEL NOT FOUND.!' . $cmdguid . '!' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
 
-            echo "Не найдена задача с id: ".$cmdguid;
-            echo $array[1]['product_rid'];
+            echo "Не найдена задача с id: ".$cmdguid."||";
+            echo $array[1]['product_rid']."||";
             exit;
         }
 

@@ -115,6 +115,10 @@ class SiteController extends Controller {
         return $this->render('about');
     }
 
+    public function actionPayment() {
+        return $this->render('payment');
+    }
+
     public function actionContacts() {
         return $this->render('contacts');
     }

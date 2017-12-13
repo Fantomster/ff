@@ -201,6 +201,7 @@ class ProductHelper extends AuthHelper {
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
 
             echo "Не найдена задача с id: ".$cmdguid;
+            echo $array[1]['product_rid'];
             exit;
         }
 
@@ -217,7 +218,7 @@ class ProductHelper extends AuthHelper {
 
         // Заполнение номенклатуры
 
-        if (!empty($array[1]['group_rid'])) {
+        if (!empty($array[1]['product_rid'])) {
 
         $icount = 0;
 
@@ -228,7 +229,8 @@ class ProductHelper extends AuthHelper {
                 ->andWhere('rid = :rid', [':rid' => $a['product_rid']])
                 ->andWhere('unit_rid = :unit_rid', [':unit_rid' => $a['unit_rid']])
                 ->one();
-            if (!$checks) {
+
+            if ($checks == null) {
 
                 $amodel = new RkProduct();
 

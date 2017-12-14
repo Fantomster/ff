@@ -2,6 +2,7 @@
 
 namespace frontend\modules\clientintegr\modules\rkws\components;
 
+use api\common\models\RkDicconst;
 use yii;
 use api\common\models\RkAccess;
 use api\common\models\RkSession;
@@ -10,6 +11,7 @@ use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkProduct;
 use api\common\models\RkDic;
+
 
 /* 
  * To change this license header, choose License Headers in Project Properties.
@@ -193,12 +195,13 @@ class ProductHelper extends AuthHelper {
             file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', print_r($getr, true), FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', print_r($array, true), FILE_APPEND);
+        //    file_put_contents('runtime/logs/callback.log', print_r($array, true), FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'TASK TMODEL NOT FOUND.!' . $cmdguid . '!' . PHP_EOL, FILE_APPEND);
             file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
 
-            echo "Не найдена задача с id: ".$cmdguid;
+            echo "Не найдена задача с id: (".$cmdguid.")";
+           // echo $array[1]['product_rid']."||";
             exit;
         }
 
@@ -215,7 +218,7 @@ class ProductHelper extends AuthHelper {
 
         // Заполнение номенклатуры
 
-        if (!empty($array[1]['group_rid'])) {
+        if (isset($array[1]['product_rid'])) {
 
         $icount = 0;
 
@@ -226,7 +229,8 @@ class ProductHelper extends AuthHelper {
                 ->andWhere('rid = :rid', [':rid' => $a['product_rid']])
                 ->andWhere('unit_rid = :unit_rid', [':unit_rid' => $a['unit_rid']])
                 ->one();
-            if (!$checks) {
+
+            if ($checks == null) {
 
                 $amodel = new RkProduct();
 
@@ -249,12 +253,16 @@ class ProductHelper extends AuthHelper {
              $icount++;
           }
                         echo "Данные номенклатуры успешно распознаны и сохранены. (Count: ".sizeof($array).")";
+                        file_put_contents('runtime/logs/callback.log',PHP_EOL.' Продуктов сохранено:'.sizeof($array).PHP_EOL,FILE_APPEND);
         } else {
-            if (isset($array['code']))
-
+            if (isset($array['code'])) {
                 echo "Код ошибки принят и сохранен.";
-            else
+                file_put_contents('runtime/logs/callback.log',PHP_EOL.'Код ошибки принят и сохранен'.PHP_EOL,FILE_APPEND);
+            } else {
                 echo "Неизвестная ошибка";
+                file_put_contents('runtime/logs/callback.log',PHP_EOL.'Неизвестная ошибка'.PHP_EOL,FILE_APPEND);
+            }
+
         }
 
 

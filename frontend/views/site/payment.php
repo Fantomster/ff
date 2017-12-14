@@ -1,4 +1,10 @@
+<?php
+/* @var $this yii\web\View */
 
+use yii\helpers\Html;
+
+$this->title = 'Оплата';
+?>
 <section class="tarif">
     <div class="p_wrapper">
         <h2 class="block_title">ПОДКЛЮЧЕНИЕ И АБОНЕНТСКАЯ ПЛАТА</h2>

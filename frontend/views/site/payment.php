@@ -3,7 +3,7 @@
 
 use yii\helpers\Html;
 
-$this->title = 'Оплата';
+$this->title = 'Тарифы';
 ?>
 <section class="tarif">
     <div class="p_wrapper">
@@ -16,7 +16,7 @@ $this->title = 'Оплата';
                 <div class="tarif_coll">
                     <div class="tarif__item">
                         <div class="tarif__item__head">
-                            <span class="paket">тарификация</span>
+                            <span class="paket">тариф</span>
                             <span class="name">РЕСТОРАН</span>
                         </div>
                         <div class="tarif__item__row">
@@ -26,7 +26,7 @@ $this->title = 'Оплата';
                         </div>
                         <div class="tarif__item__row">
                             <span class="price_text">абонентская плата</span>
-                            <span class="srok">период 30 календарных дней</span>
+                            <span class="srok">один календарный месяц</span>
                             <span class="price">2 940 Р</span>
                         </div>
                     </div>
@@ -35,7 +35,7 @@ $this->title = 'Оплата';
                 <div class="tarif_coll">
                     <div class="tarif__item">
                         <div class="tarif__item__head">
-                            <span class="paket">тарификация</span>
+                            <span class="paket">тариф</span>
                             <span class="name">ПОСТАВЩИК</span>
                         </div>
                         <div class="tarif__item__row">
@@ -45,7 +45,7 @@ $this->title = 'Оплата';
                         </div>
                         <div class="tarif__item__row">
                             <span class="price_text">абонентская плата</span>
-                            <span class="srok">период 30 календарных дней</span>
+                            <span class="srok">один календарный месяц</span>
                             <span class="price">5 000 Р</span>
                         </div>
                     </div>

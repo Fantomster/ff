@@ -11,7 +11,6 @@ use common\models\User;
 use api\common\models\RkTasks;
 use api\common\models\RkProduct;
 use api\common\models\RkDic;
-use modules\clientintegr\modules\rkws\components\DebugHelper;
 
 
 /* 
@@ -89,14 +88,15 @@ class ProductHelper extends AuthHelper
 
     }
 
+    /**
+     *
+     */
     public function callback()
     {
 
         $array = [];
 
         ini_set('MAX_EXECUTION_TIME', -1);
-
-        $org = User::findOne(Yii::$app->user->id)->organization_id;
 
         $getr = Yii::$app->request->getRawBody();
 
@@ -106,16 +106,18 @@ class ProductHelper extends AuthHelper
         $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-';
 
         $isLog = new DebugHelper();
-        $isLog->setLogFile('runtime/logs/callback_' . $org . '.log');
 
+        $isLog->setLogFile('../runtime/logs/callback_prod_' . date("Y-m-d_H-i-s").'_'.$cmdguid . '.log');
+
+        $isLog->logAppendString('=========================================');
         $isLog->logAppendString(date("Y-m-d H:i:s") . ' : Product callback received ');
         $isLog->logAppendString('CMDGUID: ' . $cmdguid . ' || POSID: ' . $posid);
         $isLog->logAppendString('=========================================');
-        $isLog->logAppendString(\yii\helpers\StringHelper::truncate($getr, 300, '...'));
+        $isLog->logAppendString(substr($getr, 0, 300));
 
     // Checking if the Task is active
 
-    $tmodel = RkTasks::find()->andWhere('guid= :guid', [':guid' => $cmdguid])->one();
+        $tmodel = RkTasks::find()->andWhere('guid= :guid', [':guid' => $cmdguid])->one();
 
         if (!$tmodel) {
             $isLog->logAppendString('ERROR:: Task with guid ' . $cmdguid . 'has not been found!!');
@@ -140,7 +142,7 @@ class ProductHelper extends AuthHelper
 
     if (isset($array['code'])) {  // We got external error
 
-        $tmodel->intstatus_id = 2;
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_EXTERROR;
         $tmodel->wsstatus_id = $array['code'];
         $tmodel->retry = $tmodel->retry + 1;
         $tmodel->rcount = 0;
@@ -157,7 +159,7 @@ class ProductHelper extends AuthHelper
 
     }
 
-    // We got no errors. Try to parse XML with no external errors
+        // We got no errors. Try to parse XML with no external errors
 
         $gcount = 0;
 
@@ -209,16 +211,15 @@ class ProductHelper extends AuthHelper
             $isLog->logAppendString('ERROR:: Task after XML parsing cannot be saved!!');
             exit;
         } else {
-            $isLog->logAppendString('Task after XML successfully saved!');
-            exit;
+            $isLog->logAppendString('SUCCESS:: Task after XML successfully saved!');
         }
 
         // Заполнение номенклатуры
 
         $icount = 0;
+        $scount = 0;
 
         foreach ($array as $a) {
-
 
             $checks = RkProduct::find()->andWhere('acc = :acc', [':acc' => $acc])
                 ->andWhere('rid = :rid', [':rid' => $a['product_rid']])
@@ -245,13 +246,17 @@ class ProductHelper extends AuthHelper
                     $isLog->logAppendString('ERROR:: Product ' . $amodel->rid . 'cannot be saved - ' . $er);
                 }
 
+                $scount++;
             }
             $icount++;
         }
 
-             $isLog->logAppendString('SUCCESS:: Products saved: ' . $icount);
+        $isLog->logAppendString('SUCCESS:: Products saved: ' . $scount);
 
-       
+        $tmodel->rcount = $icount;
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_DICOK;
+
+
     // Обновление словаря RkDic
     
         $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
@@ -261,9 +266,11 @@ class ProductHelper extends AuthHelper
             exit;
         }
 
-            $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-            $rmodel->dicstatus_id = 6;
-            $rmodel->obj_count = isset($icount) ? $icount : 0;
+        $fcount = RkProduct::find()->andWhere('acc= :org_id', [':org_id' => $acc])->count('*');
+
+        $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $rmodel->dicstatus_id = 6;
+        $rmodel->obj_count = isset($fcount) ? $fcount : 0;
     
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
@@ -271,6 +278,17 @@ class ProductHelper extends AuthHelper
                 exit;
             } else $isLog->logAppendString('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
 
+
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_FULLOK;
+
+        if (!$tmodel->setCallbackEnd()) {
+            $isLog->logAppendString('ERROR:: Task status THE END cannot be saved!!');
+            exit;
+        } else {
+            $isLog->logAppendString('SUCCESS:: All operations status is looking good');
+            echo 'SUCCESS:: All operations status is looking good';
+            exit;
+        }
 
     }
 }

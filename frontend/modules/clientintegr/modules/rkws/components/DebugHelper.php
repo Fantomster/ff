@@ -6,7 +6,7 @@
  * Time: 21:13
  */
 
-namespace modules\clientintegr\modules\rkws\components;
+namespace frontend\modules\clientintegr\modules\rkws\components;
 
 use common\models\User;
 
@@ -22,7 +22,7 @@ class DebugHelper
 
     public function logAppendString($text) {
 
-        file_put_contents($this->_logfile, PHP_EOL . $text. PHP_EOL, FILE_APPEND);
+        file_put_contents($this->_logfile, $text. PHP_EOL, FILE_APPEND);
 
     }
 }

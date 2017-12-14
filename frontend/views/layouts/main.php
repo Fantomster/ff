@@ -290,6 +290,7 @@ $this->registerJs($js, \yii\web\View::POS_READY);
                                     <li><?= Html::a('Для поставщиков', ["/site/supplier"]) ?></li>
                                     <li><?= Html::a('О компании', ["/site/about"]) ?></li>
                                     <li><?= Html::a('Контакты', ["/site/contacts"]) ?></li>
+                                    <li><?= Html::a('Тарифы', ["/site/payment"]) ?></li>
                                 </ul>
                             </div>	
                         </div>

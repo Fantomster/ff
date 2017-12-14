@@ -165,7 +165,7 @@ $form = ActiveForm::begin([
     <div class="row">
         <div class="col-md-12 text-center">
             <h5 class="sub-h3-text">Вы можете разместить Ваш товар в Маркете
-                <br><small>Товар будет доступен на площадке MixMarket в течении 2 минут</small><h5>
+                <br><small>Товар будет доступен на площадке MixMarket в течение 2 минут</small><h5>
                     </div>
                     </div>
                     <div class="row">

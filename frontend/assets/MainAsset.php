@@ -14,6 +14,7 @@ class MainAsset extends AssetBundle {
     public $css = [
 //        'css/style.css',
         'css/media.css', 
+        'css/payment.css',
         'https://fonts.googleapis.com/css?family=Open+Sans:300,400'
     ];
     public $depends = [

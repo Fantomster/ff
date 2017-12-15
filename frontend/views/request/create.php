@@ -228,7 +228,7 @@ $(this).next().toggle(Boolean($(this).val()));
             <?php
             $mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name');
             foreach ($mpCat as &$item){
-                $item['name'] = Yii::t('app', $item);
+                $item = Yii::t('app', $item);
             }
             echo $form->field($request, 'category',['template'=>'{input}{error}'])->widget(Select2::classname(), [
                 'model'=>$request->category,

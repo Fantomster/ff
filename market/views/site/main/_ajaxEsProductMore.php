@@ -30,7 +30,7 @@ foreach ($pr as $row) {
                         <a href="<?= Url::to(['/site/product', 'id' => $row->product_id]); ?>"><h3><?= Html::decode(Html::decode($row->product_name)) ?></h3></a>
                     </div>
                     <div class="product-category">
-                        <h5><?= $row->product_category_name ?>/<?= $row->product_category_sub_name; ?></h5>
+                        <h5><?= Yii::t('app', $row->product_category_name) ?>/<?= Yii::t('app', $row->product_category_sub_name); ?></h5>
                     </div>
                     <div class="product-company">
                         <a href="<?= Url::to(['/site/supplier', 'id' => $row->product_supp_id]); ?>">

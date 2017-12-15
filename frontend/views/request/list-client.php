@@ -72,7 +72,7 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
     <h1>
         <i class="fa fa-paper-plane"></i> <?= Yii::t('message', 'frontend.views.request.req_list_three', ['ru'=>'Список заявок']) ?>
         <small><?= Yii::t('message', 'frontend.views.request.set_req', ['ru'=>'Разместите заявку и ее увидят все поставщики системы MixCart']) ?></small>
-    </h1>   
+    </h1>
     <?=
     Breadcrumbs::widget([
         'options' => [
@@ -123,7 +123,7 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
 <?php
 echo $this->render("create", compact('request', 'organization', 'profile'));
 Modal::end();
-?>   
+?>
                             </div>
                         </div>
                     </div>
@@ -142,7 +142,7 @@ Modal::end();
                                     'timeout' => 10000,
                                     'enablePushState' => false,
                                 ]);
-                                ?> 
+                                ?>
 
                                 <?=
                                 ListView::widget([
@@ -335,4 +335,3 @@ $("#create").on("shown.bs.modal", function () {
 });
 ', yii\web\View::POS_END);
 
-        

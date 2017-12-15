@@ -421,8 +421,8 @@
 "app"|"common.mail.request_set_resp_mail.go_to"|"en"|"Go to request"
 "app"|"common.mail.request_set_resp_mail.go_to"|"es"|"Ir a la orden"
 "app"|"common.mail.request_set_resp_mail.go_to"|"ru"|"Перейти к заявке"
-"app"|"common.mail.view_grid.article"|"en"|NULL
-"app"|"common.mail.view_grid.article"|"es"|NULL
+"app"|"common.mail.view_grid.article"|"en"|"Note:"
+"app"|"common.mail.view_grid.article"|"es"|"Nota:"
 "app"|"common.mail.view_grid.article"|"ru"|"Заметка: "
 "app"|"common.mail.view_grid.art"|"en"|"Order code:"
 "app"|"common.mail.view_grid.art"|"es"|"Referencia:"
@@ -4682,8 +4682,9 @@
 "message"|"frontend.controllers.order.change"|"en"|"<br/>changed quantity {prod} from {oldQuan} {ed} to"
 "message"|"frontend.controllers.order.change"|"es"|"<br/>ha modificado el número de {prod} de {oldQuan} {ed} por "
 "message"|"frontend.controllers.order.change"|"ru"|"<br/>изменил количество {prod} с {oldQuan} {ed} на "
-"message"|"frontend.controllers.order.change_price"|"en"|NULL
-"message"|"frontend.controllers.order.change_price"|"es"|NULL
+"message"|"frontend.controllers.order.change_price"|"en"|"<br/> changed price {prod} from {productPrice} {currencySymbol} on "
+"message"|"frontend.controllers.order.change_price"|"es"|"<br/> precio cambiado {prod} de
+ {productPrice} {currencySymbol} en "
 "message"|"frontend.controllers.order.change_price"|"ru"|"<br/>изменил цену {prod} с {productPrice} {currencySymbol} на "
 "message"|"frontend.controllers.order.cancelled_order_two"|"en"|"canceled the order!"
 "message"|"frontend.controllers.order.cancelled_order_two"|"es"|"ha cancelado el pedido!"
@@ -6728,8 +6729,8 @@
 "message"|"frontend.views.vendor.main_catalog"|"en"|"Main catalogue"
 "message"|"frontend.views.vendor.main_catalog"|"es"|"Catálogo principal"
 "message"|"frontend.views.vendor.main_catalog"|"ru"|"Главный каталог"
-"message"|"frontend.views.vendor.currency"|"en"|NULL
-"message"|"frontend.views.vendor.currency"|"es"|NULL
+"message"|"frontend.views.vendor.currency"|"en"|"Currency of the catalog:"
+"message"|"frontend.views.vendor.currency"|"es"|"Moneda del catálogo:"
 "message"|"frontend.views.vendor.currency"|"ru"|"Валюта каталога:"
 "message"|"frontend.views.vendor.this_cat"|"en"|"This catalogue includes all your products available on MixCart"
 "message"|"frontend.views.vendor.this_cat"|"es"|"Este catálogo contiene todos tus productos disponibles en MixCart"
@@ -6974,8 +6975,8 @@
 "message"|"frontend.views.vendor.search_six"|"en"|"Search"
 "message"|"frontend.views.vendor.search_six"|"es"|"Buscar"
 "message"|"frontend.views.vendor.search_six"|"ru"|"Поиск"
-"message"|"frontend.views.vendor.import_six"|"en"|NULL
-"message"|"frontend.views.vendor.import_six"|"es"|NULL
+"message"|"frontend.views.vendor.import_six"|"en"|"Download catalog (.xls)"
+"message"|"frontend.views.vendor.import_six"|"es"|"Descargue el catálogo (.xls)"
 "message"|"frontend.views.vendor.import_six"|"ru"|"Загрузить каталог (.xls)"
 "message"|"frontend.views.vendor.change_curr_five"|"en"|"Change currency:"
 "message"|"frontend.views.vendor.change_curr_five"|"es"|"Cambiar moneda:"
@@ -7745,8 +7746,8 @@
 "message"|"frontend.views.vendor.regions"|"en"|"Regions of delivery"
 "message"|"frontend.views.vendor.regions"|"es"|"Regiones de entrega"
 "message"|"frontend.views.vendor.regions"|"ru"|"Регионы доставки"
-"message"|"frontend.views.vendor.delivery_regions"|"en"|NULL
-"message"|"frontend.views.vendor.delivery_regions"|"es"|NULL
+"message"|"frontend.views.vendor.delivery_regions"|"en"|"Add the regions to which you deliver"
+"message"|"frontend.views.vendor.delivery_regions"|"es"|"Agregue las regiones a las que entrega"
 "message"|"frontend.views.vendor.delivery_regions"|"ru"|"Добавьте регионы в которые Вы доставляете"
 "message"|"frontend.views.vendor.search_seven"|"en"|"Search"
 "message"|"frontend.views.vendor.search_seven"|"es"|"Buscar"
@@ -7913,8 +7914,8 @@
 "message"|"frontend.views.vendor.good"|"en"|"Product"
 "message"|"frontend.views.vendor.good"|"es"|"Producto"
 "message"|"frontend.views.vendor.good"|"ru"|"Товар"
-"message"|"frontend.views.vendor.total"|"en"|NULL
-"message"|"frontend.views.vendor.total"|"es"|NULL
+"message"|"frontend.views.vendor.total"|"en"|"Total:"
+"message"|"frontend.views.vendor.total"|"es"|"TOTAL:"
 "message"|"frontend.views.vendor.total"|"ru"|"ИТОГО: "
 "message"|"frontend.views.vendor.total_two"|"en"|"Total"
 "message"|"frontend.views.vendor.total_two"|"es"|"Total"
@@ -8282,7 +8283,7 @@
 "message"|"frontend.views.order.var1"|"en"|"Unapplied changes!"
 "message"|"frontend.views.order.var1"|"es"|"¡Cambios no guardados!"
 "message"|"frontend.views.order.var1"|"ru"|"Несохраненные изменения!"
-"message"|"frontend.views.order.var2"|"en"|NULL
+"message"|"frontend.views.order.var2"|"en"|"You changed the order, but did not save the changes!"
 "message"|"frontend.views.order.var2"|"es"|"¡Cambiaste el pedido, pero no guardaste los cambios!"
 "message"|"frontend.views.order.var2"|"ru"|"Вы изменили заказ, но не сохранили изменения!"
 "message"|"frontend.views.order.var3"|"en"|"Leave"
@@ -8552,7 +8553,7 @@
 "message"|"frontend.views.order.unsaved_changes"|"en"|"Unapplied changes!"
 "message"|"frontend.views.order.unsaved_changes"|"es"|"¡Cambios no guardados!"
 "message"|"frontend.views.order.unsaved_changes"|"ru"|"Несохраненные изменения!"
-"message"|"frontend.views.order.not_saved_changes"|"en"|NULL
+"message"|"frontend.views.order.not_saved_changes"|"en"|"You changed the order, but did not save the changes!"
 "message"|"frontend.views.order.not_saved_changes"|"es"|"¡Cambiaste el pedido, pero no guardaste los cambios!"
 "message"|"frontend.views.order.not_saved_changes"|"ru"|"Вы изменили заказ, но не сохранили изменения!"
 "message"|"frontend.views.order.out"|"en"|"Leave"
@@ -8708,8 +8709,8 @@
 "message"|"frontend.views.order.including_delivery"|"en"|"including delivery"
 "message"|"frontend.views.order.including_delivery"|"es"|"incluyendo la entrega"
 "message"|"frontend.views.order.including_delivery"|"ru"|"включая доставку"
-"message"|"frontend.views.order.creating_date_three"|"en"|NULL
-"message"|"frontend.views.order.creating_date_three"|"es"|NULL
+"message"|"frontend.views.order.creating_date_three"|"en"|"date of creation"
+"message"|"frontend.views.order.creating_date_three"|"es"|"fecha de creación"
 "message"|"frontend.views.order.creating_date_three"|"ru"|"дата создания "
 "message"|"frontend.views.order.set_order"|"en"|"Place order"
 "message"|"frontend.views.order.set_order"|"es"|"Publicar un pedido"
@@ -9458,8 +9459,9 @@
 "app"|"frontend.widgets.cart.views.seek"|"en"|NULL
 "app"|"frontend.widgets.cart.views.seek"|"es"|NULL
 "app"|"frontend.widgets.cart.views.seek"|"ru"|"Ищите кнопки <span>&laquo;Купить&raquo;</span> на нашем сайте. Они рядом  с товарами, которые вы хотите приобрести.<br><br>Вы можете начать с выбора товаров в нашем {cat}"
-"app"|"frontend.controllers.request.mix"|"en"|NULL
-"app"|"frontend.controllers.request.mix"|"es"|NULL
+"app"|"frontend.controllers.request.mix"|"en"|"mixcart.ru - request №%s
+"
+"app"|"frontend.controllers.request.mix"|"es"|"mixcart.ru - orden №%s"
 "app"|"frontend.controllers.request.mix"|"ru"|"mixcart.ru - заявка №%s"
 "app"|"frontend.controllers.request.mix_two"|"en"|NULL
 "app"|"frontend.controllers.request.mix_two"|"es"|NULL
@@ -9567,8 +9569,8 @@
 "app"|"frontend.views.order.guides.rename_five"|"en"|NULL
 "app"|"frontend.views.order.guides.rename_five"|"es"|NULL
 "app"|"frontend.views.order.guides.rename_five"|"ru"|"Переименовать"
-"app"|"frontend.views.order.view_grid.note"|"en"|NULL
-"app"|"frontend.views.order.view_grid.note"|"es"|NULL
+"app"|"frontend.views.order.view_grid.note"|"en"|"Note"
+"app"|"frontend.views.order.view_grid.note"|"es"|"Nota"
 "app"|"frontend.views.order.view_grid.note"|"ru"|"Заметка"
 "app"|"frontend.views.order.view_grid.good."|"en"|"Product"
 "app"|"frontend.views.order.view_grid.good."|"es"|"Producto"
@@ -12677,3 +12679,24 @@
 "app"|"Instructions to reset your password have been sent"|"en"|"Instructions to reset your password have been sent"
 "app"|"Instructions to reset your password have been sent"|"es"|"Se han enviado instrucciones para restablecer su contraseña"
 "app"|"Instructions to reset your password have been sent"|"ru"|"Вам выслана иснтрукция по восстановлению пароля"
+"app"|"включая доставку"|"en"|"including delivery"
+"app"|"включая доставку"|"es"|"incluyendo envío"
+"app"|"включая доставку"|"ru"|"включая доставку"
+"app"|"Cохранить"|"en"|"Save"
+"app"|"Cохранить"|"es"|"Guardar"
+"app"|"Cохранить"|"ru"|"Cохранить"
+"app"|"Никогда"|"en"|"Never"
+"app"|"Никогда"|"es"|"Nunca"
+"app"|"Никогда"|"ru"|"Никогда"
+"app"|"Все"|"en"|"All"
+"app"|"Все"|"es"|"Todo"
+"app"|"Все"|"ru"|"Все"
+"app"|"Готово!"|"en"|"Done!"
+"app"|"Готово!"|"es"|"Hecho!"
+"app"|"Готово!"|"ru"|"Готово!"
+"app"|"Ошибка!"|"en"|"Error!"
+"app"|"Ошибка!"|"es"|"Error!"
+"app"|"Ошибка!"|"ru"|"Ошибка!"
+"app"|"Пользователь обновлен!"|"en"|"¡Usuario actualizado!"
+"app"|"Пользователь обновлен!"|"es"|"User updated!"
+"app"|"Пользователь обновлен!"|"ru"|"Пользователь обновлен!"

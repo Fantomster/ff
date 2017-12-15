@@ -75,7 +75,7 @@ Modal::begin([
                             <?= Html::a('<h4 class="m-b-xs text-info">' . Yii::t('message', 'frontend.views.vendor.main_catalog', ['ru'=>'Главный каталог']) . ' </h4>', ['vendor/basecatalog', 'id' => $arrBaseCatalogs->id]) ?>
 
                             <p class="small">
-                                <?= Yii::t('message', 'frontend.views.vendor.currency', ['ru'=>'Валюта каталога:']) ?> <?php  echo $catCurrency->text.' (' . $catCurrency->iso_code. ')'; ?>
+                                <?= Yii::t('message', 'frontend.views.vendor.currency', ['ru'=>'Валюта каталога:']) ?> <?php  echo Yii::t('app', $catCurrency->text).' (' . $catCurrency->iso_code. ')'; ?>
 								 <br>
                             	<?= Yii::t('message', 'frontend.views.vendor.this_cat', ['ru'=>'Этот каталог содержит все ваши продукты доступные на MixCart']) ?>
                             </p>

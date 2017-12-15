@@ -35,10 +35,10 @@ $this->title = Yii::t('message', 'frontend.views.request.request_no_two', ['ru'=
 </section>
 <section  class="content-header">
   <div class="row">
-    <?php 
+    <?php
         Pjax::begin([
-          'id' => 'pjax-callback', 
-          'timeout' => 10000, 
+          'id' => 'pjax-callback',
+          'timeout' => 10000,
           'enablePushState' => false,
           ]);
       ?>
@@ -60,8 +60,8 @@ $this->title = Yii::t('message', 'frontend.views.request.request_no_two', ['ru'=
             <h6><b><?= Yii::t('message', 'frontend.views.request.order_frequency', ['ru'=>'Периодичность заказа:']) ?></b> <?=$request->regularName?></h6>
             <h6><b><?= Yii::t('message', 'frontend.views.request.payment_variant', ['ru'=>'Способ оплаты:']) ?></b> <?=$request->paymentMethodName ?></h6>
             <div class="req-respons"><?= Yii::t('message', 'frontend.views.request.executor_two', ['ru'=>'Исполнитель:']) ?>
-                <?=$request->responsible_supp_org_id ? 
-                      '<span style="color:#84bf76;text-decoration:underline">' . $request->vendor->name . '</span>' : 
+                <?=$request->responsible_supp_org_id ?
+                      '<span style="color:#84bf76;text-decoration:underline">' . $request->vendor->name . '</span>' :
                       '<span style="color:#ccc;">' . Yii::t('message', 'frontend.views.request.not_set', ['ru'=>'не назначен']) . ' </span>';
                 ?>
             </div>
@@ -82,7 +82,7 @@ $this->title = Yii::t('message', 'frontend.views.request.request_no_two', ['ru'=
               <h3 class="text-success"><?=$author->name?></h3>
               <h4><?=$author->address?> <small><?= Yii::t('message', 'frontend.views.request.change_address', ['ru'=>'Адрес можно изменить в разделе "Настройки"']) ?></small></h4>
               <div id="map"></div>
-              
+
           </div>
 	  <div class="col-md-12">
 	    <hr>
@@ -170,9 +170,9 @@ swal({
   }
 }).then(function (result){
     if (result.value.success === true) {
-        swal("Готово!",eNames["end"],"success");
+        swal("' . Yii::t('message', 'Готово!') . ' ",eNames["end"],"success");
     } else {
-        swal("Ошибка!",result.value.error,"error");
+        swal("' . Yii::t('message', 'Ошибка!') . ' ",result.value.error,"error");
     }
 });
 });

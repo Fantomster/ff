@@ -324,7 +324,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                         'data-url' => Url::to(['/order/ajax-delete-order', 'all' => true]),
                     ]);
                     ?>
-                    <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> Сохранить</span></button>
+                    <button class="btn btn-success pull-right" style="display:none;" id="saveChanges"><i class="fa fa-save" style="margin-top:-3px;"></i><span class="hidden-sm hidden-xs"> <?= Yii::t('app', 'Сохранить') ?></span></button>
                 </div>
             </div>
         </div>
@@ -422,7 +422,7 @@ Pjax::begin(['enablePushState' => false, 'id' => 'checkout', 'timeout' => 30000]
                                 <?php } elseif ($forFreeDelivery == 0) { ?>
                                     <p><?= Yii::t('message', 'frontend.views.order.free_delivery', ['ru'=>'бесплатная доставка!']) ?></p>
                                 <?php } else { ?>
-                                    <p>включая доставку</p><p><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
+                                    <p><?= Yii::t('app', 'включая доставку') ?></p><p><?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
                                 <?php } ?>
                                 <?=
                                 Html::button(Yii::t('message', 'frontend.views.order.make_order_two', ['ru'=>'Оформить заказ']), [

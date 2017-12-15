@@ -17,23 +17,15 @@ $count_products_from_mp = CatalogBaseGoods::find()
                 ->andWhere('category_id is not null')
                 ->count();
 $left_menu_categorys     = \common\models\MpCategory::getDb()->cache(function ($db) {
-    $cat = \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
-    foreach ($cat as &$item){
-        $item['name'] = Yii::t('app', $item['name']);
-    }
-    return $cat;
+    return \common\models\MpCategory::find()->select('id,name,parent')->where(['parent'=>NULL])->asArray()->all();
 });
 //$left_menu_categorys_sub = \common\models\MpCategory::getDb()->cache(function ($db) {
 //    return \common\models\MpCategory::find()->where('parent is not null')->all();
 //});
-$cat = \common\models\MpCategory::find()->where('parent is not null')->all();;
-foreach ($cat as &$item){
-    $item['name'] = Yii::t('app', $item['name']);
-}
-$left_menu_categorys_sub = $cat;
+$left_menu_categorys_sub = \common\models\MpCategory::find()->where('parent is not null')->all();
 ?>
 <style>
-.panel-group {margin-bottom: 0px;overflow: hidden;}  
+.panel-group {margin-bottom: 0px;overflow: hidden;}
 .panel-group .panel{border-radius:0;border:0;border-bottom:1px solid #ddd}
 .panel-body { padding:0px; }
 .panel-body table tr td span{ width:100%;display: block;padding-left: 25px;padding-top:10px;padding-bottom:7px;}
@@ -60,7 +52,7 @@ $left_menu_categorys_sub = $cat;
 <div class="row">
     <div class="col-md-12">
       <div class="panel-group" id="accordion">
-        <?php 
+        <?php
         $i = 0;
         foreach($left_menu_categorys as $row){
         $i++;
@@ -69,7 +61,7 @@ $left_menu_categorys_sub = $cat;
             <div class="panel-heading">
               <a data-toggle="collapse" data-parent="#accordion" href="#coll<?= $i ?>">
                 <h4 class="panel-title">
-                    <?=$row['name']?>
+                    <?=Yii::t('app', $row['name'])?>
                 </h4>
                 <span class="caret pull-right"></span>
               </a>
@@ -83,23 +75,23 @@ $left_menu_categorys_sub = $cat;
                     <table class="table">
                         <tr>
                             <td>
-                                <a href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row2->slug ]) ?>" title="<?=$row2->name ?>">
-                                <span><?=$row2->name ?></span>
+                                <a href="<?= \yii\helpers\Url::to(['site/category', 'slug' => $row2->slug ]) ?>" title="<?=Yii::t('app', $row2->name) ?>">
+                                <span><?=Yii::t('app', $row2->name) ?></span>
                               </a>
                             </td>
                         </tr>
                     </table>
                 </div>
-                <?php 
+                <?php
                     }
                 }
                 ?>
             </div>
         </div>
         <?php
-        } 
+        }
         ?>
       </div>
-      
+
     </div>
 </div>

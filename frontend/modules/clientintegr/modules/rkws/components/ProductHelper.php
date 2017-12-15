@@ -19,211 +19,207 @@ use api\common\models\RkDic;
  * and open the template in the editor.
  */
 
-class ProductHelper extends AuthHelper {
-    
-  //  const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/product";
-    
-    public function getProduct () {
-    if (!$this->Authorizer()) {
-       
-      echo "Can't perform authorization";
-      return;
-    }    
-    
-    $guid = UUID::uuid4();
+class ProductHelper extends AuthHelper
+{
 
-    $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
-          
-    $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="'.$guid.'" callback="'.Yii::$app->params['rkeepCallBackURL'].'/product'.'" timeout="3600">
-    <PARAM name="object_id" val="'.$this->restr->code.'" />
-    <PARAM name="goodgroup_rid" val="'.$defGoodGroup.'" />
+    //  const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/product";
+
+    public function getProduct()
+    {
+        if (!$this->Authorizer()) {
+
+            echo "Can't perform authorization";
+            return;
+        }
+
+        $guid = UUID::uuid4();
+
+        $defGoodGroup = RkDicconst::findOne(['denom' => 'defGoodGroup'])->getPconstValue();
+
+        $xml = '<?xml version="1.0" encoding="utf-8"?>
+    <RQ cmd="sh_get_goodgroups" tasktype="any_call" guid="' . $guid . '" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/product' . '" timeout="3600">
+    <PARAM name="object_id" val="' . $this->restr->code . '" />
+    <PARAM name="goodgroup_rid" val="' . $defGoodGroup . '" />
     <PARAM name="include_goods" val="1" />
-    </RQ>'; 
-       
-     $res = ApiHelper::sendCurl($xml,$this->restr);
-     
-     
-     $tmodel = new RkTasks();
-     
-     $tmodel->tasktype_id = 23;
-     $tmodel->acc = $this->org;
-     $tmodel->fid = 1;
-     $tmodel->guid = $res['respcode']['taskguid'];
-     $tmodel->fcode = $res['respcode']['code'];
-     $tmodel->version = $res['respcode']['version'];
-     $tmodel->isactive = 1;
-     $tmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
-     $tmodel->intstatus_id = 1; 
-     
-     if (!$tmodel->save()) {
-         echo "Ошибка валидации<br>";
-         var_dump($tmodel->getErrors());
-     }
-     
+    </RQ>';
+
+        $res = ApiHelper::sendCurl($xml, $this->restr);
+
+
+        $tmodel = new RkTasks();
+
+        $tmodel->tasktype_id = 23;
+        $tmodel->acc = $this->org;
+        $tmodel->fid = 1;
+        $tmodel->guid = $res['respcode']['taskguid'];
+        $tmodel->fcode = $res['respcode']['code'];
+        $tmodel->version = $res['respcode']['version'];
+        $tmodel->isactive = 1;
+        $tmodel->created_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $tmodel->intstatus_id = 1;
+
+        if (!$tmodel->save()) {
+            echo "Ошибка валидации<br>";
+            var_dump($tmodel->getErrors());
+        }
+
         // Обновление словаря RkDic
-    
-        $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$this->org])->andWhere('dictype_id = 3')->one();
-    
+
+        $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $this->org])->andWhere('dictype_id = 3')->one();
+
         if (!$rmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'RKDIC TMODEL NOT FOUND.' . PHP_EOL, FILE_APPEND);
+            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
 
         } else {
-            
-            $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
-            $rmodel->dicstatus_id= 2;
+
+            $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+            $rmodel->dicstatus_id = 2;
             $rmodel->obj_count = 0;
-    
+
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
-            } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
+            } else $er3 = "Данные справочника успешно сохранены.(ID:" . $rmodel->id . " )";
         }
-     
-    // var_dump($res);
-     
-     return true;
-    
+
+        // var_dump($res);
+
+        return true;
+
     }
-    
+
+    /**
+     *
+     */
     public function callback()
     {
 
-     ini_set('MAX_EXECUTION_TIME',-1);
+        $array = [];
 
-    $getr = Yii::$app->request->getRawBody();
+        ini_set('MAX_EXECUTION_TIME', -1);
 
-    
-    $myXML   = simplexml_load_string($getr);
-    $gcount = 0;        
-    
-    foreach ($myXML->ITEM as $goodsgroup) {
-            foreach($goodsgroup->attributes() as $c => $d) {
-                if ($c == 'rid') $grid=strval($d[0]);
-                if ($c == 'name') $grname=strval($d[0]);
-                if ($c == 'parent') $grparent=strval($d[0]);
-            }
-                foreach ($goodsgroup->GOODS_LIST as $glist) {
-                    
-                    foreach ($glist->ITEM as $item) {
-                        
-                        foreach($item->attributes() as $a => $b) {
-                            if ($a == 'rid') { $prid=strval($b[0]); }
-                            if ($a == 'name') { $prname=strval($b[0]); }
-                        }    
-                        
-                            foreach ($item->MUNITS->MUNIT as $unit) {
-                            $gcount++;
-                                $array[$gcount]['group_rid'] = $grid;
-                                $array[$gcount]['group_name'] = $grname;
-                                $array[$gcount]['group_parent'] = $grparent;
-                                $array[$gcount]['product_rid'] = $prid;
-                                $array[$gcount]['product_name'] = $prname;
-                                
-                                foreach($unit->attributes() as $e => $h) {
-                                    if ($e == 'rid') $array[$gcount]['unit_rid'] = strval($h[0]);
-                                    if ($e == 'name') $array[$gcount]['unit_name'] = strval($h[0]);
-                                }
-                                
-                            }
+        $getr = Yii::$app->request->getRawBody();
 
-                        }
-                        
-            }
-                                     
-                
-    }
+        $myXML = simplexml_load_string($getr);
 
+        $cmdguid = $myXML['cmdguid'] ? $myXML['cmdguid'] : $myXML['taskguid']; // Try to find guid in cmdguid or taskguid
+        $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-';
 
+        $isLog = new DebugHelper();
 
-    if (empty($array)) {
+        $isLog->setLogFile('../runtime/logs/callback_prod_' . date("Y-m-d_H-i-s").'_'.$cmdguid . '.log');
 
-        foreach ($myXML->ERROR as $err) {
+        $isLog->logAppendString('=========================================');
+        $isLog->logAppendString(date("Y-m-d H:i:s") . ' : Product callback received ');
+        $isLog->logAppendString('CMDGUID: ' . $cmdguid . ' || POSID: ' . $posid);
+        $isLog->logAppendString('=========================================');
+        $isLog->logAppendString(substr($getr, 0, 300));
 
-            foreach($err->attributes() as $e => $h) {
-                if ($e == 'code') $array['code'] = strval($h[0]);
-                if ($e == 'text') $array['text'] = strval($h[0]);
-            }
+    // Checking if the Task is active
 
+        $tmodel = RkTasks::find()->andWhere('guid= :guid', [':guid' => $cmdguid])->one();
+
+        if (!$tmodel) {
+            $isLog->logAppendString('ERROR:: Task with guid ' . $cmdguid . 'has not been found!!');
+            echo "Не найдена задача с id: (" . $cmdguid . ")";
+            exit;
+        }
+
+        $acc = $tmodel->acc;
+        $tmodel->isactive = 0;
+        $tmodel->setCallbackStart();
+
+    // Parsing XML for errors
+
+    foreach ($myXML->ERROR as $err) {
+
+        foreach ($err->attributes() as $e => $h) {
+            if ($e == 'code') $array['code'] = strval($h[0]);
+            if ($e == 'text') $array['text'] = strval($h[0]);
         }
 
     }
 
+    if (isset($array['code'])) {  // We got external error
 
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_EXTERROR;
+        $tmodel->wsstatus_id = $array['code'];
+        $tmodel->retry = $tmodel->retry + 1;
+        $tmodel->rcount = 0;
 
-    /* Работает без едизм
-    foreach ($myXML->ITEM as $goodsgroup) {
-            foreach($goodsgroup->attributes() as $c => $d) {
-                if ($c == 'rid') $grid=strval($d[0]);
-                if ($c == 'name') $grname=strval($d[0]);
-                if ($c == 'parent') $grparent=strval($d[0]);
+        if (!$tmodel->setCallbackEnd()) {
+            $isLog->logAppendString('ERROR:: Task with external ERROR with guid ' . $cmdguid . 'cannot be saved!!');
+            echo "Cannot save task (" . $cmdguid . ") with error: (" . $array['code'] . ")";
+            exit;
+        } else {
+            $isLog->logAppendString('Task with external ERROR with guid ' . $cmdguid . 'successfully saved!');
+            echo "Task with guid (" . $cmdguid . ") with error: (" . $array['code'] . ") successfully saved.";
+            exit;
+        }
+
+    }
+
+        // We got no errors. Try to parse XML with no external errors
+
+        $gcount = 0;
+
+        foreach ($myXML->ITEM as $goodsgroup) {
+
+            foreach ($goodsgroup->attributes() as $c => $d) {
+                if ($c == 'rid') $grid = strval($d[0]);
+                if ($c == 'name') $grname = strval($d[0]);
+                if ($c == 'parent') $grparent = strval($d[0]);
             }
-                foreach ($goodsgroup->GOODS_LIST as $glist) {
-                    
-                    foreach ($glist->ITEM as $item) {
+            foreach ($goodsgroup->GOODS_LIST as $glist) {
+
+                foreach ($glist->ITEM as $item) {
+
+                    foreach ($item->attributes() as $a => $b) {
+                        if ($a == 'rid') {
+                            $prid = strval($b[0]);
+                        }
+                        if ($a == 'name') {
+                            $prname = strval($b[0]);
+                        }
+                    }
+
+                    foreach ($item->MUNITS->MUNIT as $unit) {
                         $gcount++;
                         $array[$gcount]['group_rid'] = $grid;
                         $array[$gcount]['group_name'] = $grname;
                         $array[$gcount]['group_parent'] = $grparent;
-                        
-                        foreach($item->attributes() as $a => $b) {
-                          $array[$gcount][$a] = strval($b[0]);
+                        $array[$gcount]['product_rid'] = $prid;
+                        $array[$gcount]['product_name'] = $prname;
+
+                        foreach ($unit->attributes() as $e => $h) {
+                            if ($e == 'rid') $array[$gcount]['unit_rid'] = strval($h[0]);
+                            if ($e == 'name') $array[$gcount]['unit_name'] = strval($h[0]);
                         }
-                        
+
                     }
-                                     
+
                 }
-    }
-    */
-    
-    $cmdguid = $myXML['cmdguid'] ? $myXML['cmdguid'] : $myXML['taskguid'];
-    $posid = $myXML['posid'] ? $myXML['posid'] : '-нет POSID-' ;
 
-    
-    if (!empty($array) && !empty($cmdguid)) {
-
-        // Заполнение tasks
-        $tmodel = RkTasks::find()->andWhere('guid= :guid', [':guid' => $cmdguid])->one();
+            }
 
 
-        if (!$tmodel) {
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . '=======PRODUCT==EVENT==START=================' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . date("Y-m-d H:i:s") . ':REQUEST:' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . '===========================================' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'CMDGUID:' . $cmdguid . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'POSID:' . $posid . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', print_r($getr, true), FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
-        //    file_put_contents('runtime/logs/callback.log', print_r($array, true), FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . '*******************************************' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'TASK TMODEL NOT FOUND.!' . $cmdguid . '!' . PHP_EOL, FILE_APPEND);
-            file_put_contents('runtime/logs/callback.log', PHP_EOL . 'Nothing has been saved.' . PHP_EOL, FILE_APPEND);
-
-            echo "Не найдена задача с id: (".$cmdguid.")";
-           // echo $array[1]['product_rid']."||";
-            exit;
         }
 
-        $tmodel->intstatus_id = 3;
-        $tmodel->isactive = 0;
-        $tmodel->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
-        $tmodel->wsstatus_id = isset($array['code']) ? $array['code'] : 0;
+    // Update task after XML
 
-        $acc = $tmodel->acc;
-
-        if (!$tmodel->save()) {
-            $er2 = $tmodel->getErrors();
-        } else $er2 = "Данные task успешно сохранены (ID:" . $tmodel->id . " )";
+        if (!$tmodel->setCallbackXML()) {
+            $isLog->logAppendString('ERROR:: Task after XML parsing cannot be saved!!');
+            exit;
+        } else {
+            $isLog->logAppendString('SUCCESS:: Task after XML successfully saved!');
+        }
 
         // Заполнение номенклатуры
 
-        if (isset($array[1]['product_rid'])) {
-
         $icount = 0;
+        $scount = 0;
 
         foreach ($array as $a) {
-
 
             $checks = RkProduct::find()->andWhere('acc = :acc', [':acc' => $acc])
                 ->andWhere('rid = :rid', [':rid' => $a['product_rid']])
@@ -247,82 +243,53 @@ class ProductHelper extends AuthHelper {
 
                 if (!$amodel->save()) {
                     $er = $amodel->getErrors();
-                } else $er = "Данные продуктов успешно сохранены.(ID:" . $amodel->id . " )";
+                    $isLog->logAppendString('ERROR:: Product ' . $amodel->rid . 'cannot be saved - ' . $er);
+                }
 
-              }
-             $icount++;
-          }
-                        echo "Данные номенклатуры успешно распознаны и сохранены. (Count: ".sizeof($array).")";
-                        file_put_contents('runtime/logs/callback.log',PHP_EOL.' Продуктов сохранено:'.sizeof($array).PHP_EOL,FILE_APPEND);
-        } else {
-            if (isset($array['code'])) {
-                echo "Код ошибки принят и сохранен.";
-                file_put_contents('runtime/logs/callback.log',PHP_EOL.'Код ошибки принят и сохранен'.PHP_EOL,FILE_APPEND);
-            } else {
-                echo "Неизвестная ошибка";
-                file_put_contents('runtime/logs/callback.log',PHP_EOL.'Неизвестная ошибка'.PHP_EOL,FILE_APPEND);
+                $scount++;
             }
-
+            $icount++;
         }
 
+        $isLog->logAppendString('SUCCESS:: Products saved: ' . $scount);
 
-    }
-    
-       
+        $tmodel->rcount = $icount;
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_DICOK;
+
+
     // Обновление словаря RkDic
     
-    $rmodel= RkDic::find()->andWhere('org_id= :org_id',[':org_id'=>$acc])->andWhere('dictype_id = 3')->one();
+        $rmodel = RkDic::find()->andWhere('org_id= :org_id', [':org_id' => $acc])->andWhere('dictype_id = 3')->one();
     
         if (!$rmodel) {
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'RKDIC TMODEL NOT FOUND.'.PHP_EOL,FILE_APPEND); 
-        file_put_contents('runtime/logs/callback.log',PHP_EOL.'Nothing has been saved.'.PHP_EOL,FILE_APPEND); 
+            $isLog->logAppendString('ERROR:: Dictionary to update products is not found.');
+            exit;
+        }
 
-        } else {
-            
-            $rmodel->updated_at=Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss'); 
-            $rmodel->dicstatus_id= 6;
-            $rmodel->obj_count = isset($icount) ? $icount : 0;
+        $fcount = RkProduct::find()->andWhere('acc= :org_id', [':org_id' => $acc])->count('*');
+
+        $rmodel->updated_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $rmodel->dicstatus_id = 6;
+        $rmodel->obj_count = isset($fcount) ? $fcount : 0;
     
             if (!$rmodel->save()) {
                 $er3 = $rmodel->getErrors();
-            } else $er3 = "Данные справочника успешно сохранены.(ID:".$rmodel->id." )";
-        }
-        
-      
-  //  $array = ApiHelper::xml2array($myXML);
-  //  
-  //  $array = json_decode(json_encode((array) $myXML), 1);
-  //  $array = array($myXML->getName() => $array);
-   
-    /*
-    foreach($array['CORRGROUP'] as $corgroup) {
-        
-        foreach ($corgroup['CORR'] as $cor) {
-            
-            
-        }
-        
-    }
-   */
-    if (empty($cmdguid)) $cmdguid = 'пусто';     
-    if (empty($posid)) $posid = 'пусто'; 
-    if (empty($array)) $array=array(0 => '0');
-    $er = (isset($array['code'])) ? 'Ошибка :'.$array['code'].', '.$array['text'] : '-Код ошибки не опознан-';
-        
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'=========PRODUCT==EVENT==START==============='.PHP_EOL,FILE_APPEND);
-    file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'==========================================='.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'CMDGUID:'.$cmdguid.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'POSID:'.$posid.PHP_EOL,FILE_APPEND); 
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($getr,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($array,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'*******************************************'.PHP_EOL,FILE_APPEND);     
-    file_put_contents('runtime/logs/callback.log',print_r($er,true) , FILE_APPEND);    
-    file_put_contents('runtime/logs/callback.log',PHP_EOL.'============EVENT END======================'.PHP_EOL,FILE_APPEND);
-              
-    }
+                $isLog->logAppendString('ERROR:: Dictionary ' . $rmodel->id . 'cannot be saved - ' . $er3);
+                exit;
+            } else $isLog->logAppendString('SUCCESS:: Dictionary ' . $rmodel->id . ' is successfully saved.');
 
+
+        $tmodel->intstatus_id = RkTasks::INTSTATUS_FULLOK;
+
+        if (!$tmodel->setCallbackEnd()) {
+            $isLog->logAppendString('ERROR:: Task status THE END cannot be saved!!');
+            exit;
+        } else {
+            $isLog->logAppendString('SUCCESS:: All operations status is looking good');
+            echo 'SUCCESS:: All operations status is looking good';
+            exit;
+        }
+
+    }
 }
 

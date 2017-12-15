@@ -20,7 +20,7 @@ use api\common\models\RkDic;
 
 class WaybillHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
+    // const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
     
     public function sendWaybill ($id) {
     if (!$this->Authorizer()) {
@@ -33,14 +33,14 @@ class WaybillHelper extends AuthHelper {
     
     $wmodel = \api\common\models\RkWaybill::findOne(['id' => $id]);
 
-    $exportApproved        = RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue();
+    $exportApproved        = RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() ? RkDicconst::findOne(['denom' => 'useAcceptedDocs'])->getPconstValue() : 0;
     $exportVAT             = RkDicconst::findOne(['denom' => 'taxVat'])->getPconstValue();
     $exportAutoNumber      = RkDicconst::findOne(['denom' => 'useAutoNumber'])->getPconstValue();
 
     $autoNumber = ($exportAutoNumber == 0) ? 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ' : '';
 
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/waybill' . '">
     <PARAM name="object_id" val="'.$this->restr->code.'" />
     <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store->rid.'" active="'.$exportApproved.'"'
             . ' duedate="1" note="'.$wmodel->note.'" '.$autoNumber.'>'.PHP_EOL;
@@ -247,6 +247,7 @@ class WaybillHelper extends AuthHelper {
     if (empty($cmdguid)) $cmdguid = 'пусто';     
     if (empty($posid)) $posid = 'пусто'; 
     if (empty($array)) $array=array(0 => '0');
+    if (empty($er2)) $er2='пусто';
         
     file_put_contents('runtime/logs/callback.log',PHP_EOL.'=======WAYBILL==EVENT==START================='.PHP_EOL,FILE_APPEND);  
     file_put_contents('runtime/logs/callback.log', PHP_EOL.date("Y-m-d H:i:s").':REQUEST:'.PHP_EOL, FILE_APPEND);   

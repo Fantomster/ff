@@ -29,8 +29,13 @@ use common\models\Organization;
 class RkTasks extends \yii\db\ActiveRecord
 {
     
-    const STATUS_UNLOCKED = 0;
-    const STATUS_LOCKED = 1;
+    const INTSTATUS_SENT = 1;
+    const INTSTATUS_EXTERROR = 2;
+    const INTSTATUS_XMLOK = 3;
+    const INTSTATUS_DICOK = 4;
+    const INTSTATUS_FULLOK = 5;
+
+
       
     
     /**
@@ -50,7 +55,7 @@ class RkTasks extends \yii\db\ActiveRecord
             [['fid','acc','guid'], 'required'],
             [['id','fid','acc'], 'integer'],
             [['guid','acc','created_at','updated_at', 'callback_at', 'intstatus_id', 'wsstatus_id', 
-                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive' ], 'safe'],
+                'wsclientstatus_id','tasktype_id','fid','fcode','version','isactive','callback_xml','callback_end','rcount' ], 'safe'],
         ];
     }
 
@@ -88,6 +93,38 @@ class RkTasks extends \yii\db\ActiveRecord
     
     */
     
+   
+    public function setCallbackXML() {
+        
+        $this->callback_xml = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
+        if (!$this->save())
+            return false;
+        else
+            return true;
+    }
+
+    public function setCallbackStart() {
+
+        $this->callback_at = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+        $this->intstatus_id = self::INTSTATUS_XMLOK;
+
+        if (!$this->save())
+            return false;
+        else
+            return true;
+    }
+
+    public function setCallbackEnd() {
+
+        $this->callback_end = Yii::$app->formatter->asDate(time(), 'yyyy-MM-dd HH:mm:ss');
+
+        if (!$this->save())
+            return false;
+        else
+            return true;
+    }
+
     public static function getDb()
     {
        return \Yii::$app->db_api;

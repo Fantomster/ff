@@ -126,7 +126,7 @@ $this->title = Yii::t('message', 'frontend.views.request.req', ['ru'=>'Заяв�
                     <?php
                     $mpCat = ArrayHelper::map(\common\models\MpCategory::find()->where(['parent'=>null])->orderBy('name')->all(),'id','name');
                     foreach ($mpCat as &$item){
-                        $item['name'] = Yii::t('app', $item);
+                        $item = Yii::t('app', $item);
                     }; ?>
                     <?=Select2::widget([
                         'name' => 'category',

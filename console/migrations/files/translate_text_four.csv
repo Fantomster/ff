@@ -880,9 +880,9 @@
 "app"|"common.models.confirm"|"en"|"Please confirm account on MixCart"
 "app"|"common.models.confirm"|"es"|"Confirma la cuenta en MixCart"
 "app"|"common.models.confirm"|"ru"|"Подтвердите аккаунт на MixCart"
-"app"|"common.models.user.confirm."|"en"|NULL
-"app"|"common.models.user.confirm."|"es"|NULL
-"app"|"common.models.user.confirm."|"ru"|NULL
+"app"|"common.models.user.confirm."|"en"|"Confirmation"
+"app"|"common.models.user.confirm."|"es"|"Confirmación"
+"app"|"common.models.user.confirm."|"ru"|"Подтверждение"
 "app"|"common.models.please"|"en"|"Please write how would you want me to call you?"
 "app"|"common.models.please"|"es"|"Rogamos escribas el nombre que podríamos utilizar dirigiéndonos a ti"
 "app"|"common.models.please"|"ru"|"Пожалуйста, напишите, как к вам обращаться"
@@ -5048,8 +5048,8 @@
 "message"|"frontend.views.client.index.vendors"|"en"|"Suppliers"
 "message"|"frontend.views.client.index.vendors"|"es"|"Proveedores"
 "message"|"frontend.views.client.index.vendors"|"ru"|"Поставщики"
-"message"|"frontend.views.client.index.order"|"en"|NULL
-"message"|"frontend.views.client.index.order"|"es"|NULL
+"message"|"frontend.views.client.index.order"|"en"|"To order"
+"message"|"frontend.views.client.index.order"|"es"|"Ordene ahora"
 "message"|"frontend.views.client.index.order"|"ru"|"Заказать"
 "message"|"frontend.views.client.index.history"|"en"|"<span style=""color:#3F3E3E"">History</span> orders"
 "message"|"frontend.views.client.index.history"|"es"|"<span style=""color:#3F3E3E"">Historial</span> de pedidos"
@@ -5748,7 +5748,7 @@
 "message"|"frontend.views.settings.save_two"|"es"|"Guardar"
 "message"|"frontend.views.settings.save_two"|"ru"|"Сохранить"
 "message"|"frontend.views.layouts.client.left.add"|"en"|"ext."
-"message"|"frontend.views.layouts.client.left.add"|"es"|
+"message"|"frontend.views.layouts.client.left.add"|"es"|NULL
 "message"|"frontend.views.layouts.client.left.add"|"ru"|" доб. "
 "message"|"frontend.views.layouts.client.left.phone"|"en"|"+7-499-404-10-18 ext. 202"
 "message"|"frontend.views.layouts.client.left.phone"|"es"|"+7-499-404-10-18 ad. 202"
@@ -5799,7 +5799,7 @@
 "message"|"frontend.views.layouts.client.left.techno"|"es"|"Soporte técnico"
 "message"|"frontend.views.layouts.client.left.techno"|"ru"|"ТЕХНИЧЕСКАЯ ПОДДЕРЖКА"
 "message"|"frontend.views.layouts.left_additional"|"en"|"ext."
-"message"|"frontend.views.layouts.left_additional"|"es"|
+"message"|"frontend.views.layouts.left_additional"|"es"|NULL
 "message"|"frontend.views.layouts.left_additional"|"ru"|" доб. "
 "message"|"frontend.views.layouts.left_phone"|"en"|"+7-499-404-10-18 ext. 202"
 "message"|"frontend.views.layouts.left_phone"|"es"|"+7-499-404-10-18 ad. 202"
@@ -5966,7 +5966,7 @@
 "message"|"frontend.views.layouts.main.var6"|"en"|"You have already sent a request"
 "message"|"frontend.views.layouts.main.var6"|"es"|"Ya ha enviado la orden"
 "message"|"frontend.views.layouts.main.var6"|"ru"|"Вы уже отправляли заявку"
-"message"|"frontend.views.layouts.main.var8"|"en"|NULL
+"message"|"frontend.views.layouts.main.var8"|"en"|"Application not sent"
 "message"|"frontend.views.layouts.main.var8"|"es"|"La orden no ha sido enviada"
 "message"|"frontend.views.layouts.main.var8"|"ru"|"Заявка не отправлена"
 "message"|"frontend.views.layouts.header.var1"|"en"|"Invitation in MixCart"
@@ -6128,7 +6128,7 @@
 "message"|"frontend.views.site.soroka"|"en"|"Director: Soroka, MOS"
 "message"|"frontend.views.site.soroka"|"es"|"Gerente: Soroka, MOS."
 "message"|"frontend.views.site.soroka"|"ru"|"Управляющий: Сорока, МОС."
-"message"|"frontend.views.site.big_rest"|"en"|NULL
+"message"|"frontend.views.site.big_rest"|"en"|"I manage two large restaurants, we need a high level of both service and optimization of internal processes. MixCart, solves the whole range of tasks related to procurement. Transparency and speed are provided."
 "message"|"frontend.views.site.big_rest"|"es"|"Soy administrador de dos restaurantes grandes. Necesitamos el alto nivel de servicio y optimización de procesos internos. MixCart resuelve toda la gama de problemas relacionadas con las compras. Están garantizadas la transparencia y la velocidad."
 "message"|"frontend.views.site.big_rest"|"ru"|"Я управляю двумя крупными ресторанами, нам важен высокий уровень как сервиса, так и оптимизации внутренних процессов. MixCart, решает весь спектр задач, связанных с закупками. Прозрачность и скорость обеспечены."
 "message"|"frontend.views.site.kucha"|"en"|"Roman Kucha"
@@ -6137,7 +6137,7 @@
 "message"|"frontend.views.site.brookwin"|"en"|"Founder: Brookwin."
 "message"|"frontend.views.site.brookwin"|"es"|"Fundador: Brookwin."
 "message"|"frontend.views.site.brookwin"|"ru"|"Основатель: Brookwin."
-"message"|"frontend.views.site.modern"|"en"|NULL
+"message"|"frontend.views.site.modern"|"en"|"My restaurant is in Anapa, I'm in Moscow, now I see what happens in our purchases, who buys what and where. I'm for the modern tools of work, MixCart, solves my problems."
 "message"|"frontend.views.site.modern"|"es"|"Mi restaurante está en Anapa y yo estoy en Moscú. Ahora veo que es lo que sucede con nuestras compras, quién compra, qué compra y dónde compra. Estoy a favor de las herramientas modernas de trabajo. MixCart resuelve mis problemas."
 "message"|"frontend.views.site.modern"|"ru"|"Мой ресторан находится в Анапе, я нахожусь в Москве, сейчас я вижу, что происходит у нас с закупками, кто, что и где покупает. Я за современные инструменты работы, MixCart, решает мои задачи."
 "message"|"frontend.views.site.integration"|"en"|"Integration with 1C, iiko, r-keeper"
@@ -8396,8 +8396,8 @@
 "message"|"frontend.views.order.guides.step_one"|"en"|"STEP 1"
 "message"|"frontend.views.order.guides.step_one"|"es"|"PASO No. 1"
 "message"|"frontend.views.order.guides.step_one"|"ru"|"ШАГ 1"
-"message"|"frontend.views.order.guides.search"|"en"|NULL
-"message"|"frontend.views.order.guides.search"|"es"|NULL
+"message"|"frontend.views.order.guides.search"|"en"|"Search by name"
+"message"|"frontend.views.order.guides.search"|"es"|"Buscar por nombre"
 "message"|"frontend.views.order.guides.search"|"ru"|"Поиск по названию"
 "message"|"frontend.views.order.guides.choose_product"|"en"|"Select his product"
 "message"|"frontend.views.order.guides.choose_product"|"es"|"Selecciona su producto"
@@ -9479,8 +9479,8 @@
 "app"|"frontend.views.to_main"|"en"|"Main"
 "app"|"frontend.views.to_main"|"es"|"Inicio"
 "app"|"frontend.views.to_main"|"ru"|"Главная"
-"app"|"frontend.views.client.index.orders"|"en"|NULL
-"app"|"frontend.views.client.index.orders"|"es"|NULL
+"app"|"frontend.views.client.index.orders"|"en"|"orders"
+"app"|"frontend.views.client.index.orders"|"es"|"pedidos"
 "app"|"frontend.views.client.index.orders"|"ru"|"заказов"
 "app"|"frontend.views.user_form.new_pass"|"en"|NULL
 "app"|"frontend.views.user_form.new_pass"|"es"|NULL
@@ -9545,14 +9545,15 @@
 "app"|"frontend.views.user.forgot.phone"|"en"|"8-499-404-10-18"
 "app"|"frontend.views.user.forgot.phone"|"es"|"8-499-404-10-18"
 "app"|"frontend.views.user.forgot.phone"|"ru"|"8-499-404-10-18"
-"app"|"frontend.views.user.forgot.email"|"en"|NULL
-"app"|"frontend.views.user.forgot.email"|"es"|NULL
+"app"|"frontend.views.user.forgot.email"|"en"|"info@mixcart.ru"
+"app"|"frontend.views.user.forgot.email"|"es"|"info@mixcart.ru"
 "app"|"frontend.views.user.forgot.email"|"ru"|"info@mixcart.ru"
-"app"|"frontend.views.user.default.i_buy."|"en"|NULL
-"app"|"frontend.views.user.default.i_buy."|"es"|NULL
+"app"|"frontend.views.user.default.i_buy."|"en"|"I'm buying"
+"app"|"frontend.views.user.default.i_buy."|"es"|"Estoy comprando"
 "app"|"frontend.views.user.default.i_buy."|"ru"|"Я покупаю"
-"app"|"frontend.views.user.default.i_sell"|"en"|NULL
-"app"|"frontend.views.user.default.i_sell"|"es"|NULL
+"app"|"frontend.views.user.default.i_sell"|"en"|"I sell
+"
+"app"|"frontend.views.user.default.i_sell"|"es"|"Estoy vendiendo"
 "app"|"frontend.views.user.default.i_sell"|"ru"|"Я продаю"
 "app"|"frontend.views.vendor.clients.rest"|"en"|"Restaurant"
 "app"|"frontend.views.vendor.clients.rest"|"es"|"Restaurante"
@@ -9572,11 +9573,11 @@
 "app"|"frontend.views.order.view_grid.good."|"en"|"Product"
 "app"|"frontend.views.order.view_grid.good."|"es"|"Producto"
 "app"|"frontend.views.order.view_grid.good."|"ru"|"Товар"
-"app"|"frontend.views.order.guides.rename"|"en"|NULL
-"app"|"frontend.views.order.guides.rename"|"es"|NULL
+"app"|"frontend.views.order.guides.rename"|"en"|"Rename template"
+"app"|"frontend.views.order.guides.rename"|"es"|"Renombrar plantilla"
 "app"|"frontend.views.order.guides.rename"|"ru"|"Переименовать шаблон"
-"app"|"frontend.views.order.guides.rename_two"|"en"|NULL
-"app"|"frontend.views.order.guides.rename_two"|"es"|NULL
+"app"|"frontend.views.order.guides.rename_two"|"en"|"Rename"
+"app"|"frontend.views.order.guides.rename_two"|"es"|"Renombrar"
 "app"|"frontend.views.order.guides.rename_two"|"ru"|"Переименовать"
 "app"|"frontend.views.order.favorites.all"|"en"|"All products"
 "app"|"frontend.views.order.favorites.all"|"es"|"Todos los productos"

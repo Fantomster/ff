@@ -72,11 +72,11 @@ font-family: "HelveticaBold",Arial,sans-serif;
         'links' => [
             Html::decode($product->mainCategory->name),
             [
-                'label' => Html::decode($product->category->name),
+                'label' => Html::decode(Yii::t('app', $product->category->name)),
                 'url' => ['site/category', 'slug' => $product->category->slug],
             ],
             [
-            'label' => Html::decode($product->product, ['style'=>'text-overflow: ellipsis']),
+            'label' => Html::decode(Yii::t('app', $product->product), ['style'=>'text-overflow: ellipsis']),
             'encode' => false,
             ]
         ],

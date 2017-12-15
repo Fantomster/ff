@@ -340,7 +340,7 @@ class ClientController extends DefaultController {
                 }
                 foreach ($arrCatalog as $arrCatalogs) {
                     $product = strip_tags(trim($arrCatalogs['dataItem']['product']));
-                    $price = floatval(trim($arrCatalogs['dataItem']['price']));
+                    $price = floatval(trim(str_replace(',', '.', $arrCatalogs['dataItem']['price'])));
                     $ed = strip_tags(trim($arrCatalogs['dataItem']['ed']));
                     if (empty($product)) {
                         $result = ['success' => false, 'message' => 'Ошибка: Пустое поле <strong>[Продукт]</strong>!'];
@@ -687,7 +687,7 @@ class ClientController extends DefaultController {
                             if (empty($units) || $units < 0) {
                                 $units = null;
                             }
-                            $price = floatval(trim($arrCatalogs['dataItem']['price']));
+                            $price = floatval(trim(str_replace(',', '.', $arrCatalogs['dataItem']['price'])));
                             //$note = trim($arrCatalogs['dataItem']['note']);
                             $ed = trim($arrCatalogs['dataItem']['ed']);
                             $price = str_replace(',', '.', $price);
@@ -1042,7 +1042,7 @@ class ClientController extends DefaultController {
                 $product = trim($arrCatalogs['dataItem']['product']);
                 $article = trim($arrCatalogs['dataItem']['article']);
                 $units = trim($arrCatalogs['dataItem']['units']);
-                $price = trim($arrCatalogs['dataItem']['price']);
+                $price = trim(str_replace(',', '.', $arrCatalogs['dataItem']['price']));
                 $ed = trim($arrCatalogs['dataItem']['ed']);
                 $note = trim($arrCatalogs['dataItem']['note']);
                 array_push($articleArray, (string) $article);

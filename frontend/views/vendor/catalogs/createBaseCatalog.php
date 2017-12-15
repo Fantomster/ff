@@ -154,6 +154,8 @@ $mped = json_encode($mped, JSON_UNESCAPED_UNICODE);
 
 $supplierStartCatalogCreateUrl = \yii\helpers\Url::to(['vendor/supplier-start-catalog-create']);
 
+$language = Yii::$app->sourceLanguage;
+
 $customJs = <<< JS
 var ed = $mped;
 var arr = [];
@@ -185,13 +187,13 @@ hot = new Handsontable(container, {
         data: 'units', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {
         data: 'price', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {
         data: 'ed', 

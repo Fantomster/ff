@@ -27,6 +27,8 @@ $arr_count = count($array);
 
 $editCatalogUrl = Url::to(['client/edit-catalog', 'id' => $id]);
 
+$language = Yii::$app->sourceLanguage;
+
 $customJs = <<< JS
 var data = $arr;
 var container = document.getElementById('editCatalogSupplier');
@@ -56,13 +58,13 @@ columns: [
         data: 'units', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {
         data: 'price', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {data: 'ed', allowEmpty: false},
     {data: 'note', wordWrap:true}

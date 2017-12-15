@@ -327,6 +327,9 @@ $inviteUrl = Url::to(['client/invite']);
 $createUrl = Url::to(['client/create']);
 $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
+
+$language = Yii::$app->sourceLanguage;
+
 $customJs = <<< JS
         
 var currencies = $.map($currencySymbolList, function(el) { return el });
@@ -373,7 +376,7 @@ for ( var i = 0; i < 60; i++ ) {
             data: 'price', 
             type: 'numeric',
             format: '0.00',
-            language: 'ru-RU'
+            language: '$language'
         }
     ],
   className : 'Handsontable_table',

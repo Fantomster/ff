@@ -139,6 +139,8 @@ $step4Url = Url::to(['vendor/step-4', 'id' => $cat_id]);
 $changeCurrencyUrl = Url::to(['vendor/ajax-change-currency', 'id' => $cat_id]);
 $calculatePricesUrl = Url::to(['vendor/ajax-calculate-prices', 'id' => $cat_id]);
 
+$language = Yii::$app->sourceLanguage;
+
 $customJs = <<< JS
 /** 
  * Forward port jQuery.live()
@@ -182,24 +184,24 @@ var save = document.getElementById('save'), hot, originalColWidths = [], colWidt
         data: 'base_price', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU',
+        language: '$language',
         readOnly: true
     },
     {
         data: 'price', 
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {data: 'ed',readOnly: true}, 
     {
         data: 'discount',
         type: 'numeric',
         format: '0.00',
-        language: 'ru-RU'
+        language: '$language'
     },
     {data: 'discount_percent', type: 'numeric',format: '0',},
-    {data: 'total_price',readOnly: true,type: 'numeric',format: '0.00',language: 'ru-RU'},
+    {data: 'total_price',readOnly: true,type: 'numeric',format: '0.00',language: '$language'},
   ],
   className : 'Handsontable_table',
   rowHeaders : true,

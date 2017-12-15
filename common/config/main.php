@@ -2,7 +2,7 @@
 
 return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
-    'sourceLanguage' => 'ru_ru',
+    'sourceLanguage' => 'ru-RU',
     'language' => 'ru',
     'timeZone' => 'Asia/Baghdad',
     'charset' => 'utf-8',

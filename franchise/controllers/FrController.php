@@ -22,7 +22,8 @@ class FrController extends \yii\rest\Controller {
                         'https://fr.mixcart.ru',
                         'https://franch.mixcart.ru',
                         'https://2017.mixcart.ru',
-                        'http://2017.mixcart.dev',
+                        'http://gastreet2018.mixcart.ru',
+                        'http://gastreet2018.mixcart.test',
                     ],
                     'Access-Control-Request-Method' => ['POST', 'GET', 'HEAD'],
                     'Access-Control-Allow-Credentials' => true,
@@ -48,6 +49,19 @@ class FrController extends \yii\rest\Controller {
             $type = isset($fields['type']) ? Html::encode($fields['type']) : '';
             $lpartner = isset($fields['partner']) ? Html::encode($fields['partner']) : '';
             $lname = isset($fields['lead_name']) ? Html::encode($fields['lead_name']) : '';
+
+            if ($sitepage == "gastreet") {
+                $result = Yii::$app->mailer->compose('gastreet', compact("cname", "cphone", "cemail", "city"))
+                        ->setTo("gastreet2018@mixcart.ru")
+                        ->setSubject("Заявка на Гастрит от $cname")
+                        ->send();
+                if ($result) {
+                    return ['result' => 'success'];
+                } else {
+                    return ['result' => 'error'];
+                }
+            }
+
             $response = null;
             if (strlen(trim($cname)) < 2 || strlen(trim($cphone)) < 7) {
                 return ['result' => 'error'];

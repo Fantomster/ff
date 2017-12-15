@@ -54,6 +54,8 @@ $suppliersUrl = Url::to(['client/suppliers']);
 $removeSupplierUrl = Url::to(['client/remove-supplier']);
 $home = Url::to(['client/index']);
 
+$language = Yii::$app->sourceLanguage;
+
 $customJs = <<< JS
     $(".modal").removeAttr("tabindex");
     $('#addProduct').click(function (e){
@@ -194,7 +196,7 @@ for ( var i = 0; i < 60; i++ ) {
             data: 'price', 
             type: 'numeric',
             format: '0.00',
-            language: 'ru-RU'
+            language: '$language'
         }
     ],
   className : 'Handsontable_table',

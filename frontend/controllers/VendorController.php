@@ -1553,14 +1553,14 @@ class VendorController extends DefaultController {
             $catalogGoods = \yii\helpers\ArrayHelper::map($catalogGoods, 'id', 'price');
             foreach ($arrCatalog as $arrCatalogs) {
                 $goods_id = (int) (trim($arrCatalogs['dataItem']['goods_id']));
-                $price = floatval(trim($arrCatalogs['dataItem']['total_price']));
+                $price = floatval(trim(str_replace(',', '.', $arrCatalogs['dataItem']['total_price'])));
 
                 if (!isset($goods_id)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный товар']];
                     return $result;
                 }
 
-                $price = str_replace(',', '.', $price);
+//                $price = str_replace(',', '.', $price);
 
                 if (!preg_match($numberPattern, $price)) {
                     $result = ['success' => false, 'alert' => ['class' => 'danger-fk', 'title' => 'УПС! Ошибка', 'body' => 'Неверный формат <strong>Цены</strong><br><small>только число в формате 0,00</small>']];

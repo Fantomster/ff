@@ -17,7 +17,7 @@ RewriteRule ^hello/?(.*) /site/hello/$1 [NC,L,QSA]
 #RewriteCond %{REQUEST_URI} ^/v1
 #RewriteRule ^v1/?(.*) /v1/default/$1 [NC,L,QSA]
 
-#RewriteRule ^(.+)$ api/web/index.php/$1 [NC,L,QSA]
+RewriteRule ^(.+)$ api/web/index.php/$1 [NC,L,QSA]
 
 #RewriteRule ^(.*)$ api/web/index.php/$1 [NC,L,QSA]
 

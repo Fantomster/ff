@@ -110,12 +110,12 @@ class GuideProduct extends \yii\db\ActiveRecord
         return isset($note) ? $note->note : '';
     }
     
-    public function afterSave() {
-        parent::afterDelete();
-        if (!is_a(Yii::$app, 'yii\console\Application')) {
-//            \api\modules\v1\modules\mobile\components\NotificationHelper::actionGuideProduct($this->id);
-        }
-    }
+//    public function afterSave() {
+//        parent::afterDelete();
+//        if (!is_a(Yii::$app, 'yii\console\Application')) {
+////            \api\modules\v1\modules\mobile\components\NotificationHelper::actionGuideProduct($this->id);
+//        }
+//    }
     
     public function getFormattedPrice() {
         $cgTable = CatalogGoods::tableName();

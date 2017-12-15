@@ -20,7 +20,7 @@ use api\common\models\RkDic;
 
 class WaybillHelper extends AuthHelper {
     
-    const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
+    // const CALLBACK_URL = "https://api.f-keeper.ru/api/web/v1/restor/callback/waybill";
     
     public function sendWaybill ($id) {
     if (!$this->Authorizer()) {
@@ -40,7 +40,7 @@ class WaybillHelper extends AuthHelper {
     $autoNumber = ($exportAutoNumber == 0) ? 'textcode="'.$wmodel->text_code.'" numcode="'.$wmodel->num_code.'" ' : '';
 
     $xml = '<?xml version="1.0" encoding="utf-8"?>
-    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="'.self::CALLBACK_URL.'">
+    <RQ cmd="sh_doc_receiving_report" tasktype="any_call" guid="'.$guid.'" callback="' . Yii::$app->params['rkeepCallBackURL'] . '/waybill' . '">
     <PARAM name="object_id" val="'.$this->restr->code.'" />
     <DOC date="'.Yii::$app->formatter->asDatetime($wmodel->doc_date, "php:Y-m-d").'" corr="'.$wmodel->corr_rid.'" store="'.$wmodel->store->rid.'" active="'.$exportApproved.'"'
             . ' duedate="1" note="'.$wmodel->note.'" '.$autoNumber.'>'.PHP_EOL;

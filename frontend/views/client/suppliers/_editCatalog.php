@@ -27,7 +27,7 @@ $arr_count = count($array);
 
 $editCatalogUrl = Url::to(['client/edit-catalog', 'id' => $id]);
 
-$arr = [
+$arr1 = [
     Yii::t('message', 'frontend.views.client.supp.var', ['ru'=>'Артикул']),
     Yii::t('message', 'frontend.views.client.supp.var1', ['ru'=>'Наименование товара']),
     Yii::t('message', 'frontend.views.client.supp.var2', ['ru'=>'Кратность']),
@@ -45,7 +45,7 @@ var save = document.getElementById('save-catalog-supplier'), hot, originalColWid
 hot = new Handsontable(container, {
 removeRowPlugin: true,
 data: JSON.parse(JSON.stringify(data)),
-colHeaders : ['base_goods_id', 'goods_id', '$arr[0]', '$arr[1]', '$arr[2]', '$arr[3] (<span class="currency-symbol">{$catalogCurrency->symbol}</span>)', '$arr[4]', '$arr[5]'],
+colHeaders : ['base_goods_id', 'goods_id', '$arr1[0]', '$arr1[1]', '$arr1[2]', '$arr1[3] (<span class="currency-symbol">{$catalogCurrency->symbol}</span>)', '$arr1[4]', '$arr1[5]'],
 colWidths: [0, 0, 50, 60, 40, 30, 40, 60],
 columns: [
         
@@ -131,7 +131,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "$arr[6]",
+                          label: "$arr1[6]",
                           className: "btn-success btn-md",
                           callback: function() {
                             
@@ -148,7 +148,7 @@ Handsontable.Dom.addEvent(save, 'click', function() {
                     title: response.alert.title,
                     buttons: {
                         success: {
-                          label: "$arr[7]",
+                          label: "$arr1[7]",
                           className: "btn-success btn-md",
                           callback: function() {
                             console.log("err");

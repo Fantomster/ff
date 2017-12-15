@@ -96,7 +96,7 @@ $this->title = 'MixCart';
                     </div>
                 </div>	
                 <div class="col-md-7">
-                    <img class="hows__banner" src="/images/image-1.png" alt=""/>
+                    <img class="hows__banner" src="http://static.f-keeper.ru/images/<?=Yii::$app->language ?>/main_<?=Yii::$app->language ?>.png" alt=""/>
                 </div>	
             </div>
         </div>

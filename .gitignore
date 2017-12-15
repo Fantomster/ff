@@ -51,3 +51,4 @@ phpunit.phar
 /api/web/assets/
 /frontend/web/runtime/
 /.htaccess
+/.gitignore

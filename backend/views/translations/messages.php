@@ -13,6 +13,9 @@ $this->params['breadcrumbs'][] = $this->title;
 \common\assets\SweetAlertAsset::register($this);
 
 ?>
+    <p>
+        <?= Html::a('Создать трансляцию', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
 <div class="sms-send-index">
 
     <h1><?= Html::encode($this->title) ?></h1>

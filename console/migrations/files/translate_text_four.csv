@@ -12674,3 +12674,6 @@
 "app"|"frontend.views.settings.if_you_wanna_two"|"en"|NULL
 "app"|"frontend.views.settings.if_you_wanna_two"|"es"|NULL
 "app"|"frontend.views.settings.if_you_wanna_two"|"ru"|"Для каждого добавленного email вы можете выбрать события, о которых будут приходить уведомления."
+"app"|"Instructions to reset your password have been sent"|"en"|"Instructions to reset your password have been sent"
+"app"|"Instructions to reset your password have been sent"|"es"|"Se han enviado instrucciones para restablecer su contraseña"
+"app"|"Instructions to reset your password have been sent"|"ru"|"Вам выслана иснтрукция по восстановлению пароля"

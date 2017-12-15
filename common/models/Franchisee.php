@@ -195,7 +195,7 @@ class Franchisee extends \yii\db\ActiveRecord {
                 $models = Role::findAll(['organization_type' => Organization::TYPE_FRANCHISEE]);
             foreach ($models as $model) {
                 if ($model->id !== Role::ROLE_FRANCHISEE_AGENT) {
-                    $dropdown[$model->id] = $model->name;
+                    $dropdown[$model->id] = Yii::t('app', $model->name);
                 }
             }
         }

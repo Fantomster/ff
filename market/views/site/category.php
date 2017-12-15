@@ -97,7 +97,7 @@ $this->registerMetaTag([
                       <a href="<?=Url::to(['/site/product', 'id' => $row->id]);?>"><h3><?=$row->product; ?></h3></a>
                   </div>
                   <div class="product-category">
-                      <h5><?= \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name; ?>/<?=$row->subCategory->name; ?></h5>
+                      <h5><?= Yii::t('app', \common\models\CatalogBaseGoods::getCurCategory($row->category_id)->name); ?>/<?=Yii::t('app', $row->subCategory->name); ?></h5>
                   </div>
                   <div class="product-company">
                       <a href="<?=Url::to(['/site/supplier', 'id' => $row->vendor->id]);?>">

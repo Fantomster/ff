@@ -76,7 +76,7 @@ class MpCategory extends \yii\db\ActiveRecord {
     public static function allCategory() {
         $mp_ed = ArrayHelper::map(MpCategory::find()->all(), 'id', 'name');
         foreach ($mp_ed as &$item){
-            $item['name'] = Yii::t('app', $item['name']);
+            $item = Yii::t('app', $item);
         }
         return $mp_ed;
     }

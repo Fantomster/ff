@@ -101,6 +101,10 @@ $this->registerJs($customJs, yii\web\View::POS_READY);
                                 [
                                     'label' => 'Переводы СМС',
                                     'url' => ['/sms/message'],
+                                ],
+                                [
+                                    'label' => 'Все переводы',
+                                    'url' => ['/translations/message'],
                                 ]
                             ],
                         ],

@@ -146,7 +146,9 @@ $this->registerCss("
                         [
                             'attribute' => 'role.name',
                             'label' => Yii::t('app', 'franchise.views.site.role', ['ru'=>'Роль']),
-                            'value' => 'role.name'
+                            'value' => function($model) {
+                                return Yii::t('app', $model['role']['name']);
+                            }
                         ],
                         [
                             'attribute' => 'status',

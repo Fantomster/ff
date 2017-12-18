@@ -52,7 +52,7 @@ echo GridView::widget([
         [
             'attribute' => 'quantity',
             'value' => function($data) {
-                return number_format(round($data->quantity, 2), 2, ',', ' ');
+                return number_format(round($data->quantity, 2), 2, '.', '');
             },
             'label' => 'Кол-во',
             'contentOptions' => [
@@ -65,7 +65,7 @@ echo GridView::widget([
         [
             'attribute' => 'price',
             'value' => function($data) use ($order) {
-                return number_format(round($data->price, 2), 2, ',', ' ');
+                return number_format(round($data->price, 2), 2, '.', '');
             },
             'label' => 'Цена за ед.,  ' . $order->currency->iso_code,
             'contentOptions' => [
@@ -78,14 +78,14 @@ echo GridView::widget([
         [
             'attribute' => 'total',
             'value' => function($data) {
-                return number_format(round($data->total, 2), 2, ',', ' ');
+                return number_format(round($data->total, 2), 2, '.', '');
             },
             'label' => 'Сумма',
             'contentOptions' => [
                 'style' => 'text-align:right;vertical-align:middle',
             ],
             'headerOptions' => [
-                'width' => '60'
+                'width' => '70'
             ],
         ],
     ],

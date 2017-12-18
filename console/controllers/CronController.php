@@ -39,7 +39,7 @@ class CronController extends Controller {
                 ->all();
 
         foreach ($base as $catalogBaseGoods) {
-            try {
+            //try {
                 $product_id = $catalogBaseGoods->id;
                 $product_image = !empty($catalogBaseGoods->image) ? $catalogBaseGoods->imageUrl : '';
                 $product_name = $catalogBaseGoods->product;
@@ -54,10 +54,10 @@ class CronController extends Controller {
                 $product_show_price = $catalogBaseGoods->mp_show_price;
                 $product_created_at = $catalogBaseGoods->created_at;
                 $product_partnership = $catalogBaseGoods->vendor->partnership;
-            } catch (\Exception $e) {
-                echo "\nошибка! cbg_id: $product_id\n";
-                return;
-            }
+//            } catch (\Exception $e) {
+//                echo "\nошибка! cbg_id: $product_id\n";
+//                return;
+//            }
 
             $product_rating = $catalogBaseGoods->vendor->rating;
             if (!empty($product_image)) {

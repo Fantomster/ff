@@ -71,7 +71,7 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                Заказ создал: <?= isset($order->acceptedByProfile->full_name) ? $order->acceptedByProfile->full_name : '' ?>
+                                Заказ принял: <?= isset($order->acceptedByProfile->full_name) ? $order->acceptedByProfile->full_name : '' ?>
                             </td>
                         </tr>
                         <tr>

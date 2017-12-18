@@ -2,7 +2,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 ?>
-<div class="col-md-12 req-items" data-id="<?=$model->id;?>">
+<div class="col-md-12 req-items" data-url="<?=Url::to(["request/view", 'id' => $model->id])?>">
   <div class="row">
     <div class="col-md-6">
       <span class="req-name">№<?=$model->id;?> <?=$model->product?></span>

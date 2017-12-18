@@ -1,0 +1,15 @@
+.pdf-table {
+    border-collapse: collapse;
+    border: 1px solid black;
+    font-size: 11px;
+    width:100%;
+}
+
+.pdf-table th {
+    border-right: 1px solid black;
+}
+.pdf-table td {
+    border-right: 1px solid black;
+    border-top: 1px solid black;
+    vertical-align: bottom;
+}

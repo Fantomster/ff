@@ -30,17 +30,17 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                Телефон: <?= $order->createdByProfile->phone ?>
+                                Телефон: <?= $order->createdByProfile->phone ? $order->createdByProfile->phone : $order->createdByProfile->phone ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Email: <?= $order->createdBy->email ?>
+                                Email: <?= $order->createdBy->email ? $order->createdBy->email : $order->createdBy->email ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Заказ создал: <?= $order->createdByProfile->full_name ?>
+                                Заказ создал: <?= $order->createdByProfile->full_name ? $order->createdByProfile->full_name : '' ?>
                             </td>
                         </tr>
                         <tr>
@@ -61,22 +61,24 @@ $currencySymbol = $order->currency->iso_code;
                         </tr>
                         <tr>
                             <td>
-                                Телефон: <?= $order->acceptedByProfile->phone ?>
+                                Телефон: <?= $order->acceptedByProfile->phone ? $order->acceptedByProfile->phone : ''?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Email: <?= $order->acceptedBy->email ?>
+                                Email: <?= $order->acceptedBy->email ? $order->acceptedBy->email : '' ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Заказ создал: <?= $order->acceptedByProfile->full_name ?>
+                                Заказ создал: <?= $order->acceptedByProfile->full_name ? $order->acceptedByProfile->full_name : '' ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                Адрес: <?= $order->vendor->locality ?>, <?= $order->vendor->route ?>, <?= $order->vendor->street_number ?>
+                                Адрес: <?= $order->vendor->locality ? $order->vendor->locality : '' ?>,
+                                <?= $order->vendor->route ? $order->vendor->route  : '' ?>,
+                                <?= $order->vendor->street_number ? $order->vendor->street_number : '' ?>
                             </td>
                         </tr>
                     </table>

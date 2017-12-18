@@ -175,7 +175,6 @@ class CatalogBaseGoods extends \yii\db\ActiveRecord {
             'weight' => 'Вес',
             'mp_show_price' => 'Показывать цену в F-MARKET',
             'rating' => 'Рейтинг'
-                //'importCatalog'=>'Files'
         ];
     }
 

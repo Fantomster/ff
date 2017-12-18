@@ -10,7 +10,7 @@ echo GridView::widget([
     'dataProvider' => $dataProvider,
     'filterPosition' => false,
     'summary' => '',
-    'tableOptions' => ['class' => 'table table-bordered', 'style' => 'font-size: 11px!important;'],
+    'tableOptions' => ['class' => 'table table-bordered', 'style' => 'font-size: 11px'],
     'columns' => [
         [
             'attribute' => 'product.product',

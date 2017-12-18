@@ -1,13 +1,13 @@
-"app"|"common.components.sms.empty"|"en"|NULL
+"app"|"common.components.sms.empty"|"en"|"""Сonsignee"" field cannot be blank"
 "app"|"common.components.sms.empty"|"es"|NULL
 "app"|"common.components.sms.empty"|"ru"|"Поле получатель не может быть пустым. "
-"app"|"common.components.sms.cant_be"|"en"|"Message cannot be empty"
+"app"|"common.components.sms.cant_be"|"en"|"Message cannot be blank"
 "app"|"common.components.sms.cant_be"|"es"|NULL
 "app"|"common.components.sms.cant_be"|"ru"|"Сообщение не может быть пустым. "
 "app"|"common.config.params.pass"|"en"|"Creation of password to enter MixCart system "
 "app"|"common.config.params.pass"|"es"|"Crear una contraseña para iniciar sesión en MixCart"
 "app"|"common.config.params.pass"|"ru"|"Создание пароля для входа в систему MixCart"
-"app"|"common.config.main.empty"|"en"|"empty"
+"app"|"common.config.main.empty"|"en"|"blank"
 "app"|"common.config.main.empty"|"es"|"vacio"
 "app"|"common.config.main.empty"|"ru"|"пусто"
 "app"|"common.mail.welcome.hello"|"en"|"Welcome"
@@ -49,7 +49,7 @@
 "app"|"common.mail.order_change.order_no"|"en"|"Order No."
 "app"|"common.mail.order_change.order_no"|"es"|"Pedido No."
 "app"|"common.mail.order_change.order_no"|"ru"|"Заказ №"
-"app"|"common.mail.confirm_email.hello"|"en"|"How do you do,"
+"app"|"common.mail.confirm_email.hello"|"en"|"Hello,"
 "app"|"common.mail.confirm_email.hello"|"es"|"¡Buenos días!"
 "app"|"common.mail.confirm_email.hello"|"ru"|"Здравствуйте,"
 "app"|"common.mail.confirm_email.you_registered"|"en"|"You have registered in the service"
@@ -79,13 +79,13 @@
 "app"|"common.mail.order_done.order_no"|"en"|"Order No."
 "app"|"common.mail.order_done.order_no"|"es"|"Pedido No."
 "app"|"common.mail.order_done.order_no"|"ru"|"Заказ №"
-"app"|"common.mail.request_set_responsible.change"|"en"|NULL
+"app"|"common.mail.request_set_responsible.change"|"en"|"You request is changing "
 "app"|"common.mail.request_set_responsible.change"|"es"|NULL
 "app"|"common.mail.request_set_responsible.change"|"ru"|"Изменение Вашей заявки"
 "app"|"common.mail.request_set_responsible.dear"|"en"|"Dear"
 "app"|"common.mail.request_set_responsible.dear"|"es"|"Estimado(a)"
 "app"|"common.mail.request_set_responsible.dear"|"ru"|"Уважаемый(ая)"
-"app"|"common.mail.request_set_responsible.took_off"|"en"|NULL
+"app"|"common.mail.request_set_responsible.took_off"|"en"|"removed you from the request execution"
 "app"|"common.mail.request_set_responsible.took_off"|"es"|NULL
 "app"|"common.mail.request_set_responsible.took_off"|"ru"|"снял Вас с исполнения заявки"
 "app"|"common.mail.request_set_responsible.date"|"en"|"Date"
@@ -238,7 +238,7 @@
 "app"|"common.mail.bill.delivery_price"|"en"|"Delivery cost:"
 "app"|"common.mail.bill.delivery_price"|"es"|"Precio de entrega:"
 "app"|"common.mail.bill.delivery_price"|"ru"|"Стоимость доставки:"
-"app"|"common.mail.bill.total"|"en"|"Totally:"
+"app"|"common.mail.bill.total"|"en"|"Total:"
 "app"|"common.mail.bill.total"|"es"|"Total:"
 "app"|"common.mail.bill.total"|"ru"|"Итого:"
 "app"|"common.mail.bill.subscribe"|"en"|"Signature:"
@@ -346,16 +346,16 @@
 "app"|"common.mail.forgot_password.confirm"|"en"|"To confirm"
 "app"|"common.mail.forgot_password.confirm"|"es"|"Confirmar"
 "app"|"common.mail.forgot_password.confirm"|"ru"|"Подтвердить"
-"app"|"common.mail.request_set_responsible.change_two"|"en"|NULL
+"app"|"common.mail.request_set_responsible.change_two"|"en"|"Request is changing"
 "app"|"common.mail.request_set_responsible.change_two"|"es"|NULL
 "app"|"common.mail.request_set_responsible.change_two"|"ru"|"Изменение заявки"
 "app"|"common.mail.request_set_responsible.dear_two"|"en"|"Dear"
 "app"|"common.mail.request_set_responsible.dear_two"|"es"|"Estimado(a)"
 "app"|"common.mail.request_set_responsible.dear_two"|"ru"|"Уважаемый(ая)"
-"app"|"common.mail.request_set_responsible.from_your"|"en"|NULL
+"app"|"common.mail.request_set_responsible.from_your"|"en"|"From your request"
 "app"|"common.mail.request_set_responsible.from_your"|"es"|NULL
 "app"|"common.mail.request_set_responsible.from_your"|"ru"|"С вашей заявки"
-"app"|"common.mail.request_set_responsible.took_off_two"|"en"|NULL
+"app"|"common.mail.request_set_responsible.took_off_two"|"en"|"executor is removed"
 "app"|"common.mail.request_set_responsible.took_off_two"|"es"|NULL
 "app"|"common.mail.request_set_responsible.took_off_two"|"ru"|"снят исполнитель"
 "app"|"common.mail.request_set_responsible.date_two"|"en"|"Date"
@@ -379,7 +379,7 @@
 "app"|"common.mail.request_set_resp_mail.go_to"|"en"|"Go to request"
 "app"|"common.mail.request_set_resp_mail.go_to"|"es"|"Ir a la orden"
 "app"|"common.mail.request_set_resp_mail.go_to"|"ru"|"Перейти к заявке"
-"app"|"common.mail.view_grid.article"|"en"|"Note:"
+"app"|"common.mail.view_grid.article"|"en"|"Remark:"
 "app"|"common.mail.view_grid.article"|"es"|"Nota:"
 "app"|"common.mail.view_grid.article"|"ru"|"Заметка: "
 "app"|"common.mail.view_grid.art"|"en"|"Order code:"
@@ -514,7 +514,7 @@
 "app"|"common.models.additional_email.ready"|"en"|"Completed"
 "app"|"common.models.additional_email.ready"|"es"|"Finalizado"
 "app"|"common.models.additional_email.ready"|"ru"|"Выполнен"
-"app"|"common.models.additional_email.ready.accepted_two"|"en"|NULL
+"app"|"common.models.additional_email.ready.accepted_two"|"en"|"Request is accepting"
 "app"|"common.models.additional_email.ready.accepted_two"|"es"|NULL
 "app"|"common.models.additional_email.ready.accepted_two"|"ru"|"Принятие заявки"
 "app"|"common.models.amount"|"en"|"Quantity"
@@ -535,13 +535,13 @@
 "app"|"common.models.message"|"en"|"Message"
 "app"|"common.models.message"|"es"|"Mensaje"
 "app"|"common.models.message"|"ru"|"Сообщение"
-"app"|"common.models.reciever"|"en"|NULL
+"app"|"common.models.reciever"|"en"|"Consignee"
 "app"|"common.models.reciever"|"es"|NULL
 "app"|"common.models.reciever"|"ru"|"Получатель"
-"app"|"common.models.send_date"|"en"|NULL
+"app"|"common.models.send_date"|"en"|"Delivery date"
 "app"|"common.models.send_date"|"es"|NULL
 "app"|"common.models.send_date"|"ru"|"Дата отправки"
-"app"|"common.models.cancel_date"|"en"|NULL
+"app"|"common.models.cancel_date"|"en"|"Status change date"
 "app"|"common.models.cancel_date"|"es"|NULL
 "app"|"common.models.cancel_date"|"ru"|"Дата смены статуса"
 "app"|"common.models.goods_category"|"en"|"Product category"
@@ -688,7 +688,7 @@
 "app"|"common.models.rest_name"|"en"|"Restaurant name"
 "app"|"common.models.rest_name"|"es"|"Nombre del restaurante"
 "app"|"common.models.rest_name"|"ru"|"Название ресторана"
-"app"|"common.models.creation_date"|"en"|"Date of creation "
+"app"|"common.models.creation_date"|"en"|"Creation date"
 "app"|"common.models.creation_date"|"es"|"Fecha de creación"
 "app"|"common.models.creation_date"|"ru"|"Дата создания"
 "app"|"common.models.open"|"en"|"Opened"
@@ -778,10 +778,10 @@
 "app"|"common.models.discount_percent_two"|"en"|"Discount %"
 "app"|"common.models.discount_percent_two"|"es"|"Descuento %"
 "app"|"common.models.discount_percent_two"|"ru"|"Скидка (%)"
-"app"|"common.models.waiting"|"en"|NULL
+"app"|"common.models.waiting"|"en"|"Expecting supplier's confirmation "
 "app"|"common.models.waiting"|"es"|"En espera de la confirmación del proveedor"
 "app"|"common.models.waiting"|"ru"|"Ожидает подтверждения поставщика"
-"app"|"common.models.waiting_client"|"en"|NULL
+"app"|"common.models.waiting_client"|"en"|"Expecting customer's confirmation"
 "app"|"common.models.waiting_client"|"es"|"Está esperando la confirmación del cliente"
 "app"|"common.models.waiting_client"|"ru"|"Ожидает подтверждения клиента"
 "app"|"common.models.in_process_two"|"en"|"In progress"
@@ -811,7 +811,7 @@
 "app"|"common.models.order_accepted"|"en"|"Order is accepted by"
 "app"|"common.models.order_accepted"|"es"|"Orden aceptada por"
 "app"|"common.models.order_accepted"|"ru"|"Заказ принял"
-"app"|"common.models.creating_date"|"en"|"Date of creation "
+"app"|"common.models.creating_date"|"en"|"Creation date"
 "app"|"common.models.creating_date"|"es"|"Fecha de creación"
 "app"|"common.models.creating_date"|"ru"|"Дата создания"
 "app"|"common.models.status_two"|"en"|"Status"
@@ -1264,7 +1264,7 @@
 "app"|"common.models.percent"|"en"|"Turnover interest"
 "app"|"common.models.percent"|"es"|"Porcentaje de facturación"
 "app"|"common.models.percent"|"ru"|"Процент с оборота"
-"app"|"common.models.creating_date_two"|"en"|"Date of creation "
+"app"|"common.models.creating_date_two"|"en"|"Creation date"
 "app"|"common.models.creating_date_two"|"es"|"Fecha de creación"
 "app"|"common.models.creating_date_two"|"ru"|"Дата создания"
 "app"|"common.models.refreshing_date"|"en"|"Undating date"
@@ -1511,7 +1511,7 @@
 "app"|"franchise.views.finance.mix_me"|"en"|"MixCart"
 "app"|"franchise.views.finance.mix_me"|"es"|"MixCart a mi favor"
 "app"|"franchise.views.finance.mix_me"|"ru"|"MixCart мне"
-"app"|"franchise.views.finance.me_mix_three"|"en"|NULL
+"app"|"franchise.views.finance.me_mix_three"|"en"|"I'm MixCart'у"
 "app"|"franchise.views.finance.me_mix_three"|"es"|NULL
 "app"|"franchise.views.finance.me_mix_three"|"ru"|"Я MixCart'у"
 "app"|"franchise.views.finance.total_income_five"|"en"|"Total sum of revenue"
@@ -1538,7 +1538,7 @@
 "app"|"franchise.views.finance.rouble_two"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_two"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_two"|"ru"|"руб."
-"app"|"franchise.views.finance.me_mix"|"en"|NULL
+"app"|"franchise.views.finance.me_mix"|"en"|"I'm MixCart'у:"
 "app"|"franchise.views.finance.me_mix"|"es"|NULL
 "app"|"franchise.views.finance.me_mix"|"ru"|"Я MixCart'у:"
 "app"|"franchise.views.finance.rouble_three"|"en"|"RUB"
@@ -1559,7 +1559,7 @@
 "app"|"franchise.views.finance.rouble_five"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_five"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_five"|"ru"|"руб."
-"app"|"franchise.views.finance.me_mix_two"|"en"|NULL
+"app"|"franchise.views.finance.me_mix_two"|"en"|"I'm MixCart'у:"
 "app"|"franchise.views.finance.me_mix_two"|"es"|NULL
 "app"|"franchise.views.finance.me_mix_two"|"ru"|"Я MixCart'у:"
 "app"|"franchise.views.finance.rouble_six"|"en"|"RUB"
@@ -1583,46 +1583,46 @@
 "app"|"franchise.views.finance.turnover"|"en"|"Turnover"
 "app"|"franchise.views.finance.turnover"|"es"|"Facturación"
 "app"|"franchise.views.finance.turnover"|"ru"|"Оборот"
-"app"|"franchise.views.finance.vendors_turnover"|"en"|NULL
+"app"|"franchise.views.finance.vendors_turnover"|"en"|"Supplier's turnover:"
 "app"|"franchise.views.finance.vendors_turnover"|"es"|NULL
 "app"|"franchise.views.finance.vendors_turnover"|"ru"|"Оборот поставщика:"
 "app"|"franchise.views.finance.rouble_eight"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_eight"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_eight"|"ru"|"руб."
-"app"|"franchise.views.finance.debet"|"en"|NULL
+"app"|"franchise.views.finance.debet"|"en"|"Added on:"
 "app"|"franchise.views.finance.debet"|"es"|NULL
 "app"|"franchise.views.finance.debet"|"ru"|"Начислено:"
 "app"|"franchise.views.finance.rouble_nine"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_nine"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_nine"|"ru"|"руб."
-"app"|"franchise.views.finance.me_to_mix"|"en"|NULL
+"app"|"franchise.views.finance.me_to_mix"|"en"|"MixCart'у:"
 "app"|"franchise.views.finance.me_to_mix"|"es"|NULL
 "app"|"franchise.views.finance.me_to_mix"|"ru"|"MixCart'у:"
 "app"|"franchise.views.finance.rouble_ten"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_ten"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_ten"|"ru"|"руб."
-"app"|"franchise.views.finance.my_turnover_income"|"en"|NULL
+"app"|"franchise.views.finance.my_turnover_income"|"en"|"My income from sales:"
 "app"|"franchise.views.finance.my_turnover_income"|"es"|NULL
 "app"|"franchise.views.finance.my_turnover_income"|"ru"|"Мой доход с оборота:"
 "app"|"franchise.views.finance.rouble_eleven"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_eleven"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_eleven"|"ru"|"руб."
-"app"|"franchise.views.finance.fix_part"|"en"|NULL
+"app"|"franchise.views.finance.fix_part"|"en"|"Fixed part"
 "app"|"franchise.views.finance.fix_part"|"es"|NULL
 "app"|"franchise.views.finance.fix_part"|"ru"|"Фиксированная часть"
-"app"|"franchise.views.finance.plug"|"en"|NULL
+"app"|"franchise.views.finance.plug"|"en"|"Connection charge:"
 "app"|"franchise.views.finance.plug"|"es"|NULL
 "app"|"franchise.views.finance.plug"|"ru"|"Плата за подключение:"
 "app"|"franchise.views.finance.twelwe"|"en"|"RUB"
 "app"|"franchise.views.finance.twelwe"|"es"|"RUB"
 "app"|"franchise.views.finance.twelwe"|"ru"|"руб."
-"app"|"franchise.views.finance.monthly_payment"|"en"|NULL
+"app"|"franchise.views.finance.monthly_payment"|"en"|"Monthly payment:"
 "app"|"franchise.views.finance.monthly_payment"|"es"|NULL
 "app"|"franchise.views.finance.monthly_payment"|"ru"|"Ежемесячный платеж:"
 "app"|"franchise.views.finance.rouble_twelve"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_twelve"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_twelve"|"ru"|"руб."
-"app"|"franchise.views.finance.your_percent"|"en"|NULL
+"app"|"franchise.views.finance.your_percent"|"en"|"Your %:"
 "app"|"franchise.views.finance.your_percent"|"es"|NULL
 "app"|"franchise.views.finance.your_percent"|"ru"|"Ваш %:"
 "app"|"franchise.views.finance.rouble_thirteen"|"en"|"RUB"
@@ -1631,13 +1631,13 @@
 "app"|"franchise.views.finance.rouble_fourteen"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_fourteen"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_fourteen"|"ru"|"руб."
-"app"|"franchise.views.finance.commercial"|"en"|NULL
+"app"|"franchise.views.finance.commercial"|"en"|"Advertisement:"
 "app"|"franchise.views.finance.commercial"|"es"|NULL
 "app"|"franchise.views.finance.commercial"|"ru"|"Реклама:"
 "app"|"franchise.views.finance.rouble_fifteen"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_fifteen"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_fifteen"|"ru"|"руб."
-"app"|"franchise.views.finance.your_percent_two"|"en"|NULL
+"app"|"franchise.views.finance.your_percent_two"|"en"|"Your %:"
 "app"|"franchise.views.finance.your_percent_two"|"es"|NULL
 "app"|"franchise.views.finance.your_percent_two"|"ru"|"Ваш %:"
 "app"|"franchise.views.finance.rouble_sixteen"|"en"|"RUB"
@@ -1646,13 +1646,13 @@
 "app"|"franchise.views.finance.seventeen"|"en"|"RUB"
 "app"|"franchise.views.finance.seventeen"|"es"|"RUB"
 "app"|"franchise.views.finance.seventeen"|"ru"|"руб."
-"app"|"franchise.views.finance.requests"|"en"|NULL
+"app"|"franchise.views.finance.requests"|"en"|"Requests:"
 "app"|"franchise.views.finance.requests"|"es"|NULL
 "app"|"franchise.views.finance.requests"|"ru"|"Заявки:"
 "app"|"franchise.views.finance.rouble_eighteen"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_eighteen"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_eighteen"|"ru"|"руб."
-"app"|"franchise.views.finance.your_percent_three"|"en"|NULL
+"app"|"franchise.views.finance.your_percent_three"|"en"|"Your %:"
 "app"|"franchise.views.finance.your_percent_three"|"es"|NULL
 "app"|"franchise.views.finance.your_percent_three"|"ru"|"Ваш %:"
 "app"|"franchise.views.finance.rouble_nineteen"|"en"|"RUB"
@@ -1661,25 +1661,25 @@
 "app"|"franchise.views.finance.rouble_twenty"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_twenty"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_twenty"|"ru"|"руб."
-"app"|"franchise.views.finance.debts"|"en"|NULL
+"app"|"franchise.views.finance.debts"|"en"|"Debts"
 "app"|"franchise.views.finance.debts"|"es"|NULL
 "app"|"franchise.views.finance.debts"|"ru"|"Долги"
-"app"|"franchise.views.finance.system_debt"|"en"|NULL
+"app"|"franchise.views.finance.system_debt"|"en"|"Supplier's debt to system:"
 "app"|"franchise.views.finance.system_debt"|"es"|NULL
 "app"|"franchise.views.finance.system_debt"|"ru"|"Долг поставщика перед системой:"
 "app"|"franchise.views.finance.rouble_twenty_one"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_twenty_one"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_twenty_one"|"ru"|"руб."
-"app"|"franchise.views.finance.last_month"|"en"|NULL
+"app"|"franchise.views.finance.last_month"|"en"|"Last month debt:"
 "app"|"franchise.views.finance.last_month"|"es"|NULL
 "app"|"franchise.views.finance.last_month"|"ru"|"Долг за прошлый месяц:"
 "app"|"franchise.views.finance.rouble_twenty_two"|"en"|"RUB"
 "app"|"franchise.views.finance.rouble_twenty_two"|"es"|"RUB"
 "app"|"franchise.views.finance.rouble_twenty_two"|"ru"|"руб."
-"app"|"franchise.views.finance.period"|"en"|NULL
+"app"|"franchise.views.finance.period"|"en"|"Statement period"
 "app"|"franchise.views.finance.period"|"es"|NULL
 "app"|"franchise.views.finance.period"|"ru"|"Период для выписки"
-"app"|"franchise.views.finance.download"|"en"|NULL
+"app"|"franchise.views.finance.download"|"en"|"Download statement"
 "app"|"franchise.views.finance.download"|"es"|NULL
 "app"|"franchise.views.finance.download"|"ru"|"Скачать выписку"
 "app"|"franchise.views.catalog.my_catalogs"|"en"|"My catalogues"
@@ -2111,10 +2111,10 @@
 "app"|"franchise.views.catalog.newcatalog.change_cat_name"|"en"|"Change catalogue name"
 "app"|"franchise.views.catalog.newcatalog.change_cat_name"|"es"|"Cambiar el nombre del catálogo"
 "app"|"franchise.views.catalog.newcatalog.change_cat_name"|"ru"|"Изменить название каталога"
-"app"|"franchise.views.catalog.newcatalog.saved"|"en"|NULL
+"app"|"franchise.views.catalog.newcatalog.saved"|"en"|"Saved!"
 "app"|"franchise.views.catalog.newcatalog.saved"|"es"|NULL
 "app"|"franchise.views.catalog.newcatalog.saved"|"ru"|"Сохранено!"
-"app"|"franchise.views.catalog.newcatalog.ok"|"en"|NULL
+"app"|"franchise.views.catalog.newcatalog.ok"|"en"|"Ok"
 "app"|"franchise.views.catalog.newcatalog.ok"|"es"|NULL
 "app"|"franchise.views.catalog.newcatalog.ok"|"ru"|"Ok"
 "app"|"franchise.views.catalog.newcatalog.edit_products"|"en"|"Edit products"
@@ -2930,7 +2930,7 @@
 "app"|"franchise.views.site.zero"|"en"|"0 RUB"
 "app"|"franchise.views.site.zero"|"es"|"0 RUB"
 "app"|"franchise.views.site.zero"|"ru"|"0 руб."
-"app"|"franchise.views.site.me_to_mix"|"en"|NULL
+"app"|"franchise.views.site.me_to_mix"|"en"|"I'm MixCart'у:"
 "app"|"franchise.views.site.me_to_mix"|"es"|NULL
 "app"|"franchise.views.site.me_to_mix"|"ru"|"Я MixCart'у:"
 "app"|"franchise.views.site.rouble_three"|"en"|"RUB"
@@ -2984,7 +2984,7 @@
 "app"|"franchise.views.site.sum"|"en"|"Sum"
 "app"|"franchise.views.site.sum"|"es"|"Importe"
 "app"|"franchise.views.site.sum"|"ru"|"Сумма"
-"app"|"franchise.views.site.creating_date"|"en"|"Date of creation "
+"app"|"franchise.views.site.creating_date"|"en"|"Creation date"
 "app"|"franchise.views.site.creating_date"|"es"|"Fecha de creación"
 "app"|"franchise.views.site.creating_date"|"ru"|"Дата создания"
 "app"|"franchise.views.site.status"|"en"|"Status"
@@ -3050,7 +3050,7 @@
 "app"|"franchise.views.site.sum_two"|"en"|"Sum"
 "app"|"franchise.views.site.sum_two"|"es"|"Importe"
 "app"|"franchise.views.site.sum_two"|"ru"|"Сумма"
-"app"|"franchise.views.site.creating_date_two"|"en"|"Date of creation "
+"app"|"franchise.views.site.creating_date_two"|"en"|"Creation date"
 "app"|"franchise.views.site.creating_date_two"|"es"|"Fecha de creación"
 "app"|"franchise.views.site.creating_date_two"|"ru"|"Дата создания"
 "app"|"franchise.views.site.status_three"|"en"|"Status"
@@ -3362,7 +3362,7 @@
 "app"|"franchise.views.site.request.rest_name"|"en"|"Restaurant name"
 "app"|"franchise.views.site.request.rest_name"|"es"|"Nombre del restaurante"
 "app"|"franchise.views.site.request.rest_name"|"ru"|"Название ресторана"
-"app"|"franchise.views.site.request.creating_date"|"en"|"Date of creation "
+"app"|"franchise.views.site.request.creating_date"|"en"|"Creation date"
 "app"|"franchise.views.site.request.creating_date"|"es"|"Fecha de creación"
 "app"|"franchise.views.site.request.creating_date"|"ru"|"Дата создания"
 "app"|"franchise.views.site.request.opened"|"en"|"Opened"
@@ -3575,7 +3575,7 @@
 "app"|"franchise.views.organization.your_rest"|"en"|"Your restaurants"
 "app"|"franchise.views.organization.your_rest"|"es"|"Tus restaurantes"
 "app"|"franchise.views.organization.your_rest"|"ru"|"Ваши рестораны"
-"app"|"franchise.views.organization.shure"|"en"|NULL
+"app"|"franchise.views.organization.shure"|"en"|"Are you sure you want to delete restaurant?"
 "app"|"franchise.views.organization.shure"|"es"|NULL
 "app"|"franchise.views.organization.shure"|"ru"|"Вы уверены, что хотите удалить ресторан?"
 "app"|"franchise.views.organization.your_rest_two"|"en"|"Your restaurants"
@@ -3659,7 +3659,7 @@
 "app"|"franchise.views.organization.your_vendors"|"en"|"Your suppliers"
 "app"|"franchise.views.organization.your_vendors"|"es"|"Tus proveedores"
 "app"|"franchise.views.organization.your_vendors"|"ru"|"Ваши поставщики"
-"app"|"franchise.views.organization.sure_two"|"en"|NULL
+"app"|"franchise.views.organization.sure_two"|"en"|"Are you sure you want to delete supplier?"
 "app"|"franchise.views.organization.sure_two"|"es"|NULL
 "app"|"franchise.views.organization.sure_two"|"ru"|"Вы уверены, что хотите удалить поставщика?"
 "app"|"franchise.views.organization.your_vendors_two"|"en"|"Your suppliers"
@@ -4508,7 +4508,7 @@
 "message"|"frontend.controllers.client.invite_sent"|"en"|"Invitation is sent!"
 "message"|"frontend.controllers.client.invite_sent"|"es"|"¡Invitación se ha enviado correctamente!"
 "message"|"frontend.controllers.client.invite_sent"|"ru"|"Приглашение отправлено!"
-"message"|"frontend.controllers.client.rest_four"|"en"|NULL
+"message"|"frontend.controllers.client.rest_four"|"en"|"Restaurant"
 "message"|"frontend.controllers.client.rest_four"|"es"|NULL
 "message"|"frontend.controllers.client.rest_four"|"ru"|"Ресторан "
 "message"|"frontend.controllers.client.invites_you"|"en"|"welcomes into the system "
@@ -4517,7 +4517,7 @@
 "message"|"frontend.controllers.client.valid"|"en"|"Validation is failed!"
 "message"|"frontend.controllers.client.valid"|"es"|"¡Validación no realizada!"
 "message"|"frontend.controllers.client.valid"|"ru"|"Валидация не пройдена!"
-"message"|"frontend.controllers.client.contact_us"|"en"|NULL
+"message"|"frontend.controllers.client.contact_us"|"en"|"To add/update more than <strong>5000</strong> items, please contact us"
 "message"|"frontend.controllers.client.contact_us"|"es"|NULL
 "message"|"frontend.controllers.client.contact_us"|"ru"|"Чтобы добавить/обновить более <strong>5000</strong> позиций, пожалуйста свяжитесь с нами "
 "message"|"frontend.controllers.client.oops"|"en"|"OOPS! Error"
@@ -4622,7 +4622,7 @@
 "message"|"frontend.controllers.order.uncorrect_date"|"en"|"Incorrect data"
 "message"|"frontend.controllers.order.uncorrect_date"|"es"|"Fecha incorrecta"
 "message"|"frontend.controllers.order.uncorrect_date"|"ru"|"Некорректная дата"
-"message"|"frontend.controllers.order.date_changed"|"en"|NULL
+"message"|"frontend.controllers.order.date_changed"|"en"|"Delivery date was changed"
 "message"|"frontend.controllers.order.date_changed"|"es"|"Fecha de entrega está modificada"
 "message"|"frontend.controllers.order.date_changed"|"ru"|"Дата доставки изменена"
 "message"|"frontend.controllers.order.date_set"|"en"|"Delivery date is set"
@@ -4640,7 +4640,7 @@
 "message"|"frontend.controllers.order.change"|"en"|"<br/>changed quantity {prod} from {oldQuan} {ed} to"
 "message"|"frontend.controllers.order.change"|"es"|"<br/>ha modificado el número de {prod} de {oldQuan} {ed} por "
 "message"|"frontend.controllers.order.change"|"ru"|"<br/>изменил количество {prod} с {oldQuan} {ed} на "
-"message"|"frontend.controllers.order.change_price"|"en"|"<br/> changed price {prod} from {productPrice} {currencySymbol} on "
+"message"|"frontend.controllers.order.change_price"|"en"|"<br/>changed price {prod} from {product Price} {currencySymbol} to "
 "message"|"frontend.controllers.order.change_price"|"es"|"<br/> precio cambiado {prod} de
  {productPrice} {currencySymbol} en "
 "message"|"frontend.controllers.order.change_price"|"ru"|"<br/>изменил цену {prod} с {productPrice} {currencySymbol} на "
@@ -4800,7 +4800,7 @@
 "message"|"frontend.controllers.vendor.inv_sent"|"en"|"Invitation is sent!"
 "message"|"frontend.controllers.vendor.inv_sent"|"es"|"¡Invitación se ha enviado correctamente!"
 "message"|"frontend.controllers.vendor.inv_sent"|"ru"|"Приглашение отправлено!"
-"message"|"frontend.controllers.vendor.saved_two"|"en"|NULL
+"message"|"frontend.controllers.vendor.saved_two"|"en"|"Saved!"
 "message"|"frontend.controllers.vendor.saved_two"|"es"|NULL
 "message"|"frontend.controllers.vendor.saved_two"|"ru"|"Сохранено!"
 "message"|"frontend.views.client.dashboard.ola"|"en"|"Welcome you!"
@@ -5007,7 +5007,7 @@
 "message"|"frontend.views.client.index.vendors"|"en"|"Suppliers"
 "message"|"frontend.views.client.index.vendors"|"es"|"Proveedores"
 "message"|"frontend.views.client.index.vendors"|"ru"|"Поставщики"
-"message"|"frontend.views.client.index.order"|"en"|"To order"
+"message"|"frontend.views.client.index.order"|"en"|"Order"
 "message"|"frontend.views.client.index.order"|"es"|"Ordene ahora"
 "message"|"frontend.views.client.index.order"|"ru"|"Заказать"
 "message"|"frontend.views.client.index.history"|"en"|"<span style=""color:#3F3E3E"">History</span> orders"
@@ -5025,7 +5025,7 @@
 "message"|"frontend.views.client.index.sum"|"en"|"Sum"
 "message"|"frontend.views.client.index.sum"|"es"|"Importe"
 "message"|"frontend.views.client.index.sum"|"ru"|"Сумма"
-"message"|"frontend.views.client.index.created_at"|"en"|"Date of creation "
+"message"|"frontend.views.client.index.created_at"|"en"|"Creation date"
 "message"|"frontend.views.client.index.created_at"|"es"|"Fecha de creación"
 "message"|"frontend.views.client.index.created_at"|"ru"|"Дата создания"
 "message"|"frontend.views.client.index.status"|"en"|"Status"
@@ -5454,7 +5454,7 @@
 "message"|"frontend.views.client.supp.phone"|"en"|"Supplier phone number"
 "message"|"frontend.views.client.supp.phone"|"es"|"Teléfono del proveedor"
 "message"|"frontend.views.client.supp.phone"|"ru"|"Телефон поставщика"
-"message"|"frontend.views.client.supp.org"|"en"|NULL
+"message"|"frontend.views.client.supp.org"|"en"|"Enter supplier's company name"
 "message"|"frontend.views.client.supp.org"|"es"|"Introduce el nombre de la empresa del proveedor"
 "message"|"frontend.views.client.supp.org"|"ru"|"Введите название организации поставщика"
 "message"|"frontend.views.client.supp.add_goods"|"en"|"Add products"
@@ -5508,7 +5508,7 @@
 "message"|"frontend.views.client.settings.settings"|"en"|"Settings"
 "message"|"frontend.views.client.settings.settings"|"es"|"Ajustes"
 "message"|"frontend.views.client.settings.settings"|"ru"|"Настройки"
-"message"|"frontend.views.client.settings.fill"|"en"|"In order to continue working with our system please fill in all the required fields of the form. "
+"message"|"frontend.views.client.settings.fill"|"en"|"To continue working with our system please fill in all the required fields in the form."
 "message"|"frontend.views.client.settings.fill"|"es"|"Para seguir trabajando con nuestro sistema, completa todos los campos del formulario."
 "message"|"frontend.views.client.settings.fill"|"ru"|"Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы."
 "message"|"frontend.views.client.settings.lets_do_it"|"en"|"Let do it!"
@@ -5919,13 +5919,13 @@
 "message"|"frontend.views.layouts.main.var2"|"en"|"We will contact you in the nearest time."
 "message"|"frontend.views.layouts.main.var2"|"es"|"En breve contactaremos con Vds."
 "message"|"frontend.views.layouts.main.var2"|"ru"|"Мы свяжемся с вами в ближайшее время."
-"message"|"frontend.views.layouts.main.var4"|"en"|NULL
+"message"|"frontend.views.layouts.main.var4"|"en"|"Failed to send Request"
 "message"|"frontend.views.layouts.main.var4"|"es"|"La orden no ha sido enviada"
 "message"|"frontend.views.layouts.main.var4"|"ru"|"Заявка не отправлена"
 "message"|"frontend.views.layouts.main.var6"|"en"|"You have already sent a request"
 "message"|"frontend.views.layouts.main.var6"|"es"|"Ya ha enviado la orden"
 "message"|"frontend.views.layouts.main.var6"|"ru"|"Вы уже отправляли заявку"
-"message"|"frontend.views.layouts.main.var8"|"en"|"Application not sent"
+"message"|"frontend.views.layouts.main.var8"|"en"|"Failed to send Request"
 "message"|"frontend.views.layouts.main.var8"|"es"|"La orden no ha sido enviada"
 "message"|"frontend.views.layouts.main.var8"|"ru"|"Заявка не отправлена"
 "message"|"frontend.views.layouts.header.var1"|"en"|"Invitation in MixCart"
@@ -6087,7 +6087,7 @@
 "message"|"frontend.views.site.soroka"|"en"|"Director: Soroka, MOS"
 "message"|"frontend.views.site.soroka"|"es"|"Gerente: Soroka, MOS."
 "message"|"frontend.views.site.soroka"|"ru"|"Управляющий: Сорока, МОС."
-"message"|"frontend.views.site.big_rest"|"en"|"I manage two large restaurants, we need a high level of both service and optimization of internal processes. MixCart, solves the whole range of tasks related to procurement. Transparency and speed are provided."
+"message"|"frontend.views.site.big_rest"|"en"|"I'm a director of two major restaurants. The high level of services and performance optimization are highly important for us. MixCart offers solution for full range of matters related to purchases. This provides transparency and efficiency.   "
 "message"|"frontend.views.site.big_rest"|"es"|"Soy administrador de dos restaurantes grandes. Necesitamos el alto nivel de servicio y optimización de procesos internos. MixCart resuelve toda la gama de problemas relacionadas con las compras. Están garantizadas la transparencia y la velocidad."
 "message"|"frontend.views.site.big_rest"|"ru"|"Я управляю двумя крупными ресторанами, нам важен высокий уровень как сервиса, так и оптимизации внутренних процессов. MixCart, решает весь спектр задач, связанных с закупками. Прозрачность и скорость обеспечены."
 "message"|"frontend.views.site.kucha"|"en"|"Roman Kucha"
@@ -6096,7 +6096,7 @@
 "message"|"frontend.views.site.brookwin"|"en"|"Founder: Brookwin."
 "message"|"frontend.views.site.brookwin"|"es"|"Fundador: Brookwin."
 "message"|"frontend.views.site.brookwin"|"ru"|"Основатель: Brookwin."
-"message"|"frontend.views.site.modern"|"en"|"My restaurant is in Anapa, I'm in Moscow, now I see what happens in our purchases, who buys what and where. I'm for the modern tools of work, MixCart, solves my problems."
+"message"|"frontend.views.site.modern"|"en"|"My restaurant is in Anapa and I'm in Moscow and now I see how procurements are going on, who purchases and where. I support advanced tools of work and MixCart solves my tasks."
 "message"|"frontend.views.site.modern"|"es"|"Mi restaurante está en Anapa y yo estoy en Moscú. Ahora veo que es lo que sucede con nuestras compras, quién compra, qué compra y dónde compra. Estoy a favor de las herramientas modernas de trabajo. MixCart resuelve mis problemas."
 "message"|"frontend.views.site.modern"|"ru"|"Мой ресторан находится в Анапе, я нахожусь в Москве, сейчас я вижу, что происходит у нас с закупками, кто, что и где покупает. Я за современные инструменты работы, MixCart, решает мои задачи."
 "message"|"frontend.views.site.integration"|"en"|"Integration with 1C, iiko, r-keeper"
@@ -6111,7 +6111,7 @@
 "message"|"frontend.views.site.never"|"en"|"A purchase has never been this easy than now"
 "message"|"frontend.views.site.never"|"es"|"Nunca la compra fue tan fácil como ahora"
 "message"|"frontend.views.site.never"|"ru"|"Никогда закупка не была проще, чем сейчас"
-"message"|"frontend.views.site.actual"|"en"|NULL
+"message"|"frontend.views.site.actual"|"en"|"In this section we tried to answer the most topical questions, if you haven't found an answer to your question, please contact us. "
 "message"|"frontend.views.site.actual"|"es"|"En esta sección, tratamos de responder a las preguntas más frecuentes. Si no has encontrado la respuesta a tu pregunta, contáctanos."
 "message"|"frontend.views.site.actual"|"ru"|"В этом разделе, мы постарались ответить на самые актуальные вопросы, если вы не нашли ответ на свой вопрос, свяжитесь с нами, пожалуйста."
 "message"|"frontend.views.site.for_rest"|"en"|"for restaurants"
@@ -6162,7 +6162,7 @@
 "message"|"frontend.views.site.bad_conditions"|"en"|"What if the order is delivered in an inadequate condition?"
 "message"|"frontend.views.site.bad_conditions"|"es"|"¿Qué pasa si el pedido se entregó en una condición inadecuada?"
 "message"|"frontend.views.site.bad_conditions"|"ru"|"Что если заказ доставлен в ненадлежащем состоянии?"
-"message"|"frontend.views.site.like_always"|"en"|NULL
+"message"|"frontend.views.site.like_always"|"en"|" The same thing that you always do. You can reject the whole order or accept it partially. At that, you can give a rating to the supplier's work and give a feedback. "
 "message"|"frontend.views.site.like_always"|"es"|"Lo de siempre. Podrá cancelar el pedido por completo o aceptar parte del pedido. Además, publicar una evaluación  sobre el trabajo del proveedor y dejar un comentario."
 "message"|"frontend.views.site.like_always"|"ru"|"Все то же, что и всегда. Вы можете отказаться от всего заказа или принять заказ частично. При этом поставить оценку о работе поставщика и оставить отзыв."
 "message"|"frontend.views.site.repeat_orders"|"en"|"Can I repeat the previous orders?"
@@ -6183,7 +6183,7 @@
 "message"|"frontend.views.site.no_payment"|"en"|"No, you cannot. All financial relations are beyond MixCart. This is only between supplier and restaurant. "
 "message"|"frontend.views.site.no_payment"|"es"|"No. Todos los asuntos financieros se resuelven fuera de MixCart. Entre los proveedores y el restaurante."
 "message"|"frontend.views.site.no_payment"|"ru"|"Нет. Все финансовые взаимоотношения происходят за пределами MixCart. Между поставщиков и рестораном."
-"message"|"frontend.views.site.no_vendors"|"en"|NULL
+"message"|"frontend.views.site.no_vendors"|"en"|"What can I do if I haven't still had a supplier?"
 "message"|"frontend.views.site.no_vendors"|"es"|"¿Qué pasa si aún no tengo proveedores?"
 "message"|"frontend.views.site.no_vendors"|"ru"|"Что делать, если у меня пока еще нет поставщиков?"
 "message"|"frontend.views.site.marketplace"|"en"|"If you just opened a restaurant and you did not find a supplier you can easily find an appropriate supplier here.<br/>Go to Market place and select appropriate suppliers. "
@@ -6252,7 +6252,7 @@
 "message"|"frontend.views.site.diff_catalogs"|"en"|"In the section ""My catalogues"" you can create any number of different catalogues. You can create catalogues according to any rules, reduce or increase the prices, make them fixed or connected to percentages.  "
 "message"|"frontend.views.site.diff_catalogs"|"es"|"En la sección ""Mis catálogos"" puede crear cualquier número de catálogos. Puede crear catálogos según cualquier tipo de normas, bajar precios fijos, aumentar o vincular intereses. Luego, conecta a cualquiera de sus clientes con el catálogo necesario."
 "message"|"frontend.views.site.diff_catalogs"|"ru"|"В разделе ""мои каталоги"", вы можете создать любое количество разных каталогов. Вы можете создавать каталоги по любым правилам, опускать цены фиксировано, поднимать, или привязывая к процентам. Далее любого своего клиента с любым каталогом."
-"message"|"frontend.views.site.debet"|"en"|NULL
+"message"|"frontend.views.site.debet"|"en"|"What if a client doesn't pay receivables?"
 "message"|"frontend.views.site.debet"|"es"|"¿Si el Cliente no paga las cuentas por cobrar?"
 "message"|"frontend.views.site.debet"|"ru"|"Если клиент не выплачивает дебиторскую задолженность?"
 "message"|"frontend.views.site.bad_client"|"en"|"In case of the unfaithfulness of your customer, we recommend to give such customer the relative rating and leave a feedback."
@@ -6306,7 +6306,7 @@
 "message"|"frontend.views.site.home"|"en"|"And now you can<a href=""{home_url}"">go to the Home page</a>."
 "message"|"frontend.views.site.home"|"es"|"Mientras tanto, puedes <a href=""{home_url}"">ir a la página principal</a>."
 "message"|"frontend.views.site.home"|"ru"|"А пока можно <a href=""{home_url}"">перейти на главную страницу</a>."
-"message"|"frontend.views.site.for_rest_three"|"en"|NULL
+"message"|"frontend.views.site.for_rest_three"|"en"|"For restaurants"
 "message"|"frontend.views.site.for_rest_three"|"es"|"Restaurantes"
 "message"|"frontend.views.site.for_rest_three"|"ru"|"Ресторанам"
 "message"|"frontend.views.site.revolution"|"en"|"Supplier management revolution<br/>2 clicks purchase"
@@ -6360,7 +6360,7 @@
 "message"|"frontend.views.site.set_limits"|"en"|"Limitation setting"
 "message"|"frontend.views.site.set_limits"|"es"|"Fijación de límites"
 "message"|"frontend.views.site.set_limits"|"ru"|"Выставление лимитов"
-"message"|"frontend.views.site.limit_value"|"en"|NULL
+"message"|"frontend.views.site.limit_value"|"en"|"You can limit the purchased scope. The purchaser wouldn't be able to buy above the limit. "
 "message"|"frontend.views.site.limit_value"|"es"|"Puedes limitar el volumen de compras estableciendo un límite determinado. El comprador no podrá hacer compra que sea superior al límite establecido."
 "message"|"frontend.views.site.limit_value"|"ru"|"Вы можете ограничить объем закупок определенным лимитом. Закупщик не сможет сделать закупку больше лимита."
 "message"|"frontend.views.site.tenders"|"en"|"Tenders placement"
@@ -6660,7 +6660,7 @@
 "message"|"frontend.views.vendor.address"|"en"|"Address"
 "message"|"frontend.views.vendor.address"|"es"|"Dirección"
 "message"|"frontend.views.vendor.address"|"ru"|"Адрес"
-"message"|"frontend.views.vendor.continue"|"en"|NULL
+"message"|"frontend.views.vendor.continue"|"en"|"To continue working with our system please fill in all the required fields in the form."
 "message"|"frontend.views.vendor.continue"|"es"|NULL
 "message"|"frontend.views.vendor.continue"|"ru"|"Для того, чтобы продолжить работу с нашей системой, заполните все необходимые поля формы. "
 "message"|"frontend.views.vendor.create_cat"|"en"|"Create your catalogue with products"
@@ -6687,7 +6687,7 @@
 "message"|"frontend.views.vendor.main_catalog"|"en"|"Main catalogue"
 "message"|"frontend.views.vendor.main_catalog"|"es"|"Catálogo principal"
 "message"|"frontend.views.vendor.main_catalog"|"ru"|"Главный каталог"
-"message"|"frontend.views.vendor.currency"|"en"|"Currency of the catalog:"
+"message"|"frontend.views.vendor.currency"|"en"|"Catalogue currency:"
 "message"|"frontend.views.vendor.currency"|"es"|"Moneda del catálogo:"
 "message"|"frontend.views.vendor.currency"|"ru"|"Валюта каталога:"
 "message"|"frontend.views.vendor.this_cat"|"en"|"This catalogue includes all your products available on MixCart"
@@ -6717,7 +6717,7 @@
 "message"|"frontend.views.vendor.rest_to_main"|"en"|"Restaurant is connected to<strong>Main catalogue</strong>"
 "message"|"frontend.views.vendor.rest_to_main"|"es"|"El restaurante está conectado al <strong>Catálogo principal</strong>"
 "message"|"frontend.views.vendor.rest_to_main"|"ru"|"Ресторан подключен к <strong>Главному каталогу</strong>"
-"message"|"frontend.views.vendor.currency_two"|"en"|NULL
+"message"|"frontend.views.vendor.currency_two"|"en"|"Catalogue currency:"
 "message"|"frontend.views.vendor.currency_two"|"es"|NULL
 "message"|"frontend.views.vendor.currency_two"|"ru"|"Валюта каталога:"
 "message"|"frontend.views.vendor.created_at"|"en"|"Created"
@@ -6849,7 +6849,7 @@
 "message"|"frontend.views.vendor.summ"|"en"|"Sum"
 "message"|"frontend.views.vendor.summ"|"es"|"Importe"
 "message"|"frontend.views.vendor.summ"|"ru"|"Сумма"
-"message"|"frontend.views.vendor.cr_date"|"en"|"Date of creation "
+"message"|"frontend.views.vendor.cr_date"|"en"|"Creation date"
 "message"|"frontend.views.vendor.cr_date"|"es"|"Fecha de creación"
 "message"|"frontend.views.vendor.cr_date"|"ru"|"Дата создания"
 "message"|"frontend.views.vendor.status"|"en"|"Status"
@@ -6933,7 +6933,7 @@
 "message"|"frontend.views.vendor.search_six"|"en"|"Search"
 "message"|"frontend.views.vendor.search_six"|"es"|"Buscar"
 "message"|"frontend.views.vendor.search_six"|"ru"|"Поиск"
-"message"|"frontend.views.vendor.import_six"|"en"|"Download catalog (.xls)"
+"message"|"frontend.views.vendor.import_six"|"en"|"Load a catalogue(.xls)"
 "message"|"frontend.views.vendor.import_six"|"es"|"Descargue el catálogo (.xls)"
 "message"|"frontend.views.vendor.import_six"|"ru"|"Загрузить каталог (.xls)"
 "message"|"frontend.views.vendor.change_curr_five"|"en"|"Change currency:"
@@ -7704,7 +7704,7 @@
 "message"|"frontend.views.vendor.regions"|"en"|"Regions of delivery"
 "message"|"frontend.views.vendor.regions"|"es"|"Regiones de entrega"
 "message"|"frontend.views.vendor.regions"|"ru"|"Регионы доставки"
-"message"|"frontend.views.vendor.delivery_regions"|"en"|"Add the regions to which you deliver"
+"message"|"frontend.views.vendor.delivery_regions"|"en"|"Add regions of your supply"
 "message"|"frontend.views.vendor.delivery_regions"|"es"|"Agregue las regiones a las que entrega"
 "message"|"frontend.views.vendor.delivery_regions"|"ru"|"Добавьте регионы в которые Вы доставляете"
 "message"|"frontend.views.vendor.search_seven"|"en"|"Search"
@@ -8082,7 +8082,7 @@
 "message"|"frontend.views.order.delivery_price_four"|"en"|"Delivery cost:"
 "message"|"frontend.views.order.delivery_price_four"|"es"|"Precio de entrega:"
 "message"|"frontend.views.order.delivery_price_four"|"ru"|"Стоимость доставки:"
-"message"|"frontend.views.order.total_price"|"en"|"Totally:"
+"message"|"frontend.views.order.total_price"|"en"|"Total:"
 "message"|"frontend.views.order.total_price"|"es"|"Total:"
 "message"|"frontend.views.order.total_price"|"ru"|"Итого:"
 "message"|"frontend.views.order.sign"|"en"|"Signature:"
@@ -8163,7 +8163,7 @@
 "message"|"frontend.views.order.summ"|"en"|"Sum"
 "message"|"frontend.views.order.summ"|"es"|"Importe"
 "message"|"frontend.views.order.summ"|"ru"|"Сумма"
-"message"|"frontend.views.order.creating_date"|"en"|"Date of creation "
+"message"|"frontend.views.order.creating_date"|"en"|"Creation date"
 "message"|"frontend.views.order.creating_date"|"es"|"Fecha de creación"
 "message"|"frontend.views.order.creating_date"|"ru"|"Дата создания"
 "message"|"frontend.views.order.status_two"|"en"|"Status"
@@ -8211,7 +8211,7 @@
 "message"|"frontend.views.order.delivery_price_two"|"en"|"Delivery cost:"
 "message"|"frontend.views.order.delivery_price_two"|"es"|"Precio de entrega:"
 "message"|"frontend.views.order.delivery_price_two"|"ru"|"Стоимость доставки:"
-"message"|"frontend.views.order.total"|"en"|"Totally:"
+"message"|"frontend.views.order.total"|"en"|"Total:"
 "message"|"frontend.views.order.total"|"es"|"Total:"
 "message"|"frontend.views.order.total"|"ru"|"Итого:"
 "message"|"frontend.views.order.order_comment_four"|"en"|"Order comments"
@@ -8223,7 +8223,7 @@
 "message"|"frontend.views.order.delivery_price_three"|"en"|"Delivery cost:"
 "message"|"frontend.views.order.delivery_price_three"|"es"|"Precio de entrega:"
 "message"|"frontend.views.order.delivery_price_three"|"ru"|"Стоимость доставки:"
-"message"|"frontend.views.order.total_two"|"en"|"Totally:"
+"message"|"frontend.views.order.total_two"|"en"|"Total:"
 "message"|"frontend.views.order.total_two"|"es"|"Total:"
 "message"|"frontend.views.order.total_two"|"ru"|"Итого:"
 "message"|"frontend.views.order.save_six"|"en"|"Save"
@@ -8241,7 +8241,7 @@
 "message"|"frontend.views.order.var1"|"en"|"Unapplied changes!"
 "message"|"frontend.views.order.var1"|"es"|"¡Cambios no guardados!"
 "message"|"frontend.views.order.var1"|"ru"|"Несохраненные изменения!"
-"message"|"frontend.views.order.var2"|"en"|"You changed the order, but did not save the changes!"
+"message"|"frontend.views.order.var2"|"en"|"You changed order but didn't apply changes!"
 "message"|"frontend.views.order.var2"|"es"|"¡Cambiaste el pedido, pero no guardaste los cambios!"
 "message"|"frontend.views.order.var2"|"ru"|"Вы изменили заказ, но не сохранили изменения!"
 "message"|"frontend.views.order.var3"|"en"|"Leave"
@@ -8511,7 +8511,7 @@
 "message"|"frontend.views.order.unsaved_changes"|"en"|"Unapplied changes!"
 "message"|"frontend.views.order.unsaved_changes"|"es"|"¡Cambios no guardados!"
 "message"|"frontend.views.order.unsaved_changes"|"ru"|"Несохраненные изменения!"
-"message"|"frontend.views.order.not_saved_changes"|"en"|"You changed the order, but did not save the changes!"
+"message"|"frontend.views.order.not_saved_changes"|"en"|"You changed order but didn't apply changes!"
 "message"|"frontend.views.order.not_saved_changes"|"es"|"¡Cambiaste el pedido, pero no guardaste los cambios!"
 "message"|"frontend.views.order.not_saved_changes"|"ru"|"Вы изменили заказ, но не сохранили изменения!"
 "message"|"frontend.views.order.out"|"en"|"Leave"
@@ -8667,7 +8667,7 @@
 "message"|"frontend.views.order.including_delivery"|"en"|"including delivery"
 "message"|"frontend.views.order.including_delivery"|"es"|"incluyendo la entrega"
 "message"|"frontend.views.order.including_delivery"|"ru"|"включая доставку"
-"message"|"frontend.views.order.creating_date_three"|"en"|"date of creation"
+"message"|"frontend.views.order.creating_date_three"|"en"|"Creation date"
 "message"|"frontend.views.order.creating_date_three"|"es"|"fecha de creación"
 "message"|"frontend.views.order.creating_date_three"|"ru"|"дата создания "
 "message"|"frontend.views.order.set_order"|"en"|"Place order"
@@ -8886,7 +8886,7 @@
 "message"|"frontend.views.request.will_delete"|"en"|"It will be taken off"
 "message"|"frontend.views.request.will_delete"|"es"|"Se cerrará"
 "message"|"frontend.views.request.will_delete"|"ru"|"Будет снята"
-"message"|"frontend.views.request.service"|"en"|NULL
+"message"|"frontend.views.request.service"|"en"|"Offer your services"
 "message"|"frontend.views.request.service"|"es"|"Ofrece tus servicios"
 "message"|"frontend.views.request.service"|"ru"|"Предложить свои услуги"
 "message"|"frontend.views.request.amount"|"en"|"Quantity of unique views of suppliers"
@@ -9375,19 +9375,19 @@
 "message"|"frontend.views.request.delivery"|"en"|"Delivery"
 "message"|"frontend.views.request.delivery"|"es"|"Entrega"
 "message"|"frontend.views.request.delivery"|"ru"|"Доставка"
-"message"|"frontend.views.request.contact_us"|"en"|NULL
+"message"|"frontend.views.request.contact_us"|"en"|"or contact us to find out your regions of delivery"
 "message"|"frontend.views.request.contact_us"|"es"|NULL
 "message"|"frontend.views.request.contact_us"|"ru"|"или свяжитесь с нами для уточнения Ваших регионов доставки"
-"error"|"frontend.views.request.contact_us"|"en"|NULL
+"error"|"frontend.views.request.contact_us"|"en"|"or contact us to find out your regions of delivery"
 "error"|"frontend.views.request.contact_us"|"es"|NULL
 "error"|"frontend.views.request.contact_us"|"ru"|"или свяжитесь с нами для уточнения Ваших регионов доставки"
-"app"|"frontend.widgets.cart.views.go_to"|"en"|NULL
+"app"|"frontend.widgets.cart.views.go_to"|"en"|"Proceed to check out"
 "app"|"frontend.widgets.cart.views.go_to"|"es"|NULL
 "app"|"frontend.widgets.cart.views.go_to"|"ru"|"Перейти к оформлению"
 "app"|"frontend.widgets.cart.views.for_one"|"en"|"for 1"
 "app"|"frontend.widgets.cart.views.for_one"|"es"|"por 1"
 "app"|"frontend.widgets.cart.views.for_one"|"ru"|"за 1"
-"app"|"frontend.widgets.cart.views.sum"|"en"|NULL
+"app"|"frontend.widgets.cart.views.sum"|"en"|"to the total amount"
 "app"|"frontend.widgets.cart.views.sum"|"es"|NULL
 "app"|"frontend.widgets.cart.views.sum"|"ru"|"на общую сумму"
 "app"|"frontend.widgets.cart.views.sum_two"|"en"|"Sum"
@@ -9405,29 +9405,28 @@
 "app"|"frontend.widgets.cart.views.incl_delivery"|"en"|"including delivery"
 "app"|"frontend.widgets.cart.views.incl_delivery"|"es"|"incluyendo la entrega"
 "app"|"frontend.widgets.cart.views.incl_delivery"|"ru"|"включая доставку"
-"app"|"frontend.widgets.cart.views.cart.go_to"|"en"|NULL
+"app"|"frontend.widgets.cart.views.cart.go_to"|"en"|"Proceed to check out"
 "app"|"frontend.widgets.cart.views.cart.go_to"|"es"|NULL
 "app"|"frontend.widgets.cart.views.cart.go_to"|"ru"|"Перейти к оформлению"
-"app"|"frontend.widgets.cart.views.no_goods"|"en"|NULL
+"app"|"frontend.widgets.cart.views.no_goods"|"en"|"There is no product in your cart."
 "app"|"frontend.widgets.cart.views.no_goods"|"es"|NULL
 "app"|"frontend.widgets.cart.views.no_goods"|"ru"|"В вашей корзине нет товаров."
-"app"|"frontend.widgets.cart.views.empty"|"en"|NULL
+"app"|"frontend.widgets.cart.views.empty"|"en"|"Your cart is empty, let it be improved!"
 "app"|"frontend.widgets.cart.views.empty"|"es"|NULL
 "app"|"frontend.widgets.cart.views.empty"|"ru"|"Ваша корзина пуста и это нужно исправить!"
-"app"|"frontend.widgets.cart.views.seek"|"en"|NULL
+"app"|"frontend.widgets.cart.views.seek"|"en"|"Look for pushbuttons <span>&laquo;Buy&raquo;</span> in our website. They are near the products you want to buy.<br><br>You can start from product choice in our{cat}"
 "app"|"frontend.widgets.cart.views.seek"|"es"|NULL
 "app"|"frontend.widgets.cart.views.seek"|"ru"|"Ищите кнопки <span>&laquo;Купить&raquo;</span> на нашем сайте. Они рядом  с товарами, которые вы хотите приобрести.<br><br>Вы можете начать с выбора товаров в нашем {cat}"
-"app"|"frontend.controllers.request.mix"|"en"|"mixcart.ru - request №%s
-"
+"app"|"frontend.controllers.request.mix"|"en"|"mixcart.ru - request No.%s"
 "app"|"frontend.controllers.request.mix"|"es"|"mixcart.ru - orden №%s"
 "app"|"frontend.controllers.request.mix"|"ru"|"mixcart.ru - заявка №%s"
-"app"|"frontend.controllers.request.mix_two"|"en"|NULL
+"app"|"frontend.controllers.request.mix_two"|"en"|"mixcart.ru - request No.%s"
 "app"|"frontend.controllers.request.mix_two"|"es"|NULL
 "app"|"frontend.controllers.request.mix_two"|"ru"|"mixcart.ru - заявка №%s"
-"app"|"frontend.modules.form.off"|"en"|NULL
+"app"|"frontend.modules.form.off"|"en"|"Off "
 "app"|"frontend.modules.form.off"|"es"|NULL
 "app"|"frontend.modules.form.off"|"ru"|"Выключено"
-"app"|"frontend.modules.form.on"|"en"|NULL
+"app"|"frontend.modules.form.on"|"en"|"On"
 "app"|"frontend.modules.form.on"|"es"|NULL
 "app"|"frontend.modules.form.on"|"ru"|"Включено"
 "app"|"frontend.modules.form.create"|"en"|"Create"
@@ -9439,10 +9438,10 @@
 "app"|"frontend.views.to_main"|"en"|"Main"
 "app"|"frontend.views.to_main"|"es"|"Inicio"
 "app"|"frontend.views.to_main"|"ru"|"Главная"
-"app"|"frontend.views.client.index.orders"|"en"|"orders"
+"app"|"frontend.views.client.index.orders"|"en"|"of orders"
 "app"|"frontend.views.client.index.orders"|"es"|"pedidos"
 "app"|"frontend.views.client.index.orders"|"ru"|"заказов"
-"app"|"frontend.views.user_form.new_pass"|"en"|NULL
+"app"|"frontend.views.user_form.new_pass"|"en"|"New password"
 "app"|"frontend.views.user_form.new_pass"|"es"|NULL
 "app"|"frontend.views.user_form.new_pass"|"ru"|"Новый пароль"
 "app"|"frontend.views.client.emp.role"|"en"|"Role"
@@ -9454,25 +9453,25 @@
 "app"|"frontend.views.client.settings"|"en"|"Main"
 "app"|"frontend.views.client.settings"|"es"|"Inicio"
 "app"|"frontend.views.client.settings"|"ru"|"Главная"
-"app"|"frontend.views.settings.executor"|"en"|NULL
+"app"|"frontend.views.settings.executor"|"en"|"Performer in the request"
 "app"|"frontend.views.settings.executor"|"es"|NULL
 "app"|"frontend.views.settings.executor"|"ru"|"Исполнитель в заявке"
-"app"|"frontend.views.settings.new_response"|"en"|NULL
+"app"|"frontend.views.settings.new_response"|"en"|"New response to the request"
 "app"|"frontend.views.settings.new_response"|"es"|NULL
 "app"|"frontend.views.settings.new_response"|"ru"|"Новый отклик на заявку"
 "app"|"frontend.views.settings.text"|"en"|"Report the error text into the customer support service:"
 "app"|"frontend.views.settings.text"|"es"|"Informa sobre el mensaje de error al departamento de soporte técnico:"
 "app"|"frontend.views.settings.text"|"ru"|"Сообщите текст ошибки в отдел технической поддержки: "
-"app"|"frontend.views.settings.notifications.note"|"en"|NULL
+"app"|"frontend.views.settings.notifications.note"|"en"|"Notice of new responses to request to email"
 "app"|"frontend.views.settings.notifications.note"|"es"|NULL
 "app"|"frontend.views.settings.notifications.note"|"ru"|"Уведомления по новым откликам на заявку по email"
-"app"|"frontend.views.settings.notifications.note_two"|"en"|NULL
+"app"|"frontend.views.settings.notifications.note_two"|"en"|"Notice of request performer appointment to email"
 "app"|"frontend.views.settings.notifications.note_two"|"es"|NULL
 "app"|"frontend.views.settings.notifications.note_two"|"ru"|"Уведомления о назначении исполнителем заявки по email"
-"app"|"frontend.views.settings.notifications.note_three"|"en"|NULL
+"app"|"frontend.views.settings.notifications.note_three"|"en"|"Notice of new responses to request via sms"
 "app"|"frontend.views.settings.notifications.note_three"|"es"|NULL
 "app"|"frontend.views.settings.notifications.note_three"|"ru"|"Уведомления по новым откликам на заявку по sms"
-"app"|"frontend.views.settings.notifications.note_four"|"en"|NULL
+"app"|"frontend.views.settings.notifications.note_four"|"en"|"Notice of request performer appointment via sms"
 "app"|"frontend.views.settings.notifications.note_four"|"es"|NULL
 "app"|"frontend.views.settings.notifications.note_four"|"ru"|"Уведомления о назначении исполнителем заявки по sms"
 "app"|"frontend.views.layouts.main.accept"|"en"|"Receiving..."
@@ -9493,13 +9492,13 @@
 "app"|"frontend.views.site.index.set_request_two"|"en"|"leave a request "
 "app"|"frontend.views.site.index.set_request_two"|"es"|"enviar una orden"
 "app"|"frontend.views.site.index.set_request_two"|"ru"|"Оставить заявку"
-"app"|"frontend.views.user.forgot.forgot_two"|"en"|NULL
+"app"|"frontend.views.user.forgot.forgot_two"|"en"|"Forgot your password"
 "app"|"frontend.views.user.forgot.forgot_two"|"es"|NULL
 "app"|"frontend.views.user.forgot.forgot_two"|"ru"|"Забыли пароль"
 "app"|"frontend.views.user.forgot.send"|"en"|"Send"
 "app"|"frontend.views.user.forgot.send"|"es"|"Enviar"
 "app"|"frontend.views.user.forgot.send"|"ru"|"Отправить"
-"app"|"frontend.views.user.forgot.phone_two"|"en"|NULL
+"app"|"frontend.views.user.forgot.phone_two"|"en"|"84994041018"
 "app"|"frontend.views.user.forgot.phone_two"|"es"|NULL
 "app"|"frontend.views.user.forgot.phone_two"|"ru"|"84994041018"
 "app"|"frontend.views.user.forgot.phone"|"en"|"8-499-404-10-18"
@@ -9508,11 +9507,10 @@
 "app"|"frontend.views.user.forgot.email"|"en"|"info@mixcart.ru"
 "app"|"frontend.views.user.forgot.email"|"es"|"info@mixcart.ru"
 "app"|"frontend.views.user.forgot.email"|"ru"|"info@mixcart.ru"
-"app"|"frontend.views.user.default.i_buy."|"en"|"I'm buying"
+"app"|"frontend.views.user.default.i_buy."|"en"|"I buy"
 "app"|"frontend.views.user.default.i_buy."|"es"|"Estoy comprando"
 "app"|"frontend.views.user.default.i_buy."|"ru"|"Я покупаю"
-"app"|"frontend.views.user.default.i_sell"|"en"|"I sell
-"
+"app"|"frontend.views.user.default.i_sell"|"en"|"I sell "
 "app"|"frontend.views.user.default.i_sell"|"es"|"Estoy vendiendo"
 "app"|"frontend.views.user.default.i_sell"|"ru"|"Я продаю"
 "app"|"frontend.views.vendor.clients.rest"|"en"|"Restaurant"
@@ -9521,13 +9519,13 @@
 "app"|"frontend.views.vendor.empl.role"|"en"|"Role"
 "app"|"frontend.views.vendor.empl.role"|"es"|"Papel"
 "app"|"frontend.views.vendor.empl.role"|"ru"|"Роль"
-"app"|"frontend.views.order.index.report"|"en"|NULL
+"app"|"frontend.views.order.index.report"|"en"|"xls report"
 "app"|"frontend.views.order.index.report"|"es"|NULL
 "app"|"frontend.views.order.index.report"|"ru"|"отчет xls"
-"app"|"frontend.views.order.guides.rename_five"|"en"|NULL
+"app"|"frontend.views.order.guides.rename_five"|"en"|"Rename"
 "app"|"frontend.views.order.guides.rename_five"|"es"|NULL
 "app"|"frontend.views.order.guides.rename_five"|"ru"|"Переименовать"
-"app"|"frontend.views.order.view_grid.note"|"en"|"Note"
+"app"|"frontend.views.order.view_grid.note"|"en"|"Mark"
 "app"|"frontend.views.order.view_grid.note"|"es"|"Nota"
 "app"|"frontend.views.order.view_grid.note"|"ru"|"Заметка"
 "app"|"frontend.views.order.view_grid.good."|"en"|"Product"
@@ -9545,10 +9543,10 @@
 "app"|"frontend.views.order.favorites.templates"|"en"|"Order templates"
 "app"|"frontend.views.order.favorites.templates"|"es"|"Plantillas de pedidos"
 "app"|"frontend.views.order.favorites.templates"|"ru"|"Шаблоны заказов"
-"app"|"frontend.views.order.favorites.freq"|"en"|NULL
+"app"|"frontend.views.order.favorites.freq"|"en"|"Frequently ordered products"
 "app"|"frontend.views.order.favorites.freq"|"es"|NULL
 "app"|"frontend.views.order.favorites.freq"|"ru"|"Часто заказываемые товар"
-"app"|"frontend.views.order.favorites.search"|"en"|NULL
+"app"|"frontend.views.order.favorites.search"|"en"|"Search by name"
 "app"|"frontend.views.order.favorites.search"|"es"|NULL
 "app"|"frontend.views.order.favorites.search"|"ru"|"Поиск по названию"
 "app"|"frontend.views.order.favorites.add_to_basket"|"en"|"Add to cart"
@@ -9836,7 +9834,7 @@
 "message"|"market.controllers.site.catalog"|"en"|"Catalogue"
 "message"|"market.controllers.site.catalog"|"es"|"Catálogo"
 "message"|"market.controllers.site.catalog"|"ru"|"Каталог"
-"message"|"market.controllers.site.products"|"en"|NULL
+"message"|"market.controllers.site.products"|"en"|"MixCart Supplier's products"
 "message"|"market.controllers.site.products"|"es"|"MixCart Productos del proveedor"
 "message"|"market.controllers.site.products"|"ru"|"MixCart Продукты поставщика"
 "message"|"market.controllers.site.vendor_empty"|"en"|"Supplier has not still added his products to the market platform MixCart"
@@ -9953,7 +9951,7 @@
 "message"|"market.views.site.info.show_more"|"en"|"Show again"
 "message"|"market.views.site.info.show_more"|"es"|"Ver más"
 "message"|"market.views.site.info.show_more"|"ru"|"Показать еще"
-"message"|"market.views.site.supp_prod.vendors_prods"|"en"|NULL
+"message"|"market.views.site.supp_prod.vendors_prods"|"en"|"MixCart Supplier's products"
 "message"|"market.views.site.supp_prod.vendors_prods"|"es"|"MixCart Productos del proveedor"
 "message"|"market.views.site.supp_prod.vendors_prods"|"ru"|"MixCart Продукты поставщика"
 "message"|"market.views.site.supp_prod.all_vendors"|"en"|"All suppliers"
@@ -10279,102 +10277,102 @@
 "error"|"market.views.site.supplier.no_info_three"|"en"|"No information"
 "error"|"market.views.site.supplier.no_info_three"|"es"|"No hay información"
 "error"|"market.views.site.supplier.no_info_three"|"ru"|"нет информации"
-"app"|"api.modules.v1.modules.mobile.components.notifications.greetings"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.greetings"|"en"|"Welcome"
 "app"|"api.modules.v1.modules.mobile.components.notifications.greetings"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.greetings"|"ru"|"Приветствую, "
-"app"|"api.modules.v1.modules.mobile.components.notifications.artur"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.artur"|"en"|"My name is Arthur Shalamanov, I’m cofounder of MixCart service. Thank you for confirmation of your personal account."
 "app"|"api.modules.v1.modules.mobile.components.notifications.artur"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.artur"|"ru"|"Меня зовут Шамалов Артур, я являюсь сооснователем сервиса MixCart.
 Благодарю за подтверждение Вашей учетной записи."
-"app"|"api.modules.v1.modules.mobile.components.notifications.hello"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.hello"|"en"|"Hello,"
 "app"|"api.modules.v1.modules.mobile.components.notifications.hello"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.hello"|"ru"|"Здравствуйте, "
-"app"|"api.modules.v1.modules.mobile.components.notifications.pass_changed"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.pass_changed"|"en"|"Your MixCart Account password has been changed."
 "app"|"api.modules.v1.modules.mobile.components.notifications.pass_changed"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.pass_changed"|"ru"|"Пароль Вашей учетной записи в системе MixCart изменен. "
-"app"|"api.modules.v1.modules.mobile.components.notifications.auth_new"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.auth_new"|"en"|"Now you can log in with new password."
 "app"|"api.modules.v1.modules.mobile.components.notifications.auth_new"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.auth_new"|"ru"|"Теперь Вы можете авторизоваться с новым паролем."
-"app"|"api.modules.v1.modules.mobile.components.notifications.new"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.new"|"en"|"New message to order No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.new"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.new"|"ru"|"Новое сообщение по заказу №"
 "app"|"api.modules.v1.modules.mobile.components.notifications.mix_req"|"en"|"mixcart.ru - request No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.mix_req"|"es"|"mixcart.ru - pedido No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.mix_req"|"ru"|"mixcart.ru - заявка №"
-"app"|"api.modules.v1.modules.mobile.components.notifications.on_your"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.on_your"|"en"|"To your request No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.on_your"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.on_your"|"ru"|"На Вашу заявку №"
-"app"|"api.modules.v1.modules.mobile.components.notifications.executer_settled"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.executer_settled"|"en"|"performer was appointed"
 "app"|"api.modules.v1.modules.mobile.components.notifications.executer_settled"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.executer_settled"|"ru"|" назначен исполнитель "
-"app"|"api.modules.v1.modules.mobile.components.notifications.date"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.date"|"en"|"Appointment date"
 "app"|"api.modules.v1.modules.mobile.components.notifications.date"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.date"|"ru"|"
 Дата назначения: "
-"app"|"api.modules.v1.modules.mobile.components.notifications.new_order"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.new_order"|"en"|"MixCart: new order No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.new_order"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.new_order"|"ru"|"MixCart: новый заказ №"
-"app"|"api.modules.v1.modules.mobile.components.notifications.change_order"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.change_order"|"en"|"Changes in order No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.change_order"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.change_order"|"ru"|"Изменения в заказе №"
-"app"|"api.modules.v1.modules.mobile.components.notifications.new_position"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.new_position"|"en"|"New item in order No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.new_position"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.new_position"|"ru"|"Новая позиция в заказе №"
-"app"|"api.modules.v1.modules.mobile.components.notifications.change_position"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.change_position"|"en"|"Changes in item"
 "app"|"api.modules.v1.modules.mobile.components.notifications.change_position"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.change_position"|"ru"|"Изменения в позиции "
-"app"|"api.modules.v1.modules.mobile.components.notifications.order_no"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.order_no"|"en"|", order No."
 "app"|"api.modules.v1.modules.mobile.components.notifications.order_no"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.order_no"|"ru"|", заказ №"
-"app"|"api.modules.v1.modules.mobile.components.notifications.deleted_position"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.components.notifications.deleted_position"|"en"|"Item in order No. has been deleted"
 "app"|"api.modules.v1.modules.mobile.components.notifications.deleted_position"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.components.notifications.deleted_position"|"ru"|"Удалена позиция в заказе №"
-"app"|"api.modules.v1.modules.mobile.controllers.wrong_code"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.controllers.wrong_code"|"en"|"Invalid code"
 "app"|"api.modules.v1.modules.mobile.controllers.wrong_code"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.controllers.wrong_code"|"ru"|"Неверный код"
-"app"|"api.modules.v1.modules.mobile.controllers.req"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.controllers.req"|"en"|"mixcart.ru - request No.%s"
 "app"|"api.modules.v1.modules.mobile.controllers.req"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.controllers.req"|"ru"|"mixcart.ru - заявка №%s"
-"app"|"api.modules.v1.modules.mobile.controllers.you_dismissed"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.controllers.you_dismissed"|"en"|"You were removed from the execution of request No.%s"
 "app"|"api.modules.v1.modules.mobile.controllers.you_dismissed"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.controllers.you_dismissed"|"ru"|"Вы сняты с исполнения по заявке №%s"
-"app"|"api.modules.v1.modules.mobile.controllers.you_set"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.controllers.you_set"|"en"|"You were appointed as a performer for request No.%s"
 "app"|"api.modules.v1.modules.mobile.controllers.you_set"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.controllers.you_set"|"ru"|"Вы назначены исполнителем по заявке №%s"
-"app"|"api.modules.v1.modules.mobile.controllers.mix"|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.controllers.mix"|"en"|"mixcart.ru - request No.%s"
 "app"|"api.modules.v1.modules.mobile.controllers.mix"|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.controllers.mix"|"ru"|"mixcart.ru - заявка №%s"
 "app"|"api.modules.v1.modules.mobile.controllers.prod"|"en"|"<br/> deleted {prod} from the order"
 "app"|"api.modules.v1.modules.mobile.controllers.prod"|"es"|"<br/> ha eliminado {prod} del pedido"
 "app"|"api.modules.v1.modules.mobile.controllers.prod"|"ru"|"<br/> удалил {prod} из заказа"
-"app"|"api.modules.v1.modules.mobile.controllers."|"en"|NULL
+"app"|"api.modules.v1.modules.mobile.controllers."|"en"|"<br/> changed quantity {prod} from {old} {ed} to "
 "app"|"api.modules.v1.modules.mobile.controllers."|"es"|NULL
 "app"|"api.modules.v1.modules.mobile.controllers."|"ru"|"<br/> изменил количество {prod} с {old} {ed} на "
-"app"|"api.common.mail.confirm_email.greetings"|"en"|NULL
+"app"|"api.common.mail.confirm_email.greetings"|"en"|"Welcome"
 "app"|"api.common.mail.confirm_email.greetings"|"es"|NULL
 "app"|"api.common.mail.confirm_email.greetings"|"ru"|"Приветствую,"
-"app"|"api.common.mail.confirm_email.artur"|"en"|NULL
+"app"|"api.common.mail.confirm_email.artur"|"en"|"My name is Arthur Shalamanov, I’m cofounder of MixCart service."
 "app"|"api.common.mail.confirm_email.artur"|"es"|NULL
 "app"|"api.common.mail.confirm_email.artur"|"ru"|"Меня зовут Шамалов Артур, я являюсь сооснователем сервиса MixCart."
-"app"|"api.common.mail.confirm_email.thanks"|"en"|NULL
+"app"|"api.common.mail.confirm_email.thanks"|"en"|"Thank you for confirmation of your personal account."
 "app"|"api.common.mail.confirm_email.thanks"|"es"|NULL
 "app"|"api.common.mail.confirm_email.thanks"|"ru"|"Благодарю за подтверждение Вашей учетной записи."
-"app"|"api.common.mail.confirm_email.tech"|"en"|NULL
+"app"|"api.common.mail.confirm_email.tech"|"en"|"Technologies became drivers of business development in all industries of major countries. It is now becoming apparent that companies ignoring technologies or being skeptical about them will leave the market in the years ahead or they will have to adapt to new realities.  "
 "app"|"api.common.mail.confirm_email.tech"|"es"|NULL
 "app"|"api.common.mail.confirm_email.tech"|"ru"|"Технологии стали драйвером развития бизнеса во всех сферах в большинстве стран мира. Нам уже сейчас становится очевидно то, что компании, игнорирующие технологии или скептически к ним настроенные, уйдут с рынка в ближайшие годы, либо им придется адаптироваться под новые реалии."
-"app"|"api.common.mail.confirm_email.i_know"|"en"|NULL
+"app"|"api.common.mail.confirm_email.i_know"|"en"|"Yes, I know, implementation of new tools seems to be difficult in the beginning, but believe me, it is much easier and the result is worth it."
 "app"|"api.common.mail.confirm_email.i_know"|"es"|NULL
 "app"|"api.common.mail.confirm_email.i_know"|"ru"|"Да, я знаю, сначала кажется сложным внедрение новых инструментов, но, поверьте, все намного проще, чем может показаться, и результат того стоит."
-"app"|"api.common.mail.confirm_email.we_made"|"en"|NULL
+"app"|"api.common.mail.confirm_email.we_made"|"en"|"We developed MixCart system to enable you earning more money spending time for development and important processes, and leaving routine for us"
 "app"|"api.common.mail.confirm_email.we_made"|"es"|NULL
 "app"|"api.common.mail.confirm_email.we_made"|"ru"|"Мы разработали систему MixCart для того, чтобы Вы могли зарабатывать больше денег, тратя свое время на развитие и на важные процессы, оставив рутину нам."
-"app"|"api.common.mail.confirm_email.i_glad"|"en"|NULL
+"app"|"api.common.mail.confirm_email.i_glad"|"en"|"I’m sincerely glad to see you among our customers and I promise that we will do everything to exceed your expectations on work with our service."
 "app"|"api.common.mail.confirm_email.i_glad"|"es"|NULL
 "app"|"api.common.mail.confirm_email.i_glad"|"ru"|"Я искренне рад видеть Вас в числе наших клиентов и обещаю - мы сделаем все, чтобы превысить Ваши ожидания от работы с нашим сервисом."
-"app"|"api.common.mail.confirm_email.good_luck"|"en"|NULL
+"app"|"api.common.mail.confirm_email.good_luck"|"en"|"Good luck in business."
 "app"|"api.common.mail.confirm_email.good_luck"|"es"|NULL
 "app"|"api.common.mail.confirm_email.good_luck"|"ru"|"Желаю Вам успехов в бизнесе."
-"app"|"api.common.mail.confirm_email.hello"|"en"|"How do you do,"
+"app"|"api.common.mail.confirm_email.hello"|"en"|"Hello,"
 "app"|"api.common.mail.confirm_email.hello"|"es"|"¡Buenos días!"
 "app"|"api.common.mail.confirm_email.hello"|"ru"|"Здравствуйте,"
 "app"|"api.common.mail.confirm_email.you_registered"|"en"|"You have registered in the service"
@@ -10398,13 +10396,13 @@
 "app"|"api.common.models.active"|"en"|"Active"
 "app"|"api.common.models.active"|"es"|"Activo"
 "app"|"api.common.models.active"|"ru"|"Активен"
-"app"|"api.common.models.off"|"en"|NULL
+"app"|"api.common.models.off"|"en"|"Disconnected"
 "app"|"api.common.models.off"|"es"|NULL
 "app"|"api.common.models.off"|"ru"|"Отключен"
-"app"|"api.common.models.directory"|"en"|NULL
+"app"|"api.common.models.directory"|"en"|"Guide"
 "app"|"api.common.models.directory"|"es"|NULL
 "app"|"api.common.models.directory"|"ru"|"Справочник"
-"app"|"api.common.models.condition"|"en"|NULL
+"app"|"api.common.models.condition"|"en"|"State"
 "app"|"api.common.models.condition"|"es"|NULL
 "app"|"api.common.models.condition"|"ru"|"Состояние"
 "app"|"api.common.models.created"|"en"|"Created"
@@ -10413,19 +10411,19 @@
 "app"|"api.common.models.updated_two"|"en"|"Updated"
 "app"|"api.common.models.updated_two"|"es"|"Actualizado"
 "app"|"api.common.models.updated_two"|"ru"|"Обновлено"
-"app"|"api.common.models.objects_count"|"en"|NULL
+"app"|"api.common.models.objects_count"|"en"|"Number of objects"
 "app"|"api.common.models.objects_count"|"es"|NULL
 "app"|"api.common.models.objects_count"|"ru"|"Кол-во объектов"
-"app"|"api.common.models.count"|"en"|NULL
+"app"|"api.common.models.count"|"en"|"Number of the correlated "
 "app"|"api.common.models.count"|"es"|NULL
 "app"|"api.common.models.count"|"ru"|"Кол-во сопоставленных"
 "app"|"api.common.models.active_three"|"en"|"Active"
 "app"|"api.common.models.active_three"|"es"|"Activo"
 "app"|"api.common.models.active_three"|"ru"|"Активен"
-"app"|"api.common.models.off_three"|"en"|NULL
+"app"|"api.common.models.off_three"|"en"|"Disconnected"
 "app"|"api.common.models.off_three"|"es"|NULL
 "app"|"api.common.models.off_three"|"ru"|"Отключен"
-"app"|"api.common.models.store"|"en"|NULL
+"app"|"api.common.models.store"|"en"|"Name Store House"
 "app"|"api.common.models.store"|"es"|NULL
 "app"|"api.common.models.store"|"ru"|"Наименование Store House"
 "app"|"api.common.models.updated"|"en"|"Updated"
@@ -10434,7 +10432,7 @@
 "app"|"api.common.models.active_two"|"en"|"Active"
 "app"|"api.common.models.active_two"|"es"|"Activo"
 "app"|"api.common.models.active_two"|"ru"|"Активен"
-"app"|"api.common.models.off_two"|"en"|NULL
+"app"|"api.common.models.off_two"|"en"|"Disconnected"
 "app"|"api.common.models.off_two"|"es"|NULL
 "app"|"api.common.models.off_two"|"ru"|"Отключен"
 "app"|"api.common.views.blocked"|"en"|"Access via this one-time link is denied. You can Log in using your login and password or request your password to your email."
@@ -12580,16 +12578,16 @@
 "app"|"Менеджер"|"en"|"Manager"
 "app"|"Менеджер"|"es"|"Gerente"
 "app"|"Менеджер"|"ru"|"Менеджер"
-"app"|"Работник"|"en"|NULL
-"app"|"Работник"|"es"|NULL
+"app"|"Работник"|"en"|"Employee"
+"app"|"Работник"|"es"|"Trabajador"
 "app"|"Работник"|"ru"|"Работник"
 "app"|"Руководитель"|"en"|"Head"
 "app"|"Руководитель"|"es"|"Jefe"
 "app"|"Руководитель"|"ru"|"Руководитель"
-"app"|"Менеджер f-keeper"|"en"|NULL
-"app"|"Менеджер f-keeper"|"es"|NULL
+"app"|"Менеджер f-keeper"|"en"|"Manager f-keeper"
+"app"|"Менеджер f-keeper"|"es"|"Manager f-keeper"
 "app"|"Менеджер f-keeper"|"ru"|"Менеджер f-keeper"
-"app"|"Наблюдатель f-keeper"|"en"|NULL
+"app"|"Наблюдатель f-keeper"|"en"|"Observer f-keeper"
 "app"|"Наблюдатель f-keeper"|"es"|NULL
 "app"|"Наблюдатель f-keeper"|"ru"|"Наблюдатель f-keeper"
 "app"|"Владелец"|"en"|"Owner"
@@ -12604,35 +12602,35 @@
 "app"|"Агент"|"en"|"Agent"
 "app"|"Агент"|"es"|NULL
 "app"|"Агент"|"ru"|"Агент"
-"app"|"отправлено"|"en"|NULL
-"app"|"отправлено"|"es"|NULL
+"app"|"отправлено"|"en"|"sent"
+"app"|"отправлено"|"es"|"enviado"
 "app"|"отправлено"|"ru"|"отправлено"
-"app"|"сообщение доставлено"|"en"|NULL
-"app"|"сообщение доставлено"|"es"|NULL
+"app"|"сообщение доставлено"|"en"|"message delivered"
+"app"|"сообщение доставлено"|"es"|"mensaje entregado"
 "app"|"сообщение доставлено"|"ru"|"сообщение доставлено"
-"app"|"время попыток доставить сообщение оператором истекло"|"en"|NULL
-"app"|"время попыток доставить сообщение оператором истекло"|"es"|NULL
+"app"|"время попыток доставить сообщение оператором истекло"|"en"|"time of attempts to deliver the message by the operator expired"
+"app"|"время попыток доставить сообщение оператором истекло"|"es"|"tiempo de intentos de entregar el mensaje por el operador caducado"
 "app"|"время попыток доставить сообщение оператором истекло"|"ru"|"время попыток доставить сообщение оператором истекло"
-"app"|"сообщение не может быть доставлено (ошибка в номере, номер не существует и т.д.)"|"en"|NULL
-"app"|"сообщение не может быть доставлено (ошибка в номере, номер не существует и т.д.)"|"es"|NULL
+"app"|"сообщение не может быть доставлено (ошибка в номере, номер не существует и т.д.)"|"en"|"the message can not be delivered (an error in the number, the number does not exist, etc.)"
+"app"|"сообщение не может быть доставлено (ошибка в номере, номер не существует и т.д.)"|"es"|"el mensaje no puede ser entregado (un error en el número, el número no existe, etc.)"
 "app"|"сообщение не может быть доставлено (ошибка в номере, номер не существует и т.д.)"|"ru"|"сообщение не может быть доставлено (ошибка в номере, номер не существует и т.д.)"
-"app"|"сообщение не принято оператором"|"en"|NULL
-"app"|"сообщение не принято оператором"|"es"|NULL
+"app"|"сообщение не принято оператором"|"en"|"the message is not accepted by the operator"
+"app"|"сообщение не принято оператором"|"es"|"el mensaje no es aceptado por el operador"
 "app"|"сообщение не принято оператором"|"ru"|"сообщение не принято оператором"
-"app"|"отправка отменена пользователем"|"en"|NULL
-"app"|"отправка отменена пользователем"|"es"|NULL
+"app"|"отправка отменена пользователем"|"en"|"sending canceled by the user"
+"app"|"отправка отменена пользователем"|"es"|"envío cancelado por el usuario"
 "app"|"отправка отменена пользователем"|"ru"|"отправка отменена пользователем"
-"app"|"системная ошибка"|"en"|NULL
-"app"|"системная ошибка"|"es"|NULL
+"app"|"системная ошибка"|"en"|"system error"
+"app"|"системная ошибка"|"es"|"error del sistema"
 "app"|"системная ошибка"|"ru"|"системная ошибка"
-"app"|"оператор не сообщил о состоянии сообщения за отведенное время."|"en"|NULL
-"app"|"оператор не сообщил о состоянии сообщения за отведенное время."|"es"|NULL
+"app"|"оператор не сообщил о состоянии сообщения за отведенное время."|"en"|"the operator did not report the status of the message within the allotted time."
+"app"|"оператор не сообщил о состоянии сообщения за отведенное время."|"es"|"el operador no informó el estado del mensaje dentro del tiempo asignado."
 "app"|"оператор не сообщил о состоянии сообщения за отведенное время."|"ru"|"оператор не сообщил о состоянии сообщения за отведенное время."
-"app"|"frontend.views.settings.if_you_wanna"|"en"|NULL
-"app"|"frontend.views.settings.if_you_wanna"|"es"|NULL
+"app"|"frontend.views.settings.if_you_wanna"|"en"|"If you want to add one more email to receive notifications without setting up a new one"
+"app"|"frontend.views.settings.if_you_wanna"|"es"|"Si desea agregar un correo electrónico más para recibir notificaciones sin configurar uno nuevo"
 "app"|"frontend.views.settings.if_you_wanna"|"ru"|"Если вы хотите добавить еще один email для получения уведомлений без заведения нового сотрудника, то вы можете сделать это в таблице ниже."
-"app"|"frontend.views.settings.if_you_wanna_two"|"en"|NULL
-"app"|"frontend.views.settings.if_you_wanna_two"|"es"|NULL
+"app"|"frontend.views.settings.if_you_wanna_two"|"en"|"For each email you add, you can select the events that notifications will be notified about."
+"app"|"frontend.views.settings.if_you_wanna_two"|"es"|"Por cada correo electrónico que agregue, puede seleccionar los eventos de los que se notificarán las notificaciones."
 "app"|"frontend.views.settings.if_you_wanna_two"|"ru"|"Для каждого добавленного email вы можете выбрать события, о которых будут приходить уведомления."
 "app"|"Instructions to reset your password have been sent"|"en"|"Instructions to reset your password have been sent"
 "app"|"Instructions to reset your password have been sent"|"es"|"Se han enviado instrucciones para restablecer su contraseña"

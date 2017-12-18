@@ -13,6 +13,7 @@ use yii\helpers\FormatConverter;
  * @property string $receipt_number
  * @property integer $organization_id
  * @property integer $type_payment
+ * @property integer $status
  * @property string $email
  * @property string $phone
  * @property string $date
@@ -22,6 +23,7 @@ use yii\helpers\FormatConverter;
  * @property Organization $organization
  * @property PaymentType $payment
  */
+
 class Payment extends \yii\db\ActiveRecord
 {
     /**
@@ -41,10 +43,10 @@ class Payment extends \yii\db\ActiveRecord
             [['total', 'organization_id', 'type_payment', 'date'], 'required'],
             [['total'], 'number'],
             [['receipt_number', 'email', 'phone'], 'string'],
-            [['organization_id', 'type_payment'], 'integer'],
+            [['organization_id', 'type_payment', 'status'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['organization_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organization::className(), 'targetAttribute' => ['organization_id' => 'id']],
-            [['payment_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentType::className(), 'targetAttribute' => ['payment_id' => 'type_id']],
+            [['type_payment'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentType::className(), 'targetAttribute' => ['type_payment' => 'type_id']],
             [['organization_id', 'type_payment'], 'compare', 'compareValue' => 0, 'operator' => '!=', 'message' => 'Необходимо выбрать из списка'],
         ];
     }
@@ -65,6 +67,7 @@ class Payment extends \yii\db\ActiveRecord
             'phone' => 'Phone',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
+            'status' => 'status',
         ];
     }
 
@@ -91,7 +94,7 @@ class Payment extends \yii\db\ActiveRecord
     public function beforeSave($insert)
     {
         if (isset($this->date) && !empty($this->date)) {
-            $this->date = date('Y-m-d', strtotime($this->date));
+            $this->date = date('Y-m-d H:i:s', strtotime($this->date));
         }
 
         return parent::beforeSave($insert);

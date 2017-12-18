@@ -3,7 +3,7 @@ $currencySymbol = $order->currency->iso_code;
 ?>
 
 <div>
-    <div class="pdf_header" style="text-align: center;border-bottom: 3px solid black;margin-bottom: 20px;">
+    <div class="pdf_header" style="text-align: center;border-bottom: 2px solid black;margin-bottom: 15px;">
         <span style="font-size: 20px;" >
             <b>Заказ №<?=$order->id?></b>
         </span>
@@ -86,22 +86,22 @@ $currencySymbol = $order->currency->iso_code;
             </tr>
         </table>
 
-        <div style="margin-top: 30px;">
+        <div style="margin-top: 20px;border-top: 2px solid black;padding-top:20px;">
+            <?php if (!empty($order->comment)) { ?>
+                <div style="font-size: 12px;width: 100%;height: auto;text-align:left;padding: 5px;margin-bottom: 10px;">
+                    <b>Комментарий к заказу:</b>
+                    <p class = "pl" style="padding-top: 5px;">
+                        <?= $order->comment ?>
+                    </p>
+                </div>
+            <?php } ?>
             <?= $this->render('_view-grid_pdf', compact('dataProvider', 'order')) ?>
         </div>
-        <?php if (!empty($order->comment)) { ?>
-            <div style="font-size: 12px;width: 100%;height: auto;border: 1px solid grey;text-align:left;padding: 5px;margin-bottom: 10px;">
-                Комментарий к заказу:
-                <p class = "pl" style="margin-left: 10px;padding-left: 60px;padding-top: 13px;">
-                    <?= $order->comment ?>
-                </p>
-            </div>
-        <?php } ?>
 
         <div style="text-align: right;font-size: 12px;">
             <?php if ($order->discount) { ?>
                 <p>
-                    Скидка: <?= $order->getFormattedDiscount() ?>
+                    Скидка: <?= $order->getFormattedDiscount(true) ?>
                 </p>
             <?php } ?>
             <p>Стоимость доставки: <?= $order->calculateDelivery() ?> <?= $currencySymbol ?></p>
@@ -110,7 +110,7 @@ $currencySymbol = $order->currency->iso_code;
             </p>
         </div>
 
-        <div style="text-align:right; padding-top: 50px;width:100%;">
+        <div style="display:none;text-align:right; padding-top: 50px;width:100%;">
             <div class = "but_p_1" style="color: #999C9E;display: block;float: left">
                 Подпись: ______________ &nbsp;&nbsp;Дата: _________________
             </div>

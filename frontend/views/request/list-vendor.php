@@ -236,9 +236,7 @@ $("body").on("hidden.bs.modal", "#create", function() {
     
 });
 $(document).on("click", ".req-items", function() {
-    var id = $(this).attr("data-id");
-    var url = "' . Url::to(["request/view", 'id' => '']) . '" + id;
-    window.location.href = url;
+    window.location.href = $(this).data("url");
 })  
 
 ');

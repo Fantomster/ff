@@ -34,6 +34,7 @@ class CronController extends Controller {
         $base = CatalogBaseGoods::find()
                 ->andWhere('category_id is not null')
                 ->andWhere(['in', 'es_status', [1, 2]])
+                ->andWhere(['deleted' => false])
                 ->limit(500)
                 ->all();
 
@@ -54,7 +55,7 @@ class CronController extends Controller {
                 $product_created_at = $catalogBaseGoods->created_at;
                 $product_partnership = $catalogBaseGoods->vendor->partnership;
             } catch (\Exception $e) {
-                echo "ошибка! cbg_id: $product_id/n";
+                echo "\nошибка! cbg_id: $product_id\n";
                 return;
             }
 
